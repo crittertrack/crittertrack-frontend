@@ -24,7 +24,6 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
   const [isLoading, setIsLoading] = useState(true);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [hasCompletedAdvancedFeatures, setHasCompletedAdvancedFeatures] = useState(false);
-  const [hasSeenWelcomeBanner, setHasSeenWelcomeBanner] = useState(false);
   const [hasSeenProfileSetupGuide, setHasSeenProfileSetupGuide] = useState(false);
 
   // Load tutorial state from backend when user logs in
@@ -49,7 +48,6 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
         setCompletedTutorials(response.data.completedTutorials || []);
         setHasCompletedOnboarding(response.data.hasCompletedOnboarding || false);
         setHasCompletedAdvancedFeatures(response.data.hasCompletedAdvancedFeatures || false);
-        setHasSeenWelcomeBanner(response.data.hasSeenWelcomeBanner || false);
         setHasSeenProfileSetupGuide(response.data.hasSeenProfileSetupGuide || false);
         
         console.log('[TUTORIAL CONTEXT] State set - hasSeenProfileSetupGuide:', response.data.hasSeenProfileSetupGuide);
@@ -228,25 +226,6 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
     setCurrentTutorialId(null);
   }, []);
 
-  // Dismiss welcome banner
-  const dismissWelcomeBanner = useCallback(async () => {
-    if (authToken && API_BASE_URL) {
-      try {
-        await axios.post(`${API_BASE_URL}/users/dismiss-welcome-banner`, {}, {
-          headers: { Authorization: `Bearer ${authToken}` }
-        });
-        setHasSeenWelcomeBanner(true);
-        console.log('Welcome banner dismissed');
-      } catch (error) {
-        console.error('Failed to dismiss welcome banner:', error);
-        // Still update local state even if backend fails
-        setHasSeenWelcomeBanner(true);
-      }
-    } else {
-      setHasSeenWelcomeBanner(true);
-    }
-  }, [authToken, API_BASE_URL]);
-
   // Dismiss profile setup guide
   const dismissProfileSetupGuide = useCallback(async () => {
     if (authToken && API_BASE_URL) {
@@ -293,14 +272,12 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
     isLoading,
     hasCompletedOnboarding,
     hasCompletedAdvancedFeatures,
-    hasSeenWelcomeBanner,
     hasSeenProfileSetupGuide,
 
     // Actions
     markInitialTutorialSeen,
     markTutorialCompleted,
     isTutorialCompleted,
-    dismissWelcomeBanner,
     dismissProfileSetupGuide,
     resetAllTutorials,
     restartTutorial,

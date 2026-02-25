@@ -20,7 +20,6 @@ import { TutorialOverlay, TutorialHighlight } from './components/TutorialOverlay
 import { TUTORIAL_LESSONS } from './data/tutorialLessonsNew';
 import DatePicker from './components/DatePicker';
 import InfoTab from './components/InfoTab';
-import WelcomeBanner from './components/WelcomeBanner';
 import WelcomeGuideModal from './components/WelcomeGuideModal';
 import ReportButton from './components/ReportButton';
 import ModerationAuthModal from './components/moderation/ModerationAuthModal';
@@ -20081,7 +20080,7 @@ const App = () => {
     }, [API_BASE_URL, setUserCount]);
     
     // Tutorial context hook
-    const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted, completedTutorials, isTutorialCompleted, hasSeenWelcomeBanner, dismissWelcomeBanner, hasSeenProfileSetupGuide, dismissProfileSetupGuide } = useTutorial(); 
+    const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted, completedTutorials, isTutorialCompleted, hasSeenProfileSetupGuide, dismissProfileSetupGuide } = useTutorial(); 
     const [animalToEdit, setAnimalToEdit] = useState(null);
     const [speciesToAdd, setSpeciesToAdd] = useState(null); 
     const [speciesOptions, setSpeciesOptions] = useState([]); 
@@ -21054,31 +21053,19 @@ const App = () => {
         }
     }, [authToken, userProfile, showModalMessage]);
 
-    // Check if user has seen welcome guide
+    // Check if user has seen welcome guide (localStorage only - no API call needed)
     useEffect(() => {
-        const checkWelcomeGuide = async () => {
-            if (!authToken || !userProfile) return;
-            
-            try {
-                const response = await axios.get(`${API_BASE_URL}/users/tutorial-progress`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
-                
-                const hasSeen = response.data.hasSeenProfileSetupGuide || false;
-                console.log('[WELCOME GUIDE] Loaded from database:', hasSeen);
-                setHasSeenWelcomeGuide(hasSeen);
-                
-                // Show modal if they haven't seen it
-                if (!hasSeen) {
-                    setShowWelcomeGuide(true);
-                }
-            } catch (error) {
-                console.error('[WELCOME GUIDE] Failed to load status:', error);
-            }
-        };
+        if (!authToken || !userProfile) return;
         
-        checkWelcomeGuide();
-    }, [authToken, userProfile, API_BASE_URL]);
+        const storageKey = `${userProfile._id}_hasSeenWelcomeGuide`;
+        const hasSeen = localStorage.getItem(storageKey) === 'true';
+        setHasSeenWelcomeGuide(hasSeen);
+        
+        // Show modal if they haven't seen it
+        if (!hasSeen) {
+            setShowWelcomeGuide(true);
+        }
+    }, [authToken, userProfile]);
 
     // Fetch animals for genetics calculator when needed
     useEffect(() => {
@@ -22295,35 +22282,6 @@ const App = () => {
             {showWelcomeGuide && (
                 <WelcomeGuideModal 
                     onClose={handleDismissWelcomeGuide}
-                />
-            )}
-
-            {/* Welcome Banner - Shows once to new users within first month */}
-            {authToken && !hasSeenWelcomeBanner && !tutorialLoading && userProfile && (() => {
-                // Check if account is less than 30 days old
-                const accountCreationDate = new Date(userProfile.creationDate);
-                const now = new Date();
-                const daysSinceCreation = Math.floor((now - accountCreationDate) / (1000 * 60 * 60 * 24));
-                return daysSinceCreation <= 30;
-            })() && (
-                <WelcomeBanner 
-                    isMobile={isMobile}
-                    onStartTutorial={() => {
-                        // Find the first incomplete lesson to resume from
-                        let startIndex = 0;
-                        for (let i = 0; i < TUTORIAL_LESSONS.onboarding.length; i++) {
-                            if (!isTutorialCompleted(TUTORIAL_LESSONS.onboarding[i].id)) {
-                                startIndex = i;
-                                break;
-                            }
-                        }
-                        
-                        setCurrentTutorialIndex(startIndex);
-                        setCurrentTutorialId(TUTORIAL_LESSONS.onboarding[startIndex].id);
-                        setShowTutorialOverlay(true);
-                        dismissWelcomeBanner();
-                    }}
-                    onDismiss={dismissWelcomeBanner}
                 />
             )}
             
