@@ -11,7 +11,7 @@ export const TUTORIAL_SCREENSHOTS = {
   },
   
   'gs-select-species': {
-    // Screenshots to be added
+    1: 'welcome-to-species-selection.png', // Step 1: Welcome to Species Selection
   },
   
   'create-animals': {
