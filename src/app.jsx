@@ -15,8 +15,6 @@ import PrivacyPolicy from './components/PrivacyPolicy';
 import InstallPWA from './components/InstallPWA';
 import AdminPanel from './components/EnhancedAdminPanel';
 import MaintenanceMode from './MaintenanceMode';
-import { TutorialProvider, useTutorial } from './contexts/TutorialContext';
-import { TutorialOverlay, TutorialHighlight } from './components/TutorialOverlay';
 import { TUTORIAL_LESSONS } from './data/tutorialLessonsNew';
 import DatePicker from './components/DatePicker';
 import InfoTab from './components/InfoTab';
@@ -20339,7 +20337,7 @@ const App = () => {
         }
     });
     const [userProfile, setUserProfile] = useState(null);
-    const [hasSkippedTutorialThisSession, setHasSkippedTutorialThisSession] = useState(false);
+
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [userCount, setUserCount] = useState('...');
     
@@ -20410,7 +20408,7 @@ const App = () => {
     }, [API_BASE_URL, setUserCount]);
     
     // Tutorial context hook
-    const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted, completedTutorials, isTutorialCompleted, hasSeenProfileSetupGuide, dismissProfileSetupGuide } = useTutorial(); 
+ 
     const [animalToEdit, setAnimalToEdit] = useState(null);
     const [speciesToAdd, setSpeciesToAdd] = useState(null); 
     const [speciesOptions, setSpeciesOptions] = useState([]); 
@@ -20566,7 +20564,6 @@ const App = () => {
     // Community banner states
     const [communityUsers, setCommunityUsers] = useState([]);
     const scrollContainerRef = useRef(null);
-    const tutorialOverlayRef = useRef(null);
     const litterFormDataRef = useRef(null);
 
     // Tutorial modal states
@@ -20588,12 +20585,6 @@ const App = () => {
     const [maintenanceMessage, setMaintenanceMessage] = useState('');
     const [showUrgentNotification, setShowUrgentNotification] = useState(false);
     const [urgentNotificationData, setUrgentNotificationData] = useState({ title: '', content: '' });
-    const [currentTutorialId, setCurrentTutorialId] = useState(null);
-    const [showTutorialOverlay, setShowTutorialOverlay] = useState(false);
-    const [currentTutorialIndex, setCurrentTutorialIndex] = useState(0);
-    const [currentTutorialStep, setCurrentTutorialStep] = useState(null);
-    const [litterFormOpen, setLitterFormOpen] = useState(false);
-    const [profileEditButtonClicked, setProfileEditButtonClicked] = useState(false);
 
     const timeoutRef = useRef(null);
     const consecutiveAuthErrors = useRef(0);
@@ -21138,107 +21129,6 @@ const App = () => {
     // Instead, users see a one-time WelcomeGuideModal that explains profile setup
     // Tutorials are available manually via the Help button (?) in the header
 
-    // Auto-advance tutorial when view changes (indicating step completion)
-    useEffect(() => {
-        if (!showTutorialOverlay || currentTutorialId !== 'create-animals' || !tutorialOverlayRef.current) {
-            return;
-        }
-
-        // Determine expected step based on current view and state
-        let expectedStep = undefined;
-
-        if (currentView === 'list') {
-            expectedStep = 0; // Start Adding Animals
-        } else if (currentView === 'select-species') {
-            expectedStep = 1; // Select a Species
-        } else if (currentView === 'add-animal' && speciesToAdd) {
-            expectedStep = 2; // Species selected - advances to step 3 (Fill in Basic Information)
-        } else if (currentView === 'form') {
-            expectedStep = 3;
-        }
-
-        if (expectedStep !== undefined && currentTutorialStep && expectedStep > currentTutorialStep.stepNumber - 1) {
-            // Auto-advance to the next step
-            tutorialOverlayRef.current.advanceStep();
-        }
-    }, [currentView, speciesToAdd, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
-
-    // Auto-advance tutorial for lesson 3 (assign-parents) when entering edit view
-    useEffect(() => {
-        if (!showTutorialOverlay || currentTutorialId !== 'assign-parents' || !tutorialOverlayRef.current) {
-            return;
-        }
-
-        // When editing an animal, advance to step 2 (where pedigree section is highlighted)
-        if (currentView === 'edit-animal' && currentTutorialStep?.stepNumber === 1) {
-            tutorialOverlayRef.current.advanceStep();
-        }
-    }, [currentView, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
-
-    // Auto-advance tutorial for lesson 4 (create-litters) when entering litters view
-    useEffect(() => {
-        if (!showTutorialOverlay || currentTutorialId !== 'create-litters' || !tutorialOverlayRef.current) {
-            return;
-        }
-
-        // When viewing litters, advance to step 2 (where new litter button is highlighted)
-        if (currentView === 'litters' && currentTutorialStep?.stepNumber === 1) {
-            tutorialOverlayRef.current.advanceStep();
-        }
-    }, [currentView, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
-
-    // Auto-advance tutorial for lesson 4 (profile-settings) when entering profile view
-    useEffect(() => {
-        if (!showTutorialOverlay || currentTutorialId !== 'profile-settings' || !tutorialOverlayRef.current) {
-            return;
-        }
-
-        // When viewing profile, advance to step 2 (where edit button is highlighted)
-        if (currentView === 'profile' && currentTutorialStep?.stepNumber === 1) {
-            if (currentTutorialId === 'kf-profile-settings') {
-                tutorialOverlayRef.current.advanceStep();
-            }
-        }
-    }, [currentView, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
-
-    // Auto-advance tutorial for lesson 3 step 2 when edit profile button is clicked
-    useEffect(() => {
-        if (!showTutorialOverlay || currentTutorialId !== 'kf-profile-settings' || !tutorialOverlayRef.current) {
-            return;
-        }
-
-        // When edit profile button is clicked, advance to step 3 (profile image)
-        if (profileEditButtonClicked && currentTutorialStep?.stepNumber === 2) {
-            tutorialOverlayRef.current.advanceStep();
-            setProfileEditButtonClicked(false);
-        }
-    }, [profileEditButtonClicked, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
-
-    // Auto-advance tutorial for lesson 6 (budget-basics) when entering budget view
-    useEffect(() => {
-        if (!showTutorialOverlay || currentTutorialId !== 'budget-basics' || !tutorialOverlayRef.current) {
-            return;
-        }
-
-        // When viewing budget, advance to step 2 (where add transaction button is explained)
-        if (currentView === 'budget' && currentTutorialStep?.stepNumber === 1) {
-            tutorialOverlayRef.current.advanceStep();
-        }
-    }, [currentView, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
-
-    // Auto-advance tutorial for lesson 6 (budget-basics) step 2 when Add Transaction clicked
-    useEffect(() => {
-        if (!showTutorialOverlay || currentTutorialId !== 'budget-basics' || !tutorialOverlayRef.current) {
-            return;
-        }
-
-        // When Add Transaction is clicked, advance from step 2 to step 3 (manual vs transfer)
-        if (budgetModalOpen && currentTutorialStep?.stepNumber === 2) {
-            tutorialOverlayRef.current.advanceStep();
-            setBudgetModalOpen(false); // Reset for next time
-        }
-    }, [budgetModalOpen, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
-
     // Clear pre-selected transfer data when leaving budget view
     useEffect(() => {
         if (currentView !== 'budget') {
@@ -21246,33 +21136,6 @@ const App = () => {
             setPreSelectedTransactionType(null);
         }
     }, [currentView]);
-
-    // Auto-advance tutorial for lesson 4 step 2 when form opens
-    useEffect(() => {
-        if (!showTutorialOverlay || currentTutorialId !== 'create-litters' || !tutorialOverlayRef.current) {
-            return;
-        }
-
-        // When new litter form opens, advance to step 3 (where parents section is highlighted)
-        if (litterFormOpen && currentTutorialStep?.stepNumber === 2) {
-            tutorialOverlayRef.current.advanceStep();
-        }
-    }, [showTutorialOverlay, currentTutorialId, currentTutorialStep, litterFormOpen]);
-
-    // Auto-advance tutorial for lesson 4 step 3 when parents and birthdate are filled
-    useEffect(() => {
-        if (!showTutorialOverlay || currentTutorialId !== 'create-litters' || !tutorialOverlayRef.current) {
-            return;
-        }
-
-        // When parents and birthdate are set, advance from step 3 to step 4 (offspring sections)
-        if (currentTutorialStep?.stepNumber === 3 && litterFormDataRef.current) {
-            const { sireId_public, damId_public, birthDate } = litterFormDataRef.current;
-            if (sireId_public && damId_public && birthDate) {
-                tutorialOverlayRef.current.advanceStep();
-            }
-        }
-    }, [showTutorialOverlay, currentTutorialId, currentTutorialStep, litterFormDataRef.current?.sireId_public, litterFormDataRef.current?.damId_public, litterFormDataRef.current?.birthDate]);
 
     // Auth token effect - set up axios defaults
     useEffect(() => {
@@ -23175,119 +23038,7 @@ const App = () => {
                 />
             )}
 
-            {/* Tutorial Modal disabled - only available via Help button. Users can still access tutorials through the UI. */}
 
-            {/* Tutorial Overlay Modal */}
-            {showTutorialOverlay && currentTutorialId && (
-                <TutorialOverlay
-                    ref={tutorialOverlayRef}
-                    lessonId={currentTutorialId}
-                    onStepChange={(stepIndex, step) => {
-                        setCurrentTutorialStep(step);
-                    }}
-                    onClose={() => {
-                        // Close tutorial and don't show again this session (like "Skip for Now")
-                        setShowTutorialOverlay(false);
-                        setCurrentTutorialId(null);
-                        setCurrentTutorialIndex(0);
-                        setCurrentTutorialStep(null);
-                        setHasSkippedTutorialThisSession(true);
-                    }}
-                    onComplete={(signal) => {
-                        // Handle "start-features" signal from Getting Started completion
-                        if (signal === 'start-features') {
-                            // Start the first Key Features tutorial
-                            setCurrentTutorialIndex(0);
-                            setCurrentTutorialId(TUTORIAL_LESSONS.features[0].id);
-                            setCurrentTutorialStep(null);
-                            setShowTutorialOverlay(true);
-                            return;
-                        }
-
-                        // Handle "start-advanced" signal from Key Features completion
-                        if (signal === 'start-advanced') {
-                            // Start the first advanced features tutorial
-                            setCurrentTutorialIndex(0);
-                            setCurrentTutorialId(TUTORIAL_LESSONS.advanced[0].id);
-                            setCurrentTutorialStep(null);
-                            setShowTutorialOverlay(true);
-                            return;
-                        }
-
-                        // Determine which tutorial array we're in
-                        const isInOnboarding = TUTORIAL_LESSONS.onboarding.some(lesson => lesson.id === currentTutorialId);
-                        const isInFeatures = TUTORIAL_LESSONS.features.some(lesson => lesson.id === currentTutorialId);
-                        const isInAdvanced = TUTORIAL_LESSONS.advanced.some(lesson => lesson.id === currentTutorialId);
-
-                        if (isInOnboarding) {
-                            // Move to next lesson in onboarding sequence
-                            setCurrentTutorialIndex(prevIndex => {
-                                const nextIndex = prevIndex + 1;
-                                if (nextIndex < TUTORIAL_LESSONS.onboarding.length) {
-                                    // Show next lesson
-                                    setCurrentTutorialId(TUTORIAL_LESSONS.onboarding[nextIndex].id);
-                                    setCurrentTutorialStep(null);
-                                    return nextIndex;
-                                } else {
-                                    // All onboarding lessons completed
-                                    setShowTutorialOverlay(false);
-                                    setCurrentTutorialId(null);
-                                    setCurrentTutorialStep(null);
-                                    return 0;
-                                }
-                            });
-                        } else if (isInFeatures) {
-                            // Move to next lesson in features sequence
-                            setCurrentTutorialIndex(prevIndex => {
-                                const nextIndex = prevIndex + 1;
-                                if (nextIndex < TUTORIAL_LESSONS.features.length) {
-                                    // Show next lesson
-                                    setCurrentTutorialId(TUTORIAL_LESSONS.features[nextIndex].id);
-                                    setCurrentTutorialStep(null);
-                                    return nextIndex;
-                                } else {
-                                    // All feature lessons completed
-                                    setShowTutorialOverlay(false);
-                                    setCurrentTutorialId(null);
-                                    setCurrentTutorialStep(null);
-                                    return 0;
-                                }
-                            });
-                        } else if (isInAdvanced) {
-                            // Move to next lesson in advanced features sequence
-                            setCurrentTutorialIndex(prevIndex => {
-                                const nextIndex = prevIndex + 1;
-                                if (nextIndex < TUTORIAL_LESSONS.advanced.length) {
-                                    // Show next lesson
-                                    setCurrentTutorialId(TUTORIAL_LESSONS.advanced[nextIndex].id);
-                                    setCurrentTutorialStep(null);
-                                    return nextIndex;
-                                } else {
-                                    // All advanced lessons completed - mark initial tutorial as seen
-                                    markInitialTutorialSeen();
-                                    setShowTutorialOverlay(false);
-                                    setCurrentTutorialId(null);
-                                    setCurrentTutorialStep(null);
-                                    return 0;
-                                }
-                            });
-                        } else {
-                            // Fallback: just close the tutorial
-                            setShowTutorialOverlay(false);
-                            setCurrentTutorialId(null);
-                            setCurrentTutorialStep(null);
-                        }
-                    }}
-                />
-            )}
-
-            {/* Tutorial Highlight - highlights elements during tutorial */}
-            {showTutorialOverlay && currentTutorialStep && currentTutorialStep.highlightElement && (
-                <TutorialHighlight 
-                    elementSelector={currentTutorialStep.highlightElement}
-                    onHighlightClose={() => {}}
-                />
-            )}
 
             {/* Profile Card and Community Feed - shown only on list view */}
             {currentView === 'list' && (
@@ -26030,42 +25781,13 @@ const AppRouter = () => {
             <Routes>
                 <Route path="/animal/:animalId" element={<PublicAnimalPage />} />
                 <Route path="/user/:userId" element={<PublicProfilePage />} />
-                <Route path="/*" element={<AppWithTutorial />} />
+                <Route path="/*" element={<App />} />
             </Routes>
         </>
     );
 };
 
-// Wrapper component - TutorialProvider is now inside App to access auth state
-const AppWithTutorial = () => {
-    const getUserId = () => {
-        try {
-            return localStorage.getItem('userId');
-        } catch (e) {
-            console.warn('Could not read userId from localStorage', e);
-            return null;
-        }
-    };
-    
-    const getAuthToken = () => {
-        try {
-            return localStorage.getItem('authToken');
-        } catch (e) {
-            console.warn('Could not read authToken from localStorage', e);
-            return null;
-        }
-    };
-    
-    return (
-        <TutorialProvider 
-            userId={getUserId()}
-            authToken={getAuthToken()}
-            API_BASE_URL={API_BASE_URL}
-        >
-            <App />
-        </TutorialProvider>
-    );
-};
+
 
 export default AppRouter;
 
