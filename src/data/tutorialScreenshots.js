@@ -54,7 +54,17 @@ export const TUTORIAL_SCREENSHOTS = {
     11: 'add-first-measurement.png', // Step 11: Add First Measurement
     12: 'add-second-measurement.png', // Step 12: Add Second Measurement
     13: 'view-growth-chart.png', // Step 13: View Growth Chart
-    14: 'move-to-identification-tab.png', // Step 14: Move to Identification Tab
+  },
+  
+  'gs-identification': {
+    1: 'identification-tab.png', // Step 1: Identification Tab
+    2: 'identification-breeder-id.png', // Step 2: Identification (Breeder ID)
+    3: 'microchip-number.png', // Step 3: Microchip Number
+    4: 'pedigree-registration-id.png', // Step 4: Pedigree Registration ID
+    5: 'classification-section.png', // Step 5: Classification Section
+    6: 'breed-selection.png', // Step 6: Breed Selection
+    7: 'strain.png', // Step 7: Strain
+    8: 'tags-feature.png', // Step 8: Tags Feature
   },
   
   'create-animals': {
