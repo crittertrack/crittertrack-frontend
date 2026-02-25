@@ -23923,6 +23923,7 @@ const App = () => {
                                         {/* Tab 3: Physical Profile */}
                                         {detailViewTab === 3 && (
                                             <div className="space-y-6">
+                                                {/* Variety Section - Always show */}
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                     <h3 className="text-lg font-semibold text-gray-700">Variety</h3>
                                                     <div className="text-sm">
@@ -23931,7 +23932,7 @@ const App = () => {
                                                             animalToView.coatPattern,
                                                             animalToView.coat,
                                                             animalToView.earset
-                                                        ].filter(Boolean).join(' ') || ''}</strong>
+                                                        ].filter(Boolean).join(' ') || 'Not specified'}</strong>
                                                     </div>
                                                 </div>
                                                 {animalToView.geneticCode && (
@@ -23940,13 +23941,13 @@ const App = () => {
                                                         <p className="text-sm font-mono">{animalToView.geneticCode}</p>
                                                     </div>
                                                 )}
-                                                {animalToView.lifeStage && (
-                                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                                        <span className="text-sm text-gray-600">Life Stage:</span> <strong>{animalToView.lifeStage}</strong>
-                                                    </div>
-                                                )}
+                                                
+                                                {/* Life Stage - Always show */}
+                                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                                    <span className="text-sm text-gray-600">Life Stage:</span> <strong>{animalToView.lifeStage || 'Not specified'}</strong>
+                                                </div>
 
-                                                {/* Current Measurements */}
+                                                {/* Current Measurements - Always show */}
                                                 {(() => {
                                                     let growthRecords = animalToView.growthRecords;
                                                     if (typeof growthRecords === 'string') {
@@ -23973,23 +23974,28 @@ const App = () => {
                                                     // Fallback to stored values if no growth records
                                                     if (!currentWeight) currentWeight = animalToView.currentWeight;
                                                     
-                                                    return (currentWeight || animalToView.bcs || currentLength || currentHeight) && (
+                                                    // Always show Current Measurements section
+                                                    return (
                                                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                             <h3 className="text-lg font-semibold text-gray-700">Current Measurements</h3>
-                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                                                {currentWeight && (
-                                                                    <div><span className="text-gray-600">Weight:</span> <strong>{currentWeight} {animalToView.measurementUnits?.weight || 'g'}</strong></div>
-                                                                )}
-                                                                {animalToView.bcs && (
-                                                                    <div><span className="text-gray-600">BCS:</span> <strong>{animalToView.bcs}</strong></div>
-                                                                )}
-                                                                {currentLength && (
-                                                                    <div><span className="text-gray-600">Length:</span> <strong>{currentLength} {animalToView.measurementUnits?.length || 'cm'}</strong></div>
-                                                                )}
-                                                                {currentHeight && (
-                                                                    <div><span className="text-gray-600">Height:</span> <strong>{currentHeight} {animalToView.measurementUnits?.length || 'cm'}</strong></div>
-                                                                )}
-                                                            </div>
+                                                            {(currentWeight || animalToView.bcs || currentLength || currentHeight) ? (
+                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                                    {currentWeight && (
+                                                                        <div><span className="text-gray-600">Weight:</span> <strong>{currentWeight} {animalToView.measurementUnits?.weight || 'g'}</strong></div>
+                                                                    )}
+                                                                    {animalToView.bcs && (
+                                                                        <div><span className="text-gray-600">BCS:</span> <strong>{animalToView.bcs}</strong></div>
+                                                                    )}
+                                                                    {currentLength && (
+                                                                        <div><span className="text-gray-600">Length:</span> <strong>{currentLength} {animalToView.measurementUnits?.length || 'cm'}</strong></div>
+                                                                    )}
+                                                                    {currentHeight && (
+                                                                        <div><span className="text-gray-600">Height:</span> <strong>{currentHeight} {animalToView.measurementUnits?.length || 'cm'}</strong></div>
+                                                                    )}
+                                                                </div>
+                                                            ) : (
+                                                                <div className="text-sm text-gray-500">No measurements recorded yet.</div>
+                                                            )}
                                                         </div>
                                                     );
                                                 })()}
@@ -24031,10 +24037,10 @@ const App = () => {
                                                                     
                                                                     {/* Empty state message */}
                                                                     <text x={270} y={150} textAnchor="middle" fontSize="14" fill="#999">
-                                                                        Add more entries to see growth charts
+                                                                        No growth data recorded yet
                                                                     </text>
                                                                 </svg>
-                                                                <p className="text-xs text-gray-500 mt-2">Growth curves will appear once you add measurement entries.</p>
+                                                                <p className="text-xs text-gray-500 mt-2">Growth curves will appear once measurement entries are added.</p>
                                                             </div>
                                                         );
                                                     }
