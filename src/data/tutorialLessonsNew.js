@@ -835,8 +835,30 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 3,
-        title: 'Environment & Housing Details',
-        content: 'Document cage/enclosure setup, bedding type, temperature, humidity, and lighting schedule. This completes the care record and is useful for handover to new owners.',
+        title: 'Housing Details',
+        content: 'Assign your animal to an enclosure, document the housing type (wire cage, glass aquarium, etc.), bedding/substrate, and enrichment items like toys and tunnels.',
+        highlightElement: '[data-tutorial-target="husbandry-details-section"]',
+        tips: [
+          'Enclosure assignment helps organize animals',
+          'Housing details useful for rehoming',
+          'Track what works best for your animal'
+        ]
+      },
+      {
+        stepNumber: 4,
+        title: 'Scheduled Care Tasks',
+        content: 'Add custom recurring tasks like "Weigh", "Clean water bottle", or "Nail trim" with a frequency in days. Each task gets its own due-date tracking in the Management View.',
+        highlightElement: '',
+        tips: [
+          'Each task tracked independently',
+          'Mark done from Management View instantly',
+          'Great for multi-step care routines'
+        ]
+      },
+      {
+        stepNumber: 5,
+        title: 'Environment',
+        content: 'Document environmental conditions including temperature range, humidity levels, lighting schedule, and noise levels. Proper environment is crucial for health and breeding success.',
         highlightElement: '[data-tutorial-target="environment-section"]',
         tips: [
           'Environment affects behavior and health',
@@ -845,14 +867,14 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 4,
-        title: 'Scheduled Care Tasks',
-        content: 'Add custom recurring tasks like "Weigh", "Clean water bottle", or "Nail trim" with a frequency in days. Each task gets its own due-date tracking in the Management View.',
-        highlightElement: '[data-tutorial-target="husbandry-details-section"]',
+        stepNumber: 6,
+        title: 'Exercise & Grooming',
+        content: 'For some species (primarily dogs and cats), track exercise requirements, daily exercise minutes, grooming needs, and shedding levels. These fields help document care routines.',
+        highlightElement: '',
         tips: [
-          'Each task tracked independently',
-          'Mark done from Management View instantly',
-          'Great for multi-step care routines'
+          'Species-specific fields',
+          'Important for dogs and cats',
+          'Documents ongoing care needs'
         ]
       }
     ]
