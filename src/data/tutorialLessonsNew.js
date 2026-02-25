@@ -325,38 +325,42 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 2,
-        title: 'Color',
-        content: 'Enter the color of your animal\'s coat. Examples: Black, White, Brown, Grey, Spotted, etc. Be as specific as you need for your records.',
+        title: 'Template-Based Physical Fields',
+        content: 'The Physical tab displays fields specific to your species based on field templates. For example, Fancy Mouse shows Color, Pattern, Coat Type, and Size fields. Other species may show different fields like Eye Color, Nail Color, Wing Span, Scale Type, and more. Each species template is customized to show only the relevant physical characteristics for that animal type.',
         highlightElement: '[data-tutorial-target="appearance-section"]',
         actionType: 'click',
         tips: [
-          'Use standard color names or your own system',
-          'This helps identify and track traits',
-          'Combined with coat type for full description'
+          'Fields vary by species - each template is unique',
+          'Fancy Mouse: Color, Pattern, Coat Type, Size',
+          'Birds may show Beak Color, Wing Pattern, Crest Type',
+          'Reptiles may show Scale Type, Eye Color, Body Pattern',
+          'All fields are optional but help with identification and breeding'
         ]
       },
       {
         stepNumber: 3,
-        title: 'Coat Type',
-        content: 'Specify the texture of your animal\'s coat. Common options: Short hair, Long hair, Curly, Wavy, Hairless, etc.',
+        title: 'Filling Out Physical Fields',
+        content: 'Fill in the physical characteristic fields that appear for your species. You can be as specific or general as you like. Examples: "Black" for color, "Standard" for coat type, "Marked" for pattern, "Large" for size. These fields help identify your animal and track genetic traits.',
         highlightElement: '[data-tutorial-target="appearance-section"]',
         actionType: 'click',
         tips: [
-          'Coat type is genetic',
-          'Important for breeding selection',
-          'Different species have different coat types'
+          'Use consistent terminology across your animals',
+          'These fields help with breeding decisions',
+          'All fields are optional - fill what\'s relevant',
+          'You can always edit these later'
         ]
       },
       {
         stepNumber: 4,
-        title: 'Coat Pattern',
-        content: 'Describe any patterns in the coat. Examples: Solid, Striped, Spotted, Banded, Dalmatian, etc.',
+        title: 'Additional Physical Notes',
+        content: 'Some species templates include additional fields like Eye Color, Nail Color, Markings, or other unique characteristics. Scroll through the Physical tab to see all available fields for your species. Each field is designed to capture traits relevant to that specific animal type.',
         highlightElement: '[data-tutorial-target="appearance-section"]',
         actionType: 'click',
         tips: [
-          'Pattern is often genetic',
-          'Helps identify specific animals',
-          'Important for selective breeding'
+          'Templates ensure you capture species-specific traits',
+          'Fields are organized logically for each species',
+          'Physical traits often have genetic components',
+          'Useful for identification and breeding records'
         ]
       },
       {
