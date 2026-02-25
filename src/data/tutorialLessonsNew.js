@@ -591,14 +591,14 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 3,
         title: 'Parent Search System',
-        content: 'This modal lets you search for the sire. Notice the buttons for "Local" (your animals), "Global" (community animals), and "Both". You can also search by name or ID. The system only shows animals that match your current animal\'s species and the correct gender.',
+        content: 'This modal lets you search for the sire. Notice the buttons for "Local" (your animals), "Global" (community animals), and "Both". You can also search by name or ID. The system only shows animals that match your current animal\'s species and the correct gender. Note: Global search only shows public community animals that other users have made publicly visible.',
         highlightElement: '[data-tutorial-target="parent-search-modal"]',
         hideHighlightPrompt: true,
         tips: [
           'Local Animals: Your collection only',
-          'Global Animals: Community collection',
+          'Global Animals: Public community animals only',
           'Both: Search everywhere',
-          'Gender filter ensures correct parentage'
+          'Gender and species filters ensure correct parentage'
         ]
       },
       {
