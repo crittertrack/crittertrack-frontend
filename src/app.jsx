@@ -327,10 +327,17 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             setLoading(true);
             try {
                 // Enhanced recursive function to fetch animal, ancestors, and descendants
-                const fetchAnimalWithFamily = async (id, depth = 0, fetchedIds = new Set()) => {
-                    if (!id || depth > 4 || fetchedIds.has(id)) return null; // Limit to 5 generations (0-4) and prevent infinite loops
-                    
-                    fetchedIds.add(id); // Track this ID to prevent circular references
+                // resultCache: Map<id, data> — avoids redundant API calls but allows the same
+                //   ancestor to appear in *multiple* pedigree positions (inbreeding).
+                // pathIds: Set of IDs in the current call-chain — detects true circular loops only.
+                const resultCache = new Map();
+                const fetchAnimalWithFamily = async (id, depth = 0, pathIds = new Set()) => {
+                    if (!id || depth > 4) return null;
+                    if (pathIds.has(id)) return null; // circular reference — stop this branch
+
+                    // Return cached result so the same ancestor shows in multiple pedigree
+                    // positions (inbreeding) without redundant API calls
+                    if (resultCache.has(id)) return resultCache.get(id);
 
                     let animalInfo = null;
 
@@ -407,12 +414,14 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         }
                     }
 
-                    // Recursively fetch parents
+                    // Recursively fetch parents — each branch gets its own path copy so that
+                    // an ancestor appearing on BOTH sides (inbreeding) isn't blocked.
                     const fatherId = animalInfo.fatherId_public || animalInfo.sireId_public;
                     const motherId = animalInfo.motherId_public || animalInfo.damId_public;
+                    const childPath = new Set([...pathIds, id]);
 
-                    const father = fatherId ? await fetchAnimalWithFamily(fatherId, depth + 1, fetchedIds) : null;
-                    const mother = motherId ? await fetchAnimalWithFamily(motherId, depth + 1, fetchedIds) : null;
+                    const father = fatherId ? await fetchAnimalWithFamily(fatherId, depth + 1, childPath) : null;
+                    const mother = motherId ? await fetchAnimalWithFamily(motherId, depth + 1, childPath) : null;
 
                     // Fetch offspring (children) if user is authenticated and depth allows
                     let offspring = [];
@@ -426,11 +435,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                             if (offspringResponse.data && offspringResponse.data.length > 0) {
                                 // Recursively fetch offspring details but limit depth to prevent infinite expansion
                                 for (const child of offspringResponse.data.slice(0, 15)) { // Limit to first 15 offspring per animal to accommodate larger mouse litters
-                                    if (!fetchedIds.has(child.id_public)) {
-                                        const childData = await fetchAnimalWithFamily(child.id_public, depth + 1, fetchedIds);
-                                        if (childData) {
-                                            offspring.push(childData);
-                                        }
+                                    const childData = await fetchAnimalWithFamily(child.id_public, depth + 1, childPath);
+                                    if (childData) {
+                                        offspring.push(childData);
                                     }
                                 }
                             }
@@ -439,12 +446,14 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         }
                     }
 
-                    return {
+                    const result = {
                         ...animalInfo,
                         father,
                         mother,
                         offspring: offspring.length > 0 ? offspring : undefined
                     };
+                    resultCache.set(id, result);
+                    return result;
                 };
 
                 const data = await fetchAnimalWithFamily(animalId || animalData?.id_public);
