@@ -583,6 +583,20 @@ export default function ModOversightPanel({
                 }
             }
 
+            const requestBody = {
+                status: nextStatus,
+                adminNotes: adminNotes.trim() || undefined
+            };
+            
+            console.log('[ModOversightPanel] Request details:', {
+                url: `${baseUrl}/moderation/reports/${actualType}/${selectedReport._id}/status`,
+                body: requestBody,
+                statusValue: nextStatus,
+                statusType: typeof nextStatus,
+                statusLength: nextStatus?.length,
+                statusCharCodes: Array.from(nextStatus || '').map(c => c.charCodeAt(0))
+            });
+
             const response = await fetch(
                 `${baseUrl}/moderation/reports/${actualType}/${selectedReport._id}/status`,
                 {
@@ -591,16 +605,20 @@ export default function ModOversightPanel({
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${authToken}`
                     },
-                    body: JSON.stringify({
-                        status: nextStatus,
-                        adminNotes: adminNotes.trim() || undefined
-                    })
+                    body: JSON.stringify(requestBody)
                 }
             );
 
             const data = await response.json();
+            
+            console.log('[ModOversightPanel] Response:', { 
+                ok: response.ok, 
+                status: response.status, 
+                data 
+            });
 
             if (!response.ok) {
+                console.error('[ModOversightPanel] Update failed:', data);
                 throw new Error(data.message || data.error || 'Failed to update report');
             }
 
