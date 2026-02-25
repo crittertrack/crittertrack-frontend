@@ -2424,7 +2424,7 @@ const DetailJsonList = ({ label, data, renderItem }) => {
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
-const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, onHideAnimal, showModalMessage, onTransfer, onViewAnimal, onToggleOwned }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, onHideAnimal, showModalMessage, onTransfer, onViewAnimal, onToggleOwned }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -2532,7 +2532,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             <span className="text-[10px] bg-green-100 text-green-800 px-1.5 py-0.5 rounded font-medium">
                                  OWNER
                             </span>
-                            <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
+                            <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={24} />
                             </button>
                         </div>
@@ -2607,7 +2607,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                     Transfer
                                 </button>
                             )}
-                            <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
+                            <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={28} />
                             </button>
                         </div>
@@ -3772,7 +3772,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
 // ==================== VIEW-ONLY PRIVATE ANIMAL DETAIL (SOLD/TRANSFERRED) ====================
 // Identical to PrivateAnimalDetail but without edit/delete and privacy controls
 // Used for animals you have view-only access to (sold, transferred, purchased)
-const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onHideAnimal, showModalMessage, onViewAnimal }) => {
+const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onHideAnimal, showModalMessage, onViewAnimal }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -3828,7 +3828,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             <span className="text-[10px] bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded font-medium">
                                 📋 VIEW-ONLY
                             </span>
-                            <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
+                            <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={24} />
                             </button>
                         </div>
@@ -3878,7 +3878,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                     Hide
                                 </button>
                             )}
-                            <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
+                            <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={28} />
                             </button>
                         </div>
@@ -4874,7 +4874,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
 // ==================== PUBLIC ANIMAL DETAIL (VIEW-ONLY FOR OTHERS) ====================
 // Respects privacy toggles - only shows public sections
 // Accessed from: Global search, user profiles, offspring links
-const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, onViewAnimal, authToken, setModCurrentContext, setShowImageModal, setEnlargedImageUrl }) => {
+const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onViewProfile, onViewAnimal, authToken, setModCurrentContext, setShowImageModal, setEnlargedImageUrl }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
@@ -5023,7 +5023,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, on
                                 authToken={authToken}
                                 tooltipText="Report this animal"
                             />
-                            <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
+                            <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={28} />
                             </button>
                         </div>
@@ -21588,6 +21588,14 @@ const App = () => {
         }
     };
     
+    // Handle closing all animal modals (X button closes entire stack)
+    const handleCloseAllAnimals = () => {
+        setAnimalToView(null);
+        setAnimalViewHistory([]);
+        navigate('/');
+        console.log('[handleCloseAllAnimals] Closed entire animal modal stack');
+    };
+    
     // Handle viewing public animals with history support
     const handleViewPublicAnimal = (animal) => {
         console.log('[handleViewPublicAnimal] Viewing public animal:', animal);
@@ -21615,6 +21623,13 @@ const App = () => {
             setPublicAnimalViewHistory([]);
             console.log('[handleBackFromPublicAnimal] No history, closing detail view');
         }
+    };
+    
+    // Handle closing all public animal modals (X button closes entire stack)
+    const handleCloseAllPublicAnimals = () => {
+        setViewingPublicAnimal(null);
+        setPublicAnimalViewHistory([]);
+        console.log('[handleCloseAllPublicAnimals] Closed entire public animal modal stack');
     };
 
     // Set up global handler for viewing public animals from search modal
@@ -21844,6 +21859,7 @@ const App = () => {
                         <ViewOnlyAnimalDetail 
                             animal={viewingPublicAnimal}
                             onClose={handleBackFromPublicAnimal}
+                            onCloseAll={handleCloseAllPublicAnimals}
                             API_BASE_URL={API_BASE_URL}
                             authToken={authToken}
                             onViewProfile={(user) => setViewingPublicProfile(user)}
@@ -21974,6 +21990,7 @@ const App = () => {
                         <ViewOnlyAnimalDetail 
                             animal={viewingPublicAnimal}
                             onClose={handleBackFromPublicAnimal}
+                            onCloseAll={handleCloseAllPublicAnimals}
                             API_BASE_URL={API_BASE_URL}
                             authToken={authToken}
                             onViewProfile={(user) => setViewingPublicProfile(user)}
@@ -22339,10 +22356,7 @@ const App = () => {
                 <ViewOnlyAnimalDetail 
                     animal={viewingPublicAnimal}
                     onClose={handleBackFromPublicAnimal}
-                    API_BASE_URL={API_BASE_URL}
-                    setModCurrentContext={setModCurrentContext}
-                    authToken={authToken}
-                    onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
+                            onCloseAll={handleCloseAllPublicAnimals}
                     onViewAnimal={handleViewPublicAnimal}
                     setShowImageModal={setShowImageModal}
                     setEnlargedImageUrl={setEnlargedImageUrl}
@@ -23292,6 +23306,7 @@ const App = () => {
                                     <PrivateAnimalDetail
                                         animal={animalToView}
                                         onClose={handleBackFromAnimal}
+                                        onCloseAll={handleCloseAllAnimals}
                                         onEdit={handleEditAnimal}
                                         API_BASE_URL={API_BASE_URL}
                                         authToken={authToken}
@@ -23314,6 +23329,7 @@ const App = () => {
                                     <ViewOnlyPrivateAnimalDetail
                                         animal={animalToView}
                                         onClose={handleBackFromAnimal}
+                                        onCloseAll={handleCloseAllAnimals}
                                         API_BASE_URL={API_BASE_URL}
                                         authToken={authToken}
                                         setShowImageModal={setShowImageModal}
