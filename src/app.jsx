@@ -19144,12 +19144,6 @@ const WarningBanner = ({ authToken, API_BASE_URL, userProfile }) => {
                 
                 // Filter to only active (non-lifted) warnings
                 const activeWarnings = userWarnings.filter(w => !w.isLifted);
-                
-                console.log('[WARNING BANNER] Checking warnings:', { 
-                    totalWarnings: activeWarnings.length, 
-                    warnings: activeWarnings 
-                });
-                
                 setWarnings(activeWarnings);
             } catch (error) {
                 console.error('Failed to fetch user profile:', error);
@@ -19342,24 +19336,21 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                 const response = await axios.get(`${API_BASE_URL}/notifications`, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
-                console.log('[BroadcastBanner] All notifications:', response.data);
                 // Filter for broadcast/announcement types that are NOT warning/alert (show info, announcement, or undefined)
                 const broadcastNotifications = (response.data || []).filter(n => {
                     const isBroadcastType = n.type === 'broadcast' || n.type === 'announcement';
                     const isNotUrgent = n.broadcastType !== 'warning' && n.broadcastType !== 'alert';
                     const isNotDismissed = !dismissedIds.includes(n._id);
-                    console.log('[BroadcastBanner] Checking:', n._id, { isBroadcastType, isNotUrgent, isNotDismissed, type: n.type, broadcastType: n.broadcastType });
                     return isBroadcastType && isNotUrgent && isNotDismissed;
                 });
-                console.log('[BroadcastBanner] Filtered broadcasts:', broadcastNotifications);
                 setBroadcasts(broadcastNotifications);
             } catch (error) {
                 console.error('Failed to fetch broadcasts:', error);
             }
         };
         fetchBroadcasts();
-        // Refresh every 15 seconds for real-time updates
-        const interval = setInterval(fetchBroadcasts, 15000);
+        // Refresh every 60 seconds for updates
+        const interval = setInterval(fetchBroadcasts, 60000);
         return () => clearInterval(interval);
     }, [authToken, API_BASE_URL, dismissedIds]);
 
@@ -21211,12 +21202,9 @@ const App = () => {
     const fetchNotificationCount = useCallback(async () => {
         if (!authToken) return;
         try {
-            console.log('[fetchNotificationCount] Fetching notification count...');
             const response = await axios.get(`${API_BASE_URL}/notifications/unread-count`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            console.log('[fetchNotificationCount] Response:', response.data);
-            console.log('[fetchNotificationCount] Setting count to:', response.data?.count || 0);
             setNotificationCount(response.data?.count || 0);
         } catch (error) {
             console.error('Failed to fetch notification count:', error);
@@ -21243,11 +21231,11 @@ const App = () => {
         if (authToken) {
             fetchNotificationCount();
             fetchUnreadMessageCount();
-            // Poll for new notifications and messages every 30 seconds
+            // Poll for new notifications and messages every 60 seconds
             const interval = setInterval(() => {
                 fetchNotificationCount();
                 fetchUnreadMessageCount();
-            }, 30000);
+            }, 60000);
             return () => clearInterval(interval);
         }
     }, [authToken, fetchNotificationCount, fetchUnreadMessageCount]);
