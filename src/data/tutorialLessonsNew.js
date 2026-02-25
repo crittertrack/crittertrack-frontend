@@ -402,12 +402,13 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 8,
         title: 'Life Stage',
-        content: 'Select the current life stage of your animal: Newborn (just born), Juvenile (young), Adult (mature), Senior (elderly), or Unknown. This is calculated based on the species and date of birth but can be manually adjusted.',
+        content: 'Select the current life stage of your animal from the dropdown. Available options vary by species and may include: Newborn (just born), Juvenile (young), Adult (mature), Senior (elderly), or Unknown. This is a manual selection field.',
         highlightElement: '[data-tutorial-target="life-stage-select"]',
         tips: [
-          'Affects health monitoring and breeding eligibility',
-          'Auto-calculated but customizable',
-          'Used for record organization'
+          'Life stage options are species-specific',
+          'Manually selected from dropdown',
+          'Affects breeding eligibility and record organization',
+          'Can be updated as the animal ages'
         ]
       },
       {
