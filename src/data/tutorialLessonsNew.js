@@ -694,12 +694,12 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 4,
         title: 'Mating & Pregnancy',
-        content: 'Check this box if your animal is currently mating or pregnant. This flag helps track breeding status.',
-        highlightElement: '[data-tutorial-target="mating-pregnancy-checkbox"]',
+        content: 'Record when your animal was bred using the Mating Date field. Some species also allow tracking whether artificial insemination was used.',
+        highlightElement: '',
         tips: [
-          'Temporary status during breeding',
-          'Uncheck when breeding complete',
-          'Important for health monitoring'
+          'Track breeding dates for accurate records',
+          'Helps calculate expected due dates',
+          'AI option available for some species'
         ]
       },
       {
