@@ -104,6 +104,35 @@ export const TUTORIAL_SCREENSHOTS = {
     6: 'exercise-and-grooming.png', // Step 6: Exercise & Grooming
   },
   
+  'gs-behavior': {
+    1: 'behavior-tab.png', // Step 1: Behavior Tab
+    2: 'behavior-items.png', // Step 2: Behavior Items
+    3: 'activity-pattern.png', // Step 3: Activity Pattern
+    4: 'training-and-working.png', // Step 4: Training & Working
+  },
+  
+  'gs-records-eol': {
+    1: 'records-tab.png', // Step 1: Records Tab
+    2: 'remarks-and-notes.png', // Step 2: Remarks & Notes
+    3: 'move-to-end-of-life-tab.png', // Step 3: Move to End of Life Tab
+    4: 'date-of-death.png', // Step 4: Date of Death
+    5: 'cause-of-death.png', // Step 5: Cause of Death
+    6: 'necropsy-results.png', // Step 6: Necropsy Results
+  },
+  
+  'gs-show': {
+    1: 'show-tab.png', // Step 1: Show Tab
+    2: 'show-titles-and-ratings.png', // Step 2: Show Titles & Ratings
+    3: 'judge-comments.png', // Step 3: Judge Comments
+  },
+  
+  'gs-legal': {
+    1: 'legal-tab.png', // Step 1: Legal Tab
+    2: 'licensing-and-permits.png', // Step 2: Licensing & Permits
+    3: 'legal-administrative.png', // Step 3: Legal / Administrative
+    4: 'restrictions.png', // Step 4: Restrictions
+  },
+  
   'create-animals': {
     // Screenshots to be added
   },
