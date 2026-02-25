@@ -17681,14 +17681,18 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
 
         // 4. Maintenance — enclosure cleaning tasks + supply reorders
         const enclosuresWithCleaningTasks = enclosures.filter(enc => enc.cleaningTasks?.length > 0);
-        const animalsWithCareTasks = allAnimals.filter(a => a.careTasks?.length > 0);
+        const animalsWithCareTasks = allAnimals.filter(a => (a.careTasks?.length > 0) || (a.animalCareTasks?.length > 0));
         const todayMaint = new Date(); todayMaint.setHours(0, 0, 0, 0);
         const supplyReorderDue = supplies.filter(s =>
             (s.reorderThreshold != null && s.currentStock <= s.reorderThreshold) ||
             (s.nextOrderDate && new Date(s.nextOrderDate) < todayMaint)
         );
         const maintTotalDue = enclosuresWithCleaningTasks.reduce((sum, enc) => sum + enc.cleaningTasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0) + supplyReorderDue.length;
-        const animalCareDue = feedDue.length + animalsWithCareTasks.reduce((sum, a) => sum + (a.careTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
+        const animalCareDue = feedDue.length + animalsWithCareTasks.reduce((sum, a) => {
+            const enclosureTasks = (a.careTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length;
+            const animalTasks = (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length;
+            return sum + enclosureTasks + animalTasks;
+        }, 0);
 
         // 5. Medical — quarantine and treatment
         const quarantineList = allAnimals.filter(a => a.isQuarantine);
@@ -17723,26 +17727,28 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 .catch(err => { console.error('Skip enclosure task failed:', err); fetchEnclosures(); });
         };
 
-        const handleMarkAnimalCareTaskDone = (e, animal, taskIdx) => {
+        const handleMarkAnimalCareTaskDone = (e, animal, taskIdx, taskType = 'enclosure') => {
             e.stopPropagation();
-            const updated = [...(animal.careTasks || [])];
+            const fieldName = taskType === 'animal' ? 'animalCareTasks' : 'careTasks';
+            const updated = [...(animal[fieldName] || [])];
             updated[taskIdx] = { ...updated[taskIdx], lastDoneDate: new Date().toISOString() };
             // Optimistic update
-            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, careTasks: updated } : a));
-            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { careTasks: updated },
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: updated } : a));
+            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: updated },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
                 .then(() => logManagementActivity('care_task_done', animal.id_public, { name: animal.name, taskName: updated[taskIdx]?.taskName || 'Care task' }))
                 .catch(err => { console.error('Mark animal care task done failed:', err); fetchAllAnimals(); });
         };
 
-        const handleSkipAnimalCareTask = (e, animal, taskIdx) => {
+        const handleSkipAnimalCareTask = (e, animal, taskIdx, taskType = 'enclosure') => {
             e.stopPropagation();
-            const updated = [...(animal.careTasks || [])];
+            const fieldName = taskType === 'animal' ? 'animalCareTasks' : 'careTasks';
+            const updated = [...(animal[fieldName] || [])];
             const taskName = updated[taskIdx]?.taskName || 'Care task';
             updated[taskIdx] = { ...updated[taskIdx], lastDoneDate: new Date().toISOString(), lastSkipped: true };
             // Optimistic update
-            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, careTasks: updated } : a));
-            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { careTasks: updated },
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: updated } : a));
+            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: updated },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
                 .then(() => logManagementActivity('care_task_skipped', animal.id_public, { name: animal.name, taskName }))
                 .catch(err => { console.error('Skip animal care task failed:', err); fetchAllAnimals(); });
@@ -18205,7 +18211,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                 ) : animalsWithCareTasks.map(a => {
                                     const grpKey = `maint_animal_${a.id_public}`;
                                     const isGrpCollapsed = collapsedMgmtGroups[grpKey] || false;
-                                    const tasks = a.careTasks || [];
+                                    const enclosureTasks = (a.careTasks || []).map(t => ({ ...t, type: 'enclosure' }));
+                                    const animalTasks = (a.animalCareTasks || []).map(t => ({ ...t, type: 'animal' }));
+                                    const tasks = [...enclosureTasks, ...animalTasks];
                                     const dueTasks = tasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays));
                                     return (
                                         <div key={a.id_public} className="border-b border-gray-100 last:border-0">
@@ -18227,20 +18235,24 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                                         const daysAgo = task.lastDoneDate ? daysSince(task.lastDoneDate) : null;
                                                         const daysLeft = task.frequencyDays && daysAgo !== null ? task.frequencyDays - daysAgo : null;
                                                         const soon = !due && daysLeft !== null && daysLeft <= 2;
+                                                        const taskType = task.type;
+                                                        const realIdx = taskType === 'animal' ? idx - enclosureTasks.length : idx;
                                                         return (
                                                             <div key={idx} className="flex items-center justify-between gap-2 text-sm" onClick={e => e.stopPropagation()}>
                                                                 <div className="flex items-center gap-2 min-w-0">
                                                                     <span className={`w-2 h-2 rounded-full flex-shrink-0 ${due ? 'bg-red-500' : soon ? 'bg-orange-400' : task.frequencyDays ? 'bg-green-500' : 'bg-gray-300'}`} />
                                                                     <span className="text-gray-700 truncate">{task.taskName}</span>
+                                                                    {taskType === 'enclosure' && <span className="text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">Housing</span>}
+                                                                    {taskType === 'animal' && <span className="text-xs bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded">Animal</span>}
                                                                 </div>
                                                                 <div className="flex items-center gap-1.5 shrink-0 text-xs text-gray-400">
                                                                     {task.frequencyDays && <span>Every {task.frequencyDays}d</span>}
                                                                     {task.lastDoneDate ? <span>⚠ Last: {formatDateShort(task.lastDoneDate)}</span> : <span className="text-orange-500">✗ Never done</span>}
-                                                                    <button onClick={(e) => handleMarkAnimalCareTaskDone(e, a, idx)}
+                                                                    <button onClick={(e) => handleMarkAnimalCareTaskDone(e, a, realIdx, taskType)}
                                                                         className={`ml-1 text-xs px-2 py-0.5 rounded font-medium border ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
                                                                         ✓ Done
                                                                     </button>
-                                                                    <button onClick={(e) => handleSkipAnimalCareTask(e, a, idx)}
+                                                                    <button onClick={(e) => handleSkipAnimalCareTask(e, a, realIdx, taskType)}
                                                                         className="ml-1 text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200">
                                                                         ↷ Skip
                                                                     </button>
