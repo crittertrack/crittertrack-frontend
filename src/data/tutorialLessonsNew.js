@@ -728,10 +728,10 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 7,
         title: 'Breeding History',
-        content: 'This section lets you record a brief summary of your animal\'s reproductive events. First select if this animal was a Sire, Dam, or Both. Then fill in mating dates, successful matings count, total offspring produced, total litters, and date of last pregnancy.',
+        content: 'This section lets you record a brief summary of your animal\'s reproductive events. Male animals can select Sire, females can select Dam, and Intersex/Unknown animals have the option to select Both. Fill in mating dates, successful matings count, total offspring produced, total litters, and date of last pregnancy.',
         highlightElement: '[data-tutorial-target="breeding-history-section"]',
         tips: [
-          'Select Sire, Dam, or Both',
+          'Role options match animal gender',
           'Fill in reproductive summary',
           'Helps track breeding productivity'
         ]
