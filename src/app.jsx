@@ -20564,7 +20564,6 @@ const App = () => {
     // Community banner states
     const [communityUsers, setCommunityUsers] = useState([]);
     const scrollContainerRef = useRef(null);
-    const litterFormDataRef = useRef(null);
 
     // Tutorial modal states
     const [showInfoTab, setShowInfoTab] = useState(false);
@@ -23184,7 +23183,7 @@ const App = () => {
                             onBack={() => navigate('/')}
                         />
                     } />
-                    <Route path="/profile" element={<ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} onProfileEditButtonClicked={setProfileEditButtonClicked} />} />
+                    <Route path="/profile" element={<ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} />} />
                     <Route path="/breeder-directory" element={
                         <BreederDirectory
                             authToken={authToken}
@@ -23199,8 +23198,6 @@ const App = () => {
                             userProfile={userProfile}
                             showModalMessage={showModalMessage}
                             onViewAnimal={handleViewAnimal}
-                            formDataRef={litterFormDataRef}
-                            onFormOpenChange={setLitterFormOpen}
                         />
                     } />
                     <Route path="/budget" element={
