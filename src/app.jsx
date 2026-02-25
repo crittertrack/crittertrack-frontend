@@ -19559,8 +19559,8 @@ const UrgentBroadcastPopup = ({ authToken, API_BASE_URL }) => {
             }
         };
         fetchUrgentBroadcasts();
-        // Check every 15 seconds for urgent broadcasts
-        const interval = setInterval(fetchUrgentBroadcasts, 15000);
+        // Check every 60 seconds for urgent broadcasts
+        const interval = setInterval(fetchUrgentBroadcasts, 60000);
         return () => clearInterval(interval);
     }, [authToken, API_BASE_URL, acknowledgedIds]);
 
@@ -20700,7 +20700,7 @@ const App = () => {
             }
         };
 
-        const pollInterval = setInterval(pollForUpdates, 10000); // Check every 10 seconds
+        const pollInterval = setInterval(pollForUpdates, 300000); // Check every 5 minutes
         pollForUpdates(); // Check immediately on mount
 
         return () => clearInterval(pollInterval);
@@ -20796,8 +20796,8 @@ const App = () => {
             }
         };
 
-        // Poll every 30 seconds for user status changes
-        const statusPollInterval = setInterval(pollUserStatus, 30000);
+        // Poll every 2 minutes for user status changes
+        const statusPollInterval = setInterval(pollUserStatus, 120000);
         
         // Also check immediately on mount
         pollUserStatus();

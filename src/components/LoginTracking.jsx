@@ -7,8 +7,8 @@ const LoginTracking = ({ authToken, API_BASE_URL }) => {
 
     useEffect(() => {
         fetchLoginHistory();
-        // Check for new logins every 30 seconds
-        const interval = setInterval(fetchLoginHistory, 30000);
+        // Check for new logins every 2 minutes
+        const interval = setInterval(fetchLoginHistory, 120000);
         return () => clearInterval(interval);
     }, []);
 
