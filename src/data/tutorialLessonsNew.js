@@ -1008,17 +1008,6 @@ const GETTING_STARTED_LESSONS = [
           'Helps understand health issues',
           'Valuable for genetics research'
         ]
-      },
-      {
-        stepNumber: 7,
-        title: 'Legal & Administrative',
-        content: 'Document any legal or administrative aspects of the animal\'s passing: burial location, cremation, organ donation, etc.',
-        highlightElement: '[data-tutorial-target="legal-admin-section"]',
-        tips: [
-          'Some may be required in your area',
-          'Document disposal method',
-          'Keep records for compliance'
-        ]
       }
     ]
   },
@@ -1063,6 +1052,47 @@ const GETTING_STARTED_LESSONS = [
           'Helps identify strengths',
           'Useful for breeding decisions',
           'Can guide future showing strategy'
+        ]
+      }
+    ]
+  },
+
+  {
+    id: 'gs-legal',
+    title: '14. Legal & Documentation',
+    description: 'Manage legal status, insurance, and documentation',
+    tour: 'getting-started',
+    tourOrder: 14,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Legal Tab',
+        content: 'This tab manages all legal and administrative documentation for your animal, including insurance, ownership documents, permits, and restrictions.',
+        tips: [
+          'Important for compliance',
+          'Keep official documents recorded',
+          'Required for some species'
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'Legal / Administrative',
+        content: 'Document insurance details (pet insurance policy, provider, coverage) and legal status (ownership documents, permits, CITES registration for regulated species).',
+        highlightElement: '[data-tutorial-target="legal-admin-section"]',
+        tips: [
+          'Some species require permits',
+          'Insurance protects your investment',
+          'Keep permit numbers accessible'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Restrictions',
+        content: 'Record any Breeding Restrictions (limited registration, spay/neuter contracts) or Export Restrictions that apply to this animal.',
+        tips: [
+          'Important for contract compliance',
+          'Export restrictions vary by country',
+          'Breeding restrictions protect genetics'
         ]
       }
     ]
