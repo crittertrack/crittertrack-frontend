@@ -11379,7 +11379,7 @@ const AnimalForm = ({
                                     <label className="block text-sm font-medium text-gray-700">{getFieldLabel('size', 'Size')}</label>
                                     <input type="text" name="size" value={formData.size || ''} onChange={handleChange} 
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Small, Medium, Large" />
+                                        placeholder="e.g., Standard, Dwarf" />
                                 </div>
                                 )}
                             </div>
