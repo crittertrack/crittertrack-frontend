@@ -21487,22 +21487,34 @@ const App = () => {
 
                 const seenIds = new Set();
                 const combined = [];
+                
+                // Create a set of active user IDs for quick lookup
+                const activeIds = new Set(active.map(u => u.id_public));
 
-                // First, add up to 1 newest member (if any) to showcase new users
+                // First, add up to 1 newest member (if any) who is NOT also active
                 const fourteenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
                 for (const user of newest) {
-                    if (!seenIds.has(user.id_public) && combined.length < 1) {
+                    if (!seenIds.has(user.id_public) && !activeIds.has(user.id_public) && combined.length < 1) {
                         seenIds.add(user.id_public);
                         const isNew = user.createdAt && new Date(user.createdAt) > fourteenDaysAgo;
                         combined.push({ ...user, isActive: false, isNew: !!isNew });
                     }
                 }
 
-                // Fill remaining slots up to 5 total with active users (already sorted most-recently-active first by backend)
+                // Fill up to 5 total with active users (already sorted most-recently-active first by backend)
                 for (const user of active) {
                     if (!seenIds.has(user.id_public) && combined.length < 5) {
                         seenIds.add(user.id_public);
                         combined.push({ ...user, isActive: true, isNew: false });
+                    }
+                }
+                
+                // If we still have less than 5, fill remaining with new users
+                for (const user of newest) {
+                    if (!seenIds.has(user.id_public) && combined.length < 5) {
+                        seenIds.add(user.id_public);
+                        const isNew = user.createdAt && new Date(user.createdAt) > fourteenDaysAgo;
+                        combined.push({ ...user, isActive: false, isNew: !!isNew });
                     }
                 }
 
