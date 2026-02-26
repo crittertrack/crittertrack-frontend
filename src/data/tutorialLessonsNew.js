@@ -1137,13 +1137,13 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 2,
         title: 'Owned Toggle',
-        content: 'The owned toggle lets you mark whether you currently own this animal. When set to owned (red Heart icon), the animal appears on your PUBLIC profile (what others see) and is part of your active collection. When not owned (gray Heart-Off icon), it\'s hidden from your PUBLIC profile but always remains in your private My Animals list under the "All" filter. This is useful for tracking sold or rehomed animals while keeping their records. You can find this toggle at the top right of the detail overview screen. Changes apply instantly!',
+        content: 'The owned toggle lets you mark whether you currently own this animal. When set to owned (red Heart icon), the animal appears under your "Owned" filter and, if also set to public, on your PUBLIC profile. When not owned (gray Heart-Off icon), it only appears in your private "All" filter. This is useful for tracking sold or rehomed animals while keeping their records. You can find this toggle at the top right of the detail overview screen. Changes apply instantly!',
         highlightElement: '[data-tutorial-target="detail-owned-toggle"]',
         tips: [
           'Located at top right of detail view',
           'Red Heart = Owned, Gray Heart-Off = Not Owned',
-          'Controls if animal shows on your PUBLIC profile',
-          'Not owned animals stay in your private "All" filter',
+          'Owned + Public = Shows on your PUBLIC profile',
+          'Not owned animals only in "All" filter',
           'Useful for sold or rehomed animals',
           'Can be toggled anytime - updates instantly'
         ]
@@ -1151,12 +1151,13 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 3,
         title: 'Private Toggle',
-        content: 'The private/public toggle controls global web visibility of this animal. When set to private (gray Eye-Off icon), only you can access it. When public (green Eye icon), others can view it via direct link, search, or as a parent/offspring of other animals. Note: Only owned animals appear on your public profile - this toggle controls whether non-owned animals remain accessible. You can find this toggle at the top right of the detail overview screen. Changes apply instantly!',
+        content: 'The private/public toggle controls global web visibility of this animal. When set to public (green Eye icon), others can view it via search, as a parent/offspring in pedigrees, and on your PUBLIC profile (if also owned). When private (gray Eye-Off icon), only you can access it. You can find this toggle at the top right of the detail overview screen. Changes apply instantly!',
         highlightElement: '[data-tutorial-target="detail-private-toggle"]',
         tips: [
           'Located at top right of detail view',
           'Green Eye = Public, Gray Eye-Off = Private',
           'Controls global web visibility',
+          'Public animals appear in search & pedigrees',
           'Works together with owned toggle',
           'Can be toggled anytime - updates instantly'
         ]
