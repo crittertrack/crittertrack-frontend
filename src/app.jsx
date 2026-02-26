@@ -21488,21 +21488,21 @@ const App = () => {
                 const seenIds = new Set();
                 const combined = [];
 
-                // First, add up to 3 active users (already sorted most-recently-active first by backend)
-                for (const user of active) {
-                    if (!seenIds.has(user.id_public) && combined.length < 3) {
-                        seenIds.add(user.id_public);
-                        combined.push({ ...user, isActive: true, isNew: false });
-                    }
-                }
-
-                // Fill remaining slots up to 5 total with newest members (if any)
+                // First, add up to 1 newest member (if any) to showcase new users
                 const fourteenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
                 for (const user of newest) {
-                    if (!seenIds.has(user.id_public) && combined.length < 5) {
+                    if (!seenIds.has(user.id_public) && combined.length < 1) {
                         seenIds.add(user.id_public);
                         const isNew = user.createdAt && new Date(user.createdAt) > fourteenDaysAgo;
                         combined.push({ ...user, isActive: false, isNew: !!isNew });
+                    }
+                }
+
+                // Fill remaining slots up to 5 total with active users (already sorted most-recently-active first by backend)
+                for (const user of active) {
+                    if (!seenIds.has(user.id_public) && combined.length < 5) {
+                        seenIds.add(user.id_public);
+                        combined.push({ ...user, isActive: true, isNew: false });
                     }
                 }
 
