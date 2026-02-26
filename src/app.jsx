@@ -3050,6 +3050,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                     { key: 'markings', label: 'Markings' },
                                     { key: 'eyeColor', label: 'Eye Color' },
                                     { key: 'nailColor', label: 'Nail/Claw Color' },
+                                    { key: 'size', label: 'Size' },
                                     { key: 'carrierTraits', label: 'Carrier Traits' },
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return (
@@ -4506,6 +4507,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                     { key: 'markings', label: 'Markings' },
                                     { key: 'eyeColor', label: 'Eye Color' },
                                     { key: 'nailColor', label: 'Nail/Claw Color' },
+                                    { key: 'size', label: 'Size' },
                                     { key: 'carrierTraits', label: 'Carrier Traits' },
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return fields.length > 0 && (
@@ -5683,6 +5685,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     { key: 'markings', label: 'Markings' },
                                     { key: 'eyeColor', label: 'Eye Color' },
                                     { key: 'nailColor', label: 'Nail/Claw Color' },
+                                    { key: 'size', label: 'Size' },
                                     { key: 'carrierTraits', label: 'Carrier Traits' },
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return fields.length > 0 && (
