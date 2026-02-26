@@ -1223,18 +1223,6 @@ const KEY_FEATURES_LESSONS = [
           'Your data remains unchanged',
           'You can reopen any animal anytime to view or edit'
         ]
-      },
-      {
-        stepNumber: 8,
-        title: 'Move to Litters',
-        content: 'Now let\'s explore the Litters feature. Click the "Litters" button in the header to navigate to the litter management section.',
-        highlightElement: '[data-tutorial-target="litters-btn"]',
-        actionType: 'click',
-        tips: [
-          'Litters are where you track breeding',
-          'Where offspring are recorded',
-          'Essential for breeding programs'
-        ]
       }
     ]
   },
@@ -1248,6 +1236,18 @@ const KEY_FEATURES_LESSONS = [
     steps: [
       {
         stepNumber: 1,
+        title: 'Move to Litters',
+        content: 'Now let\'s explore the Litters feature. Click the "Litters" button in the header to navigate to the litter management section.',
+        highlightElement: '[data-tutorial-target="litters-btn"]',
+        actionType: 'click',
+        tips: [
+          'Litters are where you track breeding',
+          'Where offspring are recorded',
+          'Essential for breeding programs'
+        ]
+      },
+      {
+        stepNumber: 2,
         title: 'Litter Management',
         content: 'You\'re now in the Litters section. This is where you track breeding litters and manage offspring. Click the "New Litter" button to create a new litter.',
         highlightElement: '[data-tutorial-target="new-litter-btn"]',
@@ -1259,7 +1259,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 2,
+        stepNumber: 3,
         title: 'Sire & Dam Selection',
         content: 'Select both a Sire (father) and Dam (mother) for the litter. Note: Intersex and Unknown gender animals can be selected on both Sire and Dam selectors, allowing inclusive representation of non-binary animals.',
         highlightElement: '[data-tutorial-target="sire-dam-section"]',
@@ -1270,7 +1270,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 3,
+        stepNumber: 4,
         title: 'Birth Date & Offspring Count',
         content: 'Enter the birth date of the litter (optional but recommended for direct offspring creation). Enter the number of males and females born. These fields help with administrative tracking.',
         highlightElement: '[data-tutorial-target="litter-dates-counts"]',
@@ -1281,7 +1281,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 4,
+        stepNumber: 5,
         title: 'Link Existing Animals',
         content: 'After creating the litter with parents and a birth date, you can link existing animals as offspring. Click "Link Animals" to connect animals that are offspring from this specific litter.',
         highlightElement: '[data-tutorial-target="link-animals-btn"]',
@@ -1294,7 +1294,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 5,
+        stepNumber: 6,
         title: 'Create New Offspring Animals',
         content: 'In the "New Offspring Animals" section (separate from the male/female count fields), you can directly create new offspring animals. With a birth date filled in, click "Create Offspring" to add new animals and automatically set them as children of this litter with the sire and dam already assigned.',
         highlightElement: '[data-tutorial-target="create-offspring-btn"]',
@@ -1307,7 +1307,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 6,
+        stepNumber: 7,
         title: 'Litter Card Details',
         content: 'Once you\'ve created a litter, click on a litter card to view its details. Here you can see the parents, offspring, and manage the litter from an expanded view.',
         highlightElement: '[data-tutorial-target="litter-card"]',
@@ -1319,7 +1319,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 7,
+        stepNumber: 8,
         title: 'Litter Actions',
         content: 'On the expanded litter view, you\'ll see buttons to: Edit the litter, Link animals to it, Add new offspring, and Delete the litter. These give you full control over litter management.',
         highlightElement: '[data-tutorial-target="litter-actions"]',
@@ -1332,7 +1332,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 8,
+        stepNumber: 9,
         title: 'Move to Profile',
         content: 'Let\'s now explore your profile settings. Click the "Profile" button in the header.',
         highlightElement: '[data-tutorial-target="profile-btn"]',
