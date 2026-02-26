@@ -1283,13 +1283,13 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 5,
         title: 'Link Existing Animals',
-        content: 'After creating the litter with parents and a birth date, you can link existing animals as offspring. Click "Link Animals" to connect animals that are offspring from this specific litter.',
+        content: 'You can link existing animals as offspring during litter creation. Select animals with matching parents to link them to this litter. If you have no birth date filled, it will auto-fill from the existing offspring when you click them.',
         highlightElement: '[data-tutorial-target="link-animals-btn"]',
         hideHighlightPrompt: true,
         tips: [
-          'Birth date is required before linking',
-          'Only animals matching parents and date appear',
-          'Updates their parent information',
+          'Only requires parents to be filled',
+          'Shows animals matching those parents',
+          'Auto-fills birth date from offspring if empty',
           'Completes the family tree'
         ]
       },
