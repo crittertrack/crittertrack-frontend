@@ -2700,6 +2700,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                         : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                                                 }`}
                                                 title="Toggle owned status"
+                                                data-tutorial-target="detail-owned-toggle"
                                             >
                                                 {animal.isOwned ? <Heart size={16} /> : <HeartOff size={16} />}
                                                 <span>{animal.isOwned ? 'Owned' : 'Not Owned'}</span>

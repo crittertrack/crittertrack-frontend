@@ -1136,18 +1136,33 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 2,
-        title: 'Private Toggle',
-        content: 'The private/public toggle controls whether this entire animal appears on your public profile. When set to private (gray Eye-Off icon), only you can see it. When public (green Eye icon), everyone can view it. You can find this toggle at the top right of the detail overview screen. Changes apply instantly!',
-        highlightElement: '[data-tutorial-target="detail-private-toggle"]',
+        title: 'Owned Toggle',
+        content: 'The owned toggle lets you mark whether you currently own this animal. When set to owned (red Heart icon), the animal appears on your PUBLIC profile (what others see) and is part of your active collection. When not owned (gray Heart-Off icon), it\'s hidden from your PUBLIC profile but always remains in your private My Animals list under the "All" filter. This is useful for tracking sold or rehomed animals while keeping their records. You can find this toggle at the top right of the detail overview screen. Changes apply instantly!',
+        highlightElement: '[data-tutorial-target="detail-owned-toggle"]',
         tips: [
           'Located at top right of detail view',
-          'Green Eye = Public, Gray Eye-Off = Private',
-          'Controls whole animal visibility',
+          'Red Heart = Owned, Gray Heart-Off = Not Owned',
+          'Controls if animal shows on your PUBLIC profile',
+          'Not owned animals stay in your private "All" filter',
+          'Useful for sold or rehomed animals',
           'Can be toggled anytime - updates instantly'
         ]
       },
       {
         stepNumber: 3,
+        title: 'Private Toggle',
+        content: 'The private/public toggle controls global web visibility of this animal. When set to private (gray Eye-Off icon), only you can access it. When public (green Eye icon), others can view it via direct link, search, or as a parent/offspring of other animals. Note: Only owned animals appear on your public profile - this toggle controls whether non-owned animals remain accessible. You can find this toggle at the top right of the detail overview screen. Changes apply instantly!',
+        highlightElement: '[data-tutorial-target="detail-private-toggle"]',
+        tips: [
+          'Located at top right of detail view',
+          'Green Eye = Public, Gray Eye-Off = Private',
+          'Controls global web visibility',
+          'Works together with owned toggle',
+          'Can be toggled anytime - updates instantly'
+        ]
+      },
+      {
+        stepNumber: 4,
         title: 'Pedigree Chart Button',
         content: 'On the Lineage tab, you can click the "View Pedigree" button to see a detailed family tree chart of your animal. This shows parents, grandparents, and further back generations. When you\'re done viewing, close this pedigree screen by clicking the X or close button.',
         highlightElement: '[data-tutorial-target="pedigree-btn"]',
@@ -1159,7 +1174,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 4,
+        stepNumber: 5,
         title: 'Edit Button',
         content: 'Click the "Edit" button in the top right corner to enter edit mode. This allows you to modify any information in the animal record.',
         highlightElement: '[data-tutorial-target="edit-animal-btn"]',
@@ -1171,7 +1186,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 5,
+        stepNumber: 6,
         title: 'Edit View Overview',
         content: 'You\'re now in the edit view. Notice it works exactly like the create form - same tabs, same fields, same Save button. You can edit any information here.',
         highlightElement: '[data-tutorial-target="edit-form"]',
@@ -1183,7 +1198,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 6,
+        stepNumber: 7,
         title: 'Delete Button',
         content: 'When you\'re in edit mode, you can find the Delete button (usually in red) at the bottom of the form. This allows you to remove an animal from your collection entirely. Warning: This action cannot be undone, so use with caution.',
         highlightElement: '[data-tutorial-target="delete-animal-btn"]',
@@ -1195,7 +1210,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 7,
+        stepNumber: 8,
         title: 'Close Edit Without Saving',
         content: 'For now, let\'s go back to the main animal list without making changes. Click the back arrow at the top right to close edit mode and return to your list. You can always reopen an existing animal to view or edit it again.',
         highlightElement: '[data-tutorial-target="close-edit-btn"]',
