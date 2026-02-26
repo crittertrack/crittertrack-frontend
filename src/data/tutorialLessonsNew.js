@@ -1330,18 +1330,6 @@ const KEY_FEATURES_LESSONS = [
           'Add offspring creates new animals',
           'Delete removes litter (careful!)'
         ]
-      },
-      {
-        stepNumber: 9,
-        title: 'Move to Profile',
-        content: 'Let\'s now explore your profile settings. Click the "Profile" button in the header.',
-        highlightElement: '[data-tutorial-target="profile-btn"]',
-        actionType: 'click',
-        tips: [
-          'Profile shows your public identity',
-          'Settings affect sharing and visibility',
-          'Where others find you'
-        ]
       }
     ]
   },
@@ -1355,6 +1343,18 @@ const KEY_FEATURES_LESSONS = [
     steps: [
       {
         stepNumber: 1,
+        title: 'Move to Profile',
+        content: 'Let\'s now explore your profile settings. Click the "Profile" button in the header.',
+        highlightElement: '[data-tutorial-target="profile-btn"]',
+        actionType: 'click',
+        tips: [
+          'Profile shows your public identity',
+          'Settings affect sharing and visibility',
+          'Where others find you'
+        ]
+      },
+      {
+        stepNumber: 2,
         title: 'Profile Summary',
         content: 'Your profile page shows a summary of your settings and information. You can see your Personal ID here - this is a unique identifier in CritterTrack. Your Personal ID is used by other users to find and contact you.',
         highlightElement: '[data-tutorial-target="personal-id-section"]',
@@ -1366,7 +1366,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 2,
+        stepNumber: 3,
         title: 'Edit Profile Button',
         content: 'Click "Edit Profile" to modify your profile information including name, image, and public settings.',
         highlightElement: '[data-tutorial-target="profile-edit-btn"]',
@@ -1377,7 +1377,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 3,
+        stepNumber: 4,
         title: 'Profile Image',
         content: 'Upload a profile picture. This image represents you to other users. Click the image area to upload.',
         highlightElement: '[data-tutorial-target="profile-image-upload"]',
@@ -1388,7 +1388,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 4,
+        stepNumber: 5,
         title: 'Personal Name & Breeder Name',
         content: 'Enter your Personal Name (your real name) and Breeder Name (your breeder affixes/kennel name). These are separate so you can maintain privacy if desired. Each has a visibility toggle.',
         highlightElement: '[data-tutorial-target="name-fields"]',
@@ -1399,7 +1399,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 5,
+        stepNumber: 6,
         title: 'Website & Country',
         content: 'Add your website (if you have a breeding website), select your country, and write a bio. The bio helps tell other breeders about yourself and your breeding program. These help other users find and learn about you.',
         highlightElement: '[data-tutorial-target="website-country-fields"]',
@@ -1410,7 +1410,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 6,
+        stepNumber: 7,
         title: 'Public Profile Visibility',
         content: 'These checkboxes control what information is visible on your public profile. Check which aspects you want to share: Personal Name, Breeder Name, website, etc. If private, only you see that info.',
         highlightElement: '[data-tutorial-target="public-visibility-checkboxes"]',
@@ -1422,7 +1422,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 7,
+        stepNumber: 8,
         title: 'Messaging Preferences',
         content: 'Configure how other users can contact you. You can allow messages, emails, or both. This controls your preferred method of communication.',
         highlightElement: '[data-tutorial-target="messaging-preferences"]',
@@ -1433,7 +1433,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 8,
+        stepNumber: 9,
         title: 'Email Notifications',
         content: 'Set up email notifications for important events like messages, transfer requests, or system updates. Choose which notifications you want to receive.',
         highlightElement: '[data-tutorial-target="email-notifications"]',
@@ -1444,7 +1444,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 9,
+        stepNumber: 10,
         title: 'Breeding Status',
         content: 'Set your breeding status for each species you work with. Choose Owner (not breeding), Active Breeder, or Retired Breeder. Active and Retired breeders are visible in the public Breeders Registry.',
         highlightElement: '[data-tutorial-target="breeding-status-section"]',
@@ -1456,7 +1456,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 10,
+        stepNumber: 11,
         title: 'Save or Cancel',
         content: 'Use the Save button to keep your changes or Cancel to discard them. Changes are applied immediately upon save.',
         highlightElement: '[data-tutorial-target="profile-save-cancel"]',
@@ -1467,7 +1467,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 11,
+        stepNumber: 12,
         title: 'Move to Budget',
         content: 'Now let\'s explore the Budget section to understand financial tracking. Click the "Budget" button in the header.',
         highlightElement: '[data-tutorial-target="budget-btn"]',
