@@ -7909,13 +7909,21 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             </label>
                             <div className="bg-gray-50 p-3 rounded-lg">
                                 <p className="text-xs text-gray-600 mb-3">
-                                    Select animals with matching parents to link them to this litter. Birth date will be filled automatically.
+                                    Select animals with matching parents to link them to this litter. {formData.birthDate ? 'Only animals with matching birth date are shown.' : 'Birth date will be filled automatically from selected animals.'}
                                 </p>
                                 <div className="space-y-2">
                                     {myAnimals
                                         .filter(animal => {
                                             const matchesSire = animal.fatherId_public === formData.sireId_public || animal.sireId_public === formData.sireId_public;
                                             const matchesDam = animal.motherId_public === formData.damId_public || animal.damId_public === formData.damId_public;
+                                            
+                                            // If litter has birthdate, only show animals with matching birthdate
+                                            if (formData.birthDate && animal.birthDate) {
+                                                const litterDate = formData.birthDate.split('T')[0];
+                                                const animalDate = animal.birthDate.split('T')[0];
+                                                return matchesSire && matchesDam && litterDate === animalDate;
+                                            }
+                                            
                                             return matchesSire && matchesDam;
                                         })
                                         .map(animal => (
@@ -7978,6 +7986,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     {myAnimals.filter(animal => {
                                         const matchesSire = animal.fatherId_public === formData.sireId_public || animal.sireId_public === formData.sireId_public;
                                         const matchesDam = animal.motherId_public === formData.damId_public || animal.damId_public === formData.damId_public;
+                                        
+                                        // If litter has birthdate, only show animals with matching birthdate
+                                        if (formData.birthDate && animal.birthDate) {
+                                            const litterDate = formData.birthDate.split('T')[0];
+                                            const animalDate = animal.birthDate.split('T')[0];
+                                            return matchesSire && matchesDam && litterDate === animalDate;
+                                        }
+                                        
                                         return matchesSire && matchesDam;
                                     }).length === 0 && (
                                         <p className="text-xs text-gray-500 italic">No matching animals found</p>
