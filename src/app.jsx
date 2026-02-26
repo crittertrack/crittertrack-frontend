@@ -21481,7 +21481,7 @@ const App = () => {
                 let active = activeResponse.data || [];
 
                 const hasVisibleName = (u) => (u.showBreederName && u.breederName) || (u.showPersonalName && u.personalName);
-                const clean = (arr) => arr.filter(u => u.id_public && u.accountStatus !== 'banned' && hasVisibleName(u));
+                const clean = (arr) => arr.filter(u => u.id_public && u.accountStatus !== 'banned' && u.id_public !== 'CTU1' && hasVisibleName(u));
                 newest = clean(newest);
                 active = clean(active);
 
