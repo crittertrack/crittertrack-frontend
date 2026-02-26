@@ -2833,7 +2833,14 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                 animal.color,
                                                 animal.coatPattern,
                                                 animal.coat,
-                                                animal.earset
+                                                animal.earset,
+                                                animal.phenotype,
+                                                animal.morph,
+                                                animal.markings,
+                                                animal.eyeColor,
+                                                animal.nailColor,
+                                                animal.carrierTraits,
+                                                animal.size
                                             ].filter(Boolean).join(' ') || ''}
                                         </p>
 
@@ -4303,7 +4310,14 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                 animal.color,
                                                 animal.coatPattern,
                                                 animal.coat,
-                                                animal.earset
+                                                animal.earset,
+                                                animal.phenotype,
+                                                animal.morph,
+                                                animal.markings,
+                                                animal.eyeColor,
+                                                animal.nailColor,
+                                                animal.carrierTraits,
+                                                animal.size
                                             ].filter(Boolean).join(' ') || ''}
                                         </p>
 
@@ -5450,8 +5464,15 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     animal.color,
                                     animal.coatPattern,
                                     animal.coat,
-                                    animal.earset
-                                ].filter(Boolean).join(' ')}
+                                                animal.earset,
+                                                animal.phenotype,
+                                                animal.morph,
+                                                animal.markings,
+                                                animal.eyeColor,
+                                                animal.nailColor,
+                                                animal.carrierTraits,
+                                                animal.size
+                                            ].filter(Boolean).join(' ')}
                             </p>
                         )}
 
