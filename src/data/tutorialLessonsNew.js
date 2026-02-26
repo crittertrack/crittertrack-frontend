@@ -1272,12 +1272,12 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 4,
         title: 'Birth Date & Offspring Count',
-        content: 'Enter the birth date of the litter (optional but recommended for direct offspring creation). Enter the number of males and females born. These fields help with administrative tracking.',
+        content: 'Enter the birth date of the litter (optional but recommended). The male and female count fields are simple text fields for administrative tracking. There is a separate feature for direct offspring creation that relies on the birth date.',
         highlightElement: '[data-tutorial-target="litter-dates-counts"]',
         tips: [
           'Birth date needed to create offspring directly',
-          'Male/female counts are optional',
-          'Used for statistics'
+          'Male/female counts are optional text fields',
+          'Used for statistics and tracking'
         ]
       },
       {
