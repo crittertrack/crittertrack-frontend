@@ -190,7 +190,7 @@ const GETTING_STARTED_LESSONS = [
         highlightElement: '[data-tutorial-target="animal-gender-select"]',
         actionType: 'click',
         tips: [
-          'Intersex and Unknown are available for non-binary animals',
+          'Intersex and Unknown are available for intersex/unknown animals',
           'Gender affects breeding features',
           'Can be changed anytime'
         ]
@@ -1261,7 +1261,7 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 3,
         title: 'Sire & Dam Selection',
-        content: 'Select both a Sire (father) and Dam (mother) for the litter. Note: Intersex and Unknown gender animals can be selected on both Sire and Dam selectors, allowing inclusive representation of non-binary animals.',
+        content: 'Select both a Sire (father) and Dam (mother) for the litter. Note: Intersex and Unknown gender animals can be selected on both Sire and Dam selectors, allowing inclusive representation of intersex/unknown animals.',
         highlightElement: '[data-tutorial-target="sire-dam-section"]',
         tips: [
           'Both parents are mandatory',

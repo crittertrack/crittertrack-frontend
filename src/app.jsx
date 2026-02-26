@@ -12116,7 +12116,7 @@ const AnimalForm = ({
                                     >
                                         <div className="flex items-center space-x-2 w-full">
                                             <span className="text-gray-400">
-                                                Non-binary/Unknown
+                                                Intersex/Unknown
                                             </span>
                                         </div>
                                     </div>
