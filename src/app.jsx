@@ -7924,17 +7924,48 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     type="checkbox"
                                                     checked={formData.linkedOffspringIds?.includes(animal.id_public)}
                                                     onChange={(e) => {
-                                                        const newLinked = e.target.checked
-                                                            ? [...(formData.linkedOffspringIds || []), animal.id_public]
-                                                            : (formData.linkedOffspringIds || []).filter(id => id !== animal.id_public);
-                                                        
-                                                        // Auto-fill birthdate from offspring if litter has no birthdate
-                                                        const newFormData = { ...formData, linkedOffspringIds: newLinked };
-                                                        if (e.target.checked && !formData.birthDate && animal.birthDate) {
-                                                            newFormData.birthDate = animal.birthDate.split('T')[0];
+                                                        if (e.target.checked) {
+                                                            // Check if litter has a birthdate and animal has a different birthdate
+                                                            if (formData.birthDate && animal.birthDate) {
+                                                                const litterDate = formData.birthDate.split('T')[0];
+                                                                const animalDate = animal.birthDate.split('T')[0];
+                                                                
+                                                                if (litterDate !== animalDate) {
+                                                                    const confirmChange = window.confirm(
+                                                                        `This animal has a different birth date (${animalDate}) than the litter (${litterDate}).\n\n` +
+                                                                        `Click OK to update the litter birth date to match the animal's date, or Cancel to abort linking.`
+                                                                    );
+                                                                    
+                                                                    if (!confirmChange) {
+                                                                        // User cancelled, abort the link
+                                                                        return;
+                                                                    }
+                                                                    
+                                                                    // User accepted, update litter birthdate and link the animal
+                                                                    setFormData({
+                                                                        ...formData,
+                                                                        birthDate: animalDate,
+                                                                        linkedOffspringIds: [...(formData.linkedOffspringIds || []), animal.id_public]
+                                                                    });
+                                                                    return;
+                                                                }
+                                                            }
+                                                            
+                                                            // Normal linking flow
+                                                            const newLinked = [...(formData.linkedOffspringIds || []), animal.id_public];
+                                                            const newFormData = { ...formData, linkedOffspringIds: newLinked };
+                                                            
+                                                            // Auto-fill birthdate from offspring if litter has no birthdate
+                                                            if (!formData.birthDate && animal.birthDate) {
+                                                                newFormData.birthDate = animal.birthDate.split('T')[0];
+                                                            }
+                                                            
+                                                            setFormData(newFormData);
+                                                        } else {
+                                                            // Unlinking
+                                                            const newLinked = (formData.linkedOffspringIds || []).filter(id => id !== animal.id_public);
+                                                            setFormData({ ...formData, linkedOffspringIds: newLinked });
                                                         }
-                                                        
-                                                        setFormData(newFormData);
                                                     }}
                                                     className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
                                                 />
