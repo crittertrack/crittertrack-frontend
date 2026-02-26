@@ -7927,7 +7927,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                         const newLinked = e.target.checked
                                                             ? [...(formData.linkedOffspringIds || []), animal.id_public]
                                                             : (formData.linkedOffspringIds || []).filter(id => id !== animal.id_public);
-                                                        setFormData({...formData, linkedOffspringIds: newLinked});
+                                                        
+                                                        // Auto-fill birthdate from offspring if litter has no birthdate
+                                                        const newFormData = { ...formData, linkedOffspringIds: newLinked };
+                                                        if (e.target.checked && !formData.birthDate && animal.birthDate) {
+                                                            newFormData.birthDate = animal.birthDate.split('T')[0];
+                                                        }
+                                                        
+                                                        setFormData(newFormData);
                                                     }}
                                                     className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
                                                 />
