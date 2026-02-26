@@ -10807,9 +10807,12 @@ const AnimalForm = ({
                     length: payloadToSave.length
                 });
 
-                await onSave(method, url, payloadToSave);
+                console.log('[SAVE] About to call onSave:', { method, url });
+                const saveResponse = await onSave(method, url, payloadToSave);
+                console.log('[SAVE] onSave completed successfully:', saveResponse?.status);
             } catch (saveErr) {
                 // If we uploaded a file but the animal save failed, attempt cleanup to avoid orphan files.
+                console.error('[SAVE] Error in onSave:', saveErr);
                 if (uploadedFilename) {
                     try {
                         await axios.delete(`${API_BASE_URL}/upload/${uploadedFilename}`, { headers: { Authorization: `Bearer ${authToken}` } });
@@ -10823,12 +10826,15 @@ const AnimalForm = ({
             // Notify other parts of the app that animals changed so lists refresh
             try { window.dispatchEvent(new Event('animals-changed')); } catch (e) { /* ignore */ }
 
+            console.log('[SAVE] Showing success message and closing form');
             showModalMessage('Success', `Animal ${formData.name} successfully ${animalToEdit ? 'updated' : 'added'}!`);
             onCancel(); 
         } catch (error) {
             console.error('Animal Save Error:', error.response?.data || error.message);
+            console.error('Animal Save Error (full):', error);
             showModalMessage('Error', error.response?.data?.message || `Failed to ${animalToEdit ? 'update' : 'add'} animal.`);
         } finally {
+            console.log('[SAVE] Setting loading to false');
             setLoading(false);
         }
     };
@@ -21943,6 +21949,7 @@ const App = () => {
     }, [viewingPublicAnimal, publicAnimalViewHistory]);
 
     const handleSaveAnimal = async (method, url, data) => {
+        console.log('[handleSaveAnimal] Called with:', { method, url, dataKeys: Object.keys(data), size: data.size });
         if (userProfile && !data.ownerId_public) {
             data.ownerId_public = userProfile.id_public;
         }
@@ -21951,9 +21958,13 @@ const App = () => {
             const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
             let response;
             if (method === 'post') {
+                console.log('[handleSaveAnimal] Making POST request...');
                 response = await axios.post(url, data, { headers });
+                console.log('[handleSaveAnimal] POST response:', response?.status);
             } else if (method === 'put') {
+                console.log('[handleSaveAnimal] Making PUT request...');
                 response = await axios.put(url, data, { headers });
+                console.log('[handleSaveAnimal] PUT response:', response?.status);
             }
             
             // After saving, if we were editing an animal, refetch it to get updated data
