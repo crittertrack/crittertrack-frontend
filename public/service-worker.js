@@ -1,8 +1,9 @@
 // Service Worker for CritterTrack PWA
-const CACHE_NAME = 'crittertrack-v7'; // Increment version to force cache update
+const CACHE_NAME = 'crittertrack-v8'; // Increment version to force cache update
 const urlsToCache = [
   '/',
-  '/index.html'
+  '/index.html',
+  '/logo.png'
 ];
 
 // Install event - cache resources
@@ -85,14 +86,13 @@ self.addEventListener('fetch', (event) => {
   
   // Cache-first strategy for other resources (CSS, JS, images)
   event.respondWith(
-    caches.match(request)
+    caches.match(request, { ignoreVary: true })
       .then((response) => {
         // Cache hit - return response
         if (response) {
-          console.log('[SW] Cache hit:', url.pathname);
           return response;
         }
-        console.log('[SW] Cache miss, fetching:', url.pathname);
+        // Cache miss - fetch and cache
         return fetch(request).then(
           (response) => {
             // Check if valid response
@@ -105,8 +105,10 @@ self.addEventListener('fetch', (event) => {
 
             caches.open(CACHE_NAME)
               .then((cache) => {
+                // Cache using ignoreSearch to normalize URLs with query params
                 cache.put(request, responseToCache);
-              });
+              })
+              .catch(err => console.error('[SW] Cache put failed:', err));
 
             return response;
           }
