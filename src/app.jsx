@@ -2421,7 +2421,7 @@ const DetailJsonList = ({ label, data, renderItem }) => {
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
-const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, onHideAnimal, showModalMessage, onTransfer, onViewAnimal, onToggleOwned }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, onHideAnimal, showModalMessage, onTransfer, onViewAnimal, onToggleOwned, userProfile }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -2551,16 +2551,44 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                     Edit
                                 </button>
                             )}
-                            {onTransfer && (
-                                <button
-                                    onClick={() => onTransfer(animal)}
-                                    className="px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
-                                    title="Transfer"
-                                >
-                                    <ArrowLeftRight size={14} />
-                                    Transfer
-                                </button>
-                            )}
+                            {onTransfer && (() => {
+                                const iWasTransferredThisAnimal = animal.breederId_public && animal.breederId_public !== userProfile?.id_public && animal.ownerId_public === userProfile?.id_public;
+                                if (iWasTransferredThisAnimal) {
+                                    return (
+                                        <button
+                                            onClick={async () => {
+                                                if (window.confirm(`Return ${animal.name} to ${animal.breederName || 'the breeder'}? This will remove the animal from your account.`)) {
+                                                    try {
+                                                        await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/return`, {}, {
+                                                            headers: { Authorization: `Bearer ${authToken}` }
+                                                        });
+                                                        onClose();
+                                                        showModalMessage('Success', `Animal has been returned to ${animal.breederName || 'the breeder'}.`);
+                                                    } catch (error) {
+                                                        console.error('Failed to return animal:', error);
+                                                        showModalMessage('Error', `Failed to return animal: ${error.response?.data?.message || error.message}`);
+                                                    }
+                                                }
+                                            }}
+                                            className="px-2 py-1 bg-orange-100 hover:bg-orange-200 text-orange-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                            title="Return to breeder"
+                                        >
+                                            <RotateCcw size={14} />
+                                            Return
+                                        </button>
+                                    );
+                                }
+                                return (
+                                    <button
+                                        onClick={() => onTransfer(animal)}
+                                        className="px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                        title="Transfer"
+                                    >
+                                        <ArrowLeftRight size={14} />
+                                        Transfer
+                                    </button>
+                                );
+                            })()}
                         </div>
                     </div>
                     
@@ -2594,16 +2622,44 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                     Edit
                                 </button>
                             )}
-                            {onTransfer && (
-                                <button
-                                    onClick={() => onTransfer(animal)}
-                                    className="px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-lg transition flex items-center gap-2"
-                                    title="Transfer this animal"
-                                >
-                                    <ArrowLeftRight size={16} />
-                                    Transfer
-                                </button>
-                            )}
+                            {onTransfer && (() => {
+                                const iWasTransferredThisAnimal = animal.breederId_public && animal.breederId_public !== userProfile?.id_public && animal.ownerId_public === userProfile?.id_public;
+                                if (iWasTransferredThisAnimal) {
+                                    return (
+                                        <button
+                                            onClick={async () => {
+                                                if (window.confirm(`Return ${animal.name} to ${animal.breederName || 'the breeder'}? This will remove the animal from your account.`)) {
+                                                    try {
+                                                        await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/return`, {}, {
+                                                            headers: { Authorization: `Bearer ${authToken}` }
+                                                        });
+                                                        onClose();
+                                                        showModalMessage('Success', `Animal has been returned to ${animal.breederName || 'the breeder'}.`);
+                                                    } catch (error) {
+                                                        console.error('Failed to return animal:', error);
+                                                        showModalMessage('Error', `Failed to return animal: ${error.response?.data?.message || error.message}`);
+                                                    }
+                                                }
+                                            }}
+                                            className="px-3 py-1.5 bg-orange-100 hover:bg-orange-200 text-orange-700 font-semibold rounded-lg transition flex items-center gap-2"
+                                            title="Return to breeder"
+                                        >
+                                            <RotateCcw size={16} />
+                                            Return Animal
+                                        </button>
+                                    );
+                                }
+                                return (
+                                    <button
+                                        onClick={() => onTransfer(animal)}
+                                        className="px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-lg transition flex items-center gap-2"
+                                        title="Transfer this animal"
+                                    >
+                                        <ArrowLeftRight size={16} />
+                                        Transfer
+                                    </button>
+                                );
+                            })()}
                             <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={28} />
                             </button>
@@ -23357,6 +23413,7 @@ const App = () => {
                                         }}
                                         onViewAnimal={handleViewAnimal}
                                         onToggleOwned={toggleAnimalOwned}
+                                        userProfile={userProfile}
                                     />
                                 );
                             } else {
