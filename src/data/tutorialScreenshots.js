@@ -138,6 +138,28 @@ export const TUTORIAL_SCREENSHOTS = {
   },
   
   // Key Features Lessons
+  'kf-viewing-animals': {
+    1: 'click-on-an-existing-animal.png', // Step 1: Click on an Existing Animal
+    2: 'owned-toggle.png', // Step 2: Owned Toggle
+    3: 'private-toggle.png', // Step 3: Private Toggle
+    4: 'pedigree-chart-button.png', // Step 4: Pedigree Chart Button
+    5: 'edit-button.png', // Step 5: Edit Button
+    6: 'edit-view-overview.png', // Step 6: Edit View Overview
+    7: 'delete-button.png', // Step 7: Delete Button
+    8: 'close-edit-without-saving.png', // Step 8: Close Edit Without Saving
+  },
+  
+  'kf-creating-litters': {
+    1: 'move-to-litters.png', // Step 1: Move to Litters
+    2: 'litter-management.png', // Step 2: Litter Management
+    3: 'sire-and-dam-selection.png', // Step 3: Sire & Dam Selection
+    4: 'birth-date-and-offspring-count.png', // Step 4: Birth Date & Offspring Count
+    5: 'link-existing-animals.png', // Step 5: Link Existing Animals
+    6: 'create-new-offspring-animals.png', // Step 6: Create New Offspring Animals
+    7: 'litter-card-details.png', // Step 7: Litter Card Details
+    8: 'litter-actions.png', // Step 8: Litter Actions
+  },
+  
   'kf-profile-settings': {
     // Screenshots to be added
   },
