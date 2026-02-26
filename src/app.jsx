@@ -23063,7 +23063,7 @@ const App = () => {
                                     return (
                                         <div
                                             key={user.id_public}
-                                            className="relative flex-shrink-0 bg-white rounded-lg p-2 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer min-w-[120px]"
+                                            className="relative bg-white rounded-lg p-2 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer w-[18%] min-w-[110px] max-w-[140px]"
                                             onClick={() => navigate(`/user/${user.id_public}`)}
                                         >
                                             {/* Active green dot */}
@@ -23083,7 +23083,7 @@ const App = () => {
                                                     </div>
                                                 )}
                                             </div>
-                                            <p className="text-xs font-semibold text-gray-800 text-center truncate">{displayName}</p>
+                                            <p className="text-xs font-semibold text-gray-800 text-center line-clamp-2 min-h-[2.5rem]">{displayName}</p>
                                             <p className="text-xs text-gray-500 text-center truncate">{user.id_public}</p>
                                         </div>
                                     );
