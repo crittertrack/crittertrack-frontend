@@ -10796,6 +10796,16 @@ const AnimalForm = ({
                     console.warn('Could not set window.__lastAnimalPayload:', exposeErr);
                 }
                 console.debug('Animal payload about to be saved:', payloadToSave);
+                console.log('[APPEARANCE FIELDS] Checking payload:', {
+                    size: payloadToSave.size,
+                    phenotype: payloadToSave.phenotype,
+                    morph: payloadToSave.morph,
+                    markings: payloadToSave.markings,
+                    eyeColor: payloadToSave.eyeColor,
+                    nailColor: payloadToSave.nailColor,
+                    weight: payloadToSave.weight,
+                    length: payloadToSave.length
+                });
 
                 await onSave(method, url, payloadToSave);
             } catch (saveErr) {
