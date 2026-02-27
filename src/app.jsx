@@ -3598,10 +3598,15 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                         </div>
                                                     )}
                                                     
-                                                    {/* Litter: formatted for easy reading */}
+                                                    {/* Litter: formatted with bullet points */}
                                                     {(record.litterSizeBorn !== null || record.litterSizeWeaned !== null || record.stillbornCount) && (
                                                         <div className="text-xs text-gray-600">
-                                                            <strong>Litter:</strong> {record.litterSizeBorn !== null ? `${record.litterSizeBorn} born` : ''}{record.litterSizeBorn !== null && record.litterSizeWeaned !== null ? ' / ' : ''}{record.litterSizeWeaned !== null ? `${record.litterSizeWeaned} weaned` : ''}{(record.litterSizeBorn !== null || record.litterSizeWeaned !== null) && record.stillbornCount ? ' / ' : ''}{record.stillbornCount ? `${record.stillbornCount} stillborn` : ''}
+                                                            <strong>Litter:</strong>
+                                                            <div className="ml-4 space-y-1 mt-1">
+                                                                {record.litterSizeBorn !== null && <div>• {record.litterSizeBorn} born</div>}
+                                                                {record.litterSizeWeaned !== null && <div>• {record.litterSizeWeaned} weaned</div>}
+                                                                {record.stillbornCount && <div>• {record.stillbornCount} stillborn</div>}
+                                                            </div>
                                                         </div>
                                                     )}
                                                     
@@ -12911,7 +12916,7 @@ const AnimalForm = ({
                             {/* Breeding Records List */}
                             {breedingRecords.length > 0 && (
                                 <div className="space-y-2 bg-white p-3 rounded-lg border border-blue-200 max-h-96 overflow-y-auto">
-                                    <h4 className="text-sm font-semibold text-gray-700">Saved Records ({breedingRecords.length})</h4>
+                                    <h4 className="text-sm font-semibold text-gray-700">Saved Breeding Records ({breedingRecords.length})</h4>
                                     {breedingRecords.map((record) => (
                                         <div key={record.id} className="p-3 bg-blue-50 rounded border border-blue-100 text-sm space-y-2">
                                             <div className="flex items-start justify-between">
@@ -12944,10 +12949,15 @@ const AnimalForm = ({
                                                         </div>
                                                     )}
                                                     
-                                                    {/* Litter: formatted for easy reading */}
+                                                    {/* Litter: formatted with bullet points */}
                                                     {(record.litterSizeBorn !== null || record.litterSizeWeaned !== null || record.stillbornCount) && (
                                                         <div className="text-xs text-gray-600">
-                                                            <strong>Litter:</strong> {record.litterSizeBorn !== null ? `${record.litterSizeBorn} born` : ''}{record.litterSizeBorn !== null && record.litterSizeWeaned !== null ? ' / ' : ''}{record.litterSizeWeaned !== null ? `${record.litterSizeWeaned} weaned` : ''}{(record.litterSizeBorn !== null || record.litterSizeWeaned !== null) && record.stillbornCount ? ' / ' : ''}{record.stillbornCount ? `${record.stillbornCount} stillborn` : ''}
+                                                            <strong>Litter:</strong>
+                                                            <div className="ml-4 space-y-1 mt-1">
+                                                                {record.litterSizeBorn !== null && <div>• {record.litterSizeBorn} born</div>}
+                                                                {record.litterSizeWeaned !== null && <div>• {record.litterSizeWeaned} weaned</div>}
+                                                                {record.stillbornCount && <div>• {record.stillbornCount} stillborn</div>}
+                                                            </div>
                                                         </div>
                                                     )}
                                                     
