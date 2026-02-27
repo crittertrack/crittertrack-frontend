@@ -3571,85 +3571,52 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                             
                                             return (
                                                 <div key={idx} className="p-3 bg-white rounded border border-purple-100 text-sm space-y-2">
-                                                    <div className="flex items-start justify-between">
-                                                        <div className="flex-1">
-                                                            <div className="font-semibold text-gray-800">
-                                                                {record.breedingMethod || 'Unknown Method'}
-                                                            </div>
-                                                            {record.breedingConditionAtTime && (
-                                                                <div className="text-xs text-gray-600 mt-1">
-                                                                    Animal Condition at Mating: {record.breedingConditionAtTime}
-                                                                </div>
-                                                            )}
-                                                            <div className="text-xs text-gray-500 mt-1">
-                                                                {record.recordDate && `Recorded: ${formatDate(record.recordDate)}`}
-                                                            </div>
+                                                    {/* Top: CTL-ID or litter name placeholder */}
+                                                    <div className="font-medium text-gray-800 mb-2">
+                                                        {record.litterId ? (
+                                                            <span className="font-mono bg-purple-300 px-2 py-1 rounded text-xs">{record.litterId}</span>
+                                                        ) : (
+                                                            <span className="text-gray-500 italic text-xs">No litter linked</span>
+                                                        )}
+                                                    </div>
+                                                    
+                                                    {/* Breeding Condition */}
+                                                    {record.breedingConditionAtTime && (
+                                                        <div className="text-xs text-gray-600">
+                                                            <strong>Breeding Condition:</strong> {record.breedingConditionAtTime}
                                                         </div>
+                                                    )}
+                                                    
+                                                    {/* Mating: date + method */}
+                                                    <div className="text-xs text-gray-600">
+                                                        <strong>Mating:</strong> {formatDate(record.matingDates)} {record.breedingMethod && `• ${record.breedingMethod}`}
                                                     </div>
-                                                    <div className="grid grid-cols-2 gap-2 text-xs">
-                                                        {record.matingDates && (
-                                                            <div><span className="text-gray-600">Mating Date:</span> <strong>{formatDate(record.matingDates)}</strong></div>
-                                                        )}
-                                                        
-                                                        {record.breedingMethod && (
-                                                            <div><span className="text-gray-600">Mating Method:</span> <strong>{record.breedingMethod}</strong></div>
-                                                        )}
-                                                        
-                                                        {/* MALE/SIRE FIELDS */}
-                                                        {(isSireOnly || isBoth) && record.outcome && (
-                                                            <div><span className="text-gray-600">Outcome (Sire):</span> <strong className={record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}>{record.outcome}</strong></div>
-                                                        )}
-                                                        
-                                                        {/* FEMALE/DAM FIELDS */}
-                                                        {(isDamOnly || isBoth) && record.birthEventDate && (
-                                                            <div><span className="text-gray-600">Birth Date (Dam):</span> <strong>{formatDate(record.birthEventDate)}</strong></div>
-                                                        )}
-                                                        
-                                                        {(isDamOnly || isBoth) && record.birthMethod && (
-                                                            <div><span className="text-gray-600">Birth Method:</span> <strong>{record.birthMethod}</strong></div>
-                                                        )}
-                                                        
-                                                        {/* LITTER FIELDS - conditional based on gender/outcome */}
-                                                        {/* For females/dams: always show if available */}
-                                                        {(isDamOnly) && record.litterSizeBorn !== null && record.litterSizeBorn !== undefined && (
-                                                            <div><span className="text-gray-600">Born:</span> <strong>{record.litterSizeBorn}</strong></div>
-                                                        )}
-                                                        {(isDamOnly) && record.litterSizeWeaned !== null && record.litterSizeWeaned !== undefined && (
-                                                            <div><span className="text-gray-600">Weaned:</span> <strong>{record.litterSizeWeaned}</strong></div>
-                                                        )}
-                                                        {(isDamOnly) && record.stillbornCount !== null && record.stillbornCount !== undefined && (
-                                                            <div><span className="text-gray-600">Stillborn:</span> <strong>{record.stillbornCount}</strong></div>
-                                                        )}
-                                                        
-                                                        {/* For males/sires: show only if successful */}
-                                                        {(isSireOnly && record.outcome === 'Successful') && record.litterSizeBorn !== null && record.litterSizeBorn !== undefined && (
-                                                            <div><span className="text-gray-600">Born (Sire):</span> <strong>{record.litterSizeBorn}</strong></div>
-                                                        )}
-                                                        {(isSireOnly && record.outcome === 'Successful') && record.litterSizeWeaned !== null && record.litterSizeWeaned !== undefined && (
-                                                            <div><span className="text-gray-600">Weaned (Sire):</span> <strong>{record.litterSizeWeaned}</strong></div>
-                                                        )}
-                                                        {(isSireOnly && record.outcome === 'Successful') && record.stillbornCount !== null && record.stillbornCount !== undefined && (
-                                                            <div><span className="text-gray-600">Stillborn (Sire):</span> <strong>{record.stillbornCount}</strong></div>
-                                                        )}
-                                                        
-                                                        {/* For intersex: show all if either dam role OR successful mating */}
-                                                        {(isBoth) && (record.birthEventDate || record.litterSizeBorn !== null || record.outcome === 'Successful') && (
-                                                            <>
-                                                                {record.litterSizeBorn !== null && record.litterSizeBorn !== undefined && (
-                                                                    <div><span className="text-gray-600">Born:</span> <strong>{record.litterSizeBorn}</strong></div>
-                                                                )}
-                                                                {record.litterSizeWeaned !== null && record.litterSizeWeaned !== undefined && (
-                                                                    <div><span className="text-gray-600">Weaned:</span> <strong>{record.litterSizeWeaned}</strong></div>
-                                                                )}
-                                                                {record.stillbornCount !== null && record.stillbornCount !== undefined && (
-                                                                    <div><span className="text-gray-600">Stillborn:</span> <strong>{record.stillbornCount}</strong></div>
-                                                                )}
-                                                            </>
-                                                        )}
-                                                    </div>
+                                                    
+                                                    {/* Birth: date + method */}
+                                                    {(isDamOnly || isBoth) && record.birthEventDate && (
+                                                        <div className="text-xs text-gray-600">
+                                                            <strong>Birth:</strong> {formatDate(record.birthEventDate)} {record.birthMethod && `• ${record.birthMethod}`}
+                                                        </div>
+                                                    )}
+                                                    
+                                                    {/* Litter: formatted for easy reading */}
+                                                    {(record.litterSizeBorn !== null || record.litterSizeWeaned !== null || record.stillbornCount) && (
+                                                        <div className="text-xs text-gray-600">
+                                                            <strong>Litter:</strong> {record.litterSizeBorn !== null ? `${record.litterSizeBorn} born` : ''}{record.litterSizeBorn !== null && record.litterSizeWeaned !== null ? ' / ' : ''}{record.litterSizeWeaned !== null ? `${record.litterSizeWeaned} weaned` : ''}{(record.litterSizeBorn !== null || record.litterSizeWeaned !== null) && record.stillbornCount ? ' / ' : ''}{record.stillbornCount ? `${record.stillbornCount} stillborn` : ''}
+                                                        </div>
+                                                    )}
+                                                    
+                                                    {/* Notes */}
                                                     {record.notes && (
-                                                        <div className="text-xs text-gray-600 border-t pt-2 mt-2">
-                                                            <span className="text-gray-600">Notes:</span> <p className="text-gray-700 whitespace-pre-wrap">{record.notes}</p>
+                                                        <div className="text-xs text-gray-600 italic border-t pt-2 mt-1">
+                                                            <strong>Notes:</strong> {record.notes}
+                                                        </div>
+                                                    )}
+                                                    
+                                                    {/* Outcome indicator for sires */}
+                                                    {(isSireOnly || isBoth) && record.outcome && (
+                                                        <div className="text-xs border-t pt-2 mt-1">
+                                                            <span className="text-gray-600">Outcome:</span> <strong className={record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}>{record.outcome}</strong>
                                                         </div>
                                                     )}
                                                     
