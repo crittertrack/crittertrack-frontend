@@ -32,7 +32,7 @@ import AnimalTree from './components/AnimalTree';
 const API_BASE_URL = '/api'; // Production via Vercel proxy - v2
 
 // App version for cache invalidation - increment to force cache clear
-const APP_VERSION = '7.0.2';
+const APP_VERSION = '7.0.3';
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'];
 const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
