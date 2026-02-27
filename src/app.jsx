@@ -3570,13 +3570,42 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                             
                                             return (
                                                 <div key={idx} className="p-3 bg-white rounded border border-purple-100 text-sm space-y-2">
-                                                    {/* Top: CTL-ID or litter name placeholder */}
-                                                    <div className="font-medium text-gray-800 mb-2">
-                                                        {record.litterId ? (
-                                                            <span className="font-mono bg-purple-300 px-2 py-1 rounded text-xs">{record.litterId}</span>
-                                                        ) : (
-                                                            <span className="text-gray-500 italic text-xs">No litter linked</span>
-                                                        )}
+                                                    {/* Top with CTL-ID and action buttons */}
+                                                    <div className="flex items-start justify-between mb-2">
+                                                        <div className="font-medium text-gray-800">
+                                                            {record.litterId ? (
+                                                                <span className="font-mono bg-purple-300 px-2 py-1 rounded text-xs">{record.litterId}</span>
+                                                            ) : (
+                                                                <span className="text-gray-500 italic text-xs">No litter linked</span>
+                                                            )}
+                                                        </div>
+                                                        {/* Create/Link Litter Buttons */}
+                                                        <div className="flex gap-1">
+                                                            {!record.litterId && (
+                                                                <>
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            setBreedingRecordForLitter(record);
+                                                                            setShowCreateLitterModal(true);
+                                                                        }}
+                                                                        className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                                                                        title="Create new litter from this record"
+                                                                    >
+                                                                        Create
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            setBreedingRecordForLitter(record);
+                                                                            setShowLinkLitterModal(true);
+                                                                        }}
+                                                                        className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
+                                                                        title="Link existing litter"
+                                                                    >
+                                                                        Link
+                                                                    </button>
+                                                                </>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                     
                                                     {/* Breeding Condition */}
@@ -10144,6 +10173,13 @@ const AnimalForm = ({
         notes: ''
     });
     
+    // Modal states for create/link litter
+    const [showCreateLitterModal, setShowCreateLitterModal] = useState(false);
+    const [showLinkLitterModal, setShowLinkLitterModal] = useState(false);
+    const [breedingRecordForLitter, setBreedingRecordForLitter] = useState(null);
+    const [existingLitters, setExistingLitters] = useState([]);
+    const [litterSearchLoading, setLitterSearchLoading] = useState(false);
+    
     const [medicalConditionsArray, setMedicalConditionsArray] = useState(() => {
         const data = animalToEdit?.medicalConditions;
         if (!data) return [];
@@ -10652,6 +10688,113 @@ const AnimalForm = ({
             notes: ''
         });
     };
+    
+    // Handler for creating a litter from breeding record
+    const handleCreateLitterFromBreeding = async (litterData) => {
+        try {
+            setLoading(true);
+            
+            // Prepare litter creation payload
+            const payload = {
+                ...litterData,
+                species: formData.species,
+                // Link breeding record
+                breedingRecordId: breedingRecordForLitter?.id
+            };
+            
+            console.log('[CREATE LITTER] Payload:', payload);
+            
+            // Create the litter via API
+            const response = await axios.post(`${API_BASE_URL}/litters`, payload, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            
+            const newLitter = response.data;
+            console.log('[CREATE LITTER] Created litter:', newLitter);
+            
+            // Update the breeding record with the litter ID
+            if (breedingRecordForLitter && newLitter.litter_id_public) {
+                const updatedRecords = breedingRecords.map(r => 
+                    r.id === breedingRecordForLitter.id 
+                        ? { ...r, litterId: newLitter.litter_id_public }
+                        : r
+                );
+                setBreedingRecords(updatedRecords);
+                
+                showModalMessage('Success', `Litter ${newLitter.litter_id_public} created and linked!`);
+            }
+            
+            setShowCreateLitterModal(false);
+            setBreedingRecordForLitter(null);
+        } catch (error) {
+            console.error('Error creating litter:', error);
+            showModalMessage('Error', error.response?.data?.message || 'Failed to create litter');
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    // Handler for linking existing litter to breeding record
+    const handleLinkLitterToBreeding = (litterId) => {
+        if (breedingRecordForLitter) {
+            const updatedRecords = breedingRecords.map(r => 
+                r.id === breedingRecordForLitter.id 
+                    ? { ...r, litterId }
+                    : r
+            );
+            setBreedingRecords(updatedRecords);
+            
+            showModalMessage('Success', `Breeding record linked to litter ${litterId}!`);
+            
+            setShowLinkLitterModal(false);
+            setBreedingRecordForLitter(null);
+        }
+    };
+    
+    // Fetch existing litters for linking (filtered by species and animal as sire/dam)
+    const fetchLittersForLinking = async () => {
+        try {
+            setLitterSearchLoading(true);
+            
+            // Fetch all litters for current species
+            const response = await axios.get(
+                `${API_BASE_URL}/litters?species=${encodeURIComponent(formData.species)}`,
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+            
+            let filtered = response.data || [];
+            
+            // Filter: current animal as sire/dam/other parent
+            // Only show litters that match current animal's gender role
+            const animalPublicId = formData.id_public || animalToEdit?.id_public;
+            
+            if (formData.gender === 'Male' || (formData.gender === 'Intersex')) {
+                // Can be a sire - filter litters where this animal is sire or unknown sire
+                filtered = filtered.filter(litter => 
+                    !litter.sireId_public || litter.sireId_public === animalPublicId
+                );
+            } else if (formData.gender === 'Female' || (formData.gender === 'Intersex')) {
+                // Can be a dam - filter litters where this animal is dam or unknown dam
+                filtered = filtered.filter(litter => 
+                    !litter.damId_public || litter.damId_public === animalPublicId
+                );
+            }
+            
+            setExistingLitters(filtered);
+        } catch (error) {
+            console.error('Error fetching litters:', error);
+            showModalMessage('Error', 'Failed to fetch litters');
+        } finally {
+            setLitterSearchLoading(false);
+        }
+    };
+    
+    // Trigger litter fetch when link modal is opened
+    useEffect(() => {
+        if (showLinkLitterModal && formData.species) {
+            fetchLittersForLinking();
+        }
+    }, [showLinkLitterModal]);
     
     const addMedicalCondition = () => {
         if (!newMedicalCondition.name) {
@@ -12921,12 +13064,39 @@ const AnimalForm = ({
                                         <div key={record.id} className="p-3 bg-blue-50 rounded border border-blue-100 text-sm space-y-2">
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1">
-                                                    {/* Top: CTL-ID or litter name placeholder */}
-                                                    <div className="font-medium text-gray-800 mb-2">
-                                                        {record.litterId ? (
-                                                            <span className="font-mono bg-gray-300 px-2 py-1 rounded text-xs mr-2">{record.litterId}</span>
-                                                        ) : (
-                                                            <span className="text-gray-500 italic">No litter linked</span>
+                                                    {/* Top with CTL-ID and action buttons */}
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <div className="font-medium text-gray-800">
+                                                            {record.litterId ? (
+                                                                <span className="font-mono bg-gray-300 px-2 py-1 rounded text-xs mr-2">{record.litterId}</span>
+                                                            ) : (
+                                                                <span className="text-gray-500 italic">No litter linked</span>
+                                                            )}
+                                                        </div>
+                                                        {/* Create/Link Litter Buttons */}
+                                                        {!record.litterId && (
+                                                            <div className="flex gap-1">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setBreedingRecordForLitter(record);
+                                                                        setShowCreateLitterModal(true);
+                                                                    }}
+                                                                    className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                                                                    title="Create new litter from this record"
+                                                                >
+                                                                    Create
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setBreedingRecordForLitter(record);
+                                                                        setShowLinkLitterModal(true);
+                                                                    }}
+                                                                    className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
+                                                                    title="Link existing litter"
+                                                                >
+                                                                    Link
+                                                                </button>
+                                                            </div>
                                                         )}
                                                     </div>
                                                     
