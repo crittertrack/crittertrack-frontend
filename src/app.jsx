@@ -3575,8 +3575,12 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                         <div className="flex-1">
                                                             <div className="font-semibold text-gray-800">
                                                                 {record.breedingMethod || 'Unknown Method'}
-                                                                {record.breedingConditionAtTime && <span className="text-xs text-gray-500 ml-2">({record.breedingConditionAtTime})</span>}
                                                             </div>
+                                                            {record.breedingConditionAtTime && (
+                                                                <div className="text-xs text-gray-600 mt-1">
+                                                                    Condition: {record.breedingConditionAtTime}
+                                                                </div>
+                                                            )}
                                                             <div className="text-xs text-gray-500 mt-1">
                                                                 {record.recordDate && `Recorded: ${formatDate(record.recordDate)}`}
                                                             </div>
@@ -12990,8 +12994,13 @@ const AnimalForm = ({
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1">
                                                     <div className="font-medium text-gray-800">
-                                                        {record.breedingMethod} {record.breedingConditionAtTime && `(${record.breedingConditionAtTime})`}
+                                                        {record.breedingMethod}
                                                     </div>
+                                                    {record.breedingConditionAtTime && (
+                                                        <div className="text-xs text-gray-600 mt-0.5">
+                                                            Condition: {record.breedingConditionAtTime}
+                                                        </div>
+                                                    )}
                                                     <div className="text-xs text-gray-600 mt-1">
                                                         <strong>Mating:</strong> {record.matingDates}
                                                     </div>
