@@ -10790,10 +10790,7 @@ const AnimalForm = ({
     };
 
     const addBreedingRecord = () => {
-        if (!newBreedingRecord.breedingMethod || !newBreedingRecord.matingDates) {
-            showModalMessage('Missing Data', 'Please enter at least a breeding method and mating date(s).');
-            return;
-        }
+        // All fields are now optional - no validation required
         const record = {
             id: Date.now().toString(),
             recordDate: new Date().toISOString(),
@@ -10876,19 +10873,44 @@ const AnimalForm = ({
     };
     
     // Handler for linking existing litter to breeding record
-    const handleLinkLitterToBreeding = (litterId) => {
+    const handleLinkLitterToBreeding = (litter) => {
         if (breedingRecordForLitter) {
             const updatedRecords = breedingRecords.map(r => 
                 r.id === breedingRecordForLitter.id 
-                    ? { ...r, litterId }
+                    ? { ...r, litterId: litter.litter_id_public }
                     : r
             );
             setBreedingRecords(updatedRecords);
             
-            showModalMessage('Success', `Breeding record linked to litter ${litterId}!`);
+            showModalMessage('Success', `Breeding record linked to litter ${litter.litter_id_public}!`);
             
             setShowLinkLitterModal(false);
             setBreedingRecordForLitter(null);
+        } else {
+            // Linking from the add form - auto-fill blank fields
+            const updates = {
+                litterId: litter.litter_id_public
+            };
+            
+            // Auto-fill only if field is empty
+            if (!newBreedingRecord.birthEventDate && litter.birthDate) {
+                updates.birthEventDate = litter.birthDate;
+            }
+            if (!newBreedingRecord.litterSizeBorn && litter.numberBorn) {
+                updates.litterSizeBorn = litter.numberBorn;
+            }
+            if (!newBreedingRecord.stillbornCount && litter.stillborn) {
+                updates.stillbornCount = litter.stillborn;
+            }
+            if (!newBreedingRecord.litterSizeWeaned && litter.numberWeaned) {
+                updates.litterSizeWeaned = litter.numberWeaned;
+            }
+            if (!newBreedingRecord.matingDates && litter.pairingDate) {
+                updates.matingDates = litter.pairingDate;
+            }
+            
+            setNewBreedingRecord(prev => ({ ...prev, ...updates }));
+            setShowLinkLitterModal(false);
         }
     };
     
@@ -10921,6 +10943,29 @@ const AnimalForm = ({
                 );
             }
             
+            // If mate animal is selected (not manual text), filter by that parent too
+            if (newBreedingRecord.mateAnimalId && mateInfo) {
+                const mateId = newBreedingRecord.mateAnimalId;
+                if (formData.gender === 'Male') {
+                    // Current animal is sire, mate should be dam
+                    filtered = filtered.filter(litter => 
+                        !litter.damId_public || litter.damId_public === mateId
+                    );
+                } else if (formData.gender === 'Female') {
+                    // Current animal is dam, mate should be sire
+                    filtered = filtered.filter(litter => 
+                        !litter.sireId_public || litter.sireId_public === mateId
+                    );
+                }
+            }
+            
+            // Filter by birth date if entered
+            if (newBreedingRecord.birthEventDate) {
+                filtered = filtered.filter(litter => 
+                    !litter.birthDate || litter.birthDate === newBreedingRecord.birthEventDate
+                );
+            }
+            
             setExistingLitters(filtered);
         } catch (error) {
             console.error('Error fetching litters:', error);
@@ -10930,12 +10975,12 @@ const AnimalForm = ({
         }
     };
     
-    // Trigger litter fetch when link modal is opened
+    // Trigger litter fetch when link modal is opened or filter criteria change
     useEffect(() => {
         if (showLinkLitterModal && formData.species) {
             fetchLittersForLinking();
         }
-    }, [showLinkLitterModal]);
+    }, [showLinkLitterModal, newBreedingRecord.mateAnimalId, newBreedingRecord.birthEventDate]);
     
     const addMedicalCondition = () => {
         if (!newMedicalCondition.name) {
@@ -11570,7 +11615,7 @@ const AnimalForm = ({
             )}
 
             {/* --- Link Litter Modal --- */}
-            {showLinkLitterModal && breedingRecordForLitter && (
+            {showLinkLitterModal && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md max-h-96 overflow-y-auto">
                         <div className="flex items-center justify-between mb-4">
@@ -11596,7 +11641,7 @@ const AnimalForm = ({
                                     <button
                                         key={litter._id}
                                         type="button"
-                                        onClick={() => handleLinkLitterToBreeding(litter.litter_id_public)}
+                                        onClick={() => handleLinkLitterToBreeding(litter)}
                                         className="w-full text-left p-3 border border-green-200 rounded-lg hover:bg-green-50 transition"
                                     >
                                         <div className="font-semibold text-green-700">{litter.litter_id_public}</div>
@@ -12922,7 +12967,7 @@ const AnimalForm = ({
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {/* Common fields - all genders */}
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Breeding Method *</label>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Breeding Method</label>
                                         <select value={newBreedingRecord.breedingMethod} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, breedingMethod: e.target.value})}
                                             className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                             <option value="">Select method</option>
@@ -12945,7 +12990,7 @@ const AnimalForm = ({
                                     </div>
                                     
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Mating Date *</label>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Mating Date</label>
                                         <DatePicker value={newBreedingRecord.matingDates || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, matingDates: e.target.value})}
                                             maxDate={new Date()}
                                             className="p-2 text-sm" />
@@ -13088,9 +13133,33 @@ const AnimalForm = ({
                                 {/* Litter Link (Optional) */}
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Link to Litter (optional)</label>
-                                    <input type="text" value={newBreedingRecord.litterId || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, litterId: e.target.value || null})}
-                                        placeholder="Litter ID (from Litters management page)" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                    <p className="text-xs text-gray-500 mt-1">Leave blank to create litter connection later from detail view</p>
+                                    <div 
+                                        onClick={() => !loading && setShowLinkLitterModal(true)}
+                                        className="flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition"
+                                    >
+                                        <div className="flex items-center space-x-2 flex-1">
+                                            {newBreedingRecord.litterId ? (
+                                                <span className="text-gray-800 text-sm font-mono bg-purple-100 px-2 py-1 rounded">
+                                                    {newBreedingRecord.litterId}
+                                                </span>
+                                            ) : (
+                                                <span className="text-gray-400 text-sm">Click to select existing litter</span>
+                                            )}
+                                        </div>
+                                        {newBreedingRecord.litterId && (
+                                            <button 
+                                                onClick={(e) => { 
+                                                    e.stopPropagation(); 
+                                                    setNewBreedingRecord({...newBreedingRecord, litterId: null}); 
+                                                }}
+                                                className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
+                                                type="button"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        )}
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1">Auto-fills blank fields when selected</p>
                                 </div>
                                 
                                 <button type="button" onClick={addBreedingRecord} className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">
