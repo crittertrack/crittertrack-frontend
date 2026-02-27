@@ -6794,6 +6794,11 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                         {/* Litter Info - Centered */}
                         <div className="flex justify-center mb-4">
                             <div className="bg-gray-50 rounded-lg px-4 py-2 border border-gray-200 inline-block">
+                                {litter.litter_id_public && (
+                                    <p className="text-xs font-mono bg-gray-300 text-gray-800 px-2 py-1 rounded mb-2 text-center">
+                                        {litter.litter_id_public}
+                                    </p>
+                                )}
                                 {litter.litterName && (
                                     <p className="text-sm font-semibold text-gray-800 text-center mb-1">
                                         {litter.litterName}
