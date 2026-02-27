@@ -3597,6 +3597,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                             <div><span className="text-gray-600">Birth Date (Dam):</span> <strong>{formatDate(record.birthEventDate)}</strong></div>
                                                         )}
                                                         
+                                                        {(isDamOnly || isBoth) && record.birthMethod && (
+                                                            <div><span className="text-gray-600">Birth Method:</span> <strong>{record.birthMethod}</strong></div>
+                                                        )}
+                                                        
                                                         {/* LITTER FIELDS - conditional based on gender/outcome */}
                                                         {/* For females/dams: always show if available */}
                                                         {(isDamOnly) && record.litterSizeBorn !== null && record.litterSizeBorn !== undefined && (
@@ -10175,9 +10179,11 @@ const AnimalForm = ({
         matingDates: '',
         outcome: null,
         birthEventDate: '',
+        birthMethod: null,
         litterSizeBorn: null,
         litterSizeWeaned: null,
         stillbornCount: null,
+        litterId: null,
         notes: ''
     });
     
@@ -10667,9 +10673,11 @@ const AnimalForm = ({
             matingDates: newBreedingRecord.matingDates,
             outcome: newBreedingRecord.outcome || null,
             birthEventDate: newBreedingRecord.birthEventDate || null,
+            birthMethod: newBreedingRecord.birthMethod || null,
             litterSizeBorn: newBreedingRecord.litterSizeBorn !== null ? parseInt(newBreedingRecord.litterSizeBorn) : null,
             litterSizeWeaned: newBreedingRecord.litterSizeWeaned !== null ? parseInt(newBreedingRecord.litterSizeWeaned) : null,
             stillbornCount: newBreedingRecord.stillbornCount !== null ? parseInt(newBreedingRecord.stillbornCount) : null,
+            litterId: newBreedingRecord.litterId || null,
             notes: newBreedingRecord.notes || ''
         };
         setBreedingRecords([...breedingRecords, record]);
@@ -10679,9 +10687,11 @@ const AnimalForm = ({
             matingDates: '',
             outcome: null,
             birthEventDate: '',
+            birthMethod: null,
             litterSizeBorn: null,
             litterSizeWeaned: null,
             stillbornCount: null,
+            litterId: null,
             notes: ''
         });
     };
@@ -12887,6 +12897,22 @@ const AnimalForm = ({
                                         </div>
                                     )}
                                     
+                                    {/* Birth method - shown for females and intersex */}
+                                    {(formData.gender === 'Female' || formData.gender === 'Intersex' || (formData.gender === 'Unknown' && (formData.breedingRole === 'dam' || formData.breedingRole === 'both'))) && (
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">Birth Method</label>
+                                            <select value={newBreedingRecord.birthMethod || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, birthMethod: e.target.value || null})}
+                                                className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                <option value="">Select method</option>
+                                                <option value="Natural">Natural</option>
+                                                <option value="C-Section">C-Section</option>
+                                                <option value="Assisted">Assisted</option>
+                                                <option value="Induced">Induced</option>
+                                                <option value="Unknown">Unknown</option>
+                                            </select>
+                                        </div>
+                                    )}
+                                    
                                     {/* Litter fields - shown for females and intersex if outcome is successful or not specified */}
                                     {(formData.gender === 'Female' || formData.gender === 'Intersex' || (formData.gender === 'Unknown' && (formData.breedingRole === 'dam' || formData.breedingRole === 'both'))) && (
                                         <>
@@ -12976,7 +13002,7 @@ const AnimalForm = ({
                                                     )}
                                                     {record.birthEventDate && (
                                                         <div className="text-xs text-gray-600">
-                                                            <strong>Birth:</strong> {formatDate(record.birthEventDate)}
+                                                            <strong>Birth:</strong> {formatDate(record.birthEventDate)} {record.birthMethod && `(${record.birthMethod})`}
                                                         </div>
                                                     )}
                                                     {(record.litterSizeBorn !== null || record.litterSizeWeaned !== null) && (
