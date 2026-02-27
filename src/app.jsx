@@ -12897,15 +12897,15 @@ const AnimalForm = ({
                                             </div>
                                             
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700 mb-1">Litter Size Weaned</label>
-                                                <input type="number" value={newBreedingRecord.litterSizeWeaned || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, litterSizeWeaned: e.target.value ? parseInt(e.target.value) : null})}
-                                                    placeholder="Number weaned" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                            
-                                            <div>
                                                 <label className="block text-xs font-medium text-gray-700 mb-1">Stillborn Count</label>
                                                 <input type="number" value={newBreedingRecord.stillbornCount || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, stillbornCount: e.target.value ? parseInt(e.target.value) : null})}
                                                     placeholder="Stillborn" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Litter Size Weaned</label>
+                                                <input type="number" value={newBreedingRecord.litterSizeWeaned || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, litterSizeWeaned: e.target.value ? parseInt(e.target.value) : null})}
+                                                    placeholder="Number weaned" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
                                         </>
                                     )}
@@ -12920,14 +12920,14 @@ const AnimalForm = ({
                                             </div>
                                             
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700 mb-1">Litter Size Weaned (Sire)</label>
-                                                <input type="number" value={newBreedingRecord.litterSizeWeaned || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, litterSizeWeaned: e.target.value ? parseInt(e.target.value) : null})}
-                                                    placeholder="Number weaned" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Stillborn Count (Sire)</label>
+                                                <input type="number" value={newBreedingRecord.stillbornCount || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, stillbornCount: e.target.value ? parseInt(e.target.value) : null})}
+                                                    placeholder="Stillborn" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
                                             
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700 mb-1">Stillborn Count (Sire)</label>
-                                                <input type="number" value={newBreedingRecord.stillbornCount || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, stillbornCount: e.target.value ? parseInt(e.target.value) : null})}
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Litter Size Weaned (Sire)</label>
+                                                <input type="number" value={newBreedingRecord.litterSizeWeaned || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, litterSizeWeaned: e.target.value ? parseInt(e.target.value) : null})}
                                                     placeholder="Stillborn" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
                                         </>
