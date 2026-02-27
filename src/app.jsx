@@ -3604,8 +3604,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                             <strong>Litter:</strong>
                                                             <div className="ml-4 space-y-1 mt-1">
                                                                 {record.litterSizeBorn !== null && <div>• {record.litterSizeBorn} born</div>}
-                                                                {record.litterSizeWeaned !== null && <div>• {record.litterSizeWeaned} weaned</div>}
                                                                 {record.stillbornCount && <div>• {record.stillbornCount} stillborn</div>}
+                                                                {record.litterSizeWeaned !== null && <div>• {record.litterSizeWeaned} weaned</div>}
                                                             </div>
                                                         </div>
                                                     )}
@@ -12955,8 +12955,8 @@ const AnimalForm = ({
                                                             <strong>Litter:</strong>
                                                             <div className="ml-4 space-y-1 mt-1">
                                                                 {record.litterSizeBorn !== null && <div>• {record.litterSizeBorn} born</div>}
-                                                                {record.litterSizeWeaned !== null && <div>• {record.litterSizeWeaned} weaned</div>}
                                                                 {record.stillbornCount && <div>• {record.stillbornCount} stillborn</div>}
+                                                                {record.litterSizeWeaned !== null && <div>• {record.litterSizeWeaned} weaned</div>}
                                                             </div>
                                                         </div>
                                                     )}
