@@ -13267,7 +13267,7 @@ const AnimalForm = ({
                                             const isSireOnly = formData.gender === 'Male' || (formData.gender === 'Unknown' && formData.breedingRole === 'sire');
                                             const isDamOnly = formData.gender === 'Female' || (formData.gender === 'Unknown' && formData.breedingRole === 'dam');
                                             const isBoth = formData.gender === 'Intersex' || (formData.gender === 'Unknown' && formData.breedingRole === 'both');
-                                            const isExpanded = expandedBreedingRecords[idx];
+                                            const isExpanded = expandedBreedingRecords[record.id];
                                             
                                             // Get litter data if available
                                             const linkedLitter = breedingRecordLitters[record.id];
@@ -13282,7 +13282,7 @@ const AnimalForm = ({
                                                 <div key={record.id} className={`bg-white rounded border transition-all ${isExpanded ? 'border-blue-300 shadow-md' : 'border-blue-100'}`}>
                                                     {/* COLLAPSED HEADER */}
                                                     <div 
-                                                        onClick={() => setExpandedBreedingRecords({...expandedBreedingRecords, [idx]: !isExpanded})}
+                                                        onClick={() => setExpandedBreedingRecords({...expandedBreedingRecords, [record.id]: !isExpanded})}
                                                         className="p-3 flex items-center justify-between cursor-pointer hover:bg-blue-50 transition rounded"
                                                     >
                                                         <div className="flex items-center gap-3 flex-1 min-w-0">
