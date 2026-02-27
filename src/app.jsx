@@ -3513,7 +3513,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                     <h3 className="text-lg font-semibold text-gray-700">Stud Information</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">Fertility Status:</span> <strong>{animal.fertilityStatus || ''}</strong></div>
-                                        <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || ''}</strong></div>
                                     </div>
                                     {animal.fertilityNotes && (
                                         <div className="text-sm"><span className="text-gray-600">Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.fertilityNotes}</p></div>
@@ -3679,8 +3678,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                     {(animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                         <>
                                             <div><span className="text-gray-600">{getLabel('lastMatingDate', 'Last Mating Date')}:</span> <strong>{animal.lastMatingDate ? formatDate(animal.lastMatingDate) : ''}</strong></div>
-                                            <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || ''}</strong></div>
-                                        </>
+                                            </>
                                     )}
                                     {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                         <>
@@ -4847,7 +4845,6 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                     <h3 className="text-lg font-semibold text-gray-700">Stud Information</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">Fertility Status:</span> <strong>{animal.fertilityStatus || ''}</strong></div>
-                                        <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || ''}</strong></div>
                                     </div>
                                     {animal.fertilityNotes && (
                                         <div className="text-sm"><span className="text-gray-600">Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.fertilityNotes}</p></div>
@@ -4899,8 +4896,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                     {(animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                         <>
                                             <div><span className="text-gray-600">{getLabel('lastMatingDate', 'Last Mating Date')}:</span> <strong>{animal.lastMatingDate ? formatDate(animal.lastMatingDate) : ''}</strong></div>
-                                            <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || ''}</strong></div>
-                                        </>
+                                            </>
                                     )}
                                     {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                         <>
@@ -6026,7 +6022,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     <h3 className="text-lg font-semibold text-gray-700">Stud Information</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">Fertility Status:</span> <strong>{animal.fertilityStatus || ''}</strong></div>
-                                        <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || ''}</strong></div>
                                     </div>
                                     {animal.fertilityNotes && (
                                         <div className="text-sm"><span className="text-gray-600">Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.fertilityNotes}</p></div>
@@ -6078,8 +6073,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     {(animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                         <>
                                             <div><span className="text-gray-600">{getLabel('lastMatingDate', 'Last Mating Date')}:</span> <strong>{animal.lastMatingDate ? formatDate(animal.lastMatingDate) : ''}</strong></div>
-                                            <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || ''}</strong></div>
-                                        </>
+                                            </>
                                     )}
                                     {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                         <>
@@ -24995,7 +24989,6 @@ const App = () => {
                                     <h3 className="text-lg font-semibold text-gray-700">Stud Information</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">Fertility Status:</span> <strong>{animalToView.fertilityStatus || ''}</strong></div>
-                                        <div><span className="text-gray-600">Successful Matings:</span> <strong>{animalToView.successfulMatings || ''}</strong></div>
                                     </div>
                                     {animalToView.fertilityNotes && (
                                         <div className="text-sm"><span className="text-gray-600">Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animalToView.fertilityNotes}</p></div>
@@ -25055,8 +25048,7 @@ const App = () => {
                                     {(animalToView.gender === 'Male' || animalToView.gender === 'Intersex' || animalToView.gender === 'Unknown') && (
                                         <>
                                             <div><span className="text-gray-600">Last Mating Date:</span> <strong>{animalToView.lastMatingDate ? formatDate(animalToView.lastMatingDate) : ''}</strong></div>
-                                            <div><span className="text-gray-600">Successful Matings:</span> <strong>{animalToView.successfulMatings || ''}</strong></div>
-                                        </>
+                                            </>
                                     )}
                                     {(animalToView.gender === 'Female' || animalToView.gender === 'Intersex' || animalToView.gender === 'Unknown') && (
                                         <>
