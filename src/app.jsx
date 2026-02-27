@@ -11466,7 +11466,7 @@ const AnimalForm = ({
                     Loader2={Loader2}
                     LoadingSpinner={LoadingSpinner}
                     requiredGender={requiredGender}
-                    birthDate={formData.birthDate}
+                    birthDate={null}
                     species={formData.species}
                 />
             )}
