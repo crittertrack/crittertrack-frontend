@@ -10254,6 +10254,8 @@ const AnimalForm = ({
         breedingMethod: '',
         breedingConditionAtTime: null,
         matingDates: '',
+        mate: '',
+        mateAnimalId: null,
         outcome: null,
         birthEventDate: '',
         birthMethod: null,
@@ -10263,6 +10265,7 @@ const AnimalForm = ({
         litterId: null,
         notes: ''
     });
+    const [mateInfo, setMateInfo] = useState(null);
     
     // Modal states for create/link litter
     const [showCreateLitterModal, setShowCreateLitterModal] = useState(false);
@@ -10596,6 +10599,47 @@ const AnimalForm = ({
         setBreederInfo(null);
     };
 
+    // Handle mate selection from modal
+    const handleSelectMate = async (idOrAnimal) => {
+        const id = idOrAnimal && typeof idOrAnimal === 'object' ? idOrAnimal.id_public : idOrAnimal;
+        
+        // Set mate animal ID and clear manual text
+        setNewBreedingRecord(prev => ({ 
+            ...prev, 
+            mateAnimalId: id, 
+            mate: '' 
+        }));
+        
+        // Store animal info
+        if (idOrAnimal && typeof idOrAnimal === 'object') {
+            const a = idOrAnimal;
+            const info = { 
+                id_public: a.id_public, 
+                prefix: a.prefix || '', 
+                suffix: a.suffix || '', 
+                name: a.name || '', 
+                backendId: a._id || a.id_backend || null 
+            };
+            setMateInfo(info);
+        } else if (id) {
+            // Fetch animal summary
+            try {
+                const info = await fetchAnimalSummary(id);
+                setMateInfo(info);
+            } catch (err) {
+                console.warn('Failed to fetch mate summary', err);
+            }
+        }
+        
+        setModalTarget(null);
+    };
+
+    // Clear mate selection
+    const clearMateSelection = () => {
+        setNewBreedingRecord(prev => ({ ...prev, mateAnimalId: null, mate: '' }));
+        setMateInfo(null);
+    };
+
     // When editing an existing animal, initialize parent and breeder info
     useEffect(() => {
         let mounted = true;
@@ -10756,6 +10800,8 @@ const AnimalForm = ({
             breedingMethod: newBreedingRecord.breedingMethod,
             breedingConditionAtTime: newBreedingRecord.breedingConditionAtTime || null,
             matingDates: newBreedingRecord.matingDates,
+            mate: newBreedingRecord.mate || (mateInfo ? `${mateInfo.prefix || ''} ${mateInfo.name}`.trim() : null),
+            mateAnimalId: newBreedingRecord.mateAnimalId || null,
             outcome: newBreedingRecord.outcome || null,
             birthEventDate: newBreedingRecord.birthEventDate || null,
             birthMethod: newBreedingRecord.birthMethod || null,
@@ -10770,6 +10816,8 @@ const AnimalForm = ({
             breedingMethod: '',
             breedingConditionAtTime: null,
             matingDates: '',
+            mate: '',
+            mateAnimalId: null,
             outcome: null,
             birthEventDate: '',
             birthMethod: null,
@@ -10779,6 +10827,7 @@ const AnimalForm = ({
             litterId: null,
             notes: ''
         });
+        setMateInfo(null);
     };
     
     // Handler for creating a litter from breeding record
@@ -11294,12 +11343,12 @@ const AnimalForm = ({
     };
     
     const currentId = animalToEdit?.id_public;
-    const requiredGender = modalTarget === 'father' ? 'Male' : modalTarget === 'mother' ? 'Female' : modalTarget === 'other-parent' ? ['Intersex', 'Unknown'] : null;
+    const requiredGender = modalTarget === 'father' ? 'Male' : modalTarget === 'mother' ? 'Female' : modalTarget === 'other-parent' ? ['Intersex', 'Unknown'] : modalTarget === 'mate' ? null : null;
 
     return (
         <div className="w-full max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-lg">
             {/* --- Parent Search Modal --- */}
-            {modalTarget && modalTarget !== 'breeder' && modalTarget !== 'other-parent' && ( 
+            {modalTarget && modalTarget !== 'breeder' && modalTarget !== 'other-parent' && modalTarget !== 'mate' && ( 
                 <ParentSearchModal
                     title={modalTarget === 'father' ? 'Sire' : 'Dam'} 
                     currentId={currentId} 
@@ -11347,6 +11396,26 @@ const AnimalForm = ({
                     API_BASE_URL={API_BASE_URL}
                     modalTarget={modalTarget}
                     userProfile={userProfile}
+                />
+            )}
+
+            {/* --- Mate Search Modal (for breeding records) --- */}
+            {modalTarget === 'mate' && (
+                <ParentSearchModal
+                    title="Select Mate"
+                    currentId={currentId}
+                    onSelect={handleSelectMate}
+                    onClose={() => setModalTarget(null)}
+                    authToken={authToken}
+                    showModalMessage={showModalMessage}
+                    API_BASE_URL={API_BASE_URL}
+                    X={X}
+                    Search={Search}
+                    Loader2={Loader2}
+                    LoadingSpinner={LoadingSpinner}
+                    requiredGender={null}
+                    birthDate={formData.birthDate}
+                    species={formData.species}
                 />
             )}
 
@@ -12877,9 +12946,47 @@ const AnimalForm = ({
                                     
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-1">Mate / Other Parent</label>
-                                        <input type="text" value={newBreedingRecord.mate || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, mate: e.target.value || null})}
-                                            placeholder="Name or ID of mate"
-                                            className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        <div className="space-y-2">
+                                            {/* Selector / Display */}
+                                            <div 
+                                                onClick={() => !loading && setModalTarget('mate')}
+                                                className="flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition"
+                                            >
+                                                <div className="flex items-center space-x-2 flex-1">
+                                                    {newBreedingRecord.mateAnimalId && mateInfo ? (
+                                                        <span className="text-gray-800 text-sm">
+                                                            {mateInfo.prefix && `${mateInfo.prefix} `}{mateInfo.name}
+                                                        </span>
+                                                    ) : newBreedingRecord.mate ? (
+                                                        <span className="text-gray-800 text-sm">{newBreedingRecord.mate}</span>
+                                                    ) : (
+                                                        <span className="text-gray-400 text-sm">Click to select from database</span>
+                                                    )}
+                                                </div>
+                                                {(newBreedingRecord.mateAnimalId || newBreedingRecord.mate) && (
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); clearMateSelection(); }}
+                                                        className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
+                                                        type="button"
+                                                    >
+                                                        <X size={14} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                            
+                                            {/* Manual Entry Option */}
+                                            <div className="text-xs text-gray-500">
+                                                <span>Or enter manually: </span>
+                                                <input 
+                                                    type="text" 
+                                                    value={newBreedingRecord.mate || ''} 
+                                                    onChange={(e) => setNewBreedingRecord({...newBreedingRecord, mate: e.target.value || '', mateAnimalId: null})}
+                                                    placeholder="Type name or ID"
+                                                    className="ml-1 px-2 py-1 text-xs border border-gray-300 rounded focus:ring-primary focus:border-primary"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
                                     
                                     {/* Outcome field - shown for all genders */}
