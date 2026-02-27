@@ -7827,6 +7827,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         
         const query = searchQuery.toLowerCase();
         
+        // Search by CTL-ID
+        if (litter.litter_id_public && litter.litter_id_public.toLowerCase().includes(query)) return true;
+        
         // Search by litter name
         if (litter.breedingPairCodeName && litter.breedingPairCodeName.toLowerCase().includes(query)) return true;
         
@@ -7911,7 +7914,23 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">{editingLitter ? 'Edit Litter' : 'Create New Litter'}</h3>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        {/* Litter Name */}
+                        {/* Auto-assigned CTL-ID (read-only) */}
+                        {editingLitter && editingLitter.litter_id_public && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    System Litter ID (CTL-ID)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editingLitter.litter_id_public}
+                                    disabled
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 font-mono"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">Auto-assigned for system linkage</p>
+                            </div>
+                        )}
+                        
+                        {/* Litter Name - Optional user-friendly name */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Litter Name/ID (Optional)
@@ -7921,8 +7940,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 value={formData.breedingPairCodeName}
                                 onChange={(e) => setFormData({...formData, breedingPairCodeName: e.target.value})}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="e.g., Summer 2025 Litter A"
+                                placeholder="e.g., Summer 2025 Litter A, Disney's Hakuna Matata"
                             />
+                            <p className="text-xs text-gray-500 mt-1">Your custom name for this breeding pair</p>
                         </div>
 
                         {/* Pairing Date */}
@@ -8318,9 +8338,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     {/* Mobile layout: stacked info */}
                                     <div className="flex-1 sm:hidden">
                                         <div className="flex justify-between items-start mb-1">
-                                            <p className="font-bold text-gray-800 text-sm truncate flex-1">
-                                                {litter.breedingPairCodeName || 'Unnamed Litter'}
-                                            </p>
+                                            <div className="flex-1">
+                                                <p className="font-bold text-gray-800 text-sm">
+                                                    {litter.litter_id_public && <span className="text-xs font-mono bg-gray-100 px-1.5 py-0.5 rounded mr-2">{litter.litter_id_public}</span>}
+                                                    {litter.breedingPairCodeName && <span className="truncate">{litter.breedingPairCodeName}</span>}
+                                                    {!litter.breedingPairCodeName && !litter.litter_id_public && <span>Unnamed Litter</span>}
+                                                </p>
+                                            </div>
                                             <span className="text-xs font-semibold text-gray-700 ml-2">{litter.numberBorn} pups</span>
                                         </div>
                                         <div className="flex gap-3 text-xs text-gray-600">
@@ -8340,9 +8364,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     {/* Desktop layout: grid */}
                                     <div className="hidden sm:grid flex-1 grid-cols-3 md:grid-cols-5 gap-2 items-center">
                                         <div>
-                                            <p className="font-bold text-gray-800 text-base truncate">
-                                                {litter.breedingPairCodeName || 'Unnamed Litter'}
-                                            </p>
+                                            <div className="flex items-center gap-2">
+                                                {litter.litter_id_public && <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded">{litter.litter_id_public}</span>}
+                                                <p className="font-bold text-gray-800 text-base truncate">
+                                                    {litter.breedingPairCodeName || (litter.litter_id_public ? '' : 'Unnamed Litter')}
+                                                </p>
+                                            </div>
                                             <p className="text-xs text-gray-500">
                                                 {formatDate(litter.birthDate)}
                                             </p>
