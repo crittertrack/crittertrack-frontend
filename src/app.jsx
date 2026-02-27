@@ -12598,34 +12598,6 @@ const AnimalForm = ({
                             </div>
                         )}
 
-                        {/* Mating - Hidden when neutered/spayed and when all mating fields are hidden */}
-                        {!formData.isNeutered && !formData.isInfertile && (!isFieldHidden('matingDates') || !isFieldHidden('artificialInseminationUsed')) && (formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown' || formData.gender === 'Male') && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 mb-4">Mating {formData.isNeutered && <span className="text-xs font-normal text-gray-500">(History)</span>}</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {!isFieldHidden('matingDates') && (
-                                    <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Mating Date</label>
-                                        <DatePicker value={formData.matingDates} onChange={(e) => handleChange({ target: { name: 'matingDates', value: e.target.value } })} 
-                                            disabled={formData.isNeutered}
-                                            className={`block w-full p-2 border rounded-md shadow-sm focus:ring-primary focus:border-primary ${formData.isNeutered ? 'bg-gray-100 border-gray-200' : 'border-gray-300'}`}
-                                            placeholder="e.g., 2025-01-15" />
-                                    </div>
-                                    )}
-                                    
-                                    {/* Artificial Insemination */}
-                                    {!isFieldHidden('artificialInseminationUsed') && (
-                                        <div className="md:col-span-2 flex items-center space-x-2 pt-2">
-                                            <input type="checkbox" name="artificialInseminationUsed" checked={formData.artificialInseminationUsed || false} onChange={handleChange} 
-                                                className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                            <span className="text-sm font-medium text-gray-700">{getFieldLabel('artificialInseminationUsed', 'Artificial Insemination (AI) Used')}</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
-
                         {/* Stud Information - Always shown when not neutered and not infertile */}
                         {!formData.isNeutered && !formData.isInfertile && (formData.gender === 'Male' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="stud-info-section">
