@@ -12805,9 +12805,9 @@ const AnimalForm = ({
                             </div>
                         </div>
 
-                        {/* Breeding Records (All animals - Historical Data) - ALWAYS SHOWN */}
+                        {/* Breeding Records - ALWAYS SHOWN */}
                         <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-4" data-tutorial-target="breeding-records-section">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center mb-4"><span className="text-blue-600 mr-2"></span>Breeding Records <span className="text-xs font-normal text-gray-500">(Historical Data)</span></h3>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center mb-4"><span className="text-blue-600 mr-2"></span>Breeding Records</h3>
                             
                             {/* Breeding Role Selector - for animals with unclear breeding roles */}
                             {!isFieldHidden('breedingRole') && (formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
