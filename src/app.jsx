@@ -3588,7 +3588,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                     </div>
                                                     <div className="grid grid-cols-2 gap-2 text-xs">
                                                         {record.matingDates && (
-                                                            <div><span className="text-gray-600">Mating Date(s):</span> <strong>{record.matingDates}</strong></div>
+                                                            <div><span className="text-gray-600">Mating Date(s):</span> <strong>{formatDate(record.matingDates)}</strong></div>
                                                         )}
                                                         
                                                         {/* MALE/SIRE FIELDS */}
@@ -13002,7 +13002,7 @@ const AnimalForm = ({
                                                         </div>
                                                     )}
                                                     <div className="text-xs text-gray-600 mt-1">
-                                                        <strong>Mating:</strong> {record.matingDates}
+                                                        <strong>Mating:</strong> {formatDate(record.matingDates)}
                                                     </div>
                                                     {record.outcome && (
                                                         <div className="text-xs text-gray-600">
