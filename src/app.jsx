@@ -11072,6 +11072,53 @@ const AnimalForm = ({
         }
     }, [breedingRecords]);
     
+    // Fetch offspring for all breeding records with litterId (on initial load when editing)
+    useEffect(() => {
+        const fetchAllOffspring = async () => {
+            try {
+                // Get all litters first
+                const litterResponse = await axios.get(
+                    `${API_BASE_URL}/litters`,
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+                
+                // Get all animals
+                const animalsResponse = await axios.get(
+                    `${API_BASE_URL}/animals`,
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+                
+                const litters = litterResponse.data;
+                const allAnimals = animalsResponse.data;
+                const offspringMap = {};
+                
+                breedingRecords.forEach(record => {
+                    if (record.litterId && !breedingRecordOffspring[record.id]) {
+                        const litter = litters.find(l => l.litter_id_public === record.litterId);
+                        if (litter && litter.offspringIds_public && litter.offspringIds_public.length > 0) {
+                            const offspring = allAnimals.filter(a => 
+                                litter.offspringIds_public.includes(a.id_public)
+                            );
+                            if (offspring.length > 0) {
+                                offspringMap[record.id] = offspring;
+                            }
+                        }
+                    }
+                });
+                
+                if (Object.keys(offspringMap).length > 0) {
+                    setBreedingRecordOffspring(prev => ({ ...prev, ...offspringMap }));
+                }
+            } catch (error) {
+                console.error('Error fetching offspring for breeding records:', error);
+            }
+        };
+        
+        if (breedingRecords.length > 0) {
+            fetchAllOffspring();
+        }
+    }, [breedingRecords]);
+    
     const addMedicalCondition = () => {
         if (!newMedicalCondition.name) {
             showModalMessage('Missing Data', 'Please enter a condition name.');
