@@ -12650,6 +12650,20 @@ const AnimalForm = ({
                             </div>
                         </div>
                         
+                        {/* Origin */}
+                        {!isFieldHidden('origin') && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <label className="block text-sm font-medium text-gray-700">{getFieldLabel('origin', 'Origin')}</label>
+                                <select name="origin" value={formData.origin || ''} onChange={handleChange}
+                                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                    <option value="">Select Origin</option>
+                                    <option value="Captive-bred">Captive-bred</option>
+                                    <option value="Wild-caught">Wild-caught</option>
+                                    <option value="Rescue">Rescue</option>
+                                </select>
+                            </div>
+                        )}
+
                         {/* Tags */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="tags-section">
                             <label className="block text-sm font-medium text-gray-700 mb-2">Tags (Lines, Enclosures, etc)</label>
@@ -12701,20 +12715,6 @@ const AnimalForm = ({
                                 </div>
                             )}
                         </div>
-
-                        {/* Origin */}
-                        {!isFieldHidden('origin') && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <label className="block text-sm font-medium text-gray-700">{getFieldLabel('origin', 'Origin')}</label>
-                                <select name="origin" value={formData.origin || ''} onChange={handleChange}
-                                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                    <option value="">Select Origin</option>
-                                    <option value="Captive-bred">Captive-bred</option>
-                                    <option value="Wild-caught">Wild-caught</option>
-                                    <option value="Rescue">Rescue</option>
-                                </select>
-                            </div>
-                        )}
                     </div>
                 )}
                 
