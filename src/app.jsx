@@ -12994,45 +12994,51 @@ const AnimalForm = ({
                                 <div className="space-y-2 bg-white p-3 rounded-lg border border-blue-200 max-h-96 overflow-y-auto">
                                     <h4 className="text-sm font-semibold text-gray-700">Saved Records ({breedingRecords.length})</h4>
                                     {breedingRecords.map((record) => (
-                                        <div key={record.id} className="p-3 bg-blue-50 rounded border border-blue-100 text-sm space-y-1">
+                                        <div key={record.id} className="p-3 bg-blue-50 rounded border border-blue-100 text-sm space-y-2">
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1">
-                                                    <div className="font-medium text-gray-800">
-                                                        {record.breedingMethod}
+                                                    {/* Top: CTL-ID or litter name placeholder */}
+                                                    <div className="font-medium text-gray-800 mb-2">
+                                                        {record.litterId ? (
+                                                            <span className="font-mono bg-gray-300 px-2 py-1 rounded text-xs mr-2">{record.litterId}</span>
+                                                        ) : (
+                                                            <span className="text-gray-500 italic">No litter linked</span>
+                                                        )}
                                                     </div>
+                                                    
+                                                    {/* Breeding Condition */}
                                                     {record.breedingConditionAtTime && (
-                                                        <div className="text-xs text-gray-600 mt-0.5">
-                                                            Animal Condition at Mating: {record.breedingConditionAtTime}
-                                                        </div>
-                                                    )}
-                                                    <div className="text-xs text-gray-600 mt-1">
-                                                        <strong>Mating:</strong> {formatDate(record.matingDates)}
-                                                    </div>
-                                                    {record.outcome && (
                                                         <div className="text-xs text-gray-600">
-                                                            <strong>Outcome:</strong> {record.outcome}
+                                                            <strong>Breeding Condition:</strong> {record.breedingConditionAtTime}
                                                         </div>
                                                     )}
+                                                    
+                                                    {/* Mating: date + method */}
+                                                    <div className="text-xs text-gray-600">
+                                                        <strong>Mating:</strong> {formatDate(record.matingDates)} {record.breedingMethod && `• ${record.breedingMethod}`}
+                                                    </div>
+                                                    
+                                                    {/* Birth: date + method */}
                                                     {record.birthEventDate && (
                                                         <div className="text-xs text-gray-600">
-                                                            <strong>Birth:</strong> {formatDate(record.birthEventDate)} {record.birthMethod && `(${record.birthMethod})`}
+                                                            <strong>Birth:</strong> {formatDate(record.birthEventDate)} {record.birthMethod && `• ${record.birthMethod}`}
                                                         </div>
                                                     )}
-                                                    {(record.litterSizeBorn !== null || record.litterSizeWeaned !== null) && (
+                                                    
+                                                    {/* Litter: formatted for easy reading */}
+                                                    {(record.litterSizeBorn !== null || record.litterSizeWeaned !== null || record.stillbornCount) && (
                                                         <div className="text-xs text-gray-600">
-                                                            <strong>Litter:</strong> {record.litterSizeBorn !== null ? `${record.litterSizeBorn} born` : ''} {record.litterSizeWeaned !== null ? `${record.litterSizeWeaned} weaned` : ''} {record.stillbornCount ? `${record.stillbornCount} stillborn` : ''}
+                                                            <strong>Litter:</strong> {record.litterSizeBorn !== null ? `${record.litterSizeBorn} born` : ''}{record.litterSizeBorn !== null && record.litterSizeWeaned !== null ? ' / ' : ''}{record.litterSizeWeaned !== null ? `${record.litterSizeWeaned} weaned` : ''}{(record.litterSizeBorn !== null || record.litterSizeWeaned !== null) && record.stillbornCount ? ' / ' : ''}{record.stillbornCount ? `${record.stillbornCount} stillborn` : ''}
                                                         </div>
                                                     )}
+                                                    
+                                                    {/* Notes */}
                                                     {record.notes && (
-                                                        <div className="text-xs text-gray-600 mt-1 italic">
+                                                        <div className="text-xs text-gray-600 italic">
                                                             <strong>Notes:</strong> {record.notes}
                                                         </div>
                                                     )}
-                                                    {record.litterId && (
-                                                        <div className="text-xs text-green-600 mt-1 font-medium">
-                                                            ✓ Linked to Litter: {record.litterId}
-                                                        </div>
-                                                    )}
+
                                                 </div>
                                                 <button type="button" onClick={() => setBreedingRecords(breedingRecords.filter(r => r.id !== record.id))}
                                                     className="text-red-500 hover:text-red-700 p-1 flex-shrink-0" title="Delete record">✕</button>
