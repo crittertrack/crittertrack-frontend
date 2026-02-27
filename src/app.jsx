@@ -10899,6 +10899,9 @@ const AnimalForm = ({
             payloadToSave.labResults = labResultRecords.length > 0 ? JSON.stringify(labResultRecords) : null;
             payloadToSave.labResultRecords = labResultRecords; // Keep for backward compat
             
+            // Include breeding records
+            payloadToSave.breedingRecords = breedingRecords;
+            
             // Debug log for health records
             console.log('[DEBUG] Health records in payload:', {
                 vaccinations: payloadToSave.vaccinations,
