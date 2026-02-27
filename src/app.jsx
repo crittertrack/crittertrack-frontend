@@ -1521,14 +1521,15 @@ const ParentSearchModal = ({
                 const localResponse = await axios.get(localUrl, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
-                // Filter out current animal and animals deceased before offspring birth date
+                // Filter out current animal and females deceased before offspring birth date
                 const filteredLocal = localResponse.data.filter(a => {
                     if (a.id_public === currentId) return false;
-                    // If animal has deceased date and we have offspring birth date, check if alive at that time
-                    if (birthDate && a.deceasedDate) {
+                    // Only check deceased date for females (dams must be alive at offspring birth)
+                    // Males (sires) can be deceased as long as they mated before death
+                    if (birthDate && a.deceasedDate && (a.gender === 'Female' || a.gender === 'Intersex')) {
                         const offspringBirth = new Date(birthDate);
                         const parentDeceased = new Date(a.deceasedDate);
-                        if (parentDeceased < offspringBirth) return false; // Parent died before offspring born
+                        if (parentDeceased < offspringBirth) return false; // Dam died before offspring born
                     }
                     return true;
                 });
@@ -1553,14 +1554,15 @@ const ParentSearchModal = ({
                     : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
 
                 const globalResponse = await axios.get(globalUrl);
-                // Filter out current animal and animals deceased before offspring birth date
+                // Filter out current animal and females deceased before offspring birth date
                 const filteredGlobal = globalResponse.data.filter(a => {
                     if (a.id_public === currentId) return false;
-                    // If animal has deceased date and we have offspring birth date, check if alive at that time
-                    if (birthDate && a.deceasedDate) {
+                    // Only check deceased date for females (dams must be alive at offspring birth)
+                    // Males (sires) can be deceased as long as they mated before death
+                    if (birthDate && a.deceasedDate && (a.gender === 'Female' || a.gender === 'Intersex')) {
                         const offspringBirth = new Date(birthDate);
                         const parentDeceased = new Date(a.deceasedDate);
-                        if (parentDeceased < offspringBirth) return false; // Parent died before offspring born
+                        if (parentDeceased < offspringBirth) return false; // Dam died before offspring born
                     }
                     return true;
                 });
@@ -7058,18 +7060,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 return;
             }
 
-            // Validate parents were alive at litter birth date
+            // Validate dam was alive at litter birth date (only females need to be alive at birth)
             if (formData.birthDate) {
                 const litterBirthDate = new Date(formData.birthDate);
                 
-                if (sire.deceasedDate) {
-                    const sireDeceasedDate = new Date(sire.deceasedDate);
-                    if (sireDeceasedDate < litterBirthDate) {
-                        showModalMessage('Error', `Sire (${sire.name}) was deceased before the litter birth date`);
-                        return;
-                    }
-                }
-                
+                // Only validate dam (female) - sires (males) can be deceased
                 if (dam.deceasedDate) {
                     const damDeceasedDate = new Date(dam.deceasedDate);
                     if (damDeceasedDate < litterBirthDate) {
