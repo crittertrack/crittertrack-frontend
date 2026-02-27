@@ -10274,6 +10274,7 @@ const AnimalForm = ({
     const [existingLitters, setExistingLitters] = useState([]);
     const [litterSearchLoading, setLitterSearchLoading] = useState(false);
     const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});
+    const [breedingRecordOffspring, setBreedingRecordOffspring] = useState({}); // Store offspring by record ID
     
     const [medicalConditionsArray, setMedicalConditionsArray] = useState(() => {
         const data = animalToEdit?.medicalConditions;
@@ -10981,6 +10982,52 @@ const AnimalForm = ({
             fetchLittersForLinking();
         }
     }, [showLinkLitterModal, newBreedingRecord.mateAnimalId, newBreedingRecord.birthEventDate]);
+    
+    // Fetch offspring for a breeding record when expanded
+    const fetchOffspringForBreedingRecord = async (recordId, litterId) => {
+        if (!litterId) return;
+        
+        try {
+            // Fetch the litter to get offspring IDs
+            const litterResponse = await axios.get(
+                `${API_BASE_URL}/litters`,
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+            
+            const litter = litterResponse.data.find(l => l.litter_id_public === litterId);
+            if (!litter || !litter.offspringIds_public || litter.offspringIds_public.length === 0) {
+                setBreedingRecordOffspring(prev => ({ ...prev, [recordId]: [] }));
+                return;
+            }
+            
+            // Fetch animals that match the offspring IDs
+            const animalsResponse = await axios.get(
+                `${API_BASE_URL}/animals`,
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+            
+            const offspring = animalsResponse.data.filter(a => 
+                litter.offspringIds_public.includes(a.id_public)
+            );
+            
+            setBreedingRecordOffspring(prev => ({ ...prev, [recordId]: offspring }));
+        } catch (error) {
+            console.error('Error fetching offspring for breeding record:', error);
+            setBreedingRecordOffspring(prev => ({ ...prev, [recordId]: [] }));
+        }
+    };
+    
+    // Fetch offspring when a breeding record is expanded
+    useEffect(() => {
+        Object.entries(expandedBreedingRecords).forEach(([recordId, isExpanded]) => {
+            if (isExpanded) {
+                const record = breedingRecords.find(r => r.id === recordId);
+                if (record && record.litterId && !breedingRecordOffspring[recordId]) {
+                    fetchOffspringForBreedingRecord(recordId, record.litterId);
+                }
+            }
+        });
+    }, [expandedBreedingRecords, breedingRecords]);
     
     const addMedicalCondition = () => {
         if (!newMedicalCondition.name) {
@@ -13336,6 +13383,39 @@ const AnimalForm = ({
                                                                     </div>
                                                                 </div>
                                                             </div>
+                                                            
+                                                            {/* Offspring Cards */}
+                                                            {record.litterId && breedingRecordOffspring[record.id] && breedingRecordOffspring[record.id].length > 0 && (
+                                                                <div className="bg-white p-3 rounded border border-blue-100">
+                                                                    <div className="text-sm font-semibold text-gray-700 mb-3">Offspring ({breedingRecordOffspring[record.id].length})</div>
+                                                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                                        {breedingRecordOffspring[record.id].map(offspring => (
+                                                                            <div 
+                                                                                key={offspring.id_public}
+                                                                                className="border border-gray-200 rounded-lg p-2 hover:shadow-md transition"
+                                                                            >
+                                                                                <div className="flex items-center space-x-2">
+                                                                                    <div className="w-10 h-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                                                                        <AnimalImage 
+                                                                                            src={offspring.imageUrl || offspring.photoUrl} 
+                                                                                            alt={offspring.name} 
+                                                                                            className="w-full h-full object-cover" 
+                                                                                            iconSize={16} 
+                                                                                        />
+                                                                                    </div>
+                                                                                    <div className="flex-1 min-w-0">
+                                                                                        <div className="text-xs font-semibold text-gray-800 truncate">
+                                                                                            {offspring.prefix && `${offspring.prefix} `}{offspring.name}{offspring.suffix && ` ${offspring.suffix}`}
+                                                                                        </div>
+                                                                                        <div className="text-[10px] text-gray-500 font-mono">{offspring.id_public}</div>
+                                                                                        <div className="text-[10px] text-gray-600">{offspring.gender}</div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                             
                                                             {/* Notes */}
                                                             {record.notes && (
