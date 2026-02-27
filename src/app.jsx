@@ -3578,7 +3578,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                             </div>
                                                             {record.breedingConditionAtTime && (
                                                                 <div className="text-xs text-gray-600 mt-1">
-                                                                    Condition: {record.breedingConditionAtTime}
+                                                                    Animal Condition at Mating: {record.breedingConditionAtTime}
                                                                 </div>
                                                             )}
                                                             <div className="text-xs text-gray-500 mt-1">
@@ -3588,7 +3588,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                     </div>
                                                     <div className="grid grid-cols-2 gap-2 text-xs">
                                                         {record.matingDates && (
-                                                            <div><span className="text-gray-600">Mating Date(s):</span> <strong>{formatDate(record.matingDates)}</strong></div>
+                                                            <div><span className="text-gray-600">Mating Date:</span> <strong>{formatDate(record.matingDates)}</strong></div>
+                                                        )}
+                                                        
+                                                        {record.breedingMethod && (
+                                                            <div><span className="text-gray-600">Mating Method:</span> <strong>{record.breedingMethod}</strong></div>
                                                         )}
                                                         
                                                         {/* MALE/SIRE FIELDS */}
@@ -12998,7 +13002,7 @@ const AnimalForm = ({
                                                     </div>
                                                     {record.breedingConditionAtTime && (
                                                         <div className="text-xs text-gray-600 mt-0.5">
-                                                            Condition: {record.breedingConditionAtTime}
+                                                            Animal Condition at Mating: {record.breedingConditionAtTime}
                                                         </div>
                                                     )}
                                                     <div className="text-xs text-gray-600 mt-1">
