@@ -12857,9 +12857,10 @@ const AnimalForm = ({
                                     </div>
                                     
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Mating Date(s) *</label>
-                                        <input type="text" value={newBreedingRecord.matingDates || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, matingDates: e.target.value})}
-                                            placeholder="e.g., 2024-02-15 or 2024-02-15 to 2024-02-17" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Mating Date *</label>
+                                        <DatePicker value={newBreedingRecord.matingDates || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, matingDates: e.target.value})}
+                                            maxDate={new Date()}
+                                            className="p-2 text-sm" />
                                     </div>
                                     
                                     {/* Outcome field - shown for males and intersex */}
