@@ -11343,7 +11343,14 @@ const AnimalForm = ({
     };
     
     const currentId = animalToEdit?.id_public;
-    const requiredGender = modalTarget === 'father' ? 'Male' : modalTarget === 'mother' ? 'Female' : modalTarget === 'other-parent' ? ['Intersex', 'Unknown'] : modalTarget === 'mate' ? null : null;
+    const requiredGender = modalTarget === 'father' ? 'Male' : 
+                           modalTarget === 'mother' ? 'Female' : 
+                           modalTarget === 'other-parent' ? ['Intersex', 'Unknown'] : 
+                           modalTarget === 'mate' ? (
+                               formData.gender === 'Male' ? ['Female', 'Intersex', 'Unknown'] :
+                               formData.gender === 'Female' ? ['Male', 'Intersex', 'Unknown'] :
+                               null // Intersex/Unknown can mate with any gender
+                           ) : null;
 
     return (
         <div className="w-full max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-lg">
@@ -11402,7 +11409,7 @@ const AnimalForm = ({
             {/* --- Mate Search Modal (for breeding records) --- */}
             {modalTarget === 'mate' && (
                 <ParentSearchModal
-                    title="Select Mate"
+                    title="Mate"
                     currentId={currentId}
                     onSelect={handleSelectMate}
                     onClose={() => setModalTarget(null)}
@@ -11413,7 +11420,7 @@ const AnimalForm = ({
                     Search={Search}
                     Loader2={Loader2}
                     LoadingSpinner={LoadingSpinner}
-                    requiredGender={null}
+                    requiredGender={requiredGender}
                     birthDate={formData.birthDate}
                     species={formData.species}
                 />
