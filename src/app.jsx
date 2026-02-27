@@ -10275,6 +10275,7 @@ const AnimalForm = ({
     const [litterSearchLoading, setLitterSearchLoading] = useState(false);
     const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});
     const [breedingRecordOffspring, setBreedingRecordOffspring] = useState({}); // Store offspring by record ID
+    const [breedingRecordLitters, setBreedingRecordLitters] = useState({}); // Store litter data by record ID
     
     const [medicalConditionsArray, setMedicalConditionsArray] = useState(() => {
         const data = animalToEdit?.medicalConditions;
@@ -10995,7 +10996,15 @@ const AnimalForm = ({
             );
             
             const litter = litterResponse.data.find(l => l.litter_id_public === litterId);
-            if (!litter || !litter.offspringIds_public || litter.offspringIds_public.length === 0) {
+            if (!litter) {
+                setBreedingRecordOffspring(prev => ({ ...prev, [recordId]: [] }));
+                return;
+            }
+            
+            // Store the litter data for display
+            setBreedingRecordLitters(prev => ({ ...prev, [recordId]: litter }));
+            
+            if (!litter.offspringIds_public || litter.offspringIds_public.length === 0) {
                 setBreedingRecordOffspring(prev => ({ ...prev, [recordId]: [] }));
                 return;
             }
@@ -11028,6 +11037,40 @@ const AnimalForm = ({
             }
         });
     }, [expandedBreedingRecords, breedingRecords]);
+    
+    // Fetch litter data for all breeding records with litterId (for collapsed view display)
+    useEffect(() => {
+        const fetchAllLitterData = async () => {
+            try {
+                const litterResponse = await axios.get(
+                    `${API_BASE_URL}/litters`,
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+                
+                const litters = litterResponse.data;
+                const litterMap = {};
+                
+                breedingRecords.forEach(record => {
+                    if (record.litterId && !breedingRecordLitters[record.id]) {
+                        const litter = litters.find(l => l.litter_id_public === record.litterId);
+                        if (litter) {
+                            litterMap[record.id] = litter;
+                        }
+                    }
+                });
+                
+                if (Object.keys(litterMap).length > 0) {
+                    setBreedingRecordLitters(prev => ({ ...prev, ...litterMap }));
+                }
+            } catch (error) {
+                console.error('Error fetching litter data for breeding records:', error);
+            }
+        };
+        
+        if (breedingRecords.length > 0) {
+            fetchAllLitterData();
+        }
+    }, [breedingRecords]);
     
     const addMedicalCondition = () => {
         if (!newMedicalCondition.name) {
@@ -13226,6 +13269,9 @@ const AnimalForm = ({
                                             const isBoth = formData.gender === 'Intersex' || (formData.gender === 'Unknown' && formData.breedingRole === 'both');
                                             const isExpanded = expandedBreedingRecords[idx];
                                             
+                                            // Get litter data if available
+                                            const linkedLitter = breedingRecordLitters[record.id];
+                                            
                                             const countSummary = [
                                                 record.litterSizeBorn !== null && `${record.litterSizeBorn} born`,
                                                 record.stillbornCount && `${record.stillbornCount} stillborn`,
@@ -13250,10 +13296,34 @@ const AnimalForm = ({
                                                                 {record.litterId || 'No Litter'}
                                                             </span>
                                                             
-                                                            {/* Summary: Mating date + counts */}
-                                                            <div className="text-sm text-gray-700 flex gap-3 truncate">
-                                                                <span className="flex-shrink-0">{formatDate(record.matingDates)}</span>
-                                                                <span className="text-gray-600 flex-shrink-0">•</span>
+                                                            {/* Litter Name (if available) */}
+                                                            {linkedLitter?.breedingPairCodeName && (
+                                                                <span className="text-xs text-gray-600 italic flex-shrink-0">
+                                                                    {linkedLitter.breedingPairCodeName}
+                                                                </span>
+                                                            )}
+                                                            
+                                                            {/* Summary: Birth date, mate, counts */}
+                                                            <div className="text-sm text-gray-700 flex gap-2 truncate flex-wrap">
+                                                                {/* Birth date from litter or record */}
+                                                                {(linkedLitter?.birthDate || record.birthEventDate) && (
+                                                                    <>
+                                                                        <span className="flex-shrink-0">
+                                                                            {formatDate(linkedLitter?.birthDate || record.birthEventDate)}
+                                                                        </span>
+                                                                        <span className="text-gray-400 flex-shrink-0">•</span>
+                                                                    </>
+                                                                )}
+                                                                
+                                                                {/* Mate name */}
+                                                                {record.mate && (
+                                                                    <>
+                                                                        <span className="text-gray-600 flex-shrink-0">{record.mate}</span>
+                                                                        <span className="text-gray-400 flex-shrink-0">•</span>
+                                                                    </>
+                                                                )}
+                                                                
+                                                                {/* Counts */}
                                                                 <span className="text-blue-700 font-medium truncate">{countSummary}</span>
                                                             </div>
                                                         </div>
