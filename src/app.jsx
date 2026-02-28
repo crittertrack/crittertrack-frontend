@@ -8220,38 +8220,35 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 <form onSubmit={editingLitter ? handleUpdateLitter : handleSubmit} className="bg-gray-50 p-3 sm:p-6 rounded-lg mb-4 sm:mb-6 border-2 border-gray-200">
                     <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">{editingLitter ? 'Edit Litter' : 'Create New Litter'}</h3>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        {/* Auto-assigned CTL-ID (read-only) */}
-                        {editingLitter && editingLitter.litter_id_public && (
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    System Litter ID (CTL-ID)
-                                </label>
-                                <input
-                                    type="text"
-                                    value={editingLitter.litter_id_public}
-                                    disabled
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 font-mono"
-                                />
-                                <p className="text-xs text-gray-500 mt-1">Auto-assigned for system linkage</p>
-                            </div>
-                        )}
-                        
-                        {/* Litter Name */}
-                        <div>
+                    {/* Auto-assigned CTL-ID (read-only) */}
+                    {editingLitter && editingLitter.litter_id_public && (
+                        <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Litter Name/ID
+                                System Litter ID (CTL-ID)
                             </label>
                             <input
                                 type="text"
-                                value={formData.breedingPairCodeName}
-                                onChange={(e) => setFormData({...formData, breedingPairCodeName: e.target.value})}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="e.g., Summer 2025 Litter A, Disney's Hakuna Matata"
+                                value={editingLitter.litter_id_public}
+                                disabled
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 font-mono"
                             />
-                            <p className="text-xs text-gray-500 mt-1">Your custom name for this breeding pair</p>
+                            <p className="text-xs text-gray-500 mt-1">Auto-assigned for system linkage</p>
                         </div>
-
+                    )}
+                    
+                    {/* Litter Name - Full Width */}
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Litter Name/ID
+                        </label>
+                        <input
+                            type="text"
+                            value={formData.breedingPairCodeName}
+                            onChange={(e) => setFormData({...formData, breedingPairCodeName: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="e.g., Summer 2025 Litter A, Disney's Hakuna Matata"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Your custom name for this breeding pair</p>
                     </div>
 
                     {/* Sire & Dam Selection */}
