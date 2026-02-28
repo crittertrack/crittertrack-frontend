@@ -2605,11 +2605,43 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
     const [animalCOI, setAnimalCOI] = useState(null);
     const [loadingCOI, setLoadingCOI] = useState(false);
     const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
+    const [breedingRecordOffspring, setBreedingRecordOffspring] = useState({});
     const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});
     const [showCreateLitterModal, setShowCreateLitterModal] = useState(false);
     const [showLinkLitterModal, setShowLinkLitterModal] = useState(false);
     const [breedingRecordForLitter, setBreedingRecordForLitter] = useState(null);
     const { fieldTemplate, getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
+
+    // Fetch offspring for breeding records with linked litters (on expand)
+    React.useEffect(() => {
+        if (!animal?.breedingRecords?.length || !authToken) return;
+        const expanded = Object.entries(expandedBreedingRecords);
+        expanded.forEach(([idxStr, isExpanded]) => {
+            if (!isExpanded) return;
+            const idx = parseInt(idxStr);
+            const record = animal.breedingRecords[idx];
+            if (!record?.litterId || breedingRecordOffspring[record.litterId] !== undefined) return;
+            const fetch = async () => {
+                try {
+                    const [littersRes, animalsRes] = await Promise.all([
+                        axios.get(`${API_BASE_URL}/litters`, { headers: { Authorization: `Bearer ${authToken}` } }),
+                        axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` } })
+                    ]);
+                    const litter = littersRes.data.find(l => l.litter_id_public === record.litterId);
+                    if (!litter?.offspringIds_public?.length) {
+                        setBreedingRecordOffspring(prev => ({ ...prev, [record.litterId]: [] }));
+                        return;
+                    }
+                    const offspring = animalsRes.data.filter(a => litter.offspringIds_public.includes(a.id_public));
+                    setBreedingRecordOffspring(prev => ({ ...prev, [record.litterId]: offspring }));
+                } catch (e) {
+                    setBreedingRecordOffspring(prev => ({ ...prev, [record.litterId]: [] }));
+                }
+            };
+            fetch();
+        });
+    }, [expandedBreedingRecords, animal?.breedingRecords, authToken, API_BASE_URL]);
+
 
     // Fetch assigned enclosure info
     React.useEffect(() => {
@@ -3569,6 +3601,13 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 </div>
                             </div>
 
+                            {/* Origin */}
+                            {animal.origin && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">🌍 Origin</h3>
+                                <p className="text-sm text-gray-700">{animal.origin}</p>
+                            </div>
+                            )}
                             {/* Tags */}
                             {animal.tags && animal.tags.length > 0 && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
@@ -3580,11 +3619,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                     </div>
                                 </div>
                             )}
-                            {/* Origin */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🌍 Origin</h3>
-                                <p className="text-sm text-gray-700">{animal.origin || ''}</p>
-                            </div>
                         </div>
                     )}
 
@@ -3621,13 +3655,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 </div>
                             </div>
 
-                            {/* 2nd Section: Ownership History */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">👥 Ownership History</h3>
-                                <p className="text-sm text-gray-700"></p>
-                            </div>
-
-                            {/* 3rd Section: Breeding Records - Accordion View */}
+                            {/* 2nd Section: Breeding Records - Accordion View */}
                             {animal.breedingRecords && animal.breedingRecords.length > 0 && (
                                 <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 space-y-3">
                                     <h3 className="text-lg font-semibold text-gray-700 flex items-center"><span className="text-purple-600 mr-2">📊</span>Breeding Records</h3>
@@ -3685,7 +3713,40 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                     <div><div className="text-gray-600 text-xs">Outcome</div><div className={`font-semibold text-lg ${record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}`}>{record.outcome || '?'}</div></div>
                                                                 </div>
                                                             </div>
+                                                            {record.mate && (
+                                                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                                                    <div><div className="text-gray-600 text-xs">Mate / Other Parent</div><div className="font-semibold text-gray-800">{record.mate}</div></div>
+                                                                </div>
+                                                            )}
+                                                            {record.birthEventDate && (
+                                                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                                                    <div><div className="text-gray-600 text-xs">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(record.birthEventDate)}</div></div>
+                                                                    {record.birthMethod && <div><div className="text-gray-600 text-xs">Birth Method</div><div className="font-semibold text-gray-800">{record.birthMethod}</div></div>}
+                                                                    {record.outcome && <div><div className="text-gray-600 text-xs">Outcome</div><div className={`font-semibold ${record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}`}>{record.outcome}</div></div>}
+                                                                </div>
+                                                            )}
                                                             {record.notes && (<div className="bg-white p-3 rounded border border-purple-100"><div className="text-sm font-semibold text-gray-700 mb-2">Notes</div><div className="text-sm text-gray-700 italic">{record.notes}</div></div>)}
+                                                            {record.litterId && breedingRecordOffspring[record.litterId] && breedingRecordOffspring[record.litterId].length > 0 && (
+                                                                <div className="bg-white p-3 rounded border border-purple-100">
+                                                                    <div className="text-sm font-semibold text-gray-700 mb-3">Offspring ({breedingRecordOffspring[record.litterId].length})</div>
+                                                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                                        {breedingRecordOffspring[record.litterId].map(offspring => (
+                                                                            <div key={offspring.id_public} onClick={() => onViewAnimal && onViewAnimal(offspring)} className="border border-gray-200 rounded-lg p-2 hover:shadow-md transition cursor-pointer">
+                                                                                <div className="flex items-center space-x-2">
+                                                                                    <div className="w-10 h-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                                                                        <AnimalImage src={offspring.imageUrl || offspring.photoUrl} alt={offspring.name} className="w-full h-full object-cover" iconSize={16} />
+                                                                                    </div>
+                                                                                    <div className="flex-1 min-w-0">
+                                                                                        <div className="text-xs font-semibold text-gray-800 truncate">{offspring.prefix && `${offspring.prefix} `}{offspring.name}{offspring.suffix && ` ${offspring.suffix}`}</div>
+                                                                                        <div className="text-[10px] text-gray-500 font-mono">{offspring.id_public}</div>
+                                                                                        <div className="text-[10px] text-gray-600">{offspring.gender}</div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                             <div className="flex gap-2 pt-2">
                                                                 {!record.litterId ? (
                                                                     <>
@@ -3705,8 +3766,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 </div>
                             )}
 
-                            {/* 4th Section: Offspring */}
-                            <OffspringSection animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onViewAnimal={onViewAnimal} />
                         </div>
                     )}
 
@@ -3960,15 +4019,59 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                             </div>
                             )}
 
-                            {/* 2nd Section: Husbandry */}
-                            {(animal.enclosureId || animal.housingType || animal.bedding || animal.enrichment) && (
+                            {/* 2nd Section: Housing & Enclosure */}
+                            {(animal.enclosureId || animal.housingType || animal.bedding || animal.enrichment || animal.careTasks?.length > 0) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🧴 Animal Care</h3>
+                                <h3 className="text-lg font-semibold text-gray-700">🏡 Housing & Enclosure</h3>
                                 <div className="space-y-3 text-sm">
                                     {enclosureInfo && (<div><span className="text-gray-600">Enclosure:</span> <strong>{enclosureInfo.name}</strong></div>)}
                                     {fieldTemplate?.fields?.housingType?.enabled !== false && animal.housingType && <div><span className="text-gray-600">{getLabel('housingType', 'Housing Type')}:</span> <strong>{animal.housingType}</strong></div>}
                                     {fieldTemplate?.fields?.bedding?.enabled !== false && animal.bedding && <div><span className="text-gray-600">{getLabel('bedding', 'Bedding')}:</span> <strong>{animal.bedding}</strong></div>}
                                     {animal.enrichment && <div><span className="text-gray-600">Enrichment:</span> <strong>{animal.enrichment}</strong></div>}
+                                </div>
+                                {animal.careTasks && animal.careTasks.length > 0 && (
+                                    <div className="mt-3 pt-3 border-t border-gray-200">
+                                        <div className="text-sm font-semibold text-gray-700 mb-2">Enclosure Care Tasks</div>
+                                        <div className="space-y-1">
+                                            {animal.careTasks.map((task, idx) => (
+                                                <div key={idx} className="flex items-center justify-between text-xs bg-white px-2 py-1.5 rounded border border-gray-200">
+                                                    <span className="font-medium text-gray-700">{task.taskName}</span>
+                                                    <div className="flex items-center gap-3 text-gray-500">
+                                                        {task.frequencyDays && <span>Every {task.frequencyDays}d</span>}
+                                                        {task.lastDoneDate && <span>Last: {formatDate(task.lastDoneDate)}</span>}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            )}
+
+                            {/* 3rd Section: Animal Care */}
+                            {(animal.animalCareTasks?.length > 0 || animal.handlingNotes || animal.socializationNotes || animal.specialCareRequirements) && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">🧴 Animal Care</h3>
+                                <div className="space-y-3 text-sm">
+                                    {animal.animalCareTasks && animal.animalCareTasks.length > 0 && (
+                                        <div>
+                                            <div className="text-sm font-semibold text-gray-700 mb-2">Animal Care Tasks</div>
+                                            <div className="space-y-1">
+                                                {animal.animalCareTasks.map((task, idx) => (
+                                                    <div key={idx} className="flex items-center justify-between text-xs bg-white px-2 py-1.5 rounded border border-gray-200">
+                                                        <span className="font-medium text-gray-700">{task.taskName}</span>
+                                                        <div className="flex items-center gap-3 text-gray-500">
+                                                            {task.frequencyDays && <span>Every {task.frequencyDays}d</span>}
+                                                            {task.lastDoneDate && <span>Last: {formatDate(task.lastDoneDate)}</span>}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {animal.handlingNotes && <div><span className="text-gray-600 font-semibold">Handling Notes:</span><p className="mt-1 whitespace-pre-wrap">{animal.handlingNotes}</p></div>}
+                                    {animal.socializationNotes && <div><span className="text-gray-600 font-semibold">Socialization Notes:</span><p className="mt-1 whitespace-pre-wrap">{animal.socializationNotes}</p></div>}
+                                    {animal.specialCareRequirements && <div><span className="text-gray-600 font-semibold">Special Care Requirements:</span><p className="mt-1 whitespace-pre-wrap">{animal.specialCareRequirements}</p></div>}
                                 </div>
                             </div>
                             )}
@@ -4039,37 +4142,40 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                             )}
 
                             {/* 2nd Section: Activity */}
-                            {animal.activityCycle && (
+                            {(animal.activityCycle || animal.exerciseRequirements || animal.dailyExerciseMinutes || animal.trainingLevel || animal.trainingDisciplines || animal.workingRole || animal.certifications || animal.crateTrained || animal.litterTrained || animal.leashTrained || animal.freeFlightTrained) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">🌓🏃 Activity</h3>
-                                <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">Activity Cycle:</span> <strong>{animal.activityCycle}</strong></div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    {animal.activityCycle && <div><span className="text-gray-600">Activity Cycle:</span> <strong>{animal.activityCycle}</strong></div>}
+                                    {fieldTemplate?.fields?.exerciseRequirements?.enabled !== false && animal.exerciseRequirements && <div><span className="text-gray-600">{getLabel('exerciseRequirements', 'Exercise Requirements')}:</span> <strong>{animal.exerciseRequirements}</strong></div>}
+                                    {fieldTemplate?.fields?.dailyExerciseMinutes?.enabled !== false && animal.dailyExerciseMinutes && <div><span className="text-gray-600">{getLabel('dailyExerciseMinutes', 'Daily Exercise (min)')}:</span> <strong>{animal.dailyExerciseMinutes}</strong></div>}
+                                    {fieldTemplate?.fields?.trainingLevel?.enabled !== false && animal.trainingLevel && <div><span className="text-gray-600">{getLabel('trainingLevel', 'Training Level')}:</span> <strong>{animal.trainingLevel}</strong></div>}
+                                    {fieldTemplate?.fields?.trainingDisciplines?.enabled !== false && animal.trainingDisciplines && <div><span className="text-gray-600">{getLabel('trainingDisciplines', 'Training Disciplines')}:</span> <strong>{animal.trainingDisciplines}</strong></div>}
+                                    {fieldTemplate?.fields?.workingRole?.enabled !== false && animal.workingRole && <div><span className="text-gray-600">{getLabel('workingRole', 'Working Role')}:</span> <strong>{animal.workingRole}</strong></div>}
+                                    {fieldTemplate?.fields?.certifications?.enabled !== false && animal.certifications && <div className="col-span-2"><span className="text-gray-600">{getLabel('certifications', 'Certifications')}:</span> <strong>{animal.certifications}</strong></div>}
                                 </div>
+                                {(animal.crateTrained || animal.litterTrained || animal.leashTrained || animal.freeFlightTrained) && (
+                                    <div className="flex flex-wrap gap-3 text-sm pt-2">
+                                        {fieldTemplate?.fields?.crateTrained?.enabled !== false && animal.crateTrained && <span className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">✓ {getLabel('crateTrained', 'Crate Trained')}</span>}
+                                        {fieldTemplate?.fields?.litterTrained?.enabled !== false && animal.litterTrained && <span className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">✓ {getLabel('litterTrained', 'Litter Trained')}</span>}
+                                        {fieldTemplate?.fields?.leashTrained?.enabled !== false && animal.leashTrained && <span className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">✓ {getLabel('leashTrained', 'Leash Trained')}</span>}
+                                        {fieldTemplate?.fields?.freeFlightTrained?.enabled !== false && animal.freeFlightTrained && <span className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">✓ {getLabel('freeFlightTrained', 'Free Flight Trained')}</span>}
+                                    </div>
+                                )}
                             </div>
                             )}
 
-                            {/* 3rd Section: Training & Working */}
-                            {(() => {
-                                const trainFields = [
-                                    { key: 'trainingLevel', label: 'Training Level' },
-                                    { key: 'trainingDisciplines', label: 'Training Disciplines' },
-                                    { key: 'workingRole', label: 'Working Role' },
-                                    { key: 'certifications', label: 'Certifications' },
-                                    { key: 'behavioralIssues', label: 'Behavioral Issues' },
-                                    { key: 'biteHistory', label: 'Bite History' },
-                                    { key: 'reactivityNotes', label: 'Reactivity Notes' },
-                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
-                                return trainFields.length > 0 && (
-                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700">🌓🏃 Training & Working</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                            {trainFields.map(f => (
-                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                );
-                            })()}
+                            {/* 3rd Section: Known Issues */}
+                            {(animal.behavioralIssues || animal.biteHistory || animal.reactivityNotes) && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">⚠️ Known Issues</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    {fieldTemplate?.fields?.behavioralIssues?.enabled !== false && animal.behavioralIssues && <div><span className="text-gray-600">{getLabel('behavioralIssues', 'Behavioral Issues')}:</span><p className="mt-1 whitespace-pre-wrap font-medium">{animal.behavioralIssues}</p></div>}
+                                    {fieldTemplate?.fields?.biteHistory?.enabled !== false && animal.biteHistory && <div><span className="text-gray-600">{getLabel('biteHistory', 'Bite History')}:</span><p className="mt-1 whitespace-pre-wrap font-medium">{animal.biteHistory}</p></div>}
+                                    {fieldTemplate?.fields?.reactivityNotes?.enabled !== false && animal.reactivityNotes && <div className="col-span-2"><span className="text-gray-600">{getLabel('reactivityNotes', 'Reactivity Notes')}:</span><p className="mt-1 whitespace-pre-wrap font-medium">{animal.reactivityNotes}</p></div>}
+                                </div>
+                            </div>
+                            )}
                         </div>
                     )}
 
