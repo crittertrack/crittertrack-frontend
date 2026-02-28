@@ -3142,11 +3142,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                             {/* Identification Numbers Section */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">🔢 Identification Numbers</h3>
-                                <div className="space-y-2">
-                                    <p className="text-sm"><span className="font-medium">CritterTrack ID:</span> {animal.id_public || ''}</p>
-                                    <p className="text-sm"><span className="font-medium">Identification:</span> {animal.breederAssignedId || ''}</p>
-                                    {animal.microchipNumber && <p className="text-sm"><span className="font-medium">Microchip:</span> {animal.microchipNumber}</p>}
-                                    <p className="text-sm"><span className="font-medium">Pedigree Reg ID:</span> {animal.pedigreeRegistrationId || ''}</p>
+                                <div className="space-y-2 text-sm">
+                                    <p><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></p>
+                                    {animal.breederAssignedId && <p><span className="text-gray-600">Identification:</span> <strong>{animal.breederAssignedId}</strong></p>}
+                                    {animal.microchipNumber && <p><span className="text-gray-600">Microchip:</span> <strong>{animal.microchipNumber}</strong></p>}
+                                    {animal.pedigreeRegistrationId && <p><span className="text-gray-600">Pedigree Reg ID:</span> <strong>{animal.pedigreeRegistrationId}</strong></p>}
                                 </div>
                             </div>
 
@@ -4792,11 +4792,11 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {/* Identification Numbers Section */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">🔢 Identification Numbers</h3>
-                                <div className="space-y-2">
-                                    <p className="text-sm"><span className="font-medium">CritterTrack ID:</span> {animal.id_public || ''}</p>
-                                    <p className="text-sm"><span className="font-medium">Identification:</span> {animal.breederAssignedId || ''}</p>
-                                    {animal.microchipNumber && <p className="text-sm"><span className="font-medium">Microchip:</span> {animal.microchipNumber}</p>}
-                                    <p className="text-sm"><span className="font-medium">Pedigree Reg ID:</span> {animal.pedigreeRegistrationId || ''}</p>
+                                <div className="space-y-2 text-sm">
+                                    <p><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></p>
+                                    {animal.breederAssignedId && <p><span className="text-gray-600">Identification:</span> <strong>{animal.breederAssignedId}</strong></p>}
+                                    {animal.microchipNumber && <p><span className="text-gray-600">Microchip:</span> <strong>{animal.microchipNumber}</strong></p>}
+                                    {animal.pedigreeRegistrationId && <p><span className="text-gray-600">Pedigree Reg ID:</span> <strong>{animal.pedigreeRegistrationId}</strong></p>}
                                 </div>
                             </div>
 
@@ -6088,11 +6088,11 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* Identification Numbers Section */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">🔢 Identification Numbers</h3>
-                                <div className="space-y-2">
-                                    <p className="text-sm"><span className="font-medium">CritterTrack ID:</span> {animal.id_public || ''}</p>
-                                    <p className="text-sm"><span className="font-medium">Identification:</span> {animal.breederAssignedId || ''}</p>
-                                    {animal.microchipNumber && <p className="text-sm"><span className="font-medium">Microchip:</span> {animal.microchipNumber}</p>}
-                                    <p className="text-sm"><span className="font-medium">Pedigree Reg ID:</span> {animal.pedigreeRegistrationId || ''}</p>
+                                <div className="space-y-2 text-sm">
+                                    <p><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></p>
+                                    {animal.breederAssignedId && <p><span className="text-gray-600">Identification:</span> <strong>{animal.breederAssignedId}</strong></p>}
+                                    {animal.microchipNumber && <p><span className="text-gray-600">Microchip:</span> <strong>{animal.microchipNumber}</strong></p>}
+                                    {animal.pedigreeRegistrationId && <p><span className="text-gray-600">Pedigree Reg ID:</span> <strong>{animal.pedigreeRegistrationId}</strong></p>}
                                 </div>
                             </div>
                             {/* Genetic Code Display Section */}
