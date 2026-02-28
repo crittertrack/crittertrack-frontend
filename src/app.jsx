@@ -18385,19 +18385,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             const queryString = params.length > 0 ? `?${params.join('&')}` : '';
             const url = `${API_BASE_URL}/animals${queryString}`;
 
-            console.log('[fetchAnimals] Fetching with ownedFilterActive:', ownedFilterActive, 'URL:', url);
             const response = await axios.get(url, { headers: { Authorization: `Bearer ${authToken}` } });
             let data = response.data || [];
-            console.log('[fetchAnimals] Received', data.length, 'animals from backend');
-            
-            // Log a sample of animals to see their ownership status
-            if (data.length > 0) {
-                console.log('[fetchAnimals] Sample animals:', data.slice(0, 3).map(a => ({
-                    id: a.id_public,
-                    isViewOnly: a.isViewOnly,
-                    ownerId: a.ownerId_public
-                })));
-            }
             
             // Client-side fallback filtering in case the API doesn't apply the `name` filter reliably
             if (appliedNameFilter) {
@@ -18457,17 +18446,24 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 data = data.filter(a => !a.showOnPublicProfile);
             }
 
-            // Cache-bust any image URLs so updated uploads appear immediately
-            data = data.map(a => {
-                const img = a.imageUrl || a.photoUrl || null;
-                if (img) {
-                    const busted = img.includes('?') ? `${img}&t=${Date.now()}` : `${img}?t=${Date.now()}`;
-                    return { ...a, imageUrl: busted, photoUrl: busted };
-                }
-                return a;
-            });
+            // Cache-bust images ONLY once per session startup (not on every filter change)
+            // Store whether we've already busted this session
+            if (!fetchAnimals._cacheBusted) {
+                fetchAnimals._cacheBusted = true;
+                data = data.map(a => {
+                    const img = a.imageUrl || a.photoUrl || null;
+                    if (img) {
+                        const busted = img.includes('?') ? `${img}&t=${Date.now()}` : `${img}?t=${Date.now()}`;
+                        return { ...a, imageUrl: busted, photoUrl: busted };
+                    }
+                    return a;
+                });
+            }
 
             setAnimals(data);
+            // Derive species list from already-fetched data instead of a separate API call
+            const speciesList = [...new Set(data.map(a => a.species).filter(Boolean))];
+            if (speciesList.length > 0) setAllUserSpecies(speciesList);
         } catch (error) {
             console.error('Fetch animals error:', error);
             showModalMessage('Error', 'Failed to fetch animal list.');
@@ -18476,17 +18472,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         }
     }, [authToken, statusFilter, selectedGenders, selectedSpecies, appliedNameFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, ownedFilterActive, publicFilter, showModalMessage]);
 
-    // Fetch ALL user species (no filters) ? master list for filter UI and group headers
+    // Species list is now derived from the fetchAnimals result — no separate API call needed
     const fetchAllSpecies = useCallback(async () => {
-        if (!authToken) return;
-        try {
-            const res = await axios.get(`${API_BASE_URL}/animals`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            const species = [...new Set((res.data || []).map(a => a.species).filter(Boolean))];
-            setAllUserSpecies(species);
-        } catch (err) { console.error('[fetchAllSpecies]', err); }
-    }, [authToken, API_BASE_URL]);
+        // No-op: species are populated as a side-effect of fetchAnimals()
+        // Kept for compatibility with the animals-changed event handler
+    }, []);
 
     // Fetch ALL user animals (no client-side filters) ? used by Management View
     const fetchAllAnimals = useCallback(async () => {
@@ -18515,7 +18505,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         return () => window.removeEventListener('animals-changed', handleAnimalsChanged);
     }, [fetchAnimals, fetchAllSpecies, fetchAllAnimals]);
 
-    useEffect(() => { fetchAllSpecies(); }, [fetchAllSpecies]);
     useEffect(() => { fetchAllAnimals(); }, [fetchAllAnimals]);
 
     // Fetch the current user's activity log (lazy ? only when log screen opens)
