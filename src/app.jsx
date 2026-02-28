@@ -10251,12 +10251,12 @@ const AnimalForm = ({
         return [];
     });
     const [newBreedingRecord, setNewBreedingRecord] = useState({
-        breedingMethod: '',
+        breedingMethod: 'Unknown',
         breedingConditionAtTime: null,
         matingDates: '',
         mate: '',
         mateAnimalId: null,
-        outcome: null,
+        outcome: 'Unknown',
         birthEventDate: '',
         birthMethod: null,
         litterSizeBorn: null,
@@ -11347,8 +11347,14 @@ const AnimalForm = ({
             payloadToSave.labResults = labResultRecords.length > 0 ? JSON.stringify(labResultRecords) : null;
             payloadToSave.labResultRecords = labResultRecords; // Keep for backward compat
             
-            // Include breeding records
-            payloadToSave.breedingRecords = breedingRecords;
+            // Include breeding records (clean up enum fields to prevent validation errors)
+            payloadToSave.breedingRecords = breedingRecords.map(record => ({
+                ...record,
+                breedingMethod: record.breedingMethod || 'Unknown',
+                outcome: record.outcome || 'Unknown',
+                breedingConditionAtTime: record.breedingConditionAtTime || null,
+                birthMethod: record.birthMethod || null
+            }));
             
             // Debug log for health records
             console.log('[DEBUG] Health records in payload:', {
