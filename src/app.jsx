@@ -15323,7 +15323,7 @@ const AnimalForm = ({
 
                         {/* 4th Section: Environment */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="environment-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">�️ Environment</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">🌡️ Environment</h3>
                             <div className="space-y-4">
                                 {!isFieldHidden('temperatureRange') && (
                                 <div>
