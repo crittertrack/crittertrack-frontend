@@ -12005,6 +12005,34 @@ const AnimalForm = ({
                 );
             }
             
+            // Enrich litters with gender counts derived from linked offspring animals
+            // when the litter doesn't have explicitly-stored maleCount/femaleCount/unknownCount
+            const littersNeedingOffspringCounts = filtered.filter(l =>
+                l.offspringIds_public?.length > 0 &&
+                l.maleCount == null && l.femaleCount == null && l.unknownCount == null
+            );
+            if (littersNeedingOffspringCounts.length > 0) {
+                try {
+                    const animalsRes = await axios.get(`${API_BASE_URL}/animals`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    const allAnimals = animalsRes.data || [];
+                    filtered = filtered.map(litter => {
+                        if (!litter.offspringIds_public?.length) return litter;
+                        if (litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) return litter;
+                        const offspring = allAnimals.filter(a => litter.offspringIds_public.includes(a.id_public));
+                        if (!offspring.length) return litter;
+                        const maleCount = offspring.filter(a => a.gender === 'Male').length || null;
+                        const femaleCount = offspring.filter(a => a.gender === 'Female').length || null;
+                        const unknownCount = offspring.filter(a => a.gender !== 'Male' && a.gender !== 'Female').length || null;
+                        return { ...litter, maleCount, femaleCount, unknownCount };
+                    });
+                } catch (e) {
+                    // Non-critical — continue without derived gender counts
+                    console.warn('Could not derive gender counts from offspring:', e);
+                }
+            }
+
             setExistingLitters(filtered);
         } catch (error) {
             console.error('Error fetching litters:', error);
