@@ -3230,10 +3230,29 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 </div>
                             </div>
 
-                            {/* 3rd Section: Ownership History */}
+                            {/* 3rd Section: Keeper History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">👥 Ownership History</h3>
-                                <p className="text-sm text-gray-700"></p>
+                                <h3 className="text-lg font-semibold text-gray-700">📋 Keeper History</h3>
+                                {(animal.ownershipHistory || []).length === 0 ? (
+                                    <p className="text-sm text-gray-400 italic">No entries yet</p>
+                                ) : (
+                                    <div className="space-y-2">
+                                        {(animal.ownershipHistory || []).map((entry, idx) => (
+                                            <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-semibold text-gray-800">{entry.name || 'Unknown'}</p>
+                                                    {entry.userId_public && <p className="text-xs text-gray-400 font-mono">{entry.userId_public}</p>}
+                                                </div>
+                                                {entry.country && (
+                                                    <div className="flex items-center gap-1 flex-shrink-0">
+                                                        <span className={`${getCountryFlag(entry.country)} inline-block h-4 w-6`}></span>
+                                                        <span className="text-xs text-gray-500">{getCountryName(entry.country)}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
                             {/* 4th Section: Availability for Sale or Stud */}
@@ -4874,10 +4893,29 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 </div>
                             </div>
 
-                            {/* 3rd Section: Ownership History */}
+                            {/* 3rd Section: Keeper History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">👥 Ownership History</h3>
-                                <p className="text-sm text-gray-700"></p>
+                                <h3 className="text-lg font-semibold text-gray-700">📋 Keeper History</h3>
+                                {(animal.ownershipHistory || []).length === 0 ? (
+                                    <p className="text-sm text-gray-400 italic">No entries yet</p>
+                                ) : (
+                                    <div className="space-y-2">
+                                        {(animal.ownershipHistory || []).map((entry, idx) => (
+                                            <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-semibold text-gray-800">{entry.name || 'Unknown'}</p>
+                                                    {entry.userId_public && <p className="text-xs text-gray-400 font-mono">{entry.userId_public}</p>}
+                                                </div>
+                                                {entry.country && (
+                                                    <div className="flex items-center gap-1 flex-shrink-0">
+                                                        <span className={`${getCountryFlag(entry.country)} inline-block h-4 w-6`}></span>
+                                                        <span className="text-xs text-gray-500">{getCountryName(entry.country)}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
                             {/* 4th Section: Availability for Sale or Stud */}
@@ -5065,10 +5103,29 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 </div>
                             </div>
 
-                            {/* 2nd Section: Ownership History */}
+                            {/* 2nd Section: Keeper History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">👥 Ownership History</h3>
-                                <p className="text-sm text-gray-700"></p>
+                                <h3 className="text-lg font-semibold text-gray-700">📋 Keeper History</h3>
+                                {(animal.ownershipHistory || []).length === 0 ? (
+                                    <p className="text-sm text-gray-400 italic">No entries yet</p>
+                                ) : (
+                                    <div className="space-y-2">
+                                        {(animal.ownershipHistory || []).map((entry, idx) => (
+                                            <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-semibold text-gray-800">{entry.name || 'Unknown'}</p>
+                                                    {entry.userId_public && <p className="text-xs text-gray-400 font-mono">{entry.userId_public}</p>}
+                                                </div>
+                                                {entry.country && (
+                                                    <div className="flex items-center gap-1 flex-shrink-0">
+                                                        <span className={`${getCountryFlag(entry.country)} inline-block h-4 w-6`}></span>
+                                                        <span className="text-xs text-gray-500">{getCountryName(entry.country)}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
                             {/* 3rd Section: Breeding Records - Accordion View */}
@@ -10285,6 +10342,14 @@ const AnimalForm = ({
     const [newCareTaskFreq, setNewCareTaskFreq] = useState('');
     const [newAnimalCareTaskName, setNewAnimalCareTaskName] = useState('');
     const [newAnimalCareTaskFreq, setNewAnimalCareTaskFreq] = useState('');
+    // Keeper History add-entry states
+    const [khMode, setKhMode] = useState('manual'); // 'manual' | 'user'
+    const [khName, setKhName] = useState('');
+    const [khCountry, setKhCountry] = useState('');
+    const [khSelectedUser, setKhSelectedUser] = useState(null);
+    const [khUserSearch, setKhUserSearch] = useState('');
+    const [khUserResults, setKhUserResults] = useState([]);
+    const [khSearching, setKhSearching] = useState(false);
 
     // Fetch user's enclosures for the dropdown
     useEffect(() => {
@@ -12232,28 +12297,7 @@ const AnimalForm = ({
                 parasiteControlCount: parasiteControlRecords.length
             });
             
-            // Update ownership history only when saving (not on every form change)
-            if (formData.keeperName) {
-                const ownershipHistory = payloadToSave.ownershipHistory || [];
-                const existingIndex = ownershipHistory.findIndex(h => h.name === formData.keeperName);
-                
-                if (existingIndex >= 0) {
-                    // Update existing entry - set endDate to empty (current owner)
-                    ownershipHistory[existingIndex] = {
-                        ...ownershipHistory[existingIndex],
-                        endDate: null
-                    };
-                } else {
-                    // Add new owner to history with today's date
-                    const today = new Date().toISOString().substring(0, 10);
-                    ownershipHistory.push({
-                        name: formData.keeperName,
-                        startDate: today,
-                        endDate: null
-                    });
-                }
-                payloadToSave.ownershipHistory = ownershipHistory;
-            }
+            // ownershipHistory (Keeper History) is managed directly in formData by the user
             
             // Handle image deletion
             if (deleteImage && animalToEdit) {
@@ -13010,7 +13054,7 @@ const AnimalForm = ({
                                         placeholder="Keeper name (person caring for this animal)"
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                     />
-                                    <p className="text-xs text-gray-500 mt-1">Records keeper changes in ownership history.</p>
+                                    <p className="text-xs text-gray-500 mt-1">Records keeper changes in keeper history.</p>
                                 </div>
                             </div>
                             )}
@@ -13026,10 +13070,108 @@ const AnimalForm = ({
                             )}
                         </div>
 
-                        {/* Ownership History */}
+                        {/* Keeper History */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">👥 Ownership History</h3>
-                            <p className="text-sm text-gray-600 italic">Ownership changes are tracked automatically</p>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">📋 Keeper History</h3>
+
+                            {/* Existing entries */}
+                            {(formData.ownershipHistory || []).length > 0 && (
+                                <div className="space-y-2">
+                                    {(formData.ownershipHistory || []).map((entry, idx) => (
+                                        <div key={idx} className="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-3">
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                {entry.country && <span className={`${getCountryFlag(entry.country)} inline-block h-4 w-6 flex-shrink-0`}></span>}
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-medium text-gray-800 truncate">{entry.name || 'Anonymous'}</p>
+                                                    {entry.userId_public && <p className="text-xs text-gray-400 font-mono">{entry.userId_public}</p>}
+                                                    {entry.country && <p className="text-xs text-gray-500">{getCountryName(entry.country)}</p>}
+                                                </div>
+                                            </div>
+                                            <button type="button" onClick={() => setFormData(prev => ({ ...prev, ownershipHistory: (prev.ownershipHistory || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 p-1 flex-shrink-0 ml-2">
+                                                <X size={14} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Add new entry */}
+                            <div className="bg-white border border-dashed border-gray-300 rounded-lg p-3 space-y-3">
+                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Add Entry</p>
+
+                                {/* Mode toggle */}
+                                <div className="flex gap-2">
+                                    <button type="button" onClick={() => { setKhMode('manual'); setKhSelectedUser(null); setKhUserSearch(''); setKhUserResults([]); }} className={`px-3 py-1 text-xs rounded-full border transition ${khMode === 'manual' ? 'bg-gray-700 text-white border-gray-700' : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500'}`}>Manual Name</button>
+                                    <button type="button" onClick={() => setKhMode('user')} className={`px-3 py-1 text-xs rounded-full border transition ${khMode === 'user' ? 'bg-gray-700 text-white border-gray-700' : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500'}`}>Select User</button>
+                                </div>
+
+                                {khMode === 'manual' ? (
+                                    <input type="text" value={khName} onChange={e => setKhName(e.target.value)} placeholder="Keeper name" className="block w-full p-2 border border-gray-300 rounded text-sm focus:ring-primary focus:border-primary" />
+                                ) : (
+                                    <div className="space-y-2">
+                                        <div className="flex gap-2">
+                                            <input type="text" value={khUserSearch} onChange={e => { setKhUserSearch(e.target.value); setKhUserResults([]); setKhSelectedUser(null); setKhName(''); }} placeholder="Search by name or CTUID" className="flex-1 p-2 border border-gray-300 rounded text-sm focus:ring-primary focus:border-primary" />
+                                            <button type="button" disabled={khSearching || !khUserSearch.trim()} onClick={async () => {
+                                                if (!khUserSearch.trim()) return;
+                                                setKhSearching(true);
+                                                try {
+                                                    const res = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(khUserSearch.trim())}&limit=10`);
+                                                    setKhUserResults(res.data || []);
+                                                } catch(e) {}
+                                                setKhSearching(false);
+                                            }} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded disabled:opacity-40 transition flex-shrink-0">
+                                                {khSearching ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+                                            </button>
+                                        </div>
+                                        {khUserResults.length > 0 && !khSelectedUser && (
+                                            <div className="border border-gray-200 rounded divide-y divide-gray-100 max-h-44 overflow-y-auto bg-white shadow-sm">
+                                                {khUserResults.map(u => {
+                                                    const showP = u.showPersonalName ?? false;
+                                                    const showB = u.showBreederName ?? false;
+                                                    const dName = (showP && showB && u.personalName && u.breederName) ? `${u.personalName} (${u.breederName})` : (showB && u.breederName) ? u.breederName : (showP && u.personalName) ? u.personalName : 'Anonymous';
+                                                    return (
+                                                        <button key={u.id_public} type="button" onClick={() => { setKhSelectedUser(u); setKhName(dName); setKhCountry(u.country || ''); setKhUserResults([]); }} className="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2">
+                                                            {u.profileImage && u.profileImage !== 'present' ? <img src={u.profileImage} className="w-7 h-7 rounded-full object-cover flex-shrink-0" alt="" /> : <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0"><User size={12} className="text-gray-400" /></div>}
+                                                            <div className="min-w-0 flex-1">
+                                                                <p className="text-sm font-medium text-gray-800 truncate">{dName}</p>
+                                                                <p className="text-xs text-gray-400 font-mono">{u.id_public}</p>
+                                                            </div>
+                                                            {u.country && <span className={`${getCountryFlag(u.country)} inline-block h-4 w-6 flex-shrink-0`}></span>}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                        {khSelectedUser && (
+                                            <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-lg p-2">
+                                                {khSelectedUser.profileImage && khSelectedUser.profileImage !== 'present' ? <img src={khSelectedUser.profileImage} className="w-9 h-9 rounded-full object-cover flex-shrink-0" alt="" /> : <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0"><User size={14} className="text-gray-400" /></div>}
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-semibold text-gray-800 truncate">{khName}</p>
+                                                    <p className="text-xs text-gray-500 font-mono">{khSelectedUser.id_public}</p>
+                                                </div>
+                                                {khSelectedUser.country && <span className={`${getCountryFlag(khSelectedUser.country)} inline-block h-4 w-6 flex-shrink-0`}></span>}
+                                                <button type="button" onClick={() => { setKhSelectedUser(null); setKhName(''); setKhUserSearch(''); setKhCountry(''); }} className="text-gray-400 hover:text-gray-600 p-0.5"><X size={13} /></button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Country dropdown */}
+                                <select value={khCountry} onChange={e => setKhCountry(e.target.value)} className="block w-full p-2 border border-gray-300 rounded text-sm focus:ring-primary focus:border-primary">
+                                    <option value="">Country (optional)</option>
+                                    {[['US','United States'],['CA','Canada'],['GB','United Kingdom'],['AU','Australia'],['NZ','New Zealand'],['DE','Germany'],['FR','France'],['IT','Italy'],['ES','Spain'],['NL','Netherlands'],['SE','Sweden'],['NO','Norway'],['DK','Denmark'],['CH','Switzerland'],['BE','Belgium'],['AT','Austria'],['PL','Poland'],['CZ','Czech Republic'],['IE','Ireland'],['PT','Portugal'],['GR','Greece'],['RU','Russia'],['JP','Japan'],['KR','South Korea'],['CN','China'],['IN','India'],['BR','Brazil'],['MX','Mexico'],['ZA','South Africa'],['SG','Singapore'],['HK','Hong Kong'],['MY','Malaysia'],['TH','Thailand']].map(([code, name]) => (
+                                        <option key={code} value={code}>{name}</option>
+                                    ))}
+                                </select>
+
+                                <button type="button" disabled={!khName.trim()} onClick={() => {
+                                    const entry = { name: khName.trim(), userId_public: khSelectedUser?.id_public || null, country: khCountry || null };
+                                    setFormData(prev => ({ ...prev, ownershipHistory: [...(prev.ownershipHistory || []), entry] }));
+                                    setKhName(''); setKhCountry(''); setKhSelectedUser(null); setKhUserSearch(''); setKhUserResults([]);
+                                }} className="w-full py-1.5 bg-gray-700 hover:bg-gray-800 text-white text-sm rounded transition disabled:opacity-40 disabled:cursor-not-allowed">
+                                    + Add Entry
+                                </button>
+                            </div>
                         </div>
                         
                         {/* Availability for Sale/Stud */}
@@ -26263,12 +26405,20 @@ const App = () => {
                                                 </div>
                                                 {animalToView.ownershipHistory && animalToView.ownershipHistory.length > 0 && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                                        <h3 className="text-lg font-semibold text-gray-700">👥 Ownership History</h3>
+                                                        <h3 className="text-lg font-semibold text-gray-700">📋 Keeper History</h3>
                                                         <div className="space-y-2">
-                                                            {animalToView.ownershipHistory.map((owner, idx) => (
-                                                                <div key={idx} className="p-3 bg-white rounded border border-gray-200">
-                                                                    <p className="font-medium text-gray-800">{owner.name}</p>
-                                                                    <p className="text-xs text-gray-500">From: {owner.startDate || 'N/A'} {owner.endDate ? `To: ${owner.endDate}` : '(Current)'}</p>
+                                                            {animalToView.ownershipHistory.map((entry, idx) => (
+                                                                <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded border border-gray-200">
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <p className="text-sm font-semibold text-gray-800">{entry.name || 'Unknown'}</p>
+                                                                        {entry.userId_public && <p className="text-xs text-gray-400 font-mono">{entry.userId_public}</p>}
+                                                                    </div>
+                                                                    {entry.country && (
+                                                                        <div className="flex items-center gap-1 flex-shrink-0">
+                                                                            <span className={`${getCountryFlag(entry.country)} inline-block h-4 w-6`}></span>
+                                                                            <span className="text-xs text-gray-500">{getCountryName(entry.country)}</span>
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                             ))}
                                                         </div>
