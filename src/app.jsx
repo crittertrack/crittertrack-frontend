@@ -3234,7 +3234,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
 
                             {/* 3rd Section: Keeper History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">?? Keeper History</h3>
+                                <h3 className="text-lg font-semibold text-gray-700">🏠 Keeper History</h3>
                                 {(animal.keeperHistory || []).length === 0 ? (
                                     <p className="text-sm text-gray-400 italic">No entries yet</p>
                                 ) : (
@@ -4920,7 +4920,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
 
                             {/* 3rd Section: Keeper History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">?? Keeper History</h3>
+                                <h3 className="text-lg font-semibold text-gray-700">🏠 Keeper History</h3>
                                 {(animal.keeperHistory || []).length === 0 ? (
                                     <p className="text-sm text-gray-400 italic">No entries yet</p>
                                 ) : (
@@ -5130,7 +5130,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
 
                             {/* 2nd Section: Keeper History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">?? Keeper History</h3>
+                                <h3 className="text-lg font-semibold text-gray-700">🏠 Keeper History</h3>
                                 {(animal.keeperHistory || []).length === 0 ? (
                                     <p className="text-sm text-gray-400 italic">No entries yet</p>
                                 ) : (
@@ -13169,7 +13169,7 @@ const AnimalForm = ({
 
                         {/* Keeper History */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">?? Keeper History</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">🏠 Keeper History</h3>
 
                             {/* Existing entries */}
                             {(formData.keeperHistory || []).length > 0 && (
@@ -26506,7 +26506,7 @@ const App = () => {
                                                 </div>
                                                 {animalToView.keeperHistory && animalToView.keeperHistory.length > 0 && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                                        <h3 className="text-lg font-semibold text-gray-700">?? Keeper History</h3>
+                                                        <h3 className="text-lg font-semibold text-gray-700">🏠 Keeper History</h3>
                                                         <div className="space-y-2">
                                                             {animalToView.keeperHistory.map((entry, idx) => (
                                                                 <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded border border-gray-200">
