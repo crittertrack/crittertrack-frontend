@@ -8216,502 +8216,533 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 </div>
             </div>
 
+            {/* Create/Edit Litter Modal */}
             {showAddForm && (
-                <form onSubmit={editingLitter ? handleUpdateLitter : handleSubmit} className="bg-gray-50 p-3 sm:p-6 rounded-lg mb-4 sm:mb-6 border-2 border-gray-200">
-                    <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">{editingLitter ? 'Edit Litter' : 'Create New Litter'}</h3>
-                    
-                    {/* Auto-assigned CTL-ID (read-only) */}
-                    {editingLitter && editingLitter.litter_id_public && (
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                System Litter ID (CTL-ID)
-                            </label>
-                            <input
-                                type="text"
-                                value={editingLitter.litter_id_public}
-                                disabled
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 font-mono"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">Auto-assigned for system linkage</p>
-                        </div>
-                    )}
-                    
-                    {/* Litter Name - Full Width */}
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Litter Name/ID
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.breedingPairCodeName}
-                            onChange={(e) => setFormData({...formData, breedingPairCodeName: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="e.g., Summer 2025 Litter A, Disney's Hakuna Matata"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">Your custom name for this breeding pair</p>
-                    </div>
-
-                    {/* Sire & Dam Selection */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        {/* Sire Selection */}
-                        <div data-tutorial-target="sire-dam-section">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Sire (Father) <span className="text-red-500">*</span>
-                            </label>
-                            <button
-                                type="button"
-                                onClick={() => setModalTarget('sire-litter')}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left transition focus:ring-2 focus:ring-primary focus:border-transparent"
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+                        <div className="flex justify-between items-center border-b p-4">
+                            <h3 className="text-xl font-bold text-gray-800">{editingLitter ? 'Edit Litter' : 'Create New Litter'}</h3>
+                            <button 
+                                onClick={() => {
+                                    setShowAddForm(false);
+                                    setEditingLitter(null);
+                                }}
+                                className="text-gray-500 hover:text-gray-800"
                             >
-                                {formData.sireId_public ? (
-                                    <div>
-                                        <div className="font-medium">
-                                            {myAnimals.find(a => a.id_public === formData.sireId_public)?.name || 'Unknown'}
-                                        </div>
-                                        <div className="text-xs text-gray-500">
-                                            {formData.sireId_public}
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="text-gray-400">Select Sire...</div>
-                                )}
+                                <X size={24} />
                             </button>
                         </div>
 
-                        {/* Dam Selection */}
-                        <div data-tutorial-target="sire-dam-section">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Dam (Mother) <span className="text-red-500">*</span>
-                            </label>
-                            <button
-                                type="button"
-                                onClick={() => setModalTarget('dam-litter')}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left transition focus:ring-2 focus:ring-primary focus:border-transparent"
-                            >
-                                {formData.damId_public ? (
+                        <div className="flex-grow overflow-y-auto p-4">
+                            <form onSubmit={editingLitter ? handleUpdateLitter : handleSubmit} id="litter-form" className="space-y-4">
+                                {/* Auto-assigned CTL-ID (read-only) */}
+                                {editingLitter && editingLitter.litter_id_public && (
                                     <div>
-                                        <div className="font-medium">
-                                            {myAnimals.find(a => a.id_public === formData.damId_public)?.name || 'Unknown'}
-                                        </div>
-                                        <div className="text-xs text-gray-500">
-                                            {formData.damId_public}
-                                        </div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            System Litter ID (CTL-ID)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={editingLitter.litter_id_public}
+                                            disabled
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 font-mono"
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">Auto-assigned for system linkage</p>
                                     </div>
-                                ) : (
-                                    <div className="text-gray-400">Select Dam...</div>
                                 )}
-                            </button>
-                        </div>
-                    </div>
+                                
+                                {/* Litter Name - Full Width */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Litter Name/ID
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.breedingPairCodeName}
+                                        onChange={(e) => setFormData({...formData, breedingPairCodeName: e.target.value})}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                        placeholder="e.g., Summer 2025 Litter A, Disney's Hakuna Matata"
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">Your custom name for this breeding pair</p>
+                                </div>
 
-                    {/* Predicted COI Display */}
-                    {(formData.sireId_public && formData.damId_public) && (
-                        <div className="mb-4 p-3 rounded-lg border bg-gray-50 flex items-center gap-2">
-                            <span className="text-sm font-medium text-gray-700">Predicted COI for this pairing:</span>
-                            {calculatingCOI ? (
-                                <span className="text-sm text-gray-500 flex items-center gap-1">
-                                    <Loader2 className="w-4 h-4 animate-spin" /> Calculating...
-                                </span>
-                            ) : predictedCOI != null ? (
-                                <span className="text-sm font-bold text-gray-800">
-                                    {predictedCOI.toFixed(2)}%
-                                </span>
-                            ) : (
-                                <span className="text-sm text-gray-400 italic">�</span>
-                            )}
-                        </div>
-                    )}
+                                {/* Sire & Dam Selection */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Sire Selection */}
+                                    <div data-tutorial-target="sire-dam-section">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Sire (Father) <span className="text-red-500">*</span>
+                                        </label>
+                                        <button
+                                            type="button"
+                                            onClick={() => setModalTarget('sire-litter')}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left transition focus:ring-2 focus:ring-primary focus:border-transparent"
+                                        >
+                                            {formData.sireId_public ? (
+                                                <div>
+                                                    <div className="font-medium">
+                                                        {myAnimals.find(a => a.id_public === formData.sireId_public)?.name || 'Unknown'}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500">
+                                                        {formData.sireId_public}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="text-gray-400">Select Sire...</div>
+                                            )}
+                                        </button>
+                                    </div>
 
-                    {/* Breeding Information */}
-                    <div className="mb-6 p-4 border border-purple-200 rounded-lg bg-purple-50">
-                        <h4 className="text-md font-semibold text-gray-700 mb-4 flex items-center">
-                            <span className="text-purple-600 mr-2">??</span>Breeding Information
-                        </h4>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                            {/* Breeding Method */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Breeding Method
-                                </label>
-                                <select
-                                    value={formData.breedingMethod || 'Unknown'}
-                                    onChange={(e) => setFormData({...formData, breedingMethod: e.target.value})}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                >
-                                    <option value="Natural">Natural</option>
-                                    <option value="AI">Artificial Insemination</option>
-                                    <option value="Assisted">Assisted</option>
-                                    <option value="Unknown">Unknown</option>
-                                </select>
-                            </div>
+                                    {/* Dam Selection */}
+                                    <div data-tutorial-target="sire-dam-section">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Dam (Mother) <span className="text-red-500">*</span>
+                                        </label>
+                                        <button
+                                            type="button"
+                                            onClick={() => setModalTarget('dam-litter')}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left transition focus:ring-2 focus:ring-primary focus:border-transparent"
+                                        >
+                                            {formData.damId_public ? (
+                                                <div>
+                                                    <div className="font-medium">
+                                                        {myAnimals.find(a => a.id_public === formData.damId_public)?.name || 'Unknown'}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500">
+                                                        {formData.damId_public}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="text-gray-400">Select Dam...</div>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
 
-                            {/* Breeding Condition */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Breeding Condition
-                                </label>
-                                <select
-                                    value={formData.breedingConditionAtTime || ''}
-                                    onChange={(e) => setFormData({...formData, breedingConditionAtTime: e.target.value})}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                >
-                                    <option value="">Select Condition...</option>
-                                    <option value="Good">Good</option>
-                                    <option value="Okay">Okay</option>
-                                    <option value="Poor">Poor</option>
-                                </select>
-                            </div>
+                                {/* Predicted COI Display */}
+                                {(formData.sireId_public && formData.damId_public) && (
+                                    <div className="mb-4 p-3 rounded-lg border bg-gray-50 flex items-center gap-2">
+                                        <span className="text-sm font-medium text-gray-700">Predicted COI for this pairing:</span>
+                                        {calculatingCOI ? (
+                                            <span className="text-sm text-gray-500 flex items-center gap-1">
+                                                <Loader2 className="w-4 h-4 animate-spin" /> Calculating...
+                                            </span>
+                                        ) : predictedCOI != null ? (
+                                            <span className="text-sm font-bold text-gray-800">
+                                                {predictedCOI.toFixed(2)}%
+                                            </span>
+                                        ) : (
+                                            <span className="text-sm text-gray-400 italic">�</span>
+                                        )}
+                                    </div>
+                                )}
 
-                            {/* Outcome Status */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Breeding Outcome
-                                </label>
-                                <select
-                                    value={formData.outcome || 'Unknown'}
-                                    onChange={(e) => setFormData({...formData, outcome: e.target.value})}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                >
-                                    <option value="Successful">Successful</option>
-                                    <option value="Unsuccessful">Unsuccessful</option>
-                                    <option value="Unknown">Unknown</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {/* Mating Date */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Mating Date
-                                </label>
-                                <DatePicker
-                                    value={formData.matingDate || ''}
-                                    onChange={(e) => setFormData({...formData, matingDate: e.target.value})}
-                                    className="px-3 py-2"
-                                />
-                            </div>
-
-                            {/* Birth Method */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Birth Method
-                                </label>
-                                <select
-                                    value={formData.birthMethod || ''}
-                                    onChange={(e) => setFormData({...formData, birthMethod: e.target.value})}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                >
-                                    <option value="">Select Method...</option>
-                                    <option value="Natural">Natural</option>
-                                    <option value="C-Section">C-Section</option>
-                                    <option value="Assisted">Assisted</option>
-                                    <option value="Induced">Induced</option>
-                                    <option value="Unknown">Unknown</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Birth Date & Offspring Counts */}
-                    <div className="mb-6 p-4 border border-green-200 rounded-lg bg-green-50">
-                        <h4 className="text-md font-semibold text-gray-700 mb-4 flex items-center">
-                            <span className="text-green-600 mr-2">??</span>Birth & Offspring Details
-                        </h4>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4" data-tutorial-target="litter-dates-counts">
-                            {/* Birth Date */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Birth Date (Optional)
-                                </label>
-                                <DatePicker
-                                    value={formData.birthDate}
-                                    onChange={(e) => setFormData({...formData, birthDate: e.target.value})}
-                                    maxDate={new Date()}
-                                    className="px-3 py-2"
-                                />
-                            </div>
-
-                            {/* Total Born */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Total Born
-                                </label>
-                                <input
-                                    type="number"
-                                    value={typeof formData.litterSizeBorn === 'number' ? formData.litterSizeBorn : (formData.litterSizeBorn || '')}
-                                    onChange={(e) => {
-                                        const value = e.target.value ? parseInt(e.target.value) : null;
-                                        setFormData({
-                                            ...formData, 
-                                            litterSizeBorn: value,
-                                            // Auto-calculate male + female if total is entered
-                                            ...(value && !formData.maleCount && !formData.femaleCount ? {
-                                                maleCount: Math.ceil(value / 2),
-                                                femaleCount: Math.floor(value / 2)
-                                            } : {})
-                                        });
-                                    }}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                    placeholder="0"
-                                    min="0"
-                                />
-                            </div>
-
-                            {/* Stillborn Count */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Stillborn
-                                </label>
-                                <input
-                                    type="number"
-                                    value={typeof formData.stillbornCount === 'number' ? formData.stillbornCount : (formData.stillbornCount || '')}
-                                    onChange={(e) => setFormData({...formData, stillbornCount: e.target.value ? parseInt(e.target.value) : null})}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                    placeholder="0"
-                                    min="0"
-                                />
-                            </div>
-
-                            {/* Total Weaned */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Total Weaned
-                                </label>
-                                <input
-                                    type="number"
-                                    value={typeof formData.litterSizeWeaned === 'number' ? formData.litterSizeWeaned : (formData.litterSizeWeaned || '')}
-                                    onChange={(e) => setFormData({...formData, litterSizeWeaned: e.target.value ? parseInt(e.target.value) : null})}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                    placeholder="0"
-                                    min="0"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {/* Male Count */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Number of Males (Optional)
-                                </label>
-                                <input
-                                    type="number"
-                                    value={typeof formData.maleCount === 'number' ? formData.maleCount : (formData.maleCount || '')}
-                                    onChange={(e) => setFormData({...formData, maleCount: e.target.value ? parseInt(e.target.value) : null})}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                    placeholder="e.g., 5"
-                                    min="0"
-                                />
-                            </div>
-
-                            {/* Female Count */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Number of Females (Optional)
-                                </label>
-                                <input
-                                    type="number"
-                                    value={typeof formData.femaleCount === 'number' ? formData.femaleCount : (formData.femaleCount || '')}
-                                    onChange={(e) => setFormData({...formData, femaleCount: e.target.value ? parseInt(e.target.value) : null})}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                    placeholder="e.g., 3"
-                                    min="0"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Count Validation */}
-                        {(formData.maleCount || formData.femaleCount) && formData.litterSizeBorn && (
-                            <div className="mt-3 p-2 rounded-md bg-blue-100 border border-blue-200">
-                                <p className="text-xs text-blue-800">
-                                    ?? <strong>Count Check:</strong> Male + Female ({(formData.maleCount || 0) + (formData.femaleCount || 0)}) vs Total Born ({formData.litterSizeBorn || 0})
-                                    {((formData.maleCount || 0) + (formData.femaleCount || 0)) !== (formData.litterSizeBorn || 0) && (
-                                        <span className="text-orange-600 font-semibold"> - Counts don't match!</span>
-                                    )}
-                                </p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Link Existing Offspring */}
-                    {formData.sireId_public && formData.damId_public && (
-                        <div className="mb-4 border-t pt-4" data-tutorial-target="litter-offspring-sections">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Link Existing Animals as Offspring
-                            </label>
-                            <div className="bg-gray-50 p-3 rounded-lg">
-                                <p className="text-xs text-gray-600 mb-3">
-                                    Select animals with matching parents to link them to this litter. {formData.birthDate ? 'Only animals with matching birth date are shown.' : 'Birth date will be filled automatically from selected animals.'}
-                                </p>
-                                <div className="space-y-2">
-                                    {myAnimals
-                                        .filter(animal => {
-                                            const matchesSire = animal.fatherId_public === formData.sireId_public || animal.sireId_public === formData.sireId_public;
-                                            const matchesDam = animal.motherId_public === formData.damId_public || animal.damId_public === formData.damId_public;
-                                            
-                                            // If litter has birthdate, only show animals with matching birthdate
-                                            if (formData.birthDate && animal.birthDate) {
-                                                const litterDate = formData.birthDate.split('T')[0];
-                                                const animalDate = animal.birthDate.split('T')[0];
-                                                return matchesSire && matchesDam && litterDate === animalDate;
-                                            }
-                                            
-                                            return matchesSire && matchesDam;
-                                        })
-                                        .map(animal => (
-                                            <label key={animal.id_public} className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={formData.linkedOffspringIds?.includes(animal.id_public)}
-                                                    onChange={(e) => {
-                                                        if (e.target.checked) {
-                                                            // Check if litter has a birthdate and animal has a different birthdate
-                                                            if (formData.birthDate && animal.birthDate) {
-                                                                const litterDate = formData.birthDate.split('T')[0];
-                                                                const animalDate = animal.birthDate.split('T')[0];
-                                                                
-                                                                if (litterDate !== animalDate) {
-                                                                    const confirmChange = window.confirm(
-                                                                        `This animal has a different birth date (${animalDate}) than the litter (${litterDate}).\n\n` +
-                                                                        `Click OK to update the litter birth date to match the animal's date, or Cancel to abort linking.`
-                                                                    );
-                                                                    
-                                                                    if (!confirmChange) {
-                                                                        // User cancelled, abort the link
-                                                                        return;
-                                                                    }
-                                                                    
-                                                                    // User accepted, update litter birthdate and link the animal
-                                                                    setFormData({
-                                                                        ...formData,
-                                                                        birthDate: animalDate,
-                                                                        linkedOffspringIds: [...(formData.linkedOffspringIds || []), animal.id_public]
-                                                                    });
-                                                                    return;
-                                                                }
-                                                            }
-                                                            
-                                                            // Normal linking flow
-                                                            const newLinked = [...(formData.linkedOffspringIds || []), animal.id_public];
-                                                            const newFormData = { ...formData, linkedOffspringIds: newLinked };
-                                                            
-                                                            // Auto-fill birthdate from offspring if litter has no birthdate
-                                                            if (!formData.birthDate && animal.birthDate) {
-                                                                newFormData.birthDate = animal.birthDate.split('T')[0];
-                                                            }
-                                                            
-                                                            setFormData(newFormData);
-                                                        } else {
-                                                            // Unlinking
-                                                            const newLinked = (formData.linkedOffspringIds || []).filter(id => id !== animal.id_public);
-                                                            setFormData({ ...formData, linkedOffspringIds: newLinked });
-                                                        }
-                                                    }}
-                                                    className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
-                                                />
-                                                <span className="text-sm text-gray-800">
-                                                    {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`} - {animal.id_public} ({animal.gender}{animal.birthDate ? `, ${new Date(animal.birthDate).toLocaleDateString()}` : ''})
-                                                </span>
+                                {/* Breeding Information */}
+                                <div className="mb-6 p-4 border border-purple-200 rounded-lg bg-purple-50">
+                                    <h4 className="text-md font-semibold text-gray-700 mb-4 flex items-center">
+                                        <span className="text-purple-600 mr-2">??</span>Breeding Information
+                                    </h4>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                        {/* Breeding Method */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Breeding Method
                                             </label>
-                                        ))
-                                    }
-                                    {myAnimals.filter(animal => {
-                                        const matchesSire = animal.fatherId_public === formData.sireId_public || animal.sireId_public === formData.sireId_public;
-                                        const matchesDam = animal.motherId_public === formData.damId_public || animal.damId_public === formData.damId_public;
-                                        
-                                        // If litter has birthdate, only show animals with matching birthdate
-                                        if (formData.birthDate && animal.birthDate) {
-                                            const litterDate = formData.birthDate.split('T')[0];
-                                            const animalDate = animal.birthDate.split('T')[0];
-                                            return matchesSire && matchesDam && litterDate === animalDate;
-                                        }
-                                        
-                                        return matchesSire && matchesDam;
-                                    }).length === 0 && (
-                                        <p className="text-xs text-gray-500 italic">No matching animals found</p>
-                                    )}
-                                    {formData.linkedOffspringIds?.length > 0 && (
-                                        <p className="text-xs text-green-600 font-semibold mt-2">
-                                            {formData.linkedOffspringIds.length} animal(s) selected
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                                            <select
+                                                value={formData.breedingMethod || 'Unknown'}
+                                                onChange={(e) => setFormData({...formData, breedingMethod: e.target.value})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                            >
+                                                <option value="Natural">Natural</option>
+                                                <option value="AI">Artificial Insemination</option>
+                                                <option value="Assisted">Assisted</option>
+                                                <option value="Unknown">Unknown</option>
+                                            </select>
+                                        </div>
 
-                    {/* Create New Offspring */}
-                    {formData.sireId_public && formData.damId_public && formData.birthDate && (
-                        <div className="mb-4 border-t pt-4" data-tutorial-target="litter-offspring-sections">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Create New Offspring Animals
-                            </label>
-                            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                                <p className="text-xs text-blue-800 mb-3">
-                                    <strong>Create placeholder animals:</strong> These will be created with names M1, M2... for males and F1, F2... for females. You can edit names and details after creation.
-                                </p>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">
-                                            Add # Males
-                                        </label>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            value={createOffspringCounts.males}
-                                            onChange={(e) => setCreateOffspringCounts({...createOffspringCounts, males: e.target.value})}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                            placeholder="0"
-                                        />
+                                        {/* Breeding Condition */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Breeding Condition
+                                            </label>
+                                            <select
+                                                value={formData.breedingConditionAtTime || ''}
+                                                onChange={(e) => setFormData({...formData, breedingConditionAtTime: e.target.value})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                            >
+                                                <option value="">Select Condition...</option>
+                                                <option value="Good">Good</option>
+                                                <option value="Okay">Okay</option>
+                                                <option value="Poor">Poor</option>
+                                            </select>
+                                        </div>
+
+                                        {/* Outcome Status */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Breeding Outcome
+                                            </label>
+                                            <select
+                                                value={formData.outcome || 'Unknown'}
+                                                onChange={(e) => setFormData({...formData, outcome: e.target.value})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                            >
+                                                <option value="Successful">Successful</option>
+                                                <option value="Unsuccessful">Unsuccessful</option>
+                                                <option value="Unknown">Unknown</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">
-                                            Add # Females
-                                        </label>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            value={createOffspringCounts.females}
-                                            onChange={(e) => setCreateOffspringCounts({...createOffspringCounts, females: e.target.value})}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                            placeholder="0"
-                                        />
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Mating Date */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Mating Date
+                                            </label>
+                                            <DatePicker
+                                                value={formData.matingDate || ''}
+                                                onChange={(e) => setFormData({...formData, matingDate: e.target.value})}
+                                                className="px-3 py-2"
+                                            />
+                                        </div>
+
+                                        {/* Birth Method */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Birth Method
+                                            </label>
+                                            <select
+                                                value={formData.birthMethod || ''}
+                                                onChange={(e) => setFormData({...formData, birthMethod: e.target.value})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                            >
+                                                <option value="">Select Method...</option>
+                                                <option value="Natural">Natural</option>
+                                                <option value="C-Section">C-Section</option>
+                                                <option value="Assisted">Assisted</option>
+                                                <option value="Induced">Induced</option>
+                                                <option value="Unknown">Unknown</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
-                                {(parseInt(createOffspringCounts.males) > 0 || parseInt(createOffspringCounts.females) > 0) && (
-                                    <p className="text-xs text-green-600 font-semibold mt-2">
-                                        Will create {parseInt(createOffspringCounts.males) + parseInt(createOffspringCounts.females)} new animal(s)
-                                    </p>
+
+                                {/* Birth Date & Offspring Counts */}
+                                <div className="mb-6 p-4 border border-green-200 rounded-lg bg-green-50">
+                                    <h4 className="text-md font-semibold text-gray-700 mb-4 flex items-center">
+                                        <span className="text-green-600 mr-2">??</span>Birth & Offspring Details
+                                    </h4>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4" data-tutorial-target="litter-dates-counts">
+                                        {/* Birth Date */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Birth Date (Optional)
+                                            </label>
+                                            <DatePicker
+                                                value={formData.birthDate}
+                                                onChange={(e) => setFormData({...formData, birthDate: e.target.value})}
+                                                maxDate={new Date()}
+                                                className="px-3 py-2"
+                                            />
+                                        </div>
+
+                                        {/* Total Born */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Total Born
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={typeof formData.litterSizeBorn === 'number' ? formData.litterSizeBorn : (formData.litterSizeBorn || '')}
+                                                onChange={(e) => {
+                                                    const value = e.target.value ? parseInt(e.target.value) : null;
+                                                    setFormData({
+                                                        ...formData, 
+                                                        litterSizeBorn: value,
+                                                        // Auto-calculate male + female if total is entered
+                                                        ...(value && !formData.maleCount && !formData.femaleCount ? {
+                                                            maleCount: Math.ceil(value / 2),
+                                                            femaleCount: Math.floor(value / 2)
+                                                        } : {})
+                                                    });
+                                                }}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                placeholder="0"
+                                                min="0"
+                                            />
+                                        </div>
+
+                                        {/* Stillborn Count */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Stillborn
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={typeof formData.stillbornCount === 'number' ? formData.stillbornCount : (formData.stillbornCount || '')}
+                                                onChange={(e) => setFormData({...formData, stillbornCount: e.target.value ? parseInt(e.target.value) : null})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                placeholder="0"
+                                                min="0"
+                                            />
+                                        </div>
+
+                                        {/* Total Weaned */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Total Weaned
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={typeof formData.litterSizeWeaned === 'number' ? formData.litterSizeWeaned : (formData.litterSizeWeaned || '')}
+                                                onChange={(e) => setFormData({...formData, litterSizeWeaned: e.target.value ? parseInt(e.target.value) : null})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                placeholder="0"
+                                                min="0"
+                                            />
+                                        </div>
+                                    </div>
+
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Male Count */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Number of Males (Optional)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={typeof formData.maleCount === 'number' ? formData.maleCount : (formData.maleCount || '')}
+                                                onChange={(e) => setFormData({...formData, maleCount: e.target.value ? parseInt(e.target.value) : null})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                placeholder="e.g., 5"
+                                                min="0"
+                                            />
+                                        </div>
+
+                                        {/* Female Count */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Number of Females (Optional)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={typeof formData.femaleCount === 'number' ? formData.femaleCount : (formData.femaleCount || '')}
+                                                onChange={(e) => setFormData({...formData, femaleCount: e.target.value ? parseInt(e.target.value) : null})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                placeholder="e.g., 3"
+                                                min="0"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Count Validation */}
+                                    {(formData.maleCount || formData.femaleCount) && formData.litterSizeBorn && (
+                                        <div className="mt-3 p-2 rounded-md bg-blue-100 border border-blue-200">
+                                            <p className="text-xs text-blue-800">
+                                                ?? <strong>Count Check:</strong> Male + Female ({(formData.maleCount || 0) + (formData.femaleCount || 0)}) vs Total Born ({formData.litterSizeBorn || 0})
+                                                {((formData.maleCount || 0) + (formData.femaleCount || 0)) !== (formData.litterSizeBorn || 0) && (
+                                                    <span className="text-orange-600 font-semibold"> - Counts don't match!</span>
+                                                )}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Link Existing Offspring */}
+                                {formData.sireId_public && formData.damId_public && (
+                                    <div className="mb-4 border-t pt-4" data-tutorial-target="litter-offspring-sections">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Link Existing Animals as Offspring
+                                        </label>
+                                        <div className="bg-gray-50 p-3 rounded-lg">
+                                            <p className="text-xs text-gray-600 mb-3">
+                                                Select animals with matching parents to link them to this litter. {formData.birthDate ? 'Only animals with matching birth date are shown.' : 'Birth date will be filled automatically from selected animals.'}
+                                            </p>
+                                            <div className="space-y-2">
+                                                {myAnimals
+                                                    .filter(animal => {
+                                                        const matchesSire = animal.fatherId_public === formData.sireId_public || animal.sireId_public === formData.sireId_public;
+                                                        const matchesDam = animal.motherId_public === formData.damId_public || animal.damId_public === formData.damId_public;
+                                                        
+                                                        // If litter has birthdate, only show animals with matching birthdate
+                                                        if (formData.birthDate && animal.birthDate) {
+                                                            const litterDate = formData.birthDate.split('T')[0];
+                                                            const animalDate = animal.birthDate.split('T')[0];
+                                                            return matchesSire && matchesDam && litterDate === animalDate;
+                                                        }
+                                                        
+                                                        return matchesSire && matchesDam;
+                                                    })
+                                                    .map(animal => (
+                                                        <label key={animal.id_public} className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded cursor-pointer">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={formData.linkedOffspringIds?.includes(animal.id_public)}
+                                                                onChange={(e) => {
+                                                                    if (e.target.checked) {
+                                                                        // Check if litter has a birthdate and animal has a different birthdate
+                                                                        if (formData.birthDate && animal.birthDate) {
+                                                                            const litterDate = formData.birthDate.split('T')[0];
+                                                                            const animalDate = animal.birthDate.split('T')[0];
+                                                                            
+                                                                            if (litterDate !== animalDate) {
+                                                                                const confirmChange = window.confirm(
+                                                                                    `This animal has a different birth date (${animalDate}) than the litter (${litterDate}).\n\n` +
+                                                                                    `Click OK to update the litter birth date to match the animal's date, or Cancel to abort linking.`
+                                                                                );
+                                                                                
+                                                                                if (!confirmChange) {
+                                                                                    // User cancelled, abort the link
+                                                                                    return;
+                                                                                }
+                                                                                
+                                                                                // User accepted, update litter birthdate and link the animal
+                                                                                setFormData({
+                                                                                    ...formData,
+                                                                                    birthDate: animalDate,
+                                                                                    linkedOffspringIds: [...(formData.linkedOffspringIds || []), animal.id_public]
+                                                                                });
+                                                                                return;
+                                                                            }
+                                                                        }
+                                                                        
+                                                                        // Normal linking flow
+                                                                        const newLinked = [...(formData.linkedOffspringIds || []), animal.id_public];
+                                                                        const newFormData = { ...formData, linkedOffspringIds: newLinked };
+                                                                        
+                                                                        // Auto-fill birthdate from offspring if litter has no birthdate
+                                                                        if (!formData.birthDate && animal.birthDate) {
+                                                                            newFormData.birthDate = animal.birthDate.split('T')[0];
+                                                                        }
+                                                                        
+                                                                        setFormData(newFormData);
+                                                                    } else {
+                                                                        // Unlinking
+                                                                        const newLinked = (formData.linkedOffspringIds || []).filter(id => id !== animal.id_public);
+                                                                        setFormData({ ...formData, linkedOffspringIds: newLinked });
+                                                                    }
+                                                                }}
+                                                                className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
+                                                            />
+                                                            <span className="text-sm text-gray-800">
+                                                                {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`} - {animal.id_public} ({animal.gender}{animal.birthDate ? `, ${new Date(animal.birthDate).toLocaleDateString()}` : ''})
+                                                            </span>
+                                                        </label>
+                                                    ))
+                                                }
+                                                {myAnimals.filter(animal => {
+                                                    const matchesSire = animal.fatherId_public === formData.sireId_public || animal.sireId_public === formData.sireId_public;
+                                                    const matchesDam = animal.motherId_public === formData.damId_public || animal.damId_public === formData.damId_public;
+                                                    
+                                                    // If litter has birthdate, only show animals with matching birthdate
+                                                    if (formData.birthDate && animal.birthDate) {
+                                                        const litterDate = formData.birthDate.split('T')[0];
+                                                        const animalDate = animal.birthDate.split('T')[0];
+                                                        return matchesSire && matchesDam && litterDate === animalDate;
+                                                    }
+                                                    
+                                                    return matchesSire && matchesDam;
+                                                }).length === 0 && (
+                                                    <p className="text-xs text-gray-500 italic">No matching animals found</p>
+                                                )}
+                                                {formData.linkedOffspringIds?.length > 0 && (
+                                                    <p className="text-xs text-green-600 font-semibold mt-2">
+                                                        {formData.linkedOffspringIds.length} animal(s) selected
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
                                 )}
-                            </div>
-                        </div>
-                    )}
 
-                    {/* Notes */}
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Notes
-                        </label>
-                        <textarea
-                            value={formData.notes}
-                            onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                            rows="3"
-                            placeholder="Additional notes about this litter..."
-                        />
+                                {/* Create New Offspring */}
+                                {formData.sireId_public && formData.damId_public && formData.birthDate && (
+                                    <div className="mb-4 border-t pt-4" data-tutorial-target="litter-offspring-sections">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Create New Offspring Animals
+                                        </label>
+                                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                            <p className="text-xs text-blue-800 mb-3">
+                                                <strong>Create placeholder animals:</strong> These will be created with names M1, M2... for males and F1, F2... for females. You can edit names and details after creation.
+                                            </p>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                                                        Add # Males
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        min="0"
+                                                        value={createOffspringCounts.males}
+                                                        onChange={(e) => setCreateOffspringCounts({...createOffspringCounts, males: e.target.value})}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                        placeholder="0"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                                                        Add # Females
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        min="0"
+                                                        value={createOffspringCounts.females}
+                                                        onChange={(e) => setCreateOffspringCounts({...createOffspringCounts, females: e.target.value})}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                        placeholder="0"
+                                                    />
+                                                </div>
+                                            </div>
+                                            {(parseInt(createOffspringCounts.males) > 0 || parseInt(createOffspringCounts.females) > 0) && (
+                                                <p className="text-xs text-green-600 font-semibold mt-2">
+                                                    Will create {parseInt(createOffspringCounts.males) + parseInt(createOffspringCounts.females)} new animal(s)
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Notes */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Notes
+                                    </label>
+                                    <textarea
+                                        value={formData.notes}
+                                        onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                        rows="3"
+                                        placeholder="Additional notes about this litter..."
+                                    />
+                                </div>
+                            </form>
                     </div>
 
-                    <button
-                        type="submit"
-                        data-tutorial-target="create-litter-btn"
-                        className="w-full bg-primary hover:bg-primary/90 text-black font-bold py-3 px-4 rounded-lg"
-                    >
-                        {editingLitter ? 'Update Litter' : 'Create Litter'}
-                    </button>
-                </form>
+                    <div className="border-t p-4 flex gap-3 justify-end">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setShowAddForm(false);
+                                setEditingLitter(null);
+                            }}
+                            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-semibold"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            form="litter-form"
+                            data-tutorial-target="create-litter-btn"
+                            className="bg-primary hover:bg-primary/90 text-black font-bold py-2 px-6 rounded-lg"
+                        >
+                            {editingLitter ? 'Update Litter' : 'Create Litter'}
+                        </button>
+                    </div>
+                </div>
+            </div>
             )}
 
             {/* Litter List */}
