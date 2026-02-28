@@ -67,12 +67,8 @@ const DatePicker = ({
         }
     }, [value]);
 
-    console.log('[DatePicker] Render:', { name, value, dateValue, locale: navigator.language, format: dateFormat });
-
     const handleChange = (date) => {
-        console.log('[DatePicker] handleChange called with:', date, 'name:', name);
         if (!date) {
-            console.log('[DatePicker] Empty date, clearing value');
             const event = { target: { value: '' } };
             if (name) event.target.name = name;
             onChange(event);
@@ -86,7 +82,6 @@ const DatePicker = ({
         const day = String(date.getDate()).padStart(2, '0');
         const isoDate = `${year}-${month}-${day}`;
         
-        console.log('[DatePicker] Calling onChange with:', isoDate);
         // Mimic input onChange event structure - include name if provided
         const event = { target: { value: isoDate } };
         if (name) event.target.name = name;
