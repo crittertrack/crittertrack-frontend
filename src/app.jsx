@@ -11877,6 +11877,20 @@ const AnimalForm = ({
         if (!newBreedingRecord.matingDate && (litter.matingDate || litter.pairingDate)) {
             updates.matingDate = litter.matingDate || litter.pairingDate;
         }
+        if (!newBreedingRecord.maleCount && litter.maleCount) {
+            updates.maleCount = litter.maleCount;
+        }
+        if (!newBreedingRecord.femaleCount && litter.femaleCount) {
+            updates.femaleCount = litter.femaleCount;
+        }
+        if (!newBreedingRecord.unknownCount && litter.unknownCount) {
+            updates.unknownCount = litter.unknownCount;
+        }
+        // Recalculate litterSizeBorn from gender counts if any were just set
+        const m = updates.maleCount ?? newBreedingRecord.maleCount ?? 0;
+        const f = updates.femaleCount ?? newBreedingRecord.femaleCount ?? 0;
+        const u = updates.unknownCount ?? newBreedingRecord.unknownCount ?? 0;
+        if ((m + f + u) > 0) updates.litterSizeBorn = m + f + u;
         
         setNewBreedingRecord(prev => ({ ...prev, ...updates }));
         setShowLinkLitterModal(false);
@@ -11916,6 +11930,20 @@ const AnimalForm = ({
         if (!newBreedingRecord.matingDate && (litter.matingDate || litter.pairingDate) && !updates.matingDate) {
             updates.matingDate = litter.matingDate || litter.pairingDate;
         }
+        if (!newBreedingRecord.maleCount && litter.maleCount && !updates.maleCount) {
+            updates.maleCount = litter.maleCount;
+        }
+        if (!newBreedingRecord.femaleCount && litter.femaleCount && !updates.femaleCount) {
+            updates.femaleCount = litter.femaleCount;
+        }
+        if (!newBreedingRecord.unknownCount && litter.unknownCount && !updates.unknownCount) {
+            updates.unknownCount = litter.unknownCount;
+        }
+        // Recalculate litterSizeBorn from gender counts if any were just set
+        const m = updates.maleCount ?? newBreedingRecord.maleCount ?? 0;
+        const f = updates.femaleCount ?? newBreedingRecord.femaleCount ?? 0;
+        const u = updates.unknownCount ?? newBreedingRecord.unknownCount ?? 0;
+        if ((m + f + u) > 0) updates.litterSizeBorn = m + f + u;
         
         setNewBreedingRecord(prev => ({ ...prev, ...updates }));
         setShowLinkLitterModal(false);
