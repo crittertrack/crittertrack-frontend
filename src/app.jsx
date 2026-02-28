@@ -3777,13 +3777,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                 </div>
                                                             )}
                                                             <div className="flex gap-2 pt-2">
-                                                                {!record.litterId ? (
+                                                                {!record.litterId && (
                                                                     <>
                                                                         <button onClick={() => { setBreedingRecordForLitter(record); setShowCreateLitterModal(true); }} className="flex-1 px-3 py-2 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 font-medium">Create Litter</button>
                                                                         <button onClick={() => { setBreedingRecordForLitter(record); setShowLinkLitterModal(true); }} className="flex-1 px-3 py-2 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 font-medium">Link Litter</button>
                                                                     </>
-                                                                ) : (
-                                                                    <button onClick={() => { showModalMessage('Litter Link', `This breeding record is linked to litter: ${record.litterId}`); }} className="flex-1 px-3 py-2 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 font-medium">View Linked Litter</button>
                                                                 )}
                                                             </div>
                                                         </div>
@@ -5204,13 +5202,11 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                             </div>
                                                             {record.notes && (<div className="bg-white p-3 rounded border border-purple-100"><div className="text-sm font-semibold text-gray-700 mb-2">Notes</div><div className="text-sm text-gray-700 italic">{record.notes}</div></div>)}
                                                             <div className="flex gap-2 pt-2">
-                                                                {!record.litterId ? (
+                                                                {!record.litterId && (
                                                                     <>
                                                                         <button onClick={() => { setBreedingRecordForLitter(record); setShowCreateLitterModal(true); }} className="flex-1 px-3 py-2 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 font-medium">Create Litter</button>
                                                                         <button onClick={() => { setBreedingRecordForLitter(record); setShowLinkLitterModal(true); }} className="flex-1 px-3 py-2 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 font-medium">Link Litter</button>
                                                                     </>
-                                                                ) : (
-                                                                    <button onClick={() => { showModalMessage('Litter Link', `This breeding record is linked to litter: ${record.litterId}`); }} className="flex-1 px-3 py-2 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 font-medium">View Linked Litter</button>
                                                                 )}
                                                             </div>
                                                         </div>
