@@ -8982,41 +8982,105 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </label>
                                         <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                                             <p className="text-xs text-blue-800 mb-3">
-                                                <strong>Create placeholder animals:</strong> These will be created with names M1, M2... for males and F1, F2... for females. You can edit names and details after creation.
+                                                <strong>Create placeholder animals:</strong> Created with names M1, M2… / F1, F2… You can edit names and details after saving.
                                             </p>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                                                        Add # Males
-                                                    </label>
-                                                    <input
-                                                        type="number"
-                                                        min="0"
-                                                        value={createOffspringCounts.males}
-                                                        onChange={(e) => setCreateOffspringCounts({...createOffspringCounts, males: e.target.value})}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                        placeholder="0"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                                                        Add # Females
-                                                    </label>
-                                                    <input
-                                                        type="number"
-                                                        min="0"
-                                                        value={createOffspringCounts.females}
-                                                        onChange={(e) => setCreateOffspringCounts({...createOffspringCounts, females: e.target.value})}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                        placeholder="0"
-                                                    />
-                                                </div>
-                                            </div>
-                                            {(parseInt(createOffspringCounts.males) > 0 || parseInt(createOffspringCounts.females) > 0) && (
-                                                <p className="text-xs text-green-600 font-semibold mt-2">
-                                                    Will create {parseInt(createOffspringCounts.males) + parseInt(createOffspringCounts.females)} new animal(s)
-                                                </p>
-                                            )}
+                                            {(() => {
+                                                const linkedMales = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length;
+                                                const linkedFemales = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Female').length;
+                                                const totalMales = formData.maleCount || 0;
+                                                const totalFemales = formData.femaleCount || 0;
+                                                const remainingMales = Math.max(0, totalMales - linkedMales);
+                                                const remainingFemales = Math.max(0, totalFemales - linkedFemales);
+                                                const hasCountInfo = totalMales > 0 || totalFemales > 0;
+                                                return (
+                                                    <>
+                                                        {hasCountInfo && (
+                                                            <div className="grid grid-cols-2 gap-3 mb-3">
+                                                                {totalMales > 0 && (
+                                                                    <div className="bg-white rounded-lg border border-blue-200 p-3">
+                                                                        <div className="flex items-center gap-1 mb-1">
+                                                                            <span className="text-blue-600 font-bold text-sm">♂ Males</span>
+                                                                        </div>
+                                                                        <div className="text-xs text-gray-600 space-y-0.5">
+                                                                            <div>Total set: <span className="font-semibold">{totalMales}</span></div>
+                                                                            <div>Already linked: <span className="font-semibold">{linkedMales}</span></div>
+                                                                            <div>Remaining: <span className={`font-bold ${remainingMales > 0 ? 'text-blue-600' : 'text-green-600'}`}>{remainingMales}</span></div>
+                                                                        </div>
+                                                                        {remainingMales > 0 && (
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => setCreateOffspringCounts(c => ({...c, males: remainingMales.toString()}))}
+                                                                                className="mt-2 w-full px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 text-xs font-semibold rounded transition"
+                                                                            >
+                                                                                + Add {remainingMales} remaining male{remainingMales > 1 ? 's' : ''}
+                                                                            </button>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                                {totalFemales > 0 && (
+                                                                    <div className="bg-white rounded-lg border border-pink-200 p-3">
+                                                                        <div className="flex items-center gap-1 mb-1">
+                                                                            <span className="text-pink-600 font-bold text-sm">♀ Females</span>
+                                                                        </div>
+                                                                        <div className="text-xs text-gray-600 space-y-0.5">
+                                                                            <div>Total set: <span className="font-semibold">{totalFemales}</span></div>
+                                                                            <div>Already linked: <span className="font-semibold">{linkedFemales}</span></div>
+                                                                            <div>Remaining: <span className={`font-bold ${remainingFemales > 0 ? 'text-pink-600' : 'text-green-600'}`}>{remainingFemales}</span></div>
+                                                                        </div>
+                                                                        {remainingFemales > 0 && (
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => setCreateOffspringCounts(c => ({...c, females: remainingFemales.toString()}))}
+                                                                                className="mt-2 w-full px-2 py-1 bg-pink-100 hover:bg-pink-200 text-pink-800 text-xs font-semibold rounded transition"
+                                                                            >
+                                                                                + Add {remainingFemales} remaining female{remainingFemales > 1 ? 's' : ''}
+                                                                            </button>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        {hasCountInfo && (remainingMales > 0 || remainingFemales > 0) && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setCreateOffspringCounts({ males: remainingMales.toString(), females: remainingFemales.toString() })}
+                                                                className="w-full mb-3 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-lg transition"
+                                                            >
+                                                                Fill all remaining ({remainingMales}M + {remainingFemales}F = {remainingMales + remainingFemales} animals)
+                                                            </button>
+                                                        )}
+                                                        <div className="grid grid-cols-2 gap-4">
+                                                            <div>
+                                                                <label className="block text-xs font-medium text-gray-700 mb-1">Add # Males</label>
+                                                                <input
+                                                                    type="number"
+                                                                    min="0"
+                                                                    value={createOffspringCounts.males}
+                                                                    onChange={(e) => setCreateOffspringCounts({...createOffspringCounts, males: e.target.value})}
+                                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                                    placeholder="0"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-xs font-medium text-gray-700 mb-1">Add # Females</label>
+                                                                <input
+                                                                    type="number"
+                                                                    min="0"
+                                                                    value={createOffspringCounts.females}
+                                                                    onChange={(e) => setCreateOffspringCounts({...createOffspringCounts, females: e.target.value})}
+                                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                                    placeholder="0"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        {(parseInt(createOffspringCounts.males) > 0 || parseInt(createOffspringCounts.females) > 0) && (
+                                                            <p className="text-xs text-green-600 font-semibold mt-2">
+                                                                Will create {(parseInt(createOffspringCounts.males) || 0) + (parseInt(createOffspringCounts.females) || 0)} new animal(s)
+                                                            </p>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
                                         </div>
                                     </div>
                                 )}
