@@ -3702,7 +3702,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                             <span className={`font-mono px-2 py-0.5 rounded text-xs font-semibold ${record.litterId ? 'bg-purple-300 text-purple-800' : 'bg-gray-200 text-gray-600'}`}>{record.litterId || 'No Litter'}</span>
                                                             <div className="text-sm text-gray-700 flex gap-3">
                                                                 <span>{formatDate(record.matingDate)}</span>
-                                                                <span className="text-gray-600">→</span>
+                                                                <span className="text-gray-400">&bull;</span>
                                                                 <span className="text-purple-700 font-medium">{countSummary}</span>
                                                             </div>
                                                         </div>
@@ -5154,7 +5154,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                             <span className={`font-mono px-2 py-0.5 rounded text-xs font-semibold ${record.litterId ? 'bg-purple-300 text-purple-800' : 'bg-gray-200 text-gray-600'}`}>{record.litterId || 'No Litter'}</span>
                                                             <div className="text-sm text-gray-700 flex gap-3">
                                                                 <span>{formatDate(record.matingDate)}</span>
-                                                                <span className="text-gray-600">→</span>
+                                                                <span className="text-gray-400">&bull;</span>
                                                                 <span className="text-purple-700 font-medium">{countSummary}</span>
                                                             </div>
                                                         </div>
@@ -6452,7 +6452,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                             <span className={`font-mono px-2 py-0.5 rounded text-xs font-semibold ${record.litterId ? 'bg-purple-300 text-purple-800' : 'bg-gray-200 text-gray-600'}`}>{record.litterId || 'No Litter'}</span>
                                                             <div className="text-sm text-gray-700 flex gap-3">
                                                                 <span>{formatDate(record.matingDate)}</span>
-                                                                <span className="text-gray-600">→</span>
+                                                                <span className="text-gray-400">&bull;</span>
                                                                 <span className="text-purple-700 font-medium">{countSummary}</span>
                                                             </div>
                                                         </div>
@@ -14448,7 +14448,7 @@ const AnimalForm = ({
                                                                         <span className="flex-shrink-0">
                                                                             {formatDate(linkedLitter?.birthDate || record.birthEventDate)}
                                                                         </span>
-                                                                        <span className="text-gray-400 flex-shrink-0">→</span>
+                                                                        <span className="text-gray-400 flex-shrink-0">&bull;</span>
                                                                     </>
                                                                 )}
                                                                 
@@ -14456,7 +14456,7 @@ const AnimalForm = ({
                                                                 {record.mate && (
                                                                     <>
                                                                         <span className="text-gray-600 flex-shrink-0">{record.mate}</span>
-                                                                        <span className="text-gray-400 flex-shrink-0">→</span>
+                                                                        <span className="text-gray-400 flex-shrink-0">&bull;</span>
                                                                     </>
                                                                 )}
                                                                 
@@ -26899,7 +26899,7 @@ const App = () => {
                                                                                 <span className={`font-mono px-2 py-0.5 rounded text-xs font-semibold ${record.litterId ? 'bg-purple-300 text-purple-800' : 'bg-gray-200 text-gray-600'}`}>{record.litterId || 'No Litter'}</span>
                                                                                 <div className="text-sm text-gray-700 flex gap-3">
                                                                                     <span>{formatDate(record.matingDate)}</span>
-                                                                                    <span className="text-gray-600">→</span>
+                                                                                    <span className="text-gray-400">&bull;</span>
                                                                                     <span className="text-purple-700 font-medium">{countSummary}</span>
                                                                                 </div>
                                                                             </div>
