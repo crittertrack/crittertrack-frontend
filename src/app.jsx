@@ -23497,70 +23497,60 @@ const App = () => {
     }, [currentView, authToken, API_BASE_URL]);
 
     // Fetch and cycle through available animals (for sale + for stud mixed)
+    // Only runs on desktop (≥1024px) since the showcase widget is hidden on mobile
     useEffect(() => {
+        const isDesktop = () => window.matchMedia('(min-width: 1024px)').matches;
+
         const fetchAvailableAnimals = async () => {
-            if (authToken) {
-                try {
-                    console.log('[Available Animals] Fetching mixed available/stud animals...');
-                    // Get all public animals
-                    const response = await axios.get(`${API_BASE_URL}/public/global/animals`);
-                    console.log('[Available Animals] API Response count:', response.data?.length);
-                    
-                    if (response.data && response.data.length > 0) {
-                        // Filter for animals that are EITHER for sale (isForSale=true) OR available for stud (availableForBreeding=true)
-                        const filtered = response.data.filter(animal => 
-                            animal.isForSale === true || animal.isForSale === 'true' || animal.availableForBreeding === true || animal.availableForBreeding === 'true'
-                        );
-                        console.log('[Available Animals] Filtered count:', filtered.length, 'animals (for sale + for stud)');
+            if (!authToken || !isDesktop()) return;
+            try {
+                const response = await axios.get(`${API_BASE_URL}/public/global/animals`);
+                if (response.data && response.data.length > 0) {
+                    const filtered = response.data.filter(animal =>
+                        animal.isForSale === true || animal.isForSale === 'true' ||
+                        animal.availableForBreeding === true || animal.availableForBreeding === 'true'
+                    );
 
-                        // Enrich animals with owner country
-                        const ownerIds = [...new Set(filtered.map(animal => animal.ownerId_public).filter(Boolean))];
-                        const ownerProfiles = await Promise.all(ownerIds.map(async (id_public) => {
-                            try {
-                                const profileResp = await axios.get(`${API_BASE_URL}/public/profile/${id_public}`);
-                                return { id_public, country: profileResp.data?.country || null };
-                            } catch (err) {
-                                console.warn('[Available Animals] Failed to fetch profile for', id_public, err?.message);
-                                return { id_public, country: null };
-                            }
-                        }));
-                        const ownerCountryMap = new Map(ownerProfiles.map(p => [p.id_public, p.country]));
-                        const enriched = filtered.map(animal => ({
-                            ...animal,
-                            ownerCountry: ownerCountryMap.get(animal.ownerId_public) || null,
-                        }));
+                    // Enrich with owner country — only fetch profiles not already cached
+                    const ownerIds = [...new Set(filtered.map(a => a.ownerId_public).filter(Boolean))];
+                    const ownerProfiles = await Promise.all(ownerIds.map(async (id_public) => {
+                        try {
+                            const profileResp = await axios.get(`${API_BASE_URL}/public/profile/${id_public}`);
+                            return { id_public, country: profileResp.data?.country || null };
+                        } catch {
+                            return { id_public, country: null };
+                        }
+                    }));
+                    const ownerCountryMap = new Map(ownerProfiles.map(p => [p.id_public, p.country]));
+                    const enriched = filtered.map(animal => ({
+                        ...animal,
+                        ownerCountry: ownerCountryMap.get(animal.ownerId_public) || null,
+                    }));
 
-                        // Shuffle to show random animals
-                        const shuffled = enriched.sort(() => Math.random() - 0.5);
-                        setAvailableAnimals(shuffled);
-                        setCurrentAvailableIndex(0);
-                    } else {
-                        console.log('[Available Animals] No animals found in response');
-                        setAvailableAnimals([]);
-                    }
-                } catch (error) {
-                    console.error('[Available Animals] Failed to fetch:', error);
+                    setAvailableAnimals(enriched.sort(() => Math.random() - 0.5));
+                    setCurrentAvailableIndex(0);
+                } else {
                     setAvailableAnimals([]);
                 }
-            } else {
-                console.log('[Available Animals] No authToken, skipping fetch');
+            } catch (error) {
+                console.error('[Available Animals] Failed to fetch:', error);
+                setAvailableAnimals([]);
             }
         };
-        
-        // Store the function for manual refresh
+
+        // Store for manual refresh (e.g. after a user lists an animal)
         window.refreshAvailableAnimals = fetchAvailableAnimals;
-        
-        // Initial fetch
-        fetchAvailableAnimals();
-        
-        // Continuous refresh every 2 minutes
-        const refreshInterval = setInterval(fetchAvailableAnimals, 120000);
-        
+
+        // Only run initial fetch on desktop
+        if (isDesktop()) fetchAvailableAnimals();
+
+        // Refresh every 30 minutes — data changes infrequently and widget is desktop-only
+        const refreshInterval = setInterval(fetchAvailableAnimals, 1800000);
+
         return () => {
             clearInterval(refreshInterval);
             delete window.refreshAvailableAnimals;
         };
-
     }, [authToken, API_BASE_URL]);
 
     // Auto-cycle through available animals every 30 seconds
@@ -24619,10 +24609,7 @@ const App = () => {
             </div>
             
             {/* Available Animal Showcase - Top Right */}
-            {currentView === 'list' && !inModeratorMode && (() => {
-                console.log('[Available Animals Showcase] availableAnimals.length:', availableAnimals.length, 'currentIndex:', currentAvailableIndex);
-                return availableAnimals.length > 0 && availableAnimals[currentAvailableIndex];
-            })() && (
+            {currentView === 'list' && !inModeratorMode && availableAnimals.length > 0 && availableAnimals[currentAvailableIndex] && (
                 <div className="hidden lg:block absolute top-20 right-4 z-[60] w-48">
                     <div 
                         key={currentAvailableIndex}
