@@ -3200,8 +3200,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                         <span className="text-gray-600">Currently Owned:</span>
                                         <strong>{animal.isOwned ? 'Yes' : 'No'}</strong>
                                     </div>
-                                    <div>
-                                        <span className="text-gray-600 block mb-1">Breeder:</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-gray-600">Breeder:</span>
                                         <strong>{breederInfo ? `${breederInfo.breederName || breederInfo.personalName || 'Unknown'}` : (animal.manualBreederName || animal.breederId_public || '')}</strong>
                                     </div>
                                 </div>
@@ -3212,15 +3212,15 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 <h3 className="text-lg font-semibold text-gray-700">🏠 Keeper</h3>
                                 <div className="text-sm space-y-2">
                                     {(animal.keeperName || animal.isOwned) && (
-                                    <div>
+                                    <div className="flex items-center gap-2">
                                         <span className="text-gray-600">Keeper Name:</span>
-                                        <strong className="block mt-1">{animal.keeperName || (animal.isOwned ? 'Me' : '')}</strong>
+                                        <strong>{animal.keeperName || (animal.isOwned ? 'Me' : '')}</strong>
                                     </div>
                                     )}
                                     {animal.coOwnership && (
-                                        <div>
+                                        <div className="flex items-center gap-2">
                                             <span className="text-gray-600">Co-Ownership:</span>
-                                            <strong className="block mt-1 whitespace-pre-wrap">{animal.coOwnership}</strong>
+                                            <strong>{animal.coOwnership}</strong>
                                         </div>
                                     )}
                                 </div>
@@ -4844,8 +4844,8 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                         <span className="text-gray-600">Currently Owned:</span>
                                         <strong>{animal.isOwned ? 'Yes' : 'No'}</strong>
                                     </div>
-                                    <div>
-                                        <span className="text-gray-600 block mb-1">Breeder:</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-gray-600">Breeder:</span>
                                         <strong>{breederInfo ? `${breederInfo.breederName || breederInfo.personalName || 'Unknown'}` : (animal.manualBreederName || animal.breederId_public || '')}</strong>
                                     </div>
                                 </div>
@@ -4856,15 +4856,15 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 <h3 className="text-lg font-semibold text-gray-700">🏠 Keeper</h3>
                                 <div className="text-sm space-y-2">
                                     {(animal.keeperName || animal.isOwned) && (
-                                    <div>
+                                    <div className="flex items-center gap-2">
                                         <span className="text-gray-600">Keeper Name:</span>
-                                        <strong className="block mt-1">{animal.keeperName || (animal.isOwned ? 'Me' : '')}</strong>
+                                        <strong>{animal.keeperName || (animal.isOwned ? 'Me' : '')}</strong>
                                     </div>
                                     )}
                                     {animal.coOwnership && (
-                                        <div>
+                                        <div className="flex items-center gap-2">
                                             <span className="text-gray-600">Co-Ownership:</span>
-                                            <strong className="block mt-1 whitespace-pre-wrap">{animal.coOwnership}</strong>
+                                            <strong>{animal.coOwnership}</strong>
                                         </div>
                                     )}
                                 </div>
