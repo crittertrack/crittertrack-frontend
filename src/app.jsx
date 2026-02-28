@@ -9233,23 +9233,22 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             </button>
                                         </div>
 
-                                        {(litter.matingDate || litter.pairingDate) && (
-                                            <p className="text-sm text-gray-600 mb-3">
-                                                <strong>Mating Date:</strong> {formatDate(litter.matingDate || litter.pairingDate)}
-                                            </p>
-                                        )}
-
-                                        {(litter.maleCount || litter.femaleCount) && (
-                                            <p className="text-sm text-gray-600 mb-3">
-                                                {litter.maleCount && <><strong>Males:</strong> {litter.maleCount}<br /></>}
-                                                {litter.femaleCount && <><strong>Females:</strong> {litter.femaleCount}</>}
-                                            </p>
+                                        {/* Litter Info Grid */}
+                                        {((litter.matingDate || litter.pairingDate) || litter.breedingMethod || litter.breedingCondition || litter.breedingConditionAtTime || litter.outcome || litter.maleCount != null || litter.femaleCount != null) && (
+                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-4">
+                                                {(litter.matingDate || litter.pairingDate) && (<div><div className="text-gray-500 text-xs">Mating Date</div><div className="font-semibold text-gray-800">{formatDate(litter.matingDate || litter.pairingDate)}</div></div>)}
+                                                {litter.breedingMethod && (<div><div className="text-gray-500 text-xs">Breeding Method</div><div className="font-semibold text-gray-800">{litter.breedingMethod}</div></div>)}
+                                                {(litter.breedingCondition || litter.breedingConditionAtTime) && (<div><div className="text-gray-500 text-xs">Breeding Condition</div><div className="font-semibold text-gray-800">{litter.breedingCondition || litter.breedingConditionAtTime}</div></div>)}
+                                                {litter.outcome && (<div><div className="text-gray-500 text-xs">Outcome</div><div className={`font-semibold ${litter.outcome === 'Successful' ? 'text-green-600' : litter.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-800'}`}>{litter.outcome}</div></div>)}
+                                                {litter.maleCount != null && (<div><div className="text-gray-500 text-xs">Males</div><div className="font-semibold text-blue-600">{litter.maleCount}</div></div>)}
+                                                {litter.femaleCount != null && (<div><div className="text-gray-500 text-xs">Females</div><div className="font-semibold text-pink-600">{litter.femaleCount}</div></div>)}
+                                            </div>
                                         )}
 
                                         {litter.notes && (
                                             <div className="bg-white rounded-lg p-3 mb-4 border border-gray-200">
-                                                <p className="text-sm font-semibold text-gray-700 mb-1">Notes:</p>
-                                                <p className="text-sm text-gray-600">{litter.notes}</p>
+                                                <p className="text-sm font-semibold text-gray-700 mb-1">Notes</p>
+                                                <p className="text-sm text-gray-600 italic">{litter.notes}</p>
                                             </div>
                                         )}
 
