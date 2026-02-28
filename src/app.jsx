@@ -18732,6 +18732,18 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         return () => window.removeEventListener('animals-changed', handleAnimalsChanged);
     }, [fetchAnimals, fetchAllSpecies, fetchAllAnimals]);
 
+    // Patch a single updated animal in-place without reloading the full list
+    useEffect(() => {
+        const handleAnimalUpdated = (e) => {
+            const updated = e.detail;
+            if (!updated?.id_public) return;
+            setAnimals(prev => prev.map(a => a.id_public === updated.id_public ? { ...a, ...updated } : a));
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === updated.id_public ? { ...a, ...updated } : a));
+        };
+        window.addEventListener('animal-updated', handleAnimalUpdated);
+        return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
+    }, []);
+
     useEffect(() => { fetchAllAnimals(); }, [fetchAllAnimals]);
 
     // Fetch the current user's activity log (lazy ? only when log screen opens)
@@ -24285,9 +24297,8 @@ const App = () => {
                     });
                     const updated = refreshedAnimal.data;
                     setAnimalToView(updated);
-                    // Patch the animal in the list without a full refetch
-                    setAnimals(prev => prev.map(a => a.id_public === updated.id_public ? { ...a, ...updated } : a));
-                    setAllAnimalsRaw(prev => prev.map(a => a.id_public === updated.id_public ? { ...a, ...updated } : a));
+                    // Notify list components to patch this single animal in-place
+                    try { window.dispatchEvent(new CustomEvent('animal-updated', { detail: updated })); } catch (e) { /* ignore */ }
                 } catch (refreshError) {
                     console.error('Failed to refresh animal data after save:', refreshError);
                     setAnimalToView(animalToEdit);
