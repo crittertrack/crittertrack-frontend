@@ -10833,14 +10833,23 @@ const AnimalForm = ({
             litterId: newBreedingRecord.litterId || null,
             notes: newBreedingRecord.notes || ''
         };
+        
+        console.log('[DEBUG] Adding new breeding record with mate data:', {
+            mate: record.mate,
+            mateAnimalId: record.mateAnimalId,
+            mateInfo: mateInfo,
+            newBreedingRecord_mate: newBreedingRecord.mate,
+            newBreedingRecord_mateAnimalId: newBreedingRecord.mateAnimalId
+        });
+        
         setBreedingRecords([...breedingRecords, record]);
         setNewBreedingRecord({
-            breedingMethod: '',
+            breedingMethod: 'Unknown',
             breedingConditionAtTime: null,
             matingDates: '',
             mate: '',
             mateAnimalId: null,
-            outcome: null,
+            outcome: 'Unknown',
             birthEventDate: '',
             birthMethod: null,
             litterSizeBorn: null,
@@ -10848,6 +10857,7 @@ const AnimalForm = ({
             stillbornCount: null,
             litterId: null,
             notes: ''
+        });
         });
         setMateInfo(null);
     };
