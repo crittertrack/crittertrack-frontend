@@ -24296,24 +24296,16 @@ const App = () => {
 
     const handleDeleteAnimal = async (id_public, animalData = null) => {
         try {
-            // Check if this is a RETURN (transferred animal being returned to breeder)
-            // vs a DELETE (original owner deleting their own animal)
-            const isReturn = animalData && 
-                            animalData.breederId_public && 
-                            animalData.breederId_public !== userProfile?.id_public && 
-                            animalData.ownerId_public === userProfile?.id_public;
             
-            if (isReturn) {
-                // Return the animal: change ownership back to breeder, remove from current owner
-                await axios.post(`${API_BASE_URL}/animals/${id_public}/return`, {}, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
-                navigate('/');
-                showModalMessage('Success', `Animal has been returned to ${animalData.breederName || 'the breeder'}.`);
+            // Always use DELETE — the backend handles both permanent deletion and
+            // ownership revert (for formally-transferred animals with originalOwnerId)
+            const deleteResp = await axios.delete(`${API_BASE_URL}/animals/${id_public}`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            navigate('/');
+            if (deleteResp.data?.reverted) {
+                showModalMessage('Success', `Animal has been returned to ${animalData?.breederName || 'the original owner'}.`);
             } else {
-                // Delete the animal permanently
-                await axios.delete(`${API_BASE_URL}/animals/${id_public}`);
-                navigate('/');
                 showModalMessage('Success', `Animal with ID ${id_public} has been successfully deleted.`);
             }
         } catch (error) {
