@@ -9376,7 +9376,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 {litter.outcome && (<div><div className="text-gray-500 text-xs">Outcome</div><div className={`font-semibold ${litter.outcome === 'Successful' ? 'text-green-600' : litter.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-800'}`}>{litter.outcome}</div></div>)}
                                                 {litter.birthMethod && (<div><div className="text-gray-500 text-xs">Birth Method</div><div className="font-semibold text-gray-800">{litter.birthMethod}</div></div>)}
                                             </div>
-                                        ))
+                                        )}
 
                                         {litter.notes && (
                                             <div className="bg-white rounded-lg p-3 mb-4 border border-gray-200">
