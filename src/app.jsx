@@ -12762,7 +12762,7 @@ const AnimalForm = ({
                                             {litter.sireId_public && <div>Sire: {litter.sireId_public}</div>}
                                             {litter.damId_public && <div>Dam: {litter.damId_public}</div>}
                                             {litter.birthDate && <div>Born: {formatDate(litter.birthDate)}</div>}
-                                            {litter.numberBorn && <div>{litter.numberBorn} born ? {litter.stillborn || 0} stillborn ? {litter.numberWeaned || 0} weaned</div>}
+                                            {litter.numberBorn && <div>{litter.numberBorn} born &bull; {litter.stillborn || 0} stillborn &bull; {litter.numberWeaned || 0} weaned</div>}
                                         </div>
                                     </button>
                                 ))}
