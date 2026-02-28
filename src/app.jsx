@@ -2726,6 +2726,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
     const { fieldTemplate, getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
 
     // Fetch offspring for breeding records with linked litters (on expand)
+    // Uses targeted GET /litters/:id_public instead of fetching all litters.
+    // Animals are only fetched when the litter has offspring IDs, keeping the first paint fast.
     React.useEffect(() => {
         if (!animal?.breedingRecords?.length || !authToken) return;
         const expanded = Object.entries(expandedBreedingRecords);
@@ -2734,25 +2736,25 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
             const idx = parseInt(idxStr);
             const record = animal.breedingRecords[idx];
             if (!record?.litterId || breedingRecordOffspring[record.litterId] !== undefined) return;
-            const fetch = async () => {
+            const fetchLitterAndOffspring = async () => {
                 try {
-                    const [littersRes, animalsRes] = await Promise.all([
-                        axios.get(`${API_BASE_URL}/litters`, { headers: { Authorization: `Bearer ${authToken}` } }),
-                        axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` } })
-                    ]);
-                    const litter = littersRes.data.find(l => l.litter_id_public === record.litterId);
-                    if (litter) setBreedingRecordLitters(prev => ({ ...prev, [record.litterId]: litter }));
+                    // Targeted single-litter fetch — fast
+                    const litterRes = await axios.get(`${API_BASE_URL}/litters/${record.litterId}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                    const litter = litterRes.data;
+                    setBreedingRecordLitters(prev => ({ ...prev, [record.litterId]: litter }));
                     if (!litter?.offspringIds_public?.length) {
                         setBreedingRecordOffspring(prev => ({ ...prev, [record.litterId]: [] }));
                         return;
                     }
+                    // Only fetch animals when there are offspring to show
+                    const animalsRes = await axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` } });
                     const offspring = animalsRes.data.filter(a => litter.offspringIds_public.includes(a.id_public));
                     setBreedingRecordOffspring(prev => ({ ...prev, [record.litterId]: offspring }));
                 } catch (e) {
                     setBreedingRecordOffspring(prev => ({ ...prev, [record.litterId]: [] }));
                 }
             };
-            fetch();
+            fetchLitterAndOffspring();
         });
     }, [expandedBreedingRecords, animal?.breedingRecords, authToken, API_BASE_URL]);
 
@@ -3861,13 +3863,33 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                     <div><div className="text-gray-600 text-xs">Total Born</div><div className="text-2xl font-bold text-purple-600">{record.litterSizeBorn !== null ? record.litterSizeBorn : '—'}</div></div>
                                                                     <div><div className="text-gray-600 text-xs">Stillborn</div><div className="text-2xl font-bold text-gray-600">{record.stillbornCount || '0'}</div></div>
                                                                     <div><div className="text-gray-600 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '—'}</div></div>
-                                                                    {breedingRecordLitters?.[record.litterId]?.maleCount != null && <div><div className="text-gray-600 text-xs">Males</div><div className="text-2xl font-bold text-blue-500">{breedingRecordLitters[record.litterId].maleCount}</div></div>}
-                                                                    {breedingRecordLitters?.[record.litterId]?.femaleCount != null && <div><div className="text-gray-600 text-xs">Females</div><div className="text-2xl font-bold text-pink-500">{breedingRecordLitters[record.litterId].femaleCount}</div></div>}
-                                                                    {breedingRecordLitters?.[record.litterId]?.unknownCount != null && breedingRecordLitters[record.litterId].unknownCount > 0 && <div><div className="text-gray-600 text-xs">Unknown / Intersex</div><div className="text-2xl font-bold text-gray-600">{breedingRecordLitters[record.litterId].unknownCount}</div></div>}
-                                                                    {breedingRecordLitters?.[record.litterId]?.inbreedingCoefficient != null && <div><div className="text-gray-600 text-xs">COI</div><div className="text-xl font-bold text-orange-600">{breedingRecordLitters[record.litterId].inbreedingCoefficient.toFixed(2)}%</div></div>}
+                                                                    {/* M/F/U read from record.* directly (synced) — instant, no fetch needed */}
+                                                                    {(record.maleCount ?? breedingRecordLitters?.[record.litterId]?.maleCount) != null && <div><div className="text-gray-600 text-xs">Males</div><div className="text-2xl font-bold text-blue-500">{record.maleCount ?? breedingRecordLitters[record.litterId].maleCount}</div></div>}
+                                                                    {(record.femaleCount ?? breedingRecordLitters?.[record.litterId]?.femaleCount) != null && <div><div className="text-gray-600 text-xs">Females</div><div className="text-2xl font-bold text-pink-500">{record.femaleCount ?? breedingRecordLitters[record.litterId].femaleCount}</div></div>}
+                                                                    {((record.unknownCount ?? breedingRecordLitters?.[record.litterId]?.unknownCount) ?? 0) > 0 && <div><div className="text-gray-600 text-xs">Unknown / Intersex</div><div className="text-2xl font-bold text-gray-600">{record.unknownCount ?? breedingRecordLitters[record.litterId].unknownCount}</div></div>}
+                                                                    {/* COI: from record if synced, otherwise from targeted litter fetch */}
+                                                                    {(record.inbreedingCoefficient ?? breedingRecordLitters?.[record.litterId]?.inbreedingCoefficient) != null && <div><div className="text-gray-600 text-xs">COI</div><div className="text-xl font-bold text-orange-600">{(record.inbreedingCoefficient ?? breedingRecordLitters[record.litterId].inbreedingCoefficient).toFixed(2)}%</div></div>}
                                                                 </div>
                                                             </div>
                                                             {/* Linked Offspring */}
+                                                            {record.litterId && breedingRecordOffspring[record.litterId] === undefined && (
+                                                                <div className="bg-white p-3 rounded border border-purple-100">
+                                                                    <div className="text-sm font-semibold text-gray-700 mb-3">Offspring</div>
+                                                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                                        {[...Array(2)].map((_, i) => (
+                                                                            <div key={i} className="border border-gray-200 rounded-lg p-2 animate-pulse">
+                                                                                <div className="flex items-center space-x-2">
+                                                                                    <div className="w-10 h-10 bg-gray-200 rounded flex-shrink-0" />
+                                                                                    <div className="flex-1 space-y-1">
+                                                                                        <div className="h-2.5 bg-gray-200 rounded w-3/4" />
+                                                                                        <div className="h-2 bg-gray-200 rounded w-1/2" />
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                             {record.litterId && breedingRecordOffspring[record.litterId] && breedingRecordOffspring[record.litterId].length > 0 && (
                                                                 <div className="bg-white p-3 rounded border border-purple-100">
                                                                     <div className="text-sm font-semibold text-gray-700 mb-3">Offspring ({breedingRecordOffspring[record.litterId].length})</div>
