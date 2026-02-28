@@ -14289,37 +14289,7 @@ const AnimalForm = ({
                                 <h4 className="text-sm font-semibold text-gray-700">Add Breeding Record</h4>
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {/* Common fields - all genders */}
-                                    <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Breeding Method</label>
-                                        <select value={newBreedingRecord.breedingMethod} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, breedingMethod: e.target.value})}
-                                            className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                            <option value="">Select method</option>
-                                            <option value="Natural">Natural</option>
-                                            <option value="AI">AI (Artificial Insemination)</option>
-                                            <option value="Assisted">Assisted</option>
-                                            <option value="Unknown">Unknown</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Breeding Condition</label>
-                                        <select value={newBreedingRecord.breedingConditionAtTime || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, breedingConditionAtTime: e.target.value || null})}
-                                            className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                            <option value="">Select condition</option>
-                                            <option value="Good">Good</option>
-                                            <option value="Okay">Okay</option>
-                                            <option value="Poor">Poor</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Mating Date</label>
-                                        <DatePicker value={newBreedingRecord.matingDate || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, matingDate: e.target.value})}
-                                            maxDate={new Date()}
-                                            className="p-2 text-sm" />
-                                    </div>
-                                    
+                                    {/* Row 1: Mate (left) + CTL Link (right) */}
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-1">Mate / Other Parent</label>
                                         <div className="space-y-2">
@@ -14363,6 +14333,68 @@ const AnimalForm = ({
                                                 />
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Link to CTL</label>
+                                        <div 
+                                            onClick={() => !loading && setShowLinkLitterModal(true)}
+                                            className="flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition"
+                                        >
+                                            <div className="flex items-center space-x-2 flex-1">
+                                                {newBreedingRecord.litterId ? (
+                                                    <span className="text-gray-800 text-sm font-mono bg-purple-100 px-2 py-1 rounded">
+                                                        {newBreedingRecord.litterId}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-gray-400 text-sm">Click to select existing litter</span>
+                                                )}
+                                            </div>
+                                            {newBreedingRecord.litterId && (
+                                                <button 
+                                                    onClick={(e) => { 
+                                                        e.stopPropagation(); 
+                                                        setNewBreedingRecord({...newBreedingRecord, litterId: null}); 
+                                                    }}
+                                                    className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
+                                                    type="button"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            )}
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-1">Auto-fills blank fields when selected</p>
+                                    </div>
+
+                                    {/* Remaining fields */}
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Breeding Method</label>
+                                        <select value={newBreedingRecord.breedingMethod} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, breedingMethod: e.target.value})}
+                                            className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                            <option value="">Select method</option>
+                                            <option value="Natural">Natural</option>
+                                            <option value="AI">AI (Artificial Insemination)</option>
+                                            <option value="Assisted">Assisted</option>
+                                            <option value="Unknown">Unknown</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Breeding Condition</label>
+                                        <select value={newBreedingRecord.breedingConditionAtTime || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, breedingConditionAtTime: e.target.value || null})}
+                                            className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                            <option value="">Select condition</option>
+                                            <option value="Good">Good</option>
+                                            <option value="Okay">Okay</option>
+                                            <option value="Poor">Poor</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Mating Date</label>
+                                        <DatePicker value={newBreedingRecord.matingDate || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, matingDate: e.target.value})}
+                                            maxDate={new Date()}
+                                            className="p-2 text-sm" />
                                     </div>
                                     
                                     {/* Outcome field - shown for all genders */}
@@ -14462,38 +14494,6 @@ const AnimalForm = ({
                                     <textarea value={newBreedingRecord.notes || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, notes: e.target.value})}
                                         placeholder="Additional breeding record details..."
                                         rows="2" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                </div>
-                                
-                                {/* Litter Link */}
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">Link to Litter</label>
-                                    <div 
-                                        onClick={() => !loading && setShowLinkLitterModal(true)}
-                                        className="flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition"
-                                    >
-                                        <div className="flex items-center space-x-2 flex-1">
-                                            {newBreedingRecord.litterId ? (
-                                                <span className="text-gray-800 text-sm font-mono bg-purple-100 px-2 py-1 rounded">
-                                                    {newBreedingRecord.litterId}
-                                                </span>
-                                            ) : (
-                                                <span className="text-gray-400 text-sm">Click to select existing litter</span>
-                                            )}
-                                        </div>
-                                        {newBreedingRecord.litterId && (
-                                            <button 
-                                                onClick={(e) => { 
-                                                    e.stopPropagation(); 
-                                                    setNewBreedingRecord({...newBreedingRecord, litterId: null}); 
-                                                }}
-                                                className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
-                                                type="button"
-                                            >
-                                                <X size={14} />
-                                            </button>
-                                        )}
-                                    </div>
-                                    <p className="text-xs text-gray-500 mt-1">Auto-fills blank fields when selected</p>
                                 </div>
                                 
                                 <button type="button" onClick={addBreedingRecord} className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">
