@@ -3942,16 +3942,57 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                     <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? '▶' : '▼'}</span>
                                 </button>
                                 {!collapsedHealthSections.activeMedical && (<div className="space-y-3 mt-4">
-                                    {animal.medicalConditions && (
-                                        <div>
-                                            <span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span>
-                                            <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{animal.medicalConditions}</p>
-                                        </div>
-                                    )}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                        {animal.allergies && <div><span className="text-gray-600">Allergies:</span> <strong>{animal.allergies}</strong></div>}
-                                        {animal.medications && <div><span className="text-gray-600">Current Medications:</span> <strong>{animal.medications}</strong></div>}
-                                    </div>
+                                    {animal.medicalConditions && (() => {
+                                        const d = animal.medicalConditions;
+                                        const parsed = typeof d === 'string' ? (() => { try { return JSON.parse(d); } catch { return null; } })() : Array.isArray(d) ? d : null;
+                                        return parsed && parsed.length > 0 ? (
+                                            <div>
+                                                <span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parsed.map((item, i) => (
+                                                        <li key={i} className="text-gray-700">
+                                                            {item.condition || item.name}
+                                                            {item.notes && <span className="text-gray-500"> — {item.notes}</span>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        ) : <div><span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span><p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{d}</p></div>;
+                                    })()}
+                                    {animal.allergies && (() => {
+                                        const d = animal.allergies;
+                                        const parsed = typeof d === 'string' ? (() => { try { return JSON.parse(d); } catch { return null; } })() : Array.isArray(d) ? d : null;
+                                        return parsed && parsed.length > 0 ? (
+                                            <div>
+                                                <span className="text-gray-600 text-sm font-semibold">Allergies:</span>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parsed.map((item, i) => (
+                                                        <li key={i} className="text-gray-700">
+                                                            {item.allergen || item.name}
+                                                            {item.notes && <span className="text-gray-500"> — {item.notes}</span>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        ) : <div><span className="text-gray-600 text-sm font-semibold">Allergies:</span><p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{d}</p></div>;
+                                    })()}
+                                    {animal.medications && (() => {
+                                        const d = animal.medications;
+                                        const parsed = typeof d === 'string' ? (() => { try { return JSON.parse(d); } catch { return null; } })() : Array.isArray(d) ? d : null;
+                                        return parsed && parsed.length > 0 ? (
+                                            <div>
+                                                <span className="text-gray-600 text-sm font-semibold">Current Medications:</span>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parsed.map((item, i) => (
+                                                        <li key={i} className="text-gray-700">
+                                                            {item.medication || item.name}
+                                                            {item.notes && <span className="text-gray-500"> — {item.notes}</span>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        ) : <div><span className="text-gray-600 text-sm font-semibold">Current Medications:</span><p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{d}</p></div>;
+                                    })()}
                                 </div>)}
                             </div>
                             )}
@@ -5302,16 +5343,57 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                     <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? '▶' : '▼'}</span>
                                 </button>
                                 {!collapsedHealthSections.activeMedical && (<div className="space-y-3 mt-4">
-                                    {animal.medicalConditions && (
-                                        <div>
-                                            <span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span>
-                                            <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{animal.medicalConditions}</p>
-                                        </div>
-                                    )}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                        {animal.allergies && <div><span className="text-gray-600">Allergies:</span> <strong>{animal.allergies}</strong></div>}
-                                        {animal.medications && <div><span className="text-gray-600">Current Medications:</span> <strong>{animal.medications}</strong></div>}
-                                    </div>
+                                    {animal.medicalConditions && (() => {
+                                        const d = animal.medicalConditions;
+                                        const parsed = typeof d === 'string' ? (() => { try { return JSON.parse(d); } catch { return null; } })() : Array.isArray(d) ? d : null;
+                                        return parsed && parsed.length > 0 ? (
+                                            <div>
+                                                <span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parsed.map((item, i) => (
+                                                        <li key={i} className="text-gray-700">
+                                                            {item.condition || item.name}
+                                                            {item.notes && <span className="text-gray-500"> — {item.notes}</span>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        ) : <div><span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span><p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{d}</p></div>;
+                                    })()}
+                                    {animal.allergies && (() => {
+                                        const d = animal.allergies;
+                                        const parsed = typeof d === 'string' ? (() => { try { return JSON.parse(d); } catch { return null; } })() : Array.isArray(d) ? d : null;
+                                        return parsed && parsed.length > 0 ? (
+                                            <div>
+                                                <span className="text-gray-600 text-sm font-semibold">Allergies:</span>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parsed.map((item, i) => (
+                                                        <li key={i} className="text-gray-700">
+                                                            {item.allergen || item.name}
+                                                            {item.notes && <span className="text-gray-500"> — {item.notes}</span>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        ) : <div><span className="text-gray-600 text-sm font-semibold">Allergies:</span><p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{d}</p></div>;
+                                    })()}
+                                    {animal.medications && (() => {
+                                        const d = animal.medications;
+                                        const parsed = typeof d === 'string' ? (() => { try { return JSON.parse(d); } catch { return null; } })() : Array.isArray(d) ? d : null;
+                                        return parsed && parsed.length > 0 ? (
+                                            <div>
+                                                <span className="text-gray-600 text-sm font-semibold">Current Medications:</span>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parsed.map((item, i) => (
+                                                        <li key={i} className="text-gray-700">
+                                                            {item.medication || item.name}
+                                                            {item.notes && <span className="text-gray-500"> — {item.notes}</span>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        ) : <div><span className="text-gray-600 text-sm font-semibold">Current Medications:</span><p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{d}</p></div>;
+                                    })()}
                                 </div>)}
                             </div>
                             )}
