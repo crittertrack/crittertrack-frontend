@@ -12421,8 +12421,11 @@ const AnimalForm = ({
                 throw saveErr;
             }
 
-            // Notify other parts of the app that animals changed so lists refresh
-            try { window.dispatchEvent(new Event('animals-changed')); } catch (e) { /* ignore */ }
+            // For new animals, notify the list to reload. For edits, the list
+            // is updated in-place by handleSaveAnimal — no full reload needed.
+            if (!animalToEdit) {
+                try { window.dispatchEvent(new Event('animals-changed')); } catch (e) { /* ignore */ }
+            }
 
             console.log('[SAVE] Showing success message and closing form');
             showModalMessage('Success', `Animal ${formData.name} successfully ${animalToEdit ? 'updated' : 'added'}!`);
@@ -24273,16 +24276,20 @@ const App = () => {
                 console.log('[handleSaveAnimal] PUT response:', response?.status);
             }
             
-            // After saving, if we were editing an animal, refetch it to get updated data
+            // After saving, if we were editing an animal, refetch it and patch
+            // the local animals list in-place (no full reload needed).
             if (method === 'put' && animalToEdit) {
                 try {
                     const refreshedAnimal = await axios.get(`${API_BASE_URL}/animals/${animalToEdit.id_public}`, {
                         headers: { Authorization: `Bearer ${authToken}` }
                     });
-                    setAnimalToView(refreshedAnimal.data);
+                    const updated = refreshedAnimal.data;
+                    setAnimalToView(updated);
+                    // Patch the animal in the list without a full refetch
+                    setAnimals(prev => prev.map(a => a.id_public === updated.id_public ? { ...a, ...updated } : a));
+                    setAllAnimalsRaw(prev => prev.map(a => a.id_public === updated.id_public ? { ...a, ...updated } : a));
                 } catch (refreshError) {
                     console.error('Failed to refresh animal data after save:', refreshError);
-                    // Still use the old data if refresh fails
                     setAnimalToView(animalToEdit);
                 }
             }
