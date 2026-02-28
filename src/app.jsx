@@ -9049,30 +9049,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                 Fill all remaining ({remainingMales}M + {remainingFemales}F = {remainingMales + remainingFemales} animals)
                                                             </button>
                                                         )}
-                                                        <div className="grid grid-cols-2 gap-4">
-                                                            <div>
-                                                                <label className="block text-xs font-medium text-gray-700 mb-1">Add # Males</label>
-                                                                <input
-                                                                    type="number"
-                                                                    min="0"
-                                                                    value={createOffspringCounts.males}
-                                                                    onChange={(e) => setCreateOffspringCounts({...createOffspringCounts, males: e.target.value})}
-                                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                                    placeholder="0"
-                                                                />
-                                                            </div>
-                                                            <div>
-                                                                <label className="block text-xs font-medium text-gray-700 mb-1">Add # Females</label>
-                                                                <input
-                                                                    type="number"
-                                                                    min="0"
-                                                                    value={createOffspringCounts.females}
-                                                                    onChange={(e) => setCreateOffspringCounts({...createOffspringCounts, females: e.target.value})}
-                                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                                    placeholder="0"
-                                                                />
-                                                            </div>
-                                                        </div>
+                                                        {!hasCountInfo && (
+                                                            <p className="text-xs text-gray-500 italic">Set the number of males and females above to see smart creation options.</p>
+                                                        )}
+                                                        {hasCountInfo && remainingMales === 0 && remainingFemales === 0 && (
+                                                            <p className="text-xs text-green-600 font-semibold">✓ All offspring are accounted for via linked animals.</p>
+                                                        )}
                                                         {(parseInt(createOffspringCounts.males) > 0 || parseInt(createOffspringCounts.females) > 0) && (
                                                             <p className="text-xs text-green-600 font-semibold mt-2">
                                                                 Will create {(parseInt(createOffspringCounts.males) || 0) + (parseInt(createOffspringCounts.females) || 0)} new animal(s)
