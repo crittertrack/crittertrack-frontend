@@ -3704,12 +3704,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                     <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-700 text-white flex-shrink-0">{record.litterName}</span>
                                                                     {record.litterId && <span className="text-xs font-mono text-gray-400 flex-shrink-0">{record.litterId}</span>}
                                                                 </>
-                                                            ) : (
- 
-        $indent = $line -replace '^(\s*).*', 'record.litterId && <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-purple-300 text-purple-800">{record.litterId}</span>'
-        "$indent$(                                                                record.litterId && <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-purple-300 text-purple-800">{record.litterId}</span>.Groups[1].Value)"
-    
-                                                            )}
+                                                            ) : record.litterId ? (
+                                                                <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-purple-300 text-purple-800">{record.litterId}</span>
+                                                            ) : null}
                                                             <div className="text-sm text-gray-700 flex items-center gap-2 flex-wrap">
                                                                 {record.birthEventDate && <><span>{formatDate(record.birthEventDate)}</span><span className="text-gray-400">&bull;</span></>}
                                                                 {!record.birthEventDate && formatDate(record.matingDate) && <><span>{formatDate(record.matingDate)}</span><span className="text-gray-400">&bull;</span></>}
@@ -5167,12 +5164,9 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                                     <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-700 text-white flex-shrink-0">{record.litterName}</span>
                                                                     {record.litterId && <span className="text-xs font-mono text-gray-400 flex-shrink-0">{record.litterId}</span>}
                                                                 </>
-                                                            ) : (
- 
-        $indent = $line -replace '^(\s*).*', 'record.litterId && <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-purple-300 text-purple-800">{record.litterId}</span>'
-        "$indent$(                                                                record.litterId && <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-purple-300 text-purple-800">{record.litterId}</span>.Groups[1].Value)"
-    
-                                                            )}
+                                                            ) : record.litterId ? (
+                                                                <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-purple-300 text-purple-800">{record.litterId}</span>
+                                                            ) : null}
                                                             <div className="text-sm text-gray-700 flex items-center gap-2 flex-wrap">
                                                                 {record.birthEventDate && <><span>{formatDate(record.birthEventDate)}</span><span className="text-gray-400">&bull;</span></>}
                                                                 {!record.birthEventDate && formatDate(record.matingDate) && <><span>{formatDate(record.matingDate)}</span><span className="text-gray-400">&bull;</span></>}
@@ -6476,12 +6470,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                                     <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-700 text-white flex-shrink-0">{record.litterName}</span>
                                                                     {record.litterId && <span className="text-xs font-mono text-gray-400 flex-shrink-0">{record.litterId}</span>}
                                                                 </>
-                                                            ) : (
- 
-        $indent = $line -replace '^(\s*).*', 'record.litterId && <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-purple-300 text-purple-800">{record.litterId}</span>'
-        "$indent$(                                                                record.litterId && <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-purple-300 text-purple-800">{record.litterId}</span>.Groups[1].Value)"
-    
-                                                            )}
+                                                            ) : record.litterId ? (
+                                                                <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-purple-300 text-purple-800">{record.litterId}</span>
+                                                            ) : null}
                                                             <div className="text-sm text-gray-700 flex items-center gap-2 flex-wrap">
                                                                 {record.birthEventDate && <><span>{formatDate(record.birthEventDate)}</span><span className="text-gray-400">&bull;</span></>}
                                                                 {!record.birthEventDate && formatDate(record.matingDate) && <><span>{formatDate(record.matingDate)}</span><span className="text-gray-400">&bull;</span></>}
@@ -14476,9 +14467,7 @@ const AnimalForm = ({
                                                                 </>
                                                             ) : record.litterId ? (
                                                                 <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-blue-300 text-blue-800">{record.litterId}</span>
-                                                            ) : (
-                                                                
-                                                            )}
+                                                            ) : null}
                                                             
                                                             {/* Summary: Birth date, mate, counts */}
                                                             <div className="text-sm text-gray-700 flex gap-2 truncate flex-wrap">
@@ -26956,12 +26945,9 @@ const App = () => {
                                                                                         <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-700 text-white flex-shrink-0">{record.litterName}</span>
                                                                                         {record.litterId && <span className="text-xs font-mono text-gray-400 flex-shrink-0">{record.litterId}</span>}
                                                                                     </>
-                                                                                ) : (
- 
-        $indent = $line -replace '^(\s*).*', 'record.litterId && <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-purple-300 text-purple-800">{record.litterId}</span>'
-        "$indent$(                                                                                    record.litterId && <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-purple-300 text-purple-800">{record.litterId}</span>.Groups[1].Value)"
-    
-                                                                                )}
+                                                                                ) : record.litterId ? (
+                                                                                    <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-purple-300 text-purple-800">{record.litterId}</span>
+                                                                                ) : null}
                                                                                 <div className="text-sm text-gray-700 flex items-center gap-2 flex-wrap">
                                                                                     {record.birthEventDate && <><span>{formatDate(record.birthEventDate)}</span><span className="text-gray-400">&bull;</span></>}
                                                                                     {!record.birthEventDate && formatDate(record.matingDate) && <><span>{formatDate(record.matingDate)}</span><span className="text-gray-400">&bull;</span></>}
