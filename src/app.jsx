@@ -7660,7 +7660,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             maleCount: litter.maleCount || null,
             femaleCount: litter.femaleCount || null,
             notes: litter.notes || '',
-            linkedOffspringIds: litter.offspringIds_public || []
+            linkedOffspringIds: litter.offspringIds_public || [],
+            // Enhanced breeding record fields
+            breedingMethod: litter.breedingMethod || 'Unknown',
+            breedingConditionAtTime: litter.breedingConditionAtTime || '',
+            matingDates: litter.matingDates || '',
+            outcome: litter.outcome || 'Unknown',
+            birthMethod: litter.birthMethod || '',
+            litterSizeBorn: litter.litterSizeBorn || litter.numberBorn || null,
+            litterSizeWeaned: litter.litterSizeWeaned || litter.numberWeaned || null,
+            stillbornCount: litter.stillbornCount || litter.stillborn || null
         });
         setShowAddForm(true);
         setExpandedLitter(null);
@@ -8115,50 +8124,221 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         </div>
                     )}
 
-                    {/* Birth Date & Counts */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4" data-tutorial-target="litter-dates-counts">
-                        {/* Birth Date */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Birth Date (Optional)
-                            </label>
-                            <DatePicker
-                                value={formData.birthDate}
-                                onChange={(e) => setFormData({...formData, birthDate: e.target.value})}
-                                maxDate={new Date()}
-                                className="px-3 py-2"
-                            />
+                    {/* Breeding Information */}
+                    <div className="mb-6 p-4 border border-purple-200 rounded-lg bg-purple-50">
+                        <h4 className="text-md font-semibold text-gray-700 mb-4 flex items-center">
+                            <span className="text-purple-600 mr-2">🧬</span>Breeding Information
+                        </h4>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            {/* Breeding Method */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Breeding Method
+                                </label>
+                                <select
+                                    value={formData.breedingMethod || 'Unknown'}
+                                    onChange={(e) => setFormData({...formData, breedingMethod: e.target.value})}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                >
+                                    <option value="Natural">Natural</option>
+                                    <option value="AI">Artificial Insemination</option>
+                                    <option value="Assisted">Assisted</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+
+                            {/* Breeding Condition */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Breeding Condition
+                                </label>
+                                <select
+                                    value={formData.breedingConditionAtTime || ''}
+                                    onChange={(e) => setFormData({...formData, breedingConditionAtTime: e.target.value})}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                >
+                                    <option value="">Select Condition...</option>
+                                    <option value="Good">Good</option>
+                                    <option value="Okay">Okay</option>
+                                    <option value="Poor">Poor</option>
+                                </select>
+                            </div>
+
+                            {/* Outcome Status */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Breeding Outcome
+                                </label>
+                                <select
+                                    value={formData.outcome || 'Unknown'}
+                                    onChange={(e) => setFormData({...formData, outcome: e.target.value})}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                >
+                                    <option value="Successful">Successful</option>
+                                    <option value="Unsuccessful">Unsuccessful</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
                         </div>
 
-                        {/* Male Count */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Number of Males (Optional)
-                            </label>
-                            <input
-                                type="number"
-                                value={typeof formData.maleCount === 'number' ? formData.maleCount : (formData.maleCount || '')}
-                                onChange={(e) => setFormData({...formData, maleCount: e.target.value ? parseInt(e.target.value) : null})}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="e.g., 5"
-                                min="0"
-                            />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Mating Dates */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Mating Dates (Optional)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.matingDates || ''}
+                                    onChange={(e) => setFormData({...formData, matingDates: e.target.value})}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    placeholder="e.g., 2024-01-15, Jan 15-17, Multiple dates"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">Enter date(s) when mating occurred</p>
+                            </div>
+
+                            {/* Birth Method */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Birth Method (Optional)
+                                </label>
+                                <select
+                                    value={formData.birthMethod || ''}
+                                    onChange={(e) => setFormData({...formData, birthMethod: e.target.value})}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                >
+                                    <option value="">Select Method...</option>
+                                    <option value="Natural">Natural</option>
+                                    <option value="C-Section">C-Section</option>
+                                    <option value="Assisted">Assisted</option>
+                                    <option value="Induced">Induced</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Birth Date & Offspring Counts */}
+                    <div className="mb-6 p-4 border border-green-200 rounded-lg bg-green-50">
+                        <h4 className="text-md font-semibold text-gray-700 mb-4 flex items-center">
+                            <span className="text-green-600 mr-2">👶</span>Birth & Offspring Details
+                        </h4>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4" data-tutorial-target="litter-dates-counts">
+                            {/* Birth Date */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Birth Date (Optional)
+                                </label>
+                                <DatePicker
+                                    value={formData.birthDate}
+                                    onChange={(e) => setFormData({...formData, birthDate: e.target.value})}
+                                    maxDate={new Date()}
+                                    className="px-3 py-2"
+                                />
+                            </div>
+
+                            {/* Total Born */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Total Born
+                                </label>
+                                <input
+                                    type="number"
+                                    value={typeof formData.litterSizeBorn === 'number' ? formData.litterSizeBorn : (formData.litterSizeBorn || '')}
+                                    onChange={(e) => {
+                                        const value = e.target.value ? parseInt(e.target.value) : null;
+                                        setFormData({
+                                            ...formData, 
+                                            litterSizeBorn: value,
+                                            // Auto-calculate male + female if total is entered
+                                            ...(value && !formData.maleCount && !formData.femaleCount ? {
+                                                maleCount: Math.ceil(value / 2),
+                                                femaleCount: Math.floor(value / 2)
+                                            } : {})
+                                        });
+                                    }}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    placeholder="0"
+                                    min="0"
+                                />
+                            </div>
+
+                            {/* Stillborn Count */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Stillborn
+                                </label>
+                                <input
+                                    type="number"
+                                    value={typeof formData.stillbornCount === 'number' ? formData.stillbornCount : (formData.stillbornCount || '')}
+                                    onChange={(e) => setFormData({...formData, stillbornCount: e.target.value ? parseInt(e.target.value) : null})}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    placeholder="0"
+                                    min="0"
+                                />
+                            </div>
+
+                            {/* Total Weaned */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Total Weaned
+                                </label>
+                                <input
+                                    type="number"
+                                    value={typeof formData.litterSizeWeaned === 'number' ? formData.litterSizeWeaned : (formData.litterSizeWeaned || '')}
+                                    onChange={(e) => setFormData({...formData, litterSizeWeaned: e.target.value ? parseInt(e.target.value) : null})}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    placeholder="0"
+                                    min="0"
+                                />
+                            </div>
                         </div>
 
-                        {/* Female Count */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Number of Females (Optional)
-                            </label>
-                            <input
-                                type="number"
-                                value={typeof formData.femaleCount === 'number' ? formData.femaleCount : (formData.femaleCount || '')}
-                                onChange={(e) => setFormData({...formData, femaleCount: e.target.value ? parseInt(e.target.value) : null})}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="e.g., 3"
-                                min="0"
-                            />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Male Count */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Number of Males (Optional)
+                                </label>
+                                <input
+                                    type="number"
+                                    value={typeof formData.maleCount === 'number' ? formData.maleCount : (formData.maleCount || '')}
+                                    onChange={(e) => setFormData({...formData, maleCount: e.target.value ? parseInt(e.target.value) : null})}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    placeholder="e.g., 5"
+                                    min="0"
+                                />
+                            </div>
+
+                            {/* Female Count */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Number of Females (Optional)
+                                </label>
+                                <input
+                                    type="number"
+                                    value={typeof formData.femaleCount === 'number' ? formData.femaleCount : (formData.femaleCount || '')}
+                                    onChange={(e) => setFormData({...formData, femaleCount: e.target.value ? parseInt(e.target.value) : null})}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    placeholder="e.g., 3"
+                                    min="0"
+                                />
+                            </div>
                         </div>
+
+                        {/* Count Validation */}
+                        {(formData.maleCount || formData.femaleCount) && formData.litterSizeBorn && (
+                            <div className="mt-3 p-2 rounded-md bg-blue-100 border border-blue-200">
+                                <p className="text-xs text-blue-800">
+                                    💡 <strong>Count Check:</strong> Male + Female ({(formData.maleCount || 0) + (formData.femaleCount || 0)}) vs Total Born ({formData.litterSizeBorn || 0})
+                                    {((formData.maleCount || 0) + (formData.femaleCount || 0)) !== (formData.litterSizeBorn || 0) && (
+                                        <span className="text-orange-600 font-semibold"> - Counts don't match!</span>
+                                    )}
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Link Existing Offspring */}
@@ -11731,10 +11911,20 @@ const AnimalForm = ({
                                 damId_public: formData.get('damId_public') || (formData.get('gender') === 'Female' ? animalToEdit?.id_public : null),
                                 species: formData.get('species'),
                                 birthDate: formData.get('birthDate') || breedingRecordForLitter.birthEventDate,
-                                numberBorn: parseInt(formData.get('numberBorn')) || breedingRecordForLitter.litterSizeBorn || 0,
-                                stillborn: parseInt(formData.get('stillborn')) || breedingRecordForLitter.stillbornCount || 0,
-                                numberWeaned: parseInt(formData.get('numberWeaned')) || breedingRecordForLitter.litterSizeWeaned || 0,
-                                notes: formData.get('notes') || ''
+                                litterSizeBorn: parseInt(formData.get('litterSizeBorn')) || breedingRecordForLitter.litterSizeBorn || 0,
+                                stillbornCount: parseInt(formData.get('stillbornCount')) || breedingRecordForLitter.stillbornCount || 0,
+                                litterSizeWeaned: parseInt(formData.get('litterSizeWeaned')) || breedingRecordForLitter.litterSizeWeaned || 0,
+                                // Legacy fields for backward compatibility
+                                numberBorn: parseInt(formData.get('litterSizeBorn')) || breedingRecordForLitter.litterSizeBorn || 0,
+                                stillborn: parseInt(formData.get('stillbornCount')) || breedingRecordForLitter.stillbornCount || 0,
+                                numberWeaned: parseInt(formData.get('litterSizeWeaned')) || breedingRecordForLitter.litterSizeWeaned || 0,
+                                // Enhanced breeding record fields
+                                breedingMethod: formData.get('breedingMethod') || breedingRecordForLitter.breedingMethod || 'Unknown',
+                                breedingConditionAtTime: formData.get('breedingConditionAtTime') || breedingRecordForLitter.breedingConditionAtTime || null,
+                                matingDates: formData.get('matingDates') || breedingRecordForLitter.matingDates || '',
+                                outcome: formData.get('outcome') || breedingRecordForLitter.outcome || 'Unknown',
+                                birthMethod: formData.get('birthMethod') || breedingRecordForLitter.birthMethod || null,
+                                notes: formData.get('notes') || breedingRecordForLitter.notes || ''
                             };
                             handleCreateLitterFromBreeding(litterData);
                         }} className="space-y-3">
@@ -11756,6 +11946,59 @@ const AnimalForm = ({
                                 <input type="text" name="species" value={formData.species} readOnly 
                                     className="w-full text-xs p-2 border border-gray-300 rounded-md bg-gray-100" />
                             </div>
+
+                            {/* Enhanced breeding information */}
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Breeding Method</label>
+                                    <select name="breedingMethod" defaultValue={breedingRecordForLitter.breedingMethod || 'Unknown'} 
+                                        className="w-full text-xs p-2 border border-gray-300 rounded-md">
+                                        <option value="Natural">Natural</option>
+                                        <option value="AI">AI</option>
+                                        <option value="Assisted">Assisted</option>
+                                        <option value="Unknown">Unknown</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Condition</label>
+                                    <select name="breedingConditionAtTime" defaultValue={breedingRecordForLitter.breedingConditionAtTime || ''} 
+                                        className="w-full text-xs p-2 border border-gray-300 rounded-md">
+                                        <option value="">Unknown</option>
+                                        <option value="Good">Good</option>
+                                        <option value="Okay">Okay</option>
+                                        <option value="Poor">Poor</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Mating Dates</label>
+                                <input type="text" name="matingDates" defaultValue={breedingRecordForLitter.matingDates || ''} 
+                                    className="w-full text-xs p-2 border border-gray-300 rounded-md" placeholder="e.g., 2024-01-15" />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Birth Method</label>
+                                    <select name="birthMethod" defaultValue={breedingRecordForLitter.birthMethod || ''} 
+                                        className="w-full text-xs p-2 border border-gray-300 rounded-md">
+                                        <option value="">Unknown</option>
+                                        <option value="Natural">Natural</option>
+                                        <option value="C-Section">C-Section</option>
+                                        <option value="Assisted">Assisted</option>
+                                        <option value="Induced">Induced</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Outcome</label>
+                                    <select name="outcome" defaultValue={breedingRecordForLitter.outcome || 'Unknown'} 
+                                        className="w-full text-xs p-2 border border-gray-300 rounded-md">
+                                        <option value="Successful">Successful</option>
+                                        <option value="Unsuccessful">Unsuccessful</option>
+                                        <option value="Unknown">Unknown</option>
+                                    </select>
+                                </div>
+                            </div>
                             
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Birth Date</label>
@@ -11766,17 +12009,17 @@ const AnimalForm = ({
                             <div className="grid grid-cols-3 gap-2">
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Born</label>
-                                    <input type="number" name="numberBorn" defaultValue={breedingRecordForLitter.litterSizeBorn || 0} min="0"
+                                    <input type="number" name="litterSizeBorn" defaultValue={breedingRecordForLitter.litterSizeBorn || 0} min="0"
                                         className="w-full text-xs p-2 border border-gray-300 rounded-md" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Stillborn</label>
-                                    <input type="number" name="stillborn" defaultValue={breedingRecordForLitter.stillbornCount || 0} min="0"
+                                    <input type="number" name="stillbornCount" defaultValue={breedingRecordForLitter.stillbornCount || 0} min="0"
                                         className="w-full text-xs p-2 border border-gray-300 rounded-md" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Weaned</label>
-                                    <input type="number" name="numberWeaned" defaultValue={breedingRecordForLitter.litterSizeWeaned || 0} min="0"
+                                    <input type="number" name="litterSizeWeaned" defaultValue={breedingRecordForLitter.litterSizeWeaned || 0} min="0"
                                         className="w-full text-xs p-2 border border-gray-300 rounded-md" />
                                 </div>
                             </div>
