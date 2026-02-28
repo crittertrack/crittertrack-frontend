@@ -12516,7 +12516,7 @@ const AnimalForm = ({
             }
 
             // For new animals, notify the list to reload. For edits, the list
-            // is updated in-place by handleSaveAnimal — no full reload needed.
+            // is updated in-place by handleSaveAnimal - no full reload needed.
             if (!animalToEdit) {
                 try { window.dispatchEvent(new Event('animals-changed')); } catch (e) { /* ignore */ }
             }
@@ -18772,7 +18772,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         }
     }, [authToken, statusFilter, selectedGenders, selectedSpecies, appliedNameFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, ownedFilterActive, publicFilter, showModalMessage]);
 
-    // Species list is now derived from the fetchAnimals result — no separate API call needed
+    // Species list is now derived from the fetchAnimals result - no separate API call needed
     const fetchAllSpecies = useCallback(async () => {
         // No-op: species are populated as a side-effect of fetchAnimals()
         // Kept for compatibility with the animals-changed event handler
@@ -23842,7 +23842,7 @@ const App = () => {
                         animal.availableForBreeding === true || animal.availableForBreeding === 'true'
                     );
 
-                    // Enrich with owner country — only fetch profiles not already cached
+                    // Enrich with owner country - only fetch profiles not already cached
                     const ownerIds = [...new Set(filtered.map(a => a.ownerId_public).filter(Boolean))];
                     const ownerProfiles = await Promise.all(ownerIds.map(async (id_public) => {
                         try {
@@ -23875,7 +23875,7 @@ const App = () => {
         // Only run initial fetch on desktop
         if (isDesktop()) fetchAvailableAnimals();
 
-        // Refresh every 30 minutes — data changes infrequently and widget is desktop-only
+        // Refresh every 30 minutes - data changes infrequently and widget is desktop-only
         const refreshInterval = setInterval(fetchAvailableAnimals, 1800000);
 
         return () => {
@@ -24406,7 +24406,7 @@ const App = () => {
     const handleDeleteAnimal = async (id_public, animalData = null) => {
         try {
             
-            // Always use DELETE — the backend handles both permanent deletion and
+            // Always use DELETE - the backend handles both permanent deletion and
             // ownership revert (for formally-transferred animals with originalOwnerId)
             const deleteResp = await axios.delete(`${API_BASE_URL}/animals/${id_public}`, {
                 headers: { Authorization: `Bearer ${authToken}` }
