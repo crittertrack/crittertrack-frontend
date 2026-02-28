@@ -2953,16 +2953,15 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                     </div>
 
                                     <div className="w-full md:w-2/3 p-4 sm:p-6 flex flex-col border-t md:border-t-0 md:border-l border-gray-300 space-y-3">
-                                        {/* Species/Breed/Strain/CTC - At Top */}
-                                        <p className="text-sm text-gray-600">
-                                            {animal.species || 'Unknown'}
-                                            {animal.breed && ` • ${animal.breed}`}
-                                            {animal.strain && ` • ${animal.strain}`}
-                                            {animal.id_public && ` • ${animal.id_public}`}
-                                        </p>
-
-                                        {/* Toggle Controls */}
-                                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 sm:justify-end mb-2">
+                                        {/* Species/Breed/Strain/CTC + Toggle Controls - same row */}
+                                        <div className="flex items-center justify-between gap-2">
+                                            <p className="text-sm text-gray-600">
+                                                {animal.species || 'Unknown'}
+                                                {animal.breed && ` • ${animal.breed}`}
+                                                {animal.strain && ` • ${animal.strain}`}
+                                                {animal.id_public && ` • ${animal.id_public}`}
+                                            </p>
+                                            <div className="flex gap-2 shrink-0">
                                             {/* Owned Toggle */}
                                             <button
                                                 onClick={() => {
@@ -3002,6 +3001,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                 {animal.isDisplay ? <Eye size={16} /> : <EyeOff size={16} />}
                                                 <span>{animal.isDisplay ? 'Public' : 'Private'}</span>
                                             </button>
+                                            </div>
                                         </div>
 
                                         {/* Full Name */}
