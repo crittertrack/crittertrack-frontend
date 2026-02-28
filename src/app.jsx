@@ -9243,17 +9243,28 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </div>
 
                                         {/* Litter Info Grid */}
-                                        {((litter.matingDate || litter.pairingDate) || litter.breedingMethod || litter.breedingCondition || litter.breedingConditionAtTime || litter.outcome || litter.maleCount != null || litter.femaleCount != null) && (
+                                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm mb-3 bg-white p-3 rounded border border-gray-200">
+                                                <div><div className="text-gray-500 text-xs">Total Born</div><div className="text-2xl font-bold text-blue-600">{litter.litterSizeBorn ?? litter.numberBorn ?? '—'}</div></div>
+                                                <div><div className="text-gray-500 text-xs">Stillborn</div><div className="text-2xl font-bold text-gray-600">{litter.stillbornCount ?? litter.stillborn ?? '0'}</div></div>
+                                                <div><div className="text-gray-500 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? '—'}</div></div>
+                                                {litter.inbreedingCoefficient != null && <div><div className="text-gray-500 text-xs">COI</div><div className="text-2xl font-bold text-orange-600">{litter.inbreedingCoefficient.toFixed(2)}%</div></div>}
+                                            </div>
+                                        {((litter.maleCount != null || litter.femaleCount != null || (litter.unknownCount != null && litter.unknownCount > 0)) && (
+                                            <div className="grid grid-cols-3 gap-3 text-sm mb-3 bg-white p-3 rounded border border-gray-200">
+                                                {litter.maleCount != null && (<div><div className="text-gray-500 text-xs">Males Born</div><div className="text-2xl font-bold text-blue-500">{litter.maleCount}</div></div>)}
+                                                {litter.femaleCount != null && (<div><div className="text-gray-500 text-xs">Females Born</div><div className="text-2xl font-bold text-pink-500">{litter.femaleCount}</div></div>)}
+                                                {litter.unknownCount != null && litter.unknownCount > 0 && (<div><div className="text-gray-500 text-xs">Unknown / Intersex</div><div className="text-2xl font-bold text-gray-700">{litter.unknownCount}</div></div>)}
+                                            </div>
+                                        ))}
+                                        {((litter.matingDate || litter.pairingDate) || litter.breedingMethod || litter.breedingCondition || litter.breedingConditionAtTime || litter.outcome || litter.birthMethod) && (
                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-4">
                                                 {(litter.matingDate || litter.pairingDate) && (<div><div className="text-gray-500 text-xs">Mating Date</div><div className="font-semibold text-gray-800">{formatDate(litter.matingDate || litter.pairingDate)}</div></div>)}
                                                 {litter.breedingMethod && (<div><div className="text-gray-500 text-xs">Breeding Method</div><div className="font-semibold text-gray-800">{litter.breedingMethod}</div></div>)}
                                                 {(litter.breedingCondition || litter.breedingConditionAtTime) && (<div><div className="text-gray-500 text-xs">Breeding Condition</div><div className="font-semibold text-gray-800">{litter.breedingCondition || litter.breedingConditionAtTime}</div></div>)}
                                                 {litter.outcome && (<div><div className="text-gray-500 text-xs">Outcome</div><div className={`font-semibold ${litter.outcome === 'Successful' ? 'text-green-600' : litter.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-800'}`}>{litter.outcome}</div></div>)}
-                                                {litter.maleCount != null && (<div><div className="text-gray-500 text-xs">Males</div><div className="font-semibold text-blue-600">{litter.maleCount}</div></div>)}
-                                                {litter.femaleCount != null && (<div><div className="text-gray-500 text-xs">Females</div><div className="font-semibold text-pink-600">{litter.femaleCount}</div></div>)}
-                                                {litter.unknownCount != null && litter.unknownCount > 0 && (<div><div className="text-gray-500 text-xs">Unknown / Intersex</div><div className="font-semibold text-gray-700">{litter.unknownCount}</div></div>)}
+                                                {litter.birthMethod && (<div><div className="text-gray-500 text-xs">Birth Method</div><div className="font-semibold text-gray-800">{litter.birthMethod}</div></div>)}
                                             </div>
-                                        )}
+                                        ))
 
                                         {litter.notes && (
                                             <div className="bg-white rounded-lg p-3 mb-4 border border-gray-200">
@@ -12561,6 +12572,37 @@ const AnimalForm = ({
                 console.log('[SAVE] About to call onSave:', { method, url });
                 const saveResponse = await onSave(method, url, payloadToSave);
                 console.log('[SAVE] onSave completed successfully:', saveResponse?.status);
+
+                // Sync breeding record fields back to linked litters
+                const recordsWithLitters = breedingRecords.filter(r => r.litterId);
+                if (recordsWithLitters.length > 0) {
+                    try {
+                        const littersRes = await axios.get(`${API_BASE_URL}/litters`, { headers: { Authorization: `Bearer ${authToken}` } });
+                        for (const record of recordsWithLitters) {
+                            const litter = littersRes.data.find(l => l.litter_id_public === record.litterId);
+                            if (!litter) continue;
+                            const updates = {};
+                            if (record.maleCount != null) updates.maleCount = record.maleCount;
+                            if (record.femaleCount != null) updates.femaleCount = record.femaleCount;
+                            if (record.unknownCount != null) updates.unknownCount = record.unknownCount;
+                            if (record.litterSizeBorn != null) { updates.litterSizeBorn = record.litterSizeBorn; updates.numberBorn = record.litterSizeBorn; }
+                            if (record.stillbornCount != null) { updates.stillbornCount = record.stillbornCount; updates.stillborn = record.stillbornCount; }
+                            if (record.litterSizeWeaned != null) { updates.litterSizeWeaned = record.litterSizeWeaned; updates.numberWeaned = record.litterSizeWeaned; }
+                            if (record.breedingMethod) updates.breedingMethod = record.breedingMethod;
+                            if (record.breedingConditionAtTime) updates.breedingConditionAtTime = record.breedingConditionAtTime;
+                            if (record.matingDate) updates.matingDate = record.matingDate;
+                            if (record.outcome) updates.outcome = record.outcome;
+                            if (record.birthEventDate) updates.birthDate = record.birthEventDate;
+                            if (record.birthMethod) updates.birthMethod = record.birthMethod;
+                            if (Object.keys(updates).length > 0) {
+                                await axios.put(`${API_BASE_URL}/litters/${litter._id}`, updates, { headers: { Authorization: `Bearer ${authToken}` } });
+                                console.log(`[LITTER SYNC] Synced ${Object.keys(updates).length} fields to litter ${record.litterId}`);
+                            }
+                        }
+                    } catch (syncErr) {
+                        console.warn('[LITTER SYNC] Could not sync breeding record fields to litters:', syncErr);
+                    }
+                }
             } catch (saveErr) {
                 // If we uploaded a file but the animal save failed, attempt cleanup to avoid orphan files.
                 console.error('[SAVE] Error in onSave:', saveErr);
