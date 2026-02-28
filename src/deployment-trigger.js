@@ -1,4 +1,4 @@
-// Force deployment trigger - breeding record reorder
+// Force deployment trigger - emoji restore + breeding record M/F/U fields
 // Date: 2026-02-28
-// Purpose: Trigger Vercel deployment for breeding record panel reorder
-export const DEPLOYMENT_TIMESTAMP = '2026-02-28T12:30:00Z';
+// Purpose: Trigger Vercel redeployment
+export const DEPLOYMENT_TIMESTAMP = '2026-02-28T22:30:00Z';
