@@ -12215,32 +12215,7 @@ const AnimalForm = ({
             }
             
             // Enrich litters with gender counts derived from linked offspring animals
-            // when the litter doesn't have explicitly-stored maleCount/femaleCount/unknownCount
-            const littersNeedingOffspringCounts = filtered.filter(l =>
-                l.offspringIds_public?.length > 0 &&
-                l.maleCount == null && l.femaleCount == null && l.unknownCount == null
-            );
-            if (littersNeedingOffspringCounts.length > 0) {
-                try {
-                    const animalsRes = await axios.get(`${API_BASE_URL}/animals`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
-                    const allAnimals = animalsRes.data || [];
-                    filtered = filtered.map(litter => {
-                        if (!litter.offspringIds_public?.length) return litter;
-                        if (litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) return litter;
-                        const offspring = allAnimals.filter(a => litter.offspringIds_public.includes(a.id_public));
-                        if (!offspring.length) return litter;
-                        const maleCount = offspring.filter(a => a.gender === 'Male').length || null;
-                        const femaleCount = offspring.filter(a => a.gender === 'Female').length || null;
-                        const unknownCount = offspring.filter(a => a.gender !== 'Male' && a.gender !== 'Female').length || null;
-                        return { ...litter, maleCount, femaleCount, unknownCount };
-                    });
-                } catch (e) {
-                    // Non-critical — continue without derived gender counts
-                    console.warn('Could not derive gender counts from offspring:', e);
-                }
-            }
+            // REMOVED from link modal — not needed for litter selection and causes slow double-fetch
 
             setExistingLitters(filtered);
         } catch (error) {
@@ -13156,9 +13131,14 @@ const AnimalForm = ({
                         </div>
                         
                         {litterSearchLoading ? (
-                            <div className="text-center py-8">
-                                <LoadingSpinner />
-                                <p className="text-gray-600 mt-2">Loading litters...</p>
+                            <div className="space-y-2">
+                                {[0,1,2,3].map(i => (
+                                    <div key={i} className="animate-pulse border border-gray-100 rounded-lg p-3">
+                                        <div className="h-4 w-24 bg-gray-200 rounded mb-2" />
+                                        <div className="h-3 w-40 bg-gray-100 rounded mb-1" />
+                                        <div className="h-3 w-32 bg-gray-100 rounded" />
+                                    </div>
+                                ))}
                             </div>
                         ) : existingLitters.length === 0 ? (
                             <div className="text-center py-6 text-gray-600">
