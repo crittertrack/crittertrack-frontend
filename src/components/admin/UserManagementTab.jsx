@@ -1,6 +1,63 @@
 import React, { useState, useEffect } from 'react';
 import './UserManagementTab.css';
 
+// Donation badge utility function
+const getDonationBadge = (user) => {
+    if (!user) return null;
+    
+    // Monthly donation badge takes precedence
+    if (user.monthlyDonationActive) {
+        return { icon: '💎', level: 'monthly', title: 'Monthly Supporter' };
+    }
+    
+    // One-time donation badge (31 days)
+    if (user.lastDonationDate) {
+        const donationDate = new Date(user.lastDonationDate);
+        const now = new Date();
+        const daysSinceDonation = Math.floor((now - donationDate) / (1000 * 60 * 60 * 24));
+        
+        if (daysSinceDonation <= 31) {
+            return { icon: '🎁', level: 'gift', title: 'Recent Supporter' };
+        }
+    }
+    
+    return null;
+};
+
+// Donation badge component
+const DonationBadge = ({ badge, size = 'sm' }) => {
+    if (!badge) return null;
+
+    const sizeStyles = {
+        xs: { fontSize: '8px', padding: '2px 4px', gap: '2px' },
+        sm: { fontSize: '10px', padding: '2px 6px', gap: '3px' },
+        md: { fontSize: '12px', padding: '4px 8px', gap: '4px' },
+        lg: { fontSize: '14px', padding: '6px 10px', gap: '5px' }
+    };
+
+    return (
+        <span 
+            className="donation-badge"
+            style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                ...sizeStyles[size],
+                background: badge.level === 'monthly' ? 
+                    'linear-gradient(45deg, #87CEEB, #4682B4)' :
+                    'linear-gradient(45deg, #FFD700, #FFA500)',
+                color: badge.level === 'monthly' ? '#003366' : '#8B4513',
+                borderRadius: '8px',
+                fontWeight: 'bold',
+                marginLeft: '4px',
+                userSelect: 'none'
+            }}
+            title={badge.title}
+        >
+            {badge.icon}
+        </span>
+    );
+};
+
 export default function UserManagementTab({ API_BASE_URL, authToken }) {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -182,6 +239,107 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
         }
     };
 
+    const handleGrantGiftBadge = async (userId) => {
+        if (!window.confirm('Grant gift badge (31 days from today)?')) return;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/donation-badge`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({ 
+                    type: 'gift',
+                    lastDonationDate: new Date().toISOString()
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to grant gift badge');
+            }
+
+            alert('Gift badge granted successfully!');
+            // Refresh user data
+            if (selectedUser && selectedUser._id === userId) {
+                await fetchUserSummary(userId);
+            }
+            fetchUsers();
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
+    const handleToggleMonthlyBadge = async (userId, grant) => {
+        const action = grant ? 'grant' : 'remove';
+        if (!window.confirm(`${action.charAt(0).toUpperCase() + action.slice(1)} monthly supporter badge?`)) return;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/donation-badge`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({ 
+                    type: 'monthly',
+                    monthlyDonationActive: grant
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || `Failed to ${action} monthly badge`);
+            }
+
+            alert(`Monthly supporter badge ${grant ? 'granted' : 'removed'} successfully!`);
+            // Refresh user data
+            if (selectedUser && selectedUser._id === userId) {
+                await fetchUserSummary(userId);
+            }
+            fetchUsers();
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
+    const handleClearDonationBadges = async (userId) => {
+        if (!window.confirm('Remove all donation badges for this user?')) return;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/donation-badge`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({ 
+                    type: 'clear',
+                    monthlyDonationActive: false,
+                    lastDonationDate: null
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to clear donation badges');
+            }
+
+            alert('All donation badges cleared successfully!');
+            // Refresh user data
+            if (selectedUser && selectedUser._id === userId) {
+                await fetchUserSummary(userId);
+            }
+            fetchUsers();
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
     const filteredUsers = users.filter(user => {
         const matchesSearch = !searchTerm || 
             user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -237,7 +395,10 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
                 </button>
 
                 <div className="user-detail-header">
-                    <h3>{selectedUser.email}</h3>
+                    <h3>
+                        {selectedUser.email}
+                        <DonationBadge badge={getDonationBadge(selectedUser)} size="md" />
+                    </h3>
                     <div className="user-badges">
                         <span style={getStatusBadge(selectedUser.accountStatus || 'normal')}>
                             {(selectedUser.accountStatus || 'normal') === 'normal' ? 'normal' : selectedUser.accountStatus}
@@ -301,6 +462,35 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
                             <option value="moderator">Moderator</option>
                             <option value="admin">Admin</option>
                         </select>
+                    </div>
+                </div>
+
+                <div className="user-actions">
+                    <h4>Donation Badges</h4>
+                    <div className="donation-badge-info">
+                        <p><strong>Current Badge:</strong> 
+                            {selectedUser.monthlyDonationActive ? ' 💎 Monthly Supporter' :
+                             (selectedUser.lastDonationDate && 
+                              Math.floor((new Date() - new Date(selectedUser.lastDonationDate)) / (1000 * 60 * 60 * 24)) <= 31) ? 
+                              ' 🎁 Recent Supporter' : ' None'}
+                        </p>
+                        {selectedUser.lastDonationDate && (
+                            <p><strong>Last Donation:</strong> {new Date(selectedUser.lastDonationDate).toLocaleDateString('en-GB')}</p>
+                        )}
+                        {selectedUser.monthlyDonationActive && (
+                            <p><strong>Monthly Active:</strong> Yes</p>
+                        )}
+                    </div>
+                    <div className="action-buttons">
+                        <button onClick={() => handleGrantGiftBadge(selectedUser._id)}>
+                            🎁 Grant Gift Badge (31 days)
+                        </button>
+                        <button onClick={() => handleToggleMonthlyBadge(selectedUser._id, !selectedUser.monthlyDonationActive)}>
+                            💎 {selectedUser.monthlyDonationActive ? 'Remove' : 'Grant'} Diamond Badge
+                        </button>
+                        <button onClick={() => handleClearDonationBadges(selectedUser._id)}>
+                            🗑️ Clear All Badges
+                        </button>
                     </div>
                 </div>
 
@@ -386,7 +576,10 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
                         <tbody>
                             {filteredUsers.map(user => (
                                 <tr key={user._id}>
-                                    <td>{user.email}</td>
+                                    <td>
+                                        {user.email}
+                                        <DonationBadge badge={getDonationBadge(user)} size="xs" />
+                                    </td>
                                     <td>{user.personalName || 'N/A'}</td>
                                     <td>
                                         <span style={getRoleBadge(user.role)}>
