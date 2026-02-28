@@ -14431,39 +14431,18 @@ const AnimalForm = ({
                                         </select>
                                     </div>
                                     
-                                    {/* Litter fields - shown for females and intersex if outcome is successful or not specified */}
-                                    {(formData.gender === 'Female' || formData.gender === 'Intersex' || (formData.gender === 'Unknown' && (formData.breedingRole === 'dam' || formData.breedingRole === 'both'))) && (
-                                        <>
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700 mb-1">Stillborn Count</label>
-                                                <input type="number" value={newBreedingRecord.stillbornCount || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, stillbornCount: e.target.value ? parseInt(e.target.value) : null})}
-                                                    placeholder="Stillborn" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                            
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700 mb-1">Litter Size Weaned</label>
-                                                <input type="number" value={newBreedingRecord.litterSizeWeaned || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, litterSizeWeaned: e.target.value ? parseInt(e.target.value) : null})}
-                                                    placeholder="Number weaned" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                        </>
-                                    )}
+                                    {/* Litter counts - all genders */}
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Stillborn Count</label>
+                                        <input type="number" value={newBreedingRecord.stillbornCount || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, stillbornCount: e.target.value ? parseInt(e.target.value) : null})}
+                                            placeholder="Stillborn" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    </div>
                                     
-                                    {/* Litter fields for males/sire if outcome is successful */}
-                                    {(formData.gender === 'Male' || (formData.gender === 'Intersex' && newBreedingRecord.outcome === 'Successful') || ((formData.gender === 'Unknown' && (formData.breedingRole === 'sire' || formData.breedingRole === 'both')) && newBreedingRecord.outcome === 'Successful')) && newBreedingRecord.outcome === 'Successful' && (
-                                        <>
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700 mb-1">Stillborn Count (Sire)</label>
-                                                <input type="number" value={newBreedingRecord.stillbornCount || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, stillbornCount: e.target.value ? parseInt(e.target.value) : null})}
-                                                    placeholder="Stillborn" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                            
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700 mb-1">Litter Size Weaned (Sire)</label>
-                                                <input type="number" value={newBreedingRecord.litterSizeWeaned || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, litterSizeWeaned: e.target.value ? parseInt(e.target.value) : null})}
-                                                    placeholder="Stillborn" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                        </>
-                                    )}
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Litter Size Weaned</label>
+                                        <input type="number" value={newBreedingRecord.litterSizeWeaned || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, litterSizeWeaned: e.target.value ? parseInt(e.target.value) : null})}
+                                            placeholder="Number weaned" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    </div>
 
                                     {/* Offspring gender counts - auto-compute litterSizeBorn */}
                                     <div>
