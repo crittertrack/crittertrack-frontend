@@ -8543,8 +8543,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 ))}
             </div>
         )}
-        {(!loading || litters.length > 0) && (
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                 <h2 className="text-xl sm:text-3xl font-bold text-gray-800 flex items-center">
                     <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
                     Litter Management
