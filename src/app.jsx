@@ -3716,21 +3716,21 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                     {isExpanded && (
                                                         <div className="border-t border-purple-100 p-4 bg-purple-50 space-y-4">
                                                             <div className="grid grid-cols-3 gap-4 text-sm">
-                                                                <div><div className="text-gray-600 text-xs">Mating Date</div><div className="font-semibold text-gray-800">{formatDate(record.matingDate) || '?'}</div></div>
+                                                                <div><div className="text-gray-600 text-xs">Mating Date</div><div className="font-semibold text-gray-800">{formatDate(record.matingDate) || '—'}</div></div>
                                                                 {record.breedingMethod && (<div><div className="text-gray-600 text-xs">Breeding Method</div><div className="font-semibold text-gray-800">{record.breedingMethod}</div></div>)}
                                                                 {record.breedingConditionAtTime && (<div><div className="text-gray-600 text-xs">Condition</div><div className="font-semibold text-gray-800">{record.breedingConditionAtTime}</div></div>)}
                                                             </div>
                                                             <div className="grid grid-cols-3 gap-4 text-sm">
                                                                 <div><div className="text-gray-600 text-xs">CTL-ID / Litter Name</div><div className="font-mono bg-purple-100 px-2 py-1 rounded text-xs font-semibold">{record.litterId || 'Not Linked'}</div></div>
-                                                                {(isDamOnly || isBoth) && (<div><div className="text-gray-600 text-xs">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(record.birthEventDate) || '?'}</div></div>)}
+                                                                {(isDamOnly || isBoth) && (<div><div className="text-gray-600 text-xs">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(record.birthEventDate) || '—'}</div></div>)}
                                                                 {record.birthMethod && (<div><div className="text-gray-600 text-xs">Birth Method</div><div className="font-semibold text-gray-800">{record.birthMethod}</div></div>)}
                                                             </div>
                                                             <div className="bg-white p-3 rounded border border-purple-100">
                                                                 <div className="text-sm font-semibold text-gray-700 mb-3">Offspring Counts</div>
                                                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                                                                    <div><div className="text-gray-600 text-xs">Total Born</div><div className="text-2xl font-bold text-purple-600">{record.litterSizeBorn !== null ? record.litterSizeBorn : '?'}</div></div>
+                                                                    <div><div className="text-gray-600 text-xs">Total Born</div><div className="text-2xl font-bold text-purple-600">{record.litterSizeBorn !== null ? record.litterSizeBorn : '—'}</div></div>
                                                                     <div><div className="text-gray-600 text-xs">Stillborn</div><div className="text-2xl font-bold text-gray-600">{record.stillbornCount || '0'}</div></div>
-                                                                    <div><div className="text-gray-600 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '?'}</div></div>
+                                                                    <div><div className="text-gray-600 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '—'}</div></div>
                                                                     <div><div className="text-gray-600 text-xs">Outcome</div><div className={`font-semibold text-lg ${record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}`}>{record.outcome || '?'}</div></div>
                                                                 </div>
                                                             </div>
@@ -5168,21 +5168,21 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                     {isExpanded && (
                                                         <div className="border-t border-purple-100 p-4 bg-purple-50 space-y-4">
                                                             <div className="grid grid-cols-3 gap-4 text-sm">
-                                                                <div><div className="text-gray-600 text-xs">Mating Date</div><div className="font-semibold text-gray-800">{formatDate(record.matingDate) || '?'}</div></div>
+                                                                <div><div className="text-gray-600 text-xs">Mating Date</div><div className="font-semibold text-gray-800">{formatDate(record.matingDate) || '—'}</div></div>
                                                                 {record.breedingMethod && (<div><div className="text-gray-600 text-xs">Breeding Method</div><div className="font-semibold text-gray-800">{record.breedingMethod}</div></div>)}
                                                                 {record.breedingConditionAtTime && (<div><div className="text-gray-600 text-xs">Condition</div><div className="font-semibold text-gray-800">{record.breedingConditionAtTime}</div></div>)}
                                                             </div>
                                                             <div className="grid grid-cols-3 gap-4 text-sm">
                                                                 <div><div className="text-gray-600 text-xs">CTL-ID / Litter Name</div><div className="font-mono bg-purple-100 px-2 py-1 rounded text-xs font-semibold">{record.litterId || 'Not Linked'}</div></div>
-                                                                {(isDamOnly || isBoth) && (<div><div className="text-gray-600 text-xs">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(record.birthEventDate) || '?'}</div></div>)}
+                                                                {(isDamOnly || isBoth) && (<div><div className="text-gray-600 text-xs">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(record.birthEventDate) || '—'}</div></div>)}
                                                                 {record.birthMethod && (<div><div className="text-gray-600 text-xs">Birth Method</div><div className="font-semibold text-gray-800">{record.birthMethod}</div></div>)}
                                                             </div>
                                                             <div className="bg-white p-3 rounded border border-purple-100">
                                                                 <div className="text-sm font-semibold text-gray-700 mb-3">Offspring Counts</div>
                                                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                                                                    <div><div className="text-gray-600 text-xs">Total Born</div><div className="text-2xl font-bold text-purple-600">{record.litterSizeBorn !== null ? record.litterSizeBorn : '?'}</div></div>
+                                                                    <div><div className="text-gray-600 text-xs">Total Born</div><div className="text-2xl font-bold text-purple-600">{record.litterSizeBorn !== null ? record.litterSizeBorn : '—'}</div></div>
                                                                     <div><div className="text-gray-600 text-xs">Stillborn</div><div className="text-2xl font-bold text-gray-600">{record.stillbornCount || '0'}</div></div>
-                                                                    <div><div className="text-gray-600 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '?'}</div></div>
+                                                                    <div><div className="text-gray-600 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '—'}</div></div>
                                                                     <div><div className="text-gray-600 text-xs">Outcome</div><div className={`font-semibold text-lg ${record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}`}>{record.outcome || '?'}</div></div>
                                                                 </div>
                                                             </div>
@@ -6460,21 +6460,21 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                     {isExpanded && (
                                                         <div className="border-t border-purple-100 p-4 bg-purple-50 space-y-4">
                                                             <div className="grid grid-cols-3 gap-4 text-sm">
-                                                                <div><div className="text-gray-600 text-xs">Mating Date</div><div className="font-semibold text-gray-800">{formatDate(record.matingDate) || '?'}</div></div>
+                                                                <div><div className="text-gray-600 text-xs">Mating Date</div><div className="font-semibold text-gray-800">{formatDate(record.matingDate) || '—'}</div></div>
                                                                 {record.breedingMethod && (<div><div className="text-gray-600 text-xs">Breeding Method</div><div className="font-semibold text-gray-800">{record.breedingMethod}</div></div>)}
                                                                 {record.breedingConditionAtTime && (<div><div className="text-gray-600 text-xs">Condition</div><div className="font-semibold text-gray-800">{record.breedingConditionAtTime}</div></div>)}
                                                             </div>
                                                             <div className="grid grid-cols-3 gap-4 text-sm">
                                                                 <div><div className="text-gray-600 text-xs">CTL-ID / Litter Name</div><div className="font-mono bg-purple-100 px-2 py-1 rounded text-xs font-semibold">{record.litterId || 'Not Linked'}</div></div>
-                                                                {record.birthEventDate && (<div><div className="text-gray-600 text-xs">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(record.birthEventDate) || '?'}</div></div>)}
+                                                                {record.birthEventDate && (<div><div className="text-gray-600 text-xs">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(record.birthEventDate) || '—'}</div></div>)}
                                                                 {record.birthMethod && (<div><div className="text-gray-600 text-xs">Birth Method</div><div className="font-semibold text-gray-800">{record.birthMethod}</div></div>)}
                                                             </div>
                                                             <div className="bg-white p-3 rounded border border-purple-100">
                                                                 <div className="text-sm font-semibold text-gray-700 mb-3">Offspring Counts</div>
                                                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                                                                    <div><div className="text-gray-600 text-xs">Total Born</div><div className="text-2xl font-bold text-purple-600">{record.litterSizeBorn !== null ? record.litterSizeBorn : '?'}</div></div>
+                                                                    <div><div className="text-gray-600 text-xs">Total Born</div><div className="text-2xl font-bold text-purple-600">{record.litterSizeBorn !== null ? record.litterSizeBorn : '—'}</div></div>
                                                                     <div><div className="text-gray-600 text-xs">Stillborn</div><div className="text-2xl font-bold text-gray-600">{record.stillbornCount || '0'}</div></div>
-                                                                    <div><div className="text-gray-600 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '?'}</div></div>
+                                                                    <div><div className="text-gray-600 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '—'}</div></div>
                                                                     <div><div className="text-gray-600 text-xs">Outcome</div><div className={`font-semibold text-lg ${record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}`}>{record.outcome || '?'}</div></div>
                                                                 </div>
                                                             </div>
@@ -14514,7 +14514,7 @@ const AnimalForm = ({
                                                             <div className="grid grid-cols-3 gap-4 text-sm">
                                                                 <div>
                                                                     <div className="text-gray-600 text-xs">Mating Date</div>
-                                                                    <div className="font-semibold text-gray-800">{formatDate(record.matingDate) || '?'}</div>
+                                                                    <div className="font-semibold text-gray-800">{formatDate(record.matingDate) || '—'}</div>
                                                                 </div>
                                                                 {record.breedingMethod && (
                                                                     <div>
@@ -14586,7 +14586,7 @@ const AnimalForm = ({
                                                                     </div>
                                                                     <div>
                                                                         <div className="text-gray-600 text-xs">Weaned</div>
-                                                                        <div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '?'}</div>
+                                                                        <div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '—'}</div>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -26907,7 +26907,7 @@ const App = () => {
                                                                         {isExpanded && (
                                                                             <div className="border-t border-purple-100 p-4 bg-purple-50 space-y-4">
                                                                                 <div className="grid grid-cols-3 gap-4 text-sm">
-                                                                                    <div><div className="text-gray-600 text-xs">Mating Date</div><div className="font-semibold text-gray-800">{formatDate(record.matingDate) || '?'}</div></div>
+                                                                                    <div><div className="text-gray-600 text-xs">Mating Date</div><div className="font-semibold text-gray-800">{formatDate(record.matingDate) || '—'}</div></div>
                                                                                     {record.breedingMethod && (<div><div className="text-gray-600 text-xs">Breeding Method</div><div className="font-semibold text-gray-800">{record.breedingMethod}</div></div>)}
                                                                                     {record.breedingConditionAtTime && (<div><div className="text-gray-600 text-xs">Condition</div><div className="font-semibold text-gray-800">{record.breedingConditionAtTime}</div></div>)}
                                                                                 </div>
@@ -26921,7 +26921,7 @@ const App = () => {
                                                                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                                                                                         <div><div className="text-gray-600 text-xs">Total Born</div><div className="text-2xl font-bold text-purple-600">{record.litterSizeBorn !== null ? record.litterSizeBorn : '?'}</div></div>
                                                                                         <div><div className="text-gray-600 text-xs">Stillborn</div><div className="text-2xl font-bold text-gray-600">{record.stillbornCount || '0'}</div></div>
-                                                                                        <div><div className="text-gray-600 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '?'}</div></div>
+                                                                                        <div><div className="text-gray-600 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '—'}</div></div>
                                                                                         <div><div className="text-gray-600 text-xs">Outcome</div><div className={`font-semibold text-lg ${record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}`}>{record.outcome || '?'}</div></div>
                                                                                     </div>
                                                                                 </div>
