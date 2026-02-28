@@ -4108,9 +4108,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                             </div>
                                         </div>
                                     )}
-                                    {animal.handlingNotes && <div><span className="text-gray-600 font-semibold">Handling Notes:</span><strong className="mt-1 whitespace-pre-wrap">{animal.handlingNotes}</strong></div>}
-                                    {animal.socializationNotes && <div><span className="text-gray-600 font-semibold">Socialization Notes:</span><strong className="mt-1 whitespace-pre-wrap">{animal.socializationNotes}</strong></div>}
-                                    {animal.specialCareRequirements && <div><span className="text-gray-600 font-semibold">Special Care Requirements:</span><strong className="mt-1 whitespace-pre-wrap">{animal.specialCareRequirements}</strong></div>}
+                                    {animal.handlingNotes && <div className="flex items-baseline gap-1"><span className="text-gray-600 font-semibold shrink-0">Handling Notes:</span><strong className="whitespace-pre-wrap">{animal.handlingNotes}</strong></div>}
+                                    {animal.socializationNotes && <div className="flex items-baseline gap-1"><span className="text-gray-600 font-semibold shrink-0">Socialization Notes:</span><strong className="whitespace-pre-wrap">{animal.socializationNotes}</strong></div>}
+                                    {animal.specialCareRequirements && <div className="flex items-baseline gap-1"><span className="text-gray-600 font-semibold shrink-0">Special Care Requirements:</span><strong className="whitespace-pre-wrap">{animal.specialCareRequirements}</strong></div>}
                                 </div>
                             </div>
                             )}
@@ -4209,9 +4209,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">⚠️ Known Issues</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    {fieldTemplate?.fields?.behavioralIssues?.enabled !== false && animal.behavioralIssues && <div><span className="text-gray-600">{getLabel('behavioralIssues', 'Behavioral Issues')}:</span><strong className="mt-1 whitespace-pre-wrap font-medium">{animal.behavioralIssues}</strong></div>}
-                                    {fieldTemplate?.fields?.biteHistory?.enabled !== false && animal.biteHistory && <div><span className="text-gray-600">{getLabel('biteHistory', 'Bite History')}:</span><strong className="mt-1 whitespace-pre-wrap font-medium">{animal.biteHistory}</strong></div>}
-                                    {fieldTemplate?.fields?.reactivityNotes?.enabled !== false && animal.reactivityNotes && <div className="col-span-2"><span className="text-gray-600">{getLabel('reactivityNotes', 'Reactivity Notes')}:</span><strong className="mt-1 whitespace-pre-wrap font-medium">{animal.reactivityNotes}</strong></div>}
+                                    {fieldTemplate?.fields?.behavioralIssues?.enabled !== false && animal.behavioralIssues && <div className="flex items-baseline gap-1"><span className="text-gray-600 shrink-0">{getLabel('behavioralIssues', 'Behavioral Issues')}:</span><strong className="whitespace-pre-wrap font-medium">{animal.behavioralIssues}</strong></div>}
+                                    {fieldTemplate?.fields?.biteHistory?.enabled !== false && animal.biteHistory && <div className="flex items-baseline gap-1"><span className="text-gray-600 shrink-0">{getLabel('biteHistory', 'Bite History')}:</span><strong className="whitespace-pre-wrap font-medium">{animal.biteHistory}</strong></div>}
+                                    {fieldTemplate?.fields?.reactivityNotes?.enabled !== false && animal.reactivityNotes && <div className="col-span-2 flex items-baseline gap-1"><span className="text-gray-600 shrink-0">{getLabel('reactivityNotes', 'Reactivity Notes')}:</span><strong className="whitespace-pre-wrap font-medium">{animal.reactivityNotes}</strong></div>}
                                 </div>
                             </div>
                             )}
