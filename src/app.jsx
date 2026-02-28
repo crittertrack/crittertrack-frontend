@@ -3751,20 +3751,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 </div>
                             )}
 
-                            {/* 3rd Section: Mating */}
-                            {!animal.isNeutered && !animal.isInfertile && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🤝 Mating</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                        <div><span className="text-gray-600">{getLabel('matingDate', 'Mating Date')}:</span> <strong>{formatDateDisplay(animal.matingDate)}</strong></div>
-                                        <div><span className="text-gray-600">{getLabel('expectedDueDate', 'Expected Due Date')}:</span> <strong>{formatDateDisplay(animal.expectedDueDate)}</strong></div>
-                                        {(fieldTemplate?.fields?.artificialInseminationUsed?.enabled !== false) && (
-                                            <div><span className="text-gray-600">Artificial Insemination:</span> <strong>{animal.artificialInseminationUsed ? 'Yes' : 'No'}</strong></div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
                             {/* 4th Section: Stud Information */}
                             {!animal.isNeutered && !animal.isInfertile && (animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
@@ -5042,20 +5028,6 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 </div>
                             )}
 
-                            {/* 3rd Section: Mating */}
-                            {!animal.isNeutered && !animal.isInfertile && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🤝 Mating</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                        <div><span className="text-gray-600">{getLabel('matingDate', 'Mating Date')}:</span> <strong>{formatDateDisplay(animal.matingDate)}</strong></div>
-                                        <div><span className="text-gray-600">{getLabel('expectedDueDate', 'Expected Due Date')}:</span> <strong>{formatDateDisplay(animal.expectedDueDate)}</strong></div>
-                                        {(fieldTemplate?.fields?.artificialInseminationUsed?.enabled !== false) && (
-                                            <div><span className="text-gray-600">Artificial Insemination:</span> <strong>{animal.artificialInseminationUsed ? 'Yes' : 'No'}</strong></div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
                             {/* 4th Section: Stud Information */}
                             {!animal.isNeutered && !animal.isInfertile && (animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
@@ -6280,20 +6252,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                         <div><span className="text-gray-600">{getLabel('ovulationDate', 'Ovulation Date')}:</span> <strong>{animal.ovulationDate ? formatDate(animal.ovulationDate) : ''}</strong></div>
                                         {animal.estrusCycleLength && (
                                             <div><span className="text-gray-600">Estrus Cycle Length:</span> <strong>{`${animal.estrusCycleLength} days`}</strong></div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* 3rd Section: Mating */}
-                            {!animal.isNeutered && !animal.isInfertile && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🤝 Mating</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                        <div><span className="text-gray-600">{getLabel('matingDate', 'Mating Date')}:</span> <strong>{formatDateDisplay(animal.matingDate)}</strong></div>
-                                        <div><span className="text-gray-600">{getLabel('expectedDueDate', 'Expected Due Date')}:</span> <strong>{formatDateDisplay(animal.expectedDueDate)}</strong></div>
-                                        {(fieldTemplate?.fields?.artificialInseminationUsed?.enabled !== false) && (
-                                            <div><span className="text-gray-600">Artificial Insemination:</span> <strong>{animal.artificialInseminationUsed ? 'Yes' : 'No'}</strong></div>
                                         )}
                                     </div>
                                 </div>
@@ -10875,6 +10833,7 @@ const AnimalForm = ({
     const [deleteImage, setDeleteImage] = useState(false);
     const [showCommunityGeneticsModal, setShowCommunityGeneticsModal] = useState(false);
     const [activeTab, setActiveTab] = useState(1); // Tab navigation state
+    const [collapsedHealthSections, setCollapsedHealthSections] = useState({}); // collapse health tab sections
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -14624,9 +14583,12 @@ const AnimalForm = ({
                 {activeTab === 7 && (
                     <div className="space-y-6">
                         {/* Preventive Care */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-6" data-tutorial-target="preventive-care-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">🛡️ Preventive Care</h3>
-                            
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="preventive-care-section">
+                            <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, preventiveCare: !p.preventiveCare}))} className="w-full flex items-center justify-between text-left group">
+                                <h3 className="text-lg font-semibold text-gray-700">🛡️ Preventive Care</h3>
+                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.preventiveCare ? '▶' : '▼'}</span>
+                            </button>
+                            {!collapsedHealthSections.preventiveCare && (<div className="space-y-6 mt-4">
                             {/* Vaccinations */}
                             <div className="space-y-3">
                                 <h4 className="text-sm font-semibold text-gray-700">Vaccinations</h4>
@@ -14749,12 +14711,16 @@ const AnimalForm = ({
                                     </div>
                                 )}
                             </div>
+                            </div>)}
                         </div>
 
                         {/* Procedures & Diagnostics */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-6" data-tutorial-target="procedures-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">🔬 Procedures & Diagnostics</h3>
-                            
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="procedures-section">
+                            <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, proceduresDiagnostics: !p.proceduresDiagnostics}))} className="w-full flex items-center justify-between text-left group">
+                                <h3 className="text-lg font-semibold text-gray-700">🔬 Procedures & Diagnostics</h3>
+                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.proceduresDiagnostics ? '▶' : '▼'}</span>
+                            </button>
+                            {!collapsedHealthSections.proceduresDiagnostics && (<div className="space-y-6 mt-4">
                             {/* Medical Procedures */}
                             <div className="space-y-3">
                                 <h4 className="text-sm font-semibold text-gray-700">Medical Procedures</h4>
@@ -14841,11 +14807,16 @@ const AnimalForm = ({
                                     </div>
                                 )}
                             </div>
+                            </div>)}
                         </div>
 
                         {/* Active Medical Records */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="medical-history-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">�💊 Active Medical Records</h3>
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="medical-history-section">
+                            <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, activeMedical: !p.activeMedical}))} className="w-full flex items-center justify-between text-left group">
+                                <h3 className="text-lg font-semibold text-gray-700">🩹💊 Active Medical Records</h3>
+                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? '▶' : '▼'}</span>
+                            </button>
+                            {!collapsedHealthSections.activeMedical && (<div className="space-y-4 mt-4">
                             {/* Quarantine toggle */}
                             <label className="flex items-center gap-3 cursor-pointer p-3 border rounded-lg bg-white hover:bg-orange-50 transition">
                                 <input
@@ -14966,92 +14937,103 @@ const AnimalForm = ({
                                     )}
                                 </div>
                                 
-                                {/* Health Clearances & Screening - Dog/Cat */}
-                                {(!isFieldHidden('spayNeuterDate') || !isFieldHidden('heartwormStatus') || !isFieldHidden('hipElbowScores') || !isFieldHidden('eyeClearance') || !isFieldHidden('cardiacClearance') || !isFieldHidden('dentalRecords') || !isFieldHidden('geneticTestResults') || !isFieldHidden('chronicConditions')) && (
-                                    <div className="space-y-3 border-t border-gray-200 pt-4">
-                                        <h4 className="text-sm font-semibold text-gray-700">Health Clearances & Screening</h4>
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            {!isFieldHidden('spayNeuterDate') && (
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">{getFieldLabel('spayNeuterDate', 'Spay/Neuter Date')}</label>
-                                                <DatePicker value={formData.spayNeuterDate || ''} onChange={(e) => handleChange({ target: { name: 'spayNeuterDate', value: e.target.value } })}
-                                                    className="mt-1 p-2" />
-                                            </div>
-                                            )}
-                                            {!isFieldHidden('heartwormStatus') && (
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">{getFieldLabel('heartwormStatus', 'Heartworm Status')}</label>
-                                                <select name="heartwormStatus" value={formData.heartwormStatus || ''} onChange={handleChange} 
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                                    <option value="">Select...</option>
-                                                    <option value="Negative">Negative</option>
-                                                    <option value="Positive">Positive</option>
-                                                    <option value="On Prevention">On Prevention</option>
-                                                    <option value="Unknown">Unknown</option>
-                                                </select>
-                                            </div>
-                                            )}
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            {!isFieldHidden('hipElbowScores') && (
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">{getFieldLabel('hipElbowScores', 'Hip/Elbow Scores')}</label>
-                                                <input type="text" name="hipElbowScores" value={formData.hipElbowScores || ''} onChange={handleChange} 
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder="e.g., OFA Good, PennHIP 0.32" />
-                                            </div>
-                                            )}
-                                            {!isFieldHidden('eyeClearance') && (
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">{getFieldLabel('eyeClearance', 'Eye Clearance')}</label>
-                                                <input type="text" name="eyeClearance" value={formData.eyeClearance || ''} onChange={handleChange} 
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder="e.g., CAER Clear 2024" />
-                                            </div>
-                                            )}
-                                            {!isFieldHidden('cardiacClearance') && (
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">{getFieldLabel('cardiacClearance', 'Cardiac Clearance')}</label>
-                                                <input type="text" name="cardiacClearance" value={formData.cardiacClearance || ''} onChange={handleChange} 
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder="e.g., OFA Cardiac Normal" />
-                                            </div>
-                                            )}
-                                            {!isFieldHidden('dentalRecords') && (
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">{getFieldLabel('dentalRecords', 'Dental Records')}</label>
-                                                <input type="text" name="dentalRecords" value={formData.dentalRecords || ''} onChange={handleChange} 
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder="e.g., Last cleaning 01/2024" />
-                                            </div>
-                                            )}
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            {!isFieldHidden('geneticTestResults') && (
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">{getFieldLabel('geneticTestResults', 'Genetic Test Results')}</label>
-                                                <textarea name="geneticTestResults" value={formData.geneticTestResults || ''} onChange={handleChange} rows="2"
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder="e.g., Embark: Clear for DM, vWD, DCM" />
-                                            </div>
-                                            )}
-                                            {!isFieldHidden('chronicConditions') && (
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700">{getFieldLabel('chronicConditions', 'Chronic Conditions')}</label>
-                                                <textarea name="chronicConditions" value={formData.chronicConditions || ''} onChange={handleChange} rows="2"
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder="e.g., Allergies, arthritis, epilepsy" />
-                                            </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
                             </div>
+                            </div>)}
                         </div>
 
+                        {/* Health Clearances & Screening */}
+                        {(!isFieldHidden('spayNeuterDate') || !isFieldHidden('heartwormStatus') || !isFieldHidden('hipElbowScores') || !isFieldHidden('eyeClearance') || !isFieldHidden('cardiacClearance') || !isFieldHidden('dentalRecords') || !isFieldHidden('geneticTestResults') || !isFieldHidden('chronicConditions')) && (
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, healthClearances: !p.healthClearances}))} className="w-full flex items-center justify-between text-left group">
+                                <h3 className="text-lg font-semibold text-gray-700">🏥 Health Clearances & Screening</h3>
+                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? '▶' : '▼'}</span>
+                            </button>
+                            {!collapsedHealthSections.healthClearances && (<div className="space-y-4 mt-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {!isFieldHidden('spayNeuterDate') && (
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700">{getFieldLabel('spayNeuterDate', 'Spay/Neuter Date')}</label>
+                                    <DatePicker value={formData.spayNeuterDate || ''} onChange={(e) => handleChange({ target: { name: 'spayNeuterDate', value: e.target.value } })}
+                                        className="mt-1 p-2" />
+                                </div>
+                                )}
+                                {!isFieldHidden('heartwormStatus') && (
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700">{getFieldLabel('heartwormStatus', 'Heartworm Status')}</label>
+                                    <select name="heartwormStatus" value={formData.heartwormStatus || ''} onChange={handleChange}
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                        <option value="">Select...</option>
+                                        <option value="Negative">Negative</option>
+                                        <option value="Positive">Positive</option>
+                                        <option value="On Prevention">On Prevention</option>
+                                        <option value="Unknown">Unknown</option>
+                                    </select>
+                                </div>
+                                )}
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {!isFieldHidden('hipElbowScores') && (
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700">{getFieldLabel('hipElbowScores', 'Hip/Elbow Scores')}</label>
+                                    <input type="text" name="hipElbowScores" value={formData.hipElbowScores || ''} onChange={handleChange}
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                        placeholder="e.g., OFA Good, PennHIP 0.32" />
+                                </div>
+                                )}
+                                {!isFieldHidden('eyeClearance') && (
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700">{getFieldLabel('eyeClearance', 'Eye Clearance')}</label>
+                                    <input type="text" name="eyeClearance" value={formData.eyeClearance || ''} onChange={handleChange}
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                        placeholder="e.g., CAER Clear 2024" />
+                                </div>
+                                )}
+                                {!isFieldHidden('cardiacClearance') && (
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700">{getFieldLabel('cardiacClearance', 'Cardiac Clearance')}</label>
+                                    <input type="text" name="cardiacClearance" value={formData.cardiacClearance || ''} onChange={handleChange}
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                        placeholder="e.g., OFA Cardiac Normal" />
+                                </div>
+                                )}
+                                {!isFieldHidden('dentalRecords') && (
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700">{getFieldLabel('dentalRecords', 'Dental Records')}</label>
+                                    <input type="text" name="dentalRecords" value={formData.dentalRecords || ''} onChange={handleChange}
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                        placeholder="e.g., Last cleaning 01/2024" />
+                                </div>
+                                )}
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {!isFieldHidden('geneticTestResults') && (
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700">{getFieldLabel('geneticTestResults', 'Genetic Test Results')}</label>
+                                    <textarea name="geneticTestResults" value={formData.geneticTestResults || ''} onChange={handleChange} rows="2"
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                        placeholder="e.g., Embark: Clear for DM, vWD, DCM" />
+                                </div>
+                                )}
+                                {!isFieldHidden('chronicConditions') && (
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700">{getFieldLabel('chronicConditions', 'Chronic Conditions')}</label>
+                                    <textarea name="chronicConditions" value={formData.chronicConditions || ''} onChange={handleChange} rows="2"
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                        placeholder="e.g., Allergies, arthritis, epilepsy" />
+                                </div>
+                                )}
+                            </div>
+                            </div>)}
+                        </div>
+                        )}
+
                         {/* Veterinary Care */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="vet-care-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">🩺 Veterinary Care</h3>
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="vet-care-section">
+                            <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, vetCare: !p.vetCare}))} className="w-full flex items-center justify-between text-left group">
+                                <h3 className="text-lg font-semibold text-gray-700">🩺 Veterinary Care</h3>
+                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.vetCare ? '▶' : '▼'}</span>
+                            </button>
+                            {!collapsedHealthSections.vetCare && (<div className="space-y-4 mt-4">
                             <div className="space-y-4">
                                 {/* Veterinary Visits */}
                                 <div className="space-y-3">
@@ -15114,6 +15096,7 @@ const AnimalForm = ({
 
 
                             </div>
+                            </div>)}
                         </div>
                     </div>
                 )}
@@ -15121,9 +15104,9 @@ const AnimalForm = ({
                 {/* Tab 8: Animal Care */}
                 {activeTab === 8 && (
                     <div className="space-y-6">
-                        {/* 1st Section: Daily / Routine Care */}
+                        {/* 1st Section: Nutrition */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="nutrition-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">🍽️ Daily / Routine Care</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">🍽️ Nutrition</h3>
                             <div className="space-y-4">
                                 {!isFieldHidden('dietType') && (
                                 <div>
@@ -26662,19 +26645,6 @@ const App = () => {
                                 </div>
                             )}
 
-                            {/* 3rd Section: Mating */}
-                            {!animalToView.isNeutered && !animalToView.isInfertile && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🤝 Mating</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                        <div><span className="text-gray-600">Mating Date:</span> <strong>{formatDateDisplay(animalToView.matingDate)}</strong></div>
-                                        <div><span className="text-gray-600">Expected Due Date:</span> <strong>{formatDateDisplay(animalToView.expectedDueDate)}</strong></div>
-                                        {(animalToView.species === 'Dog' || animalToView.species === 'Cat') && (
-                                            <div><span className="text-gray-600">Artificial Insemination:</span> <strong>{animalToView.artificialInseminationUsed ? 'Yes' : 'No'}</strong></div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
 
                             {/* 4th Section: Stud Information */}
                             {!animalToView.isNeutered && !animalToView.isInfertile && (animalToView.gender === 'Male' || animalToView.gender === 'Intersex' || animalToView.gender === 'Unknown') && (
