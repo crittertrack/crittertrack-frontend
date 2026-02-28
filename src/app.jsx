@@ -310,6 +310,112 @@ const AnimalImage = ({ src, alt = "Animal", className = "w-full h-full object-co
     );
 };
 
+// Conflict Resolution Modal Component
+const ConflictResolutionModal = ({ conflicts, litter, onResolve, onCancel }) => {
+    const [resolutions, setResolutions] = useState({});
+
+    useEffect(() => {
+        // Initialize resolutions with default 'breeding' choice for all conflicts
+        const initialResolutions = {};
+        conflicts.forEach(conflict => {
+            initialResolutions[conflict.field] = 'breeding';
+        });
+        setResolutions(initialResolutions);
+    }, [conflicts]);
+
+    const handleResolutionChange = (field, choice) => {
+        setResolutions(prev => ({
+            ...prev,
+            [field]: choice
+        }));
+    };
+
+    const handleResolve = () => {
+        const resolutionArray = Object.entries(resolutions).map(([field, choice]) => ({
+            field,
+            choice
+        }));
+        onResolve(resolutionArray);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-2xl max-h-96 overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold text-gray-800">Resolve Data Conflicts</h3>
+                    <button onClick={onCancel} className="text-gray-500 hover:text-gray-700">
+                        <X size={24} />
+                    </button>
+                </div>
+                
+                <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-yellow-800 text-sm">
+                        <strong>Linking to Litter:</strong> {litter.litter_id_public}
+                    </p>
+                    <p className="text-yellow-800 text-sm">
+                        Some data conflicts were found between your breeding record and the litter. Please choose which values to keep.
+                    </p>
+                </div>
+
+                <div className="space-y-4">
+                    {conflicts.map((conflict) => (
+                        <div key={conflict.field} className="border border-gray-200 rounded-lg p-4">
+                            <h4 className="font-semibold text-gray-700 mb-3">{conflict.label}</h4>
+                            <div className="grid grid-cols-2 gap-4">
+                                <label className="flex items-center space-x-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name={conflict.field}
+                                        value="breeding"
+                                        checked={resolutions[conflict.field] === 'breeding'}
+                                        onChange={() => handleResolutionChange(conflict.field, 'breeding')}
+                                        className="text-blue-600"
+                                    />
+                                    <div className="flex-1">
+                                        <div className="text-sm font-medium text-blue-600">Keep Breeding Record Value</div>
+                                        <div className="text-sm text-gray-600">{conflict.breedingValue}</div>
+                                    </div>
+                                </label>
+                                <label className="flex items-center space-x-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name={conflict.field}
+                                        value="litter"
+                                        checked={resolutions[conflict.field] === 'litter'}
+                                        onChange={() => handleResolutionChange(conflict.field, 'litter')}
+                                        className="text-green-600"
+                                    />
+                                    <div className="flex-1">
+                                        <div className="text-sm font-medium text-green-600">Use Litter Value</div>
+                                        <div className="text-sm text-gray-600">{conflict.litterValue}</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                
+                <div className="flex gap-4 mt-6">
+                    <button 
+                        type="button" 
+                        onClick={onCancel}
+                        className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        type="button" 
+                        onClick={handleResolve}
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+                    >
+                        Resolve Conflicts & Link
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // Pedigree Chart Component
 const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken = null }) => {
     const [pedigreeData, setPedigreeData] = useState(null);
@@ -10473,6 +10579,8 @@ const AnimalForm = ({
     // Modal states for create/link litter
     const [showCreateLitterModal, setShowCreateLitterModal] = useState(false);
     const [showLinkLitterModal, setShowLinkLitterModal] = useState(false);
+    const [showConflictModal, setShowConflictModal] = useState(false);
+    const [conflictData, setConflictData] = useState(null);
     const [breedingRecordForLitter, setBreedingRecordForLitter] = useState(null);
     const [existingLitters, setExistingLitters] = useState([]);
     const [litterSearchLoading, setLitterSearchLoading] = useState(false);
@@ -10994,7 +11102,8 @@ const AnimalForm = ({
         setNewParasiteControl({ date: new Date().toISOString().substring(0, 10), treatment: '', notes: '' });
     };
 
-    const addBreedingRecord = () => {
+    // Enhanced breeding record creation with bidirectional sync
+    const addBreedingRecord = async () => {
         // All fields are now optional - no validation required
         const record = {
             id: Date.now().toString(),
@@ -11022,7 +11131,27 @@ const AnimalForm = ({
             newBreedingRecord_mateAnimalId: newBreedingRecord.mateAnimalId
         });
         
+        // Validate offspring counts if provided
+        const countValidation = validateOffspringCounts(record);
+        if (!countValidation.isValid) {
+            showModalMessage('Count Validation Error', `Offspring counts don't add up: ${countValidation.message}`);
+            return;
+        }
+        
         setBreedingRecords([...breedingRecords, record]);
+        
+        // Create bidirectional breeding record if mate is from database
+        if (record.mateAnimalId && mateInfo) {
+            try {
+                await createBidirectionalBreedingRecord(record, mateInfo);
+                showModalMessage('Success', `Breeding record created for both ${formData.name || animalToEdit?.name} and ${mateInfo.name}`);
+            } catch (error) {
+                console.error('Error creating bidirectional record:', error);
+                showModalMessage('Notice', `Breeding record created for ${formData.name || animalToEdit?.name}. Could not create record for mate: ${error.message}`);
+            }
+        }
+        
+        // Reset form
         setNewBreedingRecord({
             breedingMethod: 'Unknown',
             breedingConditionAtTime: null,
@@ -11039,6 +11168,91 @@ const AnimalForm = ({
             notes: ''
         });
         setMateInfo(null);
+    };
+    
+    // Validate offspring counts across all methods
+    const validateOffspringCounts = (record) => {
+        const born = record.litterSizeBorn || 0;
+        const weaned = record.litterSizeWeaned || 0;
+        const stillborn = record.stillbornCount || 0;
+        
+        // Check if any counts are provided
+        if (born === 0 && weaned === 0 && stillborn === 0) {
+            return { isValid: true }; // No counts provided is valid
+        }
+        
+        // Stillborn + Weaned should not exceed Total Born
+        if ((stillborn + weaned) > born && born > 0) {
+            return { 
+                isValid: false, 
+                message: `Stillborn (${stillborn}) + Weaned (${weaned}) = ${stillborn + weaned} exceeds Total Born (${born})` 
+            };
+        }
+        
+        // Weaned cannot exceed born
+        if (weaned > born && born > 0) {
+            return { 
+                isValid: false, 
+                message: `Weaned (${weaned}) cannot exceed Total Born (${born})` 
+            };
+        }
+        
+        // Stillborn cannot exceed born
+        if (stillborn > born && born > 0) {
+            return { 
+                isValid: false, 
+                message: `Stillborn (${stillborn}) cannot exceed Total Born (${born})` 
+            };
+        }
+        
+        return { isValid: true };
+    };
+    
+    // Create bidirectional breeding record on mate's account
+    const createBidirectionalBreedingRecord = async (originalRecord, mateInfo) => {
+        if (!authToken || !mateInfo.backendId) {
+            console.warn('Cannot create bidirectional record: missing auth or mate backend ID');
+            return;
+        }
+        
+        // Get the mate's current data
+        const mateResponse = await axios.get(`${API_BASE_URL}/animals/${mateInfo.backendId}`, {
+            headers: { Authorization: `Bearer ${authToken}` }
+        });
+        
+        const mateAnimal = mateResponse.data;
+        
+        // Create reciprocal breeding record 
+        const reciprocalRecord = {
+            id: (Date.now() + 1).toString(), // Slightly different ID
+            recordDate: originalRecord.recordDate,
+            breedingMethod: originalRecord.breedingMethod,
+            breedingConditionAtTime: originalRecord.breedingConditionAtTime,
+            matingDates: originalRecord.matingDates,
+            mate: `${formData.prefix || ''} ${formData.name || animalToEdit?.name || ''}`.trim(),
+            mateAnimalId: formData.id_public || animalToEdit?.id_public,
+            outcome: originalRecord.outcome,
+            birthEventDate: originalRecord.birthEventDate,
+            birthMethod: originalRecord.birthMethod,
+            litterSizeBorn: originalRecord.litterSizeBorn,
+            litterSizeWeaned: originalRecord.litterSizeWeaned,
+            stillbornCount: originalRecord.stillbornCount,
+            litterId: originalRecord.litterId,
+            notes: `[Auto-generated] ${originalRecord.notes}`.trim()
+        };
+        
+        // Add to mate's breeding records
+        const updatedMateData = {
+            ...mateAnimal,
+            breedingRecords: [...(mateAnimal.breedingRecords || []), reciprocalRecord]
+        };
+        
+        // Save updated mate data
+        await axios.put(`${API_BASE_URL}/animals/${mateInfo.backendId}`, updatedMateData, {
+            headers: { Authorization: `Bearer ${authToken}` }
+        });
+        
+        console.log('[BIDIRECTIONAL] Created reciprocal breeding record on mate account');
     };
     
     // Handler for creating a litter from breeding record
@@ -11101,31 +11315,138 @@ const AnimalForm = ({
             setShowLinkLitterModal(false);
             setBreedingRecordForLitter(null);
         } else {
-            // Linking from the add form - auto-fill blank fields
-            const updates = {
-                litterId: litter.litter_id_public
-            };
+            // Check for conflicts between breeding record and litter data
+            const conflicts = [];
             
-            // Auto-fill only if field is empty
-            if (!newBreedingRecord.birthEventDate && litter.birthDate) {
-                updates.birthEventDate = litter.birthDate;
-            }
-            if (!newBreedingRecord.litterSizeBorn && litter.numberBorn) {
-                updates.litterSizeBorn = litter.numberBorn;
-            }
-            if (!newBreedingRecord.stillbornCount && litter.stillborn) {
-                updates.stillbornCount = litter.stillborn;
-            }
-            if (!newBreedingRecord.litterSizeWeaned && litter.numberWeaned) {
-                updates.litterSizeWeaned = litter.numberWeaned;
-            }
-            if (!newBreedingRecord.matingDates && litter.pairingDate) {
-                updates.matingDates = litter.pairingDate;
+            // Date conflicts
+            if (newBreedingRecord.birthEventDate && litter.birthDate && 
+                newBreedingRecord.birthEventDate !== litter.birthDate) {
+                conflicts.push({
+                    field: 'birthEventDate',
+                    label: 'Birth Date',
+                    breedingValue: newBreedingRecord.birthEventDate,
+                    litterValue: litter.birthDate
+                });
             }
             
-            setNewBreedingRecord(prev => ({ ...prev, ...updates }));
-            setShowLinkLitterModal(false);
+            // Number conflicts
+            if (newBreedingRecord.litterSizeBorn && litter.numberBorn &&
+                parseInt(newBreedingRecord.litterSizeBorn) !== parseInt(litter.numberBorn)) {
+                conflicts.push({
+                    field: 'litterSizeBorn',
+                    label: 'Number Born',
+                    breedingValue: newBreedingRecord.litterSizeBorn,
+                    litterValue: litter.numberBorn
+                });
+            }
+            
+            if (newBreedingRecord.stillbornCount && litter.stillborn &&
+                parseInt(newBreedingRecord.stillbornCount) !== parseInt(litter.stillborn)) {
+                conflicts.push({
+                    field: 'stillbornCount',
+                    label: 'Stillborn Count',
+                    breedingValue: newBreedingRecord.stillbornCount,
+                    litterValue: litter.stillborn
+                });
+            }
+            
+            if (newBreedingRecord.litterSizeWeaned && litter.numberWeaned &&
+                parseInt(newBreedingRecord.litterSizeWeaned) !== parseInt(litter.numberWeaned)) {
+                conflicts.push({
+                    field: 'litterSizeWeaned',
+                    label: 'Number Weaned',
+                    breedingValue: newBreedingRecord.litterSizeWeaned,
+                    litterValue: litter.numberWeaned
+                });
+            }
+            
+            if (newBreedingRecord.matingDates && litter.pairingDate &&
+                newBreedingRecord.matingDates !== litter.pairingDate) {
+                conflicts.push({
+                    field: 'matingDates',
+                    label: 'Mating/Pairing Date',
+                    breedingValue: newBreedingRecord.matingDates,
+                    litterValue: litter.pairingDate
+                });
+            }
+            
+            if (conflicts.length > 0) {
+                // Show conflict resolution modal
+                setConflictData({ litter, conflicts });
+                setShowConflictModal(true);
+            } else {
+                // No conflicts - proceed with auto-fill
+                performLitterLink(litter);
+            }
         }
+    };
+    
+    // Perform the litter link with auto-fill
+    const performLitterLink = (litter) => {
+        const updates = { litterId: litter.litter_id_public };
+        
+        // Auto-fill only if field is empty
+        if (!newBreedingRecord.birthEventDate && litter.birthDate) {
+            updates.birthEventDate = litter.birthDate;
+        }
+        if (!newBreedingRecord.litterSizeBorn && litter.numberBorn) {
+            updates.litterSizeBorn = litter.numberBorn;
+        }
+        if (!newBreedingRecord.stillbornCount && litter.stillborn) {
+            updates.stillbornCount = litter.stillborn;
+        }
+        if (!newBreedingRecord.litterSizeWeaned && litter.numberWeaned) {
+            updates.litterSizeWeaned = litter.numberWeaned;
+        }
+        if (!newBreedingRecord.matingDates && litter.pairingDate) {
+            updates.matingDates = litter.pairingDate;
+        }
+        
+        setNewBreedingRecord(prev => ({ ...prev, ...updates }));
+        setShowLinkLitterModal(false);
+        
+        showModalMessage('Success', `Linked to litter ${litter.litter_id_public} with auto-filled data!`);
+    };
+    
+    // Handle conflict resolution
+    const handleConflictResolution = (resolutions) => {
+        const litter = conflictData.litter;
+        const updates = { litterId: litter.litter_id_public };
+        
+        // Apply conflict resolutions
+        resolutions.forEach(resolution => {
+            const conflict = conflictData.conflicts.find(c => c.field === resolution.field);
+            if (conflict) {
+                if (resolution.choice === 'litter') {
+                    updates[resolution.field] = conflict.litterValue;
+                }
+                // If choice is 'breeding', keep existing value (don't update)
+            }
+        });
+        
+        // Auto-fill empty fields (no conflicts)
+        if (!newBreedingRecord.birthEventDate && litter.birthDate && !updates.birthEventDate) {
+            updates.birthEventDate = litter.birthDate;
+        }
+        if (!newBreedingRecord.litterSizeBorn && litter.numberBorn && !updates.litterSizeBorn) {
+            updates.litterSizeBorn = litter.numberBorn;
+        }
+        if (!newBreedingRecord.stillbornCount && litter.stillborn && !updates.stillbornCount) {
+            updates.stillbornCount = litter.stillborn;
+        }
+        if (!newBreedingRecord.litterSizeWeaned && litter.numberWeaned && !updates.litterSizeWeaned) {
+            updates.litterSizeWeaned = litter.numberWeaned;
+        }
+        if (!newBreedingRecord.matingDates && litter.pairingDate && !updates.matingDates) {
+            updates.matingDates = litter.pairingDate;
+        }
+        
+        setNewBreedingRecord(prev => ({ ...prev, ...updates }));
+        setShowLinkLitterModal(false);
+        setShowConflictModal(false);
+        setConflictData(null);
+        
+        showModalMessage('Success', `Linked to litter ${litter.litter_id_public} with resolved conflicts!`);
     };
     
     // Fetch existing litters for linking (filtered by species and animal as sire/dam)
@@ -12090,6 +12411,20 @@ const AnimalForm = ({
                         </button>
                     </div>
                 </div>
+            )}
+
+            {/* --- Conflict Resolution Modal --- */}
+            {showConflictModal && conflictData && (
+                <ConflictResolutionModal 
+                    conflicts={conflictData.conflicts}
+                    litter={conflictData.litter}
+                    onResolve={handleConflictResolution}
+                    onCancel={() => {
+                        setShowConflictModal(false);
+                        setConflictData(null);
+                        setShowLinkLitterModal(false);
+                    }}
+                />
             )}
 
             <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center justify-between">
