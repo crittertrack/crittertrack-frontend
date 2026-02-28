@@ -3236,17 +3236,13 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">🏷️🥚 Availability for Sale or Stud</h3>
                                 <div className="space-y-3 text-sm">
-                                    <div>
+                                    <div className="flex items-center gap-2">
                                         <span className="text-gray-600">For Sale:</span>
-                                        <strong className="block mt-1">
-                                            {animal.isForSale ? `Yes - ${getCurrencySymbol(animal.salePriceCurrency)} ${animal.salePriceAmount || 'Negotiable'}`.trim() : 'No'}
-                                        </strong>
+                                        <strong>{animal.isForSale ? `Yes - ${getCurrencySymbol(animal.salePriceCurrency)} ${animal.salePriceAmount || 'Negotiable'}`.trim() : 'No'}</strong>
                                     </div>
-                                    <div>
+                                    <div className="flex items-center gap-2">
                                         <span className="text-gray-600">For Stud:</span>
-                                        <strong className="block mt-1">
-                                            {animal.availableForBreeding ? `Yes - ${getCurrencySymbol(animal.studFeeCurrency)} ${animal.studFeeAmount || 'Negotiable'}`.trim() : 'No'}
-                                        </strong>
+                                        <strong>{animal.availableForBreeding ? `Yes - ${getCurrencySymbol(animal.studFeeCurrency)} ${animal.studFeeAmount || 'Negotiable'}`.trim() : 'No'}</strong>
                                     </div>
                                 </div>
                             </div>
@@ -4880,17 +4876,13 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">🏷️🥚 Availability for Sale or Stud</h3>
                                 <div className="space-y-3 text-sm">
-                                    <div>
+                                    <div className="flex items-center gap-2">
                                         <span className="text-gray-600">For Sale:</span>
-                                        <strong className="block mt-1">
-                                            {animal.isForSale ? `Yes - ${animal.salePriceCurrency || ''} ${animal.salePriceAmount || 'Negotiable'}`.trim() : 'No'}
-                                        </strong>
+                                        <strong>{animal.isForSale ? `Yes - ${animal.salePriceCurrency || ''} ${animal.salePriceAmount || 'Negotiable'}`.trim() : 'No'}</strong>
                                     </div>
-                                    <div>
+                                    <div className="flex items-center gap-2">
                                         <span className="text-gray-600">For Stud:</span>
-                                        <strong className="block mt-1">
-                                            {animal.availableForBreeding ? `Yes - ${animal.studFeeCurrency || ''} ${animal.studFeeAmount || 'Negotiable'}`.trim() : 'No'}
-                                        </strong>
+                                        <strong>{animal.availableForBreeding ? `Yes - ${animal.studFeeCurrency || ''} ${animal.studFeeAmount || 'Negotiable'}`.trim() : 'No'}</strong>
                                     </div>
                                 </div>
                             </div>
