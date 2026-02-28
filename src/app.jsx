@@ -11018,6 +11018,9 @@ const AnimalForm = ({
         litterSizeBorn: null,
         litterSizeWeaned: null,
         stillbornCount: null,
+        maleCount: null,
+        femaleCount: null,
+        unknownCount: null,
         litterId: null,
         notes: ''
     });
@@ -11567,6 +11570,9 @@ const AnimalForm = ({
             litterSizeBorn: newBreedingRecord.litterSizeBorn !== null ? parseInt(newBreedingRecord.litterSizeBorn) : null,
             litterSizeWeaned: newBreedingRecord.litterSizeWeaned !== null ? parseInt(newBreedingRecord.litterSizeWeaned) : null,
             stillbornCount: newBreedingRecord.stillbornCount !== null ? parseInt(newBreedingRecord.stillbornCount) : null,
+            maleCount: newBreedingRecord.maleCount !== null && newBreedingRecord.maleCount !== '' ? parseInt(newBreedingRecord.maleCount) : null,
+            femaleCount: newBreedingRecord.femaleCount !== null && newBreedingRecord.femaleCount !== '' ? parseInt(newBreedingRecord.femaleCount) : null,
+            unknownCount: newBreedingRecord.unknownCount !== null && newBreedingRecord.unknownCount !== '' ? parseInt(newBreedingRecord.unknownCount) : null,
             litterId: newBreedingRecord.litterId || null,
             notes: newBreedingRecord.notes || ''
         };
@@ -11612,6 +11618,9 @@ const AnimalForm = ({
             litterSizeBorn: null,
             litterSizeWeaned: null,
             stillbornCount: null,
+            maleCount: null,
+            femaleCount: null,
+            unknownCount: null,
             litterId: null,
             notes: ''
         });
@@ -14435,6 +14444,23 @@ const AnimalForm = ({
                                             </div>
                                         </>
                                     )}
+
+                                    {/* Offspring gender counts */}
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Males Born</label>
+                                        <input type="number" value={newBreedingRecord.maleCount ?? ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, maleCount: e.target.value !== '' ? parseInt(e.target.value) : null})}
+                                            placeholder="# males" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Females Born</label>
+                                        <input type="number" value={newBreedingRecord.femaleCount ?? ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, femaleCount: e.target.value !== '' ? parseInt(e.target.value) : null})}
+                                            placeholder="# females" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Unknown / Intersex Born</label>
+                                        <input type="number" value={newBreedingRecord.unknownCount ?? ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, unknownCount: e.target.value !== '' ? parseInt(e.target.value) : null})}
+                                            placeholder="# unknown/intersex" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    </div>
                                 </div>
                                 
                                 {/* Notes */}
@@ -14626,6 +14652,26 @@ const AnimalForm = ({
                                                                     {linkedLitter?.femaleCount != null && <div><div className="text-gray-600 text-xs">Females</div><div className="text-2xl font-bold text-pink-500">{linkedLitter.femaleCount}</div></div>}
                                                                     {linkedLitter?.unknownCount != null && linkedLitter.unknownCount > 0 && <div><div className="text-gray-600 text-xs">Unknown / Intersex</div><div className="text-2xl font-bold text-gray-600">{linkedLitter.unknownCount}</div></div>}
                                                                     {linkedLitter?.inbreedingCoefficient != null && <div><div className="text-gray-600 text-xs">COI</div><div className="text-xl font-bold text-orange-600">{linkedLitter.inbreedingCoefficient.toFixed(2)}%</div></div>}
+                                                                </div>
+                                                                <div className="grid grid-cols-3 gap-3 mt-3">
+                                                                    <div>
+                                                                        <label className="block text-xs text-gray-500 mb-1">Males Born</label>
+                                                                        <input type="number" min="0" value={record.maleCount ?? ''} onClick={(e) => e.stopPropagation()}
+                                                                            onChange={(e) => setBreedingRecords(breedingRecords.map(r => r.id === record.id ? {...r, maleCount: e.target.value !== '' ? parseInt(e.target.value) : null} : r))}
+                                                                            className="w-full p-1.5 text-sm border border-gray-300 rounded focus:ring-primary focus:border-primary" placeholder="—" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <label className="block text-xs text-gray-500 mb-1">Females Born</label>
+                                                                        <input type="number" min="0" value={record.femaleCount ?? ''} onClick={(e) => e.stopPropagation()}
+                                                                            onChange={(e) => setBreedingRecords(breedingRecords.map(r => r.id === record.id ? {...r, femaleCount: e.target.value !== '' ? parseInt(e.target.value) : null} : r))}
+                                                                            className="w-full p-1.5 text-sm border border-gray-300 rounded focus:ring-primary focus:border-primary" placeholder="—" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <label className="block text-xs text-gray-500 mb-1">Unknown / Intersex</label>
+                                                                        <input type="number" min="0" value={record.unknownCount ?? ''} onClick={(e) => e.stopPropagation()}
+                                                                            onChange={(e) => setBreedingRecords(breedingRecords.map(r => r.id === record.id ? {...r, unknownCount: e.target.value !== '' ? parseInt(e.target.value) : null} : r))}
+                                                                            className="w-full p-1.5 text-sm border border-gray-300 rounded focus:ring-primary focus:border-primary" placeholder="—" />
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                             
