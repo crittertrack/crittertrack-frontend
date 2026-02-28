@@ -3126,15 +3126,17 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                     {breederInfo ? (() => {
                                         const showPersonal = breederInfo.showPersonalName ?? false;
                                         const showBreeder = breederInfo.showBreederName ?? false;
+                                        let bDisplayName;
                                         if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
-                                            return `${breederInfo.personalName} (${breederInfo.breederName})`;
+                                            bDisplayName = `${breederInfo.personalName} (${breederInfo.breederName})`;
                                         } else if (showBreeder && breederInfo.breederName) {
-                                            return breederInfo.breederName;
+                                            bDisplayName = breederInfo.breederName;
                                         } else if (showPersonal && breederInfo.personalName) {
-                                            return breederInfo.personalName;
+                                            bDisplayName = breederInfo.personalName;
                                         } else {
-                                            return 'Unknown Breeder';
+                                            bDisplayName = 'Unknown Breeder';
                                         }
+                                        return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-blue-600 hover:underline font-semibold">{bDisplayName}</RouterLink>;
                                     })() : ((animal.manualBreederName || animal.breederId_public) ? <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public}</span> : '')}
                                 </p>
                             </div>
@@ -3202,7 +3204,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="text-gray-600">Breeder:</span>
-                                        <strong>{breederInfo ? `${breederInfo.breederName || breederInfo.personalName || 'Unknown'}` : (animal.manualBreederName || animal.breederId_public || '')}</strong>
+                                        {breederInfo
+                                            ? <RouterLink to={`/user/${breederInfo.id_public}`} className="text-blue-600 hover:underline font-semibold">{breederInfo.breederName || breederInfo.personalName || 'Unknown'}</RouterLink>
+                                            : <strong>{animal.manualBreederName || animal.breederId_public || ''}</strong>}
                                     </div>
                                 </div>
                             </div>
@@ -4776,15 +4780,17 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                     {breederInfo ? (() => {
                                         const showPersonal = breederInfo.showPersonalName ?? false;
                                         const showBreeder = breederInfo.showBreederName ?? false;
+                                        let bDisplayName;
                                         if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
-                                            return `${breederInfo.personalName} (${breederInfo.breederName})`;
+                                            bDisplayName = `${breederInfo.personalName} (${breederInfo.breederName})`;
                                         } else if (showBreeder && breederInfo.breederName) {
-                                            return breederInfo.breederName;
+                                            bDisplayName = breederInfo.breederName;
                                         } else if (showPersonal && breederInfo.personalName) {
-                                            return breederInfo.personalName;
+                                            bDisplayName = breederInfo.personalName;
                                         } else {
-                                            return 'Unknown Breeder';
+                                            bDisplayName = 'Unknown Breeder';
                                         }
+                                        return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-blue-600 hover:underline font-semibold">{bDisplayName}</RouterLink>;
                                     })() : ((animal.manualBreederName || animal.breederId_public) ? <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public}</span> : '')}
                                 </p>
                             </div>
@@ -4842,7 +4848,9 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="text-gray-600">Breeder:</span>
-                                        <strong>{breederInfo ? `${breederInfo.breederName || breederInfo.personalName || 'Unknown'}` : (animal.manualBreederName || animal.breederId_public || '')}</strong>
+                                        {breederInfo
+                                            ? <RouterLink to={`/user/${breederInfo.id_public}`} className="text-blue-600 hover:underline font-semibold">{breederInfo.breederName || breederInfo.personalName || 'Unknown'}</RouterLink>
+                                            : <strong>{animal.manualBreederName || animal.breederId_public || ''}</strong>}
                                     </div>
                                 </div>
                             </div>
