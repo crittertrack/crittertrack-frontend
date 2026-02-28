@@ -2953,7 +2953,15 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                     </div>
 
                                     <div className="w-full md:w-2/3 p-4 sm:p-6 flex flex-col border-t md:border-t-0 md:border-l border-gray-300 space-y-3">
-                                        {/* Toggle Controls - Top */}
+                                        {/* Species/Breed/Strain/CTC - At Top */}
+                                        <p className="text-sm text-gray-600">
+                                            {animal.species || 'Unknown'}
+                                            {animal.breed && ` • ${animal.breed}`}
+                                            {animal.strain && ` • ${animal.strain}`}
+                                            {animal.id_public && ` • ${animal.id_public}`}
+                                        </p>
+
+                                        {/* Toggle Controls */}
                                         <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 sm:justify-end mb-2">
                                             {/* Owned Toggle */}
                                             <button
@@ -2995,14 +3003,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                 <span>{animal.isDisplay ? 'Public' : 'Private'}</span>
                                             </button>
                                         </div>
-
-{/* Species/Breed/Strain/CTC - At Top */}
-                                        <p className="text-sm text-gray-600">
-                                            {animal.species || 'Unknown'}
-                                            {animal.breed && ` • ${animal.breed}`}
-                                            {animal.strain && ` • ${animal.strain}`}
-                                            {animal.id_public && ` • ${animal.id_public}`}
-                                        </p>
 
                                         {/* Full Name */}
                                         <h2 className="text-2xl font-bold text-gray-800">
