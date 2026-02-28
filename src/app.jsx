@@ -473,6 +473,118 @@ const ConflictResolutionModal = ({ conflicts, litter, onResolve, onCancel }) => 
     );
 };
 
+// ─── Litter Sync Conflict Modal ───────────────────────────────────────────────
+// Shown after an animal save when a breeding record's values differ from its
+// linked litter document. Lets the user pick the "truth" for each field; the
+// winning value is written to BOTH sides.
+const LitterSyncConflictModal = ({ items, onResolve, onSkip }) => {
+    const [choices, setChoices] = useState({});
+
+    useEffect(() => {
+        const init = {};
+        items.forEach(item => {
+            item.conflicts.forEach(c => {
+                init[`${item.litter._id}__${c.field}`] = 'record';
+            });
+        });
+        setChoices(init);
+    }, [items]);
+
+    const set = (litterId, field, val) =>
+        setChoices(prev => ({ ...prev, [`${litterId}__${field}`]: val }));
+
+    return (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-70 flex items-center justify-center p-4 z-[60]">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+                {/* Header */}
+                <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-200">
+                    <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                        <span className="text-amber-600 text-xl">⚠️</span>
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-bold text-gray-900">Litter Sync Conflicts</h3>
+                        <p className="text-sm text-gray-500">Your breeding record and litter card have different values. Pick which is correct — it will be saved to both.</p>
+                    </div>
+                </div>
+
+                {/* Conflict list */}
+                <div className="overflow-y-auto flex-1 px-6 py-4 space-y-6">
+                    {items.map(item => (
+                        <div key={item.litter._id} className="space-y-3">
+                            {items.length > 1 && (
+                                <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                    Litter {item.litter.litter_id_public}
+                                </div>
+                            )}
+                            {item.conflicts.map(c => {
+                                const key = `${item.litter._id}__${c.field}`;
+                                const chosen = choices[key] ?? 'record';
+                                return (
+                                    <div key={c.field} className="rounded-xl border border-gray-200 overflow-hidden">
+                                        <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
+                                            <span className="text-sm font-semibold text-gray-700">{c.label}</span>
+                                        </div>
+                                        <div className="grid grid-cols-2 divide-x divide-gray-200">
+                                            {/* Breeding record option */}
+                                            <label className={`flex items-start gap-3 p-4 cursor-pointer transition ${chosen === 'record' ? 'bg-blue-50' : 'hover:bg-gray-50'}`}>
+                                                <input
+                                                    type="radio"
+                                                    name={key}
+                                                    value="record"
+                                                    checked={chosen === 'record'}
+                                                    onChange={() => set(item.litter._id, c.field, 'record')}
+                                                    className="mt-0.5 accent-blue-600"
+                                                />
+                                                <div>
+                                                    <div className={`text-xs font-semibold mb-1 ${chosen === 'record' ? 'text-blue-600' : 'text-gray-500'}`}>Breeding Record</div>
+                                                    <div className={`text-sm font-bold ${chosen === 'record' ? 'text-blue-800' : 'text-gray-700'}`}>{c.recordValue ?? '—'}</div>
+                                                </div>
+                                            </label>
+                                            {/* Litter card option */}
+                                            <label className={`flex items-start gap-3 p-4 cursor-pointer transition ${chosen === 'litter' ? 'bg-green-50' : 'hover:bg-gray-50'}`}>
+                                                <input
+                                                    type="radio"
+                                                    name={key}
+                                                    value="litter"
+                                                    checked={chosen === 'litter'}
+                                                    onChange={() => set(item.litter._id, c.field, 'litter')}
+                                                    className="mt-0.5 accent-green-600"
+                                                />
+                                                <div>
+                                                    <div className={`text-xs font-semibold mb-1 ${chosen === 'litter' ? 'text-green-600' : 'text-gray-500'}`}>Litter Card</div>
+                                                    <div className={`text-sm font-bold ${chosen === 'litter' ? 'text-green-800' : 'text-gray-700'}`}>{c.litterValue ?? '—'}</div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ))}
+                </div>
+
+                {/* Footer */}
+                <div className="flex gap-3 px-6 py-4 border-t border-gray-200">
+                    <button
+                        type="button"
+                        onClick={onSkip}
+                        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 px-4 rounded-lg transition text-sm"
+                    >
+                        Skip Litter Sync
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => onResolve(choices)}
+                        className="flex-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg transition text-sm"
+                    >
+                        Save to Both Sides
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // Pedigree Chart Component
 const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken = null }) => {
     const [pedigreeData, setPedigreeData] = useState(null);
@@ -11042,6 +11154,8 @@ const AnimalForm = ({
     const [showLinkLitterModal, setShowLinkLitterModal] = useState(false);
     const [showConflictModal, setShowConflictModal] = useState(false);
     const [conflictData, setConflictData] = useState(null);
+    const [showLitterSyncModal, setShowLitterSyncModal] = useState(false);
+    const [litterSyncConflictData, setLitterSyncConflictData] = useState(null);
     const [breedingRecordForLitter, setBreedingRecordForLitter] = useState(null);
     const [existingLitters, setExistingLitters] = useState([]);
     const [litterSearchLoading, setLitterSearchLoading] = useState(false);
@@ -11966,6 +12080,71 @@ const AnimalForm = ({
         
         showModalMessage('Success', `Linked to litter ${litter.litter_id_public} with resolved conflicts!`);
     };
+
+    // Handle conflict resolution from the litter-sync modal (fires after animal save)
+    const handleLitterSyncResolve = async (choices) => {
+        if (!litterSyncConflictData) return;
+        setShowLitterSyncModal(false);
+        setLitterSyncConflictData(null);
+        try {
+            let updatedBreedingRecords = [...breedingRecords];
+            let animalNeedsResave = false;
+
+            for (const item of litterSyncConflictData.items) {
+                const { litter, conflicts } = item;
+                const litterUpdates = {};
+                const recordPatch = {};
+
+                for (const c of conflicts) {
+                    const key = `${litter._id}__${c.field}`;
+                    const choice = choices[key] ?? 'record';
+                    if (choice === 'record') {
+                        // Record wins → push record's value to the litter
+                        litterUpdates[c.lwk] = c.recordValue;
+                        if (c.lwkAlso) litterUpdates[c.lwkAlso] = c.recordValue;
+                    } else {
+                        // Litter wins → pull litter's value into the breeding record
+                        recordPatch[c.field] = c.litterValue;
+                        // Also set the litter key in case it wasn't already there
+                        litterUpdates[c.lwk] = c.litterValue;
+                        if (c.lwkAlso) litterUpdates[c.lwkAlso] = c.litterValue;
+                        animalNeedsResave = true;
+                    }
+                }
+
+                // Always write the resolved values to the litter
+                if (Object.keys(litterUpdates).length > 0) {
+                    await axios.put(`${API_BASE_URL}/litters/${litter._id}`, litterUpdates, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                }
+
+                // Apply litter-wins patches to our local breedingRecords array
+                if (Object.keys(recordPatch).length > 0) {
+                    updatedBreedingRecords = updatedBreedingRecords.map(r =>
+                        r.litterId === item.record.litterId ? { ...r, ...recordPatch } : r
+                    );
+                }
+            }
+
+            // If any litter values beat the breeding record, re-save the animal
+            // so the updated breedingRecords are persisted server-side too.
+            if (animalNeedsResave && animalToEdit?._id) {
+                setBreedingRecords(updatedBreedingRecords);
+                await axios.put(
+                    `${API_BASE_URL}/animals/${animalToEdit._id}`,
+                    { breedingRecords: updatedBreedingRecords },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+                console.log('[LITTER SYNC] Re-saved animal breedingRecords after litter-wins resolution.');
+            }
+
+            showModalMessage('Saved', 'Conflicts resolved — data saved to both breeding record and litter card.');
+        } catch (err) {
+            console.error('[LITTER SYNC] Error during conflict resolution:', err);
+            showModalMessage('Error', 'Failed to save resolved values. Please try again.');
+        }
+    };
     
     // Fetch existing litters for linking (filtered by species and animal as sire/dam)
     const fetchLittersForLinking = async () => {
@@ -12573,31 +12752,55 @@ const AnimalForm = ({
                 const saveResponse = await onSave(method, url, payloadToSave);
                 console.log('[SAVE] onSave completed successfully:', saveResponse?.status);
 
-                // Sync breeding record fields back to linked litters
+                // Sync breeding record fields ↔ linked litter documents (with conflict detection)
+                const LITTER_SYNC_FIELDS = [
+                    { rk: 'maleCount',             lrk: 'maleCount',             lwk: 'maleCount',             label: 'Males Born' },
+                    { rk: 'femaleCount',            lrk: 'femaleCount',           lwk: 'femaleCount',           label: 'Females Born' },
+                    { rk: 'unknownCount',           lrk: 'unknownCount',          lwk: 'unknownCount',          label: 'Unknown / Intersex' },
+                    { rk: 'litterSizeBorn',         lrk: 'litterSizeBorn',  lrkFb: 'numberBorn',        lwk: 'litterSizeBorn', lwkAlso: 'numberBorn',   label: 'Total Born' },
+                    { rk: 'stillbornCount',         lrk: 'stillbornCount',  lrkFb: 'stillborn',         lwk: 'stillbornCount', lwkAlso: 'stillborn',    label: 'Stillborn' },
+                    { rk: 'litterSizeWeaned',       lrk: 'litterSizeWeaned', lrkFb: 'numberWeaned',     lwk: 'litterSizeWeaned', lwkAlso: 'numberWeaned', label: 'Weaned' },
+                    { rk: 'breedingMethod',         lrk: 'breedingMethod',        lwk: 'breedingMethod',        label: 'Breeding Method' },
+                    { rk: 'breedingConditionAtTime',lrk: 'breedingConditionAtTime', lrkFb: 'breedingCondition', lwk: 'breedingConditionAtTime', label: 'Breeding Condition' },
+                    { rk: 'matingDate',             lrk: 'matingDate',     lrkFb: 'pairingDate',              lwk: 'matingDate',            label: 'Mating Date' },
+                    { rk: 'outcome',                lrk: 'outcome',               lwk: 'outcome',               label: 'Outcome' },
+                    { rk: 'birthEventDate',         lrk: 'birthDate',             lwk: 'birthDate',             label: 'Birth Date' },
+                    { rk: 'birthMethod',            lrk: 'birthMethod',           lwk: 'birthMethod',           label: 'Birth Method' },
+                ];
                 const recordsWithLitters = breedingRecords.filter(r => r.litterId);
                 if (recordsWithLitters.length > 0) {
                     try {
                         const littersRes = await axios.get(`${API_BASE_URL}/litters`, { headers: { Authorization: `Bearer ${authToken}` } });
+                        const conflictItems = [];
                         for (const record of recordsWithLitters) {
                             const litter = littersRes.data.find(l => l.litter_id_public === record.litterId);
                             if (!litter) continue;
-                            const updates = {};
-                            if (record.maleCount != null) updates.maleCount = record.maleCount;
-                            if (record.femaleCount != null) updates.femaleCount = record.femaleCount;
-                            if (record.unknownCount != null) updates.unknownCount = record.unknownCount;
-                            if (record.litterSizeBorn != null) { updates.litterSizeBorn = record.litterSizeBorn; updates.numberBorn = record.litterSizeBorn; }
-                            if (record.stillbornCount != null) { updates.stillbornCount = record.stillbornCount; updates.stillborn = record.stillbornCount; }
-                            if (record.litterSizeWeaned != null) { updates.litterSizeWeaned = record.litterSizeWeaned; updates.numberWeaned = record.litterSizeWeaned; }
-                            if (record.breedingMethod) updates.breedingMethod = record.breedingMethod;
-                            if (record.breedingConditionAtTime) updates.breedingConditionAtTime = record.breedingConditionAtTime;
-                            if (record.matingDate) updates.matingDate = record.matingDate;
-                            if (record.outcome) updates.outcome = record.outcome;
-                            if (record.birthEventDate) updates.birthDate = record.birthEventDate;
-                            if (record.birthMethod) updates.birthMethod = record.birthMethod;
-                            if (Object.keys(updates).length > 0) {
-                                await axios.put(`${API_BASE_URL}/litters/${litter._id}`, updates, { headers: { Authorization: `Bearer ${authToken}` } });
-                                console.log(`[LITTER SYNC] Synced ${Object.keys(updates).length} fields to litter ${record.litterId}`);
+                            const conflicts = [];
+                            const noConflictUpdates = {};
+                            for (const f of LITTER_SYNC_FIELDS) {
+                                const recVal = record[f.rk];
+                                const litVal = litter[f.lrk] ?? (f.lrkFb ? litter[f.lrkFb] : undefined);
+                                if (recVal == null || recVal === '') continue; // record has nothing to contribute
+                                if (litVal != null && litVal !== '' && String(recVal) !== String(litVal)) {
+                                    // Both sides have a value and they disagree — conflict
+                                    conflicts.push({ field: f.rk, label: f.label, lwk: f.lwk, lwkAlso: f.lwkAlso, recordValue: recVal, litterValue: litVal });
+                                } else {
+                                    // No conflict — record value wins (or litter was empty)
+                                    noConflictUpdates[f.lwk] = recVal;
+                                    if (f.lwkAlso) noConflictUpdates[f.lwkAlso] = recVal;
+                                }
                             }
+                            // Always push no-conflict updates immediately
+                            if (Object.keys(noConflictUpdates).length > 0) {
+                                await axios.put(`${API_BASE_URL}/litters/${litter._id}`, noConflictUpdates, { headers: { Authorization: `Bearer ${authToken}` } });
+                            }
+                            if (conflicts.length > 0) {
+                                conflictItems.push({ record, litter, conflicts });
+                            }
+                        }
+                        if (conflictItems.length > 0) {
+                            setLitterSyncConflictData({ items: conflictItems });
+                            setShowLitterSyncModal(true);
                         }
                     } catch (syncErr) {
                         console.warn('[LITTER SYNC] Could not sync breeding record fields to litters:', syncErr);
@@ -12984,6 +13187,18 @@ const AnimalForm = ({
                         setShowConflictModal(false);
                         setConflictData(null);
                         setShowLinkLitterModal(false);
+                    }}
+                />
+            )}
+
+            {/* --- Litter Sync Conflict Modal (fires after animal save when values differ) --- */}
+            {showLitterSyncModal && litterSyncConflictData && (
+                <LitterSyncConflictModal
+                    items={litterSyncConflictData.items}
+                    onResolve={handleLitterSyncResolve}
+                    onSkip={() => {
+                        setShowLitterSyncModal(false);
+                        setLitterSyncConflictData(null);
                     }}
                 />
             )}
