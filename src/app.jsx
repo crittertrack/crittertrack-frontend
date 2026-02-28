@@ -8824,7 +8824,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         {/* Male Count */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Number of Males (Optional)
+                                                Number of Males
                                             </label>
                                             <input
                                                 type="number"
@@ -8832,14 +8832,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 onChange={(e) => setFormData({...formData, maleCount: e.target.value ? parseInt(e.target.value) : null})}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                                 placeholder="e.g., 5"
-                                                min="0"
+                                                min={myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length || 0}
                                             />
+                                            {(() => { const linkedMales = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length; return linkedMales > 0 && (formData.maleCount || 0) < linkedMales ? (<p className="text-xs text-red-600 mt-1">⚠ {linkedMales} male{linkedMales > 1 ? 's' : ''} already linked — count can't be below {linkedMales}</p>) : linkedMales > 0 ? (<p className="text-xs text-gray-500 mt-1">{linkedMales} male{linkedMales > 1 ? 's' : ''} linked</p>) : null; })()}
                                         </div>
 
                                         {/* Female Count */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Number of Females (Optional)
+                                                Number of Females
                                             </label>
                                             <input
                                                 type="number"
@@ -8847,8 +8848,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 onChange={(e) => setFormData({...formData, femaleCount: e.target.value ? parseInt(e.target.value) : null})}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                                 placeholder="e.g., 3"
-                                                min="0"
+                                                min={myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Female').length || 0}
                                             />
+                                            {(() => { const linkedFemales = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Female').length; return linkedFemales > 0 && (formData.femaleCount || 0) < linkedFemales ? (<p className="text-xs text-red-600 mt-1">⚠ {linkedFemales} female{linkedFemales > 1 ? 's' : ''} already linked — count can't be below {linkedFemales}</p>) : linkedFemales > 0 ? (<p className="text-xs text-gray-500 mt-1">{linkedFemales} female{linkedFemales > 1 ? 's' : ''} linked</p>) : null; })()}
                                         </div>
                                     </div>
 
