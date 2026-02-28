@@ -3699,9 +3699,17 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                     >
                                                         <div className="flex items-center gap-3 flex-1">
                                                             <span className={`text-lg transition-transform ${isExpanded ? 'rotate-90' : ''}`}>▶️</span>
-                                                            <span className={`font-mono px-2 py-0.5 rounded text-xs font-semibold ${record.litterId ? 'bg-purple-300 text-purple-800' : 'bg-gray-200 text-gray-600'}`}>{record.litterId || 'No Litter'}</span>
-                                                            <div className="text-sm text-gray-700 flex gap-3">
-                                                                {formatDate(record.matingDate) && <><span>{formatDate(record.matingDate)}</span><span className="text-gray-400">&bull;</span></>}
+                                                            {record.litterName ? (
+                                                                <>
+                                                                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-700 text-white flex-shrink-0">{record.litterName}</span>
+                                                                    {record.litterId && <span className="text-xs font-mono text-gray-400 flex-shrink-0">{record.litterId}</span>}
+                                                                </>
+                                                            ) : (
+                                                                <span className={`font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 ${record.litterId ? 'bg-purple-300 text-purple-800' : 'bg-gray-200 text-gray-600'}`}>{record.litterId || 'No Litter'}</span>
+                                                            )}
+                                                            <div className="text-sm text-gray-700 flex items-center gap-2 flex-wrap">
+                                                                {record.birthEventDate && <><span>{formatDate(record.birthEventDate)}</span><span className="text-gray-400">&bull;</span></>}
+                                                                {!record.birthEventDate && formatDate(record.matingDate) && <><span>{formatDate(record.matingDate)}</span><span className="text-gray-400">&bull;</span></>}
                                                                 {record.mate && <><span>{record.mate}</span><span className="text-gray-400">&bull;</span></>}
                                                                 <span className="text-purple-700 font-medium">{countSummary}</span>
                                                             </div>
@@ -3721,7 +3729,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                 {record.breedingConditionAtTime && (<div><div className="text-gray-600 text-xs">Condition</div><div className="font-semibold text-gray-800">{record.breedingConditionAtTime}</div></div>)}
                                                             </div>
                                                             <div className="grid grid-cols-3 gap-4 text-sm">
-                                                                <div><div className="text-gray-600 text-xs">CTL-ID / Litter Name</div><div className="font-mono bg-purple-100 px-2 py-1 rounded text-xs font-semibold">{record.litterId || 'Not Linked'}</div></div>
+                                                                <div><div className="text-gray-600 text-xs">Litter</div>{record.litterName && <div className="font-semibold text-sm text-purple-800">{record.litterName}</div>}<div className="font-mono text-xs text-gray-500">{record.litterId || 'Not Linked'}</div></div>
                                                                 {(isDamOnly || isBoth) && (<div><div className="text-gray-600 text-xs">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(record.birthEventDate) || '—'}</div></div>)}
                                                                 {record.birthMethod && (<div><div className="text-gray-600 text-xs">Birth Method</div><div className="font-semibold text-gray-800">{record.birthMethod}</div></div>)}
                                                             </div>
@@ -5151,9 +5159,17 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                     >
                                                         <div className="flex items-center gap-3 flex-1">
                                                             <span className={`text-lg transition-transform ${isExpanded ? 'rotate-90' : ''}`}>→</span>
-                                                            <span className={`font-mono px-2 py-0.5 rounded text-xs font-semibold ${record.litterId ? 'bg-purple-300 text-purple-800' : 'bg-gray-200 text-gray-600'}`}>{record.litterId || 'No Litter'}</span>
-                                                            <div className="text-sm text-gray-700 flex gap-3">
-                                                                {formatDate(record.matingDate) && <><span>{formatDate(record.matingDate)}</span><span className="text-gray-400">&bull;</span></>}
+                                                            {record.litterName ? (
+                                                                <>
+                                                                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-700 text-white flex-shrink-0">{record.litterName}</span>
+                                                                    {record.litterId && <span className="text-xs font-mono text-gray-400 flex-shrink-0">{record.litterId}</span>}
+                                                                </>
+                                                            ) : (
+                                                                <span className={`font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 ${record.litterId ? 'bg-purple-300 text-purple-800' : 'bg-gray-200 text-gray-600'}`}>{record.litterId || 'No Litter'}</span>
+                                                            )}
+                                                            <div className="text-sm text-gray-700 flex items-center gap-2 flex-wrap">
+                                                                {record.birthEventDate && <><span>{formatDate(record.birthEventDate)}</span><span className="text-gray-400">&bull;</span></>}
+                                                                {!record.birthEventDate && formatDate(record.matingDate) && <><span>{formatDate(record.matingDate)}</span><span className="text-gray-400">&bull;</span></>}
                                                                 {record.mate && <><span>{record.mate}</span><span className="text-gray-400">&bull;</span></>}
                                                                 <span className="text-purple-700 font-medium">{countSummary}</span>
                                                             </div>
@@ -5173,7 +5189,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                                 {record.breedingConditionAtTime && (<div><div className="text-gray-600 text-xs">Condition</div><div className="font-semibold text-gray-800">{record.breedingConditionAtTime}</div></div>)}
                                                             </div>
                                                             <div className="grid grid-cols-3 gap-4 text-sm">
-                                                                <div><div className="text-gray-600 text-xs">CTL-ID / Litter Name</div><div className="font-mono bg-purple-100 px-2 py-1 rounded text-xs font-semibold">{record.litterId || 'Not Linked'}</div></div>
+                                                                <div><div className="text-gray-600 text-xs">Litter</div>{record.litterName && <div className="font-semibold text-sm text-purple-800">{record.litterName}</div>}<div className="font-mono text-xs text-gray-500">{record.litterId || 'Not Linked'}</div></div>
                                                                 {(isDamOnly || isBoth) && (<div><div className="text-gray-600 text-xs">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(record.birthEventDate) || '—'}</div></div>)}
                                                                 {record.birthMethod && (<div><div className="text-gray-600 text-xs">Birth Method</div><div className="font-semibold text-gray-800">{record.birthMethod}</div></div>)}
                                                             </div>
@@ -6449,9 +6465,17 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                     >
                                                         <div className="flex items-center gap-3 flex-1">
                                                             <span className={`text-lg transition-transform ${isExpanded ? 'rotate-90' : ''}`}>▶️</span>
-                                                            <span className={`font-mono px-2 py-0.5 rounded text-xs font-semibold ${record.litterId ? 'bg-purple-300 text-purple-800' : 'bg-gray-200 text-gray-600'}`}>{record.litterId || 'No Litter'}</span>
-                                                            <div className="text-sm text-gray-700 flex gap-3">
-                                                                {formatDate(record.matingDate) && <><span>{formatDate(record.matingDate)}</span><span className="text-gray-400">&bull;</span></>}
+                                                            {record.litterName ? (
+                                                                <>
+                                                                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-700 text-white flex-shrink-0">{record.litterName}</span>
+                                                                    {record.litterId && <span className="text-xs font-mono text-gray-400 flex-shrink-0">{record.litterId}</span>}
+                                                                </>
+                                                            ) : (
+                                                                <span className={`font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 ${record.litterId ? 'bg-purple-300 text-purple-800' : 'bg-gray-200 text-gray-600'}`}>{record.litterId || 'No Litter'}</span>
+                                                            )}
+                                                            <div className="text-sm text-gray-700 flex items-center gap-2 flex-wrap">
+                                                                {record.birthEventDate && <><span>{formatDate(record.birthEventDate)}</span><span className="text-gray-400">&bull;</span></>}
+                                                                {!record.birthEventDate && formatDate(record.matingDate) && <><span>{formatDate(record.matingDate)}</span><span className="text-gray-400">&bull;</span></>}
                                                                 {record.mate && <><span>{record.mate}</span><span className="text-gray-400">&bull;</span></>}
                                                                 <span className="text-purple-700 font-medium">{countSummary}</span>
                                                             </div>
@@ -6465,7 +6489,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                                 {record.breedingConditionAtTime && (<div><div className="text-gray-600 text-xs">Condition</div><div className="font-semibold text-gray-800">{record.breedingConditionAtTime}</div></div>)}
                                                             </div>
                                                             <div className="grid grid-cols-3 gap-4 text-sm">
-                                                                <div><div className="text-gray-600 text-xs">CTL-ID / Litter Name</div><div className="font-mono bg-purple-100 px-2 py-1 rounded text-xs font-semibold">{record.litterId || 'Not Linked'}</div></div>
+                                                                <div><div className="text-gray-600 text-xs">Litter</div>{record.litterName && <div className="font-semibold text-sm text-purple-800">{record.litterName}</div>}<div className="font-mono text-xs text-gray-500">{record.litterId || 'Not Linked'}</div></div>
                                                                 {record.birthEventDate && (<div><div className="text-gray-600 text-xs">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(record.birthEventDate) || '—'}</div></div>)}
                                                                 {record.birthMethod && (<div><div className="text-gray-600 text-xs">Birth Method</div><div className="font-semibold text-gray-800">{record.birthMethod}</div></div>)}
                                                             </div>
@@ -12270,7 +12294,9 @@ const AnimalForm = ({
                 breedingMethod: record.breedingMethod || 'Unknown',
                 outcome: record.outcome || 'Unknown',
                 breedingConditionAtTime: record.breedingConditionAtTime || null,
-                birthMethod: record.birthMethod || null
+                birthMethod: record.birthMethod || null,
+                // Cache litter name from linked litter so view panels can show it without a separate fetch
+                litterName: breedingRecordLitters[record.id]?.breedingPairCodeName || record.litterName || null,
             }));
             
             // Debug log for breeding records
@@ -14429,18 +14455,20 @@ const AnimalForm = ({
                                                             {/* Expand toggle */}
                                                             <span className={`text-lg transition-transform flex-shrink-0 ${isExpanded ? 'rotate-90' : ''}`}>▶️</span>
                                                             
-                                                            {/* Litter ID Badge */}
-                                                            <span className={`font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 ${
-                                                                record.litterId ? 'bg-blue-300 text-blue-800' : 'bg-gray-200 text-gray-600'
-                                                            }`}>
-                                                                {record.litterId || 'No Litter'}
-                                                            </span>
-                                                            
-                                                            {/* Litter Name (if available) */}
-                                                            {linkedLitter?.breedingPairCodeName && (
-                                                                <span className="text-xs text-gray-600 italic flex-shrink-0">
-                                                                    {linkedLitter.breedingPairCodeName}
-                                                                </span>
+                                                            {/* Main identifier: litter name prominent, CTL ID secondary */}
+                                                            {(linkedLitter?.breedingPairCodeName || record.litterName) ? (
+                                                                <>
+                                                                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-blue-700 text-white flex-shrink-0">
+                                                                        {linkedLitter?.breedingPairCodeName || record.litterName}
+                                                                    </span>
+                                                                    {record.litterId && (
+                                                                        <span className="text-xs font-mono text-gray-400 flex-shrink-0">{record.litterId}</span>
+                                                                    )}
+                                                                </>
+                                                            ) : record.litterId ? (
+                                                                <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-blue-300 text-blue-800">{record.litterId}</span>
+                                                            ) : (
+                                                                <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-gray-200 text-gray-600">No Litter</span>
                                                             )}
                                                             
                                                             {/* Summary: Birth date, mate, counts */}
@@ -26914,9 +26942,17 @@ const App = () => {
                                                                         >
                                                                             <div className="flex items-center gap-3 flex-1">
                                                                                 <span className={`text-lg transition-transform ${isExpanded ? 'rotate-90' : ''}`}>▶️</span>
-                                                                                <span className={`font-mono px-2 py-0.5 rounded text-xs font-semibold ${record.litterId ? 'bg-purple-300 text-purple-800' : 'bg-gray-200 text-gray-600'}`}>{record.litterId || 'No Litter'}</span>
-                                                                                <div className="text-sm text-gray-700 flex gap-3">
-                                                                                    {formatDate(record.matingDate) && <><span>{formatDate(record.matingDate)}</span><span className="text-gray-400">&bull;</span></>}
+                                                                                {record.litterName ? (
+                                                                                    <>
+                                                                                        <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-700 text-white flex-shrink-0">{record.litterName}</span>
+                                                                                        {record.litterId && <span className="text-xs font-mono text-gray-400 flex-shrink-0">{record.litterId}</span>}
+                                                                                    </>
+                                                                                ) : (
+                                                                                    <span className={`font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 ${record.litterId ? 'bg-purple-300 text-purple-800' : 'bg-gray-200 text-gray-600'}`}>{record.litterId || 'No Litter'}</span>
+                                                                                )}
+                                                                                <div className="text-sm text-gray-700 flex items-center gap-2 flex-wrap">
+                                                                                    {record.birthEventDate && <><span>{formatDate(record.birthEventDate)}</span><span className="text-gray-400">&bull;</span></>}
+                                                                                    {!record.birthEventDate && formatDate(record.matingDate) && <><span>{formatDate(record.matingDate)}</span><span className="text-gray-400">&bull;</span></>}
                                                                                     {record.mate && <><span>{record.mate}</span><span className="text-gray-400">&bull;</span></>}
                                                                                     <span className="text-purple-700 font-medium">{countSummary}</span>
                                                                                 </div>
@@ -26930,7 +26966,7 @@ const App = () => {
                                                                                     {record.breedingConditionAtTime && (<div><div className="text-gray-600 text-xs">Condition</div><div className="font-semibold text-gray-800">{record.breedingConditionAtTime}</div></div>)}
                                                                                 </div>
                                                                                 <div className="grid grid-cols-3 gap-4 text-sm">
-                                                                                    <div><div className="text-gray-600 text-xs">CTL-ID / Litter Name</div><div className="font-mono bg-purple-100 px-2 py-1 rounded text-xs font-semibold">{record.litterId || 'Not Linked'}</div></div>
+                                                                                    <div><div className="text-gray-600 text-xs">Litter</div>{record.litterName && <div className="font-semibold text-sm text-purple-800">{record.litterName}</div>}<div className="font-mono text-xs text-gray-500">{record.litterId || 'Not Linked'}</div></div>
                                                                                     {record.birthEventDate && (<div><div className="text-gray-600 text-xs">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(record.birthEventDate) || '—'}</div></div>)}
                                                                                     {record.birthMethod && (<div><div className="text-gray-600 text-xs">Birth Method</div><div className="font-semibold text-gray-800">{record.birthMethod}</div></div>)}
                                                                                 </div>
