@@ -3232,12 +3232,12 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
 
                             {/* 3rd Section: Keeper History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">📋 Keeper History</h3>
-                                {(animal.ownershipHistory || []).length === 0 ? (
+                                <h3 className="text-lg font-semibold text-gray-700">👥 Keeper History</h3>
+                                {(animal.keeperHistory || []).length === 0 ? (
                                     <p className="text-sm text-gray-400 italic">No entries yet</p>
                                 ) : (
                                     <div className="space-y-2">
-                                        {(animal.ownershipHistory || []).map((entry, idx) => (
+                                        {(animal.keeperHistory || []).map((entry, idx) => (
                                             <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-semibold text-gray-800">{entry.name || 'Unknown'}</p>
@@ -4895,12 +4895,12 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
 
                             {/* 3rd Section: Keeper History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">📋 Keeper History</h3>
-                                {(animal.ownershipHistory || []).length === 0 ? (
+                                <h3 className="text-lg font-semibold text-gray-700">👥 Keeper History</h3>
+                                {(animal.keeperHistory || []).length === 0 ? (
                                     <p className="text-sm text-gray-400 italic">No entries yet</p>
                                 ) : (
                                     <div className="space-y-2">
-                                        {(animal.ownershipHistory || []).map((entry, idx) => (
+                                        {(animal.keeperHistory || []).map((entry, idx) => (
                                             <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-semibold text-gray-800">{entry.name || 'Unknown'}</p>
@@ -5105,12 +5105,12 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
 
                             {/* 2nd Section: Keeper History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">📋 Keeper History</h3>
-                                {(animal.ownershipHistory || []).length === 0 ? (
+                                <h3 className="text-lg font-semibold text-gray-700">👥 Keeper History</h3>
+                                {(animal.keeperHistory || []).length === 0 ? (
                                     <p className="text-sm text-gray-400 italic">No entries yet</p>
                                 ) : (
                                     <div className="space-y-2">
-                                        {(animal.ownershipHistory || []).map((entry, idx) => (
+                                        {(animal.keeperHistory || []).map((entry, idx) => (
                                             <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-semibold text-gray-800">{entry.name || 'Unknown'}</p>
@@ -10526,7 +10526,7 @@ const AnimalForm = ({
             necropsyResults: animalToEdit.necropsyResults || '',
             insurance: animalToEdit.insurance || '',
             legalStatus: animalToEdit.legalStatus || '',
-            ownershipHistory: animalToEdit.ownershipHistory || [],
+            keeperHistory: animalToEdit.keeperHistory || [],
             // Show tab fields
             showTitles: animalToEdit.showTitles || '',
             showRatings: animalToEdit.showRatings || '',
@@ -10699,7 +10699,7 @@ const AnimalForm = ({
             necropsyResults: '',
             insurance: '',
             legalStatus: '',
-            ownershipHistory: [],
+            keeperHistory: [],
             // Show tab fields
             showTitles: '',
             showRatings: '',
@@ -12297,7 +12297,7 @@ const AnimalForm = ({
                 parasiteControlCount: parasiteControlRecords.length
             });
             
-            // ownershipHistory (Keeper History) is managed directly in formData by the user
+            // keeperHistory (Keeper History) is managed directly in formData by the user
             
             // Handle image deletion
             if (deleteImage && animalToEdit) {
@@ -13072,12 +13072,12 @@ const AnimalForm = ({
 
                         {/* Keeper History */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">📋 Keeper History</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">👥 Keeper History</h3>
 
                             {/* Existing entries */}
-                            {(formData.ownershipHistory || []).length > 0 && (
+                            {(formData.keeperHistory || []).length > 0 && (
                                 <div className="space-y-2">
-                                    {(formData.ownershipHistory || []).map((entry, idx) => (
+                                    {(formData.keeperHistory || []).map((entry, idx) => (
                                         <div key={idx} className="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-3">
                                             <div className="flex items-center gap-2 min-w-0">
                                                 {entry.country && <span className={`${getCountryFlag(entry.country)} inline-block h-4 w-6 flex-shrink-0`}></span>}
@@ -13087,7 +13087,7 @@ const AnimalForm = ({
                                                     {entry.country && <p className="text-xs text-gray-500">{getCountryName(entry.country)}</p>}
                                                 </div>
                                             </div>
-                                            <button type="button" onClick={() => setFormData(prev => ({ ...prev, ownershipHistory: (prev.ownershipHistory || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 p-1 flex-shrink-0 ml-2">
+                                            <button type="button" onClick={() => setFormData(prev => ({ ...prev, keeperHistory: (prev.keeperHistory || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 p-1 flex-shrink-0 ml-2">
                                                 <X size={14} />
                                             </button>
                                         </div>
@@ -13166,7 +13166,7 @@ const AnimalForm = ({
 
                                 <button type="button" disabled={!khName.trim()} onClick={() => {
                                     const entry = { name: khName.trim(), userId_public: khSelectedUser?.id_public || null, country: khCountry || null };
-                                    setFormData(prev => ({ ...prev, ownershipHistory: [...(prev.ownershipHistory || []), entry] }));
+                                    setFormData(prev => ({ ...prev, keeperHistory: [...(prev.keeperHistory || []), entry] }));
                                     setKhName(''); setKhCountry(''); setKhSelectedUser(null); setKhUserSearch(''); setKhUserResults([]);
                                 }} className="w-full py-1.5 bg-gray-700 hover:bg-gray-800 text-white text-sm rounded transition disabled:opacity-40 disabled:cursor-not-allowed">
                                     + Add Entry
@@ -26403,11 +26403,11 @@ const App = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                {animalToView.ownershipHistory && animalToView.ownershipHistory.length > 0 && (
+                                                {animalToView.keeperHistory && animalToView.keeperHistory.length > 0 && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                                        <h3 className="text-lg font-semibold text-gray-700">📋 Keeper History</h3>
+                                                        <h3 className="text-lg font-semibold text-gray-700">👥 Keeper History</h3>
                                                         <div className="space-y-2">
-                                                            {animalToView.ownershipHistory.map((entry, idx) => (
+                                                            {animalToView.keeperHistory.map((entry, idx) => (
                                                                 <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded border border-gray-200">
                                                                     <div className="flex-1 min-w-0">
                                                                         <p className="text-sm font-semibold text-gray-800">{entry.name || 'Unknown'}</p>
