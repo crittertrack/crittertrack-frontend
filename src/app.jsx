@@ -10858,7 +10858,6 @@ const AnimalForm = ({
             litterId: null,
             notes: ''
         });
-        });
         setMateInfo(null);
     };
     
