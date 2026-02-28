@@ -2604,6 +2604,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
     const [animalLogsLoading, setAnimalLogsLoading] = useState(false);
     const [animalCOI, setAnimalCOI] = useState(null);
     const [loadingCOI, setLoadingCOI] = useState(false);
+    const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
     const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});
     const [showCreateLitterModal, setShowCreateLitterModal] = useState(false);
     const [showLinkLitterModal, setShowLinkLitterModal] = useState(false);
@@ -3809,9 +3810,12 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                         <div className="space-y-6">
                             {/* 1st Section: Preventive Care */}
                             {(animal.vaccinations || animal.dewormingRecords || animal.parasiteControl || animal.parasitePreventionSchedule) && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🛡️ Preventive Care</h3>
-                                <div className="space-y-4">
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, preventiveCare: !p.preventiveCare}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700">🛡️ Preventive Care</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.preventiveCare ? '▶' : '▼'}</span>
+                                </button>
+                                {!collapsedHealthSections.preventiveCare && (<div className="space-y-4 mt-4">
                                     {animal.vaccinations && (
                                         <DetailJsonList
                                             label={getLabel('vaccinations', 'Vaccinations')}
@@ -3839,15 +3843,18 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                             <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.parasitePreventionSchedule}</p>
                                         </div>
                                     )}
-                                </div>
+                                </div>)}
                             </div>
                             )}
 
                             {/* 2nd Section: Procedures & Diagnostics */}
                             {(animal.medicalProcedures || animal.labResults || animal.laboratoryResults) && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🔬 Procedures & Diagnostics</h3>
-                                <div className="space-y-4">
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, proceduresDiagnostics: !p.proceduresDiagnostics}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700">🔬 Procedures & Diagnostics</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.proceduresDiagnostics ? '▶' : '▼'}</span>
+                                </button>
+                                {!collapsedHealthSections.proceduresDiagnostics && (<div className="space-y-4 mt-4">
                                     {animal.medicalProcedures && (
                                         <DetailJsonList
                                             label="Medical Procedures"
@@ -3862,15 +3869,18 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                             renderItem={r => <>{r.testName} - {r.result} {r.date && `(${formatDate(r.date)})`}{r.notes && <span className="text-gray-600"> - {r.notes}</span>}</>}
                                         />
                                     )}
-                                </div>
+                                </div>)}
                             </div>
                             )}
 
                             {/* 3rd Section: Active Medical Records */}
                             {(animal.medicalConditions || animal.allergies || animal.medications) && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🩹💊 Active Medical Records</h3>
-                                <div className="space-y-3">
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, activeMedical: !p.activeMedical}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700">🩹💊 Active Medical Records</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? '▶' : '▼'}</span>
+                                </button>
+                                {!collapsedHealthSections.activeMedical && (<div className="space-y-3 mt-4">
                                     {animal.medicalConditions && (
                                         <div>
                                             <span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span>
@@ -3881,7 +3891,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                         {animal.allergies && <div><span className="text-gray-600">Allergies:</span> <strong>{animal.allergies}</strong></div>}
                                         {animal.medications && <div><span className="text-gray-600">Current Medications:</span> <strong>{animal.medications}</strong></div>}
                                     </div>
-                                </div>
+                                </div>)}
                             </div>
                             )}
 
@@ -3898,23 +3908,29 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 const spayDate = fieldTemplate?.fields?.spayNeuterDate?.enabled !== false && animal.spayNeuterDate;
                                 return (clearanceFields.length > 0 || spayDate) && (
-                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700">🏥 Health Clearances & Screening</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, healthClearances: !p.healthClearances}))} className="w-full flex items-center justify-between text-left group">
+                                            <h3 className="text-lg font-semibold text-gray-700">🏥 Health Clearances & Screening</h3>
+                                            <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? '▶' : '▼'}</span>
+                                        </button>
+                                        {!collapsedHealthSections.healthClearances && (<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
                                             {spayDate && <div><span className="text-gray-600">{getLabel('spayNeuterDate', 'Spay/Neuter Date')}:</span> <strong>{formatDate(animal.spayNeuterDate)}</strong></div>}
                                             {clearanceFields.map(f => (
                                                 <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
                                             ))}
-                                        </div>
+                                        </div>)}
                                     </div>
                                 );
                             })()}
 
                             {/* 5th Section: Veterinary Care */}
                             {(animal.primaryVet || animal.vetVisits) && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🩺 Veterinary Care</h3>
-                                <div className="space-y-4 text-sm">
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, vetCare: !p.vetCare}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700">🩺 Veterinary Care</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.vetCare ? '▶' : '▼'}</span>
+                                </button>
+                                {!collapsedHealthSections.vetCare && (<div className="space-y-4 text-sm mt-4">
                                     {animal.primaryVet && <div><span className="text-gray-600">Primary Veterinarian:</span> <strong>{animal.primaryVet}</strong></div>}
                                     {animal.vetVisits && (
                                         <DetailJsonList
@@ -3923,7 +3939,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                             renderItem={v => <>{v.reason} {v.date && `(${formatDate(v.date)})`}{v.notes && <span className="text-gray-600"> - {v.notes}</span>}</>}
                                         />
                                     )}
-                                </div>
+                                </div>)}
                             </div>
                             )}
                         </div>
@@ -4300,6 +4316,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
     const [enclosureInfo, setEnclosureInfo] = useState(null);
+    const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
     const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});
     const [showCreateLitterModal, setShowCreateLitterModal] = useState(false);
     const [showLinkLitterModal, setShowLinkLitterModal] = useState(false);
@@ -5104,9 +5121,12 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                         <div className="space-y-6">
                             {/* 1st Section: Preventive Care */}
                             {(animal.vaccinations || animal.dewormingRecords || animal.parasiteControl || animal.parasitePreventionSchedule) && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🛡️ Preventive Care</h3>
-                                <div className="space-y-4">
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, preventiveCare: !p.preventiveCare}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700">🛡️ Preventive Care</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.preventiveCare ? '▶' : '▼'}</span>
+                                </button>
+                                {!collapsedHealthSections.preventiveCare && (<div className="space-y-4 mt-4">
                                     {animal.vaccinations && (
                                         <DetailJsonList
                                             label={getLabel('vaccinations', 'Vaccinations')}
@@ -5134,15 +5154,18 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                             <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.parasitePreventionSchedule}</p>
                                         </div>
                                     )}
-                                </div>
+                                </div>)}
                             </div>
                             )}
 
                             {/* 2nd Section: Procedures & Diagnostics */}
                             {(animal.medicalProcedures || animal.labResults || animal.laboratoryResults) && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🔬 Procedures & Diagnostics</h3>
-                                <div className="space-y-4">
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, proceduresDiagnostics: !p.proceduresDiagnostics}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700">🔬 Procedures & Diagnostics</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.proceduresDiagnostics ? '▶' : '▼'}</span>
+                                </button>
+                                {!collapsedHealthSections.proceduresDiagnostics && (<div className="space-y-4 mt-4">
                                     {animal.medicalProcedures && (
                                         <DetailJsonList
                                             label="Medical Procedures"
@@ -5157,15 +5180,18 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                             renderItem={r => <>{r.testName} - {r.result} {r.date && `(${formatDate(r.date)})`}{r.notes && <span className="text-gray-600"> - {r.notes}</span>}</>}
                                         />
                                     )}
-                                </div>
+                                </div>)}
                             </div>
                             )}
 
                             {/* 3rd Section: Active Medical Records */}
                             {(animal.medicalConditions || animal.allergies || animal.medications) && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🩹💊 Active Medical Records</h3>
-                                <div className="space-y-3">
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, activeMedical: !p.activeMedical}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700">🩹💊 Active Medical Records</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? '▶' : '▼'}</span>
+                                </button>
+                                {!collapsedHealthSections.activeMedical && (<div className="space-y-3 mt-4">
                                     {animal.medicalConditions && (
                                         <div>
                                             <span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span>
@@ -5176,7 +5202,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                         {animal.allergies && <div><span className="text-gray-600">Allergies:</span> <strong>{animal.allergies}</strong></div>}
                                         {animal.medications && <div><span className="text-gray-600">Current Medications:</span> <strong>{animal.medications}</strong></div>}
                                     </div>
-                                </div>
+                                </div>)}
                             </div>
                             )}
 
@@ -5193,23 +5219,29 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 const spayDate = fieldTemplate?.fields?.spayNeuterDate?.enabled !== false && animal.spayNeuterDate;
                                 return (clearanceFields.length > 0 || spayDate) && (
-                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700">🏥 Health Clearances & Screening</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, healthClearances: !p.healthClearances}))} className="w-full flex items-center justify-between text-left group">
+                                            <h3 className="text-lg font-semibold text-gray-700">🏥 Health Clearances & Screening</h3>
+                                            <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? '▶' : '▼'}</span>
+                                        </button>
+                                        {!collapsedHealthSections.healthClearances && (<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
                                             {spayDate && <div><span className="text-gray-600">{getLabel('spayNeuterDate', 'Spay/Neuter Date')}:</span> <strong>{formatDate(animal.spayNeuterDate)}</strong></div>}
                                             {clearanceFields.map(f => (
                                                 <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
                                             ))}
-                                        </div>
+                                        </div>)}
                                     </div>
                                 );
                             })()}
 
                             {/* 5th Section: Veterinary Care */}
                             {(animal.primaryVet || animal.vetVisits) && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🩺 Veterinary Care</h3>
-                                <div className="space-y-4 text-sm">
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, vetCare: !p.vetCare}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700">🩺 Veterinary Care</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.vetCare ? '▶' : '▼'}</span>
+                                </button>
+                                {!collapsedHealthSections.vetCare && (<div className="space-y-4 text-sm mt-4">
                                     {animal.primaryVet && <div><span className="text-gray-600">Primary Veterinarian:</span> <strong>{animal.primaryVet}</strong></div>}
                                     {animal.vetVisits && (
                                         <DetailJsonList
@@ -5218,7 +5250,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                             renderItem={v => <>{v.reason} {v.date && `(${formatDate(v.date)})`}{v.notes && <span className="text-gray-600"> - {v.notes}</span>}</>}
                                         />
                                     )}
-                                </div>
+                                </div>)}
                             </div>
                             )}
                         </div>
