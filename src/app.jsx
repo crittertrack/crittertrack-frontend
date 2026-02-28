@@ -14460,7 +14460,7 @@ const AnimalForm = ({
                                         <input type="number" value={newBreedingRecord.unknownCount ?? ''} onChange={(e) => { const v = e.target.value !== '' ? parseInt(e.target.value) : null; const m = newBreedingRecord.maleCount || 0; const f = newBreedingRecord.femaleCount || 0; setNewBreedingRecord({...newBreedingRecord, unknownCount: v, litterSizeBorn: (m+f+(v||0)) || null}); }}
                                             placeholder="# unknown/intersex" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                     </div>
-                                    {newBreedingRecord.litterSizeBorn > 0 && (
+                                    {((newBreedingRecord.maleCount || 0) + (newBreedingRecord.femaleCount || 0) + (newBreedingRecord.unknownCount || 0)) > 0 && (
                                         <div className="col-span-full mt-1 p-2 rounded-md bg-green-50 border border-green-200">
                                             <p className="text-xs text-green-800"><strong>Total Born auto-set to {newBreedingRecord.litterSizeBorn}</strong> ({newBreedingRecord.maleCount || 0}M + {newBreedingRecord.femaleCount || 0}F + {newBreedingRecord.unknownCount || 0}U)</p>
                                         </div>
