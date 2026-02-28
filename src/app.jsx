@@ -10236,13 +10236,16 @@ const AnimalForm = ({
     const [breedingRecords, setBreedingRecords] = useState(() => {
         // Parse from database field 'breedingRecords'
         const data = animalToEdit?.breedingRecords;
+        console.log('[DEBUG] Loading breeding records from database:', data);
         if (!data) return [];
         if (Array.isArray(data)) {
+            console.log('[DEBUG] Breeding records loaded (array):', data);
             return data;
         }
         if (typeof data === 'string') {
             try { 
                 const parsed = JSON.parse(data);
+                console.log('[DEBUG] Breeding records loaded (parsed):', parsed);
                 return Array.isArray(parsed) ? parsed : [];
             } catch { 
                 return []; 
@@ -11355,6 +11358,9 @@ const AnimalForm = ({
                 breedingConditionAtTime: record.breedingConditionAtTime || null,
                 birthMethod: record.birthMethod || null
             }));
+            
+            // Debug log for breeding records
+            console.log('[DEBUG] Breeding records being saved:', payloadToSave.breedingRecords);
             
             // Debug log for health records
             console.log('[DEBUG] Health records in payload:', {
