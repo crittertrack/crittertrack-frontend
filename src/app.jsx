@@ -3705,7 +3705,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                     {record.litterId && <span className="text-xs font-mono text-gray-400 flex-shrink-0">{record.litterId}</span>}
                                                                 </>
                                                             ) : (
-                                                                <span className={`font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 ${record.litterId ? 'bg-purple-300 text-purple-800' : 'bg-gray-200 text-gray-600'}`}>{record.litterId || 'No Litter'}</span>
+                                                                {record.litterId && <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-purple-300 text-purple-800">{record.litterId}</span>}
                                                             )}
                                                             <div className="text-sm text-gray-700 flex items-center gap-2 flex-wrap">
                                                                 {record.birthEventDate && <><span>{formatDate(record.birthEventDate)}</span><span className="text-gray-400">&bull;</span></>}
@@ -5165,7 +5165,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                                     {record.litterId && <span className="text-xs font-mono text-gray-400 flex-shrink-0">{record.litterId}</span>}
                                                                 </>
                                                             ) : (
-                                                                <span className={`font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 ${record.litterId ? 'bg-purple-300 text-purple-800' : 'bg-gray-200 text-gray-600'}`}>{record.litterId || 'No Litter'}</span>
+                                                                {record.litterId && <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-purple-300 text-purple-800">{record.litterId}</span>}
                                                             )}
                                                             <div className="text-sm text-gray-700 flex items-center gap-2 flex-wrap">
                                                                 {record.birthEventDate && <><span>{formatDate(record.birthEventDate)}</span><span className="text-gray-400">&bull;</span></>}
@@ -6471,7 +6471,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                                     {record.litterId && <span className="text-xs font-mono text-gray-400 flex-shrink-0">{record.litterId}</span>}
                                                                 </>
                                                             ) : (
-                                                                <span className={`font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 ${record.litterId ? 'bg-purple-300 text-purple-800' : 'bg-gray-200 text-gray-600'}`}>{record.litterId || 'No Litter'}</span>
+                                                                {record.litterId && <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-purple-300 text-purple-800">{record.litterId}</span>}
                                                             )}
                                                             <div className="text-sm text-gray-700 flex items-center gap-2 flex-wrap">
                                                                 {record.birthEventDate && <><span>{formatDate(record.birthEventDate)}</span><span className="text-gray-400">&bull;</span></>}
@@ -14468,7 +14468,7 @@ const AnimalForm = ({
                                                             ) : record.litterId ? (
                                                                 <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-blue-300 text-blue-800">{record.litterId}</span>
                                                             ) : (
-                                                                <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-gray-200 text-gray-600">No Litter</span>
+                                                                
                                                             )}
                                                             
                                                             {/* Summary: Birth date, mate, counts */}
@@ -26948,7 +26948,7 @@ const App = () => {
                                                                                         {record.litterId && <span className="text-xs font-mono text-gray-400 flex-shrink-0">{record.litterId}</span>}
                                                                                     </>
                                                                                 ) : (
-                                                                                    <span className={`font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 ${record.litterId ? 'bg-purple-300 text-purple-800' : 'bg-gray-200 text-gray-600'}`}>{record.litterId || 'No Litter'}</span>
+                                                                                    {record.litterId && <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-purple-300 text-purple-800">{record.litterId}</span>}
                                                                                 )}
                                                                                 <div className="text-sm text-gray-700 flex items-center gap-2 flex-wrap">
                                                                                     {record.birthEventDate && <><span>{formatDate(record.birthEventDate)}</span><span className="text-gray-400">&bull;</span></>}
