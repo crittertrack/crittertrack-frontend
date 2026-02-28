@@ -1,4 +1,4 @@
-﻿// CritterTrack Frontend Application
+// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -6701,7 +6701,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {(animal.primaryVet || animal.vetVisits) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">?? Veterinary Care</h3>
-                                {animal.primaryVet && <div><strong className="text-sm">Primary Veterinarian:</strong> <p className="text-sm mt-1">{animal.primaryVet}</strong></div>}
+                                {animal.primaryVet && <div><strong className="text-sm">Primary Veterinarian:</strong> <p className="text-sm mt-1">{animal.primaryVet}</p></div>}
                                 {animal.vetVisits && (
                                     <div>
                                         <strong className="text-sm">Veterinary Visits:</strong>
@@ -6732,9 +6732,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {(animal.dietType || animal.feedingSchedule || animal.supplements) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">??? Nutrition</h3>
-                                {animal.dietType && <div><strong className="text-sm">Diet Type:</strong> <p className="text-sm mt-1">{animal.dietType}</strong></div>}
-                                {animal.feedingSchedule && <div><strong className="text-sm">Feeding Schedule:</strong> <p className="text-sm mt-1">{animal.feedingSchedule}</strong></div>}
-                                {animal.supplements && <div><strong className="text-sm">Supplements:</strong> <p className="text-sm mt-1">{animal.supplements}</strong></div>}
+                                {animal.dietType && <div><strong className="text-sm">Diet Type:</strong> <p className="text-sm mt-1">{animal.dietType}</p></div>}
+                                {animal.feedingSchedule && <div><strong className="text-sm">Feeding Schedule:</strong> <p className="text-sm mt-1">{animal.feedingSchedule}</p></div>}
+                                {animal.supplements && <div><strong className="text-sm">Supplements:</strong> <p className="text-sm mt-1">{animal.supplements}</p></div>}
                                 {!animal.dietType && !animal.feedingSchedule && !animal.supplements && <p className="text-sm text-gray-600"></p>}
                             </div>
                             )}
@@ -6743,9 +6743,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {(animal.housingType || animal.bedding || animal.enrichment || (animal.careTasks && animal.careTasks.length > 0)) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">?? Housing & Enclosure</h3>
-                                {animal.housingType && <div><strong className="text-sm">{getLabel('housingType', 'Housing Type')}:</strong> <p className="text-sm mt-1">{animal.housingType}</strong></div>}
-                                {animal.bedding && <div><strong className="text-sm">{getLabel('bedding', 'Bedding')}:</strong> <p className="text-sm mt-1">{animal.bedding}</strong></div>}
-                                {animal.enrichment && <div><strong className="text-sm">Enrichment:</strong> <p className="text-sm mt-1">{animal.enrichment}</strong></div>}
+                                {animal.housingType && <div><strong className="text-sm">{getLabel('housingType', 'Housing Type')}:</strong> <p className="text-sm mt-1">{animal.housingType}</p></div>}
+                                {animal.bedding && <div><strong className="text-sm">{getLabel('bedding', 'Bedding')}:</strong> <p className="text-sm mt-1">{animal.bedding}</p></div>}
+                                {animal.enrichment && <div><strong className="text-sm">Enrichment:</strong> <p className="text-sm mt-1">{animal.enrichment}</p></div>}
                                 {!animal.housingType && !animal.bedding && !animal.enrichment && <p className="text-sm text-gray-600"></p>}
                                 {animal.careTasks && animal.careTasks.length > 0 && (
                                     <div className="mt-4 pt-3 border-t border-gray-300">
@@ -6798,10 +6798,10 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {(animal.temperatureRange || animal.humidity || animal.lighting || animal.noise) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">??? Environment</h3>
-                                {animal.temperatureRange && <div><strong className="text-sm">Temperature Range:</strong> <p className="text-sm mt-1">{animal.temperatureRange}</strong></div>}
-                                {animal.humidity && <div><strong className="text-sm">{getLabel('humidity', 'Humidity')}:</strong> <p className="text-sm mt-1">{animal.humidity}</strong></div>}
-                                {animal.lighting && <div><strong className="text-sm">Lighting:</strong> <p className="text-sm mt-1">{animal.lighting}</strong></div>}
-                                {animal.noise && <div><strong className="text-sm">{getLabel('noise', 'Noise Level')}:</strong> <p className="text-sm mt-1">{animal.noise}</strong></div>}
+                                {animal.temperatureRange && <div><strong className="text-sm">Temperature Range:</strong> <p className="text-sm mt-1">{animal.temperatureRange}</p></div>}
+                                {animal.humidity && <div><strong className="text-sm">{getLabel('humidity', 'Humidity')}:</strong> <p className="text-sm mt-1">{animal.humidity}</p></div>}
+                                {animal.lighting && <div><strong className="text-sm">Lighting:</strong> <p className="text-sm mt-1">{animal.lighting}</p></div>}
+                                {animal.noise && <div><strong className="text-sm">{getLabel('noise', 'Noise Level')}:</strong> <p className="text-sm mt-1">{animal.noise}</p></div>}
                                 {!animal.temperatureRange && !animal.humidity && !animal.lighting && !animal.noise && <p className="text-sm text-gray-600"></p>}
                             </div>
                             )}
@@ -6815,9 +6815,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {(animal.temperament || animal.handlingTolerance || animal.socialStructure) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">?? Behavior</h3>
-                                {animal.temperament && <div><strong className="text-sm">Temperament:</strong> <p className="text-sm mt-1">{animal.temperament}</strong></div>}
-                                {animal.handlingTolerance && <div><strong className="text-sm">{getLabel('handlingTolerance', 'Handling Tolerance')}:</strong> <p className="text-sm mt-1">{animal.handlingTolerance}</strong></div>}
-                                {animal.socialStructure && <div><strong className="text-sm">Social Structure:</strong> <p className="text-sm mt-1">{animal.socialStructure}</strong></div>}
+                                {animal.temperament && <div><strong className="text-sm">Temperament:</strong> <p className="text-sm mt-1">{animal.temperament}</p></div>}
+                                {animal.handlingTolerance && <div><strong className="text-sm">{getLabel('handlingTolerance', 'Handling Tolerance')}:</strong> <p className="text-sm mt-1">{animal.handlingTolerance}</p></div>}
+                                {animal.socialStructure && <div><strong className="text-sm">Social Structure:</strong> <p className="text-sm mt-1">{animal.socialStructure}</p></div>}
                                 {!animal.temperament && !animal.handlingTolerance && !animal.socialStructure && <p className="text-sm text-gray-600"></p>}
                             </div>
                             )}
@@ -6826,7 +6826,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {animal.activityCycle && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">???? Activity</h3>
-                                {animal.activityCycle && <div><strong className="text-sm">Activity Cycle:</strong> <p className="text-sm mt-1">{animal.activityCycle}</strong></div>}
+                                {animal.activityCycle && <div><strong className="text-sm">Activity Cycle:</strong> <p className="text-sm mt-1">{animal.activityCycle}</p></div>}
                                 {!animal.activityCycle && <p className="text-sm text-gray-600"></p>}
                             </div>
                             )}
@@ -26978,7 +26978,7 @@ const App = () => {
                                                                 </ul>
                                                             </div>
                                                         )}
-                                                        {animalToView.primaryVet && <div><strong>Primary Vet:</strong> <p className="text-sm mt-1">{animalToView.primaryVet}</strong></div>}
+                                                        {animalToView.primaryVet && <div><strong>Primary Vet:</strong> <p className="text-sm mt-1">{animalToView.primaryVet}</p></div>}
                                                     </div>
                                                 )}
                                                 {(animalToView.medicalConditions || animalToView.allergies || animalToView.medications) && (
@@ -27043,26 +27043,26 @@ const App = () => {
                                                 {(animalToView.dietType || animalToView.feedingSchedule || animalToView.supplements) && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                         <h3 className="text-lg font-semibold text-gray-700">??? Nutrition</h3>
-                                                        {animalToView.dietType && <div><strong>Diet Type:</strong> <p className="text-sm mt-1">{animalToView.dietType}</strong></div>}
-                                                        {animalToView.feedingSchedule && <div><strong>Feeding Schedule:</strong> <p className="text-sm mt-1">{animalToView.feedingSchedule}</strong></div>}
-                                                        {animalToView.supplements && <div><strong>Supplements:</strong> <p className="text-sm mt-1">{animalToView.supplements}</strong></div>}
+                                                        {animalToView.dietType && <div><strong>Diet Type:</strong> <p className="text-sm mt-1">{animalToView.dietType}</p></div>}
+                                                        {animalToView.feedingSchedule && <div><strong>Feeding Schedule:</strong> <p className="text-sm mt-1">{animalToView.feedingSchedule}</p></div>}
+                                                        {animalToView.supplements && <div><strong>Supplements:</strong> <p className="text-sm mt-1">{animalToView.supplements}</p></div>}
                                                     </div>
                                                 )}
                                                 {(animalToView.housingType || animalToView.bedding || animalToView.enrichment) && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                         <h3 className="text-lg font-semibold text-gray-700">?? Animal Care</h3>
-                                                        {animalToView.housingType && <div><strong>Housing Type:</strong> <p className="text-sm mt-1">{animalToView.housingType}</strong></div>}
-                                                        {animalToView.bedding && <div><strong>Bedding:</strong> <p className="text-sm mt-1">{animalToView.bedding}</strong></div>}
-                                                        {animalToView.enrichment && <div><strong>Enrichment:</strong> <p className="text-sm mt-1">{animalToView.enrichment}</strong></div>}
+                                                        {animalToView.housingType && <div><strong>Housing Type:</strong> <p className="text-sm mt-1">{animalToView.housingType}</p></div>}
+                                                        {animalToView.bedding && <div><strong>Bedding:</strong> <p className="text-sm mt-1">{animalToView.bedding}</p></div>}
+                                                        {animalToView.enrichment && <div><strong>Enrichment:</strong> <p className="text-sm mt-1">{animalToView.enrichment}</p></div>}
                                                     </div>
                                                 )}
                                                 {(animalToView.temperatureRange || animalToView.humidity || animalToView.lighting || animalToView.noise) && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                         <h3 className="text-lg font-semibold text-gray-700">??? Environment</h3>
-                                                        {animalToView.temperatureRange && <div><strong>Temperature Range:</strong> <p className="text-sm mt-1">{animalToView.temperatureRange}</strong></div>}
-                                                        {animalToView.humidity && <div><strong>Humidity:</strong> <p className="text-sm mt-1">{animalToView.humidity}</strong></div>}
-                                                        {animalToView.lighting && <div><strong>Lighting:</strong> <p className="text-sm mt-1">{animalToView.lighting}</strong></div>}
-                                                        {animalToView.noise && <div><strong>Noise Level:</strong> <p className="text-sm mt-1">{animalToView.noise}</strong></div>}
+                                                        {animalToView.temperatureRange && <div><strong>Temperature Range:</strong> <p className="text-sm mt-1">{animalToView.temperatureRange}</p></div>}
+                                                        {animalToView.humidity && <div><strong>Humidity:</strong> <p className="text-sm mt-1">{animalToView.humidity}</p></div>}
+                                                        {animalToView.lighting && <div><strong>Lighting:</strong> <p className="text-sm mt-1">{animalToView.lighting}</p></div>}
+                                                        {animalToView.noise && <div><strong>Noise Level:</strong> <p className="text-sm mt-1">{animalToView.noise}</p></div>}
                                                     </div>
                                                 )}
                                             </div>
@@ -27074,10 +27074,10 @@ const App = () => {
                                                 {(animalToView.temperament || animalToView.handlingTolerance || animalToView.socialStructure || animalToView.activityCycle) && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                         <h3 className="text-lg font-semibold text-gray-700">Behavior & Welfare</h3>
-                                                        {animalToView.temperament && <div><strong>Temperament:</strong> <p className="text-sm mt-1">{animalToView.temperament}</strong></div>}
-                                                        {animalToView.handlingTolerance && <div><strong>Handling Tolerance:</strong> <p className="text-sm mt-1">{animalToView.handlingTolerance}</strong></div>}
-                                                        {animalToView.socialStructure && <div><strong>Social Structure:</strong> <p className="text-sm mt-1">{animalToView.socialStructure}</strong></div>}
-                                                        {animalToView.activityCycle && <div><strong>Activity Cycle:</strong> <p className="text-sm mt-1">{animalToView.activityCycle}</strong></div>}
+                                                        {animalToView.temperament && <div><strong>Temperament:</strong> <p className="text-sm mt-1">{animalToView.temperament}</p></div>}
+                                                        {animalToView.handlingTolerance && <div><strong>Handling Tolerance:</strong> <p className="text-sm mt-1">{animalToView.handlingTolerance}</p></div>}
+                                                        {animalToView.socialStructure && <div><strong>Social Structure:</strong> <p className="text-sm mt-1">{animalToView.socialStructure}</p></div>}
+                                                        {animalToView.activityCycle && <div><strong>Activity Cycle:</strong> <p className="text-sm mt-1">{animalToView.activityCycle}</p></div>}
                                                     </div>
                                                 )}
                                             </div>
