@@ -2606,6 +2606,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
     const [loadingCOI, setLoadingCOI] = useState(false);
     const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
     const [breedingRecordOffspring, setBreedingRecordOffspring] = useState({});
+    const [breedingRecordLitters, setBreedingRecordLitters] = useState({});
     const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});
     const [showCreateLitterModal, setShowCreateLitterModal] = useState(false);
     const [showLinkLitterModal, setShowLinkLitterModal] = useState(false);
@@ -2628,6 +2629,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                         axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` } })
                     ]);
                     const litter = littersRes.data.find(l => l.litter_id_public === record.litterId);
+                    if (litter) setBreedingRecordLitters(prev => ({ ...prev, [record.litterId]: litter }));
                     if (!litter?.offspringIds_public?.length) {
                         setBreedingRecordOffspring(prev => ({ ...prev, [record.litterId]: [] }));
                         return;
@@ -3740,6 +3742,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                     <div><div className="text-gray-600 text-xs">Stillborn</div><div className="text-2xl font-bold text-gray-600">{record.stillbornCount || '0'}</div></div>
                                                                     <div><div className="text-gray-600 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '—'}</div></div>
                                                                     <div><div className="text-gray-600 text-xs">Outcome</div><div className={`font-semibold text-lg ${record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}`}>{record.outcome || '—'}</div></div>
+                                                                    {breedingRecordLitters?.[record.litterId]?.maleCount != null && <div><div className="text-gray-600 text-xs">Males</div><div className="text-2xl font-bold text-blue-500">{breedingRecordLitters[record.litterId].maleCount}</div></div>}
+                                                                    {breedingRecordLitters?.[record.litterId]?.femaleCount != null && <div><div className="text-gray-600 text-xs">Females</div><div className="text-2xl font-bold text-pink-500">{breedingRecordLitters[record.litterId].femaleCount}</div></div>}
+                                                                    {breedingRecordLitters?.[record.litterId]?.inbreedingCoefficient != null && <div><div className="text-gray-600 text-xs">COI</div><div className="text-xl font-bold text-orange-600">{breedingRecordLitters[record.litterId].inbreedingCoefficient.toFixed(2)}%</div></div>}
                                                                 </div>
                                                             </div>
                                                             {record.mate && (
@@ -4491,11 +4496,29 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
     const [detailViewTab, setDetailViewTab] = useState(1);
     const [enclosureInfo, setEnclosureInfo] = useState(null);
     const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
+    const [breedingRecordLitters, setBreedingRecordLitters] = useState({});
     const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});
     const [showCreateLitterModal, setShowCreateLitterModal] = useState(false);
     const [showLinkLitterModal, setShowLinkLitterModal] = useState(false);
     const [breedingRecordForLitter, setBreedingRecordForLitter] = useState(null);
     const { fieldTemplate, getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
+
+    // Fetch litter data when breeding records expand (for male/female counts and COI)
+    React.useEffect(() => {
+        if (!animal?.breedingRecords?.length || !authToken) return;
+        Object.entries(expandedBreedingRecords).forEach(([idxStr, isExpanded]) => {
+            if (!isExpanded) return;
+            const idx = parseInt(idxStr);
+            const record = animal.breedingRecords[idx];
+            if (!record?.litterId || breedingRecordLitters[record.litterId] !== undefined) return;
+            axios.get(`${API_BASE_URL}/litters`, { headers: { Authorization: `Bearer ${authToken}` } })
+                .then(res => {
+                    const litter = res.data.find(l => l.litter_id_public === record.litterId);
+                    if (litter) setBreedingRecordLitters(prev => ({ ...prev, [record.litterId]: litter }));
+                })
+                .catch(() => {});
+        });
+    }, [expandedBreedingRecords, animal?.breedingRecords, authToken, API_BASE_URL]);
 
     // Fetch assigned enclosure info
     React.useEffect(() => {
@@ -5198,6 +5221,9 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                                     <div><div className="text-gray-600 text-xs">Stillborn</div><div className="text-2xl font-bold text-gray-600">{record.stillbornCount || '0'}</div></div>
                                                                     <div><div className="text-gray-600 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '—'}</div></div>
                                                                     <div><div className="text-gray-600 text-xs">Outcome</div><div className={`font-semibold text-lg ${record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}`}>{record.outcome || '—'}</div></div>
+                                                                    {breedingRecordLitters?.[record.litterId]?.maleCount != null && <div><div className="text-gray-600 text-xs">Males</div><div className="text-2xl font-bold text-blue-500">{breedingRecordLitters[record.litterId].maleCount}</div></div>}
+                                                                    {breedingRecordLitters?.[record.litterId]?.femaleCount != null && <div><div className="text-gray-600 text-xs">Females</div><div className="text-2xl font-bold text-pink-500">{breedingRecordLitters[record.litterId].femaleCount}</div></div>}
+                                                                    {breedingRecordLitters?.[record.litterId]?.inbreedingCoefficient != null && <div><div className="text-gray-600 text-xs">COI</div><div className="text-xl font-bold text-orange-600">{breedingRecordLitters[record.litterId].inbreedingCoefficient.toFixed(2)}%</div></div>}
                                                                 </div>
                                                             </div>
                                                             {record.notes && (<div className="bg-white p-3 rounded border border-purple-100"><div className="text-sm font-semibold text-gray-700 mb-2">Notes</div><div className="text-sm text-gray-700 italic">{record.notes}</div></div>)}
@@ -5780,12 +5806,30 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
     const [detailViewTab, setDetailViewTab] = useState(1);
     const [animalCOI, setAnimalCOI] = useState(null);
     const [loadingCOI, setLoadingCOI] = useState(false);
+    const [breedingRecordLitters, setBreedingRecordLitters] = useState({});
     const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});
     const [showCreateLitterModal, setShowCreateLitterModal] = useState(false);
     const [showLinkLitterModal, setShowLinkLitterModal] = useState(false);
     const [breedingRecordForLitter, setBreedingRecordForLitter] = useState(null);
     const { fieldTemplate, getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
-    
+
+    // Fetch litter data when breeding records expand (for male/female counts and COI)
+    React.useEffect(() => {
+        if (!animal?.breedingRecords?.length || !authToken) return;
+        Object.entries(expandedBreedingRecords).forEach(([idxStr, isExpanded]) => {
+            if (!isExpanded) return;
+            const idx = parseInt(idxStr);
+            const record = animal.breedingRecords[idx];
+            if (!record?.litterId || breedingRecordLitters[record.litterId] !== undefined) return;
+            axios.get(`${API_BASE_URL}/litters`, { headers: { Authorization: `Bearer ${authToken}` } })
+                .then(res => {
+                    const litter = res.data.find(l => l.litter_id_public === record.litterId);
+                    if (litter) setBreedingRecordLitters(prev => ({ ...prev, [record.litterId]: litter }));
+                })
+                .catch(() => {});
+        });
+    }, [expandedBreedingRecords, animal?.breedingRecords, authToken, API_BASE_URL]);
+
     // Get section privacy settings from animal data (default to true/public if not set)
     // Note: All sections now follow the main animal's public/private status
     // Individual section privacy has been removed for simplicity
@@ -6496,6 +6540,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                                     <div><div className="text-gray-600 text-xs">Stillborn</div><div className="text-2xl font-bold text-gray-600">{record.stillbornCount || '0'}</div></div>
                                                                     <div><div className="text-gray-600 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '—'}</div></div>
                                                                     <div><div className="text-gray-600 text-xs">Outcome</div><div className={`font-semibold text-lg ${record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}`}>{record.outcome || '—'}</div></div>
+                                                                    {breedingRecordLitters?.[record.litterId]?.maleCount != null && <div><div className="text-gray-600 text-xs">Males</div><div className="text-2xl font-bold text-blue-500">{breedingRecordLitters[record.litterId].maleCount}</div></div>}
+                                                                    {breedingRecordLitters?.[record.litterId]?.femaleCount != null && <div><div className="text-gray-600 text-xs">Females</div><div className="text-2xl font-bold text-pink-500">{breedingRecordLitters[record.litterId].femaleCount}</div></div>}
+                                                                    {breedingRecordLitters?.[record.litterId]?.inbreedingCoefficient != null && <div><div className="text-gray-600 text-xs">COI</div><div className="text-xl font-bold text-orange-600">{breedingRecordLitters[record.litterId].inbreedingCoefficient.toFixed(2)}%</div></div>}
                                                                 </div>
                                                             </div>
                                                             {record.notes && (<div className="bg-white p-3 rounded border border-purple-100"><div className="text-sm font-semibold text-gray-700 mb-2">Notes</div><div className="text-sm text-gray-700 italic">{record.notes}</div></div>)}
@@ -14613,6 +14660,9 @@ const AnimalForm = ({
                                                                         <div className="text-gray-600 text-xs">Weaned</div>
                                                                         <div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '—'}</div>
                                                                     </div>
+                                                                    {linkedLitter?.maleCount != null && <div><div className="text-gray-600 text-xs">Males</div><div className="text-2xl font-bold text-blue-500">{linkedLitter.maleCount}</div></div>}
+                                                                    {linkedLitter?.femaleCount != null && <div><div className="text-gray-600 text-xs">Females</div><div className="text-2xl font-bold text-pink-500">{linkedLitter.femaleCount}</div></div>}
+                                                                    {linkedLitter?.inbreedingCoefficient != null && <div><div className="text-gray-600 text-xs">COI</div><div className="text-xl font-bold text-orange-600">{linkedLitter.inbreedingCoefficient.toFixed(2)}%</div></div>}
                                                                 </div>
                                                             </div>
                                                             
@@ -22995,10 +23045,28 @@ const App = () => {
     const [copySuccessAnimal, setCopySuccessAnimal] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
     const [enlargedImageUrl, setEnlargedImageUrl] = useState(null);
+    const [breedingRecordLitters, setBreedingRecordLitters] = useState({});
     const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});
     const [showCreateLitterModal, setShowCreateLitterModal] = useState(false);
     const [showLinkLitterModal, setShowLinkLitterModal] = useState(false);
     const [breedingRecordForLitter, setBreedingRecordForLitter] = useState(null);
+
+    // Fetch litter data when breeding records expand (for male/female counts and COI)
+    React.useEffect(() => {
+        if (!animalToView?.breedingRecords?.length || !authToken) return;
+        Object.entries(expandedBreedingRecords).forEach(([idxStr, isExpanded]) => {
+            if (!isExpanded) return;
+            const idx = parseInt(idxStr);
+            const record = animalToView.breedingRecords[idx];
+            if (!record?.litterId || breedingRecordLitters[record.litterId] !== undefined) return;
+            axios.get(`${API_BASE_URL}/litters`, { headers: { Authorization: `Bearer ${authToken}` } })
+                .then(res => {
+                    const litter = res.data.find(l => l.litter_id_public === record.litterId);
+                    if (litter) setBreedingRecordLitters(prev => ({ ...prev, [record.litterId]: litter }));
+                })
+                .catch(() => {});
+        });
+    }, [expandedBreedingRecords, animalToView?.breedingRecords, authToken, API_BASE_URL]);
     
     const [showBugReportModal, setShowBugReportModal] = useState(false);
     const [bugReportCategory, setBugReportCategory] = useState('Bug');
@@ -26971,6 +27039,9 @@ const App = () => {
                                                                                         <div><div className="text-gray-600 text-xs">Stillborn</div><div className="text-2xl font-bold text-gray-600">{record.stillbornCount || '0'}</div></div>
                                                                                         <div><div className="text-gray-600 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '—'}</div></div>
                                                                                         <div><div className="text-gray-600 text-xs">Outcome</div><div className={`font-semibold text-lg ${record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}`}>{record.outcome || '—'}</div></div>
+                                                                                        {breedingRecordLitters?.[record.litterId]?.maleCount != null && <div><div className="text-gray-600 text-xs">Males</div><div className="text-2xl font-bold text-blue-500">{breedingRecordLitters[record.litterId].maleCount}</div></div>}
+                                                                                        {breedingRecordLitters?.[record.litterId]?.femaleCount != null && <div><div className="text-gray-600 text-xs">Females</div><div className="text-2xl font-bold text-pink-500">{breedingRecordLitters[record.litterId].femaleCount}</div></div>}
+                                                                                        {breedingRecordLitters?.[record.litterId]?.inbreedingCoefficient != null && <div><div className="text-gray-600 text-xs">COI</div><div className="text-xl font-bold text-orange-600">{breedingRecordLitters[record.litterId].inbreedingCoefficient.toFixed(2)}%</div></div>}
                                                                                     </div>
                                                                                 </div>
                                                                                 {record.notes && (<div className="bg-white p-3 rounded border border-purple-100"><div className="text-sm font-semibold text-gray-700 mb-2">Notes</div><div className="text-sm text-gray-700 italic">{record.notes}</div></div>)}
