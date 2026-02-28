@@ -10240,12 +10240,32 @@ const AnimalForm = ({
         if (!data) return [];
         if (Array.isArray(data)) {
             console.log('[DEBUG] Breeding records loaded (array):', data);
+            // Log mate information specifically
+            data.forEach((record, index) => {
+                console.log(`[DEBUG] Record ${index} mate data:`, {
+                    mate: record.mate,
+                    mateAnimalId: record.mateAnimalId,
+                    litterId: record.litterId,
+                    id: record.id
+                });
+            });
             return data;
         }
         if (typeof data === 'string') {
             try { 
                 const parsed = JSON.parse(data);
                 console.log('[DEBUG] Breeding records loaded (parsed):', parsed);
+                // Log mate information specifically
+                if (Array.isArray(parsed)) {
+                    parsed.forEach((record, index) => {
+                        console.log(`[DEBUG] Record ${index} mate data:`, {
+                            mate: record.mate,
+                            mateAnimalId: record.mateAnimalId,
+                            litterId: record.litterId,
+                            id: record.id
+                        });
+                    });
+                }
                 return Array.isArray(parsed) ? parsed : [];
             } catch { 
                 return []; 
@@ -11361,6 +11381,14 @@ const AnimalForm = ({
             
             // Debug log for breeding records
             console.log('[DEBUG] Breeding records being saved:', payloadToSave.breedingRecords);
+            payloadToSave.breedingRecords.forEach((record, index) => {
+                console.log(`[DEBUG] Saving record ${index} mate data:`, {
+                    mate: record.mate,
+                    mateAnimalId: record.mateAnimalId,
+                    litterId: record.litterId,
+                    id: record.id
+                });
+            });
             
             // Debug log for health records
             console.log('[DEBUG] Health records in payload:', {
