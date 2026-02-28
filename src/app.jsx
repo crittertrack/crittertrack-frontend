@@ -1,4 +1,4 @@
-// CritterTrack Frontend Application
+ï»¿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -155,13 +155,13 @@ const getStateName = (stateCode) => {
 // Get currency symbol from currency code
 const getCurrencySymbol = (currencyCode) => {
     const currencySymbols = {
-        'USD': '$', 'EUR': '€', 'GBP': '£', 'JPY': '¥', 'CNY': '¥', 'KRW': '?',
+        'USD': '$', 'EUR': 'ï¿½', 'GBP': 'ï¿½', 'JPY': 'ï¿½', 'CNY': 'ï¿½', 'KRW': '?',
         'CAD': 'C$', 'AUD': 'A$', 'CHF': 'CHF', 'SEK': 'kr', 'NOK': 'kr', 'DKK': 'kr',
         'PLN': 'zl', 'CZK': 'Kc', 'HUF': 'Ft', 'RON': 'lei', 'BGN': '??', 'HRK': 'kn',
         'RUB': '?', 'UAH': '?', 'TRY': '?', 'ILS': '?', 'AED': '?.?', 'SAR': '?',
         'INR': '?', 'PKR': '?', 'BDT': '?', 'LKR': 'Rs', 'THB': '?', 'VND': '?',
         'IDR': 'Rp', 'MYR': 'RM', 'SGD': 'S$', 'PHP': '?', 'HKD': 'HK$', 'TWD': 'NT$',
-        'NZD': 'NZ$', 'ZAR': 'R', 'EGP': 'E£', 'NGN': '?', 'KES': 'Sh', 'GHS': '?',
+        'NZD': 'NZ$', 'ZAR': 'R', 'EGP': 'Eï¿½', 'NGN': '?', 'KES': 'Sh', 'GHS': '?',
         'BRL': 'R$', 'ARS': '$', 'CLP': '$', 'COP': '$', 'PEN': 'S/', 'MXN': '$'
     };
     return currencySymbols[currencyCode] || currencyCode || '';
@@ -2999,9 +2999,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
 {/* Species/Breed/Strain/CTC - At Top */}
                                         <p className="text-sm text-gray-600">
                                             {animal.species || 'Unknown'}
-                                            {animal.breed && ` • ${animal.breed}`}
-                                            {animal.strain && ` • ${animal.strain}`}
-                                            {animal.id_public && ` • ${animal.id_public}`}
+                                            {animal.breed && ` ï¿½ ${animal.breed}`}
+                                            {animal.strain && ` ï¿½ ${animal.strain}`}
+                                            {animal.id_public && ` ï¿½ ${animal.id_public}`}
                                         </p>
 
                                         {/* Full Name */}
@@ -3209,12 +3209,12 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
 
                             {/* 2nd Section: Current Owner */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">?? Current Owner</h3>
+                                <h3 className="text-lg font-semibold text-gray-700">?? Keeper</h3>
                                 <div className="text-sm space-y-2">
-                                    {(animal.currentOwnerDisplay || animal.isOwned) && (
+                                    {(animal.keeperName || animal.isOwned) && (
                                     <div>
-                                        <span className="text-gray-600">Owner Name:</span>
-                                        <strong className="block mt-1">{animal.currentOwnerDisplay || (animal.isOwned ? 'Me' : '')}</strong>
+                                        <span className="text-gray-600">Keeper Name:</span>
+                                        <strong className="block mt-1">{animal.keeperName || (animal.isOwned ? 'Me' : '')}</strong>
                                     </div>
                                     )}
                                     {animal.coOwnership && (
@@ -3671,7 +3671,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                 record.litterSizeBorn !== null && `${record.litterSizeBorn} born`,
                                                 record.stillbornCount && `${record.stillbornCount} stillborn`,
                                                 record.litterSizeWeaned !== null && `${record.litterSizeWeaned} weaned`
-                                            ].filter(Boolean).join(' • ') || 'No counts';
+                                            ].filter(Boolean).join(' ï¿½ ') || 'No counts';
                                             return (
                                                 <div key={idx} className={`bg-white rounded border transition-all ${isExpanded ? 'border-purple-300 shadow-md' : 'border-purple-100'}`}>
                                                     <div 
@@ -3952,7 +3952,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                     {parsed.map((item, i) => (
                                                         <li key={i} className="text-gray-700">
                                                             {item.condition || item.name}
-                                                            {item.notes && <span className="text-gray-500"> — {item.notes}</span>}
+                                                            {item.notes && <span className="text-gray-500"> ï¿½ {item.notes}</span>}
                                                         </li>
                                                     ))}
                                                 </ul>
@@ -3969,7 +3969,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                     {parsed.map((item, i) => (
                                                         <li key={i} className="text-gray-700">
                                                             {item.allergen || item.name}
-                                                            {item.notes && <span className="text-gray-500"> — {item.notes}</span>}
+                                                            {item.notes && <span className="text-gray-500"> ï¿½ {item.notes}</span>}
                                                         </li>
                                                     ))}
                                                 </ul>
@@ -3986,7 +3986,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                     {parsed.map((item, i) => (
                                                         <li key={i} className="text-gray-700">
                                                             {item.medication || item.name}
-                                                            {item.notes && <span className="text-gray-500"> — {item.notes}</span>}
+                                                            {item.notes && <span className="text-gray-500"> ï¿½ {item.notes}</span>}
                                                         </li>
                                                     ))}
                                                 </ul>
@@ -4664,9 +4664,9 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                         {/* Species/Breed/Strain/CTC - At Top (NO PRIVACY TOGGLE) */}
                                         <p className="text-sm text-gray-600">
                                             {animal.species || 'Unknown'}
-                                            {animal.breed && ` • ${animal.breed}`}
-                                            {animal.strain && ` • ${animal.strain}`}
-                                            {animal.id_public && ` • ${animal.id_public}`}
+                                            {animal.breed && ` ï¿½ ${animal.breed}`}
+                                            {animal.strain && ` ï¿½ ${animal.strain}`}
+                                            {animal.id_public && ` ï¿½ ${animal.id_public}`}
                                         </p>
 
                                         {/* Full Name */}
@@ -4853,12 +4853,12 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
 
                             {/* 2nd Section: Current Owner */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">?? Current Owner</h3>
+                                <h3 className="text-lg font-semibold text-gray-700">?? Keeper</h3>
                                 <div className="text-sm space-y-2">
-                                    {(animal.currentOwnerDisplay || animal.isOwned) && (
+                                    {(animal.keeperName || animal.isOwned) && (
                                     <div>
-                                        <span className="text-gray-600">Owner Name:</span>
-                                        <strong className="block mt-1">{animal.currentOwnerDisplay || (animal.isOwned ? 'Me' : '')}</strong>
+                                        <span className="text-gray-600">Keeper Name:</span>
+                                        <strong className="block mt-1">{animal.keeperName || (animal.isOwned ? 'Me' : '')}</strong>
                                     </div>
                                     )}
                                     {animal.coOwnership && (
@@ -5085,7 +5085,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                 record.litterSizeBorn !== null && `${record.litterSizeBorn} born`,
                                                 record.stillbornCount && `${record.stillbornCount} stillborn`,
                                                 record.litterSizeWeaned !== null && `${record.litterSizeWeaned} weaned`
-                                            ].filter(Boolean).join(' • ') || 'No counts';
+                                            ].filter(Boolean).join(' ï¿½ ') || 'No counts';
                                             return (
                                                 <div key={idx} className={`bg-white rounded border transition-all ${isExpanded ? 'border-purple-300 shadow-md' : 'border-purple-100'}`}>
                                                     <div 
@@ -5353,7 +5353,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                     {parsed.map((item, i) => (
                                                         <li key={i} className="text-gray-700">
                                                             {item.condition || item.name}
-                                                            {item.notes && <span className="text-gray-500"> — {item.notes}</span>}
+                                                            {item.notes && <span className="text-gray-500"> ï¿½ {item.notes}</span>}
                                                         </li>
                                                     ))}
                                                 </ul>
@@ -5370,7 +5370,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                     {parsed.map((item, i) => (
                                                         <li key={i} className="text-gray-700">
                                                             {item.allergen || item.name}
-                                                            {item.notes && <span className="text-gray-500"> — {item.notes}</span>}
+                                                            {item.notes && <span className="text-gray-500"> ï¿½ {item.notes}</span>}
                                                         </li>
                                                     ))}
                                                 </ul>
@@ -5387,7 +5387,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                     {parsed.map((item, i) => (
                                                         <li key={i} className="text-gray-700">
                                                             {item.medication || item.name}
-                                                            {item.notes && <span className="text-gray-500"> — {item.notes}</span>}
+                                                            {item.notes && <span className="text-gray-500"> ï¿½ {item.notes}</span>}
                                                         </li>
                                                     ))}
                                                 </ul>
@@ -5950,9 +5950,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                         {/* Species/Breed/Strain/CTC - At Top */}
                                         <p className="text-sm text-gray-600">
                                             {animal.species}
-                                            {animal.breed && ` • ${animal.breed}`}
-                                            {animal.strain && ` • ${animal.strain}`}
-                                            {animal.id_public && ` • ${animal.id_public}`}
+                                            {animal.breed && ` ï¿½ ${animal.breed}`}
+                                            {animal.strain && ` ï¿½ ${animal.strain}`}
+                                            {animal.id_public && ` ï¿½ ${animal.id_public}`}
                                         </p>
 
                                         {/* Full Name */}
@@ -6083,10 +6083,10 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             )}
 
                             {/* Current Owner Section */}
-                            {(animal.currentOwnerDisplay || animal.currentOwner) && (
+                            {(animal.keeperName) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">?? Current Owner</h3>
-                                    <p className="text-gray-700">{animal.currentOwnerDisplay || animal.currentOwner}</p>
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">?? Keeper</h3>
+                                    <p className="text-gray-700">{animal.keeperName}</p>
                                     {animal.coOwnership && (
                                         <p className="text-gray-700 mt-2"><span className="text-gray-600">Co-Ownership:</span> {animal.coOwnership}</p>
                                     )}
@@ -6383,7 +6383,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                 record.litterSizeBorn !== null && `${record.litterSizeBorn} born`,
                                                 record.stillbornCount && `${record.stillbornCount} stillborn`,
                                                 record.litterSizeWeaned !== null && `${record.litterSizeWeaned} weaned`
-                                            ].filter(Boolean).join(' • ') || 'No counts';
+                                            ].filter(Boolean).join(' ï¿½ ') || 'No counts';
                                             return (
                                                 <div key={idx} className={`bg-white rounded border transition-all ${isExpanded ? 'border-purple-300 shadow-md' : 'border-purple-100'}`}>
                                                     <div 
@@ -10372,9 +10372,7 @@ const AnimalForm = ({
             fatherId_public: animalToEdit.fatherId_public || null,
             motherId_public: animalToEdit.motherId_public || null,
             breederId_public: animalToEdit.breederId_public || null,
-            ownerName: animalToEdit.ownerName || '',
-            currentOwner: animalToEdit.currentOwner || '',
-            currentOwnerDisplay: animalToEdit.currentOwnerDisplay || '',
+            keeperName: animalToEdit.keeperName || animalToEdit.ownerName || animalToEdit.currentOwner || animalToEdit.currentOwnerDisplay || '',
             groupRole: animalToEdit.groupRole || '',
                 isPregnant: animalToEdit.isPregnant || false,
             isNursing: animalToEdit.isNursing || false,
@@ -10546,9 +10544,7 @@ const AnimalForm = ({
             fatherId_public: null,
             motherId_public: null,
             breederId_public: null,
-            ownerName: '',
-            currentOwner: '',
-            currentOwnerDisplay: '',
+            keeperName: '',
             groupRole: '',
             isPregnant: false,
             isNursing: false,
@@ -12237,9 +12233,9 @@ const AnimalForm = ({
             });
             
             // Update ownership history only when saving (not on every form change)
-            if (formData.currentOwnerDisplay) {
+            if (formData.keeperName) {
                 const ownershipHistory = payloadToSave.ownershipHistory || [];
-                const existingIndex = ownershipHistory.findIndex(h => h.name === formData.currentOwnerDisplay);
+                const existingIndex = ownershipHistory.findIndex(h => h.name === formData.keeperName);
                 
                 if (existingIndex >= 0) {
                     // Update existing entry - set endDate to empty (current owner)
@@ -12251,7 +12247,7 @@ const AnimalForm = ({
                     // Add new owner to history with today's date
                     const today = new Date().toISOString().substring(0, 10);
                     ownershipHistory.push({
-                        name: formData.currentOwnerDisplay,
+                        name: formData.keeperName,
                         startDate: today,
                         endDate: null
                     });
@@ -12329,7 +12325,7 @@ const AnimalForm = ({
             console.log('[DEBUG] Breeder field in payload:', {
                 breederId_public: payloadToSave.breederId_public,
                 manualBreederName: payloadToSave.manualBreederName,
-                ownerName: payloadToSave.ownerName
+                keeperName: payloadToSave.keeperName
             });
 
             // If an image URL was set by the upload step, also populate common alternate keys
@@ -12992,7 +12988,7 @@ const AnimalForm = ({
                         
                         {/* Current Owner */}
                         <div data-tutorial-target="current-owner-field" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">?? Current Owner</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">?? Keeper</h3>
                             {!isFieldHidden('isOwned') && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
@@ -13002,19 +12998,19 @@ const AnimalForm = ({
                                 </label>
                             </div>
                             )}
-                            {!isFieldHidden('currentOwnerDisplay') && (
+                            {!isFieldHidden('keeperName') && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className='block text-sm font-medium text-gray-700 mb-2'>{getFieldLabel('currentOwnerDisplay', 'Current Owner')}</label>
+                                    <label className='block text-sm font-medium text-gray-700 mb-2'>{getFieldLabel('keeperName', 'Keeper Name')}</label>
                                     <input 
                                         type="text" 
-                                        name="currentOwnerDisplay" 
-                                        value={formData.currentOwnerDisplay || ''} 
+                                        name="keeperName" 
+                                        value={formData.keeperName || ''} 
                                         onChange={handleChange}
-                                        placeholder="Name of current owner"
+                                        placeholder="Keeper name (person caring for this animal)"
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                     />
-                                    <p className="text-xs text-gray-500 mt-1">Records owner changes in ownership history.</p>
+                                    <p className="text-xs text-gray-500 mt-1">Records keeper changes in ownership history.</p>
                                 </div>
                             </div>
                             )}
@@ -13054,11 +13050,11 @@ const AnimalForm = ({
                                         <select name="salePriceCurrency" value={formData.salePriceCurrency} onChange={handleChange} 
                                             className="block w-24 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                             <option value="USD">USD ($)</option>
-                                            <option value="EUR">EUR (€)</option>
-                                            <option value="GBP">GBP (£)</option>
+                                            <option value="EUR">EUR (ï¿½)</option>
+                                            <option value="GBP">GBP (ï¿½)</option>
                                             <option value="CAD">CAD (C$)</option>
                                             <option value="AUD">AUD (A$)</option>
-                                            <option value="JPY">JPY (¥)</option>
+                                            <option value="JPY">JPY (ï¿½)</option>
                                             <option value="Negotiable">Negotiable</option>
                                         </select>
                                         <input type="number" name="salePriceAmount" value={formData.salePriceAmount || ''} onChange={handleChange} 
@@ -13082,11 +13078,11 @@ const AnimalForm = ({
                                         <select name="studFeeCurrency" value={formData.studFeeCurrency || 'USD'} onChange={handleChange} 
                                             className="block w-24 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                             <option value="USD">USD ($)</option>
-                                            <option value="EUR">EUR (€)</option>
-                                            <option value="GBP">GBP (£)</option>
+                                            <option value="EUR">EUR (ï¿½)</option>
+                                            <option value="GBP">GBP (ï¿½)</option>
                                             <option value="CAD">CAD (C$)</option>
                                             <option value="AUD">AUD (A$)</option>
-                                            <option value="JPY">JPY (¥)</option>
+                                            <option value="JPY">JPY (ï¿½)</option>
                                             <option value="Negotiable">Negotiable</option>
                                         </select>
                                         <input type="number" name="studFeeAmount" value={formData.studFeeAmount || ''} onChange={handleChange} 
@@ -14275,7 +14271,7 @@ const AnimalForm = ({
                                                 record.litterSizeBorn !== null && `${record.litterSizeBorn} born`,
                                                 record.stillbornCount && `${record.stillbornCount} stillborn`,
                                                 record.litterSizeWeaned !== null && `${record.litterSizeWeaned} weaned`
-                                            ].filter(Boolean).join(' • ') || 'No counts';
+                                            ].filter(Boolean).join(' ï¿½ ') || 'No counts';
                                             
                                             return (
                                                 <div key={record.id} className={`bg-white rounded border transition-all ${isExpanded ? 'border-blue-300 shadow-md' : 'border-blue-100'}`}>
@@ -18558,7 +18554,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         }
     }, [authToken, statusFilter, selectedGenders, selectedSpecies, appliedNameFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, ownedFilterActive, publicFilter, showModalMessage]);
 
-    // Species list is now derived from the fetchAnimals result — no separate API call needed
+    // Species list is now derived from the fetchAnimals result ï¿½ no separate API call needed
     const fetchAllSpecies = useCallback(async () => {
         // No-op: species are populated as a side-effect of fetchAnimals()
         // Kept for compatibility with the animals-changed event handler
@@ -19457,7 +19453,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                                     .filter(([k]) => !['name', 'species', 'status', 'enclosureName'].includes(k))
                                                     .slice(0, 3)
                                                     .map(([k, v]) => `${k}: ${v}`)
-                                                    .join(' • ')
+                                                    .join(' ï¿½ ')
                                                 }
                                             </div>
                                         )}
@@ -20150,7 +20146,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                             const variety = getAnimalVariety(animal);
                             const parts = [animal.status, variety].filter(Boolean);
                             return parts.length > 0 ? (
-                                <div className="text-xs text-gray-400 truncate">{parts.join(' • ')}</div>
+                                <div className="text-xs text-gray-400 truncate">{parts.join(' ï¿½ ')}</div>
                             ) : null;
                         })()}
                     </div>
@@ -23597,7 +23593,7 @@ const App = () => {
                         animal.availableForBreeding === true || animal.availableForBreeding === 'true'
                     );
 
-                    // Enrich with owner country — only fetch profiles not already cached
+                    // Enrich with owner country ï¿½ only fetch profiles not already cached
                     const ownerIds = [...new Set(filtered.map(a => a.ownerId_public).filter(Boolean))];
                     const ownerProfiles = await Promise.all(ownerIds.map(async (id_public) => {
                         try {
@@ -23630,7 +23626,7 @@ const App = () => {
         // Only run initial fetch on desktop
         if (isDesktop()) fetchAvailableAnimals();
 
-        // Refresh every 30 minutes — data changes infrequently and widget is desktop-only
+        // Refresh every 30 minutes ï¿½ data changes infrequently and widget is desktop-only
         const refreshInterval = setInterval(fetchAvailableAnimals, 1800000);
 
         return () => {
@@ -25919,9 +25915,9 @@ const App = () => {
                                                             {/* Species/Breed/Strain/CTC - At Top */}
                                                             <p className="text-sm text-gray-600">
                                                                 {animalToView.species}
-                                                                {animalToView.breed && ` • ${animalToView.breed}`}
-                                                                {animalToView.strain && ` • ${animalToView.strain}`}
-                                                                {animalToView.id_public && ` • ${animalToView.id_public}`}
+                                                                {animalToView.breed && ` ï¿½ ${animalToView.breed}`}
+                                                                {animalToView.strain && ` ï¿½ ${animalToView.strain}`}
+                                                                {animalToView.id_public && ` ï¿½ ${animalToView.id_public}`}
                                                             </p>
 
                                                             {/* Name */}
@@ -26251,8 +26247,8 @@ const App = () => {
                                                             <p className="font-medium">{animalToView.status || 'Unknown'}</p>
                                                         </div>
                                                         <div>
-                                                            <span className="text-sm text-gray-600">?? Current Owner</span>
-                                                            <p className="font-medium">{animalToView.currentOwnerDisplay || animalToView.currentOwner || ''}</p>
+                                                            <span className="text-sm text-gray-600">?? Keeper</span>
+                                                            <p className="font-medium">{animalToView.keeperName || ''}</p>
                                                         </div>
                                                         <div>
                                                             <span className="text-sm text-gray-600">Public Profile</span>
@@ -26748,7 +26744,7 @@ const App = () => {
                                                                     record.litterSizeBorn !== null && `${record.litterSizeBorn} born`,
                                                                     record.stillbornCount && `${record.stillbornCount} stillborn`,
                                                                     record.litterSizeWeaned !== null && `${record.litterSizeWeaned} weaned`
-                                                                ].filter(Boolean).join(' • ') || 'No counts';
+                                                                ].filter(Boolean).join(' ï¿½ ') || 'No counts';
                                                                 return (
                                                                     <div key={idx} className={`bg-white rounded border transition-all ${isExpanded ? 'border-purple-300 shadow-md' : 'border-purple-100'}`}>
                                                                         <div 
