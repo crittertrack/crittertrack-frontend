@@ -3701,8 +3701,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                             <span className={`text-lg transition-transform ${isExpanded ? 'rotate-90' : ''}`}>▶️</span>
                                                             <span className={`font-mono px-2 py-0.5 rounded text-xs font-semibold ${record.litterId ? 'bg-purple-300 text-purple-800' : 'bg-gray-200 text-gray-600'}`}>{record.litterId || 'No Litter'}</span>
                                                             <div className="text-sm text-gray-700 flex gap-3">
-                                                                {formatDate(record.matingDate) && <><span>{formatDate(record.matingDate)}</span><span className="text-gray-400">&bull;</span></>
-                                                                {record.mate && <><span>{record.mate}</span><span className="text-gray-400">&bull;</span></>
+                                                                {formatDate(record.matingDate) && <><span>{formatDate(record.matingDate)}</span><span className="text-gray-400">&bull;</span></>}
+                                                                {record.mate && <><span>{record.mate}</span><span className="text-gray-400">&bull;</span></>}
                                                                 <span className="text-purple-700 font-medium">{countSummary}</span>
                                                             </div>
                                                         </div>
@@ -5153,8 +5153,8 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                             <span className={`text-lg transition-transform ${isExpanded ? 'rotate-90' : ''}`}>→</span>
                                                             <span className={`font-mono px-2 py-0.5 rounded text-xs font-semibold ${record.litterId ? 'bg-purple-300 text-purple-800' : 'bg-gray-200 text-gray-600'}`}>{record.litterId || 'No Litter'}</span>
                                                             <div className="text-sm text-gray-700 flex gap-3">
-                                                                {formatDate(record.matingDate) && <><span>{formatDate(record.matingDate)}</span><span className="text-gray-400">&bull;</span></>
-                                                                {record.mate && <><span>{record.mate}</span><span className="text-gray-400">&bull;</span></>
+                                                                {formatDate(record.matingDate) && <><span>{formatDate(record.matingDate)}</span><span className="text-gray-400">&bull;</span></>}
+                                                                {record.mate && <><span>{record.mate}</span><span className="text-gray-400">&bull;</span></>}
                                                                 <span className="text-purple-700 font-medium">{countSummary}</span>
                                                             </div>
                                                         </div>
@@ -6451,8 +6451,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                             <span className={`text-lg transition-transform ${isExpanded ? 'rotate-90' : ''}`}>▶️</span>
                                                             <span className={`font-mono px-2 py-0.5 rounded text-xs font-semibold ${record.litterId ? 'bg-purple-300 text-purple-800' : 'bg-gray-200 text-gray-600'}`}>{record.litterId || 'No Litter'}</span>
                                                             <div className="text-sm text-gray-700 flex gap-3">
-                                                                {formatDate(record.matingDate) && <><span>{formatDate(record.matingDate)}</span><span className="text-gray-400">&bull;</span></>
-                                                                {record.mate && <><span>{record.mate}</span><span className="text-gray-400">&bull;</span></>
+                                                                {formatDate(record.matingDate) && <><span>{formatDate(record.matingDate)}</span><span className="text-gray-400">&bull;</span></>}
+                                                                {record.mate && <><span>{record.mate}</span><span className="text-gray-400">&bull;</span></>}
                                                                 <span className="text-purple-700 font-medium">{countSummary}</span>
                                                             </div>
                                                         </div>
@@ -26905,8 +26905,8 @@ const App = () => {
                                                                                 <span className={`text-lg transition-transform ${isExpanded ? 'rotate-90' : ''}`}>▶️</span>
                                                                                 <span className={`font-mono px-2 py-0.5 rounded text-xs font-semibold ${record.litterId ? 'bg-purple-300 text-purple-800' : 'bg-gray-200 text-gray-600'}`}>{record.litterId || 'No Litter'}</span>
                                                                                 <div className="text-sm text-gray-700 flex gap-3">
-                                                                                    {formatDate(record.matingDate) && <><span>{formatDate(record.matingDate)}</span><span className="text-gray-400">&bull;</span></>
-                                                                                    {record.mate && <><span>{record.mate}</span><span className="text-gray-400">&bull;</span></>
+                                                                                    {formatDate(record.matingDate) && <><span>{formatDate(record.matingDate)}</span><span className="text-gray-400">&bull;</span></>}
+                                                                                    {record.mate && <><span>{record.mate}</span><span className="text-gray-400">&bull;</span></>}
                                                                                     <span className="text-purple-700 font-medium">{countSummary}</span>
                                                                                 </div>
                                                                             </div>
