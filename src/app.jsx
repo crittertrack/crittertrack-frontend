@@ -14403,12 +14403,6 @@ const AnimalForm = ({
                                     {(formData.gender === 'Female' || formData.gender === 'Intersex' || (formData.gender === 'Unknown' && (formData.breedingRole === 'dam' || formData.breedingRole === 'both'))) && (
                                         <>
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700 mb-1">Litter Size Born</label>
-                                                <input type="number" value={newBreedingRecord.litterSizeBorn || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, litterSizeBorn: e.target.value ? parseInt(e.target.value) : null})}
-                                                    placeholder="Number born" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                            
-                                            <div>
                                                 <label className="block text-xs font-medium text-gray-700 mb-1">Stillborn Count</label>
                                                 <input type="number" value={newBreedingRecord.stillbornCount || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, stillbornCount: e.target.value ? parseInt(e.target.value) : null})}
                                                     placeholder="Stillborn" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
@@ -14426,12 +14420,6 @@ const AnimalForm = ({
                                     {(formData.gender === 'Male' || (formData.gender === 'Intersex' && newBreedingRecord.outcome === 'Successful') || ((formData.gender === 'Unknown' && (formData.breedingRole === 'sire' || formData.breedingRole === 'both')) && newBreedingRecord.outcome === 'Successful')) && newBreedingRecord.outcome === 'Successful' && (
                                         <>
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700 mb-1">Litter Size Born (Sire)</label>
-                                                <input type="number" value={newBreedingRecord.litterSizeBorn || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, litterSizeBorn: e.target.value ? parseInt(e.target.value) : null})}
-                                                    placeholder="Number born" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                            
-                                            <div>
                                                 <label className="block text-xs font-medium text-gray-700 mb-1">Stillborn Count (Sire)</label>
                                                 <input type="number" value={newBreedingRecord.stillbornCount || ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, stillbornCount: e.target.value ? parseInt(e.target.value) : null})}
                                                     placeholder="Stillborn" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
@@ -14445,22 +14433,27 @@ const AnimalForm = ({
                                         </>
                                     )}
 
-                                    {/* Offspring gender counts */}
+                                    {/* Offspring gender counts - auto-compute litterSizeBorn */}
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-1">Males Born</label>
-                                        <input type="number" value={newBreedingRecord.maleCount ?? ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, maleCount: e.target.value !== '' ? parseInt(e.target.value) : null})}
+                                        <input type="number" value={newBreedingRecord.maleCount ?? ''} onChange={(e) => { const v = e.target.value !== '' ? parseInt(e.target.value) : null; const f = newBreedingRecord.femaleCount || 0; const u = newBreedingRecord.unknownCount || 0; setNewBreedingRecord({...newBreedingRecord, maleCount: v, litterSizeBorn: ((v||0)+f+u) || null}); }}
                                             placeholder="# males" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-1">Females Born</label>
-                                        <input type="number" value={newBreedingRecord.femaleCount ?? ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, femaleCount: e.target.value !== '' ? parseInt(e.target.value) : null})}
+                                        <input type="number" value={newBreedingRecord.femaleCount ?? ''} onChange={(e) => { const v = e.target.value !== '' ? parseInt(e.target.value) : null; const m = newBreedingRecord.maleCount || 0; const u = newBreedingRecord.unknownCount || 0; setNewBreedingRecord({...newBreedingRecord, femaleCount: v, litterSizeBorn: (m+(v||0)+u) || null}); }}
                                             placeholder="# females" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-1">Unknown / Intersex Born</label>
-                                        <input type="number" value={newBreedingRecord.unknownCount ?? ''} onChange={(e) => setNewBreedingRecord({...newBreedingRecord, unknownCount: e.target.value !== '' ? parseInt(e.target.value) : null})}
+                                        <input type="number" value={newBreedingRecord.unknownCount ?? ''} onChange={(e) => { const v = e.target.value !== '' ? parseInt(e.target.value) : null; const m = newBreedingRecord.maleCount || 0; const f = newBreedingRecord.femaleCount || 0; setNewBreedingRecord({...newBreedingRecord, unknownCount: v, litterSizeBorn: (m+f+(v||0)) || null}); }}
                                             placeholder="# unknown/intersex" min="0" className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                     </div>
+                                    {newBreedingRecord.litterSizeBorn > 0 && (
+                                        <div className="col-span-full mt-1 p-2 rounded-md bg-green-50 border border-green-200">
+                                            <p className="text-xs text-green-800"><strong>Total Born auto-set to {newBreedingRecord.litterSizeBorn}</strong> ({newBreedingRecord.maleCount || 0}M + {newBreedingRecord.femaleCount || 0}F + {newBreedingRecord.unknownCount || 0}U)</p>
+                                        </div>
+                                    )}
                                 </div>
                                 
                                 {/* Notes */}
