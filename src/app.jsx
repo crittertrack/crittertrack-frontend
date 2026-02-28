@@ -3755,7 +3755,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                     {breedingRecordLitters?.[record.litterId]?.inbreedingCoefficient != null && <div><div className="text-gray-600 text-xs">COI</div><div className="text-xl font-bold text-orange-600">{breedingRecordLitters[record.litterId].inbreedingCoefficient.toFixed(2)}%</div></div>}
                                                                 </div>
                                                             </div>
-                                                            {/* Linked Offspring */
+                                                            {/* Linked Offspring */}
                                                             {record.litterId && breedingRecordOffspring[record.litterId] && breedingRecordOffspring[record.litterId].length > 0 && (
                                                                 <div className="bg-white p-3 rounded border border-purple-100">
                                                                     <div className="text-sm font-semibold text-gray-700 mb-3">Offspring ({breedingRecordOffspring[record.litterId].length})</div>
