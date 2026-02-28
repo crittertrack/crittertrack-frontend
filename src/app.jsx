@@ -3725,41 +3725,36 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                     </div>
                                                     {isExpanded && (
                                                         <div className="border-t border-purple-100 p-4 bg-purple-50 space-y-4">
-                                                            <div className="grid grid-cols-3 gap-4 text-sm">
+                                                            {/* CTL ID + Litter Name */}
+                                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                                                <div><div className="text-gray-600 text-xs">CTL ID</div><div className="font-mono text-xs font-semibold text-gray-700">{record.litterId || 'Not Linked'}</div></div>
+                                                                {record.litterName && <div><div className="text-gray-600 text-xs">Litter Name</div><div className="font-semibold text-purple-800">{record.litterName}</div></div>}
+                                                            </div>
+                                                            {/* Mate, Dates, Method, Condition, Outcome */}
+                                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                                                {record.mate && (<div><div className="text-gray-600 text-xs">Mate / Other Parent</div><div className="font-semibold text-gray-800">{record.mate}</div></div>)}
                                                                 <div><div className="text-gray-600 text-xs">Mating Date</div><div className="font-semibold text-gray-800">{formatDate(record.matingDate) || '—'}</div></div>
                                                                 {record.breedingMethod && (<div><div className="text-gray-600 text-xs">Breeding Method</div><div className="font-semibold text-gray-800">{record.breedingMethod}</div></div>)}
-                                                                {record.breedingConditionAtTime && (<div><div className="text-gray-600 text-xs">Condition</div><div className="font-semibold text-gray-800">{record.breedingConditionAtTime}</div></div>)}
-                                                            </div>
-                                                            <div className="grid grid-cols-3 gap-4 text-sm">
-                                                                <div><div className="text-gray-600 text-xs">Litter</div>{record.litterName && <div className="font-semibold text-sm text-purple-800">{record.litterName}</div>}<div className="font-mono text-xs text-gray-500">{record.litterId || 'Not Linked'}</div></div>
+                                                                {record.breedingConditionAtTime && (<div><div className="text-gray-600 text-xs">Breeding Condition</div><div className="font-semibold text-gray-800">{record.breedingConditionAtTime}</div></div>)}
+                                                                {record.outcome && (<div><div className="text-gray-600 text-xs">Outcome</div><div className={`font-semibold ${record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}`}>{record.outcome}</div></div>)}
                                                                 {(isDamOnly || isBoth) && (<div><div className="text-gray-600 text-xs">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(record.birthEventDate) || '—'}</div></div>)}
                                                                 {record.birthMethod && (<div><div className="text-gray-600 text-xs">Birth Method</div><div className="font-semibold text-gray-800">{record.birthMethod}</div></div>)}
                                                             </div>
+                                                            {/* Notes */}
+                                                            {record.notes && (<div className="bg-white p-3 rounded border border-purple-100"><div className="text-sm font-semibold text-gray-700 mb-2">Notes</div><div className="text-sm text-gray-700 italic">{record.notes}</div></div>)}
+                                                            {/* Offspring Counts */}
                                                             <div className="bg-white p-3 rounded border border-purple-100">
                                                                 <div className="text-sm font-semibold text-gray-700 mb-3">Offspring Counts</div>
                                                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                                                                     <div><div className="text-gray-600 text-xs">Total Born</div><div className="text-2xl font-bold text-purple-600">{record.litterSizeBorn !== null ? record.litterSizeBorn : '—'}</div></div>
                                                                     <div><div className="text-gray-600 text-xs">Stillborn</div><div className="text-2xl font-bold text-gray-600">{record.stillbornCount || '0'}</div></div>
                                                                     <div><div className="text-gray-600 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '—'}</div></div>
-                                                                    <div><div className="text-gray-600 text-xs">Outcome</div><div className={`font-semibold text-lg ${record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}`}>{record.outcome || '—'}</div></div>
                                                                     {breedingRecordLitters?.[record.litterId]?.maleCount != null && <div><div className="text-gray-600 text-xs">Males</div><div className="text-2xl font-bold text-blue-500">{breedingRecordLitters[record.litterId].maleCount}</div></div>}
                                                                     {breedingRecordLitters?.[record.litterId]?.femaleCount != null && <div><div className="text-gray-600 text-xs">Females</div><div className="text-2xl font-bold text-pink-500">{breedingRecordLitters[record.litterId].femaleCount}</div></div>}
                                                                     {breedingRecordLitters?.[record.litterId]?.inbreedingCoefficient != null && <div><div className="text-gray-600 text-xs">COI</div><div className="text-xl font-bold text-orange-600">{breedingRecordLitters[record.litterId].inbreedingCoefficient.toFixed(2)}%</div></div>}
                                                                 </div>
                                                             </div>
-                                                            {record.mate && (
-                                                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                                                                    <div><div className="text-gray-600 text-xs">Mate / Other Parent</div><div className="font-semibold text-gray-800">{record.mate}</div></div>
-                                                                </div>
-                                                            )}
-                                                            {record.birthEventDate && (
-                                                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                                                                    <div><div className="text-gray-600 text-xs">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(record.birthEventDate)}</div></div>
-                                                                    {record.birthMethod && <div><div className="text-gray-600 text-xs">Birth Method</div><div className="font-semibold text-gray-800">{record.birthMethod}</div></div>}
-                                                                    {record.outcome && <div><div className="text-gray-600 text-xs">Outcome</div><div className={`font-semibold ${record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}`}>{record.outcome}</div></div>}
-                                                                </div>
-                                                            )}
-                                                            {record.notes && (<div className="bg-white p-3 rounded border border-purple-100"><div className="text-sm font-semibold text-gray-700 mb-2">Notes</div><div className="text-sm text-gray-700 italic">{record.notes}</div></div>)}
+                                                            {/* Linked Offspring */}
                                                             {record.litterId && breedingRecordOffspring[record.litterId] && breedingRecordOffspring[record.litterId].length > 0 && (
                                                                 <div className="bg-white p-3 rounded border border-purple-100">
                                                                     <div className="text-sm font-semibold text-gray-700 mb-3">Offspring ({breedingRecordOffspring[record.litterId].length})</div>
@@ -5204,29 +5199,35 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                     </div>
                                                     {isExpanded && (
                                                         <div className="border-t border-purple-100 p-4 bg-purple-50 space-y-4">
-                                                            <div className="grid grid-cols-3 gap-4 text-sm">
+                                                            {/* CTL ID + Litter Name */}
+                                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                                                <div><div className="text-gray-600 text-xs">CTL ID</div><div className="font-mono text-xs font-semibold text-gray-700">{record.litterId || 'Not Linked'}</div></div>
+                                                                {record.litterName && <div><div className="text-gray-600 text-xs">Litter Name</div><div className="font-semibold text-purple-800">{record.litterName}</div></div>}
+                                                            </div>
+                                                            {/* Mate, Dates, Method, Condition, Outcome */}
+                                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                                                {record.mate && (<div><div className="text-gray-600 text-xs">Mate / Other Parent</div><div className="font-semibold text-gray-800">{record.mate}</div></div>)}
                                                                 <div><div className="text-gray-600 text-xs">Mating Date</div><div className="font-semibold text-gray-800">{formatDate(record.matingDate) || '—'}</div></div>
                                                                 {record.breedingMethod && (<div><div className="text-gray-600 text-xs">Breeding Method</div><div className="font-semibold text-gray-800">{record.breedingMethod}</div></div>)}
-                                                                {record.breedingConditionAtTime && (<div><div className="text-gray-600 text-xs">Condition</div><div className="font-semibold text-gray-800">{record.breedingConditionAtTime}</div></div>)}
-                                                            </div>
-                                                            <div className="grid grid-cols-3 gap-4 text-sm">
-                                                                <div><div className="text-gray-600 text-xs">Litter</div>{record.litterName && <div className="font-semibold text-sm text-purple-800">{record.litterName}</div>}<div className="font-mono text-xs text-gray-500">{record.litterId || 'Not Linked'}</div></div>
+                                                                {record.breedingConditionAtTime && (<div><div className="text-gray-600 text-xs">Breeding Condition</div><div className="font-semibold text-gray-800">{record.breedingConditionAtTime}</div></div>)}
+                                                                {record.outcome && (<div><div className="text-gray-600 text-xs">Outcome</div><div className={`font-semibold ${record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}`}>{record.outcome}</div></div>)}
                                                                 {(isDamOnly || isBoth) && (<div><div className="text-gray-600 text-xs">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(record.birthEventDate) || '—'}</div></div>)}
                                                                 {record.birthMethod && (<div><div className="text-gray-600 text-xs">Birth Method</div><div className="font-semibold text-gray-800">{record.birthMethod}</div></div>)}
                                                             </div>
+                                                            {/* Notes */}
+                                                            {record.notes && (<div className="bg-white p-3 rounded border border-purple-100"><div className="text-sm font-semibold text-gray-700 mb-2">Notes</div><div className="text-sm text-gray-700 italic">{record.notes}</div></div>)}
+                                                            {/* Offspring Counts */}
                                                             <div className="bg-white p-3 rounded border border-purple-100">
                                                                 <div className="text-sm font-semibold text-gray-700 mb-3">Offspring Counts</div>
                                                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                                                                     <div><div className="text-gray-600 text-xs">Total Born</div><div className="text-2xl font-bold text-purple-600">{record.litterSizeBorn !== null ? record.litterSizeBorn : '—'}</div></div>
                                                                     <div><div className="text-gray-600 text-xs">Stillborn</div><div className="text-2xl font-bold text-gray-600">{record.stillbornCount || '0'}</div></div>
                                                                     <div><div className="text-gray-600 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '—'}</div></div>
-                                                                    <div><div className="text-gray-600 text-xs">Outcome</div><div className={`font-semibold text-lg ${record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}`}>{record.outcome || '—'}</div></div>
                                                                     {breedingRecordLitters?.[record.litterId]?.maleCount != null && <div><div className="text-gray-600 text-xs">Males</div><div className="text-2xl font-bold text-blue-500">{breedingRecordLitters[record.litterId].maleCount}</div></div>}
                                                                     {breedingRecordLitters?.[record.litterId]?.femaleCount != null && <div><div className="text-gray-600 text-xs">Females</div><div className="text-2xl font-bold text-pink-500">{breedingRecordLitters[record.litterId].femaleCount}</div></div>}
                                                                     {breedingRecordLitters?.[record.litterId]?.inbreedingCoefficient != null && <div><div className="text-gray-600 text-xs">COI</div><div className="text-xl font-bold text-orange-600">{breedingRecordLitters[record.litterId].inbreedingCoefficient.toFixed(2)}%</div></div>}
                                                                 </div>
                                                             </div>
-                                                            {record.notes && (<div className="bg-white p-3 rounded border border-purple-100"><div className="text-sm font-semibold text-gray-700 mb-2">Notes</div><div className="text-sm text-gray-700 italic">{record.notes}</div></div>)}
                                                             <div className="flex gap-2 pt-2">
                                                                 {!record.litterId && (
                                                                     <>
@@ -6523,29 +6524,35 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                     </div>
                                                     {isExpanded && (
                                                         <div className="border-t border-purple-100 p-4 bg-purple-50 space-y-4">
-                                                            <div className="grid grid-cols-3 gap-4 text-sm">
+                                                            {/* CTL ID + Litter Name */}
+                                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                                                <div><div className="text-gray-600 text-xs">CTL ID</div><div className="font-mono text-xs font-semibold text-gray-700">{record.litterId || 'Not Linked'}</div></div>
+                                                                {record.litterName && <div><div className="text-gray-600 text-xs">Litter Name</div><div className="font-semibold text-purple-800">{record.litterName}</div></div>}
+                                                            </div>
+                                                            {/* Mate, Dates, Method, Condition, Outcome */}
+                                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                                                {record.mate && (<div><div className="text-gray-600 text-xs">Mate / Other Parent</div><div className="font-semibold text-gray-800">{record.mate}</div></div>)}
                                                                 <div><div className="text-gray-600 text-xs">Mating Date</div><div className="font-semibold text-gray-800">{formatDate(record.matingDate) || '—'}</div></div>
                                                                 {record.breedingMethod && (<div><div className="text-gray-600 text-xs">Breeding Method</div><div className="font-semibold text-gray-800">{record.breedingMethod}</div></div>)}
-                                                                {record.breedingConditionAtTime && (<div><div className="text-gray-600 text-xs">Condition</div><div className="font-semibold text-gray-800">{record.breedingConditionAtTime}</div></div>)}
-                                                            </div>
-                                                            <div className="grid grid-cols-3 gap-4 text-sm">
-                                                                <div><div className="text-gray-600 text-xs">Litter</div>{record.litterName && <div className="font-semibold text-sm text-purple-800">{record.litterName}</div>}<div className="font-mono text-xs text-gray-500">{record.litterId || 'Not Linked'}</div></div>
+                                                                {record.breedingConditionAtTime && (<div><div className="text-gray-600 text-xs">Breeding Condition</div><div className="font-semibold text-gray-800">{record.breedingConditionAtTime}</div></div>)}
+                                                                {record.outcome && (<div><div className="text-gray-600 text-xs">Outcome</div><div className={`font-semibold ${record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}`}>{record.outcome}</div></div>)}
                                                                 {record.birthEventDate && (<div><div className="text-gray-600 text-xs">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(record.birthEventDate) || '—'}</div></div>)}
                                                                 {record.birthMethod && (<div><div className="text-gray-600 text-xs">Birth Method</div><div className="font-semibold text-gray-800">{record.birthMethod}</div></div>)}
                                                             </div>
+                                                            {/* Notes */}
+                                                            {record.notes && (<div className="bg-white p-3 rounded border border-purple-100"><div className="text-sm font-semibold text-gray-700 mb-2">Notes</div><div className="text-sm text-gray-700 italic">{record.notes}</div></div>)}
+                                                            {/* Offspring Counts */}
                                                             <div className="bg-white p-3 rounded border border-purple-100">
                                                                 <div className="text-sm font-semibold text-gray-700 mb-3">Offspring Counts</div>
                                                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                                                                     <div><div className="text-gray-600 text-xs">Total Born</div><div className="text-2xl font-bold text-purple-600">{record.litterSizeBorn !== null ? record.litterSizeBorn : '—'}</div></div>
                                                                     <div><div className="text-gray-600 text-xs">Stillborn</div><div className="text-2xl font-bold text-gray-600">{record.stillbornCount || '0'}</div></div>
                                                                     <div><div className="text-gray-600 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '—'}</div></div>
-                                                                    <div><div className="text-gray-600 text-xs">Outcome</div><div className={`font-semibold text-lg ${record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}`}>{record.outcome || '—'}</div></div>
                                                                     {breedingRecordLitters?.[record.litterId]?.maleCount != null && <div><div className="text-gray-600 text-xs">Males</div><div className="text-2xl font-bold text-blue-500">{breedingRecordLitters[record.litterId].maleCount}</div></div>}
                                                                     {breedingRecordLitters?.[record.litterId]?.femaleCount != null && <div><div className="text-gray-600 text-xs">Females</div><div className="text-2xl font-bold text-pink-500">{breedingRecordLitters[record.litterId].femaleCount}</div></div>}
                                                                     {breedingRecordLitters?.[record.litterId]?.inbreedingCoefficient != null && <div><div className="text-gray-600 text-xs">COI</div><div className="text-xl font-bold text-orange-600">{breedingRecordLitters[record.litterId].inbreedingCoefficient.toFixed(2)}%</div></div>}
                                                                 </div>
                                                             </div>
-                                                            {record.notes && (<div className="bg-white p-3 rounded border border-purple-100"><div className="text-sm font-semibold text-gray-700 mb-2">Notes</div><div className="text-sm text-gray-700 italic">{record.notes}</div></div>)}
                                                         </div>
                                                     )}
                                                 </div>
@@ -14582,84 +14589,30 @@ const AnimalForm = ({
                                                     {/* EXPANDED CONTENT */}
                                                     {isExpanded && (
                                                         <div className="border-t border-blue-100 p-4 bg-blue-50 space-y-4">
-                                                            {/* Mating Info */}
-                                                            <div className="grid grid-cols-3 gap-4 text-sm">
-                                                                <div>
-                                                                    <div className="text-gray-600 text-xs">Mating Date</div>
-                                                                    <div className="font-semibold text-gray-800">{formatDate(record.matingDate) || '—'}</div>
-                                                                </div>
-                                                                {record.breedingMethod && (
-                                                                    <div>
-                                                                        <div className="text-gray-600 text-xs">Breeding Method</div>
-                                                                        <div className="font-semibold text-gray-800">{record.breedingMethod}</div>
-                                                                    </div>
-                                                                )}
-                                                                {record.breedingConditionAtTime && (
-                                                                    <div>
-                                                                        <div className="text-gray-600 text-xs">Condition</div>
-                                                                        <div className="font-semibold text-gray-800">{record.breedingConditionAtTime}</div>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            
-                                                            {/* Litter Link Info */}
+                                                            {/* CTL ID + Litter Name */}
                                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                                                                <div>
-                                                                    <div className="text-gray-600 text-xs">CTL-ID</div>
-                                                                    <div className="font-mono bg-blue-100 px-2 py-1 rounded text-xs font-semibold">
-                                                                        {record.litterId || 'Not Linked'}
-                                                                    </div>
-                                                                </div>
-                                                                {record.mate && (
-                                                                    <div>
-                                                                        <div className="text-gray-600 text-xs">Mate / Other Parent</div>
-                                                                        <div className="font-semibold text-gray-800">{record.mate}</div>
-                                                                    </div>
-                                                                )}
+                                                                <div><div className="text-gray-600 text-xs">CTL ID</div><div className="font-mono bg-blue-100 px-2 py-1 rounded text-xs font-semibold">{record.litterId || 'Not Linked'}</div></div>
+                                                                {(linkedLitter?.breedingPairCodeName || record.litterName) && <div><div className="text-gray-600 text-xs">Litter Name</div><div className="font-semibold text-blue-800">{linkedLitter?.breedingPairCodeName || record.litterName}</div></div>}
                                                             </div>
-                                                            
-                                                            {/* Birth and Outcome Info */}
+                                                            {/* Mate, Dates, Method, Condition, Outcome */}
                                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                                                                <div>
-                                                                    <div className="text-gray-600 text-xs">Birth Date</div>
-                                                                    <div className="font-semibold text-gray-800">{formatDate(record.birthEventDate) || '—'}</div>
-                                                                </div>
-                                                                {record.birthMethod && (
-                                                                    <div>
-                                                                        <div className="text-gray-600 text-xs">Birth Method</div>
-                                                                        <div className="font-semibold text-gray-800">{record.birthMethod}</div>
-                                                                    </div>
-                                                                )}
-                                                                {record.outcome && (
-                                                                    <div>
-                                                                        <div className="text-gray-600 text-xs">Outcome</div>
-                                                                        <div className={`font-semibold ${
-                                                                            record.outcome === 'Successful' ? 'text-green-600' : 
-                                                                            record.outcome === 'Unsuccessful' ? 'text-red-600' : 
-                                                                            'text-gray-600'
-                                                                        }`}>
-                                                                            {record.outcome}
-                                                                        </div>
-                                                                    </div>
-                                                                )}
+                                                                {record.mate && (<div><div className="text-gray-600 text-xs">Mate / Other Parent</div><div className="font-semibold text-gray-800">{record.mate}</div></div>)}
+                                                                <div><div className="text-gray-600 text-xs">Mating Date</div><div className="font-semibold text-gray-800">{formatDate(record.matingDate) || '—'}</div></div>
+                                                                {record.breedingMethod && (<div><div className="text-gray-600 text-xs">Breeding Method</div><div className="font-semibold text-gray-800">{record.breedingMethod}</div></div>)}
+                                                                {record.breedingConditionAtTime && (<div><div className="text-gray-600 text-xs">Breeding Condition</div><div className="font-semibold text-gray-800">{record.breedingConditionAtTime}</div></div>)}
+                                                                {record.outcome && (<div><div className="text-gray-600 text-xs">Outcome</div><div className={`font-semibold ${record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}`}>{record.outcome}</div></div>)}
+                                                                <div><div className="text-gray-600 text-xs">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(linkedLitter?.birthDate || record.birthEventDate) || '—'}</div></div>
+                                                                {record.birthMethod && (<div><div className="text-gray-600 text-xs">Birth Method</div><div className="font-semibold text-gray-800">{record.birthMethod}</div></div>)}
                                                             </div>
-                                                            
+                                                            {/* Notes */}
+                                                            {record.notes && (<div className="bg-white p-3 rounded border border-blue-100"><div className="text-sm font-semibold text-gray-700 mb-2">Notes</div><div className="text-sm text-gray-700 italic">{record.notes}</div></div>)}
                                                             {/* Offspring Counts */}
                                                             <div className="bg-white p-3 rounded border border-blue-100">
                                                                 <div className="text-sm font-semibold text-gray-700 mb-3">Offspring Counts</div>
-                                                                <div className="grid grid-cols-3 gap-3 text-sm">
-                                                                    <div>
-                                                                        <div className="text-gray-600 text-xs">Total Born</div>
-                                                                        <div className="text-2xl font-bold text-blue-600">{record.litterSizeBorn !== null ? record.litterSizeBorn : '—'}</div>
-                                                                    </div>
-                                                                    <div>
-                                                                        <div className="text-gray-600 text-xs">Stillborn</div>
-                                                                        <div className="text-2xl font-bold text-gray-600">{record.stillbornCount || '0'}</div>
-                                                                    </div>
-                                                                    <div>
-                                                                        <div className="text-gray-600 text-xs">Weaned</div>
-                                                                        <div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '—'}</div>
-                                                                    </div>
+                                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                                                                    <div><div className="text-gray-600 text-xs">Total Born</div><div className="text-2xl font-bold text-blue-600">{record.litterSizeBorn !== null ? record.litterSizeBorn : '—'}</div></div>
+                                                                    <div><div className="text-gray-600 text-xs">Stillborn</div><div className="text-2xl font-bold text-gray-600">{record.stillbornCount || '0'}</div></div>
+                                                                    <div><div className="text-gray-600 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '—'}</div></div>
                                                                     {linkedLitter?.maleCount != null && <div><div className="text-gray-600 text-xs">Males</div><div className="text-2xl font-bold text-blue-500">{linkedLitter.maleCount}</div></div>}
                                                                     {linkedLitter?.femaleCount != null && <div><div className="text-gray-600 text-xs">Females</div><div className="text-2xl font-bold text-pink-500">{linkedLitter.femaleCount}</div></div>}
                                                                     {linkedLitter?.inbreedingCoefficient != null && <div><div className="text-gray-600 text-xs">COI</div><div className="text-xl font-bold text-orange-600">{linkedLitter.inbreedingCoefficient.toFixed(2)}%</div></div>}
@@ -14696,14 +14649,6 @@ const AnimalForm = ({
                                                                             </div>
                                                                         ))}
                                                                     </div>
-                                                                </div>
-                                                            )}
-                                                            
-                                                            {/* Notes */}
-                                                            {record.notes && (
-                                                                <div className="bg-white p-3 rounded border border-blue-100">
-                                                                    <div className="text-sm font-semibold text-gray-700 mb-2">Notes</div>
-                                                                    <div className="text-sm text-gray-700 italic">{record.notes}</div>
                                                                 </div>
                                                             )}
                                                             
@@ -27022,29 +26967,35 @@ const App = () => {
                                                                         </div>
                                                                         {isExpanded && (
                                                                             <div className="border-t border-purple-100 p-4 bg-purple-50 space-y-4">
-                                                                                <div className="grid grid-cols-3 gap-4 text-sm">
+                                                                                {/* CTL ID + Litter Name */}
+                                                                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                                                                    <div><div className="text-gray-600 text-xs">CTL ID</div><div className="font-mono text-xs font-semibold text-gray-700">{record.litterId || 'Not Linked'}</div></div>
+                                                                                    {record.litterName && <div><div className="text-gray-600 text-xs">Litter Name</div><div className="font-semibold text-purple-800">{record.litterName}</div></div>}
+                                                                                </div>
+                                                                                {/* Mate, Dates, Method, Condition, Outcome */}
+                                                                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                                                                    {record.mate && (<div><div className="text-gray-600 text-xs">Mate / Other Parent</div><div className="font-semibold text-gray-800">{record.mate}</div></div>)}
                                                                                     <div><div className="text-gray-600 text-xs">Mating Date</div><div className="font-semibold text-gray-800">{formatDate(record.matingDate) || '—'}</div></div>
                                                                                     {record.breedingMethod && (<div><div className="text-gray-600 text-xs">Breeding Method</div><div className="font-semibold text-gray-800">{record.breedingMethod}</div></div>)}
-                                                                                    {record.breedingConditionAtTime && (<div><div className="text-gray-600 text-xs">Condition</div><div className="font-semibold text-gray-800">{record.breedingConditionAtTime}</div></div>)}
-                                                                                </div>
-                                                                                <div className="grid grid-cols-3 gap-4 text-sm">
-                                                                                    <div><div className="text-gray-600 text-xs">Litter</div>{record.litterName && <div className="font-semibold text-sm text-purple-800">{record.litterName}</div>}<div className="font-mono text-xs text-gray-500">{record.litterId || 'Not Linked'}</div></div>
+                                                                                    {record.breedingConditionAtTime && (<div><div className="text-gray-600 text-xs">Breeding Condition</div><div className="font-semibold text-gray-800">{record.breedingConditionAtTime}</div></div>)}
+                                                                                    {record.outcome && (<div><div className="text-gray-600 text-xs">Outcome</div><div className={`font-semibold ${record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}`}>{record.outcome}</div></div>)}
                                                                                     {record.birthEventDate && (<div><div className="text-gray-600 text-xs">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(record.birthEventDate) || '—'}</div></div>)}
                                                                                     {record.birthMethod && (<div><div className="text-gray-600 text-xs">Birth Method</div><div className="font-semibold text-gray-800">{record.birthMethod}</div></div>)}
                                                                                 </div>
+                                                                                {/* Notes */}
+                                                                                {record.notes && (<div className="bg-white p-3 rounded border border-purple-100"><div className="text-sm font-semibold text-gray-700 mb-2">Notes</div><div className="text-sm text-gray-700 italic">{record.notes}</div></div>)}
+                                                                                {/* Offspring Counts */}
                                                                                 <div className="bg-white p-3 rounded border border-purple-100">
                                                                                     <div className="text-sm font-semibold text-gray-700 mb-3">Offspring Counts</div>
                                                                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                                                                                         <div><div className="text-gray-600 text-xs">Total Born</div><div className="text-2xl font-bold text-purple-600">{record.litterSizeBorn !== null ? record.litterSizeBorn : '—'}</div></div>
                                                                                         <div><div className="text-gray-600 text-xs">Stillborn</div><div className="text-2xl font-bold text-gray-600">{record.stillbornCount || '0'}</div></div>
                                                                                         <div><div className="text-gray-600 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{record.litterSizeWeaned !== null ? record.litterSizeWeaned : '—'}</div></div>
-                                                                                        <div><div className="text-gray-600 text-xs">Outcome</div><div className={`font-semibold text-lg ${record.outcome === 'Successful' ? 'text-green-600' : record.outcome === 'Unsuccessful' ? 'text-red-600' : 'text-gray-600'}`}>{record.outcome || '—'}</div></div>
                                                                                         {breedingRecordLitters?.[record.litterId]?.maleCount != null && <div><div className="text-gray-600 text-xs">Males</div><div className="text-2xl font-bold text-blue-500">{breedingRecordLitters[record.litterId].maleCount}</div></div>}
                                                                                         {breedingRecordLitters?.[record.litterId]?.femaleCount != null && <div><div className="text-gray-600 text-xs">Females</div><div className="text-2xl font-bold text-pink-500">{breedingRecordLitters[record.litterId].femaleCount}</div></div>}
                                                                                         {breedingRecordLitters?.[record.litterId]?.inbreedingCoefficient != null && <div><div className="text-gray-600 text-xs">COI</div><div className="text-xl font-bold text-orange-600">{breedingRecordLitters[record.litterId].inbreedingCoefficient.toFixed(2)}%</div></div>}
                                                                                     </div>
                                                                                 </div>
-                                                                                {record.notes && (<div className="bg-white p-3 rounded border border-purple-100"><div className="text-sm font-semibold text-gray-700 mb-2">Notes</div><div className="text-sm text-gray-700 italic">{record.notes}</div></div>)}
                                                                             </div>
                                                                         )}
                                                                     </div>
