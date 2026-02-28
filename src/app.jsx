@@ -7648,6 +7648,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     });
     const [bulkDeleteMode, setBulkDeleteMode] = useState({});
     const [selectedOffspring, setSelectedOffspring] = useState({});
+    const [coiCalculating, setCoiCalculating] = useState(new Set()); // litter._id values currently computing COI
 
     useEffect(() => {
         const loadData = async () => {
@@ -7766,43 +7767,35 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             // Set litters immediately so UI can render
             setLitters(littersData);
             
-            // Calculate COI for each litter in background
-            Promise.resolve().then(async () => {
-                let needsUpdate = false;
-                for (const litter of littersData) {
-                    // Always recalculate to ensure COI stays accurate
-                    if (litter.sireId_public && litter.damId_public) {
-                        try {
-                            const coiResponse = await axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
-                                params: {
-                                    sireId: litter.sireId_public,
-                                    damId: litter.damId_public,
-                                    generations: 50
-                                },
+            // Calculate COI for each litter that doesn't have it yet.
+            // Each litter updates independently so cards pop in as they resolve.
+            const littersNeedingCOI = littersData.filter(
+                l => l.inbreedingCoefficient == null && l.sireId_public && l.damId_public
+            );
+            if (littersNeedingCOI.length > 0) {
+                // Mark them all as calculating immediately
+                setCoiCalculating(new Set(littersNeedingCOI.map(l => l._id)));
+                // Fire all COI requests in parallel — no sequential waiting
+                littersNeedingCOI.forEach(async (litter) => {
+                    try {
+                        const coiResponse = await axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
+                            params: { sireId: litter.sireId_public, damId: litter.damId_public, generations: 50 },
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        });
+                        const coi = coiResponse.data.inbreedingCoefficient;
+                        if (coi != null) {
+                            // Patch just this litter in state — other cards are unaffected
+                            setLitters(prev => prev.map(l => l._id === litter._id ? { ...l, inbreedingCoefficient: coi } : l));
+                            // Persist to DB silently
+                            axios.put(`${API_BASE_URL}/litters/${litter._id}`, { inbreedingCoefficient: coi }, {
                                 headers: { Authorization: `Bearer ${authToken}` }
-                            });
-
-                            if (coiResponse.data.inbreedingCoefficient != null) {
-                                litter.inbreedingCoefficient = coiResponse.data.inbreedingCoefficient;
-                                needsUpdate = true;
-                                
-                                // Update database
-                                await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
-                                    inbreedingCoefficient: coiResponse.data.inbreedingCoefficient
-                                }, {
-                                    headers: { Authorization: `Bearer ${authToken}` }
-                                });
-                            }
-                        } catch (error) {
-                            console.log(`Could not update COI for litter ${litter._id}:`, error);
+                            }).catch(() => {});
                         }
+                    } catch {/* ignore COI errors */} finally {
+                        setCoiCalculating(prev => { const next = new Set(prev); next.delete(litter._id); return next; });
                     }
-                }
-                // Update state if any COI values were calculated
-                if (needsUpdate) {
-                    setLitters([...littersData]);
-                }
-            });
+                });
+            }
         } catch (error) {
             console.error('Error fetching litters:', error);
             setLitters([]);
@@ -8530,18 +8523,27 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         return false;
     });
 
-    if (loading) {
-        return (
-            <div className="w-full max-w-6xl bg-white p-6 rounded-xl shadow-lg">
-                <div className="flex justify-center items-center py-12">
-                    <Loader2 className="animate-spin" size={48} />
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="w-full max-w-6xl bg-white p-3 sm:p-6 rounded-xl shadow-lg">
+        {loading && litters.length === 0 && (
+            /* Skeleton litter cards — shown only until first fetch completes */
+            <div className="space-y-3 animate-pulse">
+                {[0,1,2,3].map(i => (
+                    <div key={i} className="border border-gray-200 rounded-xl p-4">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="h-5 w-40 bg-gray-200 rounded" />
+                            <div className="h-5 w-20 bg-gray-200 rounded" />
+                        </div>
+                        <div className="grid grid-cols-3 gap-3">
+                            <div className="h-4 bg-gray-100 rounded" />
+                            <div className="h-4 bg-gray-100 rounded" />
+                            <div className="h-4 bg-gray-100 rounded" />
+                        </div>
+                    </div>
+                ))}
+            </div>
+        )}
+        {(!loading || litters.length > 0) && (
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                 <h2 className="text-xl sm:text-3xl font-bold text-gray-800 flex items-center">
                     <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
@@ -9281,9 +9283,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         <p className="text-[10px] text-gray-500 mt-0.5">
                                             {formatDate(litter.birthDate)}
                                         </p>
-                                        {litter.inbreedingCoefficient != null && (
+                                        {(litter.inbreedingCoefficient != null || coiCalculating.has(litter._id)) && (
                                             <p className="text-[10px] text-gray-500 mt-0.5">
-                                                <span className="font-medium">COI:</span> {litter.inbreedingCoefficient.toFixed(2)}%
+                                                <span className="font-medium">COI:</span>{' '}
+                                                {coiCalculating.has(litter._id)
+                                                    ? <span className="inline-block w-12 h-2.5 bg-gray-200 rounded animate-pulse align-middle" />
+                                                    : `${litter.inbreedingCoefficient.toFixed(2)}%`}
                                             </p>
                                         )}
                                     </div>
@@ -9310,8 +9315,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         <div className="text-sm font-semibold text-gray-700">
                                             {litter.numberBorn} offspring
                                         </div>
-                                        <div className="text-sm">
-                                            <span className="text-gray-600">COI:</span> {litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : 'N/A'}
+                                        <div className="text-sm flex items-center gap-1">
+                                            <span className="text-gray-600">COI:</span>{' '}
+                                            {coiCalculating.has(litter._id)
+                                                ? <span className="inline-block w-10 h-3 bg-gray-200 rounded animate-pulse" />
+                                                : litter.inbreedingCoefficient != null
+                                                    ? `${litter.inbreedingCoefficient.toFixed(2)}%`
+                                                    : 'N/A'}
                                         </div>
                                     </div>
                                     <ChevronLeft 
@@ -9359,7 +9369,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 <div><div className="text-gray-500 text-xs">Total Born</div><div className="text-2xl font-bold text-blue-600">{litter.litterSizeBorn ?? litter.numberBorn ?? '—'}</div></div>
                                                 <div><div className="text-gray-500 text-xs">Stillborn</div><div className="text-2xl font-bold text-gray-600">{litter.stillbornCount ?? litter.stillborn ?? '0'}</div></div>
                                                 <div><div className="text-gray-500 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? '—'}</div></div>
-                                                {litter.inbreedingCoefficient != null && <div><div className="text-gray-500 text-xs">COI</div><div className="text-2xl font-bold text-orange-600">{litter.inbreedingCoefficient.toFixed(2)}%</div></div>}
+                                                {(litter.inbreedingCoefficient != null || coiCalculating.has(litter._id)) && (
+                                                    <div>
+                                                        <div className="text-gray-500 text-xs">COI</div>
+                                                        {coiCalculating.has(litter._id)
+                                                            ? <div className="mt-1 w-16 h-6 bg-gray-200 rounded animate-pulse" />
+                                                            : <div className="text-2xl font-bold text-orange-600">{litter.inbreedingCoefficient.toFixed(2)}%</div>}
+                                                    </div>
+                                                )}
                                             </div>
                                         {((litter.maleCount != null || litter.femaleCount != null || (litter.unknownCount != null && litter.unknownCount > 0)) && (
                                             <div className="grid grid-cols-3 gap-3 text-sm mb-3 bg-white p-3 rounded border border-gray-200">
@@ -18933,7 +18950,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     }, [publicFilter]);
     
     const fetchAnimals = useCallback(async () => {
-        setLoading(true);
+        // Do NOT setLoading(true) here — loading starts true only on initial mount
+        // and goes false after the very first fetch. All subsequent re-fetches are
+        // silent so the existing card grid never disappears during filter changes.
         try {
             let params = [];
             if (statusFilter) {
@@ -21657,9 +21676,25 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             )}
 
             {animalView === 'management' ? (
-                loading ? <LoadingSpinner /> : showActivityLogScreen ? renderActivityLogScreen() : showSuppliesScreen ? renderSuppliesScreen() : renderManagementView()
-            ) : loading ? (
-                <LoadingSpinner />
+                showActivityLogScreen ? renderActivityLogScreen() : showSuppliesScreen ? renderSuppliesScreen() : renderManagementView()
+            ) : (loading && animals.length === 0) ? (
+                /* Skeleton grid — only on very first load before any animals arrive */
+                <div className="space-y-3 sm:space-y-4">
+                    {[0,1,2].map(gi => (
+                        <div key={gi} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm animate-pulse">
+                            <div className="flex items-center justify-between bg-gray-100 px-4 py-3 border-b">
+                                <div className="h-5 w-32 bg-gray-300 rounded" />
+                            </div>
+                            <div className="p-3 sm:p-4">
+                                <div className="flex flex-wrap gap-2">
+                                    {[0,1,2,3,4,6,7,8].map(ci => (
+                                        <div key={ci} className="w-[140px] sm:w-[140px] md:w-[176px] h-44 sm:h-48 md:h-56 bg-gray-100 rounded-xl" />
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             ) : animals.length === 0 ? (
                 <div className="text-center p-8 bg-gray-50 rounded-lg">
                     <Cat size={48} className="text-gray-400 mx-auto mb-4" />
