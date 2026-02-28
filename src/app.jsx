@@ -1631,7 +1631,7 @@ const ParentSearchModal = ({
                     </p>
                     <p className="text-xs text-gray-500">{animal.id_public}</p>
                     <p className="text-sm text-gray-600">
-                        {animal.species} ? {animal.gender} ? {animal.status || 'Unknown'}
+                        {animal.species} &bull; {animal.gender} &bull; {animal.status || 'Unknown'}
                     </p>
                     {getSpeciesLatinName(animal.species) && (
                         <p className="text-xs italic text-gray-500">{getSpeciesLatinName(animal.species)}</p>
@@ -2068,7 +2068,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                         {animal.ownerUser && <DonationBadge user={animal.ownerUser} size="xs" />}
                     </div>
                     <p className="text-sm text-gray-600">
-                        {animal.species} ? {animal.gender} ? <span className="font-mono">{animal.id_public}</span>
+                        {animal.species} &bull; {animal.gender} &bull; <span className="font-mono">{animal.id_public}</span>
                     </p>
                     {animal.color && <p className="text-xs text-gray-500 mt-1">{animal.color}</p>}
                     {(animal.manualBreederName || animal.breederName) && (
@@ -9431,7 +9431,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     </div>
                                                 </div>
                                                 <div className="text-xs text-gray-500 mb-3">
-                                                    Autofilled: Species ({sire?.species}), Birth Date ({formatDate(litter.birthDate)}), Parents ({litter.sireId_public} ? {litter.damId_public})
+                                                    Autofilled: Species ({sire?.species}), Birth Date ({formatDate(litter.birthDate)}), Parents ({litter.sireId_public} • {litter.damId_public})
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <button
@@ -9492,7 +9492,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
                                                 </p>
                                                 <p className="text-sm text-gray-600">
-                                                    {animal.id_public} ? {animal.gender} ? {animal.species}
+                                                    {animal.id_public} &bull; {animal.gender} &bull; {animal.species}
                                                 </p>
                                             </div>
                                             <button
