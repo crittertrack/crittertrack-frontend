@@ -6026,7 +6026,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">For Sale</p>
                                                     <p className="text-sm text-gray-600">
-                                                        {animal.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${animal.salePriceCurrency === 'USD' ? '$' : animal.salePriceCurrency === 'EUR' ? '?' : animal.salePriceCurrency === 'GBP' ? '?' : animal.salePriceCurrency === 'CAD' ? 'C$' : animal.salePriceCurrency === 'AUD' ? 'A$' : animal.salePriceCurrency === 'JPY' ? '?' : animal.salePriceCurrency}${animal.salePriceAmount ? ` ${animal.salePriceAmount}` : ''}`}
+                                                        {animal.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount ? ` ${animal.salePriceAmount}` : ''}`}
                                                     </p>
                                                 </div>
                                             </div>
@@ -6039,7 +6039,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">Available for Stud</p>
                                                     <p className="text-sm text-gray-600">
-                                                        {animal.studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${animal.studFeeCurrency === 'USD' ? '$' : animal.studFeeCurrency === 'EUR' ? '?' : animal.studFeeCurrency === 'GBP' ? '?' : animal.studFeeCurrency === 'CAD' ? 'C$' : animal.studFeeCurrency === 'AUD' ? 'A$' : animal.studFeeCurrency === 'JPY' ? '?' : animal.studFeeCurrency}${animal.studFeeAmount ? ` ${animal.studFeeAmount}` : ''}`}
+                                                        {animal.studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount ? ` ${animal.studFeeAmount}` : ''}`}
                                                     </p>
                                                 </div>
                                             </div>
@@ -24889,12 +24889,12 @@ const App = () => {
                             <div className="mt-1 space-y-1">
                                 {availableAnimals[currentAvailableIndex].isForSale && availableAnimals[currentAvailableIndex].salePriceAmount && (
                                     <p className="text-xs text-green-600 font-semibold">
-                                        Fee: {availableAnimals[currentAvailableIndex].salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].salePriceCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].salePriceCurrency === 'EUR' ? '?' : ''}${availableAnimals[currentAvailableIndex].salePriceAmount}`}
+                                        Fee: {availableAnimals[currentAvailableIndex].salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${getCurrencySymbol(availableAnimals[currentAvailableIndex].salePriceCurrency)}${availableAnimals[currentAvailableIndex].salePriceAmount}`}
                                     </p>
                                 )}
                                 {availableAnimals[currentAvailableIndex].availableForBreeding && availableAnimals[currentAvailableIndex].studFeeAmount && (
                                     <p className="text-xs text-purple-600 font-semibold">
-                                        Fee: {availableAnimals[currentAvailableIndex].studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].studFeeCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].studFeeCurrency === 'EUR' ? '?' : ''}${availableAnimals[currentAvailableIndex].studFeeAmount}`}
+                                        Fee: {availableAnimals[currentAvailableIndex].studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${getCurrencySymbol(availableAnimals[currentAvailableIndex].studFeeCurrency)}${availableAnimals[currentAvailableIndex].studFeeAmount}`}
                                     </p>
                                 )}
                             </div>
