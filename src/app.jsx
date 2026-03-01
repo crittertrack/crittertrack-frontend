@@ -9389,53 +9389,64 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             </button>
                                         </div>
 
-                                        {/* ── 1. Parents ─────────────────────────────────────────── */}
+                                        {/* ── 1. Parents + COI ───────────────────────────────────── */}
                                         {(sire || dam) && (
                                             <div className="mb-4">
                                                 <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Parents</h4>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                    {sire && (
+                                                <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
+                                                    {/* Sire */}
+                                                    {sire ? (
                                                         <div
                                                             onClick={sire.isTransferred ? undefined : () => onViewAnimal(sire)}
                                                             className={`bg-white rounded-xl border border-gray-200 p-3 flex items-center gap-3 ${sire.isTransferred ? 'opacity-75' : 'cursor-pointer hover:shadow-md'} transition shadow-sm`}
                                                         >
-                                                            <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                                            <div className="w-14 h-14 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                                                                 {sire.imageUrl || sire.photoUrl
                                                                     ? <img src={sire.imageUrl || sire.photoUrl} alt={sire.name} className="w-full h-full object-cover" />
-                                                                    : <div className="w-full h-full flex items-center justify-center text-gray-400"><Cat size={28} /></div>}
+                                                                    : <div className="w-full h-full flex items-center justify-center text-gray-400"><Cat size={24} /></div>}
                                                             </div>
                                                             <div className="flex-1 min-w-0">
                                                                 <div className="flex items-center gap-1 mb-0.5">
-                                                                    <Mars size={13} className="text-primary flex-shrink-0" />
-                                                                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Sire</span>
+                                                                    <Mars size={12} className="text-primary flex-shrink-0" />
+                                                                    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">Sire</span>
                                                                 </div>
                                                                 <p className="font-bold text-gray-800 truncate text-sm">{sire.prefix ? `${sire.prefix} ` : ''}{sire.name}{sire.suffix ? ` ${sire.suffix}` : ''}</p>
                                                                 <p className="text-xs text-gray-500">{sire.species}</p>
                                                                 <p className="text-[10px] text-gray-400 font-mono">{sire.id_public}</p>
                                                             </div>
                                                         </div>
-                                                    )}
-                                                    {dam && (
+                                                    ) : <div />}
+                                                    {/* COI badge between parents */}
+                                                    <div className="flex flex-col items-center px-2">
+                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">COI</div>
+                                                        {coiCalculating.has(litter._id)
+                                                            ? <div className="w-14 h-5 bg-gray-200 rounded animate-pulse" />
+                                                            : litter.inbreedingCoefficient != null
+                                                                ? <div className="text-base font-extrabold text-orange-500">{litter.inbreedingCoefficient.toFixed(2)}%</div>
+                                                                : <div className="text-base font-bold text-gray-300">—</div>}
+                                                    </div>
+                                                    {/* Dam */}
+                                                    {dam ? (
                                                         <div
                                                             onClick={dam.isTransferred ? undefined : () => onViewAnimal(dam)}
                                                             className={`bg-white rounded-xl border border-gray-200 p-3 flex items-center gap-3 ${dam.isTransferred ? 'opacity-75' : 'cursor-pointer hover:shadow-md'} transition shadow-sm`}
                                                         >
-                                                            <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                                            <div className="w-14 h-14 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                                                                 {dam.imageUrl || dam.photoUrl
                                                                     ? <img src={dam.imageUrl || dam.photoUrl} alt={dam.name} className="w-full h-full object-cover" />
-                                                                    : <div className="w-full h-full flex items-center justify-center text-gray-400"><Cat size={28} /></div>}
+                                                                    : <div className="w-full h-full flex items-center justify-center text-gray-400"><Cat size={24} /></div>}
                                                             </div>
                                                             <div className="flex-1 min-w-0">
                                                                 <div className="flex items-center gap-1 mb-0.5">
-                                                                    <Venus size={13} className="text-accent flex-shrink-0" />
-                                                                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Dam</span>
+                                                                    <Venus size={12} className="text-accent flex-shrink-0" />
+                                                                    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">Dam</span>
                                                                 </div>
                                                                 <p className="font-bold text-gray-800 truncate text-sm">{dam.prefix ? `${dam.prefix} ` : ''}{dam.name}{dam.suffix ? ` ${dam.suffix}` : ''}</p>
                                                                 <p className="text-xs text-gray-500">{dam.species}</p>
                                                                 <p className="text-[10px] text-gray-400 font-mono">{dam.id_public}</p>
                                                             </div>
                                                         </div>
-                                                    )}
+                                                    ) : <div />}
                                                 </div>
                                             </div>
                                         )}
@@ -9485,59 +9496,49 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             </div>
                                         )}
 
-                                        {/* ── 3. Stats: Total / Stillborn / Weaned / COI ──────────── */}
-                                        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-3 shadow-sm">
-                                            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Litter Stats</h4>
-                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                                                <div className="text-center">
-                                                    <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Total Born</div>
-                                                    <div className="text-3xl font-extrabold text-blue-600">{litter.litterSizeBorn ?? litter.numberBorn ?? '—'}</div>
+                                        {/* ── 3. Litter Stats: left = counts, right = sex ──────────── */}
+                                        <div className="bg-white rounded-xl border border-gray-200 p-3 mb-4 shadow-sm">
+                                            <div className="flex items-stretch gap-3">
+                                                {/* Left: Total / Stillborn / Weaned */}
+                                                <div className="flex gap-4 flex-1">
+                                                    <div>
+                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Born</div>
+                                                        <div className="text-xl font-bold text-blue-600">{litter.litterSizeBorn ?? litter.numberBorn ?? '—'}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Stillborn</div>
+                                                        <div className="text-xl font-bold text-gray-400">{litter.stillbornCount ?? litter.stillborn ?? '0'}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaned</div>
+                                                        <div className="text-xl font-bold text-green-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? '—'}</div>
+                                                    </div>
                                                 </div>
-                                                <div className="text-center">
-                                                    <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Stillborn</div>
-                                                    <div className="text-3xl font-extrabold text-gray-400">{litter.stillbornCount ?? litter.stillborn ?? '0'}</div>
-                                                </div>
-                                                <div className="text-center">
-                                                    <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Weaned</div>
-                                                    <div className="text-3xl font-extrabold text-green-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? '—'}</div>
-                                                </div>
-                                                <div className="text-center">
-                                                    <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">COI</div>
-                                                    {coiCalculating.has(litter._id)
-                                                        ? <div className="mt-2 w-20 h-7 bg-gray-200 rounded-lg animate-pulse mx-auto" />
-                                                        : litter.inbreedingCoefficient != null
-                                                            ? <div className="text-3xl font-extrabold text-orange-500">{litter.inbreedingCoefficient.toFixed(2)}%</div>
-                                                            : <div className="text-3xl font-extrabold text-gray-300">—</div>}
-                                                </div>
+                                                {/* Right: Males / Females / Unknown */}
+                                                {(litter.maleCount != null || litter.femaleCount != null || (litter.unknownCount != null && litter.unknownCount > 0)) && (
+                                                    <div className="flex gap-4 border-l border-gray-100 pl-3">
+                                                        {litter.maleCount != null && (
+                                                            <div>
+                                                                <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Males</div>
+                                                                <div className="text-xl font-bold text-blue-500">{litter.maleCount}</div>
+                                                            </div>
+                                                        )}
+                                                        {litter.femaleCount != null && (
+                                                            <div>
+                                                                <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Females</div>
+                                                                <div className="text-xl font-bold text-pink-500">{litter.femaleCount}</div>
+                                                            </div>
+                                                        )}
+                                                        {litter.unknownCount != null && litter.unknownCount > 0 && (
+                                                            <div>
+                                                                <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Unknown</div>
+                                                                <div className="text-xl font-bold text-gray-500">{litter.unknownCount}</div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
-
-                                        {/* ── 4. Sex breakdown ────────────────────────────────────── */}
-                                        {(litter.maleCount != null || litter.femaleCount != null || (litter.unknownCount != null && litter.unknownCount > 0)) && (
-                                            <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4 shadow-sm">
-                                                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Sex Breakdown</h4>
-                                                <div className="flex gap-6">
-                                                    {litter.maleCount != null && (
-                                                        <div className="text-center">
-                                                            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Males</div>
-                                                            <div className="text-3xl font-extrabold text-blue-500">{litter.maleCount}</div>
-                                                        </div>
-                                                    )}
-                                                    {litter.femaleCount != null && (
-                                                        <div className="text-center">
-                                                            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Females</div>
-                                                            <div className="text-3xl font-extrabold text-pink-500">{litter.femaleCount}</div>
-                                                        </div>
-                                                    )}
-                                                    {litter.unknownCount != null && litter.unknownCount > 0 && (
-                                                        <div className="text-center">
-                                                            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Unknown / Intersex</div>
-                                                            <div className="text-3xl font-extrabold text-gray-500">{litter.unknownCount}</div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
 
                                         {/* ── 5. Notes ────────────────────────────────────────────── */}
                                         {litter.notes && (
