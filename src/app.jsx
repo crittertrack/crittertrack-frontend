@@ -17675,14 +17675,14 @@ const DonationView = ({ onBack, authToken, userProfile }) => {
     }, [authToken]);
 
     const handleSubscribe = async () => {
-        if (!authToken) return;
         setSubLoading(true);
         setSubError('');
         try {
+            const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
             const res = await axios.post(
                 `${API_BASE_URL}/payments/paypal/subscription/create`,
                 {},
-                { headers: { Authorization: `Bearer ${authToken}` } }
+                { headers }
             );
             window.location.href = res.data.approvalUrl;
         } catch (err) {
@@ -17788,7 +17788,7 @@ const DonationView = ({ onBack, authToken, userProfile }) => {
                                     <p className="text-green-700 font-bold mb-1">💎 Thank you for subscribing!</p>
                                     <p className="text-green-600 text-sm">Your Monthly Supporter badge is now active on your profile.</p>
                                 </div>
-                            ) : authToken ? (
+                            ) : (
                                 <>
                                     {subError && (
                                         <p className="text-red-600 text-sm mb-3 bg-red-50 border border-red-200 rounded p-3">{subError}</p>
@@ -17801,27 +17801,9 @@ const DonationView = ({ onBack, authToken, userProfile }) => {
                                         <Heart size={18} className="fill-current" />
                                         {subLoading ? 'Redirecting to PayPal...' : 'Support for $5/month'}
                                     </button>
-                                </>
-                            ) : (
-                                <>
-                                    <form action="https://www.paypal.com/donate" method="post" target="_blank">
-                                        <input type="hidden" name="business" value="crittertrackowner@gmail.com" />
-                                        <input type="hidden" name="no_recurring" value="0" />
-                                        <input type="hidden" name="a3" value="5" />
-                                        <input type="hidden" name="p3" value="1" />
-                                        <input type="hidden" name="t3" value="M" />
-                                        <input type="hidden" name="src" value="1" />
-                                        <input type="hidden" name="item_name" value="CritterTrack Monthly Support" />
-                                        <input type="hidden" name="currency_code" value="USD" />
-                                        <button
-                                            type="submit"
-                                            className="w-full bg-gradient-to-r from-accent to-accent/80 hover:from-accent-dark hover:to-accent text-white font-semibold py-3 px-6 rounded-lg transition shadow-md flex items-center justify-center gap-2"
-                                        >
-                                            <Heart size={18} className="fill-current" />
-                                            Support for $5/month via PayPal
-                                        </button>
-                                    </form>
-                                    <p className="text-xs text-gray-500 mt-2 text-center">Log in to CritterTrack first to receive your 💎 badge automatically.</p>
+                                    {!authToken && (
+                                        <p className="text-xs text-gray-500 mt-2 text-center">Log in to CritterTrack first to receive your 💎 badge automatically.</p>
+                                    )}
                                 </>
                             )}
                         </div>
