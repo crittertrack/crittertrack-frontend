@@ -25849,7 +25849,7 @@ const App = () => {
                             )}
                         </button>
                         
-                        {/* Avatar / Profile Dropdown */
+                        {/* Avatar / Profile Dropdown */}
                         <div className="relative" ref={profileMenuDesktopRef}>
                             <button
                                 onClick={() => setShowProfileMenu(p => !p)}
@@ -26028,7 +26028,7 @@ const App = () => {
                 )}
             </header>
 
-            {/* Moderator Warning Banner */
+            {/* Moderator Warning Banner */}
             <WarningBanner authToken={authToken} API_BASE_URL={API_BASE_URL} userProfile={userProfile} />
             
             {/* System Broadcast Banner (info/announcements) - only on dashboard */}
