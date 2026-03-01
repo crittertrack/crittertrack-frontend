@@ -7671,18 +7671,21 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [bulkDeleteMode, setBulkDeleteMode] = useState({});
     const [selectedOffspring, setSelectedOffspring] = useState({});
     const [coiCalculating, setCoiCalculating] = useState(new Set()); // litter._id values currently computing COI
+    const [myAnimalsLoaded, setMyAnimalsLoaded] = useState(false);
 
     useEffect(() => {
         const loadData = async () => {
             setLoading(true);
             try {
-                // Fetch animals and litters - they return immediately after setting data
-                await Promise.all([fetchMyAnimals(), fetchLitters()]);
+                // Load litters first so cards appear immediately; animals fetch silently in background
+                await fetchLitters();
             } catch (error) {
-                console.error('Error loading data:', error);
+                console.error('Error loading litters:', error);
             } finally {
                 setLoading(false);
             }
+            // Background — populates offspring cards as soon as it resolves
+            fetchMyAnimals().catch(err => console.error('Error loading animals:', err));
         };
         loadData();
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -7846,6 +7849,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             
             // Set animals immediately so UI can render
             setMyAnimals(animalsData);
+            setMyAnimalsLoaded(true);
             
             // Start COI calculations in background without blocking
             Promise.resolve().then(async () => {
@@ -9485,6 +9489,28 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             </div>
                                         </div>
 
+                                        {/* Offspring skeleton while myAnimals loads in background */}
+                                        {!myAnimalsLoaded && (litter.offspringIds_public?.length ?? 0) > 0 && offspringList.length === 0 && (
+                                            <div className="mb-4">
+                                                <h4 className="text-sm font-bold text-gray-700 mb-2">Offspring ({litter.offspringIds_public.length})</h4>
+                                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                                    {litter.offspringIds_public.map((_, i) => (
+                                                        <div key={i} className="bg-white rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden border-2 border-gray-200 animate-pulse">
+                                                            <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
+                                                                <div className="w-20 h-20 bg-gray-200 rounded-md" />
+                                                            </div>
+                                                            <div className="w-full px-4 pb-3 space-y-1.5">
+                                                                <div className="h-3 bg-gray-200 rounded w-3/4 mx-auto" />
+                                                                <div className="h-2 bg-gray-200 rounded w-1/2 mx-auto" />
+                                                            </div>
+                                                            <div className="w-full bg-gray-100 py-1 border-t border-gray-200">
+                                                                <div className="h-3 bg-gray-200 rounded w-1/3 mx-auto" />
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                         {/* Offspring Cards */}
                                         {offspringList.length > 0 && (
                                             <div className="mb-4">
