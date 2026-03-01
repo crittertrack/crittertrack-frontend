@@ -9516,10 +9516,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         )}
 
                                         {/* ── 3. Litter Stats: left = counts, right = sex ──────────── */}
-                                        <div className="bg-white rounded-xl border border-gray-200 p-3 mb-4 shadow-sm">
-                                            <div className="flex items-stretch gap-3">
-                                                {/* Left: Total / Stillborn / Weaned */}
-                                                <div className="flex gap-4 flex-1">
+                                        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4 shadow-sm">
+                                            <div className="grid grid-cols-2 divide-x divide-gray-200">
+                                                {/* Left: Born / Stillborn / Weaned */}
+                                                <div className="grid grid-cols-3 pr-4">
                                                     <div>
                                                         <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Born</div>
                                                         <div className="text-xl font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? '—'}</div>
@@ -9534,28 +9534,20 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     </div>
                                                 </div>
                                                 {/* Right: Males / Females / Unknown */}
-                                                {(litter.maleCount != null || litter.femaleCount != null || (litter.unknownCount != null && litter.unknownCount > 0)) && (
-                                                    <div className="flex gap-4 border-l border-gray-100 pl-3">
-                                                        {litter.maleCount != null && (
-                                                            <div>
-                                                                <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Males</div>
-                                                                <div className="text-xl font-bold text-blue-500">{litter.maleCount}</div>
-                                                            </div>
-                                                        )}
-                                                        {litter.femaleCount != null && (
-                                                            <div>
-                                                                <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Females</div>
-                                                                <div className="text-xl font-bold text-pink-500">{litter.femaleCount}</div>
-                                                            </div>
-                                                        )}
-                                                        {litter.unknownCount != null && litter.unknownCount > 0 && (
-                                                            <div>
-                                                                <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Unknown</div>
-                                                                <div className="text-xl font-bold text-purple-500">{litter.unknownCount}</div>
-                                                            </div>
-                                                        )}
+                                                <div className="grid grid-cols-3 pl-4">
+                                                    <div>
+                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Males</div>
+                                                        <div className="text-xl font-bold text-blue-500">{litter.maleCount ?? '—'}</div>
                                                     </div>
-                                                )}
+                                                    <div>
+                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Females</div>
+                                                        <div className="text-xl font-bold text-pink-500">{litter.femaleCount ?? '—'}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Unknown</div>
+                                                        <div className="text-xl font-bold text-purple-500">{litter.unknownCount ?? '—'}</div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
