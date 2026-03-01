@@ -9763,7 +9763,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         {(sire || dam) && (
                                             <div className="mb-4">
                                                 <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Parents</h4>
-                                                <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
+                                                <div className="flex flex-col sm:grid sm:grid-cols-[1fr_auto_1fr] gap-2 items-center">
                                                     {/* Sire */}
                                                     {sire ? (
                                                         <div
