@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Search, X, Star, Moon, ArrowLeft, Loader2 } from 'lucide-react';
 
-const getBreederDonationBadge = (user) => {
+const getDonationBadge = (user) => {
     if (!user) return null;
     const now = new Date();
     if (user.monthlyDonationActive) return { icon: '💎', title: 'Monthly Supporter', className: 'bg-gradient-to-r from-blue-400 to-purple-500 text-white' };
@@ -14,8 +14,8 @@ const getBreederDonationBadge = (user) => {
     return null;
 };
 
-const BreederBadge = ({ breeder }) => {
-    const badge = getBreederDonationBadge(breeder);
+const DonationBadge = ({ breeder }) => {
+    const badge = getDonationBadge(breeder);
     if (!badge) return null;
     return (
         <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium shadow-sm ${badge.className}`} title={badge.title}>
@@ -278,7 +278,7 @@ const Breeders = ({ authToken }) => {
                                                     : displayName
                                                 }
                                             </h3>
-                                            <BreederBadge breeder={breeder} />
+                                            <DonationBadge breeder={breeder} />
                                             {breeder.isCTU && (
                                                 <span className="px-2 py-0.5 bg-primary text-black text-xs font-bold rounded">
                                                     CTU
