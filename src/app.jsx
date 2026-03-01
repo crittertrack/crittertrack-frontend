@@ -5723,7 +5723,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
 
                             {/* 6th Section: Breeding History */}
                             <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 flex items-center"><span className="text-blue-600 mr-2">📊</span>Breeding History</h3>
+                                <h3 className="text-lg font-semibold text-gray-700 flex items-center"><span className="text-blue-600 mr-2">📊</span>Litter Records</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     {(animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                         <>
@@ -7043,7 +7043,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
 
                             {/* 6th Section: Breeding History */}
                             <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 flex items-center"><span className="text-blue-600 mr-2">📊</span>Breeding History</h3>
+                                <h3 className="text-lg font-semibold text-gray-700 flex items-center"><span className="text-blue-600 mr-2">📊</span>Litter Records</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     {(animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                         <>
@@ -15032,7 +15032,7 @@ const AnimalForm = ({
 
                         {/* Breeding Records - ALWAYS SHOWN */}
                         <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-4" data-tutorial-target="breeding-records-section">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center mb-4"><span className="text-blue-600 mr-2">📊</span>Breeding Records</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center mb-4"><span className="text-blue-600 mr-2">📊</span>Litter Records</h3>
                             
                             {/* Breeding Role Selector - for animals with unclear breeding roles */}
                             {!isFieldHidden('breedingRole') && (formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
@@ -15263,7 +15263,7 @@ const AnimalForm = ({
                             {/* Breeding Records List - Accordion View */}
                             {breedingRecords.length > 0 && (
                                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-2">
-                                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Saved Breeding Records ({breedingRecords.length})</h4>
+                                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Litter Records ({breedingRecords.length})</h4>
                                     <div className="space-y-2">
                                         {breedingRecords.map((record, idx) => {
                                             // Determine if this is a dam or sire record based on gender/role
@@ -27967,9 +27967,9 @@ const App = () => {
                                 </div>
                             )}
 
-                            {/* 6th Section: Breeding History */}
+                            {/* 6th Section: Litter Records */}
                             <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 flex items-center"><span className="text-blue-600 mr-2">📊</span>Breeding History</h3>
+                                <h3 className="text-lg font-semibold text-gray-700 flex items-center"><span className="text-blue-600 mr-2">📊</span>Litter Records</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     {(animalToView.gender === 'Male' || animalToView.gender === 'Intersex' || animalToView.gender === 'Unknown') && (
                                         <>
