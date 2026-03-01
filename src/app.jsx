@@ -2175,16 +2175,14 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                         <p className="text-lg font-semibold text-gray-800">
                             {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                         </p>
-                        {animal.ownerUser && <DonationBadge user={animal.ownerUser} size="xs" />}
                     </div>
                     <p className="text-sm text-gray-600">
                         {animal.species} &bull; {animal.gender} &bull; <span className="font-mono">{animal.id_public}</span>
                     </p>
                     {animal.color && <p className="text-xs text-gray-500 mt-1">{animal.color}</p>}
                     {(animal.manualBreederName || animal.breederName) && (
-                        <p className="text-xs text-gray-500 mt-1 flex items-center gap-2">
-                            <span>Breeder: {animal.manualBreederName || animal.breederName}</span>
-                            {animal.breederUser && <DonationBadge user={animal.breederUser} size="xs" />}
+                        <p className="text-xs text-gray-500 mt-1">
+                            Breeder: {animal.manualBreederName || animal.breederName}
                         </p>
                     )}
                 </div>
@@ -6496,7 +6494,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                         }
                                                     })()}
                                                 </button>
-                                                <DonationBadge badge={getDonationBadge(breederInfo)} size="xs" />
                                             </>
                                         ) : (
                                             <span className="font-mono text-accent">{animal.breederId_public}</span>
