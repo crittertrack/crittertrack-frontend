@@ -3796,10 +3796,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 </div>
                             </div>
 
-                            {/* 2nd Section: Breeding History - merged litters + pedigree offspring */}
+                            {/* 2nd Section: Offspring & Litters - merged litters + pedigree offspring */}
                             {(animalLitters === null || pedigreeOffspring === null) ? (
                                 <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                                    <div className="text-sm text-gray-500 animate-pulse">Loading breeding history…</div>
+                                    <div className="text-sm text-gray-500 animate-pulse">Loading offspring & litters…</div>
                                 </div>
                             ) : (() => {
                                 const litterItems = (animalLitters || []).map(l => ({ ...l, _recordType: 'litter' }));
@@ -3812,7 +3812,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 if (allRecords.length === 0) return null;
                                 return (
                                     <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 space-y-3">
-                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center"><span className="text-purple-600 mr-2">📊</span>Breeding History</h3>
+                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center"><span className="text-purple-600 mr-2">📊</span>Offspring & Litters</h3>
                                         <div className="space-y-2">
                                             {allRecords.map((litter) => {
                                                 if (litter._recordType === 'litter') {
@@ -5562,10 +5562,10 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 )}
                             </div>
 
-                            {/* 2nd Section: Breeding History - merged litters + pedigree offspring */}
+                            {/* 2nd Section: Offspring & Litters - merged litters + pedigree offspring */}
                             {(animalLitters === null || pedigreeOffspring === null) ? (
                                 <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                                    <div className="text-sm text-gray-500 animate-pulse">Loading breeding history…</div>
+                                    <div className="text-sm text-gray-500 animate-pulse">Loading offspring & litters…</div>
                                 </div>
                             ) : (() => {
                                 const litterItems = (animalLitters || []).map(l => ({ ...l, _recordType: 'litter' }));
@@ -5578,7 +5578,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 if (allRecords.length === 0) return null;
                                 return (
                                     <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 space-y-3">
-                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center"><span className="text-purple-600 mr-2">📊</span>Breeding History</h3>
+                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center"><span className="text-purple-600 mr-2">📊</span>Offspring & Litters</h3>
                                         <div className="space-y-2">
                                             {allRecords.map((litter) => {
                                                 if (litter._recordType === 'litter') {
