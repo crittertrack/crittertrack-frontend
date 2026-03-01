@@ -23664,6 +23664,7 @@ const App = () => {
     
     const [showMessages, setShowMessages] = useState(false);
     const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+    const [unreadAdminMessageCount, setUnreadAdminMessageCount] = useState(0);
     const [conversations, setConversations] = useState([]);
     const [selectedConversation, setSelectedConversation] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -24649,12 +24650,14 @@ const App = () => {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             setUnreadMessageCount(response.data?.count || 0);
+            setUnreadAdminMessageCount(response.data?.adminCount || 0);
         } catch (error) {
             // Silently fail for message count - backend may not have this endpoint yet
             if (error.response?.status !== 404 && error.response?.status !== 500) {
                 console.error('Failed to fetch message count:', error);
             }
             setUnreadMessageCount(0);
+            setUnreadAdminMessageCount(0);
         }
     }, [authToken, API_BASE_URL]);
 
@@ -25830,18 +25833,23 @@ const App = () => {
                         <button
                             onClick={() => setShowMessages(true)}
                             data-tutorial-target="messages-btn"
-                            className="relative flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
-                            title="Messages"
+                            className={`relative flex flex-col items-center justify-center py-2 px-3 rounded-lg transition duration-150 shadow-sm ${unreadAdminMessageCount > 0 ? 'bg-red-50 hover:bg-red-100 text-red-700 ring-1 ring-red-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}
+                            title={unreadAdminMessageCount > 0 ? 'Admin message — response required' : 'Messages'}
                         >
                             <MessageSquare size={18} />
-                            {unreadMessageCount > 0 && (
+                            {unreadAdminMessageCount > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                                    {unreadAdminMessageCount > 9 ? '9+' : unreadAdminMessageCount}
+                                </span>
+                            )}
+                            {unreadAdminMessageCount === 0 && unreadMessageCount > 0 && (
                                 <span className="absolute -top-1 -right-1 bg-purple-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                                     {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
                                 </span>
                             )}
                         </button>
                         
-                        {/* Avatar / Profile Dropdown */}
+                        {/* Avatar / Profile Dropdown */
                         <div className="relative" ref={profileMenuDesktopRef}>
                             <button
                                 onClick={() => setShowProfileMenu(p => !p)}
@@ -25917,11 +25925,16 @@ const App = () => {
                             <button
                                 onClick={() => setShowMessages(true)}
                                 data-tutorial-target="messages-btn"
-                                className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
-                                title="Messages"
+                                className={`relative flex items-center justify-center p-2 rounded-lg transition duration-150 shadow-sm ${unreadAdminMessageCount > 0 ? 'bg-red-50 hover:bg-red-100 text-red-700 ring-1 ring-red-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}
+                                title={unreadAdminMessageCount > 0 ? 'Admin message — response required' : 'Messages'}
                             >
                                 <MessageSquare size={18} />
-                                {unreadMessageCount > 0 && (
+                                {unreadAdminMessageCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold text-[10px]">
+                                        {unreadAdminMessageCount > 9 ? '9+' : unreadAdminMessageCount}
+                                    </span>
+                                )}
+                                {unreadAdminMessageCount === 0 && unreadMessageCount > 0 && (
                                     <span className="absolute -top-1 -right-1 bg-purple-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold text-[10px]">
                                         {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
                                     </span>
@@ -25999,9 +26012,23 @@ const App = () => {
                         </button>
                     </nav>
                 </div>
+
+                {/* Admin message alert — shown when there are unread moderator messages */}
+                {unreadAdminMessageCount > 0 && (
+                    <div
+                        onClick={() => setShowMessages(true)}
+                        className="mt-3 flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5 cursor-pointer hover:bg-red-100 transition"
+                    >
+                        <Shield size={15} className="text-red-600 flex-shrink-0" />
+                        <span className="text-sm text-red-700 font-medium flex-1">
+                            You have {unreadAdminMessageCount} unread message{unreadAdminMessageCount > 1 ? 's' : ''} from CritterTrack — please respond
+                        </span>
+                        <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded-full font-semibold flex-shrink-0">View</span>
+                    </div>
+                )}
             </header>
 
-            {/* Moderator Warning Banner */}
+            {/* Moderator Warning Banner */
             <WarningBanner authToken={authToken} API_BASE_URL={API_BASE_URL} userProfile={userProfile} />
             
             {/* System Broadcast Banner (info/announcements) - only on dashboard */}
