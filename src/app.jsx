@@ -9335,17 +9335,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     </div>
                                     
                                     {/* Desktop layout: grid */}
-                                    <div className="hidden sm:grid flex-1 grid-cols-[2fr_auto_2fr_2fr_auto_auto] gap-4 items-center min-w-0">
-                                        {/* Litter name */}
+                                    <div className="hidden sm:grid flex-1 grid-cols-6 gap-4 items-center min-w-0">
+                                        {/* Litter name + CTL + date */}
                                         <div className="min-w-0">
-                                            <p className="font-bold text-gray-800 text-base truncate">
-                                                {litter.breedingPairCodeName || 'Unnamed Litter'}
-                                            </p>
-                                        </div>
-                                        {/* CTL + date */}
-                                        <div className="flex-shrink-0">
-                                            {litter.litter_id_public && <span className="text-xs font-mono bg-gray-100 px-2 py-0.5 rounded block mb-0.5">{litter.litter_id_public}</span>}
-                                            <p className="text-xs text-gray-500">{formatDate(litter.birthDate)}</p>
+                                            <p className="font-bold text-gray-800 text-base truncate">{litter.breedingPairCodeName || 'Unnamed Litter'}</p>
+                                            <div className="flex items-center gap-2 mt-0.5">
+                                                {litter.litter_id_public && <span className="text-xs font-mono bg-gray-100 px-2 py-0.5 rounded flex-shrink-0">{litter.litter_id_public}</span>}
+                                                <span className="text-xs text-gray-500">{formatDate(litter.birthDate)}</span>
+                                            </div>
                                         </div>
                                         <div className="text-sm truncate min-w-0">
                                             <span className="text-gray-500 text-xs uppercase tracking-wide font-semibold block">Sire</span>
