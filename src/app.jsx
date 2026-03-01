@@ -2758,6 +2758,25 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
         });
     }, [expandedBreedingRecords, animal?.breedingRecords, authToken, API_BASE_URL]);
 
+    // Eagerly prefetch litter data for all linked litters so collapsed header counts are accurate
+    React.useEffect(() => {
+        if (!animal?.breedingRecords?.length || !authToken) return;
+        let cancelled = false;
+        animal.breedingRecords.forEach(record => {
+            if (!record?.litterId) return;
+            axios.get(`${API_BASE_URL}/litters/${record.litterId}`, { headers: { Authorization: `Bearer ${authToken}` } })
+                .then(res => {
+                    if (cancelled) return;
+                    setBreedingRecordLitters(prev => {
+                        if (record.litterId in prev) return prev;
+                        return { ...prev, [record.litterId]: res.data };
+                    });
+                })
+                .catch(() => {});
+        });
+        return () => { cancelled = true; };
+    }, [animal?.breedingRecords, authToken, API_BASE_URL]);
+
     // Sync a single linked litter + offspring on demand (↻ Sync button)
     const refreshBreedingRecordLitter = React.useCallback(async (litterId) => {
         if (!litterId || !authToken) return;
@@ -4716,6 +4735,25 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                 .catch(() => {});
         });
     }, [expandedBreedingRecords, animal?.breedingRecords, authToken, API_BASE_URL]);
+
+    // Eagerly prefetch litter data for all linked litters so collapsed header counts are accurate
+    React.useEffect(() => {
+        if (!animal?.breedingRecords?.length || !authToken) return;
+        let cancelled = false;
+        animal.breedingRecords.forEach(record => {
+            if (!record?.litterId) return;
+            axios.get(`${API_BASE_URL}/litters/${record.litterId}`, { headers: { Authorization: `Bearer ${authToken}` } })
+                .then(res => {
+                    if (cancelled) return;
+                    setBreedingRecordLitters(prev => {
+                        if (record.litterId in prev) return prev;
+                        return { ...prev, [record.litterId]: res.data };
+                    });
+                })
+                .catch(() => {});
+        });
+        return () => { cancelled = true; };
+    }, [animal?.breedingRecords, authToken, API_BASE_URL]);
 
     // Sync a single linked litter on demand (↻ Sync button)
     const refreshBreedingRecordLitter = React.useCallback(async (litterId) => {
