@@ -8454,12 +8454,28 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 console.log('Could not calculate COI for new offspring:', coiError);
             }
 
-            // Link to litter
+            // Link to litter and recalculate gender + total counts
             const updatedOffspringIds = [...(addingOffspring.offspringIds_public || []), newAnimalId];
-            await axios.put(`${API_BASE_URL}/litters/${addingOffspring._id}`, {
+
+            // Tally genders from all currently-linked animals plus the new one
+            const existingOffspring = myAnimals.filter(a => (addingOffspring.offspringIds_public || []).includes(a.id_public));
+            const allOffspring = [...existingOffspring, { gender: newOffspringData.gender }];
+            const newMaleCount = allOffspring.filter(a => a.gender === 'Male').length;
+            const newFemaleCount = allOffspring.filter(a => a.gender === 'Female').length;
+            const newUnknownCount = allOffspring.filter(a => a.gender !== 'Male' && a.gender !== 'Female').length;
+            const newTotal = updatedOffspringIds.length;
+
+            // Use tallied counts only if they exceed what's stored (never reduce a manually-entered value)
+            const litterCountUpdates = {
                 offspringIds_public: updatedOffspringIds,
-                numberBorn: updatedOffspringIds.length
-            }, {
+                numberBorn: newTotal,
+                litterSizeBorn: newTotal,
+            };
+            if (newMaleCount > (addingOffspring.maleCount || 0)) litterCountUpdates.maleCount = newMaleCount;
+            if (newFemaleCount > (addingOffspring.femaleCount || 0)) litterCountUpdates.femaleCount = newFemaleCount;
+            if (newUnknownCount > (addingOffspring.unknownCount || 0)) litterCountUpdates.unknownCount = newUnknownCount;
+
+            await axios.put(`${API_BASE_URL}/litters/${addingOffspring._id}`, litterCountUpdates, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
 
