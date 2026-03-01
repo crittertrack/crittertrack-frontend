@@ -1,4 +1,4 @@
-﻿// CritterTrack Frontend Application
+// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -3794,49 +3794,78 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                             const mate = isSire ? litter.dam : litter.sire;
                                             const isExpanded = expandedBreedingRecords[lid];
                                             const displayName = litter.breedingPairCodeName;
-                                            const countSummary = [
-                                                litter.litterSizeBorn != null && `${litter.litterSizeBorn} born`,
-                                                litter.stillbornCount && `${litter.stillbornCount} stillborn`,
-                                                litter.litterSizeWeaned != null && `${litter.litterSizeWeaned} weaned`
-                                            ].filter(Boolean).join(' • ') || 'No counts';
                                             return (
                                                 <div key={lid} className={`bg-white rounded border transition-all ${isExpanded ? 'border-purple-300 shadow-md' : 'border-purple-100'}`}>
                                                     <div
                                                         onClick={() => setExpandedBreedingRecords({...expandedBreedingRecords, [lid]: !isExpanded})}
-                                                        className="p-3 flex items-center justify-between cursor-pointer hover:bg-purple-50 transition rounded"
+                                                        className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50 transition rounded"
                                                     >
-                                                        <div className="flex items-center gap-3 flex-1">
-                                                            <span className={`text-lg transition-transform ${isExpanded ? 'rotate-90' : ''}`}>▶️</span>
-                                                            {lid || displayName ? (
-                                                                <div className="flex items-center gap-1.5 flex-shrink-0">
-                                                                    {displayName && <span className="text-xs font-bold text-gray-800 flex-shrink-0">{displayName}</span>}
-                                                                    {lid && <span className="font-mono px-1.5 py-0.5 rounded text-xs font-semibold bg-purple-100 text-purple-700 flex-shrink-0">{lid}</span>}
-                                                                </div>
-                                                            ) : null}
-                                                            <div className="text-sm text-gray-700 flex items-center gap-2 flex-wrap">
-                                                                {litter.birthDate && <><span>{formatDate(litter.birthDate)}</span><span className="text-gray-400">&bull;</span></>}
-                                                                {!litter.birthDate && (litter.matingDate || litter.pairingDate) && <><span>{formatDate(litter.matingDate || litter.pairingDate)}</span><span className="text-gray-400">&bull;</span></>}
-                                                                {mate?.name && <><span>{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span><span className="text-gray-400">&bull;</span></>}
-                                                                <span className="text-purple-700 font-medium">{countSummary}</span>
+                                                        {/* Mobile: stacked */}
+                                                        <div className="flex-1 sm:hidden">
+                                                            <div className="flex justify-between items-start mb-1">
+                                                                <p className="font-bold text-gray-800 text-sm">{displayName || <span className="text-gray-400 font-normal">Unnamed Litter</span>}</p>
+                                                                {lid && <span className="text-xs font-mono bg-purple-100 px-1.5 py-0.5 rounded text-purple-700 ml-2">{lid}</span>}
+                                                            </div>
+                                                            <div className="text-xs text-gray-600 flex gap-3 flex-wrap">
+                                                                {litter.birthDate && <span>{formatDate(litter.birthDate)}</span>}
+                                                                {mate?.name && <span>{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
+                                                                {litter.litterSizeBorn != null && <span>{litter.litterSizeBorn} born</span>}
                                                             </div>
                                                         </div>
+                                                        {/* Desktop: 6-column grid */}
+                                                        <div className="hidden sm:grid flex-1 grid-cols-6 gap-3 items-center min-w-0">
+                                                            <div className="min-w-0">
+                                                                <p className="font-bold text-gray-800 text-sm truncate">{displayName || <span className="text-gray-400 font-normal text-xs">Unnamed</span>}</p>
+                                                            </div>
+                                                            <div className="min-w-0">
+                                                                {lid ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block w-fit">{lid}</span> : <span className="text-xs text-gray-400">—</span>}
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Birth</span>
+                                                                <span className="text-sm font-semibold text-gray-800">{formatDate(litter.birthDate) || '—'}</span>
+                                                            </div>
+                                                            <div className="min-w-0">
+                                                                <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Mate</span>
+                                                                <span className="text-sm font-semibold text-gray-800 truncate block">{mate ? [mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ') : '—'}</span>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">COI</span>
+                                                                <span className="text-sm font-semibold text-gray-800">{litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : '—'}</span>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Born</span>
+                                                                <div className="flex items-center gap-1.5">
+                                                                    <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? '—'}</span>
+                                                                    {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
+                                                                        <span className="text-xs ml-1">
+                                                                            <span className="text-blue-500 font-semibold">{litter.maleCount ?? 0}M</span>
+                                                                            <span className="text-gray-400 mx-0.5">/</span>
+                                                                            <span className="text-pink-500 font-semibold">{litter.femaleCount ?? 0}F</span>
+                                                                            <span className="text-gray-400 mx-0.5">/</span>
+                                                                            <span className="text-purple-500 font-semibold">{litter.unknownCount ?? 0}U</span>
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <ChevronDown size={18} className={`text-gray-400 transition-transform flex-shrink-0 ml-2 ${isExpanded ? 'rotate-180' : ''}`} />
                                                     </div>
                                                     {isExpanded && (
                                                         <div className="border-t border-purple-100 p-3 bg-purple-50 space-y-3">
-                                                            {/* -- 1. CTL+Name | COI | Mate ----------------------------- */}
+                                                            {/* -- 1. Name+CTL | COI | Mate ----------------------------- */}
                                                             <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
-                                                                {/* Left: CTL ID + Litter Name */}
+                                                                {/* Left: Litter Name + CTL ID */}
                                                                 <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm h-full grid grid-cols-2 divide-x divide-gray-200 gap-3">
                                                                     <div>
-                                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">CTL ID</div>
-                                                                        {lid
-                                                                            ? <div className="font-mono text-sm font-bold text-purple-700">{lid}</div>
-                                                                            : <div className="text-sm text-gray-400 italic">—</div>}
-                                                                    </div>
-                                                                    <div className="pl-3">
                                                                         <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Litter Name</div>
                                                                         {displayName
                                                                             ? <div className="text-sm font-bold text-gray-800">{displayName}</div>
+                                                                            : <div className="text-sm text-gray-400 italic">—</div>}
+                                                                    </div>
+                                                                    <div className="pl-3">
+                                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">CTL ID</div>
+                                                                        {lid
+                                                                            ? <div className="font-mono text-sm font-bold text-purple-700">{lid}</div>
                                                                             : <div className="text-sm text-gray-400 italic">—</div>}
                                                                     </div>
                                                                 </div>
@@ -5340,49 +5369,78 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                             const mate = isSire ? litter.dam : litter.sire;
                                             const isExpanded = expandedBreedingRecords[lid];
                                             const displayName = litter.breedingPairCodeName;
-                                            const countSummary = [
-                                                litter.litterSizeBorn != null && `${litter.litterSizeBorn} born`,
-                                                litter.stillbornCount && `${litter.stillbornCount} stillborn`,
-                                                litter.litterSizeWeaned != null && `${litter.litterSizeWeaned} weaned`
-                                            ].filter(Boolean).join(' • ') || 'No counts';
                                             return (
                                                 <div key={lid} className={`bg-white rounded border transition-all ${isExpanded ? 'border-purple-300 shadow-md' : 'border-purple-100'}`}>
                                                     <div
                                                         onClick={() => setExpandedBreedingRecords({...expandedBreedingRecords, [lid]: !isExpanded})}
-                                                        className="p-3 flex items-center justify-between cursor-pointer hover:bg-purple-50 transition rounded"
+                                                        className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50 transition rounded"
                                                     >
-                                                        <div className="flex items-center gap-3 flex-1">
-                                                            <span className={`text-lg transition-transform ${isExpanded ? 'rotate-90' : ''}`}>▶️</span>
-                                                            {lid || displayName ? (
-                                                                <div className="flex items-center gap-1.5 flex-shrink-0">
-                                                                    {displayName && <span className="text-xs font-bold text-gray-800 flex-shrink-0">{displayName}</span>}
-                                                                    {lid && <span className="font-mono px-1.5 py-0.5 rounded text-xs font-semibold bg-purple-100 text-purple-700 flex-shrink-0">{lid}</span>}
-                                                                </div>
-                                                            ) : null}
-                                                            <div className="text-sm text-gray-700 flex items-center gap-2 flex-wrap">
-                                                                {litter.birthDate && <><span>{formatDate(litter.birthDate)}</span><span className="text-gray-400">&bull;</span></>}
-                                                                {!litter.birthDate && (litter.matingDate || litter.pairingDate) && <><span>{formatDate(litter.matingDate || litter.pairingDate)}</span><span className="text-gray-400">&bull;</span></>}
-                                                                {mate?.name && <><span>{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span><span className="text-gray-400">&bull;</span></>}
-                                                                <span className="text-purple-700 font-medium">{countSummary}</span>
+                                                        {/* Mobile: stacked */}
+                                                        <div className="flex-1 sm:hidden">
+                                                            <div className="flex justify-between items-start mb-1">
+                                                                <p className="font-bold text-gray-800 text-sm">{displayName || <span className="text-gray-400 font-normal">Unnamed Litter</span>}</p>
+                                                                {lid && <span className="text-xs font-mono bg-purple-100 px-1.5 py-0.5 rounded text-purple-700 ml-2">{lid}</span>}
+                                                            </div>
+                                                            <div className="text-xs text-gray-600 flex gap-3 flex-wrap">
+                                                                {litter.birthDate && <span>{formatDate(litter.birthDate)}</span>}
+                                                                {mate?.name && <span>{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
+                                                                {litter.litterSizeBorn != null && <span>{litter.litterSizeBorn} born</span>}
                                                             </div>
                                                         </div>
+                                                        {/* Desktop: 6-column grid */}
+                                                        <div className="hidden sm:grid flex-1 grid-cols-6 gap-3 items-center min-w-0">
+                                                            <div className="min-w-0">
+                                                                <p className="font-bold text-gray-800 text-sm truncate">{displayName || <span className="text-gray-400 font-normal text-xs">Unnamed</span>}</p>
+                                                            </div>
+                                                            <div className="min-w-0">
+                                                                {lid ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block w-fit">{lid}</span> : <span className="text-xs text-gray-400">—</span>}
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Birth</span>
+                                                                <span className="text-sm font-semibold text-gray-800">{formatDate(litter.birthDate) || '—'}</span>
+                                                            </div>
+                                                            <div className="min-w-0">
+                                                                <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Mate</span>
+                                                                <span className="text-sm font-semibold text-gray-800 truncate block">{mate ? [mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ') : '—'}</span>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">COI</span>
+                                                                <span className="text-sm font-semibold text-gray-800">{litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : '—'}</span>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Born</span>
+                                                                <div className="flex items-center gap-1.5">
+                                                                    <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? '—'}</span>
+                                                                    {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
+                                                                        <span className="text-xs ml-1">
+                                                                            <span className="text-blue-500 font-semibold">{litter.maleCount ?? 0}M</span>
+                                                                            <span className="text-gray-400 mx-0.5">/</span>
+                                                                            <span className="text-pink-500 font-semibold">{litter.femaleCount ?? 0}F</span>
+                                                                            <span className="text-gray-400 mx-0.5">/</span>
+                                                                            <span className="text-purple-500 font-semibold">{litter.unknownCount ?? 0}U</span>
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <ChevronDown size={18} className={`text-gray-400 transition-transform flex-shrink-0 ml-2 ${isExpanded ? 'rotate-180' : ''}`} />
                                                     </div>
                                                     {isExpanded && (
                                                         <div className="border-t border-purple-100 p-3 bg-purple-50 space-y-3">
-                                                            {/* -- 1. CTL+Name | COI | Mate ----------------------------- */}
+                                                            {/* -- 1. Name+CTL | COI | Mate ----------------------------- */}
                                                             <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
-                                                                {/* Left: CTL ID + Litter Name */}
+                                                                {/* Left: Litter Name + CTL ID */}
                                                                 <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm h-full grid grid-cols-2 divide-x divide-gray-200 gap-3">
                                                                     <div>
-                                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">CTL ID</div>
-                                                                        {lid
-                                                                            ? <div className="font-mono text-sm font-bold text-purple-700">{lid}</div>
-                                                                            : <div className="text-sm text-gray-400 italic">—</div>}
-                                                                    </div>
-                                                                    <div className="pl-3">
                                                                         <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Litter Name</div>
                                                                         {displayName
                                                                             ? <div className="text-sm font-bold text-gray-800">{displayName}</div>
+                                                                            : <div className="text-sm text-gray-400 italic">—</div>}
+                                                                    </div>
+                                                                    <div className="pl-3">
+                                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">CTL ID</div>
+                                                                        {lid
+                                                                            ? <div className="font-mono text-sm font-bold text-purple-700">{lid}</div>
                                                                             : <div className="text-sm text-gray-400 italic">—</div>}
                                                                     </div>
                                                                 </div>
@@ -6750,39 +6808,68 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                             const mate = isSire ? litter.dam : litter.sire;
                                             const isExpanded = expandedBreedingRecords[lid];
                                             const displayName = litter.breedingPairCodeName;
-                                            const countSummary = [
-                                                litter.litterSizeBorn != null && `${litter.litterSizeBorn} born`,
-                                                litter.stillbornCount && `${litter.stillbornCount} stillborn`,
-                                                litter.litterSizeWeaned != null && `${litter.litterSizeWeaned} weaned`
-                                            ].filter(Boolean).join(' • ') || 'No counts';
                                             return (
                                                 <div key={lid} className={`bg-white rounded border transition-all ${isExpanded ? 'border-purple-300 shadow-md' : 'border-purple-100'}`}>
                                                     <div
                                                         onClick={() => setExpandedBreedingRecords({...expandedBreedingRecords, [lid]: !isExpanded})}
-                                                        className="p-3 flex items-center justify-between cursor-pointer hover:bg-purple-50 transition rounded"
+                                                        className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50 transition rounded"
                                                     >
-                                                        <div className="flex items-center gap-3 flex-1">
-                                                            <span className={`text-lg transition-transform ${isExpanded ? 'rotate-90' : ''}`}>▶️</span>
-                                                            {lid || displayName ? (
-                                                                <>
-                                                                    {displayName && <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-700 text-white flex-shrink-0">{displayName}</span>}
-                                                                    {lid && <span className="text-xs font-mono text-gray-400 flex-shrink-0">{lid}</span>}
-                                                                </>
-                                                            ) : null}
-                                                            <div className="text-sm text-gray-700 flex items-center gap-2 flex-wrap">
-                                                                {litter.birthDate && <><span>{formatDate(litter.birthDate)}</span><span className="text-gray-400">&bull;</span></>}
-                                                                {!litter.birthDate && (litter.matingDate || litter.pairingDate) && <><span>{formatDate(litter.matingDate || litter.pairingDate)}</span><span className="text-gray-400">&bull;</span></>}
-                                                                {mate?.name && <><span>{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span><span className="text-gray-400">&bull;</span></>}
-                                                                <span className="text-purple-700 font-medium">{countSummary}</span>
+                                                        {/* Mobile: stacked */}
+                                                        <div className="flex-1 sm:hidden">
+                                                            <div className="flex justify-between items-start mb-1">
+                                                                <p className="font-bold text-gray-800 text-sm">{displayName || <span className="text-gray-400 font-normal">Unnamed Litter</span>}</p>
+                                                                {lid && <span className="text-xs font-mono bg-purple-100 px-1.5 py-0.5 rounded text-purple-700 ml-2">{lid}</span>}
+                                                            </div>
+                                                            <div className="text-xs text-gray-600 flex gap-3 flex-wrap">
+                                                                {litter.birthDate && <span>{formatDate(litter.birthDate)}</span>}
+                                                                {mate?.name && <span>{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
+                                                                {litter.litterSizeBorn != null && <span>{litter.litterSizeBorn} born</span>}
                                                             </div>
                                                         </div>
+                                                        {/* Desktop: 6-column grid */}
+                                                        <div className="hidden sm:grid flex-1 grid-cols-6 gap-3 items-center min-w-0">
+                                                            <div className="min-w-0">
+                                                                <p className="font-bold text-gray-800 text-sm truncate">{displayName || <span className="text-gray-400 font-normal text-xs">Unnamed</span>}</p>
+                                                            </div>
+                                                            <div className="min-w-0">
+                                                                {lid ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block w-fit">{lid}</span> : <span className="text-xs text-gray-400">—</span>}
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Birth</span>
+                                                                <span className="text-sm font-semibold text-gray-800">{formatDate(litter.birthDate) || '—'}</span>
+                                                            </div>
+                                                            <div className="min-w-0">
+                                                                <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Mate</span>
+                                                                <span className="text-sm font-semibold text-gray-800 truncate block">{mate ? [mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ') : '—'}</span>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">COI</span>
+                                                                <span className="text-sm font-semibold text-gray-800">{litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : '—'}</span>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Born</span>
+                                                                <div className="flex items-center gap-1.5">
+                                                                    <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? '—'}</span>
+                                                                    {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
+                                                                        <span className="text-xs ml-1">
+                                                                            <span className="text-blue-500 font-semibold">{litter.maleCount ?? 0}M</span>
+                                                                            <span className="text-gray-400 mx-0.5">/</span>
+                                                                            <span className="text-pink-500 font-semibold">{litter.femaleCount ?? 0}F</span>
+                                                                            <span className="text-gray-400 mx-0.5">/</span>
+                                                                            <span className="text-purple-500 font-semibold">{litter.unknownCount ?? 0}U</span>
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <ChevronDown size={18} className={`text-gray-400 transition-transform flex-shrink-0 ml-2 ${isExpanded ? 'rotate-180' : ''}`} />
                                                     </div>
                                                     {isExpanded && (
                                                         <div className="border-t border-purple-100 p-4 bg-purple-50 space-y-4">
-                                                            {/* CTL ID + Litter Name */}
+                                                            {/* Litter Name + CTL ID */}
                                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                                                                <div><div className="text-gray-600 text-xs">CTL ID</div><div className="font-mono text-xs font-semibold text-gray-700">{lid || '—'}</div></div>
                                                                 {displayName && <div><div className="text-gray-600 text-xs">Litter Name</div><div className="font-semibold text-purple-800">{displayName}</div></div>}
+                                                                <div><div className="text-gray-600 text-xs">CTL ID</div><div className="font-mono text-xs font-semibold text-gray-700">{lid || '—'}</div></div>
                                                             </div>
                                                             {/* Mate, Dates, Method, Condition, Outcome */}
                                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
