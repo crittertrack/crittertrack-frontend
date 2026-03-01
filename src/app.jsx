@@ -1,4 +1,4 @@
-// CritterTrack Frontend Application
+﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -3425,7 +3425,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                             {/* Genetic Code - Always show */}
                             {fieldTemplate?.fields?.geneticCode?.enabled !== false && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">?? {getLabel('geneticCode', 'Genetic Code')}</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700">🧬 {getLabel('geneticCode', 'Genetic Code')}</h3>
                                     <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || 'Not specified'}</p>
                                 </div>
                             )}
@@ -3433,7 +3433,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                             {/* Life Stage - Always show */}
                             {fieldTemplate?.fields?.lifeStage?.enabled !== false && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">?? {getLabel('lifeStage', 'Life Stage')}</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700">🌱 {getLabel('lifeStage', 'Life Stage')}</h3>
                                     <p className="text-gray-700 text-sm">{animal.lifeStage || 'Not specified'}</p>
                                 </div>
                             )}
@@ -5168,7 +5168,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {/* Genetic Code */}
                             {fieldTemplate?.fields?.geneticCode?.enabled !== false && animal.geneticCode && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">?? {getLabel('geneticCode', 'Genetic Code')}</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700">🧬 {getLabel('geneticCode', 'Genetic Code')}</h3>
                                     <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode}</p>
                                 </div>
                             )}
@@ -5176,7 +5176,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {/* Life Stage */}
                             {fieldTemplate?.fields?.lifeStage?.enabled !== false && animal.lifeStage && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">?? {getLabel('lifeStage', 'Life Stage')}</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700">🌱 {getLabel('lifeStage', 'Life Stage')}</h3>
                                     <p className="text-gray-700 text-sm">{animal.lifeStage}</p>
                                 </div>
                             )}
@@ -6568,7 +6568,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* Genetic Code */}
                             {fieldTemplate?.fields?.geneticCode?.enabled !== false && animal.geneticCode && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">?? {getLabel('geneticCode', 'Genetic Code')}</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700">🧬 {getLabel('geneticCode', 'Genetic Code')}</h3>
                                     <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode}</p>
                                 </div>
                             )}
@@ -6576,7 +6576,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* Life Stage */}
                             {fieldTemplate?.fields?.lifeStage?.enabled !== false && animal.lifeStage && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">?? {getLabel('lifeStage', 'Life Stage')}</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700">🌱 {getLabel('lifeStage', 'Life Stage')}</h3>
                                     <p className="text-gray-700 text-sm">{animal.lifeStage}</p>
                                 </div>
                             )}
