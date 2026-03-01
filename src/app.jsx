@@ -17646,7 +17646,7 @@ const DonationView = ({ onBack, authToken, userProfile }) => {
                                 or celebrating a milestone in your breeding program.
                             </p>
                             <form action="https://www.paypal.com/donate" method="post" target="_blank">
-                                <input type="hidden" name="business" value="mouserymorningstar@gmail.com" />
+                                <input type="hidden" name="business" value="crittertrackowner@gmail.com" />
                                 <input type="hidden" name="no_recurring" value="0" />
                                 <input type="hidden" name="item_name" value="Support CritterTrack Development" />
                                 <input type="hidden" name="currency_code" value="USD" />
