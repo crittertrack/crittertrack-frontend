@@ -1,4 +1,4 @@
-﻿// CritterTrack Frontend Application
+// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -3928,16 +3928,17 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                             {lid && breedingRecordOffspring[lid] === undefined && (
                                                                 <div className="bg-white p-3 rounded border border-purple-100">
                                                                     <div className="text-sm font-semibold text-gray-700 mb-3">Offspring</div>
-                                                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                                                        {[...Array(2)].map((_, i) => (
-                                                                            <div key={i} className="border border-gray-200 rounded-lg p-2 animate-pulse">
-                                                                                <div className="flex items-center space-x-2">
-                                                                                    <div className="w-10 h-10 bg-gray-200 rounded flex-shrink-0" />
-                                                                                    <div className="flex-1 space-y-1">
-                                                                                        <div className="h-2.5 bg-gray-200 rounded w-3/4" />
-                                                                                        <div className="h-2 bg-gray-200 rounded w-1/2" />
-                                                                                    </div>
+                                                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                                                        {[...Array(3)].map((_, i) => (
+                                                                            <div key={i} className="rounded-lg border-2 border-gray-200 h-52 animate-pulse bg-gray-50 flex flex-col items-center pt-2">
+                                                                                <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
+                                                                                    <div className="w-20 h-20 bg-gray-200 rounded-md" />
                                                                                 </div>
+                                                                                <div className="w-full px-2 pb-2">
+                                                                                    <div className="h-3 bg-gray-200 rounded w-3/4 mx-auto mb-1" />
+                                                                                    <div className="h-2 bg-gray-200 rounded w-1/2 mx-auto" />
+                                                                                </div>
+                                                                                <div className="w-full bg-gray-100 py-1 border-t border-gray-200 mt-auto" />
                                                                             </div>
                                                                         ))}
                                                                     </div>
@@ -3946,30 +3947,52 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                             {lid && breedingRecordOffspring[lid] && breedingRecordOffspring[lid].length > 0 && (
                                                                 <div className="bg-white p-3 rounded border border-purple-100">
                                                                     <div className="text-sm font-semibold text-gray-700 mb-3">Offspring ({breedingRecordOffspring[lid].length})</div>
-                                                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                                                                         {breedingRecordOffspring[lid].map(offspring => (
                                                                             offspring.isPrivate ? (
-                                                                                <div key={offspring.id_public} className="border border-gray-200 rounded-lg p-2 bg-gray-50">
-                                                                                    <div className="flex items-center space-x-2">
-                                                                                        <div className="w-10 h-10 bg-gray-200 rounded flex-shrink-0 flex items-center justify-center text-gray-400 text-lg">🔒</div>
-                                                                                        <div className="flex-1 min-w-0">
-                                                                                            <div className="text-xs font-semibold text-gray-500 truncate">Private Animal</div>
-                                                                                            <div className="text-[10px] text-gray-400 font-mono">{offspring.id_public}</div>
-                                                                                            <div className="text-[10px] text-gray-400">{offspring.gender || '—'}</div>
-                                                                                        </div>
+                                                                                <div key={offspring.id_public} className="relative bg-gray-50 rounded-lg border-2 border-gray-200 h-52 flex flex-col items-center overflow-hidden pt-2">
+                                                                                    <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
+                                                                                        <div className="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center text-2xl">🔒</div>
+                                                                                    </div>
+                                                                                    <div className="w-full text-center px-2 pb-1">
+                                                                                        <div className="text-sm font-semibold text-gray-500 truncate">Private Animal</div>
+                                                                                    </div>
+                                                                                    <div className="w-full px-2 pb-2 flex justify-end">
+                                                                                        <div className="text-xs text-gray-400 font-mono">{offspring.id_public}</div>
+                                                                                    </div>
+                                                                                    <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300 mt-auto">
+                                                                                        <div className="text-xs font-medium text-gray-500">{offspring.gender || '—'}</div>
                                                                                     </div>
                                                                                 </div>
                                                                             ) : (
-                                                                                <div key={offspring.id_public} onClick={() => onViewAnimal && onViewAnimal(offspring)} className="border border-gray-200 rounded-lg p-2 hover:shadow-md transition cursor-pointer">
-                                                                                    <div className="flex items-center space-x-2">
-                                                                                        <div className="w-10 h-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                                                                                            <AnimalImage src={offspring.imageUrl || offspring.photoUrl} alt={offspring.name} className="w-full h-full object-cover" iconSize={16} />
+                                                                                <div key={offspring.id_public} onClick={() => onViewAnimal && onViewAnimal(offspring)} className="relative bg-white rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-200 pt-2">
+                                                                                    {offspring.gender && (
+                                                                                        <div className="absolute top-1.5 right-1.5">
+                                                                                            {offspring.gender === 'Male'
+                                                                                                ? <Mars size={14} strokeWidth={2.5} className="text-primary" />
+                                                                                                : <Venus size={14} strokeWidth={2.5} className="text-accent" />
+                                                                                            }
                                                                                         </div>
-                                                                                        <div className="flex-1 min-w-0">
-                                                                                            <div className="text-xs font-semibold text-gray-800 truncate">{offspring.prefix && `${offspring.prefix} `}{offspring.name}{offspring.suffix && ` ${offspring.suffix}`}</div>
-                                                                                            <div className="text-[10px] text-gray-500 font-mono">{offspring.id_public}</div>
-                                                                                            <div className="text-[10px] text-gray-600">{offspring.gender}</div>
+                                                                                    )}
+                                                                                    <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
+                                                                                        {offspring.imageUrl || offspring.photoUrl ? (
+                                                                                            <img src={offspring.imageUrl || offspring.photoUrl} alt={offspring.name} className="w-20 h-20 object-cover rounded-md" />
+                                                                                        ) : (
+                                                                                            <div className="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                                                                                                <Cat size={32} />
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </div>
+                                                                                    <div className="w-full text-center px-2 pb-1">
+                                                                                        <div className="text-sm font-semibold text-gray-800 truncate">
+                                                                                            {[offspring.prefix, offspring.name, offspring.suffix].filter(Boolean).join(' ')}
                                                                                         </div>
+                                                                                    </div>
+                                                                                    <div className="w-full px-2 pb-2 flex justify-end">
+                                                                                        <div className="text-xs text-gray-500">{offspring.id_public}</div>
+                                                                                    </div>
+                                                                                    <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300 mt-auto">
+                                                                                        <div className="text-xs font-medium text-gray-700">{offspring.status || offspring.gender || 'Unknown'}</div>
                                                                                     </div>
                                                                                 </div>
                                                                             )
@@ -5503,16 +5526,17 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                             {lid && breedingRecordOffspring[lid] === undefined && (
                                                                 <div className="bg-white p-3 rounded border border-purple-100">
                                                                     <div className="text-sm font-semibold text-gray-700 mb-3">Offspring</div>
-                                                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                                                        {[...Array(2)].map((_, i) => (
-                                                                            <div key={i} className="border border-gray-200 rounded-lg p-2 animate-pulse">
-                                                                                <div className="flex items-center space-x-2">
-                                                                                    <div className="w-10 h-10 bg-gray-200 rounded flex-shrink-0" />
-                                                                                    <div className="flex-1 space-y-1">
-                                                                                        <div className="h-2.5 bg-gray-200 rounded w-3/4" />
-                                                                                        <div className="h-2 bg-gray-200 rounded w-1/2" />
-                                                                                    </div>
+                                                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                                                        {[...Array(3)].map((_, i) => (
+                                                                            <div key={i} className="rounded-lg border-2 border-gray-200 h-52 animate-pulse bg-gray-50 flex flex-col items-center pt-2">
+                                                                                <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
+                                                                                    <div className="w-20 h-20 bg-gray-200 rounded-md" />
                                                                                 </div>
+                                                                                <div className="w-full px-2 pb-2">
+                                                                                    <div className="h-3 bg-gray-200 rounded w-3/4 mx-auto mb-1" />
+                                                                                    <div className="h-2 bg-gray-200 rounded w-1/2 mx-auto" />
+                                                                                </div>
+                                                                                <div className="w-full bg-gray-100 py-1 border-t border-gray-200 mt-auto" />
                                                                             </div>
                                                                         ))}
                                                                     </div>
@@ -5521,30 +5545,52 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                             {lid && breedingRecordOffspring[lid] && breedingRecordOffspring[lid].length > 0 && (
                                                                 <div className="bg-white p-3 rounded border border-purple-100">
                                                                     <div className="text-sm font-semibold text-gray-700 mb-3">Offspring ({breedingRecordOffspring[lid].length})</div>
-                                                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                                                                         {breedingRecordOffspring[lid].map(offspring => (
                                                                             offspring.isPrivate ? (
-                                                                                <div key={offspring.id_public} className="border border-gray-200 rounded-lg p-2 bg-gray-50">
-                                                                                    <div className="flex items-center space-x-2">
-                                                                                        <div className="w-10 h-10 bg-gray-200 rounded flex-shrink-0 flex items-center justify-center text-gray-400 text-lg">🔒</div>
-                                                                                        <div className="flex-1 min-w-0">
-                                                                                            <div className="text-xs font-semibold text-gray-500 truncate">Private Animal</div>
-                                                                                            <div className="text-[10px] text-gray-400 font-mono">{offspring.id_public}</div>
-                                                                                            <div className="text-[10px] text-gray-400">{offspring.gender || '—'}</div>
-                                                                                        </div>
+                                                                                <div key={offspring.id_public} className="relative bg-gray-50 rounded-lg border-2 border-gray-200 h-52 flex flex-col items-center overflow-hidden pt-2">
+                                                                                    <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
+                                                                                        <div className="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center text-2xl">🔒</div>
+                                                                                    </div>
+                                                                                    <div className="w-full text-center px-2 pb-1">
+                                                                                        <div className="text-sm font-semibold text-gray-500 truncate">Private Animal</div>
+                                                                                    </div>
+                                                                                    <div className="w-full px-2 pb-2 flex justify-end">
+                                                                                        <div className="text-xs text-gray-400 font-mono">{offspring.id_public}</div>
+                                                                                    </div>
+                                                                                    <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300 mt-auto">
+                                                                                        <div className="text-xs font-medium text-gray-500">{offspring.gender || '—'}</div>
                                                                                     </div>
                                                                                 </div>
                                                                             ) : (
-                                                                                <div key={offspring.id_public} onClick={() => onViewAnimal && onViewAnimal(offspring)} className="border border-gray-200 rounded-lg p-2 hover:shadow-md transition cursor-pointer">
-                                                                                    <div className="flex items-center space-x-2">
-                                                                                        <div className="w-10 h-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                                                                                            <AnimalImage src={offspring.imageUrl || offspring.photoUrl} alt={offspring.name} className="w-full h-full object-cover" iconSize={16} />
+                                                                                <div key={offspring.id_public} onClick={() => onViewAnimal && onViewAnimal(offspring)} className="relative bg-white rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-200 pt-2">
+                                                                                    {offspring.gender && (
+                                                                                        <div className="absolute top-1.5 right-1.5">
+                                                                                            {offspring.gender === 'Male'
+                                                                                                ? <Mars size={14} strokeWidth={2.5} className="text-primary" />
+                                                                                                : <Venus size={14} strokeWidth={2.5} className="text-accent" />
+                                                                                            }
                                                                                         </div>
-                                                                                        <div className="flex-1 min-w-0">
-                                                                                            <div className="text-xs font-semibold text-gray-800 truncate">{offspring.prefix && `${offspring.prefix} `}{offspring.name}{offspring.suffix && ` ${offspring.suffix}`}</div>
-                                                                                            <div className="text-[10px] text-gray-500 font-mono">{offspring.id_public}</div>
-                                                                                            <div className="text-[10px] text-gray-600">{offspring.gender}</div>
+                                                                                    )}
+                                                                                    <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
+                                                                                        {offspring.imageUrl || offspring.photoUrl ? (
+                                                                                            <img src={offspring.imageUrl || offspring.photoUrl} alt={offspring.name} className="w-20 h-20 object-cover rounded-md" />
+                                                                                        ) : (
+                                                                                            <div className="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                                                                                                <Cat size={32} />
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </div>
+                                                                                    <div className="w-full text-center px-2 pb-1">
+                                                                                        <div className="text-sm font-semibold text-gray-800 truncate">
+                                                                                            {[offspring.prefix, offspring.name, offspring.suffix].filter(Boolean).join(' ')}
                                                                                         </div>
+                                                                                    </div>
+                                                                                    <div className="w-full px-2 pb-2 flex justify-end">
+                                                                                        <div className="text-xs text-gray-500">{offspring.id_public}</div>
+                                                                                    </div>
+                                                                                    <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300 mt-auto">
+                                                                                        <div className="text-xs font-medium text-gray-700">{offspring.status || offspring.gender || 'Unknown'}</div>
                                                                                     </div>
                                                                                 </div>
                                                                             )
