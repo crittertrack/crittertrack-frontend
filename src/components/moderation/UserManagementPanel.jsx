@@ -22,6 +22,8 @@ const UserManagementPanel = () => {
     const [showActionModal, setShowActionModal] = useState(false);
     const [actionType, setActionType] = useState(null);
     const [currentUserRole, setCurrentUserRole] = useState('user');
+    const [showBadgeModal, setShowBadgeModal] = useState(false);
+    const [badgeUser, setBadgeUser] = useState(null);
 
     useEffect(() => {
         fetchUsers();
@@ -55,6 +57,22 @@ const UserManagementPanel = () => {
             console.error('Error fetching users:', err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDonationBadge = async (userId, type) => {
+        try {
+            const token = localStorage.getItem('authToken');
+            await axios.patch(
+                `${API_URL}/admin/users/${userId}/donation-badge`,
+                { type },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            await fetchUsers();
+            setShowBadgeModal(false);
+            setBadgeUser(null);
+        } catch (err) {
+            console.error('Error updating donation badge:', err);
         }
     };
 
@@ -477,6 +495,16 @@ const UserManagementPanel = () => {
                                             <UserCog size={14} />
                                         </button>
                                     )}
+                                    {currentUserRole === 'admin' && (
+                                        <button
+                                            className="action-btn"
+                                            style={{ background: user.monthlyDonationActive ? '#7c3aed' : user.lastDonationDate ? '#16a34a' : '#e5e7eb', color: (user.monthlyDonationActive || user.lastDonationDate) ? '#fff' : '#374151' }}
+                                            onClick={() => { setBadgeUser(user); setShowBadgeModal(true); }}
+                                            title="Manage donation badge"
+                                        >
+                                            {user.monthlyDonationActive ? '💎' : user.lastDonationDate ? '🎁' : '🏅'}
+                                        </button>
+                                    )}
                                 </td>
                             </tr>
                         ))}
@@ -500,6 +528,37 @@ const UserManagementPanel = () => {
                     onLiftWarning={handleLiftWarning}
                     onRefresh={fetchUsers}
                 />
+            )}
+
+            {showBadgeModal && badgeUser && (
+                <div className="modal-overlay" onClick={() => { setShowBadgeModal(false); setBadgeUser(null); }}>
+                    <div className="modal-content action-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 380 }}>
+                        <div className="modal-header">
+                            <h3>Donation Badge</h3>
+                            <button className="close-btn" onClick={() => { setShowBadgeModal(false); setBadgeUser(null); }}>×</button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="target-user" style={{ marginBottom: 16 }}>
+                                <strong>{badgeUser.personalName || badgeUser.breederName || 'Unknown'}</strong>
+                                <span className="user-id">{badgeUser.id_public}</span>
+                            </div>
+                            <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 16 }}>
+                                Current: {badgeUser.monthlyDonationActive ? '💎 Monthly Supporter' : badgeUser.lastDonationDate ? '🎁 Recent Donor (gift)' : 'No badge'}
+                            </p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                <button className="action-btn" style={{ background: '#7c3aed', color: '#fff', padding: '8px 12px', borderRadius: 6, fontWeight: 600, cursor: 'pointer' }} onClick={() => handleDonationBadge(badgeUser._id, 'monthly')}>
+                                    💎 Grant / Toggle Monthly Supporter
+                                </button>
+                                <button className="action-btn" style={{ background: '#16a34a', color: '#fff', padding: '8px 12px', borderRadius: 6, fontWeight: 600, cursor: 'pointer' }} onClick={() => handleDonationBadge(badgeUser._id, 'gift')}>
+                                    🎁 Grant Gift Badge (31 days)
+                                </button>
+                                <button className="action-btn" style={{ background: '#dc2626', color: '#fff', padding: '8px 12px', borderRadius: 6, fontWeight: 600, cursor: 'pointer' }} onClick={() => handleDonationBadge(badgeUser._id, 'clear')}>
+                                    🗑 Clear All Badges
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
 
             {showActionModal && selectedUser && (

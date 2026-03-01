@@ -3,6 +3,27 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Search, X, Star, Moon, ArrowLeft, Loader2 } from 'lucide-react';
 
+const getBreederDonationBadge = (user) => {
+    if (!user) return null;
+    const now = new Date();
+    if (user.monthlyDonationActive) return { icon: '💎', title: 'Monthly Supporter', className: 'bg-gradient-to-r from-blue-400 to-purple-500 text-white' };
+    if (user.lastDonationDate) {
+        const days = Math.floor((now - new Date(user.lastDonationDate)) / 86400000);
+        if (days <= 31) return { icon: '🎁', title: 'Recent Supporter', className: 'bg-gradient-to-r from-green-400 to-blue-500 text-white' };
+    }
+    return null;
+};
+
+const BreederBadge = ({ breeder }) => {
+    const badge = getBreederDonationBadge(breeder);
+    if (!badge) return null;
+    return (
+        <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium shadow-sm ${badge.className}`} title={badge.title}>
+            {badge.icon}
+        </span>
+    );
+};
+
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://api.crittertrack.app';
 
 const Breeders = ({ authToken }) => {
@@ -257,6 +278,7 @@ const Breeders = ({ authToken }) => {
                                                     : displayName
                                                 }
                                             </h3>
+                                            <BreederBadge breeder={breeder} />
                                             {breeder.isCTU && (
                                                 <span className="px-2 py-0.5 bg-primary text-black text-xs font-bold rounded">
                                                     CTU
