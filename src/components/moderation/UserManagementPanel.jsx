@@ -63,9 +63,13 @@ const UserManagementPanel = () => {
     const handleDonationBadge = async (userId, type) => {
         try {
             const token = localStorage.getItem('authToken');
+            const body = { type };
+            if (type === 'monthly') {
+                body.monthlyDonationActive = !badgeUser?.monthlyDonationActive;
+            }
             await axios.patch(
                 `${API_URL}/admin/users/${userId}/donation-badge`,
-                { type },
+                body,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             await fetchUsers();
@@ -532,27 +536,29 @@ const UserManagementPanel = () => {
 
             {showBadgeModal && badgeUser && (
                 <div className="modal-overlay" onClick={() => { setShowBadgeModal(false); setBadgeUser(null); }}>
-                    <div className="modal-content action-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 380 }}>
-                        <div className="modal-header">
-                            <h3>Donation Badge</h3>
+                    <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: 400, boxShadow: '0 20px 60px rgba(0,0,0,0.2)', overflow: 'hidden' }}>
+                        {/* Header */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid #e5e7eb', background: '#f9fafb' }}>
+                            <span style={{ fontWeight: 700, fontSize: 16, color: '#1f2937' }}>Donation Badge</span>
                             <button className="close-btn" onClick={() => { setShowBadgeModal(false); setBadgeUser(null); }}>×</button>
                         </div>
-                        <div className="modal-body">
-                            <div className="target-user" style={{ marginBottom: 16 }}>
-                                <strong>{badgeUser.personalName || badgeUser.breederName || 'Unknown'}</strong>
-                                <span className="user-id">{badgeUser.id_public}</span>
+                        {/* Body */}
+                        <div style={{ padding: '20px' }}>
+                            <div style={{ background: '#f3f4f6', borderRadius: 8, padding: '10px 14px', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <strong style={{ color: '#1f2937' }}>{badgeUser.personalName || badgeUser.breederName || 'Unknown'}</strong>
+                                <span style={{ color: '#6b7280', fontFamily: 'monospace', fontSize: 12 }}>{badgeUser.id_public}</span>
                             </div>
                             <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 16 }}>
                                 Current: {badgeUser.monthlyDonationActive ? '💎 Monthly Supporter' : badgeUser.lastDonationDate ? '🎁 Recent Donor (gift)' : 'No badge'}
                             </p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                <button className="action-btn" style={{ background: '#7c3aed', color: '#fff', padding: '8px 12px', borderRadius: 6, fontWeight: 600, cursor: 'pointer' }} onClick={() => handleDonationBadge(badgeUser._id, 'monthly')}>
+                                <button style={{ background: '#7c3aed', color: '#fff', padding: '10px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', border: 'none', fontSize: 14, textAlign: 'left' }} onClick={() => handleDonationBadge(badgeUser._id, 'monthly')}>
                                     💎 Grant / Toggle Monthly Supporter
                                 </button>
-                                <button className="action-btn" style={{ background: '#16a34a', color: '#fff', padding: '8px 12px', borderRadius: 6, fontWeight: 600, cursor: 'pointer' }} onClick={() => handleDonationBadge(badgeUser._id, 'gift')}>
+                                <button style={{ background: '#16a34a', color: '#fff', padding: '10px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', border: 'none', fontSize: 14, textAlign: 'left' }} onClick={() => handleDonationBadge(badgeUser._id, 'gift')}>
                                     🎁 Grant Gift Badge (31 days)
                                 </button>
-                                <button className="action-btn" style={{ background: '#dc2626', color: '#fff', padding: '8px 12px', borderRadius: 6, fontWeight: 600, cursor: 'pointer' }} onClick={() => handleDonationBadge(badgeUser._id, 'clear')}>
+                                <button style={{ background: '#dc2626', color: '#fff', padding: '10px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', border: 'none', fontSize: 14, textAlign: 'left' }} onClick={() => handleDonationBadge(badgeUser._id, 'clear')}>
                                     🗑 Clear All Badges
                                 </button>
                             </div>
