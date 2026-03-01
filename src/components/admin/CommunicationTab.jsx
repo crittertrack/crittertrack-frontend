@@ -1020,6 +1020,19 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                                     {conv.initiatedBy && (
                                                         <span className="initiated-by">Started by: {conv.initiatedBy}</span>
                                                     )}
+                                                    {conv.unreadByUser > 0 ? (
+                                                        <span style={{ background: '#dc2626', color: '#fff', borderRadius: '9999px', padding: '1px 8px', fontSize: '11px', fontWeight: 700 }}>
+                                                            📨 {conv.unreadByUser} unread by user
+                                                        </span>
+                                                    ) : conv.lastSenderIsUser ? (
+                                                        <span style={{ background: '#16a34a', color: '#fff', borderRadius: '9999px', padding: '1px 8px', fontSize: '11px', fontWeight: 600 }}>
+                                                            ✅ User replied
+                                                        </span>
+                                                    ) : (
+                                                        <span style={{ background: '#6b7280', color: '#fff', borderRadius: '9999px', padding: '1px 8px', fontSize: '11px', fontWeight: 600 }}>
+                                                            ✔ Read — awaiting reply
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
                                             <div className="conversation-actions">
