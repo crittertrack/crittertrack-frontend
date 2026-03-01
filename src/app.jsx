@@ -17756,7 +17756,7 @@ const DonationView = ({ onBack, authToken, userProfile }) => {
                             </p>
                             <form action="https://www.paypal.com/donate" method="post" target="_blank">
                                 <input type="hidden" name="business" value="crittertrackowner@gmail.com" />
-                                <input type="hidden" name="no_recurring" value="0" />
+                                <input type="hidden" name="no_recurring" value="1" />
                                 <input type="hidden" name="item_name" value="Support CritterTrack Development" />
                                 <input type="hidden" name="currency_code" value="USD" />
                                 <button
@@ -17803,9 +17803,26 @@ const DonationView = ({ onBack, authToken, userProfile }) => {
                                     </button>
                                 </>
                             ) : (
-                                <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 text-center">
-                                    <p className="text-yellow-700 text-sm font-semibold">Please log in to subscribe and receive your 💎 badge automatically.</p>
-                                </div>
+                                <>
+                                    <form action="https://www.paypal.com/donate" method="post" target="_blank">
+                                        <input type="hidden" name="business" value="crittertrackowner@gmail.com" />
+                                        <input type="hidden" name="no_recurring" value="0" />
+                                        <input type="hidden" name="a3" value="5" />
+                                        <input type="hidden" name="p3" value="1" />
+                                        <input type="hidden" name="t3" value="M" />
+                                        <input type="hidden" name="src" value="1" />
+                                        <input type="hidden" name="item_name" value="CritterTrack Monthly Support" />
+                                        <input type="hidden" name="currency_code" value="USD" />
+                                        <button
+                                            type="submit"
+                                            className="w-full bg-gradient-to-r from-accent to-accent/80 hover:from-accent-dark hover:to-accent text-white font-semibold py-3 px-6 rounded-lg transition shadow-md flex items-center justify-center gap-2"
+                                        >
+                                            <Heart size={18} className="fill-current" />
+                                            Support for $5/month via PayPal
+                                        </button>
+                                    </form>
+                                    <p className="text-xs text-gray-500 mt-2 text-center">Log in to CritterTrack first to receive your 💎 badge automatically.</p>
+                                </>
                             )}
                         </div>
                     </div>
