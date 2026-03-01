@@ -3860,7 +3860,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                             {record.litterId || displayName ? (
                                                                 <div className="flex items-center gap-1.5 flex-shrink-0">
                                                                     {displayName && <span className="text-xs font-bold text-gray-800 flex-shrink-0">{displayName}</span>}
-                                                                    {displayName && record.litterId && <span className="text-gray-300 text-xs">·</span>}
                                                                     {record.litterId && <span className="font-mono px-1.5 py-0.5 rounded text-xs font-semibold bg-purple-100 text-purple-700 flex-shrink-0">{record.litterId}</span>}
                                                                 </div>
                                                             ) : null}
@@ -5437,7 +5436,6 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                             {record.litterId || displayName ? (
                                                                 <div className="flex items-center gap-1.5 flex-shrink-0">
                                                                     {displayName && <span className="text-xs font-bold text-gray-800 flex-shrink-0">{displayName}</span>}
-                                                                    {displayName && record.litterId && <span className="text-gray-300 text-xs">·</span>}
                                                                     {record.litterId && <span className="font-mono px-1.5 py-0.5 rounded text-xs font-semibold bg-purple-100 text-purple-700 flex-shrink-0">{record.litterId}</span>}
                                                                 </div>
                                                             ) : null}
