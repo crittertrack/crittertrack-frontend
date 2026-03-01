@@ -2742,9 +2742,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                         setBreedingRecordOffspring(prev => ({ ...prev, [record.litterId]: [] }));
                         return;
                     }
-                    // Only fetch animals when there are offspring to show
-                    const animalsRes = await axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` } });
-                    const offspring = animalsRes.data.filter(a => litter.offspringIds_public.includes(a.id_public));
+                    // Fetch all offspring via dedicated endpoint (no privacy filtering)
+                    const offspringRes = await axios.get(`${API_BASE_URL}/litters/${record.litterId}/offspring`, { headers: { Authorization: `Bearer ${authToken}` } });
+                    const offspring = offspringRes.data;
                     setBreedingRecordOffspring(prev => ({ ...prev, [record.litterId]: offspring }));
                 } catch (e) {
                     setBreedingRecordOffspring(prev => ({ ...prev, [record.litterId]: [] }));
@@ -2786,8 +2786,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                 setBreedingRecordOffspring(prev => ({ ...prev, [litterId]: [] }));
                 return;
             }
-            const animalsRes = await axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` } });
-            const offspring = animalsRes.data.filter(a => litter.offspringIds_public.includes(a.id_public));
+            const offspringRes = await axios.get(`${API_BASE_URL}/litters/${litterId}/offspring`, { headers: { Authorization: `Bearer ${authToken}` } });
+            const offspring = offspringRes.data;
             setBreedingRecordOffspring(prev => ({ ...prev, [litterId]: offspring }));
         } catch (e) {
             setBreedingRecordOffspring(prev => ({ ...prev, [litterId]: [] }));
@@ -4714,26 +4714,38 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
     const [enclosureInfo, setEnclosureInfo] = useState(null);
     const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
     const [breedingRecordLitters, setBreedingRecordLitters] = useState({});
+    const [breedingRecordOffspring, setBreedingRecordOffspring] = useState({});
     const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});
     const [showCreateLitterModal, setShowCreateLitterModal] = useState(false);
     const [showLinkLitterModal, setShowLinkLitterModal] = useState(false);
     const [breedingRecordForLitter, setBreedingRecordForLitter] = useState(null);
     const { fieldTemplate, getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
 
-    // Fetch litter data when breeding records expand (for male/female counts and COI)
+    // Fetch litter + offspring when breeding records expand
     React.useEffect(() => {
         if (!animal?.breedingRecords?.length || !authToken) return;
-        Object.entries(expandedBreedingRecords).forEach(([idxStr, isExpanded]) => {
+        const expanded = Object.entries(expandedBreedingRecords);
+        expanded.forEach(([idxStr, isExpanded]) => {
             if (!isExpanded) return;
             const idx = parseInt(idxStr);
             const record = animal.breedingRecords[idx];
             if (!record?.litterId || breedingRecordLitters[record.litterId] !== undefined) return;
-            axios.get(`${API_BASE_URL}/litters`, { headers: { Authorization: `Bearer ${authToken}` } })
-                .then(res => {
-                    const litter = res.data.find(l => l.litter_id_public === record.litterId);
-                    if (litter) setBreedingRecordLitters(prev => ({ ...prev, [record.litterId]: litter }));
-                })
-                .catch(() => {});
+            const fetchLitterAndOffspring = async () => {
+                try {
+                    const litterRes = await axios.get(`${API_BASE_URL}/litters/${record.litterId}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                    const litter = litterRes.data;
+                    setBreedingRecordLitters(prev => ({ ...prev, [record.litterId]: litter }));
+                    if (!litter?.offspringIds_public?.length) {
+                        setBreedingRecordOffspring(prev => ({ ...prev, [record.litterId]: [] }));
+                        return;
+                    }
+                    const offspringRes = await axios.get(`${API_BASE_URL}/litters/${record.litterId}/offspring`, { headers: { Authorization: `Bearer ${authToken}` } });
+                    setBreedingRecordOffspring(prev => ({ ...prev, [record.litterId]: offspringRes.data }));
+                } catch (e) {
+                    setBreedingRecordOffspring(prev => ({ ...prev, [record.litterId]: [] }));
+                }
+            };
+            fetchLitterAndOffspring();
         });
     }, [expandedBreedingRecords, animal?.breedingRecords, authToken, API_BASE_URL]);
 
@@ -4756,14 +4768,21 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
         return () => { cancelled = true; };
     }, [animal?.breedingRecords, authToken, API_BASE_URL]);
 
-    // Sync a single linked litter on demand (↻ Sync button)
+    // Sync a single linked litter + offspring on demand (↻ Sync button)
     const refreshBreedingRecordLitter = React.useCallback(async (litterId) => {
         if (!litterId || !authToken) return;
         setBreedingRecordLitters(prev => { const n = {...prev}; delete n[litterId]; return n; });
+        setBreedingRecordOffspring(prev => { const n = {...prev}; delete n[litterId]; return n; });
         try {
-            const res = await axios.get(`${API_BASE_URL}/litters`, { headers: { Authorization: `Bearer ${authToken}` } });
-            const litter = res.data.find(l => l.litter_id_public === litterId);
-            if (litter) setBreedingRecordLitters(prev => ({ ...prev, [litterId]: litter }));
+            const litterRes = await axios.get(`${API_BASE_URL}/litters/${litterId}`, { headers: { Authorization: `Bearer ${authToken}` } });
+            const litter = litterRes.data;
+            setBreedingRecordLitters(prev => ({ ...prev, [litterId]: litter }));
+            if (litter?.offspringIds_public?.length) {
+                const offspringRes = await axios.get(`${API_BASE_URL}/litters/${litterId}/offspring`, { headers: { Authorization: `Bearer ${authToken}` } });
+                setBreedingRecordOffspring(prev => ({ ...prev, [litterId]: offspringRes.data }));
+            } else {
+                setBreedingRecordOffspring(prev => ({ ...prev, [litterId]: [] }));
+            }
         } catch (e) {}
     }, [authToken, API_BASE_URL]);
 
@@ -5531,7 +5550,60 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                             </div>
                                                             {/* -- 4. Notes --------------------------------------------- */}
                                                             {record.notes && <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm"><h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1">Notes</h4><p className="text-sm text-gray-700 italic leading-relaxed">{record.notes}</p></div>}
-                                                            {/* -- 5. Create/Link buttons / Sync ------------------------------- */}
+                                                            {/* -- 5. Linked Offspring ---------------------------------- */}
+                                                            {record.litterId && breedingRecordOffspring[record.litterId] === undefined && (
+                                                                <div className="bg-white p-3 rounded border border-purple-100">
+                                                                    <div className="text-sm font-semibold text-gray-700 mb-3">Offspring</div>
+                                                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                                        {[...Array(2)].map((_, i) => (
+                                                                            <div key={i} className="border border-gray-200 rounded-lg p-2 animate-pulse">
+                                                                                <div className="flex items-center space-x-2">
+                                                                                    <div className="w-10 h-10 bg-gray-200 rounded flex-shrink-0" />
+                                                                                    <div className="flex-1 space-y-1">
+                                                                                        <div className="h-2.5 bg-gray-200 rounded w-3/4" />
+                                                                                        <div className="h-2 bg-gray-200 rounded w-1/2" />
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            {record.litterId && breedingRecordOffspring[record.litterId] && breedingRecordOffspring[record.litterId].length > 0 && (
+                                                                <div className="bg-white p-3 rounded border border-purple-100">
+                                                                    <div className="text-sm font-semibold text-gray-700 mb-3">Offspring ({breedingRecordOffspring[record.litterId].length})</div>
+                                                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                                        {breedingRecordOffspring[record.litterId].map(offspring => (
+                                                                            offspring.isPrivate ? (
+                                                                                <div key={offspring.id_public} className="border border-gray-200 rounded-lg p-2 bg-gray-50">
+                                                                                    <div className="flex items-center space-x-2">
+                                                                                        <div className="w-10 h-10 bg-gray-200 rounded flex-shrink-0 flex items-center justify-center text-gray-400 text-lg">🔒</div>
+                                                                                        <div className="flex-1 min-w-0">
+                                                                                            <div className="text-xs font-semibold text-gray-500 truncate">Private Animal</div>
+                                                                                            <div className="text-[10px] text-gray-400 font-mono">{offspring.id_public}</div>
+                                                                                            <div className="text-[10px] text-gray-400">{offspring.gender || '—'}</div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div key={offspring.id_public} onClick={() => onViewAnimal && onViewAnimal(offspring)} className="border border-gray-200 rounded-lg p-2 hover:shadow-md transition cursor-pointer">
+                                                                                    <div className="flex items-center space-x-2">
+                                                                                        <div className="w-10 h-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                                                                            <AnimalImage src={offspring.imageUrl || offspring.photoUrl} alt={offspring.name} className="w-full h-full object-cover" iconSize={16} />
+                                                                                        </div>
+                                                                                        <div className="flex-1 min-w-0">
+                                                                                            <div className="text-xs font-semibold text-gray-800 truncate">{offspring.prefix && `${offspring.prefix} `}{offspring.name}{offspring.suffix && ` ${offspring.suffix}`}</div>
+                                                                                            <div className="text-[10px] text-gray-500 font-mono">{offspring.id_public}</div>
+                                                                                            <div className="text-[10px] text-gray-600">{offspring.gender}</div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            )
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            {/* -- 6. Create/Link buttons / Sync ------------------------------- */}
                                                             <div className="flex gap-2">
                                                                 {!record.litterId && (
                                                                     <>
