@@ -18,7 +18,7 @@ const DonationBadge = ({ breeder }) => {
     const badge = getDonationBadge(breeder);
     if (!badge) return null;
     return (
-        <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium shadow-sm ${badge.className}`} title={badge.title}>
+        <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium shadow-sm ${badge.className}`}>
             {badge.icon}
         </span>
     );

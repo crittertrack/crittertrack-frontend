@@ -216,10 +216,8 @@ const DonationBadge = ({ user, badge: badgeProp, size = 'sm' }) => {
     return (
         <span 
             className={`inline-flex items-center gap-1 rounded-full font-medium shadow-sm ${badge.className} ${sizeClasses[size]}`}
-            title={badge.title}
         >
             <span>{badge.icon}</span>
-            {size === 'lg' && <span>{badge.title}</span>}
         </span>
     );
 };
