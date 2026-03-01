@@ -7914,6 +7914,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [selectedOffspring, setSelectedOffspring] = useState({});
     const [coiCalculating, setCoiCalculating] = useState(new Set()); // litter._id values currently computing COI
     const [myAnimalsLoaded, setMyAnimalsLoaded] = useState(false);
+    const [litterOffspringMap, setLitterOffspringMap] = useState({}); // litter._id → offspring array (undefined = not yet loaded)
+    const [offspringRefetchToken, setOffspringRefetchToken] = useState(0); // increment to force offspring re-fetch
 
     useEffect(() => {
         const loadData = async () => {
@@ -7979,6 +7981,26 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         calculatePredictedCOI();
     }, [formData.sireId_public, formData.damId_public, showAddForm, authToken, API_BASE_URL]);
 
+    // Fetch offspring via dedicated endpoint when a litter is expanded
+    // This replaces the old myAnimals.filter approach so transferred offspring are included
+    useEffect(() => {
+        if (!expandedLitter || !authToken) return;
+        if (litterOffspringMap[expandedLitter] !== undefined) return; // already loaded
+        const litter = litters.find(l => l._id === expandedLitter);
+        if (!litter) return;
+        if (!litter.offspringIds_public?.length) {
+            setLitterOffspringMap(prev => ({ ...prev, [expandedLitter]: [] }));
+            return;
+        }
+        axios.get(`${API_BASE_URL}/litters/${litter.litter_id_public}/offspring`, {
+            headers: { Authorization: `Bearer ${authToken}` }
+        }).then(res => {
+            setLitterOffspringMap(prev => ({ ...prev, [expandedLitter]: res.data }));
+        }).catch(() => {
+            setLitterOffspringMap(prev => ({ ...prev, [expandedLitter]: [] }));
+        });
+    }, [expandedLitter, litters, authToken, API_BASE_URL, offspringRefetchToken]); // eslint-disable-line react-hooks/exhaustive-deps
+
     const toggleBulkDeleteMode = (litterId) => {
         setBulkDeleteMode(prev => ({ ...prev, [litterId]: !prev[litterId] }));
         setSelectedOffspring(prev => ({ ...prev, [litterId]: [] }));
@@ -8026,6 +8048,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
     const fetchLitters = async () => {
         try {
+            // Clear offspring cache so expanded litter re-fetches fresh data
+            setLitterOffspringMap({});
+            setOffspringRefetchToken(t => t + 1);
             const response = await axios.get(`${API_BASE_URL}/litters`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
@@ -9591,9 +9616,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         const sire = litter.sire || myAnimals.find(a => a.id_public === litter.sireId_public);
                         const dam = litter.dam || myAnimals.find(a => a.id_public === litter.damId_public);
                         const isExpanded = expandedLitter === litter._id;
-                        const offspringList = myAnimals.filter(a => 
-                            litter.offspringIds_public && litter.offspringIds_public.includes(a.id_public)
-                        );
+                        // Use endpoint-fetched offspring (includes transferred animals) with fallback to myAnimals
+                        const offspringList = litterOffspringMap[litter._id] !== undefined
+                            ? litterOffspringMap[litter._id]
+                            : myAnimals.filter(a => litter.offspringIds_public && litter.offspringIds_public.includes(a.id_public));
+                        const offspringLoading = isExpanded && litterOffspringMap[litter._id] === undefined && (litter.offspringIds_public?.length ?? 0) > 0;
                         
                         return (
                             <div key={litter._id} className="border-2 border-gray-200 rounded-lg bg-white hover:shadow-md transition" data-tutorial-target="litter-card">
@@ -9855,8 +9882,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             </div>
                                         )}
 
-                                        {/* Offspring skeleton while myAnimals loads in background */}
-                                        {!myAnimalsLoaded && (litter.offspringIds_public?.length ?? 0) > 0 && offspringList.length === 0 && (
+                                        {/* Offspring skeleton while dedicated offspring fetch is in flight */}
+                                        {offspringLoading && (
                                             <div className="mb-4">
                                                 <h4 className="text-sm font-bold text-gray-700 mb-2">Offspring ({litter.offspringIds_public.length})</h4>
                                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -9916,6 +9943,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 </div>
                                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                                                     {offspringList.map(animal => {
+                                                        // Placeholder for animals that no longer exist in any collection
+                                                        if (animal.notFound) {
+                                                            return (
+                                                                <div key={animal.id_public} className="relative bg-gray-50 rounded-lg shadow-sm h-52 flex flex-col items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 pt-2">
+                                                                    <div className="text-2xl mb-1">🔍</div>
+                                                                    <div className="text-xs font-semibold text-gray-500 text-center px-2">Animal not found</div>
+                                                                    <div className="text-[10px] text-gray-400 font-mono mt-0.5">{animal.id_public}</div>
+                                                                </div>
+                                                            );
+                                                        }
                                                         const isBulkMode = bulkDeleteMode[litter._id] || false;
                                                         const isSelected = (selectedOffspring[litter._id] || []).includes(animal.id_public);
                                                         
@@ -9925,12 +9962,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                             onClick={() => {
                                                                 if (isBulkMode) {
                                                                     toggleOffspringSelection(litter._id, animal.id_public);
-                                                                } else {
+                                                                } else if (!animal.isPrivate) {
                                                                     onViewAnimal(animal);
                                                                 }
                                                             }}
-                                                            className={`relative bg-white rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 ${
-                                                                isSelected ? 'border-red-500' : 'border-gray-300'
+                                                            className={`relative bg-white rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden transition border-2 pt-2 ${
+                                                                isSelected ? 'border-red-500 cursor-pointer hover:shadow-md' : animal.isPrivate ? 'border-gray-200 cursor-default opacity-80' : 'border-gray-300 cursor-pointer hover:shadow-md'
                                                             }`}
                                                         >
                                                             {isBulkMode && (
