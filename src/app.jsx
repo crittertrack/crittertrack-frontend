@@ -9319,10 +9319,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     </div>
                                     
                                     {/* Desktop layout: grid */}
-                                    <div className="hidden sm:grid flex-1 grid-cols-3 md:grid-cols-5 gap-2 items-center">
-                                        <div>
-                                            <div className="flex items-center gap-2">
-                                                {litter.litter_id_public && <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded">{litter.litter_id_public}</span>}
+                                    <div className="hidden sm:grid flex-1 grid-cols-[2fr_2fr_2fr_1fr_1fr] gap-4 items-center min-w-0">
+                                        <div className="min-w-0">
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                {litter.litter_id_public && <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded flex-shrink-0">{litter.litter_id_public}</span>}
                                                 <p className="font-bold text-gray-800 text-base truncate">
                                                     {litter.breedingPairCodeName || (litter.litter_id_public ? '' : 'Unnamed Litter')}
                                                 </p>
@@ -9331,22 +9331,25 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 {formatDate(litter.birthDate)}
                                             </p>
                                         </div>
-                                        <div className="text-sm truncate">
-                                            <span className="text-gray-600">Sire:</span> {sire ? `${sire.prefix ? `${sire.prefix} ` : ''}${sire.name}${sire.suffix ? ` ${sire.suffix}` : ''}` : litter.sireId_public}
+                                        <div className="text-sm truncate min-w-0">
+                                            <span className="text-gray-500 text-xs uppercase tracking-wide font-semibold block">Sire</span>
+                                            <span className="font-semibold text-gray-800 truncate block">{sire ? `${sire.prefix ? `${sire.prefix} ` : ''}${sire.name}${sire.suffix ? ` ${sire.suffix}` : ''}` : (litter.sireId_public || '—')}</span>
                                         </div>
-                                        <div className="text-sm truncate">
-                                            <span className="text-gray-600">Dam:</span> {dam ? `${dam.prefix ? `${dam.prefix} ` : ''}${dam.name}${dam.suffix ? ` ${dam.suffix}` : ''}` : litter.damId_public}
+                                        <div className="text-sm truncate min-w-0">
+                                            <span className="text-gray-500 text-xs uppercase tracking-wide font-semibold block">Dam</span>
+                                            <span className="font-semibold text-gray-800 truncate block">{dam ? `${dam.prefix ? `${dam.prefix} ` : ''}${dam.name}${dam.suffix ? ` ${dam.suffix}` : ''}` : (litter.damId_public || '—')}</span>
                                         </div>
-                                        <div className="text-sm font-semibold text-gray-700">
-                                            {litter.numberBorn} offspring
+                                        <div className="text-sm">
+                                            <span className="text-gray-500 text-xs uppercase tracking-wide font-semibold block">Offspring</span>
+                                            <span className="font-semibold text-gray-800">{litter.numberBorn ?? 0}</span>
                                         </div>
-                                        <div className="text-sm flex items-center gap-1">
-                                            <span className="text-gray-600">COI:</span>{' '}
+                                        <div className="text-sm">
+                                            <span className="text-gray-500 text-xs uppercase tracking-wide font-semibold block">COI</span>
                                             {coiCalculating.has(litter._id)
-                                                ? <span className="inline-block w-10 h-3 bg-gray-200 rounded animate-pulse" />
-                                                : litter.inbreedingCoefficient != null
-                                                    ? `${litter.inbreedingCoefficient.toFixed(2)}%`
-                                                    : 'N/A'}
+                                                ? <span className="inline-block w-10 h-3 bg-gray-200 rounded animate-pulse mt-0.5" />
+                                                : <span className="font-semibold text-gray-800">
+                                                    {litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : 'N/A'}
+                                                  </span>}
                                         </div>
                                     </div>
                                     <ChevronLeft 
