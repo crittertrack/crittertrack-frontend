@@ -202,8 +202,8 @@ const getDonationBadge = (user) => {
 };
 
 // Donation Badge Component
-const DonationBadge = ({ user, size = 'sm' }) => {
-    const badge = getDonationBadge(user);
+const DonationBadge = ({ user, badge: badgeProp, size = 'sm' }) => {
+    const badge = badgeProp ?? getDonationBadge(user);
     if (!badge) return null;
     
     const sizeClasses = {
