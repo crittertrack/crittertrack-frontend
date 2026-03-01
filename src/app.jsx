@@ -2758,6 +2758,27 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
         });
     }, [expandedBreedingRecords, animal?.breedingRecords, authToken, API_BASE_URL]);
 
+    // Sync a single linked litter + offspring on demand (↻ Sync button)
+    const refreshBreedingRecordLitter = React.useCallback(async (litterId) => {
+        if (!litterId || !authToken) return;
+        setBreedingRecordLitters(prev => { const n = {...prev}; delete n[litterId]; return n; });
+        setBreedingRecordOffspring(prev => { const n = {...prev}; delete n[litterId]; return n; });
+        try {
+            const litterRes = await axios.get(`${API_BASE_URL}/litters/${litterId}`, { headers: { Authorization: `Bearer ${authToken}` } });
+            const litter = litterRes.data;
+            setBreedingRecordLitters(prev => ({ ...prev, [litterId]: litter }));
+            if (!litter?.offspringIds_public?.length) {
+                setBreedingRecordOffspring(prev => ({ ...prev, [litterId]: [] }));
+                return;
+            }
+            const animalsRes = await axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` } });
+            const offspring = animalsRes.data.filter(a => litter.offspringIds_public.includes(a.id_public));
+            setBreedingRecordOffspring(prev => ({ ...prev, [litterId]: offspring }));
+        } catch (e) {
+            setBreedingRecordOffspring(prev => ({ ...prev, [litterId]: [] }));
+        }
+    }, [authToken, API_BASE_URL]);
+
 
     // Fetch assigned enclosure info
     React.useEffect(() => {
@@ -3802,10 +3823,12 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                             const isDamOnly = animal.gender === 'Female' || (animal.gender === 'Unknown' && animal.breedingRole === 'dam');
                                             const isBoth = animal.gender === 'Intersex' || (animal.gender === 'Unknown' && animal.breedingRole === 'both');
                                             const isExpanded = expandedBreedingRecords[idx];
+                                            const linkedLitter = breedingRecordLitters?.[record.litterId];
+                                            const displayName = linkedLitter?.litterName ?? record.litterName;
                                             const countSummary = [
-                                                record.litterSizeBorn !== null && `${record.litterSizeBorn} born`,
-                                                record.stillbornCount && `${record.stillbornCount} stillborn`,
-                                                record.litterSizeWeaned !== null && `${record.litterSizeWeaned} weaned`
+                                                (linkedLitter?.litterSizeBorn ?? record.litterSizeBorn) !== null && `${linkedLitter?.litterSizeBorn ?? record.litterSizeBorn} born`,
+                                                (linkedLitter?.stillbornCount ?? record.stillbornCount) && `${linkedLitter?.stillbornCount ?? record.stillbornCount} stillborn`,
+                                                (linkedLitter?.litterSizeWeaned ?? record.litterSizeWeaned) !== null && `${linkedLitter?.litterSizeWeaned ?? record.litterSizeWeaned} weaned`
                                             ].filter(Boolean).join(' • ') || 'No counts';
                                             return (
                                                 <div key={idx} className={`bg-white rounded border transition-all ${isExpanded ? 'border-purple-300 shadow-md' : 'border-purple-100'}`}>
@@ -3815,9 +3838,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                     >
                                                         <div className="flex items-center gap-3 flex-1">
                                                             <span className={`text-lg transition-transform ${isExpanded ? 'rotate-90' : ''}`}>▶️</span>
-                                                            {record.litterName ? (
+                                                            {displayName ? (
                                                                 <>
-                                                                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-700 text-white flex-shrink-0">{record.litterName}</span>
+                                                                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-700 text-white flex-shrink-0">{displayName}</span>
                                                                     {record.litterId && <span className="text-xs font-mono text-gray-400 flex-shrink-0">{record.litterId}</span>}
                                                                 </>
                                                             ) : record.litterId ? (
@@ -3847,7 +3870,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                     {record.litterId
                                                                         ? <div className="font-mono text-sm font-bold text-gray-700">{record.litterId}</div>
                                                                         : <div className="text-sm text-gray-400 italic">Not Linked</div>}
-                                                                    {record.litterName && <div className="text-sm font-semibold text-purple-700 mt-0.5">{record.litterName}</div>}
+                                                                    {displayName && <div className="text-sm font-semibold text-purple-700 mt-0.5">{displayName}</div>}
                                                                 </div>
                                                                 {/* Center: COI */}
                                                                 <div className="flex flex-col items-center px-2">
@@ -3899,9 +3922,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                             <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">
                                                                 <div className="grid grid-cols-2 divide-x divide-gray-200">
                                                                     <div className="grid grid-cols-3 pr-3">
-                                                                        <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Born</div><div className="text-lg font-bold text-gray-800">{record.litterSizeBorn ?? '—'}</div></div>
-                                                                        <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Stillborn</div><div className="text-lg font-bold text-gray-400">{record.stillbornCount ?? '—'}</div></div>
-                                                                        <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaned</div><div className="text-lg font-bold text-green-600">{record.litterSizeWeaned ?? '—'}</div></div>
+                                                                        <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Born</div><div className="text-lg font-bold text-gray-800">{linkedLitter?.litterSizeBorn ?? record.litterSizeBorn ?? '—'}</div></div>
+                                                                        <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Stillborn</div><div className="text-lg font-bold text-gray-400">{linkedLitter?.stillbornCount ?? record.stillbornCount ?? '—'}</div></div>
+                                                                        <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaned</div><div className="text-lg font-bold text-green-600">{linkedLitter?.litterSizeWeaned ?? record.litterSizeWeaned ?? '—'}</div></div>
                                                                     </div>
                                                                     <div className="grid grid-cols-3 pl-3">
                                                                         <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Males</div><div className="text-lg font-bold text-blue-500">{(record.maleCount ?? breedingRecordLitters?.[record.litterId]?.maleCount) ?? '—'}</div></div>
@@ -3958,6 +3981,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                         <button onClick={() => { setBreedingRecordForLitter(record); setShowCreateLitterModal(true); }} className="flex-1 px-3 py-2 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 font-medium">Create Litter</button>
                                                                         <button onClick={() => { setBreedingRecordForLitter(record); setShowLinkLitterModal(true); }} className="flex-1 px-3 py-2 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 font-medium">Link Litter</button>
                                                                     </>
+                                                                        {record.litterId && (
+                                                                            <button onClick={() => refreshBreedingRecordLitter(record.litterId)} className="ml-auto px-3 py-2 text-sm bg-gray-100 text-gray-600 rounded hover:bg-gray-200 font-medium">↻ Sync</button>
+                                                                        )}
                                                                 )}
                                                             </div>
                                                         </div>
@@ -4691,6 +4717,17 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
         });
     }, [expandedBreedingRecords, animal?.breedingRecords, authToken, API_BASE_URL]);
 
+    // Sync a single linked litter on demand (↻ Sync button)
+    const refreshBreedingRecordLitter = React.useCallback(async (litterId) => {
+        if (!litterId || !authToken) return;
+        setBreedingRecordLitters(prev => { const n = {...prev}; delete n[litterId]; return n; });
+        try {
+            const res = await axios.get(`${API_BASE_URL}/litters`, { headers: { Authorization: `Bearer ${authToken}` } });
+            const litter = res.data.find(l => l.litter_id_public === litterId);
+            if (litter) setBreedingRecordLitters(prev => ({ ...prev, [litterId]: litter }));
+        } catch (e) {}
+    }, [authToken, API_BASE_URL]);
+
     // Fetch assigned enclosure info
     React.useEffect(() => {
         if (!animal?.enclosureId || !authToken) { setEnclosureInfo(null); return; }
@@ -5338,10 +5375,12 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                             const isDamOnly = animal.gender === 'Female' || (animal.gender === 'Unknown' && animal.breedingRole === 'dam');
                                             const isBoth = animal.gender === 'Intersex' || (animal.gender === 'Unknown' && animal.breedingRole === 'both');
                                             const isExpanded = expandedBreedingRecords[idx];
+                                            const linkedLitter = breedingRecordLitters?.[record.litterId];
+                                            const displayName = linkedLitter?.litterName ?? record.litterName;
                                             const countSummary = [
-                                                record.litterSizeBorn !== null && `${record.litterSizeBorn} born`,
-                                                record.stillbornCount && `${record.stillbornCount} stillborn`,
-                                                record.litterSizeWeaned !== null && `${record.litterSizeWeaned} weaned`
+                                                (linkedLitter?.litterSizeBorn ?? record.litterSizeBorn) !== null && `${linkedLitter?.litterSizeBorn ?? record.litterSizeBorn} born`,
+                                                (linkedLitter?.stillbornCount ?? record.stillbornCount) && `${linkedLitter?.stillbornCount ?? record.stillbornCount} stillborn`,
+                                                (linkedLitter?.litterSizeWeaned ?? record.litterSizeWeaned) !== null && `${linkedLitter?.litterSizeWeaned ?? record.litterSizeWeaned} weaned`
                                             ].filter(Boolean).join(' • ') || 'No counts';
                                             return (
                                                 <div key={idx} className={`bg-white rounded border transition-all ${isExpanded ? 'border-purple-300 shadow-md' : 'border-purple-100'}`}>
@@ -5351,9 +5390,9 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                     >
                                                         <div className="flex items-center gap-3 flex-1">
                                                             <span className={`text-lg transition-transform ${isExpanded ? 'rotate-90' : ''}`}>▶️</span>
-                                                            {record.litterName ? (
+                                                            {displayName ? (
                                                                 <>
-                                                                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-700 text-white flex-shrink-0">{record.litterName}</span>
+                                                                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-700 text-white flex-shrink-0">{displayName}</span>
                                                                     {record.litterId && <span className="text-xs font-mono text-gray-400 flex-shrink-0">{record.litterId}</span>}
                                                                 </>
                                                             ) : record.litterId ? (
@@ -5383,7 +5422,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                                     {record.litterId
                                                                         ? <div className="font-mono text-sm font-bold text-gray-700">{record.litterId}</div>
                                                                         : <div className="text-sm text-gray-400 italic">Not Linked</div>}
-                                                                    {record.litterName && <div className="text-sm font-semibold text-purple-700 mt-0.5">{record.litterName}</div>}
+                                                                    {displayName && <div className="text-sm font-semibold text-purple-700 mt-0.5">{displayName}</div>}
                                                                 </div>
                                                                 {/* Center: COI */}
                                                                 <div className="flex flex-col items-center px-2">
@@ -5435,9 +5474,9 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                             <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">
                                                                 <div className="grid grid-cols-2 divide-x divide-gray-200">
                                                                     <div className="grid grid-cols-3 pr-3">
-                                                                        <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Born</div><div className="text-lg font-bold text-gray-800">{record.litterSizeBorn ?? '—'}</div></div>
-                                                                        <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Stillborn</div><div className="text-lg font-bold text-gray-400">{record.stillbornCount ?? '—'}</div></div>
-                                                                        <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaned</div><div className="text-lg font-bold text-green-600">{record.litterSizeWeaned ?? '—'}</div></div>
+                                                                        <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Born</div><div className="text-lg font-bold text-gray-800">{linkedLitter?.litterSizeBorn ?? record.litterSizeBorn ?? '—'}</div></div>
+                                                                        <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Stillborn</div><div className="text-lg font-bold text-gray-400">{linkedLitter?.stillbornCount ?? record.stillbornCount ?? '—'}</div></div>
+                                                                        <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaned</div><div className="text-lg font-bold text-green-600">{linkedLitter?.litterSizeWeaned ?? record.litterSizeWeaned ?? '—'}</div></div>
                                                                     </div>
                                                                     <div className="grid grid-cols-3 pl-3">
                                                                         <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Males</div><div className="text-lg font-bold text-blue-500">{(record.maleCount ?? breedingRecordLitters?.[record.litterId]?.maleCount) ?? '—'}</div></div>
@@ -5455,6 +5494,9 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                                     <button onClick={() => { setBreedingRecordForLitter(record); setShowLinkLitterModal(true); }} className="flex-1 px-3 py-2 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 font-medium">Link Litter</button>
                                                                 </div>
                                                             )}
+                                                                    {record.litterId && (
+                                                                        <button onClick={() => refreshBreedingRecordLitter(record.litterId)} className="ml-auto px-3 py-2 text-sm bg-gray-100 text-gray-600 rounded hover:bg-gray-200 font-medium">↻ Sync</button>
+                                                                    )}
                                                         </div>
                                                     )}
                                                 </div>
