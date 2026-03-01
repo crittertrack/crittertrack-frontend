@@ -1,4 +1,4 @@
-// Force deployment trigger - emoji restore + breeding record M/F/U fields
-// Date: 2026-02-28
+// Force deployment trigger - litter offspring fixes + PayPal donation updates
+// Date: 2026-03-01
 // Purpose: Trigger Vercel redeployment
-export const DEPLOYMENT_TIMESTAMP = '2026-02-28T22:30:00Z';
+export const DEPLOYMENT_TIMESTAMP = '2026-03-01T12:00:00Z';
