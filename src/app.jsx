@@ -8264,10 +8264,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 const maleCount = linkedAnimals.filter(a => a.gender === 'Male').length;
                 const femaleCount = linkedAnimals.filter(a => a.gender === 'Female').length;
                 const unknownCount = linkedAnimals.filter(a => a.gender !== 'Male' && a.gender !== 'Female').length;
+                // Keep manually-entered litterSizeBorn if it's higher than linked count
+                const litterSizeBorn = Math.max(correctCount, litter.litterSizeBorn || 0);
 
                 const needsUpdate =
                     litter.numberBorn !== correctCount ||
-                    litter.litterSizeBorn !== correctCount ||
+                    (litter.litterSizeBorn || 0) !== litterSizeBorn ||
                     litter.maleCount !== maleCount ||
                     litter.femaleCount !== femaleCount ||
                     litter.unknownCount !== unknownCount;
@@ -8275,7 +8277,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 if (needsUpdate) {
                     await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
                         numberBorn: correctCount,
-                        litterSizeBorn: correctCount,
+                        litterSizeBorn,
                         maleCount,
                         femaleCount,
                         unknownCount
@@ -9397,7 +9399,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </div>
                                         <div className="text-sm">
                                             <span className="text-gray-500 text-xs uppercase tracking-wide font-semibold block">Offspring</span>
-                                            <span className="font-semibold text-gray-800">{litter.numberBorn ?? 0}</span>
+                                            <span className="font-semibold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
                                         </div>
                                         <div className="text-sm">
                                             <span className="text-gray-500 text-xs uppercase tracking-wide font-semibold block">COI</span>
