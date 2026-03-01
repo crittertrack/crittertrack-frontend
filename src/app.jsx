@@ -7981,9 +7981,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         calculatePredictedCOI();
     }, [formData.sireId_public, formData.damId_public, showAddForm, authToken, API_BASE_URL]);
 
-    // Fetch offspring via dedicated endpoint when a litter is expanded
-    // Also silently reconciles maleCount/femaleCount/unknownCount/litterSizeBorn
-    // if linked offspring exceed the stored counts.
+    // Fallback: fetch offspring for a specific litter if not yet loaded when expanded
+    // (normally fetchLitters pre-loads all offspring, this is just a safety net)
     useEffect(() => {
         if (!expandedLitter || !authToken) return;
         if (litterOffspringMap[expandedLitter] !== undefined) return; // already loaded
@@ -7992,49 +7991,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         axios.get(`${API_BASE_URL}/litters/${litter.litter_id_public}/offspring`, {
             headers: { Authorization: `Bearer ${authToken}` }
         }).then(res => {
-            const offspring = res.data || [];
-            setLitterOffspringMap(prev => ({ ...prev, [expandedLitter]: offspring }));
-
-            // Reconcile counts: linked offspring should never exceed stored counts
-            if (offspring.length === 0) return;
-            const linkedMales   = offspring.filter(a => a.gender === 'Male').length;
-            const linkedFemales = offspring.filter(a => a.gender === 'Female').length;
-            const linkedUnknown = offspring.filter(a => a.gender !== 'Male' && a.gender !== 'Female').length;
-            const linkedTotal   = offspring.length;
-
-            const storedMales   = litter.maleCount   ?? 0;
-            const storedFemales = litter.femaleCount  ?? 0;
-            const storedUnknown = litter.unknownCount ?? 0;
-            const storedBorn    = litter.litterSizeBorn ?? litter.numberBorn ?? 0;
-
-            const newMales   = Math.max(storedMales,   linkedMales);
-            const newFemales = Math.max(storedFemales, linkedFemales);
-            const newUnknown = Math.max(storedUnknown, linkedUnknown);
-            const newBorn    = Math.max(storedBorn,    linkedTotal);
-
-            const needsPatch =
-                newMales   !== storedMales   ||
-                newFemales !== storedFemales ||
-                newUnknown !== storedUnknown ||
-                newBorn    !== storedBorn;
-
-            if (needsPatch) {
-                const patch = {
-                    maleCount:      newMales   || null,
-                    femaleCount:    newFemales || null,
-                    unknownCount:   newUnknown || null,
-                    litterSizeBorn: newBorn    || null,
-                    numberBorn:     newBorn    || null,
-                };
-                // Update local state immediately so UI reflects correct numbers
-                setLitters(prev => prev.map(l =>
-                    l._id === expandedLitter ? { ...l, ...patch } : l
-                ));
-                // Silently persist to DB
-                axios.put(`${API_BASE_URL}/litters/${expandedLitter}`, patch, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                }).catch(() => {});
-            }
+            setLitterOffspringMap(prev => ({ ...prev, [expandedLitter]: res.data || [] }));
         }).catch(() => {
             setLitterOffspringMap(prev => ({ ...prev, [expandedLitter]: [] }));
         });
@@ -8127,6 +8084,38 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     }
                 });
             }
+
+            // Fetch offspring for all litters in parallel right away (no need to wait for expand)
+            littersData.forEach(litter => {
+                axios.get(`${API_BASE_URL}/litters/${litter.litter_id_public}/offspring`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                }).then(res => {
+                    const offspring = res.data || [];
+                    setLitterOffspringMap(prev => ({ ...prev, [litter._id]: offspring }));
+
+                    // Silently reconcile counts if linked offspring exceed stored values
+                    if (offspring.length === 0) return;
+                    const linkedMales   = offspring.filter(a => a.gender === 'Male').length;
+                    const linkedFemales = offspring.filter(a => a.gender === 'Female').length;
+                    const linkedUnknown = offspring.filter(a => a.gender !== 'Male' && a.gender !== 'Female').length;
+                    const linkedTotal   = offspring.length;
+                    const storedMales   = litter.maleCount   ?? 0;
+                    const storedFemales = litter.femaleCount  ?? 0;
+                    const storedUnknown = litter.unknownCount ?? 0;
+                    const storedBorn    = litter.litterSizeBorn ?? litter.numberBorn ?? 0;
+                    const newMales   = Math.max(storedMales,   linkedMales);
+                    const newFemales = Math.max(storedFemales, linkedFemales);
+                    const newUnknown = Math.max(storedUnknown, linkedUnknown);
+                    const newBorn    = Math.max(storedBorn,    linkedTotal);
+                    if (newMales !== storedMales || newFemales !== storedFemales || newUnknown !== storedUnknown || newBorn !== storedBorn) {
+                        const patch = { maleCount: newMales || null, femaleCount: newFemales || null, unknownCount: newUnknown || null, litterSizeBorn: newBorn || null, numberBorn: newBorn || null };
+                        setLitters(prev => prev.map(l => l._id === litter._id ? { ...l, ...patch } : l));
+                        axios.put(`${API_BASE_URL}/litters/${litter._id}`, patch, { headers: { Authorization: `Bearer ${authToken}` } }).catch(() => {});
+                    }
+                }).catch(() => {
+                    setLitterOffspringMap(prev => ({ ...prev, [litter._id]: [] }));
+                });
+            });
         } catch (error) {
             console.error('Error fetching litters:', error);
             setLitters([]);
