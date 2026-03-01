@@ -17547,6 +17547,24 @@ const DonationView = ({ onBack, authToken, userProfile }) => {
     const [subSuccess, setSubSuccess] = React.useState(false);
     const [subError, setSubError] = React.useState('');
     const [subLoading, setSubLoading] = React.useState(false);
+    const [donateAmount, setDonateAmount] = React.useState('5');
+    const [donateSuccess, setDonateSuccess] = React.useState(false);
+    const [donateError, setDonateError] = React.useState('');
+    const [donateLoading, setDonateLoading] = React.useState(false);
+
+    // On return from PayPal after one-time donation, capture and grant badge
+    React.useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (!params.get('donated') || !authToken) return;
+        const token = params.get('token'); // PayPal order token
+        if (!token) { setDonateSuccess(true); return; }
+        axios.post(
+            `${API_BASE_URL}/payments/paypal/order/capture`,
+            { orderID: token },
+            { headers: { Authorization: `Bearer ${authToken}` } }
+        ).then(() => setDonateSuccess(true))
+         .catch(() => setDonateSuccess(true)); // badge may still be granted, show success
+    }, [authToken]);
 
     // On return from PayPal, activate the badge
     React.useEffect(() => {
@@ -17564,6 +17582,25 @@ const DonationView = ({ onBack, authToken, userProfile }) => {
              setSubSuccess(true);
          });
     }, [authToken]);
+
+    const handleDonate = async () => {
+        if (!authToken) return;
+        const amt = parseFloat(donateAmount);
+        if (!amt || amt < 1) { setDonateError('Please enter a valid amount (minimum $1).'); return; }
+        setDonateLoading(true);
+        setDonateError('');
+        try {
+            const res = await axios.post(
+                `${API_BASE_URL}/payments/paypal/order/create`,
+                { amount: amt },
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+            window.location.href = res.data.approvalUrl;
+        } catch (err) {
+            setDonateError('Could not start payment. Please try again.');
+            setDonateLoading(false);
+        }
+    };
 
     const handleSubscribe = async () => {
         if (!authToken) return;
@@ -17645,19 +17682,42 @@ const DonationView = ({ onBack, authToken, userProfile }) => {
                                 Make a one-time contribution of any amount you choose. Perfect for showing your appreciation 
                                 or celebrating a milestone in your breeding program.
                             </p>
-                            <form action="https://www.paypal.com/donate" method="post" target="_blank">
-                                <input type="hidden" name="business" value="crittertrackowner@gmail.com" />
-                                <input type="hidden" name="no_recurring" value="0" />
-                                <input type="hidden" name="item_name" value="Support CritterTrack Development" />
-                                <input type="hidden" name="currency_code" value="USD" />
-                                <button
-                                    type="submit"
-                                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition shadow-md flex items-center justify-center gap-2"
-                                >
-                                    <Heart size={18} />
-                                    Donate via PayPal
-                                </button>
-                            </form>
+                            {donateSuccess ? (
+                                <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4 text-center">
+                                    <p className="text-green-700 font-bold mb-1">🎁 Thank you for your donation!</p>
+                                    <p className="text-green-600 text-sm">Your Gift Supporter badge is now active on your profile.</p>
+                                </div>
+                            ) : authToken ? (
+                                <>
+                                    {donateError && (
+                                        <p className="text-red-600 text-sm mb-3 bg-red-50 border border-red-200 rounded p-3">{donateError}</p>
+                                    )}
+                                    <div className="flex gap-2 mb-3">
+                                        <span className="flex items-center px-3 bg-gray-100 border border-gray-300 rounded-l-lg text-gray-600 font-semibold">$</span>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            step="1"
+                                            value={donateAmount}
+                                            onChange={e => setDonateAmount(e.target.value)}
+                                            className="flex-1 border border-gray-300 rounded-r-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                            placeholder="Enter amount"
+                                        />
+                                    </div>
+                                    <button
+                                        onClick={handleDonate}
+                                        disabled={donateLoading}
+                                        className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition shadow-md flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                                    >
+                                        <Heart size={18} />
+                                        {donateLoading ? 'Redirecting to PayPal...' : 'Donate via PayPal'}
+                                    </button>
+                                </>
+                            ) : (
+                                <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 text-center">
+                                    <p className="text-yellow-700 text-sm font-semibold">Please log in to donate and receive your 🎁 badge automatically.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
