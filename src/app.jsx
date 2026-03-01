@@ -3843,7 +3843,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                             const isBoth = animal.gender === 'Intersex' || (animal.gender === 'Unknown' && animal.breedingRole === 'both');
                                             const isExpanded = expandedBreedingRecords[idx];
                                             const linkedLitter = breedingRecordLitters?.[record.litterId];
-                                            const displayName = linkedLitter?.litterName ?? record.litterName;
+                                            const displayName = linkedLitter?.breedingPairCodeName ?? record.litterName;
                                             const countSummary = [
                                                 (linkedLitter?.litterSizeBorn ?? record.litterSizeBorn) !== null && `${linkedLitter?.litterSizeBorn ?? record.litterSizeBorn} born`,
                                                 (linkedLitter?.stillbornCount ?? record.stillbornCount) && `${linkedLitter?.stillbornCount ?? record.stillbornCount} stillborn`,
@@ -3857,13 +3857,12 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                     >
                                                         <div className="flex items-center gap-3 flex-1">
                                                             <span className={`text-lg transition-transform ${isExpanded ? 'rotate-90' : ''}`}>▶️</span>
-                                                            {displayName ? (
-                                                                <>
-                                                                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-700 text-white flex-shrink-0">{displayName}</span>
-                                                                    {record.litterId && <span className="text-xs font-mono text-gray-400 flex-shrink-0">{record.litterId}</span>}
-                                                                </>
-                                                            ) : record.litterId ? (
-                                                                <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-purple-300 text-purple-800">{record.litterId}</span>
+                                                            {record.litterId || displayName ? (
+                                                                <div className="flex items-center gap-1.5 flex-shrink-0">
+                                                                    {displayName && <span className="text-xs font-bold text-gray-800 flex-shrink-0">{displayName}</span>}
+                                                                    {displayName && record.litterId && <span className="text-gray-300 text-xs">·</span>}
+                                                                    {record.litterId && <span className="font-mono px-1.5 py-0.5 rounded text-xs font-semibold bg-purple-100 text-purple-700 flex-shrink-0">{record.litterId}</span>}
+                                                                </div>
                                                             ) : null}
                                                             <div className="text-sm text-gray-700 flex items-center gap-2 flex-wrap">
                                                                 {record.birthEventDate && <><span>{formatDate(record.birthEventDate)}</span><span className="text-gray-400">&bull;</span></>}
@@ -3884,12 +3883,19 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                             {/* -- 1. CTL+Name | COI | Mate ----------------------------- */}
                                                             <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
                                                                 {/* Left: CTL ID + Litter Name */}
-                                                                <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm h-full">
-                                                                    <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">CTL / Litter</div>
-                                                                    {record.litterId
-                                                                        ? <div className="font-mono text-sm font-bold text-gray-700">{record.litterId}</div>
-                                                                        : <div className="text-sm text-gray-400 italic">Not Linked</div>}
-                                                                    {displayName && <div className="text-sm font-semibold text-purple-700 mt-0.5">{displayName}</div>}
+                                                                <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm h-full grid grid-cols-2 divide-x divide-gray-200 gap-3">
+                                                                    <div>
+                                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">CTL ID</div>
+                                                                        {record.litterId
+                                                                            ? <div className="font-mono text-sm font-bold text-purple-700">{record.litterId}</div>
+                                                                            : <div className="text-sm text-gray-400 italic">Not Linked</div>}
+                                                                    </div>
+                                                                    <div className="pl-3">
+                                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Litter Name</div>
+                                                                        {displayName
+                                                                            ? <div className="text-sm font-bold text-gray-800">{displayName}</div>
+                                                                            : <div className="text-sm text-gray-400 italic">—</div>}
+                                                                    </div>
                                                                 </div>
                                                                 {/* Center: COI */}
                                                                 <div className="flex flex-col items-center px-2">
@@ -5414,7 +5420,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                             const isBoth = animal.gender === 'Intersex' || (animal.gender === 'Unknown' && animal.breedingRole === 'both');
                                             const isExpanded = expandedBreedingRecords[idx];
                                             const linkedLitter = breedingRecordLitters?.[record.litterId];
-                                            const displayName = linkedLitter?.litterName ?? record.litterName;
+                                            const displayName = linkedLitter?.breedingPairCodeName ?? record.litterName;
                                             const countSummary = [
                                                 (linkedLitter?.litterSizeBorn ?? record.litterSizeBorn) !== null && `${linkedLitter?.litterSizeBorn ?? record.litterSizeBorn} born`,
                                                 (linkedLitter?.stillbornCount ?? record.stillbornCount) && `${linkedLitter?.stillbornCount ?? record.stillbornCount} stillborn`,
@@ -5428,13 +5434,12 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                     >
                                                         <div className="flex items-center gap-3 flex-1">
                                                             <span className={`text-lg transition-transform ${isExpanded ? 'rotate-90' : ''}`}>▶️</span>
-                                                            {displayName ? (
-                                                                <>
-                                                                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-700 text-white flex-shrink-0">{displayName}</span>
-                                                                    {record.litterId && <span className="text-xs font-mono text-gray-400 flex-shrink-0">{record.litterId}</span>}
-                                                                </>
-                                                            ) : record.litterId ? (
-                                                                <span className="font-mono px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 bg-purple-300 text-purple-800">{record.litterId}</span>
+                                                            {record.litterId || displayName ? (
+                                                                <div className="flex items-center gap-1.5 flex-shrink-0">
+                                                                    {displayName && <span className="text-xs font-bold text-gray-800 flex-shrink-0">{displayName}</span>}
+                                                                    {displayName && record.litterId && <span className="text-gray-300 text-xs">·</span>}
+                                                                    {record.litterId && <span className="font-mono px-1.5 py-0.5 rounded text-xs font-semibold bg-purple-100 text-purple-700 flex-shrink-0">{record.litterId}</span>}
+                                                                </div>
                                                             ) : null}
                                                             <div className="text-sm text-gray-700 flex items-center gap-2 flex-wrap">
                                                                 {record.birthEventDate && <><span>{formatDate(record.birthEventDate)}</span><span className="text-gray-400">&bull;</span></>}
@@ -5455,12 +5460,19 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                             {/* -- 1. CTL+Name | COI | Mate ----------------------------- */}
                                                             <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
                                                                 {/* Left: CTL ID + Litter Name */}
-                                                                <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm h-full">
-                                                                    <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">CTL / Litter</div>
-                                                                    {record.litterId
-                                                                        ? <div className="font-mono text-sm font-bold text-gray-700">{record.litterId}</div>
-                                                                        : <div className="text-sm text-gray-400 italic">Not Linked</div>}
-                                                                    {displayName && <div className="text-sm font-semibold text-purple-700 mt-0.5">{displayName}</div>}
+                                                                <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm h-full grid grid-cols-2 divide-x divide-gray-200 gap-3">
+                                                                    <div>
+                                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">CTL ID</div>
+                                                                        {record.litterId
+                                                                            ? <div className="font-mono text-sm font-bold text-purple-700">{record.litterId}</div>
+                                                                            : <div className="text-sm text-gray-400 italic">Not Linked</div>}
+                                                                    </div>
+                                                                    <div className="pl-3">
+                                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Litter Name</div>
+                                                                        {displayName
+                                                                            ? <div className="text-sm font-bold text-gray-800">{displayName}</div>
+                                                                            : <div className="text-sm text-gray-400 italic">—</div>}
+                                                                    </div>
                                                                 </div>
                                                                 {/* Center: COI */}
                                                                 <div className="flex flex-col items-center px-2">
