@@ -1,4 +1,4 @@
-// CritterTrack Frontend Application
+﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -9651,41 +9651,57 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     </div>
                                     
                                     {/* Desktop layout: grid */}
-                                    <div className="hidden sm:grid flex-1 grid-cols-6 gap-4 items-center min-w-0">
+                                    <div className="hidden sm:grid flex-1 grid-cols-6 gap-3 items-center min-w-0">
                                         {/* Col 1: Litter name */}
                                         <div className="min-w-0">
-                                            <p className="font-bold text-gray-800 text-base truncate">{litter.breedingPairCodeName || 'Unnamed Litter'}</p>
+                                            <p className="font-bold text-gray-800 text-sm truncate">{litter.breedingPairCodeName || <span className="text-gray-400 font-normal text-xs">Unnamed</span>}</p>
                                         </div>
-                                        {/* Col 2: CTL + date */}
+                                        {/* Col 2: CTL + date together */}
                                         <div className="min-w-0">
-                                            {litter.litter_id_public && <span className="text-xs font-mono bg-gray-100 px-2 py-0.5 rounded block mb-0.5 w-fit">{litter.litter_id_public}</span>}
-                                            <span className="text-xs text-gray-500">{formatDate(litter.birthDate)}</span>
+                                            {litter.litter_id_public
+                                                ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block mb-0.5 w-fit">{litter.litter_id_public}</span>
+                                                : <span className="text-xs text-gray-400">—</span>}
+                                            <span className="text-xs text-gray-500">{formatDate(litter.birthDate) || '—'}</span>
                                         </div>
                                         {/* Col 3: Sire */}
-                                        <div className="text-sm truncate min-w-0">
-                                            <span className="text-gray-500 text-xs uppercase tracking-wide font-semibold block">Sire</span>
-                                            <span className="font-semibold text-gray-800 truncate block">{sire ? `${sire.prefix ? `${sire.prefix} ` : ''}${sire.name}${sire.suffix ? ` ${sire.suffix}` : ''}` : (litter.sireId_public || '—')}</span>
+                                        <div className="min-w-0">
+                                            <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Sire</span>
+                                            <span className="text-sm font-semibold text-gray-800 truncate block">{sire ? [sire.prefix, sire.name, sire.suffix].filter(Boolean).join(' ') : (litter.sireId_public || '—')}</span>
                                         </div>
-                                        <div className="text-sm truncate min-w-0">
-                                            <span className="text-gray-500 text-xs uppercase tracking-wide font-semibold block">Dam</span>
-                                            <span className="font-semibold text-gray-800 truncate block">{dam ? `${dam.prefix ? `${dam.prefix} ` : ''}${dam.name}${dam.suffix ? ` ${dam.suffix}` : ''}` : (litter.damId_public || '—')}</span>
+                                        {/* Col 4: Dam */}
+                                        <div className="min-w-0">
+                                            <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Dam</span>
+                                            <span className="text-sm font-semibold text-gray-800 truncate block">{dam ? [dam.prefix, dam.name, dam.suffix].filter(Boolean).join(' ') : (litter.damId_public || '—')}</span>
                                         </div>
-                                        <div className="text-sm">
-                                            <span className="text-gray-500 text-xs uppercase tracking-wide font-semibold block">Offspring</span>
-                                            <span className="font-semibold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
-                                        </div>
-                                        <div className="text-sm">
-                                            <span className="text-gray-500 text-xs uppercase tracking-wide font-semibold block">COI</span>
+                                        {/* Col 5: COI */}
+                                        <div>
+                                            <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">COI</span>
                                             {coiCalculating.has(litter._id)
                                                 ? <span className="inline-block w-10 h-3 bg-gray-200 rounded animate-pulse mt-0.5" />
-                                                : <span className="font-semibold text-gray-800">
-                                                    {litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : 'N/A'}
+                                                : <span className="text-sm font-semibold text-gray-800">
+                                                    {litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : '—'}
                                                   </span>}
                                         </div>
+                                        {/* Col 6: Born with M/F/U */}
+                                        <div>
+                                            <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Born</span>
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? '—'}</span>
+                                                {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
+                                                    <span className="text-xs ml-1">
+                                                        <span className="text-blue-500 font-semibold">{litter.maleCount ?? 0}M</span>
+                                                        <span className="text-gray-400 mx-0.5">/</span>
+                                                        <span className="text-pink-500 font-semibold">{litter.femaleCount ?? 0}F</span>
+                                                        <span className="text-gray-400 mx-0.5">/</span>
+                                                        <span className="text-purple-500 font-semibold">{litter.unknownCount ?? 0}U</span>
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
-                                    <ChevronLeft 
-                                        size={20} 
-                                        className={`text-gray-400 transition-transform flex-shrink-0 ml-2 ${isExpanded ? '-rotate-90' : 'rotate-180'}`}
+                                    <ChevronDown
+                                        size={18}
+                                        className={`text-gray-400 transition-transform flex-shrink-0 ml-2 ${isExpanded ? 'rotate-180' : ''}`}
                                     />
                                 </div>
 
