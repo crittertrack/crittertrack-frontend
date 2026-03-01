@@ -9335,7 +9335,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     </div>
                                     
                                     {/* Desktop layout: grid */}
-                                    <div className="hidden sm:grid flex-1 grid-cols-[2fr_auto_2fr_2fr_1fr_1fr] gap-4 items-center min-w-0">
+                                    <div className="hidden sm:grid flex-1 grid-cols-[auto_auto_2fr_2fr_1fr_1fr] gap-4 items-center min-w-0">
                                         {/* Litter name */}
                                         <div className="min-w-0">
                                             <p className="font-bold text-gray-800 text-base truncate">
