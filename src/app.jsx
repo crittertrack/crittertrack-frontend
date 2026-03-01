@@ -9639,7 +9639,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     {!litter.breedingPairCodeName && !litter.litter_id_public && <span>Unnamed Litter</span>}
                                                 </p>
                                             </div>
-                                            <span className="text-xs font-semibold text-gray-700 ml-2">{litter.numberBorn} pups</span>
+                                            <span className="text-xs font-semibold text-gray-700 ml-2">{litter.offspringIds_public?.length ?? litter.numberBorn ?? 0} pups</span>
                                         </div>
                                         <div className="flex gap-3 text-xs text-gray-600">
                                             <span><span className="font-medium">S:</span> {sire ? `${sire.prefix ? `${sire.prefix} ` : ''}${sire.name}${sire.suffix ? ` ${sire.suffix}` : ''}` : litter.sireId_public}</span>
@@ -9680,7 +9680,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </div>
                                         <div className="text-sm">
                                             <span className="text-gray-500 text-xs uppercase tracking-wide font-semibold block">Offspring</span>
-                                            <span className="font-semibold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
+                                            <span className="font-semibold text-gray-800">{litter.offspringIds_public?.length ?? litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
                                         </div>
                                         <div className="text-sm">
                                             <span className="text-gray-500 text-xs uppercase tracking-wide font-semibold block">COI</span>
@@ -9908,7 +9908,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         {offspringList.length > 0 && (
                                             <div className="mb-4">
                                                 <div className="flex items-center justify-between mb-2">
-                                                    <h4 className="text-sm font-bold text-gray-700">Offspring ({offspringList.length})</h4>
+                                                    <h4 className="text-sm font-bold text-gray-700">Offspring ({litter.offspringIds_public?.length ?? offspringList.length})</h4>
                                                     <div className="flex items-center gap-2">
                                                         {bulkDeleteMode[litter._id] && (
                                                             <>
