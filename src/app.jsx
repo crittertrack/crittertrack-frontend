@@ -17543,61 +17543,44 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     );
 };
 
-const PAYPAL_CLIENT_ID_PUBLIC = process.env.REACT_APP_PAYPAL_CLIENT_ID || 'ATxzfkbpEgX_pHrgghslrh4vNfNYAkZZoCBkogxjwnhz8qjw29ewUmWYgpHOoEKiMdoT1_fKI7F4tCKZ';
-const PAYPAL_PLAN_ID = 'P-14K35458G1459960TNGR3DAA';
-
 const DonationView = ({ onBack, authToken, userProfile }) => {
-    const [paypalLoaded, setPaypalLoaded] = React.useState(false);
     const [subSuccess, setSubSuccess] = React.useState(false);
     const [subError, setSubError] = React.useState('');
-    const paypalButtonRef = React.useRef(null);
+    const [subLoading, setSubLoading] = React.useState(false);
 
-    // Load PayPal JS SDK (only for logged-in users)
+    // On return from PayPal, activate the badge
     React.useEffect(() => {
-        if (!authToken) return;
-        const existing = document.getElementById('paypal-sdk-script');
-        if (existing) { setPaypalLoaded(true); return; }
-        const script = document.createElement('script');
-        script.id = 'paypal-sdk-script';
-        script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID_PUBLIC}&vault=true&intent=subscription`;
-        script.onload = () => setPaypalLoaded(true);
-        script.onerror = () => setSubError('Failed to load PayPal. Please refresh and try again.');
-        document.head.appendChild(script);
+        const params = new URLSearchParams(window.location.search);
+        if (!params.get('subscribed') || !authToken) return;
+        const subscriptionID = params.get('subscription_id') || params.get('ba_token');
+        if (!subscriptionID) { setSubSuccess(true); return; } // fallback — webhook will handle it
+        axios.post(
+            `${API_BASE_URL}/payments/paypal/subscription/activate`,
+            { subscriptionID },
+            { headers: { Authorization: `Bearer ${authToken}` } }
+        ).then(() => setSubSuccess(true))
+         .catch(() => {
+             // Webhook will still fire, so just show success
+             setSubSuccess(true);
+         });
     }, [authToken]);
 
-    // Render PayPal button once SDK is ready
-    React.useEffect(() => {
-        if (!paypalLoaded || !paypalButtonRef.current || subSuccess) return;
-        if (!window.paypal) return;
-        paypalButtonRef.current.innerHTML = '';
-        window.paypal.Buttons({
-            style: { shape: 'rect', color: 'gold', layout: 'vertical', label: 'subscribe' },
-            createSubscription: (data, actions) => {
-                return actions.subscription.create({
-                    plan_id: PAYPAL_PLAN_ID,
-                    custom_id: userProfile?.id_public || ''
-                });
-            },
-            onApprove: async (data) => {
-                try {
-                    await axios.post(
-                        `${API_BASE_URL}/payments/paypal/subscription/activate`,
-                        { subscriptionID: data.subscriptionID },
-                        { headers: { Authorization: `Bearer ${authToken}` } }
-                    );
-                    setSubSuccess(true);
-                    setSubError('');
-                } catch (err) {
-                    setSubError('Subscription approved but badge activation failed. Please contact support.');
-                }
-            },
-            onError: (err) => {
-                console.error('[PayPal] Button error:', err);
-                setSubError('Something went wrong with PayPal. Please try again.');
-            },
-            onCancel: () => {}
-        }).render(paypalButtonRef.current);
-    }, [paypalLoaded, subSuccess]);
+    const handleSubscribe = async () => {
+        if (!authToken) return;
+        setSubLoading(true);
+        setSubError('');
+        try {
+            const res = await axios.post(
+                `${API_BASE_URL}/payments/paypal/subscription/create`,
+                {},
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+            window.location.href = res.data.approvalUrl;
+        } catch (err) {
+            setSubError('Could not start subscription. Please try again.');
+            setSubLoading(false);
+        }
+    };
 
     return (
         <div className="w-full max-w-2xl bg-white p-8 rounded-xl shadow-lg">
@@ -17701,9 +17684,14 @@ const DonationView = ({ onBack, authToken, userProfile }) => {
                                     {subError && (
                                         <p className="text-red-600 text-sm mb-3 bg-red-50 border border-red-200 rounded p-3">{subError}</p>
                                     )}
-                                    <div ref={paypalButtonRef} className="min-h-[50px]">
-                                        {!paypalLoaded && <p className="text-sm text-gray-400 text-center py-3">Loading payment options...</p>}
-                                    </div>
+                                    <button
+                                        onClick={handleSubscribe}
+                                        disabled={subLoading}
+                                        className="w-full bg-gradient-to-r from-accent to-accent/80 hover:from-accent-dark hover:to-accent text-white font-semibold py-3 px-6 rounded-lg transition shadow-md flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                                    >
+                                        <Heart size={18} className="fill-current" />
+                                        {subLoading ? 'Redirecting to PayPal...' : 'Support for $5/month'}
+                                    </button>
                                 </>
                             ) : (
                                 <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 text-center">
