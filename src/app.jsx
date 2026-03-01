@@ -9335,16 +9335,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     </div>
                                     
                                     {/* Desktop layout: grid */}
-                                    <div className="hidden sm:grid flex-1 grid-cols-[2fr_2fr_2fr_1fr_1fr] gap-4 items-center min-w-0">
+                                    <div className="hidden sm:grid flex-1 grid-cols-[auto_2fr_2fr_2fr_1fr_1fr] gap-4 items-center min-w-0">
+                                        {/* CTL + date */}
+                                        <div className="flex-shrink-0">
+                                            {litter.litter_id_public && <span className="text-xs font-mono bg-gray-100 px-2 py-0.5 rounded block mb-0.5">{litter.litter_id_public}</span>}
+                                            <p className="text-xs text-gray-500">{formatDate(litter.birthDate)}</p>
+                                        </div>
+                                        {/* Litter name */}
                                         <div className="min-w-0">
-                                            <div className="flex items-center gap-2 min-w-0">
-                                                {litter.litter_id_public && <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded flex-shrink-0">{litter.litter_id_public}</span>}
-                                                <p className="font-bold text-gray-800 text-base truncate">
-                                                    {litter.breedingPairCodeName || (litter.litter_id_public ? '' : 'Unnamed Litter')}
-                                                </p>
-                                            </div>
-                                            <p className="text-xs text-gray-500">
-                                                {formatDate(litter.birthDate)}
+                                            <p className="font-bold text-gray-800 text-base truncate">
+                                                {litter.breedingPairCodeName || 'Unnamed Litter'}
                                             </p>
                                         </div>
                                         <div className="text-sm truncate min-w-0">
