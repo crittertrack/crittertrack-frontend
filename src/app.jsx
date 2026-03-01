@@ -8149,10 +8149,23 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const handleAddToLitter = async (animalId) => {
         try {
             const updatedOffspringIds = [...(availableToLink.litter.offspringIds_public || []), animalId];
+
+            // Tally genders from all linked offspring
+            const addedAnimal = availableToLink.animals.find(a => a.id_public === animalId);
+            const existingOffspring = myAnimals.filter(a => (availableToLink.litter.offspringIds_public || []).includes(a.id_public));
+            const allOffspring = [...existingOffspring, ...(addedAnimal ? [addedAnimal] : [])];
+            const newMaleCount = allOffspring.filter(a => a.gender === 'Male').length;
+            const newFemaleCount = allOffspring.filter(a => a.gender === 'Female').length;
+            const newUnknownCount = allOffspring.filter(a => a.gender !== 'Male' && a.gender !== 'Female').length;
+            const litter = availableToLink.litter;
+            const litterCountUpdates = { numberBorn: updatedOffspringIds.length, litterSizeBorn: updatedOffspringIds.length };
+            if (newMaleCount > (litter.maleCount || 0)) litterCountUpdates.maleCount = newMaleCount;
+            if (newFemaleCount > (litter.femaleCount || 0)) litterCountUpdates.femaleCount = newFemaleCount;
+            if (newUnknownCount > (litter.unknownCount || 0)) litterCountUpdates.unknownCount = newUnknownCount;
             
             await axios.put(`${API_BASE_URL}/litters/${availableToLink.litter._id}`, {
                 offspringIds_public: updatedOffspringIds,
-                numberBorn: updatedOffspringIds.length
+                ...litterCountUpdates
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
@@ -8180,10 +8193,22 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             // Get all animal IDs to add
             const animalIdsToAdd = availableToLink.animals.map(a => a.id_public);
             const updatedOffspringIds = [...(availableToLink.litter.offspringIds_public || []), ...animalIdsToAdd];
+
+            // Tally genders from all linked offspring
+            const existingOffspring = myAnimals.filter(a => (availableToLink.litter.offspringIds_public || []).includes(a.id_public));
+            const allOffspring = [...existingOffspring, ...availableToLink.animals];
+            const newMaleCount = allOffspring.filter(a => a.gender === 'Male').length;
+            const newFemaleCount = allOffspring.filter(a => a.gender === 'Female').length;
+            const newUnknownCount = allOffspring.filter(a => a.gender !== 'Male' && a.gender !== 'Female').length;
+            const litter = availableToLink.litter;
+            const litterCountUpdates = { numberBorn: updatedOffspringIds.length, litterSizeBorn: updatedOffspringIds.length };
+            if (newMaleCount > (litter.maleCount || 0)) litterCountUpdates.maleCount = newMaleCount;
+            if (newFemaleCount > (litter.femaleCount || 0)) litterCountUpdates.femaleCount = newFemaleCount;
+            if (newUnknownCount > (litter.unknownCount || 0)) litterCountUpdates.unknownCount = newUnknownCount;
             
             await axios.put(`${API_BASE_URL}/litters/${availableToLink.litter._id}`, {
                 offspringIds_public: updatedOffspringIds,
-                numberBorn: updatedOffspringIds.length
+                ...litterCountUpdates
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
