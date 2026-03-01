@@ -8248,7 +8248,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     };
 
     const handleRecalculateOffspringCounts = async () => {
-        if (!window.confirm('This will recalculate offspring counts for all litters based on linked animals. Continue?')) {
+        if (!window.confirm('This will recalculate offspring counts and gender tallies for all litters based on linked animals. Continue?')) {
             return;
         }
 
@@ -8257,12 +8257,28 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             let updatedCount = 0;
 
             for (const litter of litters) {
-                const correctCount = litter.offspringIds_public?.length || 0;
-                
-                // Only update if count is different
-                if (litter.numberBorn !== correctCount) {
+                const linkedIds = litter.offspringIds_public || [];
+                const linkedAnimals = myAnimals.filter(a => linkedIds.includes(a.id_public));
+
+                const correctCount = linkedIds.length;
+                const maleCount = linkedAnimals.filter(a => a.gender === 'Male').length;
+                const femaleCount = linkedAnimals.filter(a => a.gender === 'Female').length;
+                const unknownCount = linkedAnimals.filter(a => a.gender !== 'Male' && a.gender !== 'Female').length;
+
+                const needsUpdate =
+                    litter.numberBorn !== correctCount ||
+                    litter.litterSizeBorn !== correctCount ||
+                    litter.maleCount !== maleCount ||
+                    litter.femaleCount !== femaleCount ||
+                    litter.unknownCount !== unknownCount;
+
+                if (needsUpdate) {
                     await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
-                        numberBorn: correctCount
+                        numberBorn: correctCount,
+                        litterSizeBorn: correctCount,
+                        maleCount,
+                        femaleCount,
+                        unknownCount
                     }, {
                         headers: { Authorization: `Bearer ${authToken}` }
                     });
@@ -8270,7 +8286,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 }
             }
 
-            showModalMessage('Success', `Recalculated offspring counts for ${updatedCount} litter(s)!`);
+            showModalMessage('Success', `Recalculated counts for ${updatedCount} litter(s)!`);
             fetchLitters();
         } catch (error) {
             console.error('Error recalculating offspring counts:', error);
