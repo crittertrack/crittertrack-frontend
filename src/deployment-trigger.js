@@ -1,4 +1,4 @@
-// Force deployment trigger - litter offspring fixes + PayPal donation updates
+// Force deployment trigger - emoji/character fixes + admin message alerts + carrier traits
 // Date: 2026-03-01
-// Purpose: Trigger Vercel redeployment
-export const DEPLOYMENT_TIMESTAMP = '2026-03-01T12:00:00Z';
+// Purpose: Force cache refresh for all users
+export const DEPLOYMENT_TIMESTAMP = '2026-03-01T22:00:00Z';
