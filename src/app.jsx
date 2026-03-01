@@ -9425,8 +9425,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                         {coiCalculating.has(litter._id)
                                                             ? <div className="w-14 h-5 bg-gray-200 rounded animate-pulse" />
                                                             : litter.inbreedingCoefficient != null
-                                                                ? <div className="text-base font-extrabold text-orange-500">{litter.inbreedingCoefficient.toFixed(2)}%</div>
-                                                                : <div className="text-base font-bold text-gray-300">—</div>}
+                                                                ? <div className="text-base font-medium text-gray-800">{litter.inbreedingCoefficient.toFixed(2)}%</div>
+                                                                : <div className="text-base font-medium text-gray-300">—</div>}
                                                     </div>
                                                     {/* Dam */}
                                                     {dam ? (
@@ -9506,7 +9506,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 <div className="flex gap-4 flex-1">
                                                     <div>
                                                         <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Born</div>
-                                                        <div className="text-xl font-bold text-blue-600">{litter.litterSizeBorn ?? litter.numberBorn ?? '—'}</div>
+                                                        <div className="text-xl font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? '—'}</div>
                                                     </div>
                                                     <div>
                                                         <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Stillborn</div>
@@ -9535,7 +9535,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                         {litter.unknownCount != null && litter.unknownCount > 0 && (
                                                             <div>
                                                                 <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Unknown</div>
-                                                                <div className="text-xl font-bold text-gray-500">{litter.unknownCount}</div>
+                                                                <div className="text-xl font-bold text-purple-500">{litter.unknownCount}</div>
                                                             </div>
                                                         )}
                                                     </div>
