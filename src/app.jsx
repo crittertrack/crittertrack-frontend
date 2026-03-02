@@ -3842,15 +3842,19 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                     <div className="text-xs text-gray-600 flex gap-2 flex-wrap items-center">
                                                                         {litter.birthDate && <span>{formatDate(litter.birthDate)}</span>}
                                                                         {mate?.name && <span className="truncate max-w-[120px]">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
-                                                                        {litter.litterSizeBorn != null && <span>{litter.litterSizeBorn} born</span>}
                                                                         {litter.inbreedingCoefficient != null && <span className="text-gray-500">COI {litter.inbreedingCoefficient.toFixed(2)}%</span>}
-                                                                        {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
-                                                                            <span className="inline-flex gap-0.5 font-semibold">
-                                                                                <span className="text-blue-500">{litter.maleCount ?? 0}M</span>
-                                                                                <span className="text-gray-400">/</span>
-                                                                                <span className="text-pink-500">{litter.femaleCount ?? 0}F</span>
-                                                                                <span className="text-gray-400">/</span>
-                                                                                <span className="text-purple-500">{litter.unknownCount ?? 0}U</span>
+                                                                        {(litter.litterSizeBorn != null || litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
+                                                                            <span className="inline-flex items-center gap-1 whitespace-nowrap">
+                                                                                {litter.litterSizeBorn != null && <span>{litter.litterSizeBorn}</span>}
+                                                                                {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
+                                                                                    <span className="inline-flex gap-0.5 font-semibold">
+                                                                                        <span className="text-blue-500">{litter.maleCount ?? 0}M</span>
+                                                                                        <span className="text-gray-400">/</span>
+                                                                                        <span className="text-pink-500">{litter.femaleCount ?? 0}F</span>
+                                                                                        <span className="text-gray-400">/</span>
+                                                                                        <span className="text-purple-500">{litter.unknownCount ?? 0}U</span>
+                                                                                    </span>
+                                                                                )}
                                                                             </span>
                                                                         )}
                                                                     </div>
@@ -5634,15 +5638,19 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                                     <div className="text-xs text-gray-600 flex gap-2 flex-wrap items-center">
                                                                         {litter.birthDate && <span>{formatDate(litter.birthDate)}</span>}
                                                                         {mate?.name && <span className="truncate max-w-[120px]">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
-                                                                        {litter.litterSizeBorn != null && <span>{litter.litterSizeBorn} born</span>}
                                                                         {litter.inbreedingCoefficient != null && <span className="text-gray-500">COI {litter.inbreedingCoefficient.toFixed(2)}%</span>}
-                                                                        {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
-                                                                            <span className="inline-flex gap-0.5 font-semibold">
-                                                                                <span className="text-blue-500">{litter.maleCount ?? 0}M</span>
-                                                                                <span className="text-gray-400">/</span>
-                                                                                <span className="text-pink-500">{litter.femaleCount ?? 0}F</span>
-                                                                                <span className="text-gray-400">/</span>
-                                                                                <span className="text-purple-500">{litter.unknownCount ?? 0}U</span>
+                                                                        {(litter.litterSizeBorn != null || litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
+                                                                            <span className="inline-flex items-center gap-1 whitespace-nowrap">
+                                                                                {litter.litterSizeBorn != null && <span>{litter.litterSizeBorn}</span>}
+                                                                                {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
+                                                                                    <span className="inline-flex gap-0.5 font-semibold">
+                                                                                        <span className="text-blue-500">{litter.maleCount ?? 0}M</span>
+                                                                                        <span className="text-gray-400">/</span>
+                                                                                        <span className="text-pink-500">{litter.femaleCount ?? 0}F</span>
+                                                                                        <span className="text-gray-400">/</span>
+                                                                                        <span className="text-purple-500">{litter.unknownCount ?? 0}U</span>
+                                                                                    </span>
+                                                                                )}
                                                                             </span>
                                                                         )}
                                                                     </div>
