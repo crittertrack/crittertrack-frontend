@@ -9239,15 +9239,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
             const newAnimalId = response.data.id_public;
 
-            // Calculate inbreeding coefficient
-            try {
-                await axios.get(`${API_BASE_URL}/animals/${newAnimalId}/inbreeding`, {
-                    params: { generations: 50 },
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
-            } catch (coiError) {
-                console.log('Could not calculate COI for new offspring:', coiError);
-            }
+            // Calculate inbreeding coefficient in the background — don't block the save
+            axios.get(`${API_BASE_URL}/animals/${newAnimalId}/inbreeding`, {
+                params: { generations: 50 },
+                headers: { Authorization: `Bearer ${authToken}` }
+            }).catch(() => {});
 
             // Link to litter and recalculate gender + total counts
             const updatedOffspringIds = [...(addingOffspring.offspringIds_public || []), newAnimalId];
