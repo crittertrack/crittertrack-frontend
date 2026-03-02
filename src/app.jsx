@@ -1,4 +1,4 @@
-// CritterTrack Frontend Application
+﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -3883,7 +3883,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                     <div>
                                                                         <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Born</span>
                                                                         <div className="flex items-center gap-1.5">
-                                                                            <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? '—'}</span>
+                                                                            <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
                                                                             {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
                                                                                 <span className="text-xs ml-1">
                                                                                     <span className="text-blue-500 font-semibold">{litter.maleCount ?? 0}M</span>
@@ -3959,14 +3959,14 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                     <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">
                                                                         <div className="grid grid-cols-2 divide-x divide-gray-200">
                                                                             <div className="grid grid-cols-3 pr-3">
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Born</div><div className="text-lg font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? '—'}</div></div>
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Stillborn</div><div className="text-lg font-bold text-gray-400">{litter.stillbornCount ?? litter.stillborn ?? '—'}</div></div>
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaned</div><div className="text-lg font-bold text-green-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? '—'}</div></div>
+                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Born</div><div className="text-lg font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</div></div>
+                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Stillborn</div><div className="text-lg font-bold text-gray-400">{litter.stillbornCount ?? litter.stillborn ?? 0}</div></div>
+                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaned</div><div className="text-lg font-bold text-green-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? 0}</div></div>
                                                                             </div>
                                                                             <div className="grid grid-cols-3 pl-3">
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Males</div><div className="text-lg font-bold text-blue-500">{litter.maleCount ?? '—'}</div></div>
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Females</div><div className="text-lg font-bold text-pink-500">{litter.femaleCount ?? '—'}</div></div>
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Unknown</div><div className="text-lg font-bold text-purple-500">{litter.unknownCount ?? '—'}</div></div>
+                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Males</div><div className="text-lg font-bold text-blue-500">{litter.maleCount ?? 0}</div></div>
+                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Females</div><div className="text-lg font-bold text-pink-500">{litter.femaleCount ?? 0}</div></div>
+                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Unknown</div><div className="text-lg font-bold text-purple-500">{litter.unknownCount ?? 0}</div></div>
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -5680,7 +5680,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                                     <div>
                                                                         <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Born</span>
                                                                         <div className="flex items-center gap-1.5">
-                                                                            <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? '—'}</span>
+                                                                            <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
                                                                             {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
                                                                                 <span className="text-xs ml-1">
                                                                                     <span className="text-blue-500 font-semibold">{litter.maleCount ?? 0}M</span>
@@ -5756,14 +5756,14 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                                     <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">
                                                                         <div className="grid grid-cols-2 divide-x divide-gray-200">
                                                                             <div className="grid grid-cols-3 pr-3">
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Born</div><div className="text-lg font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? '—'}</div></div>
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Stillborn</div><div className="text-lg font-bold text-gray-400">{litter.stillbornCount ?? litter.stillborn ?? '—'}</div></div>
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaned</div><div className="text-lg font-bold text-green-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? '—'}</div></div>
+                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Born</div><div className="text-lg font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</div></div>
+                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Stillborn</div><div className="text-lg font-bold text-gray-400">{litter.stillbornCount ?? litter.stillborn ?? 0}</div></div>
+                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaned</div><div className="text-lg font-bold text-green-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? 0}</div></div>
                                                                             </div>
                                                                             <div className="grid grid-cols-3 pl-3">
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Males</div><div className="text-lg font-bold text-blue-500">{litter.maleCount ?? '—'}</div></div>
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Females</div><div className="text-lg font-bold text-pink-500">{litter.femaleCount ?? '—'}</div></div>
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Unknown</div><div className="text-lg font-bold text-purple-500">{litter.unknownCount ?? '—'}</div></div>
+                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Males</div><div className="text-lg font-bold text-blue-500">{litter.maleCount ?? 0}</div></div>
+                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Females</div><div className="text-lg font-bold text-pink-500">{litter.femaleCount ?? 0}</div></div>
+                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Unknown</div><div className="text-lg font-bold text-purple-500">{litter.unknownCount ?? 0}</div></div>
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -7298,7 +7298,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                             <div>
                                                                 <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Born</span>
                                                                 <div className="flex items-center gap-1.5">
-                                                                    <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? '—'}</span>
+                                                                    <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
                                                                     {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
                                                                         <span className="text-xs ml-1">
                                                                             <span className="text-blue-500 font-semibold">{litter.maleCount ?? 0}M</span>
@@ -7336,9 +7336,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                             <div className="bg-white p-3 rounded border border-purple-100">
                                                                 <div className="text-sm font-semibold text-gray-700 mb-3">Offspring Counts</div>
                                                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                                                                    <div><div className="text-gray-600 text-xs">Total Born</div><div className="text-2xl font-bold text-purple-600">{litter.litterSizeBorn ?? litter.numberBorn ?? '—'}</div></div>
+                                                                    <div><div className="text-gray-600 text-xs">Total Born</div><div className="text-2xl font-bold text-purple-600">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</div></div>
                                                                     <div><div className="text-gray-600 text-xs">Stillborn</div><div className="text-2xl font-bold text-gray-600">{litter.stillbornCount ?? litter.stillborn ?? '0'}</div></div>
-                                                                    <div><div className="text-gray-600 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? '—'}</div></div>
+                                                                    <div><div className="text-gray-600 text-xs">Weaned</div><div className="text-2xl font-bold text-green-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? 0}</div></div>
                                                                     {litter.maleCount != null && <div><div className="text-gray-600 text-xs">Males</div><div className="text-2xl font-bold text-blue-500">{litter.maleCount}</div></div>}
                                                                     {litter.femaleCount != null && <div><div className="text-gray-600 text-xs">Females</div><div className="text-2xl font-bold text-pink-500">{litter.femaleCount}</div></div>}
                                                                     {litter.unknownCount != null && litter.unknownCount > 0 && <div><div className="text-gray-600 text-xs">Unknown / Intersex</div><div className="text-2xl font-bold text-gray-600">{litter.unknownCount}</div></div>}
@@ -10142,7 +10142,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         <div>
                                             <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Born</span>
                                             <div className="flex items-center gap-1.5">
-                                                <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? '—'}</span>
+                                                <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
                                                 {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
                                                     <span className="text-xs ml-1">
                                                         <span className="text-blue-500 font-semibold">{litter.maleCount ?? 0}M</span>
@@ -10309,7 +10309,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 <div className="grid grid-cols-3 sm:pr-4">
                                                     <div>
                                                         <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Born</div>
-                                                        <div className="text-xl font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? '—'}</div>
+                                                        <div className="text-xl font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</div>
                                                     </div>
                                                     <div>
                                                         <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Stillborn</div>
@@ -10317,22 +10317,22 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     </div>
                                                     <div>
                                                         <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaned</div>
-                                                        <div className="text-xl font-bold text-green-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? '—'}</div>
+                                                        <div className="text-xl font-bold text-green-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? 0}</div>
                                                     </div>
                                                 </div>
                                                 {/* Right: Males / Females / Unknown */}
                                                 <div className="grid grid-cols-3 sm:pl-4 pt-3 sm:pt-0 border-t sm:border-t-0 border-gray-200">
                                                     <div>
                                                         <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Males</div>
-                                                        <div className="text-xl font-bold text-blue-500">{litter.maleCount ?? '—'}</div>
+                                                        <div className="text-xl font-bold text-blue-500">{litter.maleCount ?? 0}</div>
                                                     </div>
                                                     <div>
                                                         <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Females</div>
-                                                        <div className="text-xl font-bold text-pink-500">{litter.femaleCount ?? '—'}</div>
+                                                        <div className="text-xl font-bold text-pink-500">{litter.femaleCount ?? 0}</div>
                                                     </div>
                                                     <div>
                                                         <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Unknown</div>
-                                                        <div className="text-xl font-bold text-purple-500">{litter.unknownCount ?? '—'}</div>
+                                                        <div className="text-xl font-bold text-purple-500">{litter.unknownCount ?? 0}</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -10371,7 +10371,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         {offspringList.length > 0 && (
                                             <div className="mb-4">
                                                 <div className="flex items-center justify-between mb-2">
-                                                    <h4 className="text-sm font-bold text-gray-700">Offspring ({litter.litterSizeBorn ?? litter.numberBorn ?? offspringList.length})</h4>
+                                                    <h4 className="text-sm font-bold text-gray-700">Offspring ({offspringList.length})</h4>
                                                     <div className="flex items-center gap-2">
                                                         {bulkDeleteMode[litter._id] && (
                                                             <>
