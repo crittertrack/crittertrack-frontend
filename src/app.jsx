@@ -8455,10 +8455,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
     };
 
-    const fetchLitters = async () => {
+    const fetchLitters = async ({ preserveOffspring = false } = {}) => {
         try {
             // Clear offspring cache so expanded litter re-fetches fresh data
-            setLitterOffspringMap({});
+            // (skip when caller has already applied an optimistic update)
+            if (!preserveOffspring) {
+                setLitterOffspringMap({});
+            }
             setOffspringRefetchToken(t => t + 1);
             const response = await axios.get(`${API_BASE_URL}/litters`, {
                 headers: { Authorization: `Bearer ${authToken}` }
@@ -9249,9 +9252,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 headers: { Authorization: `Bearer ${authToken}` }
             });
 
+            // Optimistically add the new animal to the offspring list immediately
+            // so it appears in the UI without waiting for the full fetchLitters() refetch.
+            const newAnimal = response.data;
+            setLitterOffspringMap(prev => ({
+                ...prev,
+                [addingOffspring._id]: [...(prev[addingOffspring._id] || []), newAnimal]
+            }));
+
             showModalMessage('Success', 'Offspring added to litter!');
             setAddingOffspring(null);
-            fetchLitters();
+            fetchLitters({ preserveOffspring: true });
             fetchMyAnimals();
         } catch (error) {
             console.error('Error adding offspring:', error);
