@@ -8877,23 +8877,19 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     };
     // -------------------------------------------------------------------------
 
-    const handleLinkAnimals = async (litter) => {
-        try {
-            // Search for animals with matching parents and birthdate
-            // Require birthdate to be set first
-            if (!litter.birthDate) {
-                showModalMessage('Required', 'Please enter a birth date for the litter before linking animals.');
-                return;
-            }
+    const handleLinkAnimals = (litter) => {
+        // Search for animals with matching parents and birthdate
+        // Require birthdate to be set first
+        if (!litter.birthDate) {
+            showModalMessage('Required', 'Please enter a birth date for the litter before linking animals.');
+            return;
+        }
 
-            const response = await axios.get(`${API_BASE_URL}/animals`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            
-            // Get offspring IDs already in this litter
+        try {
+            // Use already-loaded myAnimals — no network call needed
             const linkedIds = litter.offspringIds_public || [];
             
-            const matching = response.data.filter(animal => {
+            const matching = myAnimals.filter(animal => {
                 // Skip if already linked to this litter
                 if (linkedIds.includes(animal.id_public)) return false;
                 
@@ -8927,6 +8923,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             
+            // Optimistically add to offspring list immediately
+            if (addedAnimal) {
+                setLitterOffspringMap(prev => ({
+                    ...prev,
+                    [litter._id]: [...(prev[litter._id] || []), addedAnimal]
+                }));
+            }
+
             showModalMessage('Success', 'Animal linked to litter!');
             
             // Remove from available list
@@ -8935,8 +8939,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 animals: availableToLink.animals.filter(a => a.id_public !== animalId)
             });
             
-            // Refresh litters to show updated count
-            fetchLitters();
+            // Refresh litters to show updated count without clearing offspring cache
+            fetchLitters({ preserveOffspring: true });
         } catch (error) {
             console.error('Error linking animal to litter:', error);
             showModalMessage('Error', 'Failed to link animal to litter');
@@ -8960,6 +8964,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             
+            // Optimistically add all to offspring list immediately
+            setLitterOffspringMap(prev => ({
+                ...prev,
+                [litter._id]: [...(prev[litter._id] || []), ...availableToLink.animals]
+            }));
+
             showModalMessage('Success', `${animalIdsToAdd.length} animal(s) linked to litter!`);
             
             // Clear available list
@@ -8968,8 +8978,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 animals: []
             });
             
-            // Refresh litters to show updated count
-            fetchLitters();
+            // Refresh litters to show updated count without clearing offspring cache
+            fetchLitters({ preserveOffspring: true });
         } catch (error) {
             console.error('Error linking animals to litter:', error);
             showModalMessage('Error', 'Failed to link animals to litter');
