@@ -3818,7 +3818,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 if (allRecords.length === 0) return null;
                                 return (
                                     <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 space-y-3">
-                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center"><span className="text-purple-600 mr-2">??</span>Offspring & Litters</h3>
+                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center"><Users size={20} className="text-purple-600 mr-2" />Offspring & Litters</h3>
                                         <div className="space-y-2">
                                             {allRecords.map((litter) => {
                                                 if (litter._recordType === 'litter') {
@@ -3839,10 +3839,20 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                         <p className="font-bold text-gray-800 text-sm">{displayName || <span className="text-gray-400 font-normal">Unnamed Litter</span>}</p>
                                                                         {lid && <span className="text-xs font-mono bg-purple-100 px-1.5 py-0.5 rounded text-purple-700 ml-2">{lid}</span>}
                                                                     </div>
-                                                                    <div className="text-xs text-gray-600 flex gap-3 flex-wrap">
+                                                                    <div className="text-xs text-gray-600 flex gap-2 flex-wrap items-center">
                                                                         {litter.birthDate && <span>{formatDate(litter.birthDate)}</span>}
-                                                                        {mate?.name && <span>{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
+                                                                        {mate?.name && <span className="truncate max-w-[120px]">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
                                                                         {litter.litterSizeBorn != null && <span>{litter.litterSizeBorn} born</span>}
+                                                                        {litter.inbreedingCoefficient != null && <span className="text-gray-500">COI {litter.inbreedingCoefficient.toFixed(2)}%</span>}
+                                                                        {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
+                                                                            <span className="inline-flex gap-0.5 font-semibold">
+                                                                                <span className="text-blue-500">{litter.maleCount ?? 0}M</span>
+                                                                                <span className="text-gray-400">/</span>
+                                                                                <span className="text-pink-500">{litter.femaleCount ?? 0}F</span>
+                                                                                <span className="text-gray-400">/</span>
+                                                                                <span className="text-purple-500">{litter.unknownCount ?? 0}U</span>
+                                                                            </span>
+                                                                        )}
                                                                     </div>
                                                                 </div>
                                                                 {/* Desktop: 6-column grid */}
@@ -3886,7 +3896,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                             {isExpanded && (
                                                                 <div className="border-t border-purple-100 p-3 bg-purple-50 space-y-3">
                                                                     {/* -- 1. Name+CTL | COI | Mate ----------------------------- */}
-                                                                    <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
+                                                                    <div className="flex flex-col sm:grid sm:grid-cols-[1fr_auto_1fr] gap-2 items-start sm:items-center">
                                                                         {/* Left: Litter Name + CTL ID */}
                                                                         <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm h-full grid grid-cols-2 divide-x divide-gray-200 gap-3">
                                                                             <div>
@@ -4055,10 +4065,20 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                             >
                                                                 {/* Mobile: stacked */}
                                                                 <div className="flex-1 sm:hidden">
-                                                                    <div className="text-xs text-gray-600 flex gap-3 flex-wrap">
+                                                                    <div className="text-xs text-gray-600 flex gap-2 flex-wrap items-center">
                                                                         {litter.birthDate && <span>{formatDate(litter.birthDate)}</span>}
-                                                                        {mate?.name && <span>{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
+                                                                        {mate?.name && <span className="truncate max-w-[120px]">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
                                                                         <span>{offspringList.length} born</span>
+                                                                        {coi != null && <span className="text-gray-500">COI {coi.toFixed(2)}%</span>}
+                                                                        {offspringList.length > 0 && (
+                                                                            <span className="inline-flex gap-0.5 font-semibold">
+                                                                                    <span className="text-blue-500">{maleCount}M</span>
+                                                                                    <span className="text-gray-400">/</span>
+                                                                                    <span className="text-pink-500">{femaleCount}F</span>
+                                                                                    <span className="text-gray-400">/</span>
+                                                                                    <span className="text-purple-500">{unknownCount}U</span>
+                                                                            </span>
+                                                                        )}
                                                                     </div>
                                                                 </div>
                                                                 {/* Desktop: 4-column grid */}
@@ -4096,7 +4116,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                             {isExpanded && (
                                                                 <div className="border-t border-purple-100 p-3 bg-purple-50 space-y-3">
                                                                     {/* -- 1. Birthdate | COI | Mate ----------------------------- */}
-                                                                    <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
+                                                                    <div className="flex flex-col sm:grid sm:grid-cols-[1fr_auto_1fr] gap-2 items-start sm:items-center">
                                                                         <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm h-full">
                                                                             <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Birth Date</div>
                                                                             {litter.birthDate
@@ -5590,7 +5610,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 if (allRecords.length === 0) return null;
                                 return (
                                     <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 space-y-3">
-                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center"><span className="text-purple-600 mr-2">??</span>Offspring & Litters</h3>
+                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center"><Users size={20} className="text-purple-600 mr-2" />Offspring & Litters</h3>
                                         <div className="space-y-2">
                                             {allRecords.map((litter) => {
                                                 if (litter._recordType === 'litter') {
@@ -5611,10 +5631,20 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                                         <p className="font-bold text-gray-800 text-sm">{displayName || <span className="text-gray-400 font-normal">Unnamed Litter</span>}</p>
                                                                         {lid && <span className="text-xs font-mono bg-purple-100 px-1.5 py-0.5 rounded text-purple-700 ml-2">{lid}</span>}
                                                                     </div>
-                                                                    <div className="text-xs text-gray-600 flex gap-3 flex-wrap">
+                                                                    <div className="text-xs text-gray-600 flex gap-2 flex-wrap items-center">
                                                                         {litter.birthDate && <span>{formatDate(litter.birthDate)}</span>}
-                                                                        {mate?.name && <span>{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
+                                                                        {mate?.name && <span className="truncate max-w-[120px]">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
                                                                         {litter.litterSizeBorn != null && <span>{litter.litterSizeBorn} born</span>}
+                                                                        {litter.inbreedingCoefficient != null && <span className="text-gray-500">COI {litter.inbreedingCoefficient.toFixed(2)}%</span>}
+                                                                        {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
+                                                                            <span className="inline-flex gap-0.5 font-semibold">
+                                                                                <span className="text-blue-500">{litter.maleCount ?? 0}M</span>
+                                                                                <span className="text-gray-400">/</span>
+                                                                                <span className="text-pink-500">{litter.femaleCount ?? 0}F</span>
+                                                                                <span className="text-gray-400">/</span>
+                                                                                <span className="text-purple-500">{litter.unknownCount ?? 0}U</span>
+                                                                            </span>
+                                                                        )}
                                                                     </div>
                                                                 </div>
                                                                 {/* Desktop: 6-column grid */}
@@ -5658,7 +5688,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                             {isExpanded && (
                                                                 <div className="border-t border-purple-100 p-3 bg-purple-50 space-y-3">
                                                                     {/* -- 1. Name+CTL | COI | Mate ----------------------------- */}
-                                                                    <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
+                                                                    <div className="flex flex-col sm:grid sm:grid-cols-[1fr_auto_1fr] gap-2 items-start sm:items-center">
                                                                         {/* Left: Litter Name + CTL ID */}
                                                                         <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm h-full grid grid-cols-2 divide-x divide-gray-200 gap-3">
                                                                             <div>
@@ -5827,10 +5857,20 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                             >
                                                                 {/* Mobile: stacked */}
                                                                 <div className="flex-1 sm:hidden">
-                                                                    <div className="text-xs text-gray-600 flex gap-3 flex-wrap">
+                                                                    <div className="text-xs text-gray-600 flex gap-2 flex-wrap items-center">
                                                                         {litter.birthDate && <span>{formatDate(litter.birthDate)}</span>}
-                                                                        {mate?.name && <span>{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
+                                                                        {mate?.name && <span className="truncate max-w-[120px]">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
                                                                         <span>{offspringList.length} born</span>
+                                                                        {coi != null && <span className="text-gray-500">COI {coi.toFixed(2)}%</span>}
+                                                                        {offspringList.length > 0 && (
+                                                                            <span className="inline-flex gap-0.5 font-semibold">
+                                                                                    <span className="text-blue-500">{maleCount}M</span>
+                                                                                    <span className="text-gray-400">/</span>
+                                                                                    <span className="text-pink-500">{femaleCount}F</span>
+                                                                                    <span className="text-gray-400">/</span>
+                                                                                    <span className="text-purple-500">{unknownCount}U</span>
+                                                                            </span>
+                                                                        )}
                                                                     </div>
                                                                 </div>
                                                                 {/* Desktop: 4-column grid */}
@@ -5868,7 +5908,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                             {isExpanded && (
                                                                 <div className="border-t border-purple-100 p-3 bg-purple-50 space-y-3">
                                                                     {/* -- 1. Birthdate | COI | Mate ----------------------------- */}
-                                                                    <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
+                                                                    <div className="flex flex-col sm:grid sm:grid-cols-[1fr_auto_1fr] gap-2 items-start sm:items-center">
                                                                         <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm h-full">
                                                                             <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Birth Date</div>
                                                                             {litter.birthDate
@@ -7199,7 +7239,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* 3rd Section: Litter Records - Accordion View */}
                             {animalLitters && animalLitters.length > 0 && (
                                 <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 space-y-3">
-                                    <h3 className="text-lg font-semibold text-gray-700 flex items-center"><span className="text-purple-600 mr-2">??</span>Litter Records</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700 flex items-center"><Users size={20} className="text-purple-600 mr-2" />Litter Records</h3>
                                     <div className="space-y-2">
                                         {animalLitters.map((litter) => {
                                             const lid = litter.litter_id_public;
@@ -8466,10 +8506,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     const storedFemales = litter.femaleCount  ?? 0;
                     const storedUnknown = litter.unknownCount ?? 0;
                     const storedBorn    = litter.litterSizeBorn ?? litter.numberBorn ?? 0;
-                    const newMales   = Math.max(storedMales,   linkedMales);
-                    const newFemales = Math.max(storedFemales, linkedFemales);
-                    const newUnknown = Math.max(storedUnknown, linkedUnknown);
-                    const newBorn    = Math.max(storedBorn,    linkedTotal);
+                    // Gender counts: use linked offspring as ground truth so a gender
+                    // change on a linked animal correctly decrements the old gender
+                    // and increments the new one (mirrors calcLitterCounts logic).
+                    const newMales   = linkedMales;
+                    const newFemales = linkedFemales;
+                    const newUnknown = linkedUnknown;
+                    // Total born: keep the higher value — stored may include
+                    // unlinked / stillborn animals that aren't in the offspring list.
+                    const newBorn    = Math.max(storedBorn, linkedTotal);
                     if (newMales !== storedMales || newFemales !== storedFemales || newUnknown !== storedUnknown || newBorn !== storedBorn) {
                         const patch = { maleCount: newMales || null, femaleCount: newFemales || null, unknownCount: newUnknown || null, litterSizeBorn: newBorn || null, numberBorn: newBorn || null };
                         setLitters(prev => prev.map(l => l._id === litter._id ? { ...l, ...patch } : l));
@@ -9077,13 +9122,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 offspringIds_public: allOffspringIds,
                 ...updateCounts,
                 // Enhanced breeding record fields
-                breedingMethod: formData.breedingMethod,
-                breedingConditionAtTime: formData.breedingConditionAtTime,
-                matingDate: formData.matingDate,
-                outcome: formData.outcome,
-                birthMethod: formData.birthMethod,
-                litterSizeWeaned: formData.litterSizeWeaned,
-                stillbornCount: formData.stillbornCount
+                // Use || null / || 'Unknown' to prevent sending empty strings
+                // into strict enum fields, which causes a 500 validation error.
+                breedingMethod: formData.breedingMethod || 'Unknown',
+                breedingConditionAtTime: formData.breedingConditionAtTime || null,
+                matingDate: formData.matingDate || null,
+                outcome: formData.outcome || 'Unknown',
+                birthMethod: formData.birthMethod || null,
+                litterSizeWeaned: formData.litterSizeWeaned || null,
+                stillbornCount: formData.stillbornCount || null
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
