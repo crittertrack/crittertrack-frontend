@@ -11015,6 +11015,27 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     const dn = l.dam?.name || l.damId_public || '?';
                     return `${sn} × ${dn}`;
                 };
+                // Format a date value as "10 Jan 2026"
+                const fmtD = (v) => {
+                    if (!v) return null;
+                    try { const d = new Date(v); if (isNaN(d)) return null; return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }); } catch(e) { return null; }
+                };
+                // Type-specific pill label
+                const getPillLabel = (ev) => {
+                    const l = ev.litter;
+                    const pairName = l.breedingPairCodeName || l.litter_id_public || 'Unnamed';
+                    const sn = l.sire?.name || l.sireId_public || '?';
+                    const dn = l.dam?.name || l.damId_public || '?';
+                    if (ev.type === 'due') return `${pairName} • ${dn}`;
+                    if (ev.type === 'born') {
+                        const total = l.litterSizeBorn ?? l.numberBorn ?? 0;
+                        const m = l.maleCount ?? 0;
+                        const f = l.femaleCount ?? 0;
+                        return `${pairName} • ${total} born (${m}M/${f}F)`;
+                    }
+                    // mated
+                    return `${pairName} • ${sn} × ${dn}`;
+                };
 
                 return (
                     <div className="bg-white rounded-xl border-2 border-gray-200 shadow-sm overflow-hidden">
@@ -11070,7 +11091,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                         className={`w-full text-left px-1.5 py-0.5 rounded text-xs truncate transition-colors ${st.bg}`}
                                                         title={`${st.label}: ${getLitterName(ev.litter)} (${getSireDam(ev.litter)})`}
                                                     >
-                                                        {getLitterName(ev.litter)}
+                                                        {getPillLabel(ev)}
                                                     </button>
                                                 );
                                             })}
@@ -11081,22 +11102,81 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         </div>
 
                         {/* Selected event detail */}
-                        {calendarTooltip && (
-                            <div className="mx-3 mb-3 mt-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                                <div className="flex justify-between items-start gap-2">
-                                    <div>
-                                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold mr-2 ${typeStyles[calendarTooltip.type]?.bg}`}>
-                                            {typeStyles[calendarTooltip.type]?.label}
-                                        </span>
-                                        <span className="font-semibold text-gray-800 text-sm">{getLitterName(calendarTooltip.litter)}</span>
-                                        <p className="text-gray-500 text-sm mt-0.5">{getSireDam(calendarTooltip.litter)}</p>
+                        {calendarTooltip && (() => {
+                            const l = calendarTooltip.litter;
+                            const type = calendarTooltip.type;
+                            const sn = l.sire?.name || l.sireId_public || '?';
+                            const dn = l.dam?.name || l.damId_public || '?';
+                            const pairName = l.breedingPairCodeName || l.litter_id_public || 'Unnamed Litter';
+                            const callId = l.litter_id_public;
+
+                            const daysStatus = (() => {
+                                if (!l.expectedDueDate) return null;
+                                const due = new Date(l.expectedDueDate);
+                                if (isNaN(due)) return null;
+                                const now = new Date(); now.setHours(0,0,0,0); due.setHours(0,0,0,0);
+                                const diff = Math.round((due - now) / 86400000);
+                                if (diff > 0) return { text: `${diff} day${diff !== 1 ? 's' : ''} remaining`, cls: 'text-green-600' };
+                                if (diff === 0) return { text: 'Due today', cls: 'text-amber-600 font-semibold' };
+                                return { text: `${Math.abs(diff)} day${Math.abs(diff) !== 1 ? 's' : ''} overdue`, cls: 'text-red-600 font-semibold' };
+                            })();
+
+                            const Row = ({ label, value, cls }) => {
+                                if (value == null || value === '') return null;
+                                return (
+                                    <div className="flex gap-2 text-sm">
+                                        <span className="text-gray-500 w-32 flex-shrink-0">{label}</span>
+                                        <span className={`text-gray-800 font-medium ${cls || ''}`}>{value}</span>
                                     </div>
-                                    <button onClick={() => setCalendarTooltip(null)} className="text-gray-400 hover:text-gray-600 flex-shrink-0">
-                                        <X size={16} />
-                                    </button>
+                                );
+                            };
+
+                            return (
+                                <div className="mx-3 mb-3 mt-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                                    {/* Header */}
+                                    <div className="flex justify-between items-start gap-2 mb-3 pb-2 border-b border-gray-200">
+                                        <div>
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${typeStyles[type]?.bg}`}>
+                                                    {typeStyles[type]?.label}
+                                                </span>
+                                                <span className="font-bold text-gray-800 text-sm">{pairName} — {sn} × {dn}</span>
+                                            </div>
+                                            {callId && <p className="text-xs text-gray-400 mt-0.5">{callId}</p>}
+                                        </div>
+                                        <button onClick={() => setCalendarTooltip(null)} className="text-gray-400 hover:text-gray-600 flex-shrink-0">
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+
+                                    {/* Body */}
+                                    <div className="space-y-1.5">
+                                        {type === 'due' && (<>
+                                            <Row label="Mated:" value={fmtD(l.matingDate)} />
+                                            <Row label="Due:" value={fmtD(l.expectedDueDate)} />
+                                            {daysStatus && <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Status:</span><span className={daysStatus.cls}>{daysStatus.text}</span></div>}
+                                            <Row label="Method:" value={l.breedingMethod && l.breedingMethod !== 'Unknown' ? l.breedingMethod : null} />
+                                            <Row label="Condition:" value={l.breedingConditionAtTime || null} />
+                                        </>)}
+                                        {type === 'born' && (<>
+                                            <Row label="Birth Method:" value={l.birthMethod || null} />
+                                            <Row label="Born:" value={fmtD(l.birthDate)} />
+                                            <Row label="Total:" value={l.litterSizeBorn ?? l.numberBorn ?? null} />
+                                            <Row label="Males:" value={l.maleCount ?? null} />
+                                            <Row label="Females:" value={l.femaleCount ?? null} />
+                                            <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Stillborn:</span><span className="text-gray-800 font-medium">{l.stillbornCount ?? 0}</span></div>
+                                            <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Weaned:</span><span className="text-gray-800 font-medium">{l.litterSizeWeaned ?? l.numberWeaned ?? 0}</span></div>
+                                        </>)}
+                                        {type === 'mated' && (<>
+                                            <Row label="Mating Date:" value={fmtD(l.matingDate)} />
+                                            <Row label="Expected Due:" value={fmtD(l.expectedDueDate)} />
+                                            <Row label="Method:" value={l.breedingMethod && l.breedingMethod !== 'Unknown' ? l.breedingMethod : null} />
+                                            <Row label="Condition:" value={l.breedingConditionAtTime || null} />
+                                        </>)}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            );
+                        })()}
 
                         {/* Legend */}
                         <div className="px-4 py-2.5 bg-gray-50 border-t border-gray-200 flex flex-wrap gap-4 text-xs text-gray-600 items-center">
