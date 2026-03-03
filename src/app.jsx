@@ -20014,6 +20014,17 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
     const [animalView, setAnimalView] = useState('list'); // 'list' | 'management'
     const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({ enclosures: true }); // { sectionKey: bool }
     const [collapsedMgmtGroups, setCollapsedMgmtGroups] = useState({}); // { groupKey: bool }
+    const [mgmtAlertsEnabled, setMgmtAlertsEnabled] = useState(() => {
+        try { return localStorage.getItem('ct_mgmt_urgency_enabled') !== 'false'; } catch { return true; }
+    });
+    const toggleMgmtAlerts = () => {
+        const next = !mgmtAlertsEnabled;
+        setMgmtAlertsEnabled(next);
+        try {
+            localStorage.setItem('ct_mgmt_urgency_enabled', next ? 'true' : 'false');
+            window.dispatchEvent(new StorageEvent('storage', { key: 'ct_mgmt_urgency_enabled' }));
+        } catch {}
+    };
 
     // Activity Log state
     const [activityLogs, setActivityLogs] = useState([]);
@@ -22765,6 +22776,18 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                             <span className="font-medium">Supplies</span>
                         </button>
                     )}
+                    {animalView === 'management' && !showActivityLogScreen && !showSuppliesScreen && (
+                        <button
+                            onClick={toggleMgmtAlerts}
+                            title={mgmtAlertsEnabled ? 'Management alerts on — click to disable' : 'Management alerts off — click to enable'}
+                            className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border shadow-sm transition-colors ${
+                                mgmtAlertsEnabled ? 'bg-orange-50 border-orange-300 text-orange-700 hover:bg-orange-100' : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50'
+                            }`}
+                        >
+                            <Bell size={14} className="sm:w-4 sm:h-4" />
+                            <span className="font-medium hidden sm:inline">Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
+                        </button>
+                    )}
                     <button 
                         onClick={handleRefresh} 
                         disabled={loading}
@@ -23936,6 +23959,178 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
                             </div>
                         );
                     })}
+                    <div className="px-3 py-1.5 flex justify-end">
+                        <span className="text-xs text-gray-400">
+                            Dismissed items reset at midnight \u00b7{' '}
+                            <button onClick={() => saveEnabled(false)} className="underline hover:text-gray-600">Turn off alerts</button>
+                        </span>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+// Management Urgency Banner — due-today/overdue animal care, maintenance & supply tasks
+const MgmtUrgencyBanner = ({ authToken, API_BASE_URL }) => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const [enabled, setEnabled] = useState(() => {
+        try { return localStorage.getItem('ct_mgmt_urgency_enabled') !== 'false'; } catch { return true; }
+    });
+    const [dismissed, setDismissed] = useState(() => {
+        try {
+            const raw = JSON.parse(localStorage.getItem('ct_mgmt_urgency_dismissed') || '{}');
+            const clean = {};
+            Object.entries(raw).forEach(([k, v]) => { if (v === todayStr) clean[k] = v; });
+            return clean;
+        } catch { return {}; }
+    });
+    const [animals, setAnimals] = useState([]);
+    const [enclosures, setEnclosures] = useState([]);
+    const [supplies, setSupplies] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [collapsed, setCollapsed] = useState(false);
+
+    useEffect(() => {
+        if (!authToken) return;
+        Promise.all([
+            axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` }, params: { isOwned: 'true' } }),
+            axios.get(`${API_BASE_URL}/enclosures`, { headers: { Authorization: `Bearer ${authToken}` } }),
+            axios.get(`${API_BASE_URL}/supplies`, { headers: { Authorization: `Bearer ${authToken}` } }),
+        ])
+            .then(([ar, er, sr]) => {
+                setAnimals(Array.isArray(ar.data) ? ar.data : []);
+                setEnclosures(Array.isArray(er.data) ? er.data : []);
+                setSupplies(Array.isArray(sr.data) ? sr.data : []);
+            })
+            .catch(() => {})
+            .finally(() => setLoading(false));
+    }, [authToken, API_BASE_URL]);
+
+    useEffect(() => {
+        const onStorage = () => {
+            try { setEnabled(localStorage.getItem('ct_mgmt_urgency_enabled') !== 'false'); } catch {}
+        };
+        window.addEventListener('storage', onStorage);
+        return () => window.removeEventListener('storage', onStorage);
+    }, []);
+
+    const saveEnabled = (val) => {
+        setEnabled(val);
+        try { localStorage.setItem('ct_mgmt_urgency_enabled', val ? 'true' : 'false'); } catch {}
+    };
+
+    const dismiss = (key) => {
+        const next = { ...dismissed, [key]: todayStr };
+        setDismissed(next);
+        try { localStorage.setItem('ct_mgmt_urgency_dismissed', JSON.stringify(next)); } catch {}
+    };
+
+    const dismissAll = (items) => {
+        const next = { ...dismissed };
+        items.forEach(item => { next[item.key] = todayStr; });
+        setDismissed(next);
+        try { localStorage.setItem('ct_mgmt_urgency_dismissed', JSON.stringify(next)); } catch {}
+    };
+
+    if (!enabled || loading) return null;
+
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const daysSince = (dateStr) => {
+        if (!dateStr) return null;
+        const d = new Date(dateStr); d.setHours(0, 0, 0, 0);
+        return Math.floor((today - d) / 86400000);
+    };
+    const isTaskDue = (lastDate, freqDays) => {
+        if (!freqDays) return false;
+        if (!lastDate) return true;
+        const ds = daysSince(lastDate);
+        return ds !== null && ds >= Number(freqDays);
+    };
+
+    const urgentItems = [];
+
+    // Feeding
+    const feedingDue = animals.filter(a => isTaskDue(a.lastFedDate, a.feedingFrequencyDays));
+    if (feedingDue.length > 0) {
+        const key = 'mgmt-feeding';
+        if (!dismissed[key]) urgentItems.push({ key, type: 'feeding', label: 'Feeding', icon: '\uD83C\uDF7D\uFE0F', description: `${feedingDue.length} animal${feedingDue.length !== 1 ? 's' : ''} overdue` });
+    }
+
+    // Animal care tasks
+    let careDueCount = 0;
+    animals.forEach(a => {
+        careDueCount += (a.careTasks || []).filter(t => isTaskDue(t.lastDoneDate, t.frequencyDays)).length;
+        careDueCount += (a.animalCareTasks || []).filter(t => isTaskDue(t.lastDoneDate, t.frequencyDays)).length;
+    });
+    if (careDueCount > 0) {
+        const key = 'mgmt-care';
+        if (!dismissed[key]) urgentItems.push({ key, type: 'care', label: 'Animal Care', icon: '\uD83E\uDDF4', description: `${careDueCount} task${careDueCount !== 1 ? 's' : ''} due` });
+    }
+
+    // Enclosure cleaning
+    let maintDueCount = 0;
+    enclosures.forEach(enc => {
+        maintDueCount += (enc.cleaningTasks || []).filter(t => isTaskDue(t.lastDoneDate, t.frequencyDays)).length;
+    });
+    if (maintDueCount > 0) {
+        const key = 'mgmt-maintenance';
+        if (!dismissed[key]) urgentItems.push({ key, type: 'maintenance', label: 'Maintenance', icon: '\uD83D\uDD27', description: `${maintDueCount} enclosure task${maintDueCount !== 1 ? 's' : ''} overdue` });
+    }
+
+    // Supplies
+    const suppliesDue = supplies.filter(s =>
+        (s.reorderThreshold != null && s.currentStock <= s.reorderThreshold) ||
+        (s.nextOrderDate && new Date(s.nextOrderDate) <= today)
+    );
+    if (suppliesDue.length > 0) {
+        const key = 'mgmt-supplies';
+        if (!dismissed[key]) urgentItems.push({ key, type: 'supplies', label: 'Supplies', icon: '\uD83D\uDCE6', description: `${suppliesDue.length} item${suppliesDue.length !== 1 ? 's' : ''} need restocking` });
+    }
+
+    if (urgentItems.length === 0) return null;
+
+    const typeBg = {
+        feeding:     'bg-orange-100 text-orange-700',
+        care:        'bg-purple-100 text-purple-700',
+        maintenance: 'bg-yellow-100 text-yellow-800',
+        supplies:    'bg-emerald-100 text-emerald-700',
+    };
+
+    return (
+        <div className="mx-2 sm:mx-4 mt-2 rounded-xl border-2 border-orange-300 bg-orange-50 shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between px-3 py-2 bg-orange-100 border-b border-orange-200">
+                <div className="flex items-center gap-2">
+                    <AlertTriangle size={15} className="text-orange-600 flex-shrink-0" />
+                    <span className="text-sm font-bold text-orange-800">
+                        {urgentItems.length} Management Alert{urgentItems.length !== 1 ? 's' : ''}
+                    </span>
+                </div>
+                <div className="flex items-center gap-1">
+                    <button onClick={() => setCollapsed(c => !c)} className="p-1 rounded hover:bg-orange-200 text-orange-600" title={collapsed ? 'Expand' : 'Collapse'}>
+                        {collapsed ? <ChevronDown size={15} /> : <ChevronUp size={15} />}
+                    </button>
+                    <button onClick={() => dismissAll(urgentItems)} className="p-1 rounded hover:bg-orange-200 text-orange-500 hover:text-orange-700" title="Dismiss all for today">
+                        <X size={15} />
+                    </button>
+                </div>
+            </div>
+            {!collapsed && (
+                <div className="divide-y divide-orange-200">
+                    {urgentItems.map(item => (
+                        <div key={item.key} className="flex items-center gap-2 sm:gap-3 px-3 py-2.5">
+                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${typeBg[item.type] || 'bg-gray-100 text-gray-700'}`}>
+                                {item.icon} {item.label}
+                            </span>
+                            <div className="flex-1 min-w-0">
+                                <span className="text-sm text-gray-700 font-medium">{item.description}</span>
+                            </div>
+                            <span className="text-xs font-bold text-red-600 flex-shrink-0">Action needed</span>
+                            <button onClick={() => dismiss(item.key)} className="p-0.5 text-gray-400 hover:text-gray-600 flex-shrink-0" title="Dismiss for today">
+                                <X size={14} />
+                            </button>
+                        </div>
+                    ))}
                     <div className="px-3 py-1.5 flex justify-end">
                         <span className="text-xs text-gray-400">
                             Dismissed items reset at midnight \u00b7{' '}
@@ -27053,6 +27248,9 @@ const App = () => {
 
             {/* Urgency Alerts Banner — due-today/overdue expected births and weanings */}
             {authToken && <UrgencyAlertsBanner authToken={authToken} API_BASE_URL={API_BASE_URL} />}
+
+            {/* Management Urgency Banner — due-today/overdue care, maintenance & supplies */}
+            {authToken && <MgmtUrgencyBanner authToken={authToken} API_BASE_URL={API_BASE_URL} />}
             
             {/* System Broadcast Banner (info/announcements) - only on dashboard */}}
             {(currentView === 'list' || currentView === '') && (
