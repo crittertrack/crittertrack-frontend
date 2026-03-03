@@ -14459,8 +14459,7 @@ const AnimalForm = ({
                             { id: 10, label: 'Records', icon: '📝' },
                             { id: 11, label: 'End of Life', icon: '⚖️' },
                             { id: 12, label: 'Show', icon: '🏆' },
-                            { id: 13, label: 'Legal', icon: '📄' },
-                            { id: 14, label: 'Logs', icon: '📜' }
+                            { id: 13, label: 'Legal', icon: '📄' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
