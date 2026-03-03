@@ -555,6 +555,17 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 8,
+        title: 'Origin',
+        content: 'Select where your animal came from using the Origin dropdown. Options are Captive-bred (born in captivity), Wild-caught (collected from the wild), or Rescue (rehomed from another owner or shelter). This is useful for record-keeping and transparency with buyers.',
+        highlightElement: null,
+        tips: [
+          'Captive-bred is the most common for breeders',
+          'Wild-caught is relevant for reptiles and fish',
+          'Rescue helps track rehomed animals'
+        ]
+      },
+      {
+        stepNumber: 9,
         title: 'Tags Feature',
         content: 'Tags allow you to categorize and organize your animals. You can create custom tags like "Show Animal", "Breeding Stock", "Pet", "For Sale", etc. Add tags by typing and pressing Enter.',
         highlightElement: '[data-tutorial-target="tags-section"]',

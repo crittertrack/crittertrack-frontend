@@ -64,7 +64,8 @@ export const TUTORIAL_SCREENSHOTS = {
     5: 'classification-section.png', // Step 5: Classification Section
     6: 'breed-selection.png', // Step 6: Breed Selection
     7: 'strain.png', // Step 7: Strain
-    8: 'tags-feature.png', // Step 8: Tags Feature
+    8: 'origin-information.png', // Step 8: Origin
+    9: 'tags-feature.png', // Step 9: Tags Feature
   },
   
   'gs-lineage': {
