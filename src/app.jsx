@@ -10959,10 +10959,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             {viewMode === 'calendar' && (() => {
                 const year = calendarMonth.getFullYear();
                 const month = calendarMonth.getMonth();
-                const firstDay = new Date(year, month, 1).getDay();
                 const daysInMonth = new Date(year, month + 1, 0).getDate();
                 const today = new Date();
                 const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+                // Locale-aware first day of week (0=Sun, 1=Mon, ... 6=Sat)
+                const localeFirstDay = (() => {
+                    try {
+                        const loc = new Intl.Locale(navigator.language || 'en-US');
+                        const fw = loc.weekInfo?.firstDay ?? (loc.getWeekInfo?.()?.firstDay ?? 7);
+                        return fw % 7; // JS: 7(Sun)→0, 1(Mon)→1, 6(Sat)→6
+                    } catch(e) { return 0; }
+                })();
 
                 // Build event map: 'YYYY-MM-DD' -> [{type, litter}]
                 const eventMap = {};
@@ -10981,10 +10989,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 });
 
                 const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-                const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                const allDayAbbr = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                const dayNames = [...allDayAbbr.slice(localeFirstDay), ...allDayAbbr.slice(0, localeFirstDay)];
+                // true for columns that land on Saturday or Sunday
+                const isWeekendCol = dayNames.map(d => d === 'Sun' || d === 'Sat');
+
+                // Offset of the month's first day relative to the locale week start
+                const rawFirstDay = new Date(year, month, 1).getDay();
+                const firstDayOffset = (rawFirstDay - localeFirstDay + 7) % 7;
 
                 const cells = [];
-                for (let i = 0; i < firstDay; i++) cells.push(null);
+                for (let i = 0; i < firstDayOffset; i++) cells.push(null);
                 for (let d = 1; d <= daysInMonth; d++) cells.push(d);
                 while (cells.length % 7 !== 0) cells.push(null);
 
@@ -11021,25 +11036,27 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         </div>
 
                         {/* Day-of-week headers */}
-                        <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50">
-                            {dayNames.map(d => (
-                                <div key={d} className="py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        <div className="grid grid-cols-7 border-b-2 border-gray-300 bg-gray-50">
+                            {dayNames.map((d, i) => (
+                                <div key={d} className={`py-2 text-center text-xs font-bold uppercase tracking-wide ${isWeekendCol[i] ? 'text-rose-400' : 'text-gray-500'}`}>
                                     {d}
                                 </div>
                             ))}
                         </div>
 
                         {/* Day Cells */}
-                        <div className="grid grid-cols-7 divide-x divide-y divide-gray-100">
+                        <div className="grid grid-cols-7 divide-x divide-y divide-gray-300">
                             {cells.map((day, idx) => {
+                                const colIdx = idx % 7;
+                                const isWeekend = isWeekendCol[colIdx];
                                 if (day === null) return (
-                                    <div key={`blank-${idx}`} className="min-h-[72px] bg-gray-50/60" />
+                                    <div key={`blank-${idx}`} className={`min-h-[72px] ${isWeekend ? 'bg-rose-50/40' : 'bg-gray-50/60'}`} />
                                 );
                                 const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
                                 const events = eventMap[dateKey] || [];
                                 const isToday = dateKey === todayStr;
                                 return (
-                                    <div key={dateKey} className={`min-h-[72px] p-1 ${isToday ? 'bg-blue-50' : 'hover:bg-gray-50/80'}`}>
+                                    <div key={dateKey} className={`min-h-[72px] p-1 ${isToday ? 'bg-blue-50' : isWeekend ? 'bg-rose-50/30 hover:bg-rose-50/60' : 'hover:bg-gray-50/80'}`}>
                                         <span className={`inline-flex items-center justify-center w-6 h-6 text-sm rounded-full font-medium ${isToday ? 'bg-primary text-black ring-2 ring-primary/40 font-bold' : 'text-gray-700'}`}>
                                             {day}
                                         </span>
