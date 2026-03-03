@@ -74,7 +74,6 @@ export const TUTORIAL_SCREENSHOTS = {
     3: 'parent-search-system.png', // Step 3: Parent Search System
     4: 'close-sire-selector.png', // Step 4: Close Sire Selector
     5: 'other-parent-selector.png', // Step 5: Other Parent Selector
-    6: 'origin-information.png', // Step 6: Origin Information
   },
   
   'gs-breeding': {

@@ -647,17 +647,6 @@ const GETTING_STARTED_LESSONS = [
           'Same search functionality as Sire/Dam',
           'Helps track diverse pedigrees'
         ]
-      },
-      {
-        stepNumber: 6,
-        title: 'Origin Information',
-        content: 'Select the origin of your animal: "Captive-Bred" (domestically bred), "Wild-caught" or "Rescue". This helps track where your animals come from.',
-        highlightElement: '[data-tutorial-target="origin-select"]',
-        tips: [
-          'Helps track breeding history',
-          'Important for COI calculations',
-          'Affects lineage tracking'
-        ]
       }
     ]
   },
