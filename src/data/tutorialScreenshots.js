@@ -105,8 +105,8 @@ export const TUTORIAL_SCREENSHOTS = {
   'gs-behavior': {
     1: 'behavior-tab.png', // Step 1: Behavior Tab
     2: 'behavior-items.png', // Step 2: Behavior Items
-    3: 'activity-and-training.png', // Step 3: Activity & Training
-    4: 'training-and-working.png', // Step 4: Training & Working
+    3: 'activity.png', // Step 3: Activity
+    4: 'known-issues.png', // Step 4: Known Issues
   },
   
   'gs-records-eol': {

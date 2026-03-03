@@ -900,25 +900,25 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 3,
-        title: 'Activity & Training',
-        content: 'The Activity section covers your animal\'s schedule and exercise needs. Set the Activity Cycle (Nocturnal, Diurnal, or Crepuscular), Exercise Requirements (Low to Very High), and Daily Exercise in minutes. Below that, record training details: Training Level (Basic to Competition), Training Disciplines (e.g., Agility, Nosework), Working Role (e.g., Service, Therapy), and Certifications. Checkboxes for Crate Trained, Litter Trained, Leash Trained, and Free Flight Trained are also available depending on species.',
+        title: 'Activity',
+        content: 'The Activity section covers your animal\'s schedule and physical needs. Set the Activity Cycle (Nocturnal, Diurnal, or Crepuscular), Exercise Requirements (Low to Very High), and Daily Exercise in minutes. If your species template includes training fields, you\'ll also see Training Level, Training Disciplines, Working Role, Certifications, and training checkboxes (Crate Trained, Litter Trained, Leash Trained, Free Flight Trained) within this same section.',
         highlightElement: '[data-tutorial-target="activity-pattern-select"]',
         tips: [
           'Activity Cycle is mostly species-determined',
-          'Exercise fields are most relevant for dogs',
-          'Training checkboxes vary by species template',
+          'Exercise fields most relevant for dogs',
+          'Training fields are template-controlled — may not appear for all species',
           'Examples: Mice are nocturnal, hamsters are crepuscular'
         ]
       },
       {
         stepNumber: 4,
-        title: 'Training & Working',
-        content: 'This section documents training achievements and working roles. Record Training Level (basic to competition), Training Disciplines (agility, obedience, etc.), Working Role (service, therapy, etc.), Certifications, and any behavioral challenges like Behavioral Issues, Bite History, or Reactivity Notes.',
+        title: 'Known Issues',
+        content: 'This section records any behavioural challenges or safety considerations. Behavioral Issues captures recurring problems (e.g., resource guarding, separation anxiety), Bite History logs any bite incidents with context, and Reactivity Notes describes triggers, thresholds, and management strategies. These fields are template-controlled and may not appear for all species.',
+        highlightElement: null,
         tips: [
-          'Important for working animals',
-          'Track training progress',
-          'Document certifications',
-          'Note behavioral challenges for safety'
+          'Be honest — this helps future owners',
+          'Important for safety and rehoming transparency',
+          'Template-controlled — may not show for all species'
         ]
       }
     ]
