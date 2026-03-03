@@ -25054,11 +25054,20 @@ const App = () => {
         }
     }, [authToken, userProfile, showModalMessage]);
 
-    // Check if user has seen welcome guide (localStorage only - no API call needed)
+    // Check if user has seen welcome guide — backend flag is authoritative, localStorage is a fast-path cache
     useEffect(() => {
         if (!authToken || !userProfile) return;
         
         const storageKey = `${userProfile._id}_hasSeenWelcomeGuide`;
+
+        // Backend flag (survives cache clears)
+        if (userProfile.hasSeenProfileSetupGuide) {
+            localStorage.setItem(storageKey, 'true'); // sync cache
+            setHasSeenWelcomeGuide(true);
+            return;
+        }
+
+        // Fall back to localStorage
         const hasSeen = localStorage.getItem(storageKey) === 'true';
         setHasSeenWelcomeGuide(hasSeen);
         
