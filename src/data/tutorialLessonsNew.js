@@ -266,18 +266,30 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 3,
-        title: 'Current Owner Section',
-        content: 'This section tracks ownership. Check "Currently Owned by Me" if you own the animal. The Owner Name field lets you record the owner\'s name for your records and builds an ownership history.',
+        title: 'Keeper Section',
+        content: 'The "🏠 Keeper" section tracks who is currently caring for this animal. Check "Currently Owned by Me" to mark yourself as the current keeper. The Keeper Name field records the name of whoever is keeping the animal right now — changing this name automatically logs an entry in the Keeper History below. The optional Co-Ownership field lets you note shared ownership arrangements.',
         highlightElement: '[data-tutorial-target="current-owner-field"]',
         tips: [
-          'Checkbox: Currently owned vs previously owned',
-          'Owner Name: Records for tracking',
-          'Ownership history is automatically maintained',
-          'Useful when transferring animals'
+          'Checkbox: marks you as the current keeper',
+          'Keeper Name: person currently caring for the animal',
+          'Changing the Keeper Name creates a history entry automatically',
+          'Co-Ownership: note breeding rights or shared arrangements'
         ]
       },
       {
         stepNumber: 4,
+        title: 'Keeper History',
+        content: 'The "🏠 Keeper History" section keeps a full log of everyone who has cared for this animal over time. You can add entries manually (type a name) or by searching for a registered CritterTrack user. Optionally select their country. This builds a transparent custody chain, especially useful when animals are transferred between breeders.',
+        tips: [
+          'Manual Name: type any name for non-registered keepers',
+          'Select User: search by name or CTUID for registered users',
+          'Country is optional but helps show geographic history',
+          'Entries can be removed with the X button',
+          'Auto-populated when you receive an animal via transfer'
+        ]
+      },
+      {
+        stepNumber: 5,
         title: 'Availability for Sale or Stud',
         content: 'Use this section to make your animal available in the public Marketplace. When you enable "Available for Sale" or "Available for Stud", the price/fee fields will appear inline below the checkbox. Set your desired currency and amount (or select Negotiable). Only public animals marked for sale or stud will appear in the Marketplace.',
         highlightElement: '[data-tutorial-target="availability-for-sale-stud"]',
@@ -637,16 +649,6 @@ const GETTING_STARTED_LESSONS = [
           'Affects lineage tracking'
         ]
       },
-      {
-        stepNumber: 7,
-        title: 'Ownership History',
-        content: 'This section shows who has owned this animal throughout its life. If you purchased it from another breeder, their information would be tracked here. This creates a complete history of the animal.',
-        highlightElement: '[data-tutorial-target="ownership-history"]',
-        tips: [
-          'Auto-populated when animal is transferred',
-          'Shows all previous owners',
-          'Helps verify provenance'
-        ]
       }
     ]
   },

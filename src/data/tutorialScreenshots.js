@@ -35,9 +35,9 @@ export const TUTORIAL_SCREENSHOTS = {
   'gs-status-privacy': {
     1: 'welcome-to-status-and-privacy.png', // Step 1: Welcome to Status & Privacy
     2: 'breeder-assignment.png', // Step 2: Breeder Assignment
-    3: 'current-owner-section.png', // Step 3: Current Owner Section
-    4: 'availability-for-sale-or-stud.png', // Step 4: Availability for Sale or Stud
-    5: 'move-to-physical-tab.png', // Step 5: Move to Physical Tab
+    3: 'keeper-section.png', // Step 3: Keeper Section
+    4: 'keeper-history.png', // Step 4: Keeper History
+    5: 'availability-for-sale-or-stud.png', // Step 5: Availability for Sale or Stud
   },
   
   'gs-physical': {
@@ -74,7 +74,6 @@ export const TUTORIAL_SCREENSHOTS = {
     4: 'close-sire-selector.png', // Step 4: Close Sire Selector
     5: 'other-parent-selector.png', // Step 5: Other Parent Selector
     6: 'origin-information.png', // Step 6: Origin Information
-    7: 'ownership-history.png', // Step 7: Ownership History
   },
   
   'gs-breeding': {
