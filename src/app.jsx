@@ -19292,6 +19292,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     const [allAnimalsRaw, setAllAnimalsRaw] = useState([]); // Unfiltered ? used by Management View
     const [availableAnimalsRaw, setAvailableAnimalsRaw] = useState([]); // All user-created animals with status=Available (no ownership filter)
     const [soldTransferredRaw, setSoldTransferredRaw] = useState([]); // View-only/transferred animals — shown in Management > Sold/Transferred section
+    const [soldOwnerFilter, setSoldOwnerFilter] = useState(''); // Filter sold/transferred section by recipient owner
     const [loading, setLoading] = useState(true);
     
     // Load filters from localStorage or use defaults
@@ -21881,22 +21882,57 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     <SectionHeader sectionKey="soldTransferred"
                         icon={<ArrowLeftRight size={18} className="text-orange-600" />}
                         title="Sold / Transferred" count={soldList.length} bgClass="bg-orange-50" />
-                    {!collapsedMgmtSections['soldTransferred'] && (
-                        <div className="p-3 space-y-2">
-                            {soldList.length === 0
-                                ? <div className="text-sm text-gray-400 text-center py-4">No sold or transferred animals.</div>
-                                : <MgmtGroup groupKey="sold_animals" label="View-Only Access"
-                                    groupAnimals={soldList} headerClass="bg-orange-50"
-                                    renderExtras={(a) => (
-                                        <div className="flex items-center gap-1.5 shrink-0">
-                                            <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium whitespace-nowrap">
-                                                {a.soldStatus === 'sold' ? '📤 Sold' : a.soldStatus === 'purchased' ? '📥 Purchased' : '🔀 Transferred'}
-                                            </span>
-                                        </div>
-                                    )} />
-                            }
-                        </div>
-                    )}
+                    {!collapsedMgmtSections['soldTransferred'] && (() => {
+                        // Build unique owner list for dropdown
+                        const soldOwners = [...new Map(
+                            soldList
+                                .filter(a => a.ownerName)
+                                .map(a => [a.ownerId_public || a.ownerName, { key: a.ownerId_public || a.ownerName, label: a.ownerName }])
+                        ).values()].sort((a, b) => a.label.localeCompare(b.label));
+                        const filteredSoldList = soldOwnerFilter
+                            ? soldList.filter(a => (a.ownerId_public || a.ownerName) === soldOwnerFilter)
+                            : soldList;
+                        return (
+                            <div className="p-3 space-y-2">
+                                {soldList.length === 0
+                                    ? <div className="text-sm text-gray-400 text-center py-4">No sold or transferred animals.</div>
+                                    : <>
+                                        {soldOwners.length > 1 && (
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs font-medium text-gray-500 whitespace-nowrap">Filter by recipient:</span>
+                                                <select
+                                                    value={soldOwnerFilter}
+                                                    onChange={e => setSoldOwnerFilter(e.target.value)}
+                                                    className="flex-1 text-xs border border-gray-300 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-orange-300 focus:border-orange-400 bg-white"
+                                                >
+                                                    <option value="">All recipients ({soldList.length})</option>
+                                                    {soldOwners.map(o => (
+                                                        <option key={o.key} value={o.key}>
+                                                            {o.label} ({soldList.filter(a => (a.ownerId_public || a.ownerName) === o.key).length})
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        )}
+                                        <MgmtGroup groupKey="sold_animals" label="View-Only Access"
+                                            groupAnimals={filteredSoldList} headerClass="bg-orange-50"
+                                            renderExtras={(a) => (
+                                                <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
+                                                    {a.ownerName && (
+                                                        <span className="text-xs text-gray-500 font-medium max-w-[100px] truncate" title={`Transferred to: ${a.ownerName}`}>
+                                                            → {a.ownerName}
+                                                        </span>
+                                                    )}
+                                                    <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium whitespace-nowrap">
+                                                        {a.soldStatus === 'sold' ? '📤 Sold' : a.soldStatus === 'purchased' ? '📥 Purchased' : '🔀 Transferred'}
+                                                    </span>
+                                                </div>
+                                            )} />
+                                    </>
+                                }
+                            </div>
+                        );
+                    })()}
                 </div>
 
                 {/* -- 8. ACTIVITY LOG ? now a separate screen, accessed via button in header -- */}
