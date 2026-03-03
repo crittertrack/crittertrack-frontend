@@ -8656,6 +8656,43 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         } catch {}
     };
 
+    // Test Pairing modal state
+    const [showTestPairingModal, setShowTestPairingModal] = useState(false);
+    const [tpSireId, setTpSireId] = useState('');
+    const [tpDamId, setTpDamId] = useState('');
+    const [tpCOI, setTpCOI] = useState(null);
+    const [tpCalculating, setTpCalculating] = useState(false);
+    const [tpError, setTpError] = useState(null);
+    const handleCalculateTestPairing = async () => {
+        if (!tpSireId || !tpDamId) return;
+        const cacheKey = `${tpSireId}:${tpDamId}`;
+        if (coiCacheRef.current[cacheKey] != null) {
+            setTpCOI(coiCacheRef.current[cacheKey]);
+            return;
+        }
+        setTpCalculating(true);
+        setTpError(null);
+        setTpCOI(null);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000);
+        try {
+            const res = await axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
+                params: { sireId: tpSireId, damId: tpDamId, generations: 20 },
+                headers: { Authorization: `Bearer ${authToken}` },
+                signal: controller.signal,
+            });
+            const val = res.data.inbreedingCoefficient ?? 0;
+            coiCacheRef.current[cacheKey] = val;
+            setTpCOI(val);
+        } catch (err) {
+            if (axios.isCancel(err)) setTpError('Request timed out — please try again.');
+            else setTpError('Failed to calculate COI. Please try again.');
+        } finally {
+            clearTimeout(timeout);
+            setTpCalculating(false);
+        }
+    };
+
     useEffect(() => {
         const loadData = async () => {
             setLoading(true);
@@ -8686,45 +8723,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             onFormOpenChange(showAddForm);
         }
     }, [showAddForm, onFormOpenChange]);
-
-    // Calculate predicted COI when both parents are selected
-    useEffect(() => {
-        const calculatePredictedCOI = async () => {
-            if (formData.sireId_public && formData.damId_public && showAddForm) {
-                const cacheKey = `${formData.sireId_public}:${formData.damId_public}`;
-                // Return cached result immediately — no spinner needed
-                if (coiCacheRef.current[cacheKey] != null) {
-                    setPredictedCOI(coiCacheRef.current[cacheKey]);
-                    setCalculatingCOI(false);
-                    return;
-                }
-                setCalculatingCOI(true);
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 15000);
-                try {
-                    const coiResponse = await axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
-                        params: { sireId: formData.sireId_public, damId: formData.damId_public, generations: 20 },
-                        headers: { Authorization: `Bearer ${authToken}` },
-                        signal: controller.signal,
-                    });
-                    const coiValue = coiResponse.data.inbreedingCoefficient ?? 0;
-                    coiCacheRef.current[cacheKey] = coiValue;
-                    setPredictedCOI(coiValue);
-                } catch (error) {
-                    if (!axios.isCancel(error)) console.error('[Predicted COI]', error);
-                    setPredictedCOI(0);
-                } finally {
-                    clearTimeout(timeout);
-                    setCalculatingCOI(false);
-                }
-            } else {
-                setPredictedCOI(null);
-                setCalculatingCOI(false);
-            }
-        };
-
-        calculatePredictedCOI();
-    }, [formData.sireId_public, formData.damId_public, showAddForm, authToken, API_BASE_URL]);
 
     // Fallback: fetch offspring for a specific litter if not yet loaded when expanded
     // (normally fetchLitters pre-loads all offspring, this is just a safety net)
@@ -9754,6 +9752,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         <Bell size={14} />
                         <span className="hidden sm:inline">Alerts {urgencyEnabled ? 'On' : 'Off'}</span>
                     </button>
+                    {/* Test Pairing Button */}
+                    <button
+                        onClick={() => { setShowTestPairingModal(true); setTpSireId(''); setTpDamId(''); setTpCOI(null); setTpError(null); setTpCalculating(false); }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border shadow-sm bg-white border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                        title="Test a sire/dam pairing to predict COI"
+                    >
+                        <Calculator size={14} />
+                        <span className="hidden sm:inline">Test Pairing</span>
+                    </button>
                     <button
                         onClick={handleRecalculateOffspringCounts}
                         className="bg-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg flex items-center"
@@ -9900,24 +9907,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </button>
                                     </div>
                                 </div>
-
-                                {/* Predicted COI Display */}
-                                {(formData.sireId_public && formData.damId_public) && (
-                                    <div className="mb-4 p-3 rounded-lg border bg-gray-50 flex items-center gap-2">
-                                        <span className="text-sm font-medium text-gray-700">Predicted COI for this pairing:</span>
-                                        {calculatingCOI ? (
-                                            <span className="text-sm text-gray-500 flex items-center gap-1">
-                                                <Loader2 className="w-4 h-4 animate-spin" /> Calculating...
-                                            </span>
-                                        ) : predictedCOI != null ? (
-                                            <span className="text-sm font-bold text-gray-800">
-                                                {predictedCOI.toFixed(2)}%
-                                            </span>
-                                        ) : (
-                                            <span className="text-sm text-gray-400 italic">N/A</span>
-                                        )}
-                                    </div>
-                                )}
 
                                 {/* Breeding Information */}
                                 <div className="mb-6 p-4 border border-purple-200 rounded-lg bg-purple-50">
@@ -11378,6 +11367,97 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     LoadingSpinner={LoadingSpinner}
                     genderFilter={['Female', 'Intersex', 'Unknown']}
                 />
+            )}
+
+            {/* Test Pairing Modal */}
+            {showTestPairingModal && (
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+                        <div className="flex justify-between items-center border-b p-4">
+                            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                <Calculator size={18} className="text-primary" />
+                                Test Pairing — Predict COI
+                            </h3>
+                            <button onClick={() => setShowTestPairingModal(false)} className="text-gray-500 hover:text-gray-800">
+                                <X size={22} />
+                            </button>
+                        </div>
+                        <div className="p-5 space-y-4">
+                            <p className="text-sm text-gray-500">Select a sire and dam to calculate the predicted Coefficient of Inbreeding (COI) for their offspring before creating a litter.</p>
+                            {/* Sire */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Sire (Father)</label>
+                                <select
+                                    value={tpSireId}
+                                    onChange={e => { setTpSireId(e.target.value); setTpCOI(null); setTpError(null); }}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                                >
+                                    <option value="">Select Sire...</option>
+                                    {myAnimals.filter(a => ['Male', 'Unknown', ''].includes(a.gender ?? '')).map(a => (
+                                        <option key={a.id_public} value={a.id_public}>{a.name} ({a.id_public}){a.species ? ` — ${a.species}` : ''}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            {/* Dam */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Dam (Mother)</label>
+                                <select
+                                    value={tpDamId}
+                                    onChange={e => { setTpDamId(e.target.value); setTpCOI(null); setTpError(null); }}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                                >
+                                    <option value="">Select Dam...</option>
+                                    {myAnimals.filter(a => ['Female', 'Intersex', 'Unknown', ''].includes(a.gender ?? '')).map(a => (
+                                        <option key={a.id_public} value={a.id_public}>{a.name} ({a.id_public}){a.species ? ` — ${a.species}` : ''}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            {/* Calculate Button */}
+                            <button
+                                onClick={handleCalculateTestPairing}
+                                disabled={!tpSireId || !tpDamId || tpCalculating}
+                                className="w-full py-2 px-4 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors"
+                            >
+                                {tpCalculating ? (
+                                    <><Loader2 className="w-4 h-4 animate-spin" /> Calculating...</>
+                                ) : (
+                                    <><Calculator size={15} /> Calculate COI</>
+                                )}
+                            </button>
+                            {/* Result */}
+                            {tpCOI !== null && (
+                                <div className={`p-4 rounded-lg border text-center ${
+                                    tpCOI < 5 ? 'bg-green-50 border-green-200' :
+                                    tpCOI < 12.5 ? 'bg-amber-50 border-amber-200' :
+                                    'bg-red-50 border-red-200'
+                                }`}>
+                                    <div className="text-sm font-medium text-gray-600 mb-1">Predicted COI</div>
+                                    <div className={`text-3xl font-bold ${
+                                        tpCOI < 5 ? 'text-green-700' :
+                                        tpCOI < 12.5 ? 'text-amber-700' :
+                                        'text-red-700'
+                                    }`}>{tpCOI.toFixed(2)}%</div>
+                                    <div className={`text-xs mt-1 ${
+                                        tpCOI < 5 ? 'text-green-600' :
+                                        tpCOI < 12.5 ? 'text-amber-600' :
+                                        'text-red-600'
+                                    }`}>
+                                        {tpCOI < 5 ? 'Low inbreeding — generally acceptable' :
+                                         tpCOI < 12.5 ? 'Moderate inbreeding — proceed with caution' :
+                                         'High inbreeding — not recommended'}
+                                    </div>
+                                </div>
+                            )}
+                            {/* Error */}
+                            {tpError && (
+                                <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">{tpError}</div>
+                            )}
+                        </div>
+                        <div className="border-t p-4 flex justify-end">
+                            <button onClick={() => setShowTestPairingModal(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Close</button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
