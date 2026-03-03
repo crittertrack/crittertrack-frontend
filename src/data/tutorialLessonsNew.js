@@ -267,12 +267,11 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 3,
         title: 'Keeper Section',
-        content: 'The "🏠 Keeper" section tracks who is currently caring for this animal. Check "Currently Owned by Me" to mark yourself as the current keeper. The Keeper Name field records the name of whoever is keeping the animal right now — changing this name automatically logs an entry in the Keeper History below. The optional Co-Ownership field lets you note shared ownership arrangements.',
+        content: 'The "🏠 Keeper" section tracks who is currently caring for this animal. Check "Currently Owned by Me" to mark yourself as the current keeper. The Keeper Name field records the name of whoever is keeping the animal right now. The optional Co-Ownership field lets you note shared ownership arrangements.',
         highlightElement: '[data-tutorial-target="current-owner-field"]',
         tips: [
           'Checkbox: marks you as the current keeper',
           'Keeper Name: person currently caring for the animal',
-          'Changing the Keeper Name creates a history entry automatically',
           'Co-Ownership: note breeding rights or shared arrangements'
         ]
       },
