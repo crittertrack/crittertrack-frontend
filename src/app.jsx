@@ -19290,6 +19290,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
 const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, fetchHiddenAnimals, navigate }) => {
     const [animals, setAnimals] = useState([]);
     const [allAnimalsRaw, setAllAnimalsRaw] = useState([]); // Unfiltered ? used by Management View
+    const [availableAnimalsRaw, setAvailableAnimalsRaw] = useState([]); // All user-created animals with status=Available (no ownership filter)
     const [loading, setLoading] = useState(true);
     
     // Load filters from localStorage or use defaults
@@ -19578,6 +19579,18 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         } catch (err) { console.error('[fetchAllAnimals]', err); }
     }, [authToken, API_BASE_URL]);
 
+    // Fetch ALL animals created by this user with status=Available (ignores ownership filter)
+    const fetchAvailableAnimals = useCallback(async () => {
+        if (!authToken) return;
+        try {
+            const res = await axios.get(`${API_BASE_URL}/animals`, {
+                headers: { Authorization: `Bearer ${authToken}` },
+                params: { status: 'Available' }
+            });
+            setAvailableAnimalsRaw(res.data || []);
+        } catch (err) { console.error('[fetchAvailableAnimals]', err); }
+    }, [authToken, API_BASE_URL]);
+
     useEffect(() => {
         fetchAnimals();
     }, [fetchAnimals]);
@@ -19588,10 +19601,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             try { fetchAnimals(); } catch (e) { /* ignore */ }
             try { fetchAllSpecies(); } catch (e) { /* ignore */ }
             try { fetchAllAnimals(); } catch (e) { /* ignore */ }
+            try { fetchAvailableAnimals(); } catch (e) { /* ignore */ }
         };
         window.addEventListener('animals-changed', handleAnimalsChanged);
         return () => window.removeEventListener('animals-changed', handleAnimalsChanged);
-    }, [fetchAnimals, fetchAllSpecies, fetchAllAnimals]);
+    }, [fetchAnimals, fetchAllSpecies, fetchAllAnimals, fetchAvailableAnimals]);
 
     // Patch a single updated animal in-place without reloading the full list
     useEffect(() => {
@@ -19600,12 +19614,17 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             if (!updated?.id_public) return;
             setAnimals(prev => prev.map(a => a.id_public === updated.id_public ? { ...a, ...updated } : a));
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === updated.id_public ? { ...a, ...updated } : a));
+            setAvailableAnimalsRaw(prev => {
+                const next = prev.map(a => a.id_public === updated.id_public ? { ...a, ...updated } : a);
+                return next.filter(a => a.status === 'Available');
+            });
         };
         window.addEventListener('animal-updated', handleAnimalUpdated);
         return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
     }, []);
 
     useEffect(() => { fetchAllAnimals(); }, [fetchAllAnimals]);
+    useEffect(() => { fetchAvailableAnimals(); }, [fetchAvailableAnimals]);
 
     // Fetch the current user's activity log (lazy ? only when log screen opens)
     const fetchActivityLogs = useCallback(async (page = 1, filters = {}) => {
@@ -21048,8 +21067,29 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         // 5. Medical ? quarantine and treatment
         const quarantineList = allAnimals.filter(a => a.isQuarantine);
         const treatmentList = allAnimals.filter(a => !a.isQuarantine && (
+
             parseArrayField(a.medicalConditions).length > 0 || parseArrayField(a.medications).length > 0
         ));
+
+        // 6. Available for sale/rehoming ? all user-created animals with status=Available (no ownership filter)
+        const availableList = availableAnimalsRaw.filter(a => a.status === 'Available');
+
+        const handleMarkRehomed = (e, animal) => {
+            e.stopPropagation();
+            if (!window.confirm(`Mark ${animal.name || 'this animal'} as Rehomed? This will change their status to "Rehomed".`)) return;
+            // Optimistic update
+            setAvailableAnimalsRaw(prev => prev.filter(a => a.id_public !== animal.id_public));
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, status: 'Rehomed' } : a));
+            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { status: 'Rehomed' },
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => logManagementActivity('status_change', animal.id_public, { name: animal.name, species: animal.species, status: 'Rehomed' }))
+                .catch(err => {
+                    console.error('Mark rehomed failed:', err);
+                    // Rollback
+                    setAvailableAnimalsRaw(prev => [...prev, { ...animal }]);
+                    setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, status: 'Available' } : a));
+                });
+        };
 
         const handleMarkEnclosureTaskDone = async (e, enc, taskIdx) => {
             e.stopPropagation();
@@ -21784,7 +21824,39 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     )}
                 </div>
 
-                {/* -- 6. ACTIVITY LOG ? now a separate screen, accessed via button in header -- */}
+                {/* -- 6. FOR SALE / AVAILABLE -------------------------------- */}
+                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <SectionHeader sectionKey="available"
+                        icon={<span className="text-purple-600 text-base leading-none">🏷️</span>}
+                        title="For Sale / Available" count={availableList.length} bgClass="bg-purple-50" />
+                    {!collapsedMgmtSections['available'] && (
+                        <div className="p-3 space-y-2">
+                            {availableList.length === 0
+                                ? <div className="text-sm text-gray-400 text-center py-4">No animals currently marked as Available.</div>
+                                : <MgmtGroup groupKey="avail_animals" label="Available"
+                                    groupAnimals={availableList} headerClass="bg-purple-50"
+                                    renderExtras={(a) => (
+                                        <div className="flex items-center gap-1.5 shrink-0">
+                                            {a.isForSale && a.salePriceAmount && (
+                                                <span className="text-xs text-purple-600 font-medium whitespace-nowrap">
+                                                    {a.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${a.salePriceCurrency || ''} ${a.salePriceAmount}`.trim()}
+                                                </span>
+                                            )}
+                                            <button
+                                                onClick={(e) => handleMarkRehomed(e, a)}
+                                                className="text-xs px-2 py-0.5 rounded font-medium border bg-indigo-500 text-white hover:bg-indigo-600 border-indigo-500 whitespace-nowrap"
+                                                title="Mark as Rehomed / Sold"
+                                            >
+                                                🏠 Rehomed
+                                            </button>
+                                        </div>
+                                    )} />
+                            }
+                        </div>
+                    )}
+                </div>
+
+                {/* -- 7. ACTIVITY LOG ? now a separate screen, accessed via button in header -- */}
 
                 {/* -- Feeding Modal ------------------------------------------------------- */}
                 {feedingModal && (
