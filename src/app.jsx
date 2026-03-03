@@ -21851,12 +21851,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         icon={<span className="text-purple-600 text-base leading-none">🏷️</span>}
                         title="For Sale / Available" count={availableList.length} bgClass="bg-purple-50" />
                     {!collapsedMgmtSections['available'] && (
-                        <div className="p-3 space-y-2">
+                        <div className="p-3 space-y-1.5">
                             {availableList.length === 0
                                 ? <div className="text-sm text-gray-400 text-center py-4">No animals currently marked as Available.</div>
-                                : <MgmtGroup groupKey="avail_animals" label="Available"
-                                    groupAnimals={availableList} headerClass="bg-purple-50"
-                                    renderExtras={(a) => (
+                                : availableList.map(a => (
+                                    <MgmtAnimalCard key={a._id || a.id_public} animal={a} extras={
                                         <div className="flex items-center gap-1.5 shrink-0">
                                             {a.isForSale && a.salePriceAmount && (
                                                 <span className="text-xs text-purple-600 font-medium whitespace-nowrap">
@@ -21871,7 +21870,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                                 🏠 Rehomed
                                             </button>
                                         </div>
-                                    )} />
+                                    } />
+                                ))
                             }
                         </div>
                     )}
@@ -21914,20 +21914,26 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                                 </select>
                                             </div>
                                         )}
-                                        <MgmtGroup groupKey="sold_animals" label="View-Only Access"
-                                            groupAnimals={filteredSoldList} headerClass="bg-orange-50"
-                                            renderExtras={(a) => (
-                                                <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
-                                                    {a.ownerName && (
-                                                        <span className="text-xs text-gray-500 font-medium max-w-[100px] truncate" title={`Transferred to: ${a.ownerName}`}>
-                                                            → {a.ownerName}
-                                                        </span>
-                                                    )}
-                                                    <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium whitespace-nowrap">
-                                                        {a.soldStatus === 'sold' ? '📤 Sold' : a.soldStatus === 'purchased' ? '📥 Purchased' : '🔀 Transferred'}
-                                                    </span>
-                                                </div>
-                                            )} />
+                                        <div className="space-y-1.5">
+                                            {filteredSoldList.map(a => (
+                                                <MgmtAnimalCard key={a._id || a.id_public} animal={a} extras={
+                                                    a.ownerName ? (
+                                                        <RouterLink
+                                                            to={a.ownerIdPublic ? `/user/${a.ownerIdPublic}` : '#'}
+                                                            className="flex items-center gap-1.5 shrink-0 min-w-0 hover:opacity-80 transition-opacity"
+                                                            title={`View profile: ${a.ownerName}`}
+                                                            onClick={e => e.stopPropagation()}
+                                                        >
+                                                            {a.ownerAvatar
+                                                                ? <img src={a.ownerAvatar} alt={a.ownerName} className="w-5 h-5 rounded-full object-cover shrink-0 border border-orange-200" />
+                                                                : <span className="w-5 h-5 rounded-full bg-orange-200 text-orange-700 text-[10px] font-bold flex items-center justify-center shrink-0">{a.ownerName.charAt(0).toUpperCase()}</span>
+                                                            }
+                                                            <span className="text-xs text-orange-700 font-medium max-w-[110px] truncate whitespace-nowrap">{a.ownerName}</span>
+                                                        </RouterLink>
+                                                    ) : null
+                                                } />
+                                            ))}
+                                        </div>
                                     </>
                                 }
                             </div>
