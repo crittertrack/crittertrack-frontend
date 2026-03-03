@@ -628,7 +628,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                                     headers: { Authorization: `Bearer ${authToken}` }
                                 });
                                 animalInfo = response.data;
-                                // foundViaOwned stays false — this animal belongs to someone else
+                                foundViaOwned = true; // User has legitimate access (sold/transferred animal)
                             } catch (error2) {
                                 console.log(`Animal ${id} not accessible via owned or related endpoints:`, error2.message);
                             }
@@ -8161,19 +8161,22 @@ const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal, 
     const [parentData, setParentData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [notFound, setNotFound] = useState(false);
+    const [foundViaAuth, setFoundViaAuth] = useState(false);
 
     React.useEffect(() => {
         if (!parentId) {
             setParentData(null);
             setNotFound(false);
+            setFoundViaAuth(false);
             return;
         }
 
         const fetchParent = async () => {
             setLoading(true);
             setNotFound(false);
+            setFoundViaAuth(false);
             try {
-                // If authToken is available, try fetching from owned animals first
+                // If authToken is available, try fetching from owned/accessible animals first
                 if (authToken) {
                     try {
                         const ownedResponse = await axios.get(`${API_BASE_URL}/animals/${parentId}`, {
@@ -8181,12 +8184,25 @@ const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal, 
                         });
                         if (ownedResponse.data) {
                             setParentData(ownedResponse.data);
+                            setFoundViaAuth(true);
                             setLoading(false);
                             return;
                         }
                     } catch (ownedError) {
-                        // Not in owned animals, try public database
-                        console.log(`${parentType} not in owned animals, checking public database`);
+                        // Not in owned animals, try /animals/any for sold/transferred animals
+                        try {
+                            const anyResponse = await axios.get(`${API_BASE_URL}/animals/any/${parentId}`, {
+                                headers: { Authorization: `Bearer ${authToken}` }
+                            });
+                            if (anyResponse.data) {
+                                setParentData(anyResponse.data);
+                                setFoundViaAuth(true);
+                                setLoading(false);
+                                return;
+                            }
+                        } catch (anyError) {
+                            console.log(`${parentType} not in owned or related animals, checking public database`);
+                        }
                     }
                 }
 
@@ -8218,7 +8234,7 @@ const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal, 
         );
     }
 
-    if (notFound || parentData?.isPrivate) {
+    if (notFound || (!foundViaAuth && parentData?.isPrivate)) {
         return (
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
                 <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
