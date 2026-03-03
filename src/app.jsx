@@ -11422,26 +11422,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             </button>
                             {/* Result */}
                             {tpCOI !== null && (
-                                <div className={`p-4 rounded-lg border text-center ${
-                                    tpCOI < 5 ? 'bg-green-50 border-green-200' :
-                                    tpCOI < 12.5 ? 'bg-amber-50 border-amber-200' :
-                                    'bg-red-50 border-red-200'
-                                }`}>
+                                <div className="p-4 rounded-lg border border-gray-200 bg-gray-50 text-center">
                                     <div className="text-sm font-medium text-gray-600 mb-1">Predicted COI</div>
-                                    <div className={`text-3xl font-bold ${
-                                        tpCOI < 5 ? 'text-green-700' :
-                                        tpCOI < 12.5 ? 'text-amber-700' :
-                                        'text-red-700'
-                                    }`}>{tpCOI.toFixed(2)}%</div>
-                                    <div className={`text-xs mt-1 ${
-                                        tpCOI < 5 ? 'text-green-600' :
-                                        tpCOI < 12.5 ? 'text-amber-600' :
-                                        'text-red-600'
-                                    }`}>
-                                        {tpCOI < 5 ? 'Low inbreeding — generally acceptable' :
-                                         tpCOI < 12.5 ? 'Moderate inbreeding — proceed with caution' :
-                                         'High inbreeding — not recommended'}
-                                    </div>
+                                    <div className="text-3xl font-bold text-gray-800">{tpCOI.toFixed(2)}%</div>
                                 </div>
                             )}
                             {/* Error */}
