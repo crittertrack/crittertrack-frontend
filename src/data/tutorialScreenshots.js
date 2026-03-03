@@ -45,7 +45,7 @@ export const TUTORIAL_SCREENSHOTS = {
     2: 'template-based-physical-fields.png', // Step 2: Template-Based Physical Fields
     3: 'filling-out-physical-fields.png', // Step 3: Filling Out Physical Fields
     4: 'carrier-traits.png', // Step 4: Carrier Traits
-    5: 'genetic-code-the-add-button.png', // Step 5: Genetic Code - The ADD Button
+    5: 'genetic-code-the-add-button.png', // Step 5: Genetic Code
     6: 'genetic-builder-overview.png', // Step 6: Genetic Builder Overview
     7: 'close-genetic-builder.png', // Step 7: Close Genetic Builder
     8: 'life-stage.png', // Step 8: Life Stage

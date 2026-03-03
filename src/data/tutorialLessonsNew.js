@@ -364,15 +364,15 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 5,
-        title: 'Genetic Code - The ADD Button',
-        content: 'This is where you can enter genetic information about your animal. Click the ADD button next to Genetic Code to open the genetic builder.',
+        title: 'Genetic Code',
+        content: 'The Genetic Code field lets you record the genetic notation for your animal. For Fancy Mouse, an ADD button appears next to the field — click it to open the interactive Genetic Builder which guides you through selecting genes with dropdowns. For all other species, this is a plain text field where you can type genetic notation manually.',
         highlightElement: '[data-tutorial-target="genetic-code-add-btn"]',
         actionType: 'click',
         tips: [
-          'Genetic codes are complex',
-          'Not required, but highly recommended for breeders',
-          'The builder is only available for Fancy Mice currently',
-          'Other species use manual entry'
+          'Fancy Mouse only: ADD button opens the interactive Genetic Builder',
+          'All other species: type genetic notation manually into the text field',
+          'Genetic codes are optional but highly recommended for breeders',
+          'You can always edit this later'
         ]
       },
       {
