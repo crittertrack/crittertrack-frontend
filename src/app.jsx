@@ -7244,8 +7244,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* 1st Section: Pedigree */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <div className="flex justify-between items-center">
+                                    <h3 className="text-lg font-semibold text-gray-700">🌳 Pedigree: Sire and Dam</h3>
                                     <div className="flex items-center gap-3">
-                                        <h3 className="text-lg font-semibold text-gray-700">🌳 Pedigree: Sire and Dam</h3>
                                         {animalCOI != null && (
                                             <div className="text-sm text-gray-800">
                                                 <span className="font-medium">COI:</span> {animalCOI.toFixed(2)}%
@@ -7254,14 +7254,14 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                         {loadingCOI && (
                                             <div className="text-xs text-gray-400">Calculating...</div>
                                         )}
+                                        <button
+                                            onClick={() => setShowPedigree(true)}
+                                            data-tutorial-target="pedigree-btn"
+                                            className="px-3 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition text-sm"
+                                        >
+                                            View Pedigree Chart
+                                        </button>
                                     </div>
-                                    <button
-                                        onClick={() => setShowPedigree(true)}
-                                        data-tutorial-target="pedigree-btn"
-                                        className="px-3 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition text-sm"
-                                    >
-                                        View Pedigree Chart
-                                    </button>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <ViewOnlyParentCard 
