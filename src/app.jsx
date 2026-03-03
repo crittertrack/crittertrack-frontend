@@ -19291,6 +19291,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     const [animals, setAnimals] = useState([]);
     const [allAnimalsRaw, setAllAnimalsRaw] = useState([]); // Unfiltered ? used by Management View
     const [availableAnimalsRaw, setAvailableAnimalsRaw] = useState([]); // All user-created animals with status=Available (no ownership filter)
+    const [soldTransferredRaw, setSoldTransferredRaw] = useState([]); // View-only/transferred animals — shown in Management > Sold/Transferred section
     const [loading, setLoading] = useState(true);
     
     // Load filters from localStorage or use defaults
@@ -19504,10 +19505,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 data = data.filter(a => selectedGenders.includes(a.gender));
             }
 
-            // Filter out view-only animals when "My Animals" filter is active
-            if (ownedFilterActive) {
-                data = data.filter(a => !a.isViewOnly);
-            }
+            // Always exclude view-only (sold/transferred) animals from My Animals — they appear in Management > Sold/Transferred
+            data = data.filter(a => !a.isViewOnly);
 
             // Enforce that males are excluded when pregnant or nursing filters are active
             if (statusFilterPregnant || statusFilterNursing) {
@@ -19591,6 +19590,19 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         } catch (err) { console.error('[fetchAvailableAnimals]', err); }
     }, [authToken, API_BASE_URL]);
 
+    // Fetch view-only/transferred animals — these are animals the user sold/transferred but retains view-only access to
+    const fetchSoldTransferred = useCallback(async () => {
+        if (!authToken) return;
+        try {
+            // Fetch without isOwned filter so the backend returns both owned + view-only animals
+            const res = await axios.get(`${API_BASE_URL}/animals`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            // Only keep view-only entries (ownerId !== current user)
+            setSoldTransferredRaw((res.data || []).filter(a => a.isViewOnly));
+        } catch (err) { console.error('[fetchSoldTransferred]', err); }
+    }, [authToken, API_BASE_URL]);
+
     useEffect(() => {
         fetchAnimals();
     }, [fetchAnimals]);
@@ -19602,10 +19614,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             try { fetchAllSpecies(); } catch (e) { /* ignore */ }
             try { fetchAllAnimals(); } catch (e) { /* ignore */ }
             try { fetchAvailableAnimals(); } catch (e) { /* ignore */ }
+            try { fetchSoldTransferred(); } catch (e) { /* ignore */ }
         };
         window.addEventListener('animals-changed', handleAnimalsChanged);
         return () => window.removeEventListener('animals-changed', handleAnimalsChanged);
-    }, [fetchAnimals, fetchAllSpecies, fetchAllAnimals, fetchAvailableAnimals]);
+    }, [fetchAnimals, fetchAllSpecies, fetchAllAnimals, fetchAvailableAnimals, fetchSoldTransferred]);
 
     // Patch a single updated animal in-place without reloading the full list
     useEffect(() => {
@@ -19618,6 +19631,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 const next = prev.map(a => a.id_public === updated.id_public ? { ...a, ...updated } : a);
                 return next.filter(a => a.status === 'Available');
             });
+            setSoldTransferredRaw(prev =>
+                prev.map(a => a.id_public === updated.id_public ? { ...a, ...updated } : a).filter(a => a.isViewOnly)
+            );
         };
         window.addEventListener('animal-updated', handleAnimalUpdated);
         return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
@@ -19625,6 +19641,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
 
     useEffect(() => { fetchAllAnimals(); }, [fetchAllAnimals]);
     useEffect(() => { fetchAvailableAnimals(); }, [fetchAvailableAnimals]);
+    useEffect(() => { fetchSoldTransferred(); }, [fetchSoldTransferred]);
 
     // Fetch the current user's activity log (lazy ? only when log screen opens)
     const fetchActivityLogs = useCallback(async (page = 1, filters = {}) => {
@@ -21074,6 +21091,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         // 6. Available for sale/rehoming ? all user-created animals with status=Available (no ownership filter)
         const availableList = availableAnimalsRaw.filter(a => a.status === 'Available');
 
+        // 7. Sold / Transferred ? view-only animals (transferred through the system, original owner retains view access)
+        const soldList = soldTransferredRaw.filter(a => a.isViewOnly);
+
         const handleMarkRehomed = (e, animal) => {
             e.stopPropagation();
             if (!window.confirm(`Mark ${animal.name || 'this animal'} as Rehomed? This will change their status to "Rehomed".`)) return;
@@ -21856,7 +21876,30 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     )}
                 </div>
 
-                {/* -- 7. ACTIVITY LOG ? now a separate screen, accessed via button in header -- */}
+                {/* -- 7. SOLD / TRANSFERRED -------------------------------- */}
+                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <SectionHeader sectionKey="soldTransferred"
+                        icon={<ArrowLeftRight size={18} className="text-orange-600" />}
+                        title="Sold / Transferred" count={soldList.length} bgClass="bg-orange-50" />
+                    {!collapsedMgmtSections['soldTransferred'] && (
+                        <div className="p-3 space-y-2">
+                            {soldList.length === 0
+                                ? <div className="text-sm text-gray-400 text-center py-4">No sold or transferred animals.</div>
+                                : <MgmtGroup groupKey="sold_animals" label="View-Only Access"
+                                    groupAnimals={soldList} headerClass="bg-orange-50"
+                                    renderExtras={(a) => (
+                                        <div className="flex items-center gap-1.5 shrink-0">
+                                            <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium whitespace-nowrap">
+                                                {a.soldStatus === 'sold' ? '📤 Sold' : a.soldStatus === 'purchased' ? '📥 Purchased' : '🔀 Transferred'}
+                                            </span>
+                                        </div>
+                                    )} />
+                            }
+                        </div>
+                    )}
+                </div>
+
+                {/* -- 8. ACTIVITY LOG ? now a separate screen, accessed via button in header -- */}
 
                 {/* -- Feeding Modal ------------------------------------------------------- */}
                 {feedingModal && (
@@ -22133,7 +22176,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                             className="p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[120px] sm:min-w-[160px]"
                         >
                             <option value="">All</option>
-                            {STATUS_OPTIONS.map(status => (
+                            {STATUS_OPTIONS.filter(s => s !== 'Sold').map(status => (
                                 <option key={status} value={status}>{status}</option>
                             ))}
                         </select>
