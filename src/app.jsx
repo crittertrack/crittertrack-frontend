@@ -8161,30 +8161,31 @@ const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal, 
     const [parentData, setParentData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [notFound, setNotFound] = useState(false);
-    const [foundViaAuth, setFoundViaAuth] = useState(false);
+    const [foundViaOwned, setFoundViaOwned] = useState(false);
 
     React.useEffect(() => {
         if (!parentId) {
             setParentData(null);
             setNotFound(false);
-            setFoundViaAuth(false);
+            setFoundViaOwned(false);
             return;
         }
 
         const fetchParent = async () => {
             setLoading(true);
             setNotFound(false);
-            setFoundViaAuth(false);
+            setFoundViaOwned(false);
             try {
-                // If authToken is available, try fetching from owned/accessible animals first
+                // If authToken is available, try fetching from owned animals first
                 if (authToken) {
                     try {
                         const ownedResponse = await axios.get(`${API_BASE_URL}/animals/${parentId}`, {
                             headers: { Authorization: `Bearer ${authToken}` }
                         });
                         if (ownedResponse.data) {
+                            // Found in user's own animals — always show, even if private
                             setParentData(ownedResponse.data);
-                            setFoundViaAuth(true);
+                            setFoundViaOwned(true);
                             setLoading(false);
                             return;
                         }
@@ -8195,8 +8196,8 @@ const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal, 
                                 headers: { Authorization: `Bearer ${authToken}` }
                             });
                             if (anyResponse.data) {
+                                // Found via related (not owned) — respect isPrivate flag
                                 setParentData(anyResponse.data);
-                                setFoundViaAuth(true);
                                 setLoading(false);
                                 return;
                             }
@@ -8234,7 +8235,7 @@ const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal, 
         );
     }
 
-    if (notFound || (!foundViaAuth && parentData?.isPrivate)) {
+    if (notFound || (!foundViaOwned && parentData?.isPrivate)) {
         return (
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
                 <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
