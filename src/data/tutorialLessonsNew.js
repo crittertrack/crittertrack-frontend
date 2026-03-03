@@ -351,15 +351,15 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 4,
-        title: 'Additional Physical Notes',
-        content: 'Some species templates include additional fields like Eye Color, Nail Color, Markings, or other unique characteristics. Scroll through the Physical tab to see all available fields for your species. Each field is designed to capture traits relevant to that specific animal type.',
+        title: 'Carrier Traits',
+        content: 'The Carrier Traits field lets you record genetic traits that this animal carries but does not visually express. A carrier animal has one copy of a recessive gene — it looks normal but can pass the trait on to offspring. For example, a "Black Eyed White" mouse may carry "Recessive Yellow" without showing it. Documenting carrier status here helps you make informed breeding decisions and predict offspring outcomes.',
         highlightElement: '[data-tutorial-target="appearance-section"]',
-        actionType: 'click',
         tips: [
-          'Templates ensure you capture species-specific traits',
-          'Fields are organized logically for each species',
-          'Physical traits often have genetic components',
-          'Useful for identification and breeding records'
+          'Carrier = one copy of a recessive gene, not visually expressed',
+          'Important for predicting offspring genetics',
+          'Enter traits separated by commas (e.g. "re, p")',
+          'Ask the breeder if you are unsure of carrier status',
+          'Optional but highly useful for breeding programs'
         ]
       },
       {
