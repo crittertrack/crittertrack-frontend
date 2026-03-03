@@ -8641,6 +8641,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [viewMode, setViewMode] = useState('list'); // 'list' | 'calendar'
     const [calendarMonth, setCalendarMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
     const [calendarTooltip, setCalendarTooltip] = useState(null); // { litterId, eventType, litter, x, y }
+    const [urgencyEnabled, setUrgencyEnabled] = useState(() => {
+        try { return localStorage.getItem('ct_urgency_enabled') !== 'false'; } catch { return true; }
+    });
+    const toggleUrgency = () => {
+        const next = !urgencyEnabled;
+        setUrgencyEnabled(next);
+        try {
+            localStorage.setItem('ct_urgency_enabled', next ? 'true' : 'false');
+            window.dispatchEvent(new StorageEvent('storage', { key: 'ct_urgency_enabled' }));
+        } catch {}
+    };
 
     useEffect(() => {
         const loadData = async () => {
@@ -9715,6 +9726,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             <Calendar size={14} /> Calendar
                         </button>
                     </div>
+                    {/* Urgency Alerts Toggle */}
+                    <button
+                        onClick={toggleUrgency}
+                        title={urgencyEnabled ? 'Urgency alerts on — click to disable' : 'Urgency alerts off — click to enable'}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border shadow-sm transition-colors ${urgencyEnabled ? 'bg-amber-50 border-amber-300 text-amber-700 hover:bg-amber-100' : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50'}`}
+                    >
+                        <Bell size={14} />
+                        <span className="hidden sm:inline">Alerts {urgencyEnabled ? 'On' : 'Off'}</span>
+                    </button>
                     <button
                         onClick={handleRecalculateOffspringCounts}
                         className="bg-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg flex items-center"
@@ -18841,9 +18861,6 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
     const [copySuccess, setCopySuccess] = useState(false);
     const [checkingForUpdates, setCheckingForUpdates] = useState(false);
     const [updateAvailable, setUpdateAvailable] = useState(false);
-    const [urgencyEnabled, setUrgencyEnabled] = useState(() => {
-        try { return localStorage.getItem('ct_urgency_enabled') !== 'false'; } catch { return true; }
-    });
     // Note: Donation button is now globally available via fixed button in top-left corner
 
     const handleShare = () => {
@@ -19008,34 +19025,6 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                 <Edit size={20} className="mr-2" /> Edit Profile
             </button>
             
-            {/* App Preferences */}
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <p className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                    <Bell size={16} className="text-gray-500" /> App Preferences
-                </p>
-                <div className="flex items-center justify-between gap-4">
-                    <div>
-                        <p className="text-sm font-medium text-gray-800">Urgency Alerts</p>
-                        <p className="text-xs text-gray-500 mt-0.5">Show a banner when litter births or weanings are due today or overdue</p>
-                    </div>
-                    <button
-                        onClick={() => {
-                            const next = !urgencyEnabled;
-                            setUrgencyEnabled(next);
-                            try {
-                                localStorage.setItem('ct_urgency_enabled', next ? 'true' : 'false');
-                                // Notify UrgencyAlertsBanner on the same tab
-                                window.dispatchEvent(new StorageEvent('storage', { key: 'ct_urgency_enabled' }));
-                            } catch {}
-                        }}
-                        className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${urgencyEnabled ? 'bg-primary' : 'bg-gray-300'}`}
-                        role="switch"
-                        aria-checked={urgencyEnabled}
-                    >
-                        <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ${urgencyEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
-                    </button>
-                </div>
-            </div>
 
             <button 
                 onClick={handleCheckForUpdates}
