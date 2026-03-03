@@ -6744,7 +6744,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                     <div className="flex flex-wrap">
                         {[
                             { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 2, label: 'Status', icon: '??' },
+                            { id: 2, label: 'Status', icon: '🔒' },
                             { id: 3, label: 'Physical', icon: '🎨' },
                             { id: 4, label: 'Identification', icon: '🏷️' },
                             { id: 5, label: 'Lineage', icon: '🌳' },
