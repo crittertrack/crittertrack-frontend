@@ -610,7 +610,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     if (resultCache.has(id)) return resultCache.get(id);
 
                     let animalInfo = null;
-                    let foundViaAuth = false;
+                    let foundViaOwned = false;
 
                     // Try to fetch from owned animals first if authToken is available
                     if (authToken) {
@@ -620,7 +620,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                                 headers: { Authorization: `Bearer ${authToken}` }
                             });
                             animalInfo = response.data;
-                            foundViaAuth = true;
+                            foundViaOwned = true; // Only set when truly owned by the user
                         } catch (error) {
                             // Not owned, try /animals/any endpoint for related/accessible animals
                             try {
@@ -628,7 +628,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                                     headers: { Authorization: `Bearer ${authToken}` }
                                 });
                                 animalInfo = response.data;
-                                foundViaAuth = true;
+                                // foundViaOwned stays false — this animal belongs to someone else
                             } catch (error2) {
                                 console.log(`Animal ${id} not accessible via owned or related endpoints:`, error2.message);
                             }
@@ -656,9 +656,8 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     
                     if (!animalInfo) return null;
 
-                    // If fetched from public database but marked private, hide it and its ancestors
-                    // (auth-fetched animals are always visible to the requesting user)
-                    if (!foundViaAuth && animalInfo.isPrivate) {
+                    // If not the user's own animal and it's marked private, hide it and all its ancestors
+                    if (!foundViaOwned && animalInfo.isPrivate) {
                         return { isHidden: true, id_public: id };
                     }
 
