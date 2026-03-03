@@ -9680,6 +9680,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         if (litter.damId_public.toString().includes(query)) return true;
         
         return false;
+    }).sort((a, b) => {
+        // No-birthdate litters float to the top; otherwise sort newest birthDate first
+        const aDate = a.birthDate ? new Date(a.birthDate).getTime() : null;
+        const bDate = b.birthDate ? new Date(b.birthDate).getTime() : null;
+        if (aDate === null && bDate === null) return 0;
+        if (aDate === null) return -1;
+        if (bDate === null) return 1;
+        return bDate - aDate;
     });
 
     return (
