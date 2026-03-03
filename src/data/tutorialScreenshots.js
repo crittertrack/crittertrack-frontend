@@ -90,6 +90,7 @@ export const TUTORIAL_SCREENSHOTS = {
     3: 'procedures-and-diagnostics.png', // Step 3: Procedures & Diagnostics
     4: 'active-medical-records.png', // Step 4: Active Medical Records
     5: 'veterinary-care.png', // Step 5: Veterinary Care
+    6: 'health-clearances-and-screening.png', // Step 6: Health Clearances & Screening
   },
   
   'gs-husbandry': {

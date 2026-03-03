@@ -778,6 +778,17 @@ const GETTING_STARTED_LESSONS = [
           'Important for continuity of care',
           'Useful if changing vets'
         ]
+      },
+      {
+        stepNumber: 6,
+        title: 'Health Clearances & Screening',
+        content: 'This collapsible section stores formal health screening results. Fields include Spay/Neuter Date, Heartworm Status, Hip/Elbow Scores, Eye Clearance, Cardiac Clearance, Dental Records, Genetic Test Results, and Chronic Conditions. Most fields are free-text so you can paste in lab results or certification details.',
+        highlightElement: null,
+        tips: [
+          'Expand the section to fill in screening results',
+          'Genetic test results can include DNA panel summaries',
+          'Chronic Conditions is useful for buyer transparency'
+        ]
       }
     ]
   },
