@@ -99,7 +99,7 @@ export const TUTORIAL_SCREENSHOTS = {
     3: 'housing-and-enclosure.png', // Step 3: Housing & Enclosure
     4: 'animal-care.png', // Step 4: Animal Care
     5: 'environment.png', // Step 5: Environment
-    6: 'exercise-and-grooming.png', // Step 6: Exercise & Grooming
+    6: 'grooming.png', // Step 6: Grooming
   },
   
   'gs-behavior': {

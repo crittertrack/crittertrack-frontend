@@ -857,13 +857,13 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 6,
-        title: 'Exercise & Grooming',
-        content: 'For some species (primarily dogs and cats), track exercise requirements, daily exercise minutes, grooming needs, and shedding levels. These fields help document care routines.',
-        highlightElement: '',
+        title: 'Grooming',
+        content: 'Document grooming needs and shedding level for your animal. This section is especially relevant for dogs and cats but applies to any species with regular grooming requirements. Use the Grooming Needs field to note frequency and type (e.g., "Weekly brushing, monthly bath") and the Shedding Level dropdown to indicate how much your animal sheds.',
+        highlightElement: '[data-tutorial-target="exercise-grooming-section"]',
         tips: [
-          'Species-specific fields',
-          'Important for dogs and cats',
-          'Documents ongoing care needs'
+          'Grooming Needs is a free-text field',
+          'Shedding Level helps future owners plan',
+          'Documents ongoing care requirements'
         ]
       }
     ]
