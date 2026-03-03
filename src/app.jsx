@@ -6666,7 +6666,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                 setLoadingCOI(true);
                 try {
                     const response = await axios.get(
-                        `${API_BASE_URL}/animals/${animal.id_public}/inbreeding`
+                        `${API_BASE_URL}/public/animal/${animal.id_public}/inbreeding`
                     );
                     if (response.data && response.data.inbreedingCoefficient != null) {
                         setAnimalCOI(response.data.inbreedingCoefficient);
@@ -6736,6 +6736,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                     <div className="flex flex-wrap">
                         {[
                             { id: 1, label: 'Overview', icon: '📋' },
+                            { id: 2, label: 'Status', icon: '👥' },
                             { id: 3, label: 'Physical', icon: '🎨' },
                             { id: 4, label: 'Identification', icon: '🏷️' },
                             { id: 5, label: 'Lineage', icon: '🌳' },
@@ -6963,20 +6964,16 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     {animal.pedigreeRegistrationId && <p><span className="text-gray-600">Pedigree Reg ID:</span> <strong>{animal.pedigreeRegistrationId}</strong></p>}
                                 </div>
                             </div>
+                            {/* Genetic Code Display Section */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">🧬 Genetic Code</h3>
+                                <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || ''}</p>
+                            </div>
+
                             {/* Parents Section */}
                             {(animal.fatherId_public || animal.sireId_public || animal.motherId_public || animal.damId_public) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <div className="flex items-center justify-between border-b pb-2 mb-4">
-                                        <h3 className="text-lg font-semibold text-gray-700">🌳 Parents</h3>
-                                        {animalCOI != null && (
-                                            <div className="text-sm text-gray-800">
-                                                <span className="font-medium">COI:</span> {animalCOI.toFixed(2)}%
-                                            </div>
-                                        )}
-                                        {loadingCOI && (
-                                            <div className="text-xs text-gray-400">Calculating...</div>
-                                        )}
-                                    </div>
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">🌳 Parents</h3>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <ViewOnlyParentCard 
                                             parentId={animal.fatherId_public || animal.sireId_public} 
@@ -6995,6 +6992,106 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     </div>
                                 </div>
                             )}
+                        </div>
+                    )}
+
+                    {/* Tab 2: Status & Privacy */}
+                    {detailViewTab === 2 && (
+                        <div className="space-y-6">
+                            {/* 1st Section: Ownership */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">👥 Ownership</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-gray-600">Currently Owned:</span>
+                                        <strong>{animal.isOwned ? 'Yes' : 'No'}</strong>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-gray-600">Breeder:</span>
+                                        {breederInfo ? (
+                                            <button
+                                                onClick={() => onViewProfile && onViewProfile(breederInfo)}
+                                                className="text-primary hover:underline font-semibold"
+                                            >
+                                                {(() => {
+                                                    const showPersonal = breederInfo.showPersonalName ?? false;
+                                                    const showBreeder = breederInfo.showBreederName ?? false;
+                                                    if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
+                                                        return `${breederInfo.personalName} (${breederInfo.breederName})`;
+                                                    } else if (showBreeder && breederInfo.breederName) {
+                                                        return breederInfo.breederName;
+                                                    } else if (showPersonal && breederInfo.personalName) {
+                                                        return breederInfo.personalName;
+                                                    } else {
+                                                        return 'Unknown Breeder';
+                                                    }
+                                                })()}
+                                            </button>
+                                        ) : (
+                                            <strong>{animal.manualBreederName || animal.breederId_public || ''}</strong>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 2nd Section: Current Owner */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">🏠 Keeper</h3>
+                                <div className="text-sm space-y-2">
+                                    {(animal.keeperName || animal.isOwned) && (
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-gray-600">Keeper Name:</span>
+                                        <strong>{animal.keeperName || (animal.isOwned ? 'Me' : '')}</strong>
+                                    </div>
+                                    )}
+                                    {animal.coOwnership && (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-gray-600">Co-Ownership:</span>
+                                            <strong>{animal.coOwnership}</strong>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* 3rd Section: Keeper History */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">🏠 Keeper History</h3>
+                                {(animal.keeperHistory || []).length === 0 ? (
+                                    <p className="text-sm text-gray-400 italic">No entries yet</p>
+                                ) : (
+                                    <div className="space-y-2">
+                                        {(animal.keeperHistory || []).map((entry, idx) => (
+                                            <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-semibold text-gray-800">{entry.name || 'Unknown'}</p>
+                                                    {entry.userId_public && <p className="text-xs text-gray-400 font-mono">{entry.userId_public}</p>}
+                                                </div>
+                                                {entry.country && (
+                                                    <div className="flex items-center gap-1 flex-shrink-0">
+                                                        <span className={`${getCountryFlag(entry.country)} inline-block h-4 w-6`}></span>
+                                                        <span className="text-xs text-gray-500">{getCountryName(entry.country)}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 4th Section: Availability for Sale or Stud */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">🏷️🥚 Availability for Sale or Stud</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-gray-600">For Sale:</span>
+                                        <strong>{animal.isForSale ? `Yes - ${animal.salePriceCurrency || ''} ${animal.salePriceAmount || 'Negotiable'}`.trim() : 'No'}</strong>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-gray-600">For Stud:</span>
+                                        <strong>{animal.availableForBreeding ? `Yes - ${animal.studFeeCurrency || ''} ${animal.studFeeAmount || 'Negotiable'}`.trim() : 'No'}</strong>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     )}
 
@@ -7139,7 +7236,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* 1st Section: Pedigree */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <div className="flex justify-between items-center">
-                                    <h3 className="text-lg font-semibold text-gray-700">🌳 Pedigree</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700">🌳 Pedigree: Sire and Dam</h3>
                                     <button
                                         onClick={() => setShowPedigree(true)}
                                         data-tutorial-target="pedigree-btn"
@@ -7148,7 +7245,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                         View Pedigree Chart
                                     </button>
                                 </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <ViewOnlyParentCard 
                                         parentId={animal.fatherId_public || animal.sireId_public} 
                                         parentType="Sire"
