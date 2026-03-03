@@ -286,7 +286,7 @@ const GETTING_STARTED_LESSONS = [
           'Enable "Available for Stud" to offer breeding services',
           'When enabled, currency and amount fields appear below',
           'Select currency (USD/EUR/GBP/CAD/AUD/JPY) or Negotiable',
-          'Requires Public Profile to be enabled (on Overview tab)',
+          'Requires animal to be set to Public (Eye toggle, top right of detail view)',
           'Public + For Sale/Stud = appears in Marketplace'
         ]
       }
@@ -1151,14 +1151,15 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 3,
         title: 'Private Toggle',
-        content: 'The private/public toggle controls global web visibility of this animal. When set to public (green Eye icon), others can view it via search, as a parent/offspring in pedigrees, and on your PUBLIC profile (if also owned). When private (gray Eye-Off icon), only you can access it. You can find this toggle at the top right of the detail overview screen. Changes apply instantly!',
+        content: 'The private/public toggle controls global web visibility of this animal. When set to public (green Eye icon), others can view it via search, as a parent/offspring in pedigrees, and on your PUBLIC profile (if also owned). When private (gray Eye-Off icon), only you can see the full record — other users will see a "Hidden / Private Profile" placeholder in pedigree charts where this animal appears, so lineage is indicated but the animal\'s details remain hidden. Exception: users who received or sent this animal via a transfer can still see it. You can find this toggle at the top right of the detail overview screen. Changes apply instantly!',
         highlightElement: '[data-tutorial-target="detail-private-toggle"]',
         tips: [
           'Located at top right of detail view',
           'Green Eye = Public, Gray Eye-Off = Private',
           'Controls global web visibility',
           'Public animals appear in search & pedigrees',
-          'Works together with owned toggle',
+          'Private animals show as a placeholder in others\' pedigree charts',
+          'Transfer recipients/senders can always see each other\'s animals',
           'Can be toggled anytime - updates instantly'
         ]
       },
@@ -1573,14 +1574,15 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 8,
         title: 'Transfer Ownership Features',
-        content: 'Transfer Ownership initiates an animal transfer between CritterTrack users. The key features are: The animal gets a "Sold" status in your collection, you retain a view-only copy of the animal\'s record, the new owner gains full editing rights, and you can see all future changes they make. Neither party can delete the animal.',
+        content: 'Transfer Ownership initiates an animal transfer between CritterTrack users. The key features are: The animal gets a "Sold" status in your collection, you retain a view-only copy of the animal\'s record, the new owner gains full editing rights, and you can see all future changes they make. Neither party can delete the animal. Privacy note: transferred animals are treated like your own animals for visibility purposes — both parties can always view the full record and its ancestors in pedigrees, even if those ancestors are set to private by their owners.',
         highlightElement: '[data-tutorial-target="transfer-ownership-form"]',
         hideHighlightPrompt: true,
         tips: [
           'Maintains breeding history',
           'Both parties keep records',
           'Prevents accidental deletion',
-          'Shows lineage transparency'
+          'Shows lineage transparency',
+          'Both parties can see ancestors/pedigree even if private'
         ]
       },
       {
@@ -1987,10 +1989,12 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 3,
         title: 'Viewing COI',
-        content: 'When viewing an animal, look for the COI percentage. It\'s usually shown on the animal card or in the details. It reflects that animal\'s genetic diversity.',
+        content: 'When viewing an animal, the COI percentage is shown on the Overview tab in the Parents section (top right of the Parents header). It reflects that animal\'s genetic diversity based on all known ancestors in the pedigree. The COI is visible to anyone who can view the animal — including the public view.',
         highlightElement: '[data-tutorial-target="coi-display"]',
         hideHighlightPrompt: true,
         tips: [
+          'Found on the Overview tab, Parents section (top right)',
+          'Visible in both private and public views',
           'Check before breeding',
           'Use in breeding decisions',
           'Important pedigree metric'
