@@ -6981,7 +6981,19 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* Parents Section */}
                             {(animal.fatherId_public || animal.sireId_public || animal.motherId_public || animal.damId_public) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">🌳 Parents</h3>
+                                    <div className="flex items-center justify-between border-b pb-2 mb-4">
+                                        <h3 className="text-lg font-semibold text-gray-700">🌳 Parents</h3>
+                                        <div className="flex items-center gap-3">
+                                            {animalCOI != null && (
+                                                <div className="text-sm text-gray-800">
+                                                    <span className="font-medium">COI:</span> {animalCOI.toFixed(2)}%
+                                                </div>
+                                            )}
+                                            {loadingCOI && (
+                                                <div className="text-xs text-gray-400">Calculating...</div>
+                                            )}
+                                        </div>
+                                    </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <ViewOnlyParentCard 
                                             parentId={animal.fatherId_public || animal.sireId_public} 
@@ -7245,23 +7257,13 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <div className="flex justify-between items-center">
                                     <h3 className="text-lg font-semibold text-gray-700">🌳 Pedigree: Sire and Dam</h3>
-                                    <div className="flex items-center gap-3">
-                                        {animalCOI != null && (
-                                            <div className="text-sm text-gray-800">
-                                                <span className="font-medium">COI:</span> {animalCOI.toFixed(2)}%
-                                            </div>
-                                        )}
-                                        {loadingCOI && (
-                                            <div className="text-xs text-gray-400">Calculating...</div>
-                                        )}
-                                        <button
-                                            onClick={() => setShowPedigree(true)}
-                                            data-tutorial-target="pedigree-btn"
-                                            className="px-3 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition text-sm"
-                                        >
-                                            View Pedigree Chart
-                                        </button>
-                                    </div>
+                                    <button
+                                        onClick={() => setShowPedigree(true)}
+                                        data-tutorial-target="pedigree-btn"
+                                        className="px-3 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition text-sm"
+                                    >
+                                        View Pedigree Chart
+                                    </button>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <ViewOnlyParentCard 
