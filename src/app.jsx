@@ -6540,6 +6540,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
     const [breedingRecordOffspring, setBreedingRecordOffspring] = useState({});
     const [pedigreeOffspring, setPedigreeOffspring] = useState(null);
     const [expandedPedigreeRecords, setExpandedPedigreeRecords] = useState({});
+    const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
     const { fieldTemplate, getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
 
     // Fetch all litters where this animal is sire or dam
@@ -7689,170 +7690,178 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                     {detailViewTab === 7 && (
                         <div className="space-y-6">
                             {/* 1st Section: Preventive Care */}
-                            {/* 1st Section: Preventive Care */}
-                            {(animal.vaccinations || animal.dewormingRecords || animal.parasiteControl) && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🛡️ Preventive Care</h3>
+                            {(animal.vaccinations || animal.dewormingRecords || animal.parasiteControl || animal.parasitePreventionSchedule) && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, preventiveCare: !p.preventiveCare}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700">🛡️ Preventive Care</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.preventiveCare ? '▶' : '▼'}</span>
+                                </button>
+                                {!collapsedHealthSections.preventiveCare && (<div className="space-y-4 mt-4">
                                     {animal.vaccinations && (
-                                        <div>
-                                            <strong className="text-sm">{getLabel('vaccinations', 'Vaccinations')}:</strong>
-                                            <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                {(() => {
-                                                    const data = animal.vaccinations;
-                                                    const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return []; } })() : Array.isArray(data) ? data : [];
-                                                    return parsed.map((vacc, idx) => (
-                                                        <li key={idx} className="text-gray-700">
-                                                            {vacc.name} {vacc.date && `(${formatDate(vacc.date)})`}
-                                                            {vacc.notes && <span className="text-gray-600"> - {vacc.notes}</span>}
-                                                        </li>
-                                                    ));
-                                                })()}
-                                            </ul>
-                                        </div>
+                                        <DetailJsonList
+                                            label={getLabel('vaccinations', 'Vaccinations')}
+                                            data={animal.vaccinations}
+                                            renderItem={v => <>{v.name} {v.date && `(${formatDate(v.date)})`}{v.notes && <span className="text-gray-600"> - {v.notes}</span>}</>}
+                                        />
                                     )}
                                     {animal.dewormingRecords && (
-                                        <div>
-                                            <strong className="text-sm">Deworming Records:</strong>
-                                            <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                {(() => {
-                                                    const data = animal.dewormingRecords;
-                                                    const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return []; } })() : Array.isArray(data) ? data : [];
-                                                    return parsed.map((record, idx) => (
-                                                        <li key={idx} className="text-gray-700">
-                                                            {record.medication} {record.date && `(${formatDate(record.date)})`}
-                                                            {record.notes && <span className="text-gray-600"> - {record.notes}</span>}
-                                                        </li>
-                                                    ));
-                                                })()}
-                                            </ul>
-                                        </div>
+                                        <DetailJsonList
+                                            label="Deworming Records"
+                                            data={animal.dewormingRecords}
+                                            renderItem={r => <>{r.medication} {r.date && `(${formatDate(r.date)})`}{r.notes && <span className="text-gray-600"> - {r.notes}</span>}</>}
+                                        />
                                     )}
                                     {animal.parasiteControl && (
-                                        <div>
-                                            <strong className="text-sm">Parasite Control:</strong>
-                                            <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                {(() => {
-                                                    const data = animal.parasiteControl;
-                                                    const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return []; } })() : Array.isArray(data) ? data : [];
-                                                    return parsed.map((record, idx) => (
-                                                        <li key={idx} className="text-gray-700">
-                                                            {record.treatment} {record.date && `(${formatDate(record.date)})`}
-                                                            {record.notes && <span className="text-gray-600"> - {record.notes}</span>}
-                                                        </li>
-                                                    ));
-                                                })()}
-                                            </ul>
+                                        <DetailJsonList
+                                            label="Parasite Control"
+                                            data={animal.parasiteControl}
+                                            renderItem={r => <>{r.treatment} {r.date && `(${formatDate(r.date)})`}{r.notes && <span className="text-gray-600"> - {r.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {fieldTemplate?.fields?.parasitePreventionSchedule?.enabled !== false && animal.parasitePreventionSchedule && (
+                                        <div className="text-sm">
+                                            <span className="text-gray-600">{getLabel('parasitePreventionSchedule', 'Parasite Prevention Schedule')}:</span>
+                                            <strong className="whitespace-pre-wrap">{animal.parasitePreventionSchedule}</strong>
                                         </div>
                                     )}
-                                {!animal.vaccinations && !animal.dewormingRecords && !animal.parasiteControl && <p className="text-sm text-gray-600"></p>}
+                                </div>)}
                             </div>
                             )}
 
                             {/* 2nd Section: Procedures & Diagnostics */}
-                            {(animal.medicalProcedures || animal.laboratoryResults) && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🔬 Procedures & Diagnostics</h3>
-                                {animal.medicalProcedures && (
-                                    <div>
-                                        <strong className="text-sm">Medical Procedures:</strong>
-                                        <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                            {(() => {
-                                                const data = animal.medicalProcedures;
-                                                const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return []; } })() : Array.isArray(data) ? data : [];
-                                                return parsed.map((proc, idx) => (
-                                                    <li key={idx} className="text-gray-700">
-                                                        {proc.name} {proc.date && `(${formatDate(proc.date)})`}
-                                                        {proc.notes && <span className="text-gray-600"> - {proc.notes}</span>}
-                                                    </li>
-                                                ));
-                                            })()}
-                                        </ul>
-                                    </div>
-                                )}
-                                {animal.laboratoryResults && <div><strong className="text-sm">Laboratory Results:</strong> <p className="text-sm mt-1">{animal.laboratoryResults}</p></div>}
-                                {!animal.medicalProcedures && !animal.laboratoryResults && <p className="text-sm text-gray-600"></p>}
+                            {(animal.medicalProcedures || animal.labResults || animal.laboratoryResults) && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, proceduresDiagnostics: !p.proceduresDiagnostics}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700">🔬 Procedures & Diagnostics</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.proceduresDiagnostics ? '▶' : '▼'}</span>
+                                </button>
+                                {!collapsedHealthSections.proceduresDiagnostics && (<div className="space-y-4 mt-4">
+                                    {animal.medicalProcedures && (
+                                        <DetailJsonList
+                                            label="Medical Procedures"
+                                            data={animal.medicalProcedures}
+                                            renderItem={p => <>{p.name} {p.date && `(${formatDate(p.date)})`}{p.notes && <span className="text-gray-600"> - {p.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {(animal.labResults || animal.laboratoryResults) && (
+                                        <DetailJsonList
+                                            label="Laboratory Results"
+                                            data={animal.labResults || animal.laboratoryResults}
+                                            renderItem={r => <>{r.testName} - {r.result} {r.date && `(${formatDate(r.date)})`}{r.notes && <span className="text-gray-600"> - {r.notes}</span>}</>}
+                                        />
+                                    )}
+                                </div>)}
                             </div>
                             )}
 
                             {/* 3rd Section: Active Medical Records */}
                             {(animal.medicalConditions || animal.allergies || animal.medications) && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🩹💊 Active Medical Records</h3>
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, activeMedical: !p.activeMedical}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700">🩹💊 Active Medical Records</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? '▶' : '▼'}</span>
+                                </button>
+                                {!collapsedHealthSections.activeMedical && (<div className="space-y-3 mt-4">
                                     {animal.medicalConditions && (() => {
-                                        const parsed = parseHealthRecords(animal.medicalConditions);
+                                        const d = animal.medicalConditions;
+                                        const parsed = typeof d === 'string' ? (() => { try { return JSON.parse(d); } catch { return null; } })() : Array.isArray(d) ? d : null;
                                         return parsed && parsed.length > 0 ? (
                                             <div>
-                                                <strong className="text-sm">Medical Conditions:</strong>
+                                                <span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span>
                                                 <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                    {parsed.map((condition, idx) => (
-                                                        <li key={idx} className="text-gray-700">
-                                                            {condition.condition || condition.name}
-                                                            {condition.notes && <span className="text-gray-600"> - {condition.notes}</span>}
+                                                    {parsed.map((item, i) => (
+                                                        <li key={i} className="text-gray-700">
+                                                            {item.condition || item.name}
+                                                            {item.notes && <span className="text-gray-500"> — {item.notes}</span>}
                                                         </li>
                                                     ))}
                                                 </ul>
                                             </div>
-                                        ) : null;
+                                        ) : <div><span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span><strong className="text-sm whitespace-pre-wrap">{d}</strong></div>;
                                     })()}
                                     {animal.allergies && (() => {
-                                        const parsed = parseHealthRecords(animal.allergies);
+                                        const d = animal.allergies;
+                                        const parsed = typeof d === 'string' ? (() => { try { return JSON.parse(d); } catch { return null; } })() : Array.isArray(d) ? d : null;
                                         return parsed && parsed.length > 0 ? (
                                             <div>
-                                                <strong className="text-sm">Allergies:</strong>
+                                                <span className="text-gray-600 text-sm font-semibold">Allergies:</span>
                                                 <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                    {parsed.map((allergy, idx) => (
-                                                        <li key={idx} className="text-gray-700">
-                                                            {allergy.allergen || allergy.name}
-                                                            {allergy.notes && <span className="text-gray-600"> - {allergy.notes}</span>}
+                                                    {parsed.map((item, i) => (
+                                                        <li key={i} className="text-gray-700">
+                                                            {item.allergen || item.name}
+                                                            {item.notes && <span className="text-gray-500"> — {item.notes}</span>}
                                                         </li>
                                                     ))}
                                                 </ul>
                                             </div>
-                                        ) : null;
+                                        ) : <div><span className="text-gray-600 text-sm font-semibold">Allergies:</span><strong className="text-sm whitespace-pre-wrap">{d}</strong></div>;
                                     })()}
                                     {animal.medications && (() => {
-                                        const parsed = parseHealthRecords(animal.medications);
+                                        const d = animal.medications;
+                                        const parsed = typeof d === 'string' ? (() => { try { return JSON.parse(d); } catch { return null; } })() : Array.isArray(d) ? d : null;
                                         return parsed && parsed.length > 0 ? (
                                             <div>
-                                                <strong className="text-sm">Current Medications:</strong>
+                                                <span className="text-gray-600 text-sm font-semibold">Current Medications:</span>
                                                 <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                    {parsed.map((med, idx) => (
-                                                        <li key={idx} className="text-gray-700">
-                                                            {med.medication || med.name}
-                                                            {med.notes && <span className="text-gray-600"> - {med.notes}</span>}
+                                                    {parsed.map((item, i) => (
+                                                        <li key={i} className="text-gray-700">
+                                                            {item.medication || item.name}
+                                                            {item.notes && <span className="text-gray-500"> — {item.notes}</span>}
                                                         </li>
                                                     ))}
                                                 </ul>
                                             </div>
-                                        ) : null;
+                                        ) : <div><span className="text-gray-600 text-sm font-semibold">Current Medications:</span><strong className="text-sm whitespace-pre-wrap">{d}</strong></div>;
                                     })()}
-                                    {!animal.medicalConditions && !animal.allergies && !animal.medications && <p className="text-sm text-gray-600"></p>}
+                                </div>)}
                             </div>
                             )}
 
-                            {/* 4th Section: Veterinary Care */}
-                            {(animal.primaryVet || animal.vetVisits) && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🩺 Veterinary Care</h3>
-                                {animal.primaryVet && <div><strong className="text-sm">Primary Veterinarian:</strong> <p className="text-sm mt-1">{animal.primaryVet}</p></div>}
-                                {animal.vetVisits && (
-                                    <div>
-                                        <strong className="text-sm">Veterinary Visits:</strong>
-                                        <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                            {(() => {
-                                                const data = animal.vetVisits;
-                                                const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return []; } })() : Array.isArray(data) ? data : [];
-                                                return parsed.map((visit, idx) => (
-                                                    <li key={idx} className="text-gray-700">
-                                                        {visit.reason} {visit.date && `(${formatDate(visit.date)})`}
-                                                        {visit.notes && <span className="text-gray-600"> - {visit.notes}</span>}
-                                                    </li>
-                                                ));
-                                            })()}
-                                        </ul>
+                            {/* 4th Section: Health Clearances & Screening */}
+                            {(() => {
+                                const clearanceFields = [
+                                    { key: 'heartwormStatus', label: 'Heartworm Status' },
+                                    { key: 'hipElbowScores', label: 'Hip/Elbow Scores' },
+                                    { key: 'eyeClearance', label: 'Eye Clearance' },
+                                    { key: 'cardiacClearance', label: 'Cardiac Clearance' },
+                                    { key: 'dentalRecords', label: 'Dental Records' },
+                                    { key: 'geneticTestResults', label: 'Genetic Test Results' },
+                                    { key: 'chronicConditions', label: 'Chronic Conditions' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                const spayDate = fieldTemplate?.fields?.spayNeuterDate?.enabled !== false && animal.spayNeuterDate;
+                                return (clearanceFields.length > 0 || spayDate) && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, healthClearances: !p.healthClearances}))} className="w-full flex items-center justify-between text-left group">
+                                            <h3 className="text-lg font-semibold text-gray-700">🏥 Health Clearances & Screening</h3>
+                                            <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? '▶' : '▼'}</span>
+                                        </button>
+                                        {!collapsedHealthSections.healthClearances && (<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
+                                            {spayDate && <div><span className="text-gray-600">{getLabel('spayNeuterDate', 'Spay/Neuter Date')}:</span> <strong>{formatDate(animal.spayNeuterDate)}</strong></div>}
+                                            {clearanceFields.map(f => (
+                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                            ))}
+                                        </div>)}
                                     </div>
-                                )}
-                                {!animal.primaryVet && !animal.vetVisits && <p className="text-sm text-gray-600"></p>}
+                                );
+                            })()}
+
+                            {/* 5th Section: Veterinary Care */}
+                            {(animal.primaryVet || animal.vetVisits) && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, vetCare: !p.vetCare}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700">🩺 Veterinary Care</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.vetCare ? '▶' : '▼'}</span>
+                                </button>
+                                {!collapsedHealthSections.vetCare && (<div className="space-y-4 text-sm mt-4">
+                                    {animal.primaryVet && <div><span className="text-gray-600">Primary Veterinarian:</span> <strong>{animal.primaryVet}</strong></div>}
+                                    {animal.vetVisits && (
+                                        <DetailJsonList
+                                            label="Veterinary Visits"
+                                            data={animal.vetVisits}
+                                            renderItem={v => <>{v.reason} {v.date && `(${formatDate(v.date)})`}{v.notes && <span className="text-gray-600"> - {v.notes}</span>}</>}
+                                        />
+                                    )}
+                                </div>)}
                             </div>
                             )}
                         </div>
@@ -7938,6 +7947,41 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                 {!animal.temperatureRange && !animal.humidity && !animal.lighting && !animal.noise && <p className="text-sm text-gray-600"></p>}
                             </div>
                             )}
+
+                            {/* 5th Section: Exercise & Grooming */}
+                            {(() => {
+                                const egFields = [
+                                    { key: 'exerciseRequirements', label: 'Exercise Requirements' },
+                                    { key: 'dailyExerciseMinutes', label: 'Daily Exercise (min)' },
+                                    { key: 'groomingNeeds', label: 'Grooming Needs' },
+                                    { key: 'sheddingLevel', label: 'Shedding Level' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                const trainFlags = [
+                                    { key: 'crateTrained', label: 'Crate Trained' },
+                                    { key: 'litterTrained', label: 'Litter Trained' },
+                                    { key: 'leashTrained', label: 'Leash Trained' },
+                                    { key: 'freeFlightTrained', label: 'Free Flight Trained' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                return (egFields.length > 0 || trainFlags.length > 0) && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700">✂️ Grooming</h3>
+                                        {egFields.length > 0 && (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                {egFields.map(f => (
+                                                    <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {trainFlags.length > 0 && (
+                                            <div className="flex flex-wrap gap-3 text-sm">
+                                                {trainFlags.map(f => (
+                                                    <span key={f.key} className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">&#x2713; {getLabel(f.key, f.label)}</span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
                         </div>
                     )}
 
@@ -7963,6 +8007,29 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                 {!animal.activityCycle && <p className="text-sm text-gray-600"></p>}
                             </div>
                             )}
+
+                            {/* 3rd Section: Training & Working */}
+                            {(() => {
+                                const trainFields = [
+                                    { key: 'trainingLevel', label: 'Training Level' },
+                                    { key: 'trainingDisciplines', label: 'Training Disciplines' },
+                                    { key: 'workingRole', label: 'Working Role' },
+                                    { key: 'certifications', label: 'Certifications' },
+                                    { key: 'behavioralIssues', label: 'Behavioral Issues' },
+                                    { key: 'biteHistory', label: 'Bite History' },
+                                    { key: 'reactivityNotes', label: 'Reactivity Notes' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                return trainFields.length > 0 && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700">🏃 Training & Working</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            {trainFields.map(f => (
+                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
                         </div>
                     )}
 
