@@ -22516,7 +22516,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                 {/* -- 6. FOR SALE / AVAILABLE -------------------------------- */}
                 <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="available"
-                        icon={<span className="text-purple-600 text-base leading-none">???</span>}
+                        icon={<ShoppingBag size={18} className="text-purple-600" />}
                         title="For Sale / Available" count={availableList.length} bgClass="bg-purple-50" />
                     {!collapsedMgmtSections['available'] && (
                         <div className="p-3 space-y-1.5">
@@ -22535,7 +22535,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                                                 className="text-xs px-2 py-0.5 rounded font-medium border bg-indigo-500 text-white hover:bg-indigo-600 border-indigo-500 whitespace-nowrap"
                                                 title="Mark as Rehomed / Sold"
                                             >
-                                                ?? Rehomed
+                                                ✓ Rehomed
                                             </button>
                                         </div>
                                     } />
@@ -27263,7 +27263,7 @@ const App = () => {
             {/* Management Urgency Banner — due-today/overdue care, maintenance & supplies */}
             {authToken && <MgmtUrgencyBanner authToken={authToken} API_BASE_URL={API_BASE_URL} />}
             
-            {/* System Broadcast Banner (info/announcements) - only on dashboard */}}
+            {/* System Broadcast Banner (info/announcements) - only on dashboard */}
             {(currentView === 'list' || currentView === '') && (
                 <BroadcastBanner authToken={authToken} API_BASE_URL={API_BASE_URL} />
             )}
