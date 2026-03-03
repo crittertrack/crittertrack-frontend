@@ -8576,7 +8576,7 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
 };
 
 // Litter Management Component
-const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, formDataRef, onFormOpenChange }) => {
+const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, formDataRef, onFormOpenChange, speciesOptions = [] }) => {
     const [litters, setLitters] = useState([]);
     const [myAnimals, setMyAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -11394,7 +11394,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                                 >
                                     <option value="">Select Species...</option>
-                                    {[...new Set(myAnimals.map(a => a.species).filter(Boolean))].sort().map(sp => (
+                                    {(speciesOptions.length > 0
+                                        ? speciesOptions.map(s => s.name).filter(Boolean).sort()
+                                        : [...new Set(myAnimals.map(a => a.species).filter(Boolean))].sort()
+                                    ).map(sp => (
                                         <option key={sp} value={sp}>{sp}</option>
                                     ))}
                                 </select>
@@ -27835,6 +27838,7 @@ const App = () => {
                             userProfile={userProfile}
                             showModalMessage={showModalMessage}
                             onViewAnimal={handleViewAnimal}
+                            speciesOptions={speciesOptions}
                         />
                     } />
                     <Route path="/budget" element={
