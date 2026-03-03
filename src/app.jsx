@@ -21173,10 +21173,10 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
         // -- Shared card + group components ---------------------------------------
         const MgmtAnimalCard = ({ animal, extras }) => (
             <div
-                className="flex items-center justify-between bg-white border border-gray-200 rounded-lg px-3 py-2 hover:bg-gray-50 cursor-pointer gap-2"
+                className="flex items-center bg-white border border-gray-200 rounded-lg px-3 py-2 hover:bg-gray-50 cursor-pointer gap-2"
                 onClick={() => onViewAnimal && onViewAnimal(animal)}
             >
-                <div className="flex items-center gap-2 min-w-0">
+                <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
                     {animal.imageUrl ? (
                         <img src={animal.imageUrl} alt={animal.name} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
                     ) : (
@@ -21184,7 +21184,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                             <Cat size={14} className="text-gray-400" />
                         </div>
                     )}
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                         <div className="font-semibold text-sm text-gray-800 truncate">
                             {[animal.prefix, animal.name || 'Unnamed', animal.suffix].filter(Boolean).join(' ')}
                         </div>
@@ -21201,7 +21201,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                         })()}
                     </div>
                 </div>
-                {extras}
+                {extras && <div className="shrink-0 flex items-center">{extras}</div>}
             </div>
         );
 
