@@ -693,17 +693,6 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 4,
-        title: 'Mating & Pregnancy',
-        content: 'Record when your animal was bred using the Mating Date field. Some species also allow tracking whether artificial insemination was used.',
-        highlightElement: '',
-        tips: [
-          'Track breeding dates for accurate records',
-          'Helps calculate expected due dates',
-          'AI option available for some species'
-        ]
-      },
-      {
-        stepNumber: 5,
         title: 'Stud Information',
         content: 'This section is available for all male animals to track fertility status and genetics information. To make your animal available for breeding in the showcase, go to the Status & Privacy tab and enable "Available for Stud" with a fee.',
         highlightElement: '[data-tutorial-target="stud-info-section"]',
@@ -715,7 +704,7 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 6,
+        stepNumber: 5,
         title: 'Dam Information',
         content: 'This section is available for all female animals to track fertility status and genetics information. You can fill in fertility status and any genetics or fertility-related notes.',
         highlightElement: '[data-tutorial-target="dam-info-section"]',
@@ -723,17 +712,6 @@ const GETTING_STARTED_LESSONS = [
           'Available for all females by default',
           'Track fertility status and genetics',
           'Optional to complete'
-        ]
-      },
-      {
-        stepNumber: 7,
-        title: 'Breeding History',
-        content: 'This section lets you record a brief summary of your animal\'s reproductive events. Male animals can select Sire, females can select Dam, and Intersex/Unknown animals have the option to select Both. Fill in mating dates, successful matings count, total offspring produced, total litters, and date of last pregnancy.',
-        highlightElement: '[data-tutorial-target="breeding-history-section"]',
-        tips: [
-          'Role options match animal gender',
-          'Fill in reproductive summary',
-          'Helps track breeding productivity'
         ]
       }
     ]
