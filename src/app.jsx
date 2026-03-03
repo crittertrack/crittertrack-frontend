@@ -5975,8 +5975,6 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 );
                             })()}
 
-                            {/* 4th Section: Offspring */}
-                            <OffspringSection animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onViewAnimal={onViewAnimal} />
                         </div>
                     )}
 
@@ -7324,13 +7322,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                 </div>
                             )}
 
-                            {/* 4th Section: Offspring */}
-                            <OffspringSection
-                                animalId={animal.id_public}
-                                API_BASE_URL={API_BASE_URL}
-                                authToken={authToken}
-                                onViewAnimal={onViewAnimal}
-                            />
                         </div>
                     )}                    {/* Tab 6: Breeding */}
                     {detailViewTab === 6 && (
