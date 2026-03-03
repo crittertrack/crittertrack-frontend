@@ -648,7 +648,6 @@ const GETTING_STARTED_LESSONS = [
           'Important for COI calculations',
           'Affects lineage tracking'
         ]
-      },
       }
     ]
   },
