@@ -8635,6 +8635,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [bulkDeleteMode, setBulkDeleteMode] = useState({});
     const [selectedOffspring, setSelectedOffspring] = useState({});
     const [coiCalculating, setCoiCalculating] = useState(new Set()); // litter._id values currently computing COI
+    // Session-level cache: key = `${sireId}:${damId}` or `litter:${_id}`, value = COI number
+    // Prevents re-fetching the same pairing every time fetchLitters is called
+    const coiCacheRef = useRef({});
     const [myAnimalsLoaded, setMyAnimalsLoaded] = useState(false);
     const [litterOffspringMap, setLitterOffspringMap] = useState({}); // litter._id ? offspring array (undefined = not yet loaded)
     const [offspringRefetchToken, setOffspringRefetchToken] = useState(0); // increment to force offspring re-fetch
@@ -8688,32 +8691,38 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     useEffect(() => {
         const calculatePredictedCOI = async () => {
             if (formData.sireId_public && formData.damId_public && showAddForm) {
+                const cacheKey = `${formData.sireId_public}:${formData.damId_public}`;
+                // Return cached result immediately — no spinner needed
+                if (coiCacheRef.current[cacheKey] != null) {
+                    setPredictedCOI(coiCacheRef.current[cacheKey]);
+                    setCalculatingCOI(false);
+                    return;
+                }
                 setCalculatingCOI(true);
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 15000);
                 try {
-                    console.log('[Predicted COI] Calculating for sire:', formData.sireId_public, 'dam:', formData.damId_public);
                     const coiResponse = await axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
-                        params: {
-                            sireId: formData.sireId_public,
-                            damId: formData.damId_public,
-                            generations: 50
-                        },
-                        headers: { Authorization: `Bearer ${authToken}` }
+                        params: { sireId: formData.sireId_public, damId: formData.damId_public, generations: 20 },
+                        headers: { Authorization: `Bearer ${authToken}` },
+                        signal: controller.signal,
                     });
-                    console.log('[Predicted COI] Response:', coiResponse.data);
-                    const coiValue = coiResponse.data.inbreedingCoefficient;
-                    setPredictedCOI(coiValue != null ? coiValue : 0);
+                    const coiValue = coiResponse.data.inbreedingCoefficient ?? 0;
+                    coiCacheRef.current[cacheKey] = coiValue;
+                    setPredictedCOI(coiValue);
                 } catch (error) {
-                    console.error('[Predicted COI] Error calculating:', error);
-                    console.error('[Predicted COI] Error response:', error.response?.data);
-                    setPredictedCOI(0); // Default to 0 if calculation fails
+                    if (!axios.isCancel(error)) console.error('[Predicted COI]', error);
+                    setPredictedCOI(0);
                 } finally {
+                    clearTimeout(timeout);
                     setCalculatingCOI(false);
                 }
             } else {
                 setPredictedCOI(null);
+                setCalculatingCOI(false);
             }
         };
-        
+
         calculatePredictedCOI();
     }, [formData.sireId_public, formData.damId_public, showAddForm, authToken, API_BASE_URL]);
 
@@ -8796,29 +8805,39 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             
             // Calculate COI for each litter that doesn't have it yet.
             // Each litter updates independently so cards pop in as they resolve.
-            const littersNeedingCOI = littersData.filter(
-                l => l.inbreedingCoefficient == null && l.sireId_public && l.damId_public
-            );
+            // Only calculate COI for litters not already cached this session
+            const littersNeedingCOI = littersData.filter(l => {
+                if (!l.sireId_public || !l.damId_public) return false;
+                if (l.inbreedingCoefficient != null) return false; // already stored in DB
+                const cacheKey = `${l.sireId_public}:${l.damId_public}`;
+                if (coiCacheRef.current[cacheKey] != null) {
+                    // Already computed this session — patch state immediately, no API call
+                    setLitters(prev => prev.map(x => x._id === l._id ? { ...x, inbreedingCoefficient: coiCacheRef.current[cacheKey] } : x));
+                    return false;
+                }
+                return true;
+            });
             if (littersNeedingCOI.length > 0) {
-                // Mark them all as calculating immediately
                 setCoiCalculating(new Set(littersNeedingCOI.map(l => l._id)));
-                // Fire all COI requests in parallel — no sequential waiting
                 littersNeedingCOI.forEach(async (litter) => {
+                    const cacheKey = `${litter.sireId_public}:${litter.damId_public}`;
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 15000);
                     try {
                         const coiResponse = await axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
-                            params: { sireId: litter.sireId_public, damId: litter.damId_public, generations: 50 },
-                            headers: { Authorization: `Bearer ${authToken}` }
+                            params: { sireId: litter.sireId_public, damId: litter.damId_public, generations: 20 },
+                            headers: { Authorization: `Bearer ${authToken}` },
+                            signal: controller.signal,
                         });
-                        const coi = coiResponse.data.inbreedingCoefficient;
-                        if (coi != null) {
-                            // Patch just this litter in state — other cards are unaffected
-                            setLitters(prev => prev.map(l => l._id === litter._id ? { ...l, inbreedingCoefficient: coi } : l));
-                            // Persist to DB silently
-                            axios.put(`${API_BASE_URL}/litters/${litter._id}`, { inbreedingCoefficient: coi }, {
-                                headers: { Authorization: `Bearer ${authToken}` }
-                            }).catch(() => {});
-                        }
-                    } catch {/* ignore COI errors */} finally {
+                        const coi = coiResponse.data.inbreedingCoefficient ?? 0;
+                        coiCacheRef.current[cacheKey] = coi;
+                        setLitters(prev => prev.map(l => l._id === litter._id ? { ...l, inbreedingCoefficient: coi } : l));
+                        axios.put(`${API_BASE_URL}/litters/${litter._id}`, { inbreedingCoefficient: coi }, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        }).catch(() => {});
+                    } catch { coiCacheRef.current[cacheKey] = 0; /* prevent retry loops on error */ }
+                    finally {
+                        clearTimeout(timeout);
                         setCoiCalculating(prev => { const next = new Set(prev); next.delete(litter._id); return next; });
                     }
                 });
