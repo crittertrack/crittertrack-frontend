@@ -610,6 +610,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     if (resultCache.has(id)) return resultCache.get(id);
 
                     let animalInfo = null;
+                    let foundViaAuth = false;
 
                     // Try to fetch from owned animals first if authToken is available
                     if (authToken) {
@@ -619,6 +620,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                                 headers: { Authorization: `Bearer ${authToken}` }
                             });
                             animalInfo = response.data;
+                            foundViaAuth = true;
                         } catch (error) {
                             // Not owned, try /animals/any endpoint for related/accessible animals
                             try {
@@ -626,6 +628,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                                     headers: { Authorization: `Bearer ${authToken}` }
                                 });
                                 animalInfo = response.data;
+                                foundViaAuth = true;
                             } catch (error2) {
                                 console.log(`Animal ${id} not accessible via owned or related endpoints:`, error2.message);
                             }
@@ -652,6 +655,12 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     }
                     
                     if (!animalInfo) return null;
+
+                    // If fetched from public database but marked private, hide it and its ancestors
+                    // (auth-fetched animals are always visible to the requesting user)
+                    if (!foundViaAuth && animalInfo.isPrivate) {
+                        return { isHidden: true, id_public: id };
+                    }
 
                     // Use manual breeder name if available, otherwise fetch breeder profile
                     if (animalInfo.manualBreederName) {
@@ -7464,10 +7473,14 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                                                 {breedingRecordOffspring[lid].map(offspring => (
                                                                                     offspring.isPrivate ? (
                                                                                         <div key={offspring.id_public} className="relative bg-gray-50 rounded-lg border-2 border-gray-200 h-52 flex flex-col items-center overflow-hidden pt-2">
-                                                                                            <div className="flex-1 flex items-center justify-center w-full px-2 mt-1"><div className="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center text-2xl">??</div></div>
-                                                                                            <div className="w-full text-center px-2 pb-1"><div className="text-sm font-semibold text-gray-500 truncate">Private Animal</div></div>
-                                                                                            <div className="w-full px-2 pb-2 flex justify-end"><div className="text-xs text-gray-400 font-mono">{offspring.id_public}</div></div>
-                                                                                            <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300 mt-auto"><div className="text-xs font-medium text-gray-500">{offspring.gender || '—'}</div></div>
+                                                                                            <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
+                                                                                                <div className="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center">
+                                                                                                    <EyeOff size={28} className="text-gray-300" />
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div className="w-full text-center px-2 pb-1"><div className="text-sm font-semibold text-gray-400 truncate">Private</div></div>
+                                                                                            <div className="w-full px-2 pb-2 flex justify-end"><div className="text-xs text-gray-300 font-mono">—</div></div>
+                                                                                            <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-200 mt-auto"><div className="text-xs font-medium text-gray-400">{offspring.gender || '—'}</div></div>
                                                                                         </div>
                                                                                     ) : (
                                                                                         <div key={offspring.id_public} onClick={() => onViewAnimal && onViewAnimal(offspring)} className="relative bg-white rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-200 pt-2">
@@ -8241,10 +8254,22 @@ const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal, 
         fetchParent();
     }, [parentId, parentType, API_BASE_URL, authToken]);
 
-    if (!parentId || notFound) {
+    if (!parentId) {
         return (
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
                 <p className="text-gray-500 text-sm">No {parentType.toLowerCase()} recorded</p>
+            </div>
+        );
+    }
+
+    if (notFound || parentData?.isPrivate) {
+        return (
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                    <EyeOff size={24} className="text-gray-400" />
+                </div>
+                <p className="text-gray-600 text-sm font-semibold">Private {parentType}</p>
+                <p className="text-xs text-gray-400 mt-0.5">This animal is not public</p>
             </div>
         );
     }
