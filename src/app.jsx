@@ -23871,6 +23871,16 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
         const sireDam = `${sn} \u00d7 ${dn}`;
         const callId = l.litter_id_public;
 
+        // Mating due — matingDate is today only (not overdue) and litter not yet born
+        if (l.matingDate && !l.birthDate) {
+            const mated = new Date(l.matingDate); mated.setHours(0, 0, 0, 0);
+            const diff = Math.round((mated - today) / 86400000);
+            if (diff === 0) {
+                const key = `${l._id}-mated`;
+                if (!dismissed[key]) urgentItems.push({ key, type: 'mated', pairName, sireDam, callId, diff });
+            }
+        }
+
         // Expected Birth — only if NOT already born
         if (l.expectedDueDate && !l.birthDate) {
             const due = new Date(l.expectedDueDate); due.setHours(0, 0, 0, 0);
@@ -23895,8 +23905,9 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
     if (urgentItems.length === 0) return null;
 
     const typeConfig = {
-        due:    { label: 'Expected Birth', bg: 'bg-amber-100 text-amber-700', icon: '\uD83D\uDC23' },
-        weaned: { label: 'Weaning',        bg: 'bg-sky-100 text-sky-700',     icon: '\uD83C\uDF7C' },
+        mated:  { label: 'Mating',         bg: 'bg-purple-100 text-purple-700', icon: '\u2665\uFE0F' },
+        due:    { label: 'Expected Birth', bg: 'bg-amber-100 text-amber-700',   icon: '\uD83D\uDC23' },
+        weaned: { label: 'Weaning',        bg: 'bg-sky-100 text-sky-700',       icon: '\uD83C\uDF7C' },
     };
 
     return (
