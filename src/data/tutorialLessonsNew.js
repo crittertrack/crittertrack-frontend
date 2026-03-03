@@ -900,13 +900,13 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 3,
-        title: 'Activity Pattern',
-        content: 'Select your animal\'s main activity pattern: Nocturnal (active at night), Diurnal (active during day), or Crepuscular (active at dawn/dusk). This helps you understand your animal\'s natural schedule.',
+        title: 'Activity & Training',
+        content: 'The Activity section covers your animal\'s schedule and exercise needs. Set the Activity Cycle (Nocturnal, Diurnal, or Crepuscular), Exercise Requirements (Low to Very High), and Daily Exercise in minutes. Below that, record training details: Training Level (Basic to Competition), Training Disciplines (e.g., Agility, Nosework), Working Role (e.g., Service, Therapy), and Certifications. Checkboxes for Crate Trained, Litter Trained, Leash Trained, and Free Flight Trained are also available depending on species.',
         highlightElement: '[data-tutorial-target="activity-pattern-select"]',
         tips: [
-          'Species-determined mostly',
-          'Helps plan observation time',
-          'Important for breeding schedules',
+          'Activity Cycle is mostly species-determined',
+          'Exercise fields are most relevant for dogs',
+          'Training checkboxes vary by species template',
           'Examples: Mice are nocturnal, hamsters are crepuscular'
         ]
       },
