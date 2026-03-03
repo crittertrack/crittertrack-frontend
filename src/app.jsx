@@ -8600,7 +8600,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         litterSizeBorn: null,
         litterSizeWeaned: null,
         stillbornCount: null,
-        expectedDueDate: ''
+        expectedDueDate: '',
+        weaningDate: ''
     });
     const [createOffspringCounts, setCreateOffspringCounts] = useState({
         males: 0,
@@ -9012,7 +9013,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 outcome: formData.outcome || 'Unknown',
                 birthMethod: formData.birthMethod || null,
                 litterSizeWeaned: formData.litterSizeWeaned || null,
-                stillbornCount: formData.stillbornCount || null
+                stillbornCount: formData.stillbornCount || null,
+                weaningDate: formData.weaningDate || null
             };
 
             const litterResponse = await axios.post(`${API_BASE_URL}/litters`, litterPayload, {
@@ -9157,7 +9159,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 birthMethod: '',
                 litterSizeBorn: null,
                 litterSizeWeaned: null,
-                stillbornCount: null
+                stillbornCount: null,
+                weaningDate: ''
             });
             setCreateOffspringCounts({ males: 0, females: 0, unknown: 0 });
             // setSireSearch('');
@@ -9394,7 +9397,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             litterSizeBorn: litter.litterSizeBorn || litter.numberBorn || null,
             litterSizeWeaned: litter.litterSizeWeaned || litter.numberWeaned || null,
             stillbornCount: litter.stillbornCount || litter.stillborn || null,
-            expectedDueDate: formatDateForInput(litter.expectedDueDate)
+            expectedDueDate: formatDateForInput(litter.expectedDueDate),
+            weaningDate: formatDateForInput(litter.weaningDate)
         });
         setShowAddForm(true);
         setExpandedLitter(null);
@@ -9468,7 +9472,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 outcome: formData.outcome || 'Unknown',
                 birthMethod: formData.birthMethod || null,
                 litterSizeWeaned: formData.litterSizeWeaned || null,
-                stillbornCount: formData.stillbornCount || null
+                stillbornCount: formData.stillbornCount || null,
+                weaningDate: formData.weaningDate || null
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
@@ -9496,7 +9501,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 birthMethod: '',
                 litterSizeBorn: null,
                 litterSizeWeaned: null,
-                stillbornCount: null
+                stillbornCount: null,
+                weaningDate: ''
             });
             setCreateOffspringCounts({ males: 0, females: 0, unknown: 0 });
             // setSireSearch('');
@@ -10041,6 +10047,21 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 placeholder="0"
                                                 min="0"
                                             />
+                                        </div>
+                                    </div>
+
+                                    {/* Weaning Date */}
+                                    <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Weaning Date
+                                            </label>
+                                            <DatePicker
+                                                value={formData.weaningDate || ''}
+                                                onChange={(e) => setFormData({...formData, weaningDate: e.target.value})}
+                                                className="px-3 py-2"
+                                            />
+                                            <p className="text-xs text-gray-500 mt-1">Optional — shows on calendar</p>
                                         </div>
                                     </div>
 
@@ -10986,6 +11007,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     addEvent(l.matingDate, 'mated', l);
                     addEvent(l.expectedDueDate, 'due', l);
                     addEvent(l.birthDate, 'born', l);
+                    addEvent(l.weaningDate, 'weaned', l);
                 });
 
                 const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -11004,9 +11026,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 while (cells.length % 7 !== 0) cells.push(null);
 
                 const typeStyles = {
-                    mated: { bg: 'bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300', dot: 'bg-purple-400', label: 'Mated' },
-                    due:   { bg: 'bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300', dot: 'bg-amber-400', label: 'Due' },
-                    born:  { bg: 'bg-green-100 hover:bg-green-200 text-green-800 border border-green-500', dot: 'bg-green-500', label: 'Born' },
+                    mated:  { bg: 'bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300', dot: 'bg-purple-400', label: 'Mated' },
+                    due:    { bg: 'bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300', dot: 'bg-amber-400', label: 'Due' },
+                    born:   { bg: 'bg-green-100 hover:bg-green-200 text-green-800 border border-green-500', dot: 'bg-green-500', label: 'Born' },
+                    weaned: { bg: 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300', dot: 'bg-sky-400', label: 'Weaned' },
                 };
 
                 const getLitterName = (l) => l.breedingPairCodeName || l.litter_id_public || 'Unnamed Litter';
@@ -11032,6 +11055,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         const m = l.maleCount ?? 0;
                         const f = l.femaleCount ?? 0;
                         return `${pairName} • ${total} born (${m}M/${f}F)`;
+                    }
+                    if (ev.type === 'weaned') {
+                        const total = l.litterSizeWeaned ?? l.numberWeaned ?? (l.litterSizeBorn ?? l.numberBorn ?? 0);
+                        return `${pairName} • ${total} to wean`;
                     }
                     // mated
                     return `${pairName} • ${sn} × ${dn}`;
@@ -11166,7 +11193,31 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <Row label="Females:" value={l.femaleCount ?? null} />
                                             <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Stillborn:</span><span className="text-gray-800 font-medium">{l.stillbornCount ?? 0}</span></div>
                                             <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Weaned:</span><span className="text-gray-800 font-medium">{l.litterSizeWeaned ?? l.numberWeaned ?? 0}</span></div>
+                                            <Row label="Weaning Date:" value={fmtD(l.weaningDate)} />
                                         </>)}
+                                        {type === 'weaned' && (() => {
+                                            const weanStatus = (() => {
+                                                if (!l.weaningDate) return null;
+                                                const wd = new Date(l.weaningDate); if (isNaN(wd)) return null;
+                                                const now = new Date(); now.setHours(0,0,0,0); wd.setHours(0,0,0,0);
+                                                const diff = Math.round((wd - now) / 86400000);
+                                                if (diff > 0) return { text: `Due in ${diff} day${diff !== 1 ? 's' : ''}`, cls: 'text-green-600' };
+                                                if (diff === 0) return { text: 'Weaning today', cls: 'text-amber-600 font-semibold' };
+                                                return { text: `${Math.abs(diff)} day${Math.abs(diff) !== 1 ? 's' : ''} overdue`, cls: 'text-red-600 font-semibold' };
+                                            })();
+                                            const ageInDays = (() => {
+                                                if (!l.birthDate || !l.weaningDate) return null;
+                                                const b = new Date(l.birthDate); const w = new Date(l.weaningDate);
+                                                if (isNaN(b) || isNaN(w)) return null;
+                                                return Math.round((w - b) / 86400000);
+                                            })();
+                                            return (<>
+                                                <Row label="Born:" value={fmtD(l.birthDate)} />
+                                                <Row label="Weaning Date:" value={fmtD(l.weaningDate)} />
+                                                {ageInDays != null && <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Age:</span><span className="text-gray-800 font-medium">{ageInDays} day{ageInDays !== 1 ? 's' : ''}</span></div>}
+                                                {weanStatus && <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Status:</span><span className={weanStatus.cls}>{weanStatus.text}</span></div>}
+                                            </>);
+                                        })()}
                                         {type === 'mated' && (<>
                                             <Row label="Mating Date:" value={fmtD(l.matingDate)} />
                                             <Row label="Expected Due:" value={fmtD(l.expectedDueDate)} />
