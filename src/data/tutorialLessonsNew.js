@@ -770,17 +770,6 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 5,
-        title: 'Veterinary Care',
-        content: 'Keep information about your veterinarian and record of visits, including dates, reasons for visit, and treatment provided.',
-        highlightElement: '[data-tutorial-target="vet-care-section"]',
-        tips: [
-          'Helps track veterinary history',
-          'Important for continuity of care',
-          'Useful if changing vets'
-        ]
-      },
-      {
-        stepNumber: 6,
         title: 'Health Clearances & Screening',
         content: 'This collapsible section stores formal health screening results. Fields include Spay/Neuter Date, Heartworm Status, Hip/Elbow Scores, Eye Clearance, Cardiac Clearance, Dental Records, Genetic Test Results, and Chronic Conditions. Most fields are free-text so you can paste in lab results or certification details.',
         highlightElement: null,
@@ -788,6 +777,17 @@ const GETTING_STARTED_LESSONS = [
           'Expand the section to fill in screening results',
           'Genetic test results can include DNA panel summaries',
           'Chronic Conditions is useful for buyer transparency'
+        ]
+      },
+      {
+        stepNumber: 6,
+        title: 'Veterinary Care',
+        content: 'Keep information about your veterinarian and record of visits, including dates, reasons for visit, and treatment provided.',
+        highlightElement: '[data-tutorial-target="vet-care-section"]',
+        tips: [
+          'Helps track veterinary history',
+          'Important for continuity of care',
+          'Useful if changing vets'
         ]
       }
     ]

@@ -89,8 +89,8 @@ export const TUTORIAL_SCREENSHOTS = {
     2: 'preventive-care.png', // Step 2: Preventive Care
     3: 'procedures-and-diagnostics.png', // Step 3: Procedures & Diagnostics
     4: 'active-medical-records.png', // Step 4: Active Medical Records
-    5: 'veterinary-care.png', // Step 5: Veterinary Care
-    6: 'health-clearances-and-screening.png', // Step 6: Health Clearances & Screening
+    5: 'health-clearances-and-screening.png', // Step 5: Health Clearances & Screening
+    6: 'veterinary-care.png', // Step 6: Veterinary Care
   },
   
   'gs-husbandry': {
