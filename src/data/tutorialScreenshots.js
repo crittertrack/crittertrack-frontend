@@ -139,10 +139,19 @@ export const TUTORIAL_SCREENSHOTS = {
  * @param {number} stepNumber - The step number (1-based)
  * @returns {string|null} - The screenshot URL or null if not available
  */
+// Maps lesson ID prefix to subfolder
+const LESSON_FOLDER = {
+  'gs-': 'getting-started',
+  'kf-': 'key-features',
+  'af-': 'advanced-features',
+};
+
 export const getStepScreenshot = (lessonId, stepNumber) => {
   const lessonScreenshots = TUTORIAL_SCREENSHOTS[lessonId];
   if (!lessonScreenshots || !lessonScreenshots[stepNumber]) {
     return null;
   }
-  return `/images/tutorials/${lessonScreenshots[stepNumber]}`;
+  const prefix = Object.keys(LESSON_FOLDER).find(p => lessonId.startsWith(p));
+  const subfolder = prefix ? LESSON_FOLDER[prefix] : 'getting-started';
+  return `/images/tutorials/${subfolder}/${lessonScreenshots[stepNumber]}`;
 };
