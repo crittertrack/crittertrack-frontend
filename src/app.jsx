@@ -2702,7 +2702,7 @@ const DetailJsonList = ({ label, data, renderItem }) => {
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
-const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, onHideAnimal, showModalMessage, onTransfer, onViewAnimal, onToggleOwned, userProfile }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onToggleOwned, userProfile }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -4900,7 +4900,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
 // ==================== VIEW-ONLY PRIVATE ANIMAL DETAIL (SOLD/TRANSFERRED) ====================
 // Identical to PrivateAnimalDetail but without edit/delete and privacy controls
 // Used for animals you have view-only access to (sold, transferred, purchased)
-const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onHideAnimal, showModalMessage, onViewAnimal }) => {
+const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, showModalMessage, onViewAnimal }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -5009,23 +5009,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 <X size={24} />
                             </button>
                         </div>
-                        <div className="flex justify-center gap-1.5 flex-wrap">
-                            {onHideAnimal && (
-                                <button
-                                    onClick={() => {
-                                        if (window.confirm(`Hide ${animal.name || 'this animal'}? You can restore it anytime from the hidden animals section.`)) {
-                                            onHideAnimal(animal.id_public);
-                                            onClose();
-                                        }
-                                    }}
-                                    className="px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-semibold rounded-lg transition flex items-center gap-1"
-                                    title="Hide this animal - move to hidden section"
-                                >
-                                    <Eye size={14} />
-                                    Hide
-                                </button>
-                            )}
-                        </div>
+
                     </div>
                     
                     {/* Desktop layout: single row */}
@@ -5040,21 +5024,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded font-medium">
                                 🔒 VIEW-ONLY - Read Only Access
                             </span>
-                            {onHideAnimal && (
-                                <button
-                                    onClick={() => {
-                                        if (window.confirm(`Hide ${animal.name || 'this animal'}? You can restore it anytime from the hidden animals section.`)) {
-                                            onHideAnimal(animal.id_public);
-                                            onClose();
-                                        }
-                                    }}
-                                    className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition flex items-center gap-2"
-                                    title="Hide this animal - move to hidden section"
-                                >
-                                    <Eye size={16} />
-                                    Hide
-                                </button>
-                            )}
+
                             <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={28} />
                             </button>
@@ -19287,7 +19257,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     );
 };
 
-const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, fetchHiddenAnimals, navigate }) => {
+const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, navigate }) => {
     const [animals, setAnimals] = useState([]);
     const [allAnimalsRaw, setAllAnimalsRaw] = useState([]); // Unfiltered ? used by Management View
     const [availableAnimalsRaw, setAvailableAnimalsRaw] = useState([]); // All user-created animals with status=Available (no ownership filter)
@@ -21918,18 +21888,17 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                             {filteredSoldList.map(a => (
                                                 <MgmtAnimalCard key={a._id || a.id_public} animal={a} extras={
                                                     a.ownerName ? (
-                                                        <RouterLink
-                                                            to={a.ownerIdPublic ? `/user/${a.ownerIdPublic}` : '#'}
+                                                        <button
                                                             className="flex items-center gap-1.5 shrink-0 min-w-0 hover:opacity-80 transition-opacity"
                                                             title={`View profile: ${a.ownerName}`}
-                                                            onClick={e => e.stopPropagation()}
+                                                            onClick={e => { e.stopPropagation(); if (a.ownerIdPublic) navigate(`/user/${a.ownerIdPublic}`); }}
                                                         >
                                                             {a.ownerAvatar
                                                                 ? <img src={a.ownerAvatar} alt={a.ownerName} className="w-5 h-5 rounded-full object-cover shrink-0 border border-orange-200" />
                                                                 : <span className="w-5 h-5 rounded-full bg-orange-200 text-orange-700 text-[10px] font-bold flex items-center justify-center shrink-0">{a.ownerName.charAt(0).toUpperCase()}</span>
                                                             }
                                                             <span className="text-xs text-orange-700 font-medium max-w-[110px] truncate whitespace-nowrap">{a.ownerName}</span>
-                                                        </RouterLink>
+                                                        </button>
                                                     ) : null
                                                 } />
                                             ))}
@@ -22083,15 +22052,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         <EyeOff size={14} className="sm:w-4 sm:h-4" />
                         <span className="font-medium">All Private</span>
                     </button>
-                    <button 
-                        onClick={() => { navigate('/hidden-animals'); fetchHiddenAnimals(); }}
-                        data-tutorial-target="hidden-animals-btn"
-                        className="text-gray-600 hover:text-gray-800 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-gray-100 text-xs sm:text-sm"
-                        title="View Hidden Animals"
-                    >
-                        <Archive size={14} className="sm:w-[18px] sm:h-[18px]" />
-                        <span className="font-medium">Hidden</span>
-                    </button>
+
                     </>)}
                     {animalView === 'management' && !showActivityLogScreen && !showSuppliesScreen && (
                         <button
@@ -25387,35 +25348,6 @@ const App = () => {
         }
     };
 
-    const handleHideViewOnlyAnimal = async (id_public) => {
-        if (!window.confirm('Hide this view-only animal? You can restore it later from the hidden animals list.')) {
-            return;
-        }
-        try {
-            await axios.post(`${API_BASE_URL}/animals/${id_public}/hide`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            navigate('/');
-            showModalMessage('Success', 'View-only animal hidden. You can restore it anytime from the hidden animals section.');
-        } catch (error) {
-            console.error('Failed to hide animal:', error);
-            showModalMessage('Error', error.response?.data?.message || 'Failed to hide animal');
-        }
-    };
-
-    const handleHideAnimal = async (id_public) => {
-        try {
-            await axios.post(`${API_BASE_URL}/animals/${id_public}/hide`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            showModalMessage('Success', 'Animal hidden successfully. You can restore it anytime from the hidden animals section.');
-            fetchHiddenAnimals();
-        } catch (error) {
-            console.error('Failed to hide animal:', error);
-            showModalMessage('Error', error.response?.data?.message || 'Failed to hide animal');
-        }
-    };
-
     const toggleAnimalOwned = async (animalId, newOwnedValue) => {
         try {
             const response = await axios.put(`${API_BASE_URL}/animals/${animalId}`, {
@@ -25443,31 +25375,9 @@ const App = () => {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             showModalMessage('Success', 'View-only animal restored to your list!');
-            // Refresh the view
-            if (currentView === 'hidden-animals') {
-                fetchHiddenAnimals();
-            }
         } catch (error) {
             console.error('Failed to restore animal:', error);
             showModalMessage('Error', error.response?.data?.message || 'Failed to restore animal');
-        }
-    };
-
-    const [hiddenAnimals, setHiddenAnimals] = useState([]);
-    const [loadingHidden, setLoadingHidden] = useState(false);
-
-    const fetchHiddenAnimals = async () => {
-        setLoadingHidden(true);
-        try {
-            const response = await axios.get(`${API_BASE_URL}/animals/hidden/list`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            setHiddenAnimals(response.data || []);
-        } catch (error) {
-            console.error('Failed to fetch hidden animals:', error);
-            showModalMessage('Error', 'Failed to load hidden animals');
-        } finally {
-            setLoadingHidden(false);
         }
     };
 
@@ -26641,7 +26551,6 @@ const App = () => {
                             showModalMessage={showModalMessage} 
                             onEditAnimal={handleEditAnimal} 
                             onViewAnimal={handleViewAnimal}
-                            fetchHiddenAnimals={fetchHiddenAnimals}
                             navigate={navigate}
                         />
                     } />
@@ -26651,7 +26560,6 @@ const App = () => {
                             showModalMessage={showModalMessage} 
                             onEditAnimal={handleEditAnimal} 
                             onViewAnimal={handleViewAnimal}
-                            fetchHiddenAnimals={fetchHiddenAnimals}
                             navigate={navigate}
                         />
                     } />
@@ -26875,7 +26783,6 @@ const App = () => {
                                         setShowImageModal={setShowImageModal}
                                         setEnlargedImageUrl={setEnlargedImageUrl}
                                         onUpdateAnimal={setAnimalToView}
-                                        onHideAnimal={handleHideAnimal}
                                         showModalMessage={showModalMessage}
                                         onTransfer={(animal) => {
                                             setTransferAnimal(animal);
@@ -26897,7 +26804,6 @@ const App = () => {
                                         authToken={authToken}
                                         setShowImageModal={setShowImageModal}
                                         setEnlargedImageUrl={setEnlargedImageUrl}
-                                        onHideAnimal={handleHideAnimal}
                                         showModalMessage={showModalMessage}
                                         onViewAnimal={handleViewAnimal}
                                     />
@@ -26972,15 +26878,7 @@ const App = () => {
                                                             </button>
                                                         </>
                                                     )}
-                                                    {animalToView.isViewOnly && (
-                                                        <button
-                                                            onClick={() => handleHideViewOnlyAnimal(animalToView.id_public)}
-                                                            className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition flex items-center gap-2"
-                                                        >
-                                                            <Archive size={16} />
-                                                            Hide
-                                                        </button>
-                                                    )}
+
                                                 </div>
                                             </div>
                                         </div>
@@ -28435,67 +28333,7 @@ const App = () => {
                         })()
                     )
                 } />
-                <Route path="/hidden-animals" element={
-                        <div className="w-full max-w-5xl bg-white p-6 rounded-xl shadow-lg">
-                            <div className="flex items-start justify-between mb-6">
-                                <button onClick={() => navigate('/')} className="flex items-center text-gray-600 hover:text-gray-800 font-medium">
-                                    <ArrowLeft size={20} className="mr-2" />
-                                    Back to Dashboard
-                                </button>
-                            </div>
-                            <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
-                                <Archive size={24} className="mr-3 text-gray-600" />
-                                Hidden View-Only Animals
-                            </h2>
-                            {loadingHidden ? (
-                                <div className="flex justify-center py-8">
-                                    <Loader2 className="animate-spin" size={32} />
-                                </div>
-                            ) : hiddenAnimals.length === 0 ? (
-                                <p className="text-center text-gray-500 py-8">No hidden animals</p>
-                            ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {hiddenAnimals.map(animal => (
-                                        <div key={animal.id_public} className="border border-gray-300 rounded-lg p-4 bg-gray-50">
-                                            <div className="flex items-center space-x-3 mb-3">
-                                                <div className="w-16 h-16 bg-gray-200 rounded-md overflow-hidden flex-shrink-0">
-                                                    {animal.imageUrl || animal.photoUrl ? (
-                                                        <img src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                            <Cat size={32} />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="flex-1">
-                                                    <h3 className="font-semibold text-gray-800">
-                                                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
-                                                    </h3>
-                                                    <p className="text-sm text-gray-600">{animal.id_public}</p>
-                                                    <p className="text-xs text-gray-500">{animal.species} — {animal.gender}</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={() => handleRestoreViewOnlyAnimal(animal.id_public)}
-                                                    className="flex-1 px-3 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition flex items-center justify-center gap-2"
-                                                >
-                                                    <Eye size={16} />
-                                                    Restore
-                                                </button>
-                                                <button
-                                                    onClick={() => handleViewAnimal(animal)}
-                                                    className="flex-1 px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition"
-                                                >
-                                                    View
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    } />
+
                 </Routes>
             </main>
 
