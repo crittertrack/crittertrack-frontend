@@ -8658,7 +8658,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
     // Test Pairing modal state
     const [showTestPairingModal, setShowTestPairingModal] = useState(false);
-    const [tpSpecies, setTpSpecies] = useState('');
     const [tpSireId, setTpSireId] = useState('');
     const [tpDamId, setTpDamId] = useState('');
     const [tpCOI, setTpCOI] = useState(null);
@@ -8942,6 +8941,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             setFormData({...formData, otherParent1Id_public: animal.id_public});
         } else if (modalTarget === 'other-parent2-litter') {
             setFormData({...formData, otherParent2Id_public: animal.id_public});
+        } else if (modalTarget === 'tp-sire') {
+            setTpSireId(animal.id_public);
+            setTpCOI(null);
+            setTpError(null);
+        } else if (modalTarget === 'tp-dam') {
+            setTpDamId(animal.id_public);
+            setTpCOI(null);
+            setTpError(null);
         }
         setModalTarget(null);
     };
@@ -9755,7 +9762,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     </button>
                     {/* Test Pairing Button */}
                     <button
-                        onClick={() => { setShowTestPairingModal(true); setTpSpecies(''); setTpSireId(''); setTpDamId(''); setTpCOI(null); setTpError(null); setTpCalculating(false); }}
+                        onClick={() => { setShowTestPairingModal(true); setTpSireId(''); setTpDamId(''); setTpCOI(null); setTpError(null); setTpCalculating(false); }}
                         className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border shadow-sm bg-white border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
                         title="Test a sire/dam pairing to predict COI"
                     >
@@ -11384,53 +11391,42 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             </button>
                         </div>
                         <div className="p-5 space-y-4">
-                            <p className="text-sm text-gray-500">Select a species, then pick a sire and dam to calculate the predicted Coefficient of Inbreeding (COI) for their offspring.</p>
-                            {/* Species Filter */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Species <span className="text-red-500">*</span></label>
-                                <select
-                                    value={tpSpecies}
-                                    onChange={e => { setTpSpecies(e.target.value); setTpSireId(''); setTpDamId(''); setTpCOI(null); setTpError(null); }}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-                                >
-                                    <option value="">Select Species...</option>
-                                    {(speciesOptions.length > 0
-                                        ? speciesOptions.map(s => s.name).filter(Boolean).sort()
-                                        : [...new Set(myAnimals.map(a => a.species).filter(Boolean))].sort()
-                                    ).map(sp => (
-                                        <option key={sp} value={sp}>{sp}</option>
-                                    ))}
-                                </select>
-                            </div>
+                            <p className="text-sm text-gray-500">Pick a sire and dam to calculate the predicted Coefficient of Inbreeding (COI) for their offspring.</p>
                             {/* Sire */}
                             <div>
-                                <label className={`block text-sm font-medium mb-1 ${tpSpecies ? 'text-gray-700' : 'text-gray-400'}`}>Sire (Father)</label>
-                                <select
-                                    value={tpSireId}
-                                    onChange={e => { setTpSireId(e.target.value); setTpCOI(null); setTpError(null); }}
-                                    disabled={!tpSpecies}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm disabled:bg-gray-50 disabled:text-gray-400"
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Sire (Father)</label>
+                                <button
+                                    type="button"
+                                    onClick={() => setModalTarget('tp-sire')}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left transition focus:ring-2 focus:ring-primary focus:border-transparent"
                                 >
-                                    <option value="">{tpSpecies ? 'Select Sire...' : 'Select species first'}</option>
-                                    {myAnimals.filter(a => a.species === tpSpecies && ['Male', 'Unknown', ''].includes(a.gender ?? '')).map(a => (
-                                        <option key={a.id_public} value={a.id_public}>{a.name} ({a.id_public})</option>
-                                    ))}
-                                </select>
+                                    {tpSireId ? (
+                                        <div>
+                                            <div className="font-medium">{myAnimals.find(a => a.id_public === tpSireId)?.name || 'Unknown'}</div>
+                                            <div className="text-xs text-gray-500">{tpSireId}</div>
+                                        </div>
+                                    ) : (
+                                        <div className="text-gray-400">Select Sire...</div>
+                                    )}
+                                </button>
                             </div>
                             {/* Dam */}
                             <div>
-                                <label className={`block text-sm font-medium mb-1 ${tpSpecies ? 'text-gray-700' : 'text-gray-400'}`}>Dam (Mother)</label>
-                                <select
-                                    value={tpDamId}
-                                    onChange={e => { setTpDamId(e.target.value); setTpCOI(null); setTpError(null); }}
-                                    disabled={!tpSpecies}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm disabled:bg-gray-50 disabled:text-gray-400"
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Dam (Mother)</label>
+                                <button
+                                    type="button"
+                                    onClick={() => setModalTarget('tp-dam')}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left transition focus:ring-2 focus:ring-primary focus:border-transparent"
                                 >
-                                    <option value="">{tpSpecies ? 'Select Dam...' : 'Select species first'}</option>
-                                    {myAnimals.filter(a => a.species === tpSpecies && ['Female', 'Intersex', 'Unknown', ''].includes(a.gender ?? '')).map(a => (
-                                        <option key={a.id_public} value={a.id_public}>{a.name} ({a.id_public})</option>
-                                    ))}
-                                </select>
+                                    {tpDamId ? (
+                                        <div>
+                                            <div className="font-medium">{myAnimals.find(a => a.id_public === tpDamId)?.name || 'Unknown'}</div>
+                                            <div className="text-xs text-gray-500">{tpDamId}</div>
+                                        </div>
+                                    ) : (
+                                        <div className="text-gray-400">Select Dam...</div>
+                                    )}
+                                </button>
                             </div>
                             {/* Calculate Button */}
                             <button
@@ -11478,6 +11474,40 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Test Pairing — Sire Search Modal */}
+            {modalTarget === 'tp-sire' && (
+                <LocalAnimalSearchModal
+                    title="Select Sire"
+                    onSelect={handleSelectOtherParentForLitter}
+                    onClose={() => setModalTarget(null)}
+                    authToken={authToken}
+                    showModalMessage={showModalMessage}
+                    API_BASE_URL={API_BASE_URL}
+                    X={X}
+                    Search={Search}
+                    Loader2={Loader2}
+                    LoadingSpinner={LoadingSpinner}
+                    genderFilter={['Male', 'Intersex', 'Unknown']}
+                />
+            )}
+
+            {/* Test Pairing — Dam Search Modal */}
+            {modalTarget === 'tp-dam' && (
+                <LocalAnimalSearchModal
+                    title="Select Dam"
+                    onSelect={handleSelectOtherParentForLitter}
+                    onClose={() => setModalTarget(null)}
+                    authToken={authToken}
+                    showModalMessage={showModalMessage}
+                    API_BASE_URL={API_BASE_URL}
+                    X={X}
+                    Search={Search}
+                    Loader2={Loader2}
+                    LoadingSpinner={LoadingSpinner}
+                    genderFilter={['Female', 'Intersex', 'Unknown']}
+                />
             )}
         </div>
     );
