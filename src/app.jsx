@@ -18841,6 +18841,9 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
     const [copySuccess, setCopySuccess] = useState(false);
     const [checkingForUpdates, setCheckingForUpdates] = useState(false);
     const [updateAvailable, setUpdateAvailable] = useState(false);
+    const [urgencyEnabled, setUrgencyEnabled] = useState(() => {
+        try { return localStorage.getItem('ct_urgency_enabled') !== 'false'; } catch { return true; }
+    });
     // Note: Donation button is now globally available via fixed button in top-left corner
 
     const handleShare = () => {
@@ -19005,6 +19008,35 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                 <Edit size={20} className="mr-2" /> Edit Profile
             </button>
             
+            {/* App Preferences */}
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    <Bell size={16} className="text-gray-500" /> App Preferences
+                </p>
+                <div className="flex items-center justify-between gap-4">
+                    <div>
+                        <p className="text-sm font-medium text-gray-800">Urgency Alerts</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Show a banner when litter births or weanings are due today or overdue</p>
+                    </div>
+                    <button
+                        onClick={() => {
+                            const next = !urgencyEnabled;
+                            setUrgencyEnabled(next);
+                            try {
+                                localStorage.setItem('ct_urgency_enabled', next ? 'true' : 'false');
+                                // Notify UrgencyAlertsBanner on the same tab
+                                window.dispatchEvent(new StorageEvent('storage', { key: 'ct_urgency_enabled' }));
+                            } catch {}
+                        }}
+                        className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${urgencyEnabled ? 'bg-primary' : 'bg-gray-300'}`}
+                        role="switch"
+                        aria-checked={urgencyEnabled}
+                    >
+                        <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ${urgencyEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                    </button>
+                </div>
+            </div>
+
             <button 
                 onClick={handleCheckForUpdates}
                 disabled={checkingForUpdates}
@@ -23761,6 +23793,172 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
     );
 };
 
+// Urgency Alerts Banner — shows due-today/overdue litter events on every page (can be disabled per user)
+const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const [enabled, setEnabled] = useState(() => {
+        try { return localStorage.getItem('ct_urgency_enabled') !== 'false'; } catch { return true; }
+    });
+    const [dismissed, setDismissed] = useState(() => {
+        try {
+            const raw = JSON.parse(localStorage.getItem('ct_urgency_dismissed') || '{}');
+            // Expire any dismissals not from today
+            const clean = {};
+            Object.entries(raw).forEach(([k, v]) => { if (v === todayStr) clean[k] = v; });
+            return clean;
+        } catch { return {}; }
+    });
+    const [litters, setLitters] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [collapsed, setCollapsed] = useState(false);
+
+    useEffect(() => {
+        if (!authToken) return;
+        axios.get(`${API_BASE_URL}/litters`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(res => setLitters(Array.isArray(res.data) ? res.data : []))
+            .catch(() => {})
+            .finally(() => setLoading(false));
+    }, [authToken, API_BASE_URL]);
+
+    // Sync enabled state if toggled from another part of the app (e.g. ProfileView)
+    useEffect(() => {
+        const onStorage = () => {
+            try { setEnabled(localStorage.getItem('ct_urgency_enabled') !== 'false'); } catch {}
+        };
+        window.addEventListener('storage', onStorage);
+        return () => window.removeEventListener('storage', onStorage);
+    }, []);
+
+    const saveEnabled = (val) => {
+        setEnabled(val);
+        try { localStorage.setItem('ct_urgency_enabled', val ? 'true' : 'false'); } catch {}
+    };
+
+    const dismiss = (key) => {
+        const next = { ...dismissed, [key]: todayStr };
+        setDismissed(next);
+        try { localStorage.setItem('ct_urgency_dismissed', JSON.stringify(next)); } catch {}
+    };
+
+    const dismissAll = (items) => {
+        const next = { ...dismissed };
+        items.forEach(item => { next[item.key] = todayStr; });
+        setDismissed(next);
+        try { localStorage.setItem('ct_urgency_dismissed', JSON.stringify(next)); } catch {}
+    };
+
+    if (!enabled || loading) return null;
+
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const urgentItems = [];
+
+    litters.forEach(l => {
+        const pairName = l.breedingPairCodeName || l.litter_id_public || 'Unnamed Litter';
+        const sn = l.sire?.name || l.sireId_public || '?';
+        const dn = l.dam?.name || l.damId_public || '?';
+        const sireDam = `${sn} \u00d7 ${dn}`;
+        const callId = l.litter_id_public;
+
+        // Expected Birth — only if NOT already born
+        if (l.expectedDueDate && !l.birthDate) {
+            const due = new Date(l.expectedDueDate); due.setHours(0, 0, 0, 0);
+            const diff = Math.round((due - today) / 86400000);
+            if (diff <= 0) {
+                const key = `${l._id}-due`;
+                if (!dismissed[key]) urgentItems.push({ key, type: 'due', pairName, sireDam, callId, diff });
+            }
+        }
+
+        // Weaning
+        if (l.weaningDate) {
+            const wean = new Date(l.weaningDate); wean.setHours(0, 0, 0, 0);
+            const diff = Math.round((wean - today) / 86400000);
+            if (diff <= 0) {
+                const key = `${l._id}-weaned`;
+                if (!dismissed[key]) urgentItems.push({ key, type: 'weaned', pairName, sireDam, callId, diff });
+            }
+        }
+    });
+
+    if (urgentItems.length === 0) return null;
+
+    const typeConfig = {
+        due:    { label: 'Expected Birth', bg: 'bg-amber-100 text-amber-700', icon: '\uD83D\uDC23' },
+        weaned: { label: 'Weaning',        bg: 'bg-sky-100 text-sky-700',     icon: '\uD83C\uDF7C' },
+    };
+
+    return (
+        <div className="mx-2 sm:mx-4 mt-2 rounded-xl border-2 border-amber-300 bg-amber-50 shadow-sm overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between px-3 py-2 bg-amber-100 border-b border-amber-200">
+                <div className="flex items-center gap-2">
+                    <AlertTriangle size={15} className="text-amber-600 flex-shrink-0" />
+                    <span className="text-sm font-bold text-amber-800">
+                        {urgentItems.length} Urgent Action{urgentItems.length !== 1 ? 's' : ''}
+                    </span>
+                </div>
+                <div className="flex items-center gap-1">
+                    <button
+                        onClick={() => setCollapsed(c => !c)}
+                        className="p-1 rounded hover:bg-amber-200 text-amber-600"
+                        title={collapsed ? 'Expand' : 'Collapse'}
+                    >
+                        {collapsed ? <ChevronDown size={15} /> : <ChevronUp size={15} />}
+                    </button>
+                    <button
+                        onClick={() => dismissAll(urgentItems)}
+                        className="p-1 rounded hover:bg-amber-200 text-amber-500 hover:text-amber-700"
+                        title="Dismiss all for today"
+                    >
+                        <X size={15} />
+                    </button>
+                </div>
+            </div>
+
+            {/* Items */}
+            {!collapsed && (
+                <div className="divide-y divide-amber-200">
+                    {urgentItems.map(item => {
+                        const cfg = typeConfig[item.type] || typeConfig.due;
+                        const statusText = item.diff === 0
+                            ? 'Due today'
+                            : `${Math.abs(item.diff)} day${Math.abs(item.diff) !== 1 ? 's' : ''} overdue`;
+                        return (
+                            <div key={item.key} className="flex items-center gap-2 sm:gap-3 px-3 py-2.5">
+                                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${cfg.bg}`}>
+                                    {cfg.icon} {cfg.label}
+                                </span>
+                                <div className="flex-1 min-w-0">
+                                    <span className="font-semibold text-gray-800 text-sm">{item.pairName}</span>
+                                    <span className="text-gray-400 text-sm mx-1">\u2014</span>
+                                    <span className="text-gray-600 text-sm truncate">{item.sireDam}</span>
+                                    {item.callId && <span className="text-xs text-gray-400 ml-1.5">{item.callId}</span>}
+                                </div>
+                                <span className={`text-xs font-bold flex-shrink-0 ${item.diff === 0 ? 'text-amber-600' : 'text-red-600'}`}>
+                                    {statusText}
+                                </span>
+                                <button
+                                    onClick={() => dismiss(item.key)}
+                                    className="p-0.5 text-gray-400 hover:text-gray-600 flex-shrink-0"
+                                    title="Dismiss for today"
+                                >
+                                    <X size={14} />
+                                </button>
+                            </div>
+                        );
+                    })}
+                    <div className="px-3 py-1.5 flex justify-end">
+                        <span className="text-xs text-gray-400">
+                            Dismissed items reset at midnight \u00b7{' '}
+                            <button onClick={() => saveEnabled(false)} className="underline hover:text-gray-600">Turn off alerts</button>
+                        </span>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 // System Broadcast Banner Component (for info/announcements - shows in banner area)
 const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
     const [broadcasts, setBroadcasts] = useState([]);
@@ -26863,8 +27061,11 @@ const App = () => {
 
             {/* Moderator Warning Banner */}
             <WarningBanner authToken={authToken} API_BASE_URL={API_BASE_URL} userProfile={userProfile} />
+
+            {/* Urgency Alerts Banner — due-today/overdue expected births and weanings */}
+            {authToken && <UrgencyAlertsBanner authToken={authToken} API_BASE_URL={API_BASE_URL} />}
             
-            {/* System Broadcast Banner (info/announcements) - only on dashboard */}
+            {/* System Broadcast Banner (info/announcements) - only on dashboard */}}
             {(currentView === 'list' || currentView === '') && (
                 <BroadcastBanner authToken={authToken} API_BASE_URL={API_BASE_URL} />
             )}
