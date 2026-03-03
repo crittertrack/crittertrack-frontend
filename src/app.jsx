@@ -14961,21 +14961,21 @@ const AnimalForm = ({
                                 </div>
                                 )}
                                 
-                                {!isFieldHidden('carrierTraits') && (
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">{getFieldLabel('carrierTraits', 'Carrier Traits')}</label>
-                                    <input type="text" name="carrierTraits" value={formData.carrierTraits || ''} onChange={handleChange} 
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="Genetic traits carried" />
-                                </div>
-                                )}
-
                                 {!isFieldHidden('size') && (
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">{getFieldLabel('size', 'Size')}</label>
                                     <input type="text" name="size" value={formData.size || ''} onChange={handleChange} 
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="e.g., Standard, Dwarf" />
+                                </div>
+                                )}
+
+                                {!isFieldHidden('carrierTraits') && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">{getFieldLabel('carrierTraits', 'Carrier Traits')}</label>
+                                    <input type="text" name="carrierTraits" value={formData.carrierTraits || ''} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="Genetic traits carried" />
                                 </div>
                                 )}
                             </div>
