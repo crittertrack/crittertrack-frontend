@@ -6953,17 +6953,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                 </div>
                             )}
 
-                            {/* Current Owner Section */}
-                            {(animal.keeperName) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">🏠 Keeper</h3>
-                                    <p className="text-gray-700">{animal.keeperName}</p>
-                                    {animal.coOwnership && (
-                                        <p className="text-gray-700 mt-2"><span className="text-gray-600">Co-Ownership:</span> {animal.coOwnership}</p>
-                                    )}
-                                </div>
-                            )}
-
                             {/* Identification Numbers Section */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">🔢 Identification Numbers</h3>
@@ -6974,70 +6963,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     {animal.pedigreeRegistrationId && <p><span className="text-gray-600">Pedigree Reg ID:</span> <strong>{animal.pedigreeRegistrationId}</strong></p>}
                                 </div>
                             </div>
-                            {/* Genetic Code Display Section */}
-                            {animal.geneticCode && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">🧬 Genetic Code</h3>
-                                    <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || ''}</p>
-                                </div>
-                            )}
-                            {/* Medical Information Section */}
-                            {(animal.allergies || animal.medications || animal.medicalConditions) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Medical Information</h3>
-                                    <div className="space-y-3">
-                                        {animal.allergies && (() => {
-                                            const parsed = parseHealthRecords(animal.allergies);
-                                            return parsed && parsed.length > 0 ? (
-                                                <div>
-                                                    <strong className="text-sm">Allergies:</strong>
-                                                    <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                        {parsed.map((allergy, idx) => (
-                                                            <li key={idx} className="text-gray-700">
-                                                                {allergy.allergen || allergy.name}
-                                                                {allergy.notes && <span className="text-gray-600"> - {allergy.notes}</span>}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            ) : null;
-                                        })()}
-                                        {animal.medications && (() => {
-                                            const parsed = parseHealthRecords(animal.medications);
-                                            return parsed && parsed.length > 0 ? (
-                                                <div>
-                                                    <strong className="text-sm">Medications:</strong>
-                                                    <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                        {parsed.map((med, idx) => (
-                                                            <li key={idx} className="text-gray-700">
-                                                                {med.medication || med.name}
-                                                                {med.notes && <span className="text-gray-600"> - {med.notes}</span>}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            ) : null;
-                                        })()}
-                                        {animal.medicalConditions && (() => {
-                                            const parsed = parseHealthRecords(animal.medicalConditions);
-                                            return parsed && parsed.length > 0 ? (
-                                                <div>
-                                                    <strong className="text-sm">Medical Conditions:</strong>
-                                                    <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                        {parsed.map((condition, idx) => (
-                                                            <li key={idx} className="text-gray-700">
-                                                                {condition.condition || condition.name}
-                                                                {condition.notes && <span className="text-gray-600"> - {condition.notes}</span>}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            ) : null;
-                                        })()}
-                                    </div>
-                                </div>
-                            )}
-
                             {/* Parents Section */}
                             {(animal.fatherId_public || animal.sireId_public || animal.motherId_public || animal.damId_public) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -7199,6 +7124,12 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     </div>
                                 </div>
                             )}
+
+                            {/* Origin */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">🌍 Origin</h3>
+                                <p className="text-sm text-gray-700">{animal.origin || ''}</p>
+                            </div>
                         </div>
                     )}
 
@@ -7234,14 +7165,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     />
                                 </div>
                             </div>
-
-                            {/* 2nd Section: Origin */}
-                            {animal.origin && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🌍 Origin</h3>
-                                <p className="text-gray-700">{animal.origin || ''}</p>
-                            </div>
-                            )}
 
                             {/* Keeper History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
