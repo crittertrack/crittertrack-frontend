@@ -9647,8 +9647,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
     // Filter litters based on search query and species
     const filteredLitters = litters.filter(litter => {
-        const sire = myAnimals.find(a => a.id_public === litter.sireId_public);
-        const dam = myAnimals.find(a => a.id_public === litter.damId_public);
+        // Use populated parent data first (covers transferred/hidden animals), fall back to myAnimals
+        const sire = litter.sire || myAnimals.find(a => a.id_public === litter.sireId_public);
+        const dam  = litter.dam  || myAnimals.find(a => a.id_public === litter.damId_public);
         
         // Species filter
         if (speciesFilter) {
@@ -9676,14 +9677,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         if (litter.breedingPairCodeName && litter.breedingPairCodeName.toLowerCase().includes(query)) return true;
         
         // Search by sire name or ID
-        if (sire && sire.name.toLowerCase().includes(query)) return true;
-        if (sire && sire.id_public.toString().includes(query)) return true;
-        if (litter.sireId_public.toString().includes(query)) return true;
+        if (sire?.name?.toLowerCase().includes(query)) return true;
+        if (sire?.id_public?.toString().includes(query)) return true;
+        if (litter.sireId_public?.toString().includes(query)) return true;
         
         // Search by dam name or ID
-        if (dam && dam.name.toLowerCase().includes(query)) return true;
-        if (dam && dam.id_public.toString().includes(query)) return true;
-        if (litter.damId_public.toString().includes(query)) return true;
+        if (dam?.name?.toLowerCase().includes(query)) return true;
+        if (dam?.id_public?.toString().includes(query)) return true;
+        if (litter.damId_public?.toString().includes(query)) return true;
         
         return false;
     }).sort((a, b) => {
