@@ -11144,7 +11144,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </span>
                                         <div className="mt-0.5 space-y-0.5">
                                             {events.map((ev, i) => {
-                                                const st = typeStyles[ev.type] || typeStyles.born;
+                                                const st = (ev.type === 'due' && ev.litter.birthDate)
+                                                    ? { bg: 'bg-gray-100 hover:bg-gray-200 text-gray-500 border border-gray-300', label: 'Due (Born)' }
+                                                    : (typeStyles[ev.type] || typeStyles.born);
                                                 return (
                                                     <button
                                                         key={i}
@@ -11172,6 +11174,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             const callId = l.litter_id_public;
 
                             const daysStatus = (() => {
+                                if (l.birthDate) return { text: `Born ${fmtD(l.birthDate)}`, cls: 'text-green-600 font-semibold' };
                                 if (!l.expectedDueDate) return null;
                                 const due = new Date(l.expectedDueDate);
                                 if (isNaN(due)) return null;
@@ -11192,14 +11195,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 );
                             };
 
+                            const tooltipPillStyle = (type === 'due' && l.birthDate)
+                                ? { bg: 'bg-gray-100 text-gray-500 border border-gray-300', label: 'Due (Born)' }
+                                : (typeStyles[type] || typeStyles.born);
+
                             return (
                                 <div className="mx-3 mb-3 mt-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
                                     {/* Header */}
                                     <div className="flex justify-between items-start gap-2 mb-3 pb-2 border-b border-gray-200">
                                         <div>
                                             <div className="flex items-center gap-2 flex-wrap">
-                                                <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${typeStyles[type]?.bg}`}>
-                                                    {typeStyles[type]?.label}
+                                                <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${tooltipPillStyle.bg}`}>
+                                                    {tooltipPillStyle.label}
                                                 </span>
                                                 <span className="font-bold text-gray-800 text-sm">{pairName} — {sn} × {dn}</span>
                                             </div>
