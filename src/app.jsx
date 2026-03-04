@@ -9698,24 +9698,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
     return (
         <div className="w-full max-w-6xl bg-white p-3 sm:p-6 rounded-xl shadow-lg">
-        {loading && litters.length === 0 && (
-            /* Skeleton litter cards — shown only until first fetch completes */
-            <div className="space-y-3 animate-pulse">
-                {[0,1,2,3].map(i => (
-                    <div key={i} className="border border-gray-200 rounded-xl p-4">
-                        <div className="flex items-center justify-between mb-3">
-                            <div className="h-5 w-40 bg-gray-200 rounded" />
-                            <div className="h-5 w-20 bg-gray-200 rounded" />
-                        </div>
-                        <div className="grid grid-cols-3 gap-3">
-                            <div className="h-4 bg-gray-100 rounded" />
-                            <div className="h-4 bg-gray-100 rounded" />
-                            <div className="h-4 bg-gray-100 rounded" />
-                        </div>
-                    </div>
-                ))}
-            </div>
-        )}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                 <h2 className="text-xl sm:text-3xl font-bold text-gray-800 flex items-center">
                     <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
@@ -9798,6 +9780,25 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     </button>
                 </div>
             </div>
+
+            {loading && litters.length === 0 && (
+                /* Skeleton litter cards — shown only until first fetch completes */
+                <div className="space-y-3 animate-pulse mt-2">
+                    {[0,1,2,3].map(i => (
+                        <div key={i} className="border border-gray-200 rounded-xl p-4">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="h-5 w-40 bg-gray-200 rounded" />
+                                <div className="h-5 w-20 bg-gray-200 rounded" />
+                            </div>
+                            <div className="grid grid-cols-3 gap-3">
+                                <div className="h-4 bg-gray-100 rounded" />
+                                <div className="h-4 bg-gray-100 rounded" />
+                                <div className="h-4 bg-gray-100 rounded" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
 
             {/* Create/Edit Litter Modal */}
             {showAddForm && (
