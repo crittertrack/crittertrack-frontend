@@ -24041,26 +24041,26 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
     };
 
     return (
-        <div className="mx-2 sm:mx-4 my-2 rounded-xl border-2 border-amber-300 bg-amber-50 shadow-sm overflow-hidden">
+        <div className="mx-2 sm:mx-4 my-2 rounded-xl border-2 border-purple-300 bg-purple-50 shadow-sm overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between px-3 py-2 bg-amber-100 border-b border-amber-200">
+            <div className="flex items-center justify-between px-3 py-2 bg-purple-100 border-b border-purple-200">
                 <div className="flex items-center gap-2">
-                    <AlertTriangle size={15} className="text-amber-600 flex-shrink-0" />
-                    <span className="text-sm font-bold text-amber-800">
+                    <AlertTriangle size={15} className="text-purple-600 flex-shrink-0" />
+                    <span className="text-sm font-bold text-purple-800">
                         {urgentItems.length} Breeding Reminder{urgentItems.length !== 1 ? 's' : ''}
                     </span>
                 </div>
                 <div className="flex items-center gap-1">
                     <button
                         onClick={() => setCollapsed(c => !c)}
-                        className="p-1 rounded hover:bg-amber-200 text-amber-600"
+                        className="p-1 rounded hover:bg-purple-200 text-purple-600"
                         title={collapsed ? 'Expand' : 'Collapse'}
                     >
                         {collapsed ? <ChevronDown size={15} /> : <ChevronUp size={15} />}
                     </button>
                     <button
                         onClick={() => dismissAll(urgentItems)}
-                        className="p-1 rounded hover:bg-amber-200 text-amber-500 hover:text-amber-700"
+                        className="p-1 rounded hover:bg-purple-200 text-purple-500 hover:text-purple-700"
                         title="Dismiss all for today"
                     >
                         <X size={15} />
@@ -24070,7 +24070,7 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
 
             {/* Items */}
             {!collapsed && (
-                <div className="divide-y divide-amber-200">
+                <div className="divide-y divide-purple-200">
                     {urgentItems.map(item => {
                         const cfg = typeConfig[item.type] || typeConfig.due;
                         const statusText = item.diff === 0
@@ -24087,7 +24087,7 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
                                     <span className="text-gray-600 text-sm truncate">{item.sireDam}</span>
                                     {item.callId && <span className="text-xs text-gray-400 ml-1.5">{item.callId}</span>}
                                 </div>
-                                <span className={`text-xs font-bold flex-shrink-0 ${item.diff === 0 ? 'text-amber-600' : 'text-red-600'}`}>
+                                <span className={`text-xs font-bold flex-shrink-0 ${item.diff === 0 ? 'text-purple-600' : 'text-red-600'}`}>
                                     {statusText}
                                 </span>
                                 <button
