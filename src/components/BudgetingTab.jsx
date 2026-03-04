@@ -6,6 +6,9 @@ import DatePicker from './DatePicker';
 const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAnimal = null, preSelectedType = null, onAddModalOpen = null }) => {
     const [transactions, setTransactions] = useState([]);
     const [animals, setAnimals] = useState([]);
+    const [animalsLoading, setAnimalsLoading] = useState(true);
+    const [animalSearchQuery, setAnimalSearchQuery] = useState('');
+    const [showAnimalDropdown, setShowAnimalDropdown] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
     const [loading, setLoading] = useState(true);
     const [userProfile, setUserProfile] = useState(null);
@@ -133,6 +136,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
     };
 
     const fetchAnimals = async () => {
+        setAnimalsLoading(true);
         try {
             const response = await axios.get(`${API_BASE_URL}/animals`, {
                 headers: { Authorization: `Bearer ${authToken}` }
@@ -140,6 +144,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
             setAnimals(response.data || []);
         } catch (error) {
             console.error('Error fetching animals:', error);
+        } finally {
+            setAnimalsLoading(false);
         }
     };
 
@@ -186,6 +192,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
             notes: ''
         });
         setSelectedSpecies('');
+        setAnimalSearchQuery('');
+        setShowAnimalDropdown(false);
         setUserSearchQuery('');
         setSearchResults([]);
         setSelectedUser(null); // Clear selected user
@@ -839,54 +847,97 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Select Animal {animalSaleMode === 'transfer' ? '*' : '(optional)'}
                                     </label>
-                                    <div className="space-y-3">
+                                    <div className="space-y-2">
                                         {/* Species filter */}
                                         <select
                                             value={selectedSpecies}
                                             onChange={(e) => {
                                                 setSelectedSpecies(e.target.value);
                                                 setFormData({ ...formData, animalId: '', animalName: '' });
+                                                setAnimalSearchQuery('');
                                             }}
                                             className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                            disabled={animalsLoading}
                                         >
-                                            <option value="">-- All Species --</option>
+                                            <option value="">{animalsLoading ? 'Loading...' : '-- All Species --'}</option>
                                             {[...new Set(animals.map(a => a.species))].sort().map(species => (
                                                 <option key={species} value={species}>
                                                     {species}
                                                 </option>
                                             ))}
                                         </select>
-                                        
-                                        {/* Animal selection */}
-                                        <select
-                                            value={formData.animalId}
-                                            onChange={(e) => handleAnimalSelect(e.target.value)}
-                                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                                            disabled={selectedSpecies && animals.filter(a => a.species === selectedSpecies).length === 0}
-                                            required={animalSaleMode === 'transfer'}
-                                        >
-                                            <option value="">-- Select an animal --</option>
-                                            {animals
-                                                .filter(animal => !selectedSpecies || animal.species === selectedSpecies)
-                                                .filter(animal => {
-                                                    // For sales, exclude already sold animals
-                                                    if (formData.type === 'animal-sale' && animal.soldStatus === 'sold') {
-                                                        return false;
-                                                    }
-                                                    return true;
-                                                })
-                                                .map(animal => (
-                                                    <option key={animal.id_public} value={animal.id_public}>
-                                                        {animal.id_public} - {animal.name}
-                                                    </option>
-                                                ))}
-                                        </select>
+
+                                        {/* Animal search + selection */}
+                                        {formData.animalId ? (
+                                            <div className="flex items-center justify-between w-full p-2 border border-gray-300 rounded-lg bg-gray-50">
+                                                <span className="text-gray-700 text-sm">{formData.animalId} — {formData.animalName}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setFormData({ ...formData, animalId: '', animalName: '' });
+                                                        setAnimalSearchQuery('');
+                                                    }}
+                                                    className="text-gray-400 hover:text-red-500 ml-2"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="relative">
+                                                <input
+                                                    type="text"
+                                                    value={animalSearchQuery}
+                                                    onChange={(e) => {
+                                                        setAnimalSearchQuery(e.target.value);
+                                                        setShowAnimalDropdown(true);
+                                                    }}
+                                                    onFocus={() => setShowAnimalDropdown(true)}
+                                                    onBlur={() => setTimeout(() => setShowAnimalDropdown(false), 150)}
+                                                    placeholder={animalsLoading ? 'Loading animals...' : 'Search by name or ID...'}
+                                                    disabled={animalsLoading}
+                                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                                />
+                                                {showAnimalDropdown && !animalsLoading && (() => {
+                                                    const q = animalSearchQuery.toLowerCase();
+                                                    const filtered = animals
+                                                        .filter(a => !selectedSpecies || a.species === selectedSpecies)
+                                                        .filter(a => a.soldStatus !== 'sold')
+                                                        .filter(a => !q || a.name?.toLowerCase().includes(q) || a.id_public?.toLowerCase().includes(q))
+                                                        .slice(0, 50);
+                                                    return filtered.length > 0 ? (
+                                                        <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-56 overflow-y-auto">
+                                                            {filtered.map(animal => (
+                                                                <button
+                                                                    key={animal.id_public}
+                                                                    type="button"
+                                                                    onMouseDown={() => {
+                                                                        handleAnimalSelect(animal.id_public);
+                                                                        setAnimalSearchQuery('');
+                                                                        setShowAnimalDropdown(false);
+                                                                    }}
+                                                                    className="w-full text-left px-3 py-2 hover:bg-gray-100 border-b border-gray-50 last:border-b-0"
+                                                                >
+                                                                    <span className="font-medium text-sm">{animal.id_public}</span>
+                                                                    <span className="text-gray-600 text-sm"> — {animal.name}</span>
+                                                                    {animal.species && <span className="text-xs text-gray-400 ml-1">({animal.species})</span>}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    ) : animalSearchQuery ? (
+                                                        <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3 text-center text-sm text-gray-500">
+                                                            No animals found
+                                                        </div>
+                                                    ) : null;
+                                                })()}
+                                            </div>
+                                        )}
                                     </div>
                                     <p className="text-xs text-gray-500 mt-1">
-                                        {formData.type === 'animal-sale' && 'Only unsold animals are shown. Sold animals cannot be sold again.'}
-                                        {formData.type !== 'animal-sale' && (selectedSpecies 
-                                            ? `Showing ${animals.filter(a => a.species === selectedSpecies).length} ${selectedSpecies}` 
-                                            : 'Filter by species first for easier selection')}
+                                        {!animalsLoading && (
+                                            selectedSpecies
+                                                ? `${animals.filter(a => a.species === selectedSpecies && a.soldStatus !== 'sold').length} ${selectedSpecies} available`
+                                                : `${animals.filter(a => a.soldStatus !== 'sold').length} animals — filter by species or search by name/ID`
+                                        )}
                                     </p>
                                 </div>
                             )}
