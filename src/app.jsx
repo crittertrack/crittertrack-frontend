@@ -23937,18 +23937,11 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
 
 // Urgency Alerts Banner — shows due-today/overdue litter events on every page (can be disabled per user)
 const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
-    const todayStr = new Date().toISOString().split('T')[0];
     const [enabled, setEnabled] = useState(() => {
         try { return localStorage.getItem('ct_urgency_enabled') !== 'false'; } catch { return true; }
     });
     const [dismissed, setDismissed] = useState(() => {
-        try {
-            const raw = JSON.parse(localStorage.getItem('ct_urgency_dismissed') || '{}');
-            // Expire any dismissals not from today
-            const clean = {};
-            Object.entries(raw).forEach(([k, v]) => { if (v === todayStr) clean[k] = v; });
-            return clean;
-        } catch { return {}; }
+        try { return JSON.parse(localStorage.getItem('ct_urgency_dismissed') || '{}'); } catch { return {}; }
     });
     const [litters, setLitters] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -23977,14 +23970,14 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
     };
 
     const dismiss = (key) => {
-        const next = { ...dismissed, [key]: todayStr };
+        const next = { ...dismissed, [key]: true };
         setDismissed(next);
         try { localStorage.setItem('ct_urgency_dismissed', JSON.stringify(next)); } catch {}
     };
 
     const dismissAll = (items) => {
         const next = { ...dismissed };
-        items.forEach(item => { next[item.key] = todayStr; });
+        items.forEach(item => { next[item.key] = true; });
         setDismissed(next);
         try { localStorage.setItem('ct_urgency_dismissed', JSON.stringify(next)); } catch {}
     };
@@ -24061,7 +24054,7 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
                     <button
                         onClick={() => dismissAll(urgentItems)}
                         className="p-1 rounded hover:bg-purple-200 text-purple-500 hover:text-purple-700"
-                        title="Dismiss all for today"
+                        title="Dismiss all"
                     >
                         <X size={15} />
                     </button>
@@ -24093,7 +24086,7 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
                                 <button
                                     onClick={() => dismiss(item.key)}
                                     className="p-0.5 text-gray-400 hover:text-gray-600 flex-shrink-0"
-                                    title="Dismiss for today"
+                                    title="Dismiss"
                                 >
                                     <X size={14} />
                                 </button>
@@ -24102,7 +24095,6 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
                     })}
                     <div className="px-3 py-1.5 flex justify-end">
                         <span className="text-xs text-gray-400">
-                            Dismissed items reset at midnight ·{' '}
                             <button onClick={() => saveEnabled(false)} className="underline hover:text-gray-600">Turn off alerts</button>
                         </span>
                     </div>
@@ -24114,17 +24106,11 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
 
 // Management Urgency Banner — due-today/overdue animal care, maintenance & supply tasks
 const MgmtUrgencyBanner = ({ authToken, API_BASE_URL }) => {
-    const todayStr = new Date().toISOString().split('T')[0];
     const [enabled, setEnabled] = useState(() => {
         try { return localStorage.getItem('ct_mgmt_urgency_enabled') !== 'false'; } catch { return true; }
     });
     const [dismissed, setDismissed] = useState(() => {
-        try {
-            const raw = JSON.parse(localStorage.getItem('ct_mgmt_urgency_dismissed') || '{}');
-            const clean = {};
-            Object.entries(raw).forEach(([k, v]) => { if (v === todayStr) clean[k] = v; });
-            return clean;
-        } catch { return {}; }
+        try { return JSON.parse(localStorage.getItem('ct_mgmt_urgency_dismissed') || '{}'); } catch { return {}; }
     });
     const [animals, setAnimals] = useState([]);
     const [enclosures, setEnclosures] = useState([]);
@@ -24162,14 +24148,14 @@ const MgmtUrgencyBanner = ({ authToken, API_BASE_URL }) => {
     };
 
     const dismiss = (key) => {
-        const next = { ...dismissed, [key]: todayStr };
+        const next = { ...dismissed, [key]: true };
         setDismissed(next);
         try { localStorage.setItem('ct_mgmt_urgency_dismissed', JSON.stringify(next)); } catch {}
     };
 
     const dismissAll = (items) => {
         const next = { ...dismissed };
-        items.forEach(item => { next[item.key] = todayStr; });
+        items.forEach(item => { next[item.key] = true; });
         setDismissed(next);
         try { localStorage.setItem('ct_mgmt_urgency_dismissed', JSON.stringify(next)); } catch {}
     };
@@ -24251,7 +24237,7 @@ const MgmtUrgencyBanner = ({ authToken, API_BASE_URL }) => {
                     <button onClick={() => setCollapsed(c => !c)} className="p-1 rounded hover:bg-purple-200 text-purple-600" title={collapsed ? 'Expand' : 'Collapse'}>
                         {collapsed ? <ChevronDown size={15} /> : <ChevronUp size={15} />}
                     </button>
-                    <button onClick={() => dismissAll(urgentItems)} className="p-1 rounded hover:bg-purple-200 text-purple-500 hover:text-purple-700" title="Dismiss all for today">
+                    <button onClick={() => dismissAll(urgentItems)} className="p-1 rounded hover:bg-purple-200 text-purple-500 hover:text-purple-700" title="Dismiss all">
                         <X size={15} />
                     </button>
                 </div>
@@ -24267,14 +24253,13 @@ const MgmtUrgencyBanner = ({ authToken, API_BASE_URL }) => {
                                 <span className="text-sm text-gray-700 font-medium">{item.description}</span>
                             </div>
                             <span className="text-xs font-bold text-red-600 flex-shrink-0">Action needed</span>
-                            <button onClick={() => dismiss(item.key)} className="p-0.5 text-gray-400 hover:text-gray-600 flex-shrink-0" title="Dismiss for today">
+                            <button onClick={() => dismiss(item.key)} className="p-0.5 text-gray-400 hover:text-gray-600 flex-shrink-0" title="Dismiss">
                                 <X size={14} />
                             </button>
                         </div>
                     ))}
                     <div className="px-3 py-1.5 flex justify-end">
                         <span className="text-xs text-gray-400">
-                            Dismissed items reset at midnight ·{' '}
                             <button onClick={() => saveEnabled(false)} className="underline hover:text-gray-600">Turn off alerts</button>
                         </span>
                     </div>
