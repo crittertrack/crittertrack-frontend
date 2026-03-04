@@ -10657,7 +10657,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         )}
 
                                         {/* -- 2. Breeding info -------------------------------------- */}
-                                        {((litter.matingDate || litter.pairingDate) || litter.breedingMethod || litter.breedingCondition || litter.breedingConditionAtTime || litter.outcome || litter.birthMethod || litter.birthDate) && (
+                                        {((litter.matingDate || litter.pairingDate) || litter.breedingMethod || litter.breedingCondition || litter.breedingConditionAtTime || litter.outcome || litter.birthMethod || litter.birthDate || litter.expectedDueDate || litter.weaningDate) && (
                                             <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4 shadow-sm">
                                                 <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Breeding &amp; Birth</h4>
                                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-3 text-sm">
@@ -10665,6 +10665,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                         <div>
                                                             <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Mating Date</div>
                                                             <div className="font-semibold text-gray-800">{formatDate(litter.matingDate || litter.pairingDate)}</div>
+                                                        </div>
+                                                    )}
+                                                    {litter.expectedDueDate && (
+                                                        <div>
+                                                            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Expected Due Date</div>
+                                                            <div className="font-semibold text-gray-800">{formatDate(litter.expectedDueDate)}</div>
                                                         </div>
                                                     )}
                                                     {litter.breedingMethod && (
@@ -10695,6 +10701,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                         <div>
                                                             <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Birth Date</div>
                                                             <div className="font-semibold text-gray-800">{formatDate(litter.birthDate)}</div>
+                                                        </div>
+                                                    )}
+                                                    {litter.weaningDate && (
+                                                        <div>
+                                                            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaning Date</div>
+                                                            <div className="font-semibold text-gray-800">{formatDate(litter.weaningDate)}</div>
                                                         </div>
                                                     )}
                                                 </div>
