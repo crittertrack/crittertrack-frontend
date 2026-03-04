@@ -2890,7 +2890,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 </button>
                             )}
                             {onTransfer && (() => {
-                                const iWasTransferredThisAnimal = animal.breederId_public && animal.breederId_public !== userProfile?.id_public && animal.ownerId_public === userProfile?.id_public;
+                                const iWasTransferredThisAnimal = animal.originalOwnerId && animal.ownerId_public === userProfile?.id_public;
                                 if (iWasTransferredThisAnimal) {
                                     return (
                                         <button
@@ -2961,7 +2961,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 </button>
                             )}
                             {onTransfer && (() => {
-                                const iWasTransferredThisAnimal = animal.breederId_public && animal.breederId_public !== userProfile?.id_public && animal.ownerId_public === userProfile?.id_public;
+                                const iWasTransferredThisAnimal = animal.originalOwnerId && animal.ownerId_public === userProfile?.id_public;
                                 if (iWasTransferredThisAnimal) {
                                     return (
                                         <button
@@ -17822,7 +17822,7 @@ const AnimalForm = ({
                                 // - If it was transferred TO me ? I own it but can only return it (not delete)
                                 
                                 // Check if this animal was transferred TO the current user
-                                const iWasTransferredThisAnimal = animalToEdit.breederId_public && animalToEdit.breederId_public !== userProfile?.id_public && animalToEdit.ownerId_public === userProfile?.id_public;
+                                const iWasTransferredThisAnimal = animalToEdit.originalOwnerId && animalToEdit.ownerId_public === userProfile?.id_public;
                                 
                                 const confirmMessage = iWasTransferredThisAnimal 
                                     ? `Return ${animalToEdit.name} to ${animalToEdit.breederName || 'the original breeder'}? This will remove the animal from your account.`
@@ -17834,11 +17834,11 @@ const AnimalForm = ({
                             className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2"
                         > 
                             {(() => {
-                                const iWasTransferredThisAnimal = animalToEdit.breederId_public && animalToEdit.breederId_public !== userProfile?.id_public && animalToEdit.ownerId_public === userProfile?.id_public;
+                                const iWasTransferredThisAnimal = animalToEdit.originalOwnerId && animalToEdit.ownerId_public === userProfile?.id_public;
                                 return iWasTransferredThisAnimal ? <RotateCcw size={18} /> : <Trash2 size={18} />;
                             })()}
                             <span>{(() => {
-                                const iWasTransferredThisAnimal = animalToEdit.breederId_public && animalToEdit.breederId_public !== userProfile?.id_public && animalToEdit.ownerId_public === userProfile?.id_public;
+                                const iWasTransferredThisAnimal = animalToEdit.originalOwnerId && animalToEdit.ownerId_public === userProfile?.id_public;
                                 return iWasTransferredThisAnimal ? 'Return Animal' : 'Delete';
                             })()}</span> 
                         </button>
