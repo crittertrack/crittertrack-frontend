@@ -27962,12 +27962,10 @@ const App = () => {
                     <Route path="/view-animal" element={
                         animalToView && (() => {
                             // Ownership logic:
-                            // 1. If I'm the current owner (ownerId_public === my ID) ? PrivateAnimalDetail (full edit, but can return if transferred to me)
-                            // 2. If I'm the creator but no longer the owner (breederId_public === my ID but ownerId_public !== my ID) ? ViewOnlyPrivateAnimalDetail (read-only, I transferred it away)
-                            // 3. Otherwise ? ViewOnlyPrivateAnimalDetail (someone else owns it)
+                            // 1. ownerId_public === my ID → PrivateAnimalDetail (full edit; "Return" button if originalOwnerId is set, meaning it was transferred to me)
+                            // 2. Otherwise → ViewOnlyPrivateAnimalDetail (read-only, no edit/delete/transfer buttons)
                             
                             const iCurrentlyOwn = animalToView.ownerId_public === userProfile?.id_public;
-                            const iCreatedItButTransferred = animalToView.breederId_public === userProfile?.id_public && animalToView.ownerId_public !== userProfile?.id_public;
                             
                             if (iCurrentlyOwn) {
                                 // I own it - full edit access (with return button instead of delete if transferred to me)
