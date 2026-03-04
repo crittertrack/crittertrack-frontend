@@ -24047,7 +24047,7 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
                 <div className="flex items-center gap-2">
                     <AlertTriangle size={15} className="text-amber-600 flex-shrink-0" />
                     <span className="text-sm font-bold text-amber-800">
-                        {urgentItems.length} Urgent Action{urgentItems.length !== 1 ? 's' : ''}
+                        {urgentItems.length} Breeding Reminder{urgentItems.length !== 1 ? 's' : ''}
                     </span>
                 </div>
                 <div className="flex items-center gap-1">
