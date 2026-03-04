@@ -24239,25 +24239,25 @@ const MgmtUrgencyBanner = ({ authToken, API_BASE_URL }) => {
     };
 
     return (
-        <div className="mx-2 sm:mx-4 my-2 rounded-xl border-2 border-orange-300 bg-orange-50 shadow-sm overflow-hidden">
-            <div className="flex items-center justify-between px-3 py-2 bg-orange-100 border-b border-orange-200">
+        <div className="mx-2 sm:mx-4 my-2 rounded-xl border-2 border-purple-300 bg-purple-50 shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between px-3 py-2 bg-purple-100 border-b border-purple-200">
                 <div className="flex items-center gap-2">
-                    <AlertTriangle size={15} className="text-orange-600 flex-shrink-0" />
-                    <span className="text-sm font-bold text-orange-800">
+                    <AlertTriangle size={15} className="text-purple-600 flex-shrink-0" />
+                    <span className="text-sm font-bold text-purple-800">
                         {urgentItems.length} Management Alert{urgentItems.length !== 1 ? 's' : ''}
                     </span>
                 </div>
                 <div className="flex items-center gap-1">
-                    <button onClick={() => setCollapsed(c => !c)} className="p-1 rounded hover:bg-orange-200 text-orange-600" title={collapsed ? 'Expand' : 'Collapse'}>
+                    <button onClick={() => setCollapsed(c => !c)} className="p-1 rounded hover:bg-purple-200 text-purple-600" title={collapsed ? 'Expand' : 'Collapse'}>
                         {collapsed ? <ChevronDown size={15} /> : <ChevronUp size={15} />}
                     </button>
-                    <button onClick={() => dismissAll(urgentItems)} className="p-1 rounded hover:bg-orange-200 text-orange-500 hover:text-orange-700" title="Dismiss all for today">
+                    <button onClick={() => dismissAll(urgentItems)} className="p-1 rounded hover:bg-purple-200 text-purple-500 hover:text-purple-700" title="Dismiss all for today">
                         <X size={15} />
                     </button>
                 </div>
             </div>
             {!collapsed && (
-                <div className="divide-y divide-orange-200">
+                <div className="divide-y divide-purple-200">
                     {urgentItems.map(item => (
                         <div key={item.key} className="flex items-center gap-2 sm:gap-3 px-3 py-2.5">
                             <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${typeBg[item.type] || 'bg-gray-100 text-gray-700'}`}>
