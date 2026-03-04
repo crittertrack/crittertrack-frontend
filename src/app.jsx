@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -24045,7 +24045,7 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-2 bg-purple-100 border-b border-purple-200">
                 <div className="flex items-center gap-2">
-                    <AlertTriangle size={15} className="text-purple-600 flex-shrink-0" />
+                    <Sparkles size={15} className="text-purple-600 flex-shrink-0" />
                     <span className="text-sm font-bold text-purple-800">
                         {urgentItems.length} Breeding Reminder{urgentItems.length !== 1 ? 's' : ''}
                     </span>
@@ -24242,7 +24242,7 @@ const MgmtUrgencyBanner = ({ authToken, API_BASE_URL }) => {
         <div className="mx-2 sm:mx-4 my-2 rounded-xl border-2 border-purple-300 bg-purple-50 shadow-sm overflow-hidden">
             <div className="flex items-center justify-between px-3 py-2 bg-purple-100 border-b border-purple-200">
                 <div className="flex items-center gap-2">
-                    <AlertTriangle size={15} className="text-purple-600 flex-shrink-0" />
+                    <Sparkles size={15} className="text-purple-600 flex-shrink-0" />
                     <span className="text-sm font-bold text-purple-800">
                         {urgentItems.length} Management Alert{urgentItems.length !== 1 ? 's' : ''}
                     </span>
