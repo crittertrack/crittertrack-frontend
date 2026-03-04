@@ -234,16 +234,12 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
         console.log('Animal sale mode:', animalSaleMode);
         console.log('Price validation:', formData.price, parseFloat(formData.price));
         
-        if (formData.price === '' || formData.price === null || formData.price === undefined) {
-            console.log('Price validation failed - empty');
-            showModalMessage('Error', 'Please enter a price');
-            return;
-        }
+        const isNotifySeller = formData.type === 'animal-purchase' && animalSaleMode === 'transfer';
 
         const priceValue = parseFloat(formData.price);
-        if (isNaN(priceValue) || priceValue < 0) {
-            console.log('Price validation failed - invalid or negative');
-            showModalMessage('Error', 'Please enter a valid price (0 or greater)');
+        if (!isNaN(priceValue) && priceValue < 0) {
+            console.log('Price validation failed - negative');
+            showModalMessage('Error', 'Price cannot be negative');
             return;
         }
 
@@ -252,7 +248,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
         try {
             const transactionData = {
                 ...formData,
-                price: parseFloat(formData.price)
+                price: (formData.price === '' || formData.price === null || formData.price === undefined) ? 0 : parseFloat(formData.price)
             };
 
             // Transform transaction type for API (remove 'animal-' prefix)
@@ -944,7 +940,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Price * ({getCurrencySymbol()})
+                                    Price (optional) ({getCurrencySymbol()})
                                 </label>
                                 <input
                                     type="number"
@@ -954,7 +950,6 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                                     placeholder="0.00"
                                     className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                                    required
                                 />
                             </div>
 
