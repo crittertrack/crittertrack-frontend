@@ -10461,7 +10461,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         <Search size={48} className="text-gray-400 mx-auto mb-4" />
                         <p className="text-gray-600">No litters match your search.</p>
                     </div>
-                ) : filteredLitters.length === 0 ? (
+                ) : filteredLitters.length === 0 && !loading ? (
                     <div className="text-center py-12 bg-gray-50 rounded-lg">
                         <BookOpen size={48} className="text-gray-400 mx-auto mb-4" />
                         <p className="text-gray-600">No litters yet. Create your first litter above!</p>
