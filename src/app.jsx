@@ -24083,7 +24083,7 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
                                 </span>
                                 <div className="flex-1 min-w-0">
                                     <span className="font-semibold text-gray-800 text-sm">{item.pairName}</span>
-                                    <span className="text-gray-400 text-sm mx-1">\u2014</span>
+                                    <span className="text-gray-400 text-sm mx-1">—</span>
                                     <span className="text-gray-600 text-sm truncate">{item.sireDam}</span>
                                     {item.callId && <span className="text-xs text-gray-400 ml-1.5">{item.callId}</span>}
                                 </div>
@@ -24102,7 +24102,7 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
                     })}
                     <div className="px-3 py-1.5 flex justify-end">
                         <span className="text-xs text-gray-400">
-                            Dismissed items reset at midnight \u00b7{' '}
+                            Dismissed items reset at midnight ·{' '}
                             <button onClick={() => saveEnabled(false)} className="underline hover:text-gray-600">Turn off alerts</button>
                         </span>
                     </div>
@@ -24274,7 +24274,7 @@ const MgmtUrgencyBanner = ({ authToken, API_BASE_URL }) => {
                     ))}
                     <div className="px-3 py-1.5 flex justify-end">
                         <span className="text-xs text-gray-400">
-                            Dismissed items reset at midnight \u00b7{' '}
+                            Dismissed items reset at midnight ·{' '}
                             <button onClick={() => saveEnabled(false)} className="underline hover:text-gray-600">Turn off alerts</button>
                         </span>
                     </div>
