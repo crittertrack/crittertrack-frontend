@@ -1,4 +1,4 @@
-// CritterTrack Frontend Application
+﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -24041,7 +24041,7 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
     };
 
     return (
-        <div className="mx-2 sm:mx-4 mt-2 rounded-xl border-2 border-amber-300 bg-amber-50 shadow-sm overflow-hidden">
+        <div className="mx-2 sm:mx-4 my-2 rounded-xl border-2 border-amber-300 bg-amber-50 shadow-sm overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-2 bg-amber-100 border-b border-amber-200">
                 <div className="flex items-center gap-2">
@@ -24239,7 +24239,7 @@ const MgmtUrgencyBanner = ({ authToken, API_BASE_URL }) => {
     };
 
     return (
-        <div className="mx-2 sm:mx-4 mt-2 rounded-xl border-2 border-orange-300 bg-orange-50 shadow-sm overflow-hidden">
+        <div className="mx-2 sm:mx-4 my-2 rounded-xl border-2 border-orange-300 bg-orange-50 shadow-sm overflow-hidden">
             <div className="flex items-center justify-between px-3 py-2 bg-orange-100 border-b border-orange-200">
                 <div className="flex items-center gap-2">
                     <AlertTriangle size={15} className="text-orange-600 flex-shrink-0" />
