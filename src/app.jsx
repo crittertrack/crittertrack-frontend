@@ -24041,7 +24041,7 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
     };
 
     return (
-        <div className="mx-2 sm:mx-4 my-2 rounded-xl border-2 border-purple-300 bg-purple-50 shadow-sm overflow-hidden">
+        <div className="mx-2 sm:mx-4 mt-1 mb-4 rounded-xl border-2 border-purple-300 bg-purple-50 shadow-sm overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-2 bg-purple-100 border-b border-purple-200">
                 <div className="flex items-center gap-2">
@@ -24232,7 +24232,7 @@ const MgmtUrgencyBanner = ({ authToken, API_BASE_URL }) => {
     };
 
     return (
-        <div className="mx-2 sm:mx-4 my-2 rounded-xl border-2 border-purple-300 bg-purple-50 shadow-sm overflow-hidden">
+        <div className="mx-2 sm:mx-4 mt-1 mb-4 rounded-xl border-2 border-purple-300 bg-purple-50 shadow-sm overflow-hidden">
             <div className="flex items-center justify-between px-3 py-2 bg-purple-100 border-b border-purple-200">
                 <div className="flex items-center gap-2">
                     <Sparkles size={15} className="text-purple-600 flex-shrink-0" />
