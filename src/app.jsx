@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, LinkOff, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -9428,6 +9428,30 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
     };
 
+    const handleUnlinkOffspring = async (litter, animalId_public) => {
+        if (!window.confirm('Remove this animal from the litter? The animal record will NOT be deleted — only the link to this litter will be removed.')) return;
+        try {
+            const updatedOffspringIds = (litter.offspringIds_public || []).filter(id => id !== animalId_public);
+            const remainingOffspring = (litterOffspringMap[litter._id] || []).filter(a => a.id_public !== animalId_public);
+            const counts = calcLitterCounts(litter, remainingOffspring);
+            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
+                offspringIds_public: updatedOffspringIds,
+                ...counts
+            }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            // Optimistic update
+            setLitterOffspringMap(prev => ({
+                ...prev,
+                [litter._id]: remainingOffspring
+            }));
+            fetchLitters({ preserveOffspring: true });
+        } catch (error) {
+            console.error('Error unlinking offspring:', error);
+            showModalMessage('Error', 'Failed to unlink animal from litter.');
+        }
+    };
+
     const handleDeleteLitter = async (litterId) => {
         if (!window.confirm('Are you sure you want to delete this litter? This will not delete the animals, only the litter record.')) {
             return;
@@ -11010,6 +11034,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                         onChange={() => toggleOffspringSelection(litter._id, animal.id_public)}
                                                                         className="w-5 h-5 cursor-pointer"
                                                                     />
+                                                                </div>
+                                                            )}
+                                                            {!isBulkMode && (
+                                                                <div className="absolute top-1.5 left-1.5 z-10" onClick={(e) => e.stopPropagation()}>
+                                                                    <button
+                                                                        onClick={() => handleUnlinkOffspring(litter, animal.id_public)}
+                                                                        className="p-1 rounded bg-white/80 hover:bg-orange-100 text-gray-300 hover:text-orange-500 transition"
+                                                                        title="Unlink from litter (does not delete the animal)"
+                                                                    >
+                                                                        <LinkOff size={12} />
+                                                                    </button>
                                                                 </div>
                                                             )}
                                                             {/* Gender badge top-right */}
