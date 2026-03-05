@@ -8591,6 +8591,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         breedingPairCodeName: '',
         sireId_public: '',
         damId_public: '',
+        species: '',
         birthDate: '',
         maleCount: null,
         femaleCount: null,
@@ -8624,6 +8625,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [expandedLitter, setExpandedLitter] = useState(null);
     const [editingLitter, setEditingLitter] = useState(null);
     const [modalTarget, setModalTarget] = useState(null);
+    const [selectedSireAnimal, setSelectedSireAnimal] = useState(null);
+    const [selectedDamAnimal, setSelectedDamAnimal] = useState(null);
+    const [selectedTpSireAnimal, setSelectedTpSireAnimal] = useState(null);
+    const [selectedTpDamAnimal, setSelectedTpDamAnimal] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState('');
     const [yearFilter, setYearFilter] = useState('');
@@ -8940,19 +8945,23 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
     const handleSelectOtherParentForLitter = (animal) => {
         if (modalTarget === 'sire-litter') {
-            setFormData({...formData, sireId_public: animal.id_public});
+            setFormData(prev => ({...prev, sireId_public: animal?.id_public || '', species: prev.species || animal?.species || ''}));
+            setSelectedSireAnimal(animal || null);
         } else if (modalTarget === 'dam-litter') {
-            setFormData({...formData, damId_public: animal.id_public});
+            setFormData(prev => ({...prev, damId_public: animal?.id_public || '', species: prev.species || animal?.species || ''}));
+            setSelectedDamAnimal(animal || null);
         } else if (modalTarget === 'other-parent1-litter') {
-            setFormData({...formData, otherParent1Id_public: animal.id_public});
+            setFormData(prev => ({...prev, otherParent1Id_public: animal?.id_public || ''}));
         } else if (modalTarget === 'other-parent2-litter') {
-            setFormData({...formData, otherParent2Id_public: animal.id_public});
+            setFormData(prev => ({...prev, otherParent2Id_public: animal?.id_public || ''}));
         } else if (modalTarget === 'tp-sire') {
-            setTpSireId(animal.id_public);
+            setTpSireId(animal?.id_public || '');
+            setSelectedTpSireAnimal(animal || null);
             setTpCOI(null);
             setTpError(null);
         } else if (modalTarget === 'tp-dam') {
-            setTpDamId(animal.id_public);
+            setTpDamId(animal?.id_public || '');
+            setSelectedTpDamAnimal(animal || null);
             setTpCOI(null);
             setTpError(null);
         }
@@ -9003,16 +9012,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
 
         try {
-            // Get parent details
-            const sire = myAnimals.find(a => a.id_public === formData.sireId_public);
-            const dam = myAnimals.find(a => a.id_public === formData.damId_public);
+            // Get parent details — fall back to cached selected animals for global (non-owned) ones
+            const sire = myAnimals.find(a => a.id_public === formData.sireId_public) || selectedSireAnimal;
+            const dam = myAnimals.find(a => a.id_public === formData.damId_public) || selectedDamAnimal;
 
             if (!sire || !dam) {
-                showModalMessage('Error', 'Selected parents not found');
+                showModalMessage('Error', 'Selected parents not found. Please re-select sire and dam.');
                 return;
             }
 
-            if (sire.species !== dam.species) {
+            if (sire.species && dam.species && sire.species !== dam.species) {
                 showModalMessage('Error', 'Parents must be the same species');
                 return;
             }
@@ -9154,10 +9163,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             
             showModalMessage('Success', successMsg);
             setShowAddForm(false);
+            setSelectedSireAnimal(null);
+            setSelectedDamAnimal(null);
             setFormData({
                 breedingPairCodeName: '',
                 sireId_public: '',
                 damId_public: '',
+                species: '',
                 birthDate: '',
                 maleCount: null,
                 femaleCount: null,
@@ -9391,6 +9403,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         };
 
         setEditingLitter(litter._id);
+        // Restore cached parent animal objects for display (supports global animals)
+        setSelectedSireAnimal(litter.sire || null);
+        setSelectedDamAnimal(litter.dam || null);
         setFormData({
             breedingPairCodeName: litter.breedingPairCodeName || '',
             sireId_public: litter.sireId_public,
@@ -9427,11 +9442,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
 
         try {
-            // Get parent details
-            // eslint-disable-next-line no-unused-vars
-            const sire = myAnimals.find(a => a.id_public === formData.sireId_public);
-            // eslint-disable-next-line no-unused-vars  
-            const dam = myAnimals.find(a => a.id_public === formData.damId_public);
+            // Get parent details — fall back to cached selected animals for global (non-owned) ones
+            const sire = myAnimals.find(a => a.id_public === formData.sireId_public) || selectedSireAnimal;
+            const dam = myAnimals.find(a => a.id_public === formData.damId_public) || selectedDamAnimal;
             const offspringSpecies = sire?.species || dam?.species || formData.species || '';
 
             // Create offspring animals if requested
@@ -9495,10 +9508,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             showModalMessage('Success', 'Litter updated successfully!');
             setShowAddForm(false);
             setEditingLitter(null);
+            setSelectedSireAnimal(null);
+            setSelectedDamAnimal(null);
             setFormData({
                 breedingPairCodeName: '',
                 sireId_public: '',
                 damId_public: '',
+                species: '',
                 otherParent1Id_public: '',
                 otherParent1Role: '',
                 birthDate: '',
@@ -9551,11 +9567,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
 
         try {
+            // Fall back to litter's populated sire/dam data for global animals
             const sire = myAnimals.find(a => a.id_public === addingOffspring.sireId_public);
+            const offspringSpecies = sire?.species || addingOffspring.sire?.species || addingOffspring.dam?.species || '';
             
             const animalData = {
                 name: newOffspringData.name,
-                species: sire.species,
+                species: offspringSpecies,
                 gender: newOffspringData.gender,
                 birthDate: addingOffspring.birthDate,
                 status: 'Pet',
@@ -9811,6 +9829,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 onClick={() => {
                                     setShowAddForm(false);
                                     setEditingLitter(null);
+                                    setSelectedSireAnimal(null);
+                                    setSelectedDamAnimal(null);
                                 }}
                                 className="text-gray-500 hover:text-gray-800"
                             >
@@ -9851,6 +9871,30 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     <p className="text-xs text-gray-500 mt-1">Your custom name for this breeding pair</p>
                                 </div>
 
+                                {/* Species Selection */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Species <span className="text-red-500">*</span>
+                                    </label>
+                                    <select
+                                        value={formData.species || ''}
+                                        onChange={(e) => {
+                                            const newSpecies = e.target.value;
+                                            setFormData(prev => ({...prev, species: newSpecies, sireId_public: '', damId_public: ''}));
+                                            setSelectedSireAnimal(null);
+                                            setSelectedDamAnimal(null);
+                                        }}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                        required
+                                    >
+                                        <option value="">Select species first...</option>
+                                        {speciesOptions.map(s => (
+                                            <option key={s.name || s} value={s.name || s}>{s.name || s}</option>
+                                        ))}
+                                    </select>
+                                    <p className="text-xs text-gray-500 mt-1">Choose species to filter the sire &amp; dam search</p>
+                                </div>
+
                                 {/* Sire & Dam Selection */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {/* Sire Selection */}
@@ -9861,19 +9905,25 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         <button
                                             type="button"
                                             onClick={() => setModalTarget('sire-litter')}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left transition focus:ring-2 focus:ring-primary focus:border-transparent"
+                                            disabled={!formData.species}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             {formData.sireId_public ? (
-                                                <div>
-                                                    <div className="font-medium">
-                                                        {myAnimals.find(a => a.id_public === formData.sireId_public)?.name || 'Unknown'}
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <div className="font-medium">
+                                                            {myAnimals.find(a => a.id_public === formData.sireId_public)?.name || selectedSireAnimal?.name || 'Unknown'}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500">
+                                                            {formData.sireId_public}
+                                                        </div>
                                                     </div>
-                                                    <div className="text-xs text-gray-500">
-                                                        {formData.sireId_public}
-                                                    </div>
+                                                    {!myAnimals.find(a => a.id_public === formData.sireId_public) && selectedSireAnimal && (
+                                                        <span className="text-xs text-black bg-primary px-2 py-1 rounded-full flex-shrink-0">Global</span>
+                                                    )}
                                                 </div>
                                             ) : (
-                                                <div className="text-gray-400">Select Sire...</div>
+                                                <div className="text-gray-400">{formData.species ? 'Select Sire...' : 'Select species first'}</div>
                                             )}
                                         </button>
                                     </div>
@@ -9886,19 +9936,25 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         <button
                                             type="button"
                                             onClick={() => setModalTarget('dam-litter')}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left transition focus:ring-2 focus:ring-primary focus:border-transparent"
+                                            disabled={!formData.species}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             {formData.damId_public ? (
-                                                <div>
-                                                    <div className="font-medium">
-                                                        {myAnimals.find(a => a.id_public === formData.damId_public)?.name || 'Unknown'}
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <div className="font-medium">
+                                                            {myAnimals.find(a => a.id_public === formData.damId_public)?.name || selectedDamAnimal?.name || 'Unknown'}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500">
+                                                            {formData.damId_public}
+                                                        </div>
                                                     </div>
-                                                    <div className="text-xs text-gray-500">
-                                                        {formData.damId_public}
-                                                    </div>
+                                                    {!myAnimals.find(a => a.id_public === formData.damId_public) && selectedDamAnimal && (
+                                                        <span className="text-xs text-black bg-primary px-2 py-1 rounded-full flex-shrink-0">Global</span>
+                                                    )}
                                                 </div>
                                             ) : (
-                                                <div className="text-gray-400">Select Dam...</div>
+                                                <div className="text-gray-400">{formData.species ? 'Select Dam...' : 'Select species first'}</div>
                                             )}
                                         </button>
                                     </div>
@@ -11352,7 +11408,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
             {/* Sire Modal */}
             {modalTarget === 'sire-litter' && (
-                <LocalAnimalSearchModal
+                <ParentSearchModal
                     title="Select Sire"
                     onSelect={handleSelectOtherParentForLitter}
                     onClose={() => setModalTarget(null)}
@@ -11363,13 +11419,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     Search={Search}
                     Loader2={Loader2}
                     LoadingSpinner={LoadingSpinner}
-                    genderFilter={['Male', 'Intersex', 'Unknown']}
+                    requiredGender={['Male', 'Intersex', 'Unknown']}
+                    species={formData.species || undefined}
                 />
             )}
 
             {/* Dam Modal */}
             {modalTarget === 'dam-litter' && (
-                <LocalAnimalSearchModal
+                <ParentSearchModal
                     title="Select Dam"
                     onSelect={handleSelectOtherParentForLitter}
                     onClose={() => setModalTarget(null)}
@@ -11380,7 +11437,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     Search={Search}
                     Loader2={Loader2}
                     LoadingSpinner={LoadingSpinner}
-                    genderFilter={['Female', 'Intersex', 'Unknown']}
+                    requiredGender={['Female', 'Intersex', 'Unknown']}
+                    species={formData.species || undefined}
                 />
             )}
 
@@ -11408,9 +11466,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left transition focus:ring-2 focus:ring-primary focus:border-transparent"
                                 >
                                     {tpSireId ? (
-                                        <div>
-                                            <div className="font-medium">{myAnimals.find(a => a.id_public === tpSireId)?.name || 'Unknown'}</div>
-                                            <div className="text-xs text-gray-500">{tpSireId}</div>
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <div className="font-medium">{myAnimals.find(a => a.id_public === tpSireId)?.name || selectedTpSireAnimal?.name || 'Unknown'}</div>
+                                                <div className="text-xs text-gray-500">{tpSireId}</div>
+                                            </div>
+                                            {!myAnimals.find(a => a.id_public === tpSireId) && selectedTpSireAnimal && (
+                                                <span className="text-xs text-black bg-primary px-2 py-1 rounded-full flex-shrink-0">Global</span>
+                                            )}
                                         </div>
                                     ) : (
                                         <div className="text-gray-400">Select Sire...</div>
@@ -11426,9 +11489,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left transition focus:ring-2 focus:ring-primary focus:border-transparent"
                                 >
                                     {tpDamId ? (
-                                        <div>
-                                            <div className="font-medium">{myAnimals.find(a => a.id_public === tpDamId)?.name || 'Unknown'}</div>
-                                            <div className="text-xs text-gray-500">{tpDamId}</div>
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <div className="font-medium">{myAnimals.find(a => a.id_public === tpDamId)?.name || selectedTpDamAnimal?.name || 'Unknown'}</div>
+                                                <div className="text-xs text-gray-500">{tpDamId}</div>
+                                            </div>
+                                            {!myAnimals.find(a => a.id_public === tpDamId) && selectedTpDamAnimal && (
+                                                <span className="text-xs text-black bg-primary px-2 py-1 rounded-full flex-shrink-0">Global</span>
+                                            )}
                                         </div>
                                     ) : (
                                         <div className="text-gray-400">Select Dam...</div>
@@ -11468,7 +11536,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
             {/* Test Pairing — Sire Search Modal */}
             {modalTarget === 'tp-sire' && (
-                <LocalAnimalSearchModal
+                <ParentSearchModal
                     title="Select Sire"
                     onSelect={handleSelectOtherParentForLitter}
                     onClose={() => setModalTarget(null)}
@@ -11479,13 +11547,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     Search={Search}
                     Loader2={Loader2}
                     LoadingSpinner={LoadingSpinner}
-                    genderFilter={['Male', 'Intersex', 'Unknown']}
+                    requiredGender={['Male', 'Intersex', 'Unknown']}
                 />
             )}
 
             {/* Test Pairing — Dam Search Modal */}
             {modalTarget === 'tp-dam' && (
-                <LocalAnimalSearchModal
+                <ParentSearchModal
                     title="Select Dam"
                     onSelect={handleSelectOtherParentForLitter}
                     onClose={() => setModalTarget(null)}
@@ -11496,7 +11564,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     Search={Search}
                     Loader2={Loader2}
                     LoadingSpinner={LoadingSpinner}
-                    genderFilter={['Female', 'Intersex', 'Unknown']}
+                    requiredGender={['Female', 'Intersex', 'Unknown']}
                 />
             )}
         </div>
