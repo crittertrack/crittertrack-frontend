@@ -24948,6 +24948,8 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                         <div key={notification._id} className={`border rounded-lg p-4 mb-2 ${
                                             notification.type === 'content_edited' 
                                                 ? 'bg-orange-100 border-orange-400' 
+                                                : notification.type === 'litter_assignment'
+                                                ? 'bg-green-50 border-green-300'
                                                 : !notification.read ? 'bg-primary/20 border-primary' : 'bg-white'
                                         }`}>
                                             {/* Moderation Notice Header */}
@@ -24955,6 +24957,13 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                 <div className="flex items-center text-orange-700 font-semibold mb-2">
                                                     <span className="mr-2">⚠️</span>
                                                     <span>Moderation Notice</span>
+                                                </div>
+                                            )}
+                                            {/* Litter Assignment Header */}
+                                            {notification.type === 'litter_assignment' && (
+                                                <div className="flex items-center text-green-700 font-semibold mb-2 text-sm">
+                                                    <span className="mr-2">🐣</span>
+                                                    <span>Litter Assignment — {notification.parentType === 'sire' ? 'Sire' : 'Dam'}</span>
                                                 </div>
                                             )}
                                             <div className="flex items-start space-x-3 mb-2">
@@ -24967,13 +24976,13 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                 {/* Animal Thumbnail - hide for content_edited */}
                                                 {notification.type !== 'content_edited' && (
                                                 <div 
-                                                    className="flex-shrink-0 w-16 h-16 bg-gray-200 rounded-md overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                                                    className={`flex-shrink-0 w-16 h-16 bg-gray-200 rounded-md overflow-hidden transition-opacity ${notification.type === 'litter_assignment' ? '' : 'cursor-pointer hover:opacity-80'}`}
                                                     onClick={() => {
-                                                        if (notification.animalId_public && onViewAnimal) {
+                                                        if (notification.type !== 'litter_assignment' && notification.animalId_public && onViewAnimal) {
                                                             onViewAnimal(notification.animalId_public, true);
                                                         }
                                                     }}
-                                                    title="Click to view animal"
+                                                    title={notification.type === 'litter_assignment' ? undefined : 'Click to view animal'}
                                                 >
                                                     {notification.animalImageUrl ? (
                                                         <img 
@@ -24983,7 +24992,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                         />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-500">
-                                                            <AlertCircle size={28} />
+                                                            {notification.type === 'litter_assignment' ? <span className="text-3xl">🐣</span> : <AlertCircle size={28} />}
                                                         </div>
                                                     )}
                                                 </div>
