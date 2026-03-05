@@ -9874,7 +9874,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 {/* Species Selection */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Species <span className="text-red-500">*</span>
+                                        Species {!editingLitter && <span className="text-red-500">*</span>}
+                                        {editingLitter && <span className="ml-1 text-xs text-gray-400 font-normal">(locked — cannot change on edit)</span>}
                                     </label>
                                     <select
                                         value={formData.species || ''}
@@ -9884,15 +9885,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             setSelectedSireAnimal(null);
                                             setSelectedDamAnimal(null);
                                         }}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                        required
+                                        disabled={!!editingLitter}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+                                        required={!editingLitter}
                                     >
                                         <option value="">Select species first...</option>
                                         {speciesOptions.map(s => (
                                             <option key={s.name || s} value={s.name || s}>{s.name || s}</option>
                                         ))}
                                     </select>
-                                    <p className="text-xs text-gray-500 mt-1">Choose species to filter the sire &amp; dam search</p>
+                                    {!editingLitter && <p className="text-xs text-gray-500 mt-1">Choose species to filter the sire &amp; dam search</p>}
                                 </div>
 
                                 {/* Sire & Dam Selection */}
@@ -9900,13 +9902,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     {/* Sire Selection */}
                                     <div data-tutorial-target="sire-dam-section">
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Sire (Father) <span className="text-red-500">*</span>
+                                            Sire (Father) {!editingLitter && <span className="text-red-500">*</span>}
+                                            {editingLitter && <span className="ml-1 text-xs text-gray-400 font-normal">(locked)</span>}
                                         </label>
                                         <button
                                             type="button"
-                                            onClick={() => setModalTarget('sire-litter')}
-                                            disabled={!formData.species}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                                            onClick={() => !editingLitter && setModalTarget('sire-litter')}
+                                            disabled={!!editingLitter || !formData.species}
+                                            className={`w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-left transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:opacity-75 disabled:cursor-not-allowed${editingLitter ? '' : ' hover:bg-gray-50'}`}
                                         >
                                             {formData.sireId_public ? (
                                                 <div className="flex items-center justify-between">
@@ -9931,13 +9934,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     {/* Dam Selection */}
                                     <div data-tutorial-target="sire-dam-section">
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Dam (Mother) <span className="text-red-500">*</span>
+                                            Dam (Mother) {!editingLitter && <span className="text-red-500">*</span>}
+                                            {editingLitter && <span className="ml-1 text-xs text-gray-400 font-normal">(locked)</span>}
                                         </label>
                                         <button
                                             type="button"
-                                            onClick={() => setModalTarget('dam-litter')}
-                                            disabled={!formData.species}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                                            onClick={() => !editingLitter && setModalTarget('dam-litter')}
+                                            disabled={!!editingLitter || !formData.species}
+                                            className={`w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-left transition focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:opacity-75 disabled:cursor-not-allowed${editingLitter ? '' : ' hover:bg-gray-50'}`}
                                         >
                                             {formData.damId_public ? (
                                                 <div className="flex items-center justify-between">
