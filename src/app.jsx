@@ -8581,6 +8581,105 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
     );
 };
 
+// Compact species picker modal used in Litter Management
+const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) => {
+    const categories = ['All', 'Mammal', 'Reptile', 'Bird', 'Amphibian', 'Fish', 'Invertebrate', 'Other'];
+    const [search, setSearch] = useState('');
+    const [cat, setCat] = useState('All');
+
+    const filtered = speciesOptions
+        .filter(s => {
+            const matchesCat = cat === 'All' || s.category === cat;
+            const matchesSearch = !search || s.name.toLowerCase().includes(search.toLowerCase()) || (s.latinName && s.latinName.toLowerCase().includes(search.toLowerCase()));
+            return matchesCat && matchesSearch;
+        })
+        .sort((a, b) => {
+            if (a.isDefault && !b.isDefault) return -1;
+            if (!a.isDefault && b.isDefault) return 1;
+            return a.name.localeCompare(b.name);
+        });
+
+    return (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+                {/* Header */}
+                <div className="flex justify-between items-center border-b p-4 flex-shrink-0">
+                    <h3 className="text-lg font-bold text-gray-800">Select Species</h3>
+                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={22} /></button>
+                </div>
+
+                {/* Search + Category */}
+                <div className="p-4 border-b flex-shrink-0 space-y-3">
+                    <div className="relative">
+                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search by name or latin name..."
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                            autoFocus
+                            className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                        />
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                        {categories.map(c => (
+                            <button
+                                key={c}
+                                type="button"
+                                onClick={() => setCat(c)}
+                                className={`px-3 py-1 text-xs font-semibold rounded-full transition ${
+                                    cat === c ? 'bg-primary text-black' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                }`}
+                            >
+                                {c}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Species grid */}
+                <div className="flex-grow overflow-y-auto p-4">
+                    {filtered.length === 0 ? (
+                        <p className="text-center text-gray-500 py-8">No species found.</p>
+                    ) : (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {filtered.map(s => (
+                                <button
+                                    key={s._id || s.name}
+                                    type="button"
+                                    onClick={() => onSelect(s.name)}
+                                    className={`flex flex-col items-start p-3 border-2 rounded-lg text-left transition hover:shadow-md ${
+                                        s.isDefault
+                                            ? 'border-primary bg-primary/10 hover:bg-primary/20'
+                                            : 'border-gray-200 bg-white hover:border-primary/50 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    <span className="font-medium text-sm text-gray-800 leading-tight">
+                                        {getSpeciesEmoji(s.name) && <span className="mr-1">{getSpeciesEmoji(s.name)}</span>}
+                                        {s.name}
+                                    </span>
+                                    {s.latinName && (
+                                        <span className="text-xs italic text-gray-500 mt-0.5 leading-tight">{s.latinName}</span>
+                                    )}
+                                    {s.category && (
+                                        <span className="mt-1 text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">{s.category}</span>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Footer */}
+                <div className="border-t p-3 flex-shrink-0 flex justify-between items-center">
+                    <span className="text-xs text-gray-400">{filtered.length} species</span>
+                    <button onClick={onClose} className="text-sm text-gray-500 hover:text-gray-800 transition">Cancel</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // Litter Management Component
 const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, formDataRef, onFormOpenChange, speciesOptions = [] }) => {
     const [litters, setLitters] = useState([]);
@@ -8625,6 +8724,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [expandedLitter, setExpandedLitter] = useState(null);
     const [editingLitter, setEditingLitter] = useState(null);
     const [modalTarget, setModalTarget] = useState(null);
+    const [showSpeciesPicker, setShowSpeciesPicker] = useState(false);
     const [selectedSireAnimal, setSelectedSireAnimal] = useState(null);
     const [selectedDamAnimal, setSelectedDamAnimal] = useState(null);
     const [selectedTpSireAnimal, setSelectedTpSireAnimal] = useState(null);
@@ -9831,6 +9931,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     setEditingLitter(null);
                                     setSelectedSireAnimal(null);
                                     setSelectedDamAnimal(null);
+                                    setShowSpeciesPicker(false);
                                 }}
                                 className="text-gray-500 hover:text-gray-800"
                             >
@@ -9877,23 +9978,22 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         Species {!editingLitter && <span className="text-red-500">*</span>}
                                         {editingLitter && <span className="ml-1 text-xs text-gray-400 font-normal">(locked — cannot change on edit)</span>}
                                     </label>
-                                    <select
-                                        value={formData.species || ''}
-                                        onChange={(e) => {
-                                            const newSpecies = e.target.value;
-                                            setFormData(prev => ({...prev, species: newSpecies, sireId_public: '', damId_public: ''}));
-                                            setSelectedSireAnimal(null);
-                                            setSelectedDamAnimal(null);
-                                        }}
+                                    <button
+                                        type="button"
+                                        onClick={() => !editingLitter && setShowSpeciesPicker(true)}
                                         disabled={!!editingLitter}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
-                                        required={!editingLitter}
+                                        className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-left transition focus:ring-2 focus:ring-primary focus:border-transparent ${
+                                            editingLitter
+                                                ? 'bg-gray-100 text-gray-500 cursor-not-allowed opacity-75'
+                                                : 'bg-white hover:bg-gray-50'
+                                        }`}
                                     >
-                                        <option value="">Select species first...</option>
-                                        {speciesOptions.map(s => (
-                                            <option key={s.name || s} value={s.name || s}>{s.name || s}</option>
-                                        ))}
-                                    </select>
+                                        {formData.species ? (
+                                            <span className="font-medium text-gray-800">{getSpeciesEmoji(formData.species) && <span className="mr-1">{getSpeciesEmoji(formData.species)}</span>}{formData.species}</span>
+                                        ) : (
+                                            <span className="text-gray-400">Click to select species...</span>
+                                        )}
+                                    </button>
                                     {!editingLitter && <p className="text-xs text-gray-500 mt-1">Choose species to filter the sire &amp; dam search</p>}
                                 </div>
 
@@ -11408,6 +11508,22 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Species Picker Modal */}
+            {showSpeciesPicker && (
+                <SpeciesPickerModal
+                    speciesOptions={speciesOptions}
+                    onSelect={(speciesName) => {
+                        setFormData(prev => ({...prev, species: speciesName, sireId_public: '', damId_public: ''}));
+                        setSelectedSireAnimal(null);
+                        setSelectedDamAnimal(null);
+                        setShowSpeciesPicker(false);
+                    }}
+                    onClose={() => setShowSpeciesPicker(false)}
+                    X={X}
+                    Search={Search}
+                />
             )}
 
             {/* Sire Modal */}
