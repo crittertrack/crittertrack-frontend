@@ -22553,8 +22553,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                                             renderExtras={(a) => (
                                                 <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
                                                     {a.matingDate && <div className="text-xs text-gray-400 hidden sm:block">Since {formatDateShort(a.matingDate)}</div>}
-                                                    <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: true })}
-                                                        className="text-xs px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 whitespace-nowrap">🥜 Set as Pregnant</button>
+                                                    {a.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: true })}
+                                                        className="text-xs px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 whitespace-nowrap">🥜 Set as Pregnant</button>}
                                                     <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false })}
                                                         className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200">Clear</button>
                                                 </div>
@@ -22566,8 +22566,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                                             renderExtras={(a) => (
                                                 <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
                                                     {a.expectedDueDate && <div className="text-xs text-gray-400 hidden sm:block">Due {formatDateShort(a.expectedDueDate)}</div>}
-                                                    <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false, isNursing: true })}
-                                                        className="text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 whitespace-nowrap">🍼 Set as Nursing</button>
+                                                    {a.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false, isNursing: true })}
+                                                        className="text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 whitespace-nowrap">🍼 Set as Nursing</button>}
                                                     <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false })}
                                                         className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200">Clear</button>
                                                 </div>
