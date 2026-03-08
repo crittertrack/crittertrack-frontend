@@ -1720,68 +1720,55 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], user
       }
     });
     
-    const outcomes = {};
-    
-    // Generate all possible offspring genotypes
-    const generateOffspring = (locusIndex, currentGenotype) => {
-      if (locusIndex >= selectedLoci.length) {
-        // Fill in defaults for unselected loci
-        const completeGenotype = applyDefaults(currentGenotype);
-        
-        // Calculate phenotype for this genotype, passing selected info
-        const result = calculatePhenotype(completeGenotype, selectedGenotype);
-        const phenotype = result.phenotype;
-        
-        if (!outcomes[phenotype]) {
-          outcomes[phenotype] = { count: 0, genotypes: [] };
-        }
-        outcomes[phenotype].count++;
-        outcomes[phenotype].genotypes.push(completeGenotype);
-        return;
-      }
-      
-      const locus = selectedLoci[locusIndex];
+    // Probability-weighted map approach: deduplicate genotype combinations per locus
+    // to avoid exponential blowup (e.g. Aa×Aa → {AA:1, Aa:2, aa:1} instead of 4 branches)
+    // Worst case is (unique combos per locus)^N instead of 4^N — up to 56× faster for 14 loci
+    //
+    // weightedMap: { genotypeKey -> { genotype: {}, weight: number } }
+    let weightedMap = { '': { genotype: {}, weight: 1 } };
+
+    for (const locus of selectedLoci) {
       const parent1Alleles = getAlleles(p1[locus]);
       const parent2Alleles = getAlleles(p2[locus]);
-      
-      // Create all possible combinations for this locus
-      for (const p1Allele of parent1Alleles) {
-        for (const p2Allele of parent2Alleles) {
-          // Sort alleles to create consistent genotype notation
-          const alleles = [p1Allele, p2Allele].sort((a, b) => {
-            // Dominant alleles (uppercase) come first
+
+      // Compute per-locus unique combinations with probability weights
+      const locusWeights = {};
+      for (const a1 of parent1Alleles) {
+        for (const a2 of parent2Alleles) {
+          const alleles = [a1, a2].sort((a, b) => {
             if (a[0] === a[0].toUpperCase() && b[0] === b[0].toLowerCase()) return -1;
             if (a[0] === a[0].toLowerCase() && b[0] === b[0].toUpperCase()) return 1;
             return a.localeCompare(b);
           });
-          
-          const offspringCombo = `${alleles[0]}/${alleles[1]}`;
-          generateOffspring(locusIndex + 1, {
-            ...currentGenotype,
-            [locus]: offspringCombo
-          });
+          const combo = `${alleles[0]}/${alleles[1]}`;
+          locusWeights[combo] = (locusWeights[combo] || 0) + 1;
         }
       }
-    };
-    
-    generateOffspring(0, {});
-    
-    // Create results array with each unique genotype
-    const allGenotypes = [];
-    Object.values(outcomes).forEach(data => {
-      data.genotypes.forEach(fullGenotype => {
-        allGenotypes.push(fullGenotype);
-      });
-    });
-    
-    const totalCount = allGenotypes.length;
-    
-    // Group by phenotype and collect all genotypes for each
+
+      // Cross-product with existing weighted map, keeping unique combined keys
+      const newMap = {};
+      for (const [key, { genotype, weight }] of Object.entries(weightedMap)) {
+        for (const [combo, comboWeight] of Object.entries(locusWeights)) {
+          const newKey = key ? `${key}|${combo}` : combo;
+          newMap[newKey] = {
+            genotype: { ...genotype, [locus]: combo },
+            weight: weight * comboWeight
+          };
+        }
+      }
+      weightedMap = newMap;
+    }
+
+    // Group by phenotype using weighted counts (single calculatePhenotype pass)
     const phenotypeMap = {};
-    allGenotypes.forEach(fullGenotype => {
-      const result = calculatePhenotype(fullGenotype, selectedGenotype);
+    let totalWeight = 0;
+
+    for (const { genotype: partialGenotype, weight } of Object.values(weightedMap)) {
+      const completeGenotype = applyDefaults(partialGenotype);
+      const result = calculatePhenotype(completeGenotype, selectedGenotype);
       const phenotype = result.phenotype;
-      
+      totalWeight += weight;
+
       if (!phenotypeMap[phenotype]) {
         phenotypeMap[phenotype] = {
           phenotype: phenotype,
@@ -1792,24 +1779,25 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], user
           count: 0
         };
       }
-      
+
       // Only show selected loci in the genotype display
       const displayGenotype = {};
       selectedLoci.forEach(locus => {
-        displayGenotype[locus] = fullGenotype[locus];
+        displayGenotype[locus] = completeGenotype[locus];
       });
-      
+
       // Create a unique key for this genotype to avoid duplicates
-      const genotypeKey = selectedLoci.map(locus => fullGenotype[locus]).join('|');
-      
-      // Only add if we haven't seen this exact genotype before for this phenotype
+      const genotypeKey = selectedLoci.map(locus => completeGenotype[locus]).join('|');
+
       if (!phenotypeMap[phenotype].genotypeKeys.has(genotypeKey)) {
         phenotypeMap[phenotype].genotypes.push(displayGenotype);
         phenotypeMap[phenotype].genotypeKeys.add(genotypeKey);
       }
-      
-      phenotypeMap[phenotype].count++;
-    });
+
+      phenotypeMap[phenotype].count += weight;
+    }
+
+    const totalCount = totalWeight;
     
     const resultsArray = Object.values(phenotypeMap).map(data => ({
       phenotype: data.phenotype,
