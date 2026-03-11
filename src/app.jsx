@@ -2825,9 +2825,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
     const [ownedAnimals, setOwnedAnimals] = useState(userAnimals); // may be pre-seeded from parent or fetched lazily
     const ownedAnimalsLoadedRef = useRef(userAnimals.length > 0);
     const [globalRels, setGlobalRels] = useState(null); // null = not yet fetched
-    const [galleryUploading, setGalleryUploading] = useState(false);
-    const [galleryUploadError, setGalleryUploadError] = useState(null);
-    const galleryFileInputRef = useRef(null);
     const [globalRelsLoading, setGlobalRelsLoading] = useState(false);
 
     // Fetch ALL animals on the account + global relationships lazily when Lineage tab opens
@@ -5197,99 +5194,32 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                         </div>
                     )}
 
-                {/* -- TAB 14 : Gallery ----------------------------------------- */}
+                {/* -- TAB 14 : Gallery (read-only — manage photos in Edit) --- */}
                 {detailViewTab === 14 && (
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
                                 <h3 className="text-lg font-semibold text-gray-700">🖼️ Photo Gallery</h3>
-                                <p className="text-xs text-gray-400 mt-0.5">{(animal.extraImages || []).length} / 20 photos</p>
+                                <p className="text-xs text-gray-400 mt-0.5">{(animal.extraImages || []).length} / 20 photos — manage in <strong>Edit</strong></p>
                             </div>
-                            {(animal.extraImages || []).length < 20 && (
-                                <button
-                                    type="button"
-                                    onClick={() => galleryFileInputRef.current?.click()}
-                                    disabled={galleryUploading}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm rounded-lg transition-colors"
-                                >
-                                    {galleryUploading
-                                        ? <><Loader2 size={14} className="animate-spin" /> Uploading…</>
-                                        : <><Plus size={14} /> Add Photo</>
-                                    }
-                                </button>
-                            )}
-                            <input
-                                ref={galleryFileInputRef}
-                                type="file"
-                                accept="image/png,image/jpeg,image/webp"
-                                className="hidden"
-                                onChange={async (e) => {
-                                    const file = e.target.files?.[0];
-                                    e.target.value = '';
-                                    if (!file) return;
-                                    setGalleryUploading(true);
-                                    setGalleryUploadError(null);
-                                    try {
-                                        const fd = new FormData();
-                                        fd.append('file', file);
-                                        const upRes = await axios.post(`${API_BASE_URL}/upload`, fd, {
-                                            headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'multipart/form-data' }
-                                        });
-                                        const imageUrl = upRes.data.url;
-                                        const galRes = await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/gallery`, { url: imageUrl }, {
-                                            headers: { Authorization: `Bearer ${authToken}` }
-                                        });
-                                        onUpdateAnimal({ ...animal, extraImages: galRes.data.extraImages });
-                                    } catch (err) {
-                                        setGalleryUploadError(err.response?.data?.message || 'Upload failed. Please try again.');
-                                    } finally {
-                                        setGalleryUploading(false);
-                                    }
-                                }}
-                            />
                         </div>
-
-                        {galleryUploadError && (
-                            <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                                <AlertCircle size={14} /> {galleryUploadError}
-                            </div>
-                        )}
 
                         {(animal.extraImages || []).length === 0 ? (
                             <div className="text-center py-16 text-gray-400">
                                 <div className="text-5xl mb-3">📷</div>
                                 <p className="text-sm font-medium">No extra photos yet</p>
-                                <p className="text-xs mt-1">Add up to 20 photos to this animal&apos;s gallery.</p>
+                                <p className="text-xs mt-1">Add photos from the Edit screen.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                                 {(animal.extraImages || []).map((url, idx) => (
-                                    <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                                    <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
                                         <img
                                             src={url}
                                             alt={`Gallery photo ${idx + 1}`}
-                                            className="w-full h-full object-cover cursor-pointer transition-opacity group-hover:opacity-90"
+                                            className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                                             onClick={() => { setEnlargedImageUrl(url); setShowImageModal(true); }}
                                         />
-                                        <button
-                                            type="button"
-                                            title="Remove photo"
-                                            onClick={async () => {
-                                                if (!window.confirm('Remove this photo from the gallery?')) return;
-                                                try {
-                                                    const galRes = await axios.delete(`${API_BASE_URL}/animals/${animal.id_public}/gallery`, {
-                                                        headers: { Authorization: `Bearer ${authToken}` },
-                                                        data: { url }
-                                                    });
-                                                    onUpdateAnimal({ ...animal, extraImages: galRes.data.extraImages });
-                                                } catch (err) {
-                                                    showModalMessage('Failed to remove photo: ' + (err.response?.data?.message || err.message), 'error');
-                                                }
-                                            }}
-                                            className="absolute top-1 right-1 bg-black/60 hover:bg-red-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-all"
-                                        >
-                                            <X size={12} />
-                                        </button>
                                         <span className="absolute bottom-1 left-1 bg-black/50 text-white text-[10px] rounded px-1 py-0.5">#{idx + 1}</span>
                                     </div>
                                 ))}
@@ -13801,7 +13731,12 @@ const AnimalForm = ({
     const [deleteImage, setDeleteImage] = useState(false);
     const [showCommunityGeneticsModal, setShowCommunityGeneticsModal] = useState(false);
     const [activeTab, setActiveTab] = useState(1); // Tab navigation state
-    const [collapsedHealthSections, setCollapsedHealthSections] = useState({}); // collapse health tab sections
+    const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
+    // Gallery state (edit-only; changes are applied immediately via API)
+    const [editGalleryImages, setEditGalleryImages] = useState(animalToEdit?.extraImages || []);
+    const [galleryUploading, setGalleryUploading] = useState(false);
+    const [galleryUploadError, setGalleryUploadError] = useState(null);
+    const galleryEditFileRef = useRef(null); // collapse health tab sections
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -15687,7 +15622,8 @@ const AnimalForm = ({
                             { id: 10, label: 'Records', icon: '📝' },
                             { id: 11, label: 'End of Life', icon: '⚖️' },
                             { id: 12, label: 'Show', icon: '🏆' },
-                            { id: 13, label: 'Legal', icon: '📄' }
+                            { id: 13, label: 'Legal', icon: '📄' },
+                            { id: 14, label: 'Gallery', icon: '🖼️' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -18513,6 +18449,111 @@ const AnimalForm = ({
                                 )}
                             </div>
                         </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Tab 14: Gallery */}
+                {activeTab === 14 && (
+                    <div className="space-y-4">
+                        {!animalToEdit ? (
+                            <div className="text-center py-12 text-gray-400 text-sm">Save this animal first to manage gallery photos.</div>
+                        ) : (
+                            <>
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h3 className="text-lg font-semibold text-gray-700">🖼️ Photo Gallery</h3>
+                                        <p className="text-xs text-gray-400 mt-0.5">{editGalleryImages.length} / 20 photos</p>
+                                    </div>
+                                    {editGalleryImages.length < 20 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => galleryEditFileRef.current?.click()}
+                                            disabled={galleryUploading}
+                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm rounded-lg transition-colors"
+                                        >
+                                            {galleryUploading
+                                                ? <><Loader2 size={14} className="animate-spin" /> Uploading…</>
+                                                : <><Plus size={14} /> Add Photo</>
+                                            }
+                                        </button>
+                                    )}
+                                    <input
+                                        ref={galleryEditFileRef}
+                                        type="file"
+                                        accept="image/png,image/jpeg,image/webp"
+                                        className="hidden"
+                                        onChange={async (e) => {
+                                            const file = e.target.files?.[0];
+                                            e.target.value = '';
+                                            if (!file) return;
+                                            setGalleryUploading(true);
+                                            setGalleryUploadError(null);
+                                            try {
+                                                const fd = new FormData();
+                                                fd.append('file', file);
+                                                const upRes = await axios.post(`${API_BASE_URL}/upload`, fd, {
+                                                    headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'multipart/form-data' }
+                                                });
+                                                const galRes = await axios.post(`${API_BASE_URL}/animals/${animalToEdit.id_public}/gallery`, { url: upRes.data.url }, {
+                                                    headers: { Authorization: `Bearer ${authToken}` }
+                                                });
+                                                setEditGalleryImages(galRes.data.extraImages);
+                                            } catch (err) {
+                                                setGalleryUploadError(err.response?.data?.message || 'Upload failed. Please try again.');
+                                            } finally {
+                                                setGalleryUploading(false);
+                                            }
+                                        }}
+                                    />
+                                </div>
+
+                                {galleryUploadError && (
+                                    <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                                        <AlertCircle size={14} /> {galleryUploadError}
+                                    </div>
+                                )}
+
+                                {editGalleryImages.length === 0 ? (
+                                    <div className="text-center py-16 text-gray-400">
+                                        <div className="text-5xl mb-3">📷</div>
+                                        <p className="text-sm font-medium">No extra photos yet</p>
+                                        <p className="text-xs mt-1">Add up to 20 extra photos for this animal.</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                        {editGalleryImages.map((url, idx) => (
+                                            <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                                                <img
+                                                    src={url}
+                                                    alt={`Gallery photo ${idx + 1}`}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    title="Remove photo"
+                                                    onClick={async () => {
+                                                        if (!window.confirm('Remove this photo from the gallery?')) return;
+                                                        try {
+                                                            const galRes = await axios.delete(`${API_BASE_URL}/animals/${animalToEdit.id_public}/gallery`, {
+                                                                headers: { Authorization: `Bearer ${authToken}` },
+                                                                data: { url }
+                                                            });
+                                                            setEditGalleryImages(galRes.data.extraImages);
+                                                        } catch (err) {
+                                                            showModalMessage('Failed to remove photo: ' + (err.response?.data?.message || err.message), 'error');
+                                                        }
+                                                    }}
+                                                    className="absolute top-1 right-1 bg-black/60 hover:bg-red-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-all"
+                                                >
+                                                    <X size={12} />
+                                                </button>
+                                                <span className="absolute bottom-1 left-1 bg-black/50 text-white text-[10px] rounded px-1 py-0.5">#{idx + 1}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
                 )}
