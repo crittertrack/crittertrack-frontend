@@ -1,4 +1,4 @@
-﻿// CritterTrack Frontend Application
+// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -3995,7 +3995,16 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                             {/* 1st Section: Pedigree */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <div className="flex justify-between items-center">
-                                    <h3 className="text-lg font-semibold text-gray-700">🌳 Pedigree: Sire and Dam</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
+                                        🌳 Pedigree: Sire and Dam
+                                        {ownedAnimals.length > 0 && (
+                                            pedigreeIssues.some(i => i.severity === 'error')
+                                                ? <AlertCircle size={16} className="text-red-500" />
+                                                : pedigreeIssues.some(i => i.severity === 'warning')
+                                                    ? <AlertTriangle size={16} className="text-yellow-500" />
+                                                    : <CheckCircle size={16} className="text-green-500" />
+                                        )}
+                                    </h3>
                                     <button
                                         onClick={() => setShowPedigree(true)}
                                         data-tutorial-target="pedigree-btn"
