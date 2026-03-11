@@ -2861,6 +2861,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
         })).filter(g => g.animals.length > 0);
     }, [globalRels, ownedIds, animal?.id_public]);
     const [relInsightsOpen, setRelInsightsOpen] = useState(true);
+    const [relOwnOpen, setRelOwnOpen] = useState(true);
+    const [relExternalOpen, setRelExternalOpen] = useState(false);
+    const [offspringOpen, setOffspringOpen] = useState(true);
 
     // Fetch all litters where this animal is sire or dam
     React.useEffect(() => {
@@ -3976,12 +3979,18 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                             {/* Own collection */}
                                             {relationships.length > 0 && (
                                                 <div className="space-y-3">
-                                                    <div className="flex items-center gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setRelOwnOpen(o => !o)}
+                                                        className="w-full flex items-center gap-2 text-left"
+                                                    >
                                                         <span className="text-xs font-bold text-blue-700 uppercase tracking-wide">Your Collection</span>
                                                         <div className="flex-1 h-px bg-blue-200" />
-                                                    </div>
+                                                        {relOwnOpen ? <ChevronUp size={13} className="text-blue-400 flex-shrink-0" /> : <ChevronDown size={13} className="text-blue-400 flex-shrink-0" />}
+                                                    </button>
+                                                    {relOwnOpen && (<>
                                                     {[
-                                                        ['Parents',            ['Sire (Father)', 'Dam (Mother)']],
+                                                        ['Parents',            ['Sire (Father)', 'Dam (Mother)']],  
                                                         ['Siblings',           ['Full Sibling', 'Half-Sibling (via Sire)', 'Half-Sibling (via Dam)']],
                                                         ['Nieces & Nephews',   ['Niece / Nephew']],
                                                         ['Aunts & Uncles',     ['Aunt / Uncle', 'Paternal Aunt / Uncle', 'Maternal Aunt / Uncle']],
@@ -4023,6 +4032,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                             </div>
                                                         );
                                                     })}
+                                                    </>)}
                                                 </div>
                                             )}
 
@@ -4035,10 +4045,16 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                             )}
                                             {!globalRelsLoading && externalRelGroups.length > 0 && (
                                                 <div className="space-y-3">
-                                                    <div className="flex items-center gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setRelExternalOpen(o => !o)}
+                                                        className="w-full flex items-center gap-2 text-left"
+                                                    >
                                                         <span className="text-xs font-bold text-amber-700 uppercase tracking-wide">From Other Breeders</span>
                                                         <div className="flex-1 h-px bg-amber-200" />
-                                                    </div>
+                                                        {relExternalOpen ? <ChevronUp size={13} className="text-amber-400 flex-shrink-0" /> : <ChevronDown size={13} className="text-amber-400 flex-shrink-0" />}
+                                                    </button>
+                                                    {relExternalOpen && (<>
                                                     {externalRelGroups.map(({ label: groupLabel, animals: groupAnimals }) => (
                                                         <div key={groupLabel}>
                                                             <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{groupLabel}</h4>
@@ -4058,7 +4074,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                                 </div>
                                                                             )}
                                                                             <div className="min-w-0">
-                                                                                <div className="text-sm font-medium text-gray-800 truncate">{rel.name}</div>
+                                                                                <div className="text-sm font-medium text-gray-800 truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}{rel.suffix ? ` ${rel.suffix}` : ''}</div>
                                                                                 <div className="text-xs text-gray-500">{rel.species}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
                                                                             </div>
                                                                         </div>
@@ -4071,6 +4087,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                             </div>
                                                         </div>
                                                     ))}
+                                                    </>)}
                                                 </div>
                                             )}
                                         </div>
@@ -4094,8 +4111,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 if (allRecords.length === 0) return null;
                                 return (
                                     <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 space-y-3">
-                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center"><Users size={20} className="text-purple-600 mr-2" />Offspring & Litters</h3>
-                                        <div className="space-y-2">
+                                        <button type="button" onClick={() => setOffspringOpen(o => !o)} className="w-full flex items-center justify-between text-left">
+                                            <h3 className="text-lg font-semibold text-gray-700 flex items-center"><Users size={20} className="text-purple-600 mr-2" />Offspring & Litters</h3>
+                                            {offspringOpen ? <ChevronUp size={18} className="text-purple-400 flex-shrink-0" /> : <ChevronDown size={18} className="text-purple-400 flex-shrink-0" />}
+                                        </button>
+                                        {offspringOpen && <div className="space-y-2">
                                             {allRecords.map((litter) => {
                                                 if (litter._recordType === 'litter') {
                                                     const lid = litter.litter_id_public;
@@ -4481,7 +4501,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                     );
                                                 }
                                             })}
-                                        </div>
+                                        </div>}
                                     </div>
                                 );
                             })()}
