@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -2292,11 +2293,38 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
     );
 };
 
+// Reusable QR code share modal
+const QRModal = ({ url, title, onClose }) => {
+    const [copied, setCopied] = React.useState(false);
+    const handleCopy = () => navigator.clipboard.writeText(url).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+    return (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60" onClick={onClose}>
+            <div className="bg-white rounded-2xl shadow-2xl p-6 flex flex-col items-center gap-4 w-72" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center justify-between w-full">
+                    <h3 className="font-semibold text-gray-800 text-sm truncate pr-2">{title || 'Share'}</h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+                </div>
+                <div className="p-3 bg-white border border-gray-200 rounded-xl">
+                    <QRCodeSVG value={url} size={196} bgColor="#ffffff" fgColor="#111827" level="M" />
+                </div>
+                <p className="text-xs text-gray-400 break-all text-center leading-relaxed">{url}</p>
+                <button
+                    onClick={handleCopy}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg text-sm transition"
+                >
+                    {copied ? <><CheckCircle size={14} /> Copied!</> : <><Link size={14} /> Copy Link</>}
+                </button>
+            </div>
+        </div>
+    );
+};
+
 // Public Profile View Component - Shows a breeder's public animals
 const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStartMessage, authToken, setModCurrentContext }) => {
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [copySuccess, setCopySuccess] = useState(false);
+    const [showQR, setShowQR] = useState(false);
     const [speciesFilter, setSpeciesFilter] = useState('');
     const [genderFilters, setGenderFilters] = useState({ Male: true, Female: true, Intersex: true, Unknown: true });
     const [statusFilter, setStatusFilter] = useState('');
@@ -2432,12 +2460,13 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         </button>
                     )}
                     <button
-                        onClick={handleShare}
+                        onClick={() => setShowQR(true)}
                         className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
                     >
-                        <Link size={16} />
-                        {copySuccess ? 'Link Copied!' : 'Share Profile'}
+                        <QrCode size={16} />
+                        Share Profile
                     </button>
+                    {showQR && <QRModal url={`${window.location.origin}/user/${freshProfile?.id_public || profile.id_public}`} title={freshProfile?.breederName || freshProfile?.personalName || 'Share Profile'} onClose={() => setShowQR(false)} />}
                     <ReportButton
                         contentType="profile"
                         contentId={profile.id_public}
@@ -2707,14 +2736,111 @@ const DetailJsonList = ({ label, data, renderItem }) => {
     );
 };
 
+// ==================== RELATIONSHIP INSIGHTS HELPER ====================
+// Computes related animals (up to 3 generations) from the user's own animal collection.
+// Returns array of { animal, rel } sorted by proximity (parents first).
+const computeRelationships = (animal, userAnimals) => {
+    if (!animal || !userAnimals || userAnimals.length === 0) return [];
+    const id = animal.id_public;
+    const sireId = animal.fatherId_public || animal.sireId_public;
+    const damId = animal.motherId_public || animal.damId_public;
+
+    // Quick-lookup map
+    const map = {};
+    userAnimals.forEach(a => { if (a.id_public) map[a.id_public] = a; });
+
+    const results = [];
+    const addedIds = new Set([id]); // prevent duplicates & self-reference
+    const add = (a, rel) => {
+        if (!a || addedIds.has(a.id_public)) return;
+        addedIds.add(a.id_public);
+        results.push({ animal: a, rel });
+    };
+    const g = (male, female, neutral, gender) =>
+        gender === 'Male' ? male : gender === 'Female' ? female : neutral;
+
+    // Helper: return parent ids for any animal id
+    const parentsOf = (pid) => {
+        const p = map[pid];
+        if (!p) return [];
+        return [
+            p.fatherId_public || p.sireId_public,
+            p.motherId_public || p.damId_public
+        ].filter(Boolean);
+    };
+
+    // Gen 1 — Parents
+    if (sireId && map[sireId]) add(map[sireId], 'Sire (Father)');
+    if (damId && map[damId]) add(map[damId], 'Dam (Mother)');
+
+    // Gen 1 — Full siblings & half-siblings; track sibling ids for niece/nephew
+    const siblingIds = new Set();
+    userAnimals.forEach(a => {
+        if (a.id_public === id) return;
+        const aSire = a.fatherId_public || a.sireId_public;
+        const aDam = a.motherId_public || a.damId_public;
+        const shareSire = sireId && aSire && sireId === aSire;
+        const shareDam = damId && aDam && damId === aDam;
+        if (shareSire && shareDam) { add(a, g('Full Brother', 'Full Sister', 'Full Sibling', a.gender)); siblingIds.add(a.id_public); }
+        else if (shareSire) { add(a, g('Half-Brother (via Sire)', 'Half-Sister (via Sire)', 'Half-Sibling (via Sire)', a.gender)); siblingIds.add(a.id_public); }
+        else if (shareDam) { add(a, g('Half-Brother (via Dam)', 'Half-Sister (via Dam)', 'Half-Sibling (via Dam)', a.gender)); siblingIds.add(a.id_public); }
+    });
+
+    // Nieces & Nephews — offspring of siblings
+    userAnimals.forEach(a => {
+        if (a.id_public === id) return;
+        const aSire = a.fatherId_public || a.sireId_public;
+        const aDam = a.motherId_public || a.damId_public;
+        if ((aSire && siblingIds.has(aSire)) || (aDam && siblingIds.has(aDam))) {
+            add(a, g('Nephew', 'Niece', 'Niece / Nephew', a.gender));
+        }
+    });
+
+    // Gen 2 — Grandparents; track grandparent ids for aunt/uncle detection
+    const sireGrandparentIds = sireId ? new Set(parentsOf(sireId)) : new Set();
+    const damGrandparentIds  = damId  ? new Set(parentsOf(damId))  : new Set();
+    const allGrandparentIds  = new Set([...sireGrandparentIds, ...damGrandparentIds]);
+    const genTwoIds = new Set();
+    sireGrandparentIds.forEach(gpId => {
+        if (map[gpId]) { add(map[gpId], g('Paternal Grandfather', 'Paternal Grandmother', 'Paternal Grandparent', map[gpId].gender)); genTwoIds.add(gpId); }
+    });
+    damGrandparentIds.forEach(gpId => {
+        if (map[gpId]) { add(map[gpId], g('Maternal Grandfather', 'Maternal Grandmother', 'Maternal Grandparent', map[gpId].gender)); genTwoIds.add(gpId); }
+    });
+
+    // Aunts & Uncles — siblings of parents (share a grandparent with this animal's parent)
+    userAnimals.forEach(a => {
+        if (a.id_public === id) return;
+        if (a.id_public === sireId || a.id_public === damId) return; // skip parents themselves
+        const aSire = a.fatherId_public || a.sireId_public;
+        const aDam = a.motherId_public || a.damId_public;
+        const sharesPaternalGP = (aSire && sireGrandparentIds.has(aSire)) || (aDam && sireGrandparentIds.has(aDam));
+        const sharesMaternalGP = (aSire && damGrandparentIds.has(aSire)) || (aDam && damGrandparentIds.has(aDam));
+        if (sharesPaternalGP && sharesMaternalGP) add(a, g('Uncle', 'Aunt', 'Aunt / Uncle', a.gender));
+        else if (sharesPaternalGP) add(a, g('Paternal Uncle', 'Paternal Aunt', 'Paternal Aunt / Uncle', a.gender));
+        else if (sharesMaternalGP) add(a, g('Maternal Uncle', 'Maternal Aunt', 'Maternal Aunt / Uncle', a.gender));
+    });
+
+    // Gen 3 — Great-grandparents
+    genTwoIds.forEach(gpId => {
+        const label = sireGrandparentIds.has(gpId) ? 'Paternal' : 'Maternal';
+        parentsOf(gpId).forEach(ggpId => {
+            if (map[ggpId]) add(map[ggpId], g(`${label} Great-Grandfather`, `${label} Great-Grandmother`, `${label} Great-Grandparent`, map[ggpId].gender));
+        });
+    });
+
+    return results;
+};
+
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
-const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onToggleOwned, userProfile }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onToggleOwned, userProfile, userAnimals = [] }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
     const [copySuccess, setCopySuccess] = useState(false);
+    const [showQR, setShowQR] = useState(false);
     const [enclosureInfo, setEnclosureInfo] = useState(null);
     const [animalLogs, setAnimalLogs] = useState(null); // null = not yet fetched
     const [animalLogsLoading, setAnimalLogsLoading] = useState(false);
@@ -2726,6 +2852,122 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
     const [animalLitters, setAnimalLitters] = useState(null);
     const [pedigreeOffspring, setPedigreeOffspring] = useState(null);
     const [expandedPedigreeRecords, setExpandedPedigreeRecords] = useState({});
+    const [ownedAnimals, setOwnedAnimals] = useState(userAnimals); // may be pre-seeded from parent or fetched lazily
+    const ownedAnimalsLoadedRef = useRef(userAnimals.length > 0);
+    const [globalRels, setGlobalRels] = useState(null); // null = not yet fetched
+    const [globalRelsLoading, setGlobalRelsLoading] = useState(false);
+
+    // Fetch ALL animals on the account + global relationships lazily when Lineage tab opens
+    useEffect(() => {
+        if (detailViewTab !== 5 || ownedAnimalsLoadedRef.current || !authToken || !animal?.id_public) return;
+        ownedAnimalsLoadedRef.current = true;
+        // Fetch all account animals (no ownership filter)
+        axios.get(`${API_BASE_URL}/animals`, {
+            headers: { Authorization: `Bearer ${authToken}` }
+        }).then(res => setOwnedAnimals(res.data || [])).catch(() => {});
+        // Fetch cross-platform relationships from backend
+        setGlobalRelsLoading(true);
+        axios.get(`${API_BASE_URL}/animals/${animal.id_public}/relationships`, {
+            headers: { Authorization: `Bearer ${authToken}` }
+        }).then(res => setGlobalRels(res.data || null)).catch(() => setGlobalRels(null)).finally(() => setGlobalRelsLoading(false));
+    }, [detailViewTab, authToken, API_BASE_URL, animal?.id_public]);
+
+    // Relationship Insights — computed from all account animals (shown in Lineage tab)
+    const relationships = useMemo(() => computeRelationships(animal, ownedAnimals), [animal, ownedAnimals]);
+    const ownedIds = useMemo(() => new Set(ownedAnimals.map(a => a.id_public)), [ownedAnimals]);
+    // Flatten global relationships from backend, exclude own-collection animals, add group label
+    const externalRelGroups = useMemo(() => {
+        if (!globalRels) return [];
+        const groupDefs = [
+            { key: 'parents',           label: 'Parents' },
+            { key: 'siblings',          label: 'Siblings' },
+            { key: 'nephewsNieces',     label: 'Nieces & Nephews' },
+            { key: 'auntsUncles',       label: 'Aunts & Uncles' },
+            { key: 'grandparents',      label: 'Grandparents' },
+            { key: 'greatGrandparents', label: 'Great-Grandparents' },
+            { key: 'cousins',           label: 'Cousins' },
+        ];
+        return groupDefs.map(({ key, label }) => ({
+            label,
+            animals: (globalRels[key] || []).filter(a => !ownedIds.has(a.id_public) && a.id_public !== animal.id_public),
+        })).filter(g => g.animals.length > 0);
+    }, [globalRels, ownedIds, animal?.id_public]);
+    const getExternalRelLabel = (groupLabel, rel) => {
+        const isMale = rel.gender === 'Male';
+        const isFemale = rel.gender === 'Female';
+        const side = rel._side === 'paternal' ? 'Paternal ' : rel._side === 'maternal' ? 'Maternal ' : '';
+        switch (groupLabel) {
+            case 'Parents':
+                if (rel.id_public === animal?.sireId_public) return 'Sire (Father)';
+                if (rel.id_public === animal?.damId_public) return 'Dam (Mother)';
+                return isMale ? 'Sire (Father)' : isFemale ? 'Dam (Mother)' : 'Parent';
+            case 'Siblings':
+                return isMale ? 'Brother' : isFemale ? 'Sister' : 'Sibling';
+            case 'Nieces & Nephews':
+                return isMale ? 'Nephew' : isFemale ? 'Niece' : 'Niece / Nephew';
+            case 'Aunts & Uncles':
+                return isMale ? `${side}Uncle` : isFemale ? `${side}Aunt` : `${side}Aunt / Uncle`;
+            case 'Grandparents':
+                return isMale ? `${side}Grandfather` : isFemale ? `${side}Grandmother` : `${side}Grandparent`;
+            case 'Great-Grandparents':
+                return isMale ? `${side}Great-Grandfather` : isFemale ? `${side}Great-Grandmother` : `${side}Great-Grandparent`;
+            case 'Cousins': return 'Cousin';
+            default: return groupLabel;
+        }
+    };
+    const [relInsightsOpen, setRelInsightsOpen] = useState(true);
+    const [relOwnOpen, setRelOwnOpen] = useState(true);
+    const [relExternalOpen, setRelExternalOpen] = useState(false);
+    const [offspringOpen, setOffspringOpen] = useState(true);
+    const pedigreeIssues = useMemo(() => {
+        const issues = [];
+        const map = {};
+        ownedAnimals.forEach(a => { if (a.id_public) map[a.id_public] = a; });
+        const sireId = animal.fatherId_public || animal.sireId_public;
+        const damId  = animal.motherId_public  || animal.damId_public;
+        const externalParents = globalRels?.parents || [];
+        const sireFull = map[sireId] || (sireId ? externalParents.find(p => p.id_public === sireId) : null);
+        const damFull  = map[damId]  || (damId  ? externalParents.find(p => p.id_public === damId)  : null);
+        const animalBirth = animal.birthDate ? new Date(animal.birthDate) : null;
+        // 1. Self-reference
+        if (sireId && sireId === animal.id_public) issues.push({ severity: 'error', field: 'Sire', message: 'This animal is listed as its own sire — impossible self-reference.' });
+        if (damId  && damId  === animal.id_public) issues.push({ severity: 'error', field: 'Dam',  message: 'This animal is listed as its own dam — impossible self-reference.' });
+        // 2. Broken parent link
+        if (sireId && !sireFull && ownedAnimals.length > 0) issues.push({ severity: 'warning', field: 'Sire', message: 'Sire is linked but not found in your collection or known platform animals.' });
+        if (damId  && !damFull  && ownedAnimals.length > 0) issues.push({ severity: 'warning', field: 'Dam',  message: 'Dam is linked but not found in your collection or known platform animals.' });
+        // 3. Parent born on or after offspring
+        if (animalBirth) {
+            if (sireFull?.birthDate && new Date(sireFull.birthDate) >= animalBirth)
+                issues.push({ severity: 'error', field: 'Sire', message: `Sire "${[sireFull.prefix, sireFull.name].filter(Boolean).join(' ')}" was born on or after this animal — impossible parentage.` });
+            if (damFull?.birthDate && new Date(damFull.birthDate) >= animalBirth)
+                issues.push({ severity: 'error', field: 'Dam',  message: `Dam "${[damFull.prefix, damFull.name].filter(Boolean).join(' ')}" was born on or after this animal — impossible parentage.` });
+        }
+        // 4. Same-sex parents
+        if (sireFull && damFull) {
+            const sg = sireFull.gender; const dg = damFull.gender;
+            if (sg && dg && sg !== 'Unknown' && dg !== 'Unknown' && sg === dg)
+                issues.push({ severity: 'error', field: 'Parents', message: `Both linked parents are ${sg} — a sire/dam pair must be male and female.` });
+        }
+        // 5. Species mismatch
+        if (sireFull?.species && animal.species && sireFull.species !== animal.species)
+            issues.push({ severity: 'warning', field: 'Sire', message: `Sire is ${sireFull.species} but this animal is ${animal.species} — species mismatch.` });
+        if (damFull?.species && animal.species && damFull.species !== animal.species)
+            issues.push({ severity: 'warning', field: 'Dam',  message: `Dam is ${damFull.species} but this animal is ${animal.species} — species mismatch.` });
+        // 6. Circular lineage
+        const seen = new Set();
+        const hasCycle = (pid) => {
+            if (!pid || !map[pid]) return false;
+            if (pid === animal.id_public) return true;
+            if (seen.has(pid)) return false;
+            seen.add(pid);
+            const p = map[pid];
+            return hasCycle(p.fatherId_public || p.sireId_public) || hasCycle(p.motherId_public || p.damId_public);
+        };
+        if (hasCycle(sireId) || hasCycle(damId))
+            issues.push({ severity: 'error', field: 'Lineage', message: 'Circular lineage detected — this animal appears in its own ancestry chain.' });
+        return issues;
+    }, [animal, ownedAnimals, globalRels]);
+    const [pedigreeValidationOpen, setPedigreeValidationOpen] = useState(true);
 
     // Fetch all litters where this animal is sire or dam
     React.useEffect(() => {
@@ -2873,11 +3115,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                         </div>
                         <div className="flex justify-center gap-1.5 flex-wrap">
                             <button
-                                onClick={handleShare}
+                                onClick={() => setShowQR(true)}
                                 className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
-                                title="Copy public link"
                             >
-                                <Link size={14} />
+                                <QrCode size={14} />
                                 Share
                             </button>
                             {onEdit && (
@@ -2943,12 +3184,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 👁️ OWNER VIEW - All Data Visible
                             </span>
                             <button
-                                onClick={handleShare}
+                                onClick={() => setShowQR(true)}
                                 className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
-                                title="Copy public link to clipboard"
                             >
-                                <Link size={16} />
-                                {copySuccess ? 'Link Copied!' : 'Share'}
+                                <QrCode size={16} />
+                                Share
                             </button>
                             {onEdit && (
                                 <button
@@ -3022,7 +3262,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                             { id: 11, label: 'End of Life', icon: '⚖️' },
                             { id: 12, label: 'Show', icon: '🏆' },
                             { id: 13, label: 'Legal', icon: '📄' },
-                            { id: 14, label: 'Logs', icon: '📜' }
+                            { id: 14, label: 'Gallery', icon: '🖼️' },
+                            { id: 15, label: 'Logs', icon: '📜' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -3783,7 +4024,16 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                             {/* 1st Section: Pedigree */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <div className="flex justify-between items-center">
-                                    <h3 className="text-lg font-semibold text-gray-700">🌳 Pedigree: Sire and Dam</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
+                                        🌳 Pedigree: Sire and Dam
+                                        {ownedAnimals.length > 0 && (
+                                            pedigreeIssues.some(i => i.severity === 'error')
+                                                ? <AlertCircle size={16} className="text-red-500" />
+                                                : pedigreeIssues.some(i => i.severity === 'warning')
+                                                    ? <AlertTriangle size={16} className="text-yellow-500" />
+                                                    : <CheckCircle size={16} className="text-green-500" />
+                                        )}
+                                    </h3>
                                     <button
                                         onClick={() => setShowPedigree(true)}
                                         data-tutorial-target="pedigree-btn"
@@ -3810,6 +4060,193 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 </div>
                             </div>
 
+                            {/* Pedigree Validation — only shown when issues exist */}
+                            {ownedAnimals.length > 0 && pedigreeIssues.length > 0 && (
+                                <div className="rounded-lg border bg-red-50 border-red-200">
+                                    <button
+                                        type="button"
+                                        onClick={() => setPedigreeValidationOpen(o => !o)}
+                                        className="w-full flex items-center justify-between p-4 text-left"
+                                    >
+                                        <h3 className="text-base font-semibold text-gray-700 flex items-center gap-2">
+                                            {pedigreeIssues.length > 0
+                                                ? <AlertTriangle size={18} className="text-red-500 flex-shrink-0" />
+                                                : <CheckCircle size={18} className="text-green-500 flex-shrink-0" />}
+                                            Pedigree Validation
+                                            {pedigreeIssues.length > 0 && (
+                                                <span className="text-xs font-normal text-red-700 bg-red-100 border border-red-200 rounded-full px-2 py-0.5">
+                                                    {pedigreeIssues.filter(i => i.severity === 'error').length > 0 && `${pedigreeIssues.filter(i => i.severity === 'error').length} error${pedigreeIssues.filter(i => i.severity === 'error').length !== 1 ? 's' : ''}`}
+                                                    {pedigreeIssues.filter(i => i.severity === 'error').length > 0 && pedigreeIssues.filter(i => i.severity === 'warning').length > 0 && ' · '}
+                                                    {pedigreeIssues.filter(i => i.severity === 'warning').length > 0 && `${pedigreeIssues.filter(i => i.severity === 'warning').length} warning${pedigreeIssues.filter(i => i.severity === 'warning').length !== 1 ? 's' : ''}`}
+                                                </span>
+                                            )}
+                                        </h3>
+                                        {pedigreeValidationOpen ? <ChevronUp size={18} className="text-gray-400 flex-shrink-0" /> : <ChevronDown size={18} className="text-gray-400 flex-shrink-0" />}
+                                    </button>
+                                    {pedigreeValidationOpen && (
+                                        <div className="px-4 pb-4">
+                                            <div className="space-y-2">
+                                                    {pedigreeIssues.map((issue, idx) => (
+                                                        <div key={idx} className={`flex items-start gap-2.5 p-2.5 rounded-lg border text-sm ${issue.severity === 'error' ? 'bg-white border-red-200 text-red-800' : 'bg-white border-yellow-200 text-yellow-800'}`}>
+                                                            {issue.severity === 'error'
+                                                                ? <AlertCircle size={15} className="text-red-500 flex-shrink-0 mt-0.5" />
+                                                                : <AlertTriangle size={15} className="text-yellow-500 flex-shrink-0 mt-0.5" />}
+                                                            <div><span className="font-semibold mr-1">{issue.field}:</span>{issue.message}</div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Relationship Insights */}
+                            {(relationships.length > 0 || externalRelGroups.length > 0 || globalRelsLoading) && (
+                                <div className="bg-blue-50 rounded-lg border border-blue-200">
+                                    <button
+                                        type="button"
+                                        onClick={() => setRelInsightsOpen(o => !o)}
+                                        className="w-full flex items-center justify-between p-4 text-left"
+                                    >
+                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center">
+                                            <Network size={20} className="text-blue-600 mr-2" />
+                                            Relationship Insights
+                                            {relationships.length > 0 && (
+                                                <span className="ml-2 text-xs font-normal text-gray-500 bg-white border border-blue-200 rounded-full px-2 py-0.5">
+                                                    {relationships.length} in your collection
+                                                </span>
+                                            )}
+                                            {externalRelGroups.length > 0 && (
+                                                <span className="ml-1 text-xs font-normal text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
+                                                    +{externalRelGroups.reduce((s, g) => s + g.animals.length, 0)} from other breeders
+                                                </span>
+                                            )}
+                                        </h3>
+                                        {relInsightsOpen
+                                            ? <ChevronUp size={18} className="text-blue-400 flex-shrink-0" />
+                                            : <ChevronDown size={18} className="text-blue-400 flex-shrink-0" />}
+                                    </button>
+                                    {relInsightsOpen && (
+                                        <div className="px-4 pb-4 space-y-5">
+                                            {/* Own collection */}
+                                            {relationships.length > 0 && (
+                                                <div className="space-y-3">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setRelOwnOpen(o => !o)}
+                                                        className="w-full flex items-center gap-2 text-left"
+                                                    >
+                                                        <span className="text-xs font-bold text-blue-700 uppercase tracking-wide">Your Collection</span>
+                                                        <div className="flex-1 h-px bg-blue-200" />
+                                                        {relOwnOpen ? <ChevronUp size={13} className="text-blue-400 flex-shrink-0" /> : <ChevronDown size={13} className="text-blue-400 flex-shrink-0" />}
+                                                    </button>
+                                                    {relOwnOpen && (<>
+                                                    {[
+                                                        ['Parents',            ['Sire (Father)', 'Dam (Mother)']],  
+                                                        ['Siblings',           ['Full Sibling', 'Full Brother', 'Full Sister', 'Half-Sibling (via Sire)', 'Half-Brother (via Sire)', 'Half-Sister (via Sire)', 'Half-Sibling (via Dam)', 'Half-Brother (via Dam)', 'Half-Sister (via Dam)']],
+                                                        ['Nieces & Nephews',   ['Niece / Nephew', 'Niece', 'Nephew']],
+                                                        ['Aunts & Uncles',     ['Aunt / Uncle', 'Aunt', 'Uncle', 'Paternal Aunt / Uncle', 'Paternal Aunt', 'Paternal Uncle', 'Maternal Aunt / Uncle', 'Maternal Aunt', 'Maternal Uncle']],
+                                                        ['Grandparents',       ['Paternal Grandparent', 'Paternal Grandfather', 'Paternal Grandmother', 'Maternal Grandparent', 'Maternal Grandfather', 'Maternal Grandmother']],
+                                                        ['Great-Grandparents', ['Paternal Great-Grandparent', 'Paternal Great-Grandfather', 'Paternal Great-Grandmother', 'Maternal Great-Grandparent', 'Maternal Great-Grandfather', 'Maternal Great-Grandmother']],
+                                                    ].map(([groupLabel, relTypes]) => {
+                                                        const group = relationships.filter(r => relTypes.includes(r.rel));
+                                                        if (!group.length) return null;
+                                                        return (
+                                                            <div key={groupLabel}>
+                                                                <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{groupLabel}</h4>
+                                                                <div className="space-y-2">
+                                                                    {group.map(({ animal: rel, rel: relLabel }) => (
+                                                                        <div
+                                                                            key={rel.id_public}
+                                                                            className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-blue-100 hover:border-blue-300 transition-colors cursor-pointer"
+                                                                            onClick={() => onViewAnimal && onViewAnimal(rel)}
+                                                                        >
+                                                                            <div className="flex items-center gap-2 min-w-0">
+                                                                                {(rel.imageUrl || rel.photoUrl) ? (
+                                                                                    <img src={rel.imageUrl || rel.photoUrl} alt={rel.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200" />
+                                                                                ) : (
+                                                                                    <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-base">
+                                                                                        {getSpeciesEmoji(rel.species)}
+                                                                                    </div>
+                                                                                )}
+                                                                                <div className="min-w-0">
+                                                                                    <div className="text-sm font-medium text-gray-800 truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}</div>
+                                                                                    <div className="text-xs text-gray-500">{rel.gender}{[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ') ? ` · ${[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                                                                                <span className="text-xs text-blue-700 bg-blue-100 rounded-full px-2 py-0.5 font-medium whitespace-nowrap">{relLabel}</span>
+                                                                                <ChevronRight size={14} className="text-gray-400" />
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                    </>)}
+                                                </div>
+                                            )}
+
+                                            {/* Other breeders */}
+                                            {globalRelsLoading && (
+                                                <div className="flex items-center gap-2 text-xs text-gray-400 py-1">
+                                                    <Loader2 size={13} className="animate-spin" />
+                                                    Searching across platform…
+                                                </div>
+                                            )}
+                                            {!globalRelsLoading && externalRelGroups.length > 0 && (
+                                                <div className="space-y-3">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setRelExternalOpen(o => !o)}
+                                                        className="w-full flex items-center gap-2 text-left"
+                                                    >
+                                                        <span className="text-xs font-bold text-amber-700 uppercase tracking-wide">From Other Breeders</span>
+                                                        <div className="flex-1 h-px bg-amber-200" />
+                                                        {relExternalOpen ? <ChevronUp size={13} className="text-amber-400 flex-shrink-0" /> : <ChevronDown size={13} className="text-amber-400 flex-shrink-0" />}
+                                                    </button>
+                                                    {relExternalOpen && (<>
+                                                    {externalRelGroups.map(({ label: groupLabel, animals: groupAnimals }) => (
+                                                        <div key={groupLabel}>
+                                                            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{groupLabel}</h4>
+                                                            <div className="space-y-2">
+                                                                {groupAnimals.map(rel => (
+                                                                    <div
+                                                                        key={rel.id_public}
+                                                                        className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-amber-100 hover:border-amber-300 transition-colors cursor-pointer"
+                                                                        onClick={() => onViewAnimal && onViewAnimal(rel)}
+                                                                    >
+                                                                        <div className="flex items-center gap-2 min-w-0">
+                                                                            {(rel.imageUrl || rel.photoUrl) ? (
+                                                                                <img src={rel.imageUrl || rel.photoUrl} alt={rel.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200" />
+                                                                            ) : (
+                                                                                <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 text-base">
+                                                                                    {getSpeciesEmoji(rel.species)}
+                                                                                </div>
+                                                                            )}
+                                                                            <div className="min-w-0">
+                                                                                <div className="text-sm font-medium text-gray-800 truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}{rel.suffix ? ` ${rel.suffix}` : ''}</div>
+                                                                                <div className="text-xs text-gray-500">{rel.gender}{[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ') ? ` · ${[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                                                                            <span className="text-xs text-amber-700 bg-amber-100 rounded-full px-2 py-0.5 font-medium whitespace-nowrap">{getExternalRelLabel(groupLabel, rel)}</span>
+                                                                            <Globe size={13} className="text-amber-400" />
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    </>)}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             {/* 2nd Section: Offspring & Litters - merged litters + pedigree offspring */}
                             {(animalLitters === null || pedigreeOffspring === null) ? (
                                 <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
@@ -3826,8 +4263,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 if (allRecords.length === 0) return null;
                                 return (
                                     <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 space-y-3">
-                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center"><Users size={20} className="text-purple-600 mr-2" />Offspring & Litters</h3>
-                                        <div className="space-y-2">
+                                        <button type="button" onClick={() => setOffspringOpen(o => !o)} className="w-full flex items-center justify-between text-left">
+                                            <h3 className="text-lg font-semibold text-gray-700 flex items-center"><Users size={20} className="text-purple-600 mr-2" />Offspring & Litters</h3>
+                                            {offspringOpen ? <ChevronUp size={18} className="text-purple-400 flex-shrink-0" /> : <ChevronDown size={18} className="text-purple-400 flex-shrink-0" />}
+                                        </button>
+                                        {offspringOpen && <div className="space-y-2">
                                             {allRecords.map((litter) => {
                                                 if (litter._recordType === 'litter') {
                                                     const lid = litter.litter_id_public;
@@ -4213,7 +4653,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                     );
                                                 }
                                             })}
-                                        </div>
+                                        </div>}
                                     </div>
                                 );
                             })()}
@@ -4782,8 +5222,42 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                         </div>
                     )}
 
-                {/* -- TAB 14 ? Logs --------------------------------------------------- */}
+                {/* -- TAB 14 : Gallery (read-only — manage photos in Edit) --- */}
                 {detailViewTab === 14 && (
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-700">🖼️ Photo Gallery</h3>
+                                <p className="text-xs text-gray-400 mt-0.5">{(animal.extraImages || []).length} / 20 photos — manage in <strong>Edit</strong></p>
+                            </div>
+                        </div>
+
+                        {(animal.extraImages || []).length === 0 ? (
+                            <div className="text-center py-16 text-gray-400">
+                                <div className="text-5xl mb-3">📷</div>
+                                <p className="text-sm font-medium">No extra photos yet</p>
+                                <p className="text-xs mt-1">Add photos from the Edit screen.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                {(animal.extraImages || []).map((url, idx) => (
+                                    <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                                        <img
+                                            src={url}
+                                            alt={`Gallery photo ${idx + 1}`}
+                                            className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                            onClick={() => { setEnlargedImageUrl(url); setShowImageModal(true); }}
+                                        />
+                                        <span className="absolute bottom-1 left-1 bg-black/50 text-white text-[10px] rounded px-1 py-0.5">#{idx + 1}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* -- TAB 15 : Logs -------------------------------------------------- */}
+                {detailViewTab === 15 && (
                     <div className="space-y-6 p-1">
                         {animalLogsLoading ? (
                             <div className="flex items-center justify-center py-12 text-gray-400 gap-2">
@@ -4891,6 +5365,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                         })()}
                     </div>
                 )}
+
+                {/* QR Share Modal */}
+                {showQR && <QRModal url={`${window.location.origin}/animal/${animal.id_public}`} title={animal.name} onClose={() => setShowQR(false)} />}
 
                 {/* Pedigree Chart Modal */}
                 {showPedigree && (
@@ -6544,6 +7021,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
+    const [showQR, setShowQR] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
     const [animalCOI, setAnimalCOI] = useState(null);
     const [loadingCOI, setLoadingCOI] = useState(false);
@@ -6723,12 +7201,13 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                         </button>
                         <div className="flex items-center gap-2">
                             <button
-                                onClick={handleShare}
+                                onClick={() => setShowQR(true)}
                                 className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
                             >
-                                <Link size={16} />
-                                {copySuccess ? 'Link Copied!' : 'Share'}
+                                <QrCode size={16} />
+                                Share
                             </button>
+                            {showQR && <QRModal url={`${window.location.origin}/animal/${animal.id_public}`} title={animal.name} onClose={() => setShowQR(false)} />}
                             <ReportButton
                                 contentType="animal"
                                 contentId={animal.id_public}
@@ -13285,7 +13764,12 @@ const AnimalForm = ({
     const [deleteImage, setDeleteImage] = useState(false);
     const [showCommunityGeneticsModal, setShowCommunityGeneticsModal] = useState(false);
     const [activeTab, setActiveTab] = useState(1); // Tab navigation state
-    const [collapsedHealthSections, setCollapsedHealthSections] = useState({}); // collapse health tab sections
+    const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
+    // Gallery state (edit-only; changes are applied immediately via API)
+    const [editGalleryImages, setEditGalleryImages] = useState(animalToEdit?.extraImages || []);
+    const [galleryUploading, setGalleryUploading] = useState(false);
+    const [galleryUploadError, setGalleryUploadError] = useState(null);
+    const galleryEditFileRef = useRef(null); // collapse health tab sections
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -15171,7 +15655,8 @@ const AnimalForm = ({
                             { id: 10, label: 'Records', icon: '📝' },
                             { id: 11, label: 'End of Life', icon: '⚖️' },
                             { id: 12, label: 'Show', icon: '🏆' },
-                            { id: 13, label: 'Legal', icon: '📄' }
+                            { id: 13, label: 'Legal', icon: '📄' },
+                            { id: 14, label: 'Gallery', icon: '🖼️' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -18000,6 +18485,111 @@ const AnimalForm = ({
                         )}
                     </div>
                 )}
+
+                {/* Tab 14: Gallery */}
+                {activeTab === 14 && (
+                    <div className="space-y-4">
+                        {!animalToEdit ? (
+                            <div className="text-center py-12 text-gray-400 text-sm">Save this animal first to manage gallery photos.</div>
+                        ) : (
+                            <>
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h3 className="text-lg font-semibold text-gray-700">🖼️ Photo Gallery</h3>
+                                        <p className="text-xs text-gray-400 mt-0.5">{editGalleryImages.length} / 20 photos</p>
+                                    </div>
+                                    {editGalleryImages.length < 20 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => galleryEditFileRef.current?.click()}
+                                            disabled={galleryUploading}
+                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm rounded-lg transition-colors"
+                                        >
+                                            {galleryUploading
+                                                ? <><Loader2 size={14} className="animate-spin" /> Uploading…</>
+                                                : <><Plus size={14} /> Add Photo</>
+                                            }
+                                        </button>
+                                    )}
+                                    <input
+                                        ref={galleryEditFileRef}
+                                        type="file"
+                                        accept="image/png,image/jpeg,image/webp"
+                                        className="hidden"
+                                        onChange={async (e) => {
+                                            const file = e.target.files?.[0];
+                                            e.target.value = '';
+                                            if (!file) return;
+                                            setGalleryUploading(true);
+                                            setGalleryUploadError(null);
+                                            try {
+                                                const fd = new FormData();
+                                                fd.append('file', file);
+                                                const upRes = await axios.post(`${API_BASE_URL}/upload`, fd, {
+                                                    headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'multipart/form-data' }
+                                                });
+                                                const galRes = await axios.post(`${API_BASE_URL}/animals/${animalToEdit.id_public}/gallery`, { url: upRes.data.url }, {
+                                                    headers: { Authorization: `Bearer ${authToken}` }
+                                                });
+                                                setEditGalleryImages(galRes.data.extraImages);
+                                            } catch (err) {
+                                                setGalleryUploadError(err.response?.data?.message || 'Upload failed. Please try again.');
+                                            } finally {
+                                                setGalleryUploading(false);
+                                            }
+                                        }}
+                                    />
+                                </div>
+
+                                {galleryUploadError && (
+                                    <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                                        <AlertCircle size={14} /> {galleryUploadError}
+                                    </div>
+                                )}
+
+                                {editGalleryImages.length === 0 ? (
+                                    <div className="text-center py-16 text-gray-400">
+                                        <div className="text-5xl mb-3">📷</div>
+                                        <p className="text-sm font-medium">No extra photos yet</p>
+                                        <p className="text-xs mt-1">Add up to 20 extra photos for this animal.</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                        {editGalleryImages.map((url, idx) => (
+                                            <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                                                <img
+                                                    src={url}
+                                                    alt={`Gallery photo ${idx + 1}`}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    title="Remove photo"
+                                                    onClick={async () => {
+                                                        if (!window.confirm('Remove this photo from the gallery?')) return;
+                                                        try {
+                                                            const galRes = await axios.delete(`${API_BASE_URL}/animals/${animalToEdit.id_public}/gallery`, {
+                                                                headers: { Authorization: `Bearer ${authToken}` },
+                                                                data: { url }
+                                                            });
+                                                            setEditGalleryImages(galRes.data.extraImages);
+                                                        } catch (err) {
+                                                            showModalMessage('Failed to remove photo: ' + (err.response?.data?.message || err.message), 'error');
+                                                        }
+                                                    }}
+                                                    className="absolute top-1 right-1 bg-black/60 hover:bg-red-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-all"
+                                                >
+                                                    <X size={12} />
+                                                </button>
+                                                <span className="absolute bottom-1 left-1 bg-black/50 text-white text-[10px] rounded px-1 py-0.5">#{idx + 1}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+                )}
                 
                 {/* Submit/Delete Buttons (always visible outside tabs) */}
                 <div className="mt-8 flex justify-between items-center border-t pt-4">
@@ -19221,6 +19811,7 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
     const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
+    const [showQR, setShowQR] = useState(false);
     const [checkingForUpdates, setCheckingForUpdates] = useState(false);
     const [updateAvailable, setUpdateAvailable] = useState(false);
     // Note: Donation button is now globally available via fixed button in top-left corner
@@ -19302,13 +19893,16 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                     <Settings className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
                     Profile Settings
                 </h2>
-                <button
-                    onClick={handleShare}
-                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 sm:gap-2 text-sm sm:text-base self-start sm:self-auto"
-                >
-                    <Link className="w-4 h-4 sm:w-4 sm:h-4" />
-                    {copySuccess ? 'Copied!' : 'Share'}
-                </button>
+                <div className="flex items-center gap-2 self-start sm:self-auto">
+                    <button
+                        onClick={() => setShowQR(true)}
+                        className="px-2 sm:px-3 py-1 sm:py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
+                    >
+                        <QrCode className="w-4 h-4" />
+                        Share
+                    </button>
+                    {showQR && <QRModal url={`${window.location.origin}/user/${userProfile.id_public}`} title="My Public Profile" onClose={() => setShowQR(false)} />}
+                </div>
             </div>
             <div className="space-y-3 sm:space-y-4 overflow-x-hidden">
                 
@@ -25382,6 +25976,7 @@ const App = () => {
     
     const [showPedigreeChart, setShowPedigreeChart] = useState(false);
     const [copySuccessAnimal, setCopySuccessAnimal] = useState(false);
+    const [showQRAnimal, setShowQRAnimal] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
     const [enlargedImageUrl, setEnlargedImageUrl] = useState(null);
     const [breedingRecordLitters, setBreedingRecordLitters] = useState({});
@@ -28276,14 +28871,14 @@ const App = () => {
                                                 </button>
                                                 <div className="flex flex-wrap items-center gap-2">
                                                     <button
-                                                        onClick={handleShareAnimal}
+                                                        onClick={() => setShowQRAnimal(true)}
                                                         data-tutorial-target="share-animal-btn"
                                                         className="px-3 py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
-                                                        title={copySuccessAnimal ? 'Link Copied!' : 'Share Link'}
                                                     >
-                                                        <Link size={18} />
-                                                        <span className="text-sm">{copySuccessAnimal ? 'Link Copied!' : 'Share'}</span>
+                                                        <QrCode size={18} />
+                                                        <span className="text-sm">Share</span>
                                                     </button>
+                                                    {showQRAnimal && <QRModal url={`${window.location.origin}/animal/${animalToView.id_public}`} title={animalToView.name} onClose={() => setShowQRAnimal(false)} />}
                                                     {userProfile && animalToView.ownerId_public === userProfile.id_public && !animalToView.isViewOnly && (
                                                         <>
                                                             <button 
