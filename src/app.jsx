@@ -2795,9 +2795,21 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
     const [animalLitters, setAnimalLitters] = useState(null);
     const [pedigreeOffspring, setPedigreeOffspring] = useState(null);
     const [expandedPedigreeRecords, setExpandedPedigreeRecords] = useState({});
+    const [ownedAnimals, setOwnedAnimals] = useState(userAnimals); // may be pre-seeded from parent or fetched lazily
+    const ownedAnimalsLoadedRef = useRef(userAnimals.length > 0);
+
+    // Fetch owned animals lazily when Lineage tab opens (if not pre-seeded by parent)
+    useEffect(() => {
+        if (detailViewTab !== 5 || ownedAnimalsLoadedRef.current || !authToken) return;
+        ownedAnimalsLoadedRef.current = true;
+        axios.get(`${API_BASE_URL}/animals`, {
+            headers: { Authorization: `Bearer ${authToken}` },
+            params: { isOwned: 'true' }
+        }).then(res => setOwnedAnimals(res.data || [])).catch(() => {});
+    }, [detailViewTab, authToken, API_BASE_URL]);
 
     // Relationship Insights — computed from owner's animal collection (shown in Lineage tab)
-    const relationships = useMemo(() => computeRelationships(animal, userAnimals), [animal, userAnimals]);
+    const relationships = useMemo(() => computeRelationships(animal, ownedAnimals), [animal, ownedAnimals]);
 
     // Fetch all litters where this animal is sire or dam
     React.useEffect(() => {
@@ -28346,7 +28358,6 @@ const App = () => {
                                         onViewAnimal={handleViewAnimal}
                                         onToggleOwned={toggleAnimalOwned}
                                         userProfile={userProfile}
-                                        userAnimals={allAnimalsRaw}
                                     />
                                 );
                             } else {
