@@ -2460,18 +2460,11 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         </button>
                     )}
                     <button
-                        onClick={handleShare}
+                        onClick={() => setShowQR(true)}
                         className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
                     >
-                        <Link size={16} />
-                        {copySuccess ? 'Link Copied!' : 'Share Profile'}
-                    </button>
-                    <button
-                        onClick={() => setShowQR(true)}
-                        className="px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition flex items-center gap-1"
-                        title="Show QR code"
-                    >
                         <QrCode size={16} />
+                        Share Profile
                     </button>
                     {showQR && <QRModal url={`${window.location.origin}/user/${freshProfile?.id_public || profile.id_public}`} title={freshProfile?.breederName || freshProfile?.personalName || 'Share Profile'} onClose={() => setShowQR(false)} />}
                     <ReportButton
@@ -3122,19 +3115,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                         </div>
                         <div className="flex justify-center gap-1.5 flex-wrap">
                             <button
-                                onClick={handleShare}
-                                className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
-                                title="Copy public link"
-                            >
-                                <Link size={14} />
-                                Share
-                            </button>
-                            <button
                                 onClick={() => setShowQR(true)}
-                                className="px-1.5 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition flex items-center text-xs"
-                                title="Show QR code"
+                                className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
                             >
                                 <QrCode size={14} />
+                                Share
                             </button>
                             {onEdit && (
                                 <button
@@ -3199,19 +3184,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 👁️ OWNER VIEW - All Data Visible
                             </span>
                             <button
-                                onClick={handleShare}
-                                className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
-                                title="Copy public link to clipboard"
-                            >
-                                <Link size={16} />
-                                {copySuccess ? 'Link Copied!' : 'Share'}
-                            </button>
-                            <button
                                 onClick={() => setShowQR(true)}
-                                className="px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition flex items-center gap-1"
-                                title="Show QR code"
+                                className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
                             >
                                 <QrCode size={16} />
+                                Share
                             </button>
                             {onEdit && (
                                 <button
@@ -7224,18 +7201,11 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                         </button>
                         <div className="flex items-center gap-2">
                             <button
-                                onClick={handleShare}
+                                onClick={() => setShowQR(true)}
                                 className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
                             >
-                                <Link size={16} />
-                                {copySuccess ? 'Link Copied!' : 'Share'}
-                            </button>
-                            <button
-                                onClick={() => setShowQR(true)}
-                                className="px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition flex items-center gap-1"
-                                title="Show QR code"
-                            >
                                 <QrCode size={16} />
+                                Share
                             </button>
                             {showQR && <QRModal url={`${window.location.origin}/animal/${animal.id_public}`} title={animal.name} onClose={() => setShowQR(false)} />}
                             <ReportButton
@@ -19925,18 +19895,11 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                 </h2>
                 <div className="flex items-center gap-2 self-start sm:self-auto">
                     <button
-                        onClick={handleShare}
+                        onClick={() => setShowQR(true)}
                         className="px-2 sm:px-3 py-1 sm:py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
                     >
-                        <Link className="w-4 h-4 sm:w-4 sm:h-4" />
-                        {copySuccess ? 'Copied!' : 'Share'}
-                    </button>
-                    <button
-                        onClick={() => setShowQR(true)}
-                        className="px-2 py-1 sm:py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition flex items-center"
-                        title="Show QR code"
-                    >
                         <QrCode className="w-4 h-4" />
+                        Share
                     </button>
                     {showQR && <QRModal url={`${window.location.origin}/user/${userProfile.id_public}`} title="My Public Profile" onClose={() => setShowQR(false)} />}
                 </div>
@@ -28908,20 +28871,12 @@ const App = () => {
                                                 </button>
                                                 <div className="flex flex-wrap items-center gap-2">
                                                     <button
-                                                        onClick={handleShareAnimal}
+                                                        onClick={() => setShowQRAnimal(true)}
                                                         data-tutorial-target="share-animal-btn"
                                                         className="px-3 py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
-                                                        title={copySuccessAnimal ? 'Link Copied!' : 'Share Link'}
-                                                    >
-                                                        <Link size={18} />
-                                                        <span className="text-sm">{copySuccessAnimal ? 'Link Copied!' : 'Share'}</span>
-                                                    </button>
-                                                    <button
-                                                        onClick={() => setShowQRAnimal(true)}
-                                                        className="px-2.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition flex items-center"
-                                                        title="Show QR code"
                                                     >
                                                         <QrCode size={18} />
+                                                        <span className="text-sm">Share</span>
                                                     </button>
                                                     {showQRAnimal && <QRModal url={`${window.location.origin}/animal/${animalToView.id_public}`} title={animalToView.name} onClose={() => setShowQRAnimal(false)} />}
                                                     {userProfile && animalToView.ownerId_public === userProfile.id_public && !animalToView.isViewOnly && (
