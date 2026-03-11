@@ -4022,9 +4022,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 </div>
                             </div>
 
-                            {/* Pedigree Validation */}
-                            {ownedAnimals.length > 0 && (
-                                <div className={`rounded-lg border ${pedigreeIssues.length > 0 ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
+                            {/* Pedigree Validation — only shown when issues exist */}
+                            {ownedAnimals.length > 0 && pedigreeIssues.length > 0 && (
+                                <div className="rounded-lg border bg-red-50 border-red-200">
                                     <button
                                         type="button"
                                         onClick={() => setPedigreeValidationOpen(o => !o)}
@@ -4047,10 +4047,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                     </button>
                                     {pedigreeValidationOpen && (
                                         <div className="px-4 pb-4">
-                                            {pedigreeIssues.length === 0 ? (
-                                                <p className="text-sm text-green-700">All checks passed — no pedigree issues found.</p>
-                                            ) : (
-                                                <div className="space-y-2">
+                                            <div className="space-y-2">
                                                     {pedigreeIssues.map((issue, idx) => (
                                                         <div key={idx} className={`flex items-start gap-2.5 p-2.5 rounded-lg border text-sm ${issue.severity === 'error' ? 'bg-white border-red-200 text-red-800' : 'bg-white border-yellow-200 text-yellow-800'}`}>
                                                             {issue.severity === 'error'
@@ -4060,7 +4057,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                         </div>
                                                     ))}
                                                 </div>
-                                            )}
                                         </div>
                                     )}
                                 </div>
