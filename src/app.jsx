@@ -2822,18 +2822,44 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
     const [expandedPedigreeRecords, setExpandedPedigreeRecords] = useState({});
     const [ownedAnimals, setOwnedAnimals] = useState(userAnimals); // may be pre-seeded from parent or fetched lazily
     const ownedAnimalsLoadedRef = useRef(userAnimals.length > 0);
+    const [globalRels, setGlobalRels] = useState(null); // null = not yet fetched
+    const [globalRelsLoading, setGlobalRelsLoading] = useState(false);
 
-    // Fetch ALL animals on the account lazily when Lineage tab opens (no ownership filter)
+    // Fetch ALL animals on the account + global relationships lazily when Lineage tab opens
     useEffect(() => {
-        if (detailViewTab !== 5 || ownedAnimalsLoadedRef.current || !authToken) return;
+        if (detailViewTab !== 5 || ownedAnimalsLoadedRef.current || !authToken || !animal?.id_public) return;
         ownedAnimalsLoadedRef.current = true;
+        // Fetch all account animals (no ownership filter)
         axios.get(`${API_BASE_URL}/animals`, {
             headers: { Authorization: `Bearer ${authToken}` }
         }).then(res => setOwnedAnimals(res.data || [])).catch(() => {});
-    }, [detailViewTab, authToken, API_BASE_URL]);
+        // Fetch cross-platform relationships from backend
+        setGlobalRelsLoading(true);
+        axios.get(`${API_BASE_URL}/animals/${animal.id_public}/relationships`, {
+            headers: { Authorization: `Bearer ${authToken}` }
+        }).then(res => setGlobalRels(res.data || null)).catch(() => setGlobalRels(null)).finally(() => setGlobalRelsLoading(false));
+    }, [detailViewTab, authToken, API_BASE_URL, animal?.id_public]);
 
     // Relationship Insights — computed from all account animals (shown in Lineage tab)
     const relationships = useMemo(() => computeRelationships(animal, ownedAnimals), [animal, ownedAnimals]);
+    const ownedIds = useMemo(() => new Set(ownedAnimals.map(a => a.id_public)), [ownedAnimals]);
+    // Flatten global relationships from backend, exclude own-collection animals, add group label
+    const externalRelGroups = useMemo(() => {
+        if (!globalRels) return [];
+        const groupDefs = [
+            { key: 'parents',           label: 'Parents' },
+            { key: 'siblings',          label: 'Siblings' },
+            { key: 'nephewsNieces',     label: 'Nieces & Nephews' },
+            { key: 'auntsUncles',       label: 'Aunts & Uncles' },
+            { key: 'grandparents',      label: 'Grandparents' },
+            { key: 'greatGrandparents', label: 'Great-Grandparents' },
+            { key: 'cousins',           label: 'Cousins' },
+        ];
+        return groupDefs.map(({ key, label }) => ({
+            label,
+            animals: (globalRels[key] || []).filter(a => !ownedIds.has(a.id_public) && a.id_public !== animal.id_public),
+        })).filter(g => g.animals.length > 0);
+    }, [globalRels, ownedIds, animal?.id_public]);
     const [relInsightsOpen, setRelInsightsOpen] = useState(true);
 
     // Fetch all litters where this animal is sire or dam
@@ -3920,7 +3946,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                             </div>
 
                             {/* Relationship Insights */}
-                            {relationships.length > 0 && (
+                            {(relationships.length > 0 || externalRelGroups.length > 0 || globalRelsLoading) && (
                                 <div className="bg-blue-50 rounded-lg border border-blue-200">
                                     <button
                                         type="button"
@@ -3930,59 +3956,123 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                         <h3 className="text-lg font-semibold text-gray-700 flex items-center">
                                             <Network size={20} className="text-blue-600 mr-2" />
                                             Relationship Insights
-                                            <span className="ml-2 text-xs font-normal text-gray-500 bg-white border border-blue-200 rounded-full px-2 py-0.5">
-                                                {relationships.length} related on account
-                                            </span>
+                                            {relationships.length > 0 && (
+                                                <span className="ml-2 text-xs font-normal text-gray-500 bg-white border border-blue-200 rounded-full px-2 py-0.5">
+                                                    {relationships.length} in your collection
+                                                </span>
+                                            )}
+                                            {externalRelGroups.length > 0 && (
+                                                <span className="ml-1 text-xs font-normal text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
+                                                    +{externalRelGroups.reduce((s, g) => s + g.animals.length, 0)} from other breeders
+                                                </span>
+                                            )}
                                         </h3>
                                         {relInsightsOpen
                                             ? <ChevronUp size={18} className="text-blue-400 flex-shrink-0" />
                                             : <ChevronDown size={18} className="text-blue-400 flex-shrink-0" />}
                                     </button>
                                     {relInsightsOpen && (
-                                        <div className="px-4 pb-4 space-y-3">
-                                            {[
-                                                ['Parents',            ['Sire (Father)', 'Dam (Mother)']],
-                                                ['Siblings',           ['Full Sibling', 'Half-Sibling (via Sire)', 'Half-Sibling (via Dam)']],
-                                                ['Nieces & Nephews',   ['Niece / Nephew']],
-                                                ['Aunts & Uncles',     ['Aunt / Uncle', 'Paternal Aunt / Uncle', 'Maternal Aunt / Uncle']],
-                                                ['Grandparents',       ['Paternal Grandparent', 'Maternal Grandparent']],
-                                                ['Great-Grandparents', ['Paternal Great-Grandparent', 'Maternal Great-Grandparent']],
-                                            ].map(([groupLabel, relTypes]) => {
-                                                const group = relationships.filter(r => relTypes.includes(r.rel));
-                                                if (!group.length) return null;
-                                                return (
-                                                    <div key={groupLabel}>
-                                                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{groupLabel}</h4>
-                                                        <div className="space-y-2">
-                                                            {group.map(({ animal: rel, rel: relLabel }) => (
-                                                                <div
-                                                                    key={rel.id_public}
-                                                                    className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-blue-100 hover:border-blue-300 transition-colors cursor-pointer"
-                                                                    onClick={() => onViewAnimal && onViewAnimal(rel)}
-                                                                >
-                                                                    <div className="flex items-center gap-2 min-w-0">
-                                                                        {(rel.imageUrl || rel.photoUrl) ? (
-                                                                            <img src={rel.imageUrl || rel.photoUrl} alt={rel.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200" />
-                                                                        ) : (
-                                                                            <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-base">
-                                                                                {getSpeciesEmoji(rel.species)}
+                                        <div className="px-4 pb-4 space-y-5">
+                                            {/* Own collection */}
+                                            {relationships.length > 0 && (
+                                                <div className="space-y-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs font-bold text-blue-700 uppercase tracking-wide">Your Collection</span>
+                                                        <div className="flex-1 h-px bg-blue-200" />
+                                                    </div>
+                                                    {[
+                                                        ['Parents',            ['Sire (Father)', 'Dam (Mother)']],
+                                                        ['Siblings',           ['Full Sibling', 'Half-Sibling (via Sire)', 'Half-Sibling (via Dam)']],
+                                                        ['Nieces & Nephews',   ['Niece / Nephew']],
+                                                        ['Aunts & Uncles',     ['Aunt / Uncle', 'Paternal Aunt / Uncle', 'Maternal Aunt / Uncle']],
+                                                        ['Grandparents',       ['Paternal Grandparent', 'Maternal Grandparent']],
+                                                        ['Great-Grandparents', ['Paternal Great-Grandparent', 'Maternal Great-Grandparent']],
+                                                    ].map(([groupLabel, relTypes]) => {
+                                                        const group = relationships.filter(r => relTypes.includes(r.rel));
+                                                        if (!group.length) return null;
+                                                        return (
+                                                            <div key={groupLabel}>
+                                                                <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{groupLabel}</h4>
+                                                                <div className="space-y-2">
+                                                                    {group.map(({ animal: rel, rel: relLabel }) => (
+                                                                        <div
+                                                                            key={rel.id_public}
+                                                                            className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-blue-100 hover:border-blue-300 transition-colors cursor-pointer"
+                                                                            onClick={() => onViewAnimal && onViewAnimal(rel)}
+                                                                        >
+                                                                            <div className="flex items-center gap-2 min-w-0">
+                                                                                {(rel.imageUrl || rel.photoUrl) ? (
+                                                                                    <img src={rel.imageUrl || rel.photoUrl} alt={rel.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200" />
+                                                                                ) : (
+                                                                                    <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-base">
+                                                                                        {getSpeciesEmoji(rel.species)}
+                                                                                    </div>
+                                                                                )}
+                                                                                <div className="min-w-0">
+                                                                                    <div className="text-sm font-medium text-gray-800 truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}</div>
+                                                                                    <div className="text-xs text-gray-500">{rel.species}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
+                                                                                </div>
                                                                             </div>
-                                                                        )}
-                                                                        <div className="min-w-0">
-                                                                            <div className="text-sm font-medium text-gray-800 truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}</div>
-                                                                            <div className="text-xs text-gray-500">{rel.species}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
+                                                                            <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                                                                                <span className="text-xs text-blue-700 bg-blue-100 rounded-full px-2 py-0.5 font-medium whitespace-nowrap">{relLabel}</span>
+                                                                                <ChevronRight size={14} className="text-gray-400" />
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+
+                                            {/* Other breeders */}
+                                            {globalRelsLoading && (
+                                                <div className="flex items-center gap-2 text-xs text-gray-400 py-1">
+                                                    <Loader2 size={13} className="animate-spin" />
+                                                    Searching across platform…
+                                                </div>
+                                            )}
+                                            {!globalRelsLoading && externalRelGroups.length > 0 && (
+                                                <div className="space-y-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs font-bold text-amber-700 uppercase tracking-wide">From Other Breeders</span>
+                                                        <div className="flex-1 h-px bg-amber-200" />
+                                                    </div>
+                                                    {externalRelGroups.map(({ label: groupLabel, animals: groupAnimals }) => (
+                                                        <div key={groupLabel}>
+                                                            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{groupLabel}</h4>
+                                                            <div className="space-y-2">
+                                                                {groupAnimals.map(rel => (
+                                                                    <div
+                                                                        key={rel.id_public}
+                                                                        className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-amber-100 hover:border-amber-300 transition-colors cursor-pointer"
+                                                                        onClick={() => onViewAnimal && onViewAnimal(rel)}
+                                                                    >
+                                                                        <div className="flex items-center gap-2 min-w-0">
+                                                                            {(rel.imageUrl || rel.photoUrl) ? (
+                                                                                <img src={rel.imageUrl || rel.photoUrl} alt={rel.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200" />
+                                                                            ) : (
+                                                                                <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 text-base">
+                                                                                    {getSpeciesEmoji(rel.species)}
+                                                                                </div>
+                                                                            )}
+                                                                            <div className="min-w-0">
+                                                                                <div className="text-sm font-medium text-gray-800 truncate">{rel.name}</div>
+                                                                                <div className="text-xs text-gray-500">{rel.species}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                                                                            <span className="text-xs text-amber-700 bg-amber-100 rounded-full px-2 py-0.5 font-medium whitespace-nowrap">{{ 'Parents': 'Parent', 'Siblings': 'Sibling', 'Nieces & Nephews': 'Niece / Nephew', 'Aunts & Uncles': 'Aunt / Uncle', 'Grandparents': 'Grandparent', 'Great-Grandparents': 'Great-Grandparent', 'Cousins': 'Cousin' }[groupLabel] || groupLabel}</span>
+                                                                            <Globe size={13} className="text-amber-400" />
                                                                         </div>
                                                                     </div>
-                                                                    <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                                                                        <span className="text-xs text-blue-700 bg-blue-100 rounded-full px-2 py-0.5 font-medium whitespace-nowrap">{relLabel}</span>
-                                                                        <ChevronRight size={14} className="text-gray-400" />
-                                                                    </div>
-                                                                </div>
-                                                            ))}
+                                                                ))}
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                );
-                                            })}
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
