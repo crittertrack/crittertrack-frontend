@@ -2727,6 +2727,8 @@ const computeRelationships = (animal, userAnimals) => {
         addedIds.add(a.id_public);
         results.push({ animal: a, rel });
     };
+    const g = (male, female, neutral, gender) =>
+        gender === 'Male' ? male : gender === 'Female' ? female : neutral;
 
     // Helper: return parent ids for any animal id
     const parentsOf = (pid) => {
@@ -2750,9 +2752,9 @@ const computeRelationships = (animal, userAnimals) => {
         const aDam = a.motherId_public || a.damId_public;
         const shareSire = sireId && aSire && sireId === aSire;
         const shareDam = damId && aDam && damId === aDam;
-        if (shareSire && shareDam) { add(a, 'Full Sibling'); siblingIds.add(a.id_public); }
-        else if (shareSire) { add(a, 'Half-Sibling (via Sire)'); siblingIds.add(a.id_public); }
-        else if (shareDam) { add(a, 'Half-Sibling (via Dam)'); siblingIds.add(a.id_public); }
+        if (shareSire && shareDam) { add(a, g('Full Brother', 'Full Sister', 'Full Sibling', a.gender)); siblingIds.add(a.id_public); }
+        else if (shareSire) { add(a, g('Half-Brother (via Sire)', 'Half-Sister (via Sire)', 'Half-Sibling (via Sire)', a.gender)); siblingIds.add(a.id_public); }
+        else if (shareDam) { add(a, g('Half-Brother (via Dam)', 'Half-Sister (via Dam)', 'Half-Sibling (via Dam)', a.gender)); siblingIds.add(a.id_public); }
     });
 
     // Nieces & Nephews — offspring of siblings
@@ -2761,7 +2763,7 @@ const computeRelationships = (animal, userAnimals) => {
         const aSire = a.fatherId_public || a.sireId_public;
         const aDam = a.motherId_public || a.damId_public;
         if ((aSire && siblingIds.has(aSire)) || (aDam && siblingIds.has(aDam))) {
-            add(a, 'Niece / Nephew');
+            add(a, g('Nephew', 'Niece', 'Niece / Nephew', a.gender));
         }
     });
 
@@ -2771,10 +2773,10 @@ const computeRelationships = (animal, userAnimals) => {
     const allGrandparentIds  = new Set([...sireGrandparentIds, ...damGrandparentIds]);
     const genTwoIds = new Set();
     sireGrandparentIds.forEach(gpId => {
-        if (map[gpId]) { add(map[gpId], 'Paternal Grandparent'); genTwoIds.add(gpId); }
+        if (map[gpId]) { add(map[gpId], g('Paternal Grandfather', 'Paternal Grandmother', 'Paternal Grandparent', map[gpId].gender)); genTwoIds.add(gpId); }
     });
     damGrandparentIds.forEach(gpId => {
-        if (map[gpId]) { add(map[gpId], 'Maternal Grandparent'); genTwoIds.add(gpId); }
+        if (map[gpId]) { add(map[gpId], g('Maternal Grandfather', 'Maternal Grandmother', 'Maternal Grandparent', map[gpId].gender)); genTwoIds.add(gpId); }
     });
 
     // Aunts & Uncles — siblings of parents (share a grandparent with this animal's parent)
@@ -2785,16 +2787,16 @@ const computeRelationships = (animal, userAnimals) => {
         const aDam = a.motherId_public || a.damId_public;
         const sharesPaternalGP = (aSire && sireGrandparentIds.has(aSire)) || (aDam && sireGrandparentIds.has(aDam));
         const sharesMaternalGP = (aSire && damGrandparentIds.has(aSire)) || (aDam && damGrandparentIds.has(aDam));
-        if (sharesPaternalGP && sharesMaternalGP) add(a, 'Aunt / Uncle');
-        else if (sharesPaternalGP) add(a, 'Paternal Aunt / Uncle');
-        else if (sharesMaternalGP) add(a, 'Maternal Aunt / Uncle');
+        if (sharesPaternalGP && sharesMaternalGP) add(a, g('Uncle', 'Aunt', 'Aunt / Uncle', a.gender));
+        else if (sharesPaternalGP) add(a, g('Paternal Uncle', 'Paternal Aunt', 'Paternal Aunt / Uncle', a.gender));
+        else if (sharesMaternalGP) add(a, g('Maternal Uncle', 'Maternal Aunt', 'Maternal Aunt / Uncle', a.gender));
     });
 
     // Gen 3 — Great-grandparents
     genTwoIds.forEach(gpId => {
         const label = sireGrandparentIds.has(gpId) ? 'Paternal' : 'Maternal';
         parentsOf(gpId).forEach(ggpId => {
-            if (map[ggpId]) add(map[ggpId], `${label} Great-Grandparent`);
+            if (map[ggpId]) add(map[ggpId], g(`${label} Great-Grandfather`, `${label} Great-Grandmother`, `${label} Great-Grandparent`, map[ggpId].gender));
         });
     });
 
@@ -4013,11 +4015,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                     {relOwnOpen && (<>
                                                     {[
                                                         ['Parents',            ['Sire (Father)', 'Dam (Mother)']],  
-                                                        ['Siblings',           ['Full Sibling', 'Half-Sibling (via Sire)', 'Half-Sibling (via Dam)']],
-                                                        ['Nieces & Nephews',   ['Niece / Nephew']],
-                                                        ['Aunts & Uncles',     ['Aunt / Uncle', 'Paternal Aunt / Uncle', 'Maternal Aunt / Uncle']],
-                                                        ['Grandparents',       ['Paternal Grandparent', 'Maternal Grandparent']],
-                                                        ['Great-Grandparents', ['Paternal Great-Grandparent', 'Maternal Great-Grandparent']],
+                                                        ['Siblings',           ['Full Sibling', 'Full Brother', 'Full Sister', 'Half-Sibling (via Sire)', 'Half-Brother (via Sire)', 'Half-Sister (via Sire)', 'Half-Sibling (via Dam)', 'Half-Brother (via Dam)', 'Half-Sister (via Dam)']],
+                                                        ['Nieces & Nephews',   ['Niece / Nephew', 'Niece', 'Nephew']],
+                                                        ['Aunts & Uncles',     ['Aunt / Uncle', 'Aunt', 'Uncle', 'Paternal Aunt / Uncle', 'Paternal Aunt', 'Paternal Uncle', 'Maternal Aunt / Uncle', 'Maternal Aunt', 'Maternal Uncle']],
+                                                        ['Grandparents',       ['Paternal Grandparent', 'Paternal Grandfather', 'Paternal Grandmother', 'Maternal Grandparent', 'Maternal Grandfather', 'Maternal Grandmother']],
+                                                        ['Great-Grandparents', ['Paternal Great-Grandparent', 'Paternal Great-Grandfather', 'Paternal Great-Grandmother', 'Maternal Great-Grandparent', 'Maternal Great-Grandfather', 'Maternal Great-Grandmother']],
                                                     ].map(([groupLabel, relTypes]) => {
                                                         const group = relationships.filter(r => relTypes.includes(r.rel));
                                                         if (!group.length) return null;
