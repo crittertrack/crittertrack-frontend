@@ -1,4 +1,4 @@
-// CritterTrack Frontend Application
+﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -2825,6 +2825,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
     const [ownedAnimals, setOwnedAnimals] = useState(userAnimals); // may be pre-seeded from parent or fetched lazily
     const ownedAnimalsLoadedRef = useRef(userAnimals.length > 0);
     const [globalRels, setGlobalRels] = useState(null); // null = not yet fetched
+    const [galleryUploading, setGalleryUploading] = useState(false);
+    const [galleryUploadError, setGalleryUploadError] = useState(null);
+    const galleryFileInputRef = useRef(null);
     const [globalRelsLoading, setGlobalRelsLoading] = useState(false);
 
     // Fetch ALL animals on the account + global relationships lazily when Lineage tab opens
@@ -3234,7 +3237,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                             { id: 11, label: 'End of Life', icon: '⚖️' },
                             { id: 12, label: 'Show', icon: '🏆' },
                             { id: 13, label: 'Legal', icon: '📄' },
-                            { id: 14, label: 'Logs', icon: '📜' }
+                            { id: 14, label: 'Gallery', icon: '🖼️' },
+                            { id: 15, label: 'Logs', icon: '📜' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -5193,8 +5197,109 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                         </div>
                     )}
 
-                {/* -- TAB 14 ? Logs --------------------------------------------------- */}
+                {/* -- TAB 14 : Gallery ----------------------------------------- */}
                 {detailViewTab === 14 && (
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-700">🖼️ Photo Gallery</h3>
+                                <p className="text-xs text-gray-400 mt-0.5">{(animal.extraImages || []).length} / 20 photos</p>
+                            </div>
+                            {(animal.extraImages || []).length < 20 && (
+                                <button
+                                    type="button"
+                                    onClick={() => galleryFileInputRef.current?.click()}
+                                    disabled={galleryUploading}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm rounded-lg transition-colors"
+                                >
+                                    {galleryUploading
+                                        ? <><Loader2 size={14} className="animate-spin" /> Uploading…</>
+                                        : <><Plus size={14} /> Add Photo</>
+                                    }
+                                </button>
+                            )}
+                            <input
+                                ref={galleryFileInputRef}
+                                type="file"
+                                accept="image/png,image/jpeg,image/webp"
+                                className="hidden"
+                                onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    e.target.value = '';
+                                    if (!file) return;
+                                    setGalleryUploading(true);
+                                    setGalleryUploadError(null);
+                                    try {
+                                        const fd = new FormData();
+                                        fd.append('file', file);
+                                        const upRes = await axios.post(`${API_BASE_URL}/upload`, fd, {
+                                            headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'multipart/form-data' }
+                                        });
+                                        const imageUrl = upRes.data.url;
+                                        const galRes = await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/gallery`, { url: imageUrl }, {
+                                            headers: { Authorization: `Bearer ${authToken}` }
+                                        });
+                                        onUpdateAnimal({ ...animal, extraImages: galRes.data.extraImages });
+                                    } catch (err) {
+                                        setGalleryUploadError(err.response?.data?.message || 'Upload failed. Please try again.');
+                                    } finally {
+                                        setGalleryUploading(false);
+                                    }
+                                }}
+                            />
+                        </div>
+
+                        {galleryUploadError && (
+                            <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                                <AlertCircle size={14} /> {galleryUploadError}
+                            </div>
+                        )}
+
+                        {(animal.extraImages || []).length === 0 ? (
+                            <div className="text-center py-16 text-gray-400">
+                                <div className="text-5xl mb-3">📷</div>
+                                <p className="text-sm font-medium">No extra photos yet</p>
+                                <p className="text-xs mt-1">Add up to 20 photos to this animal&apos;s gallery.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                {(animal.extraImages || []).map((url, idx) => (
+                                    <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                                        <img
+                                            src={url}
+                                            alt={`Gallery photo ${idx + 1}`}
+                                            className="w-full h-full object-cover cursor-pointer transition-opacity group-hover:opacity-90"
+                                            onClick={() => { setEnlargedImageUrl(url); setShowImageModal(true); }}
+                                        />
+                                        <button
+                                            type="button"
+                                            title="Remove photo"
+                                            onClick={async () => {
+                                                if (!window.confirm('Remove this photo from the gallery?')) return;
+                                                try {
+                                                    const galRes = await axios.delete(`${API_BASE_URL}/animals/${animal.id_public}/gallery`, {
+                                                        headers: { Authorization: `Bearer ${authToken}` },
+                                                        data: { url }
+                                                    });
+                                                    onUpdateAnimal({ ...animal, extraImages: galRes.data.extraImages });
+                                                } catch (err) {
+                                                    showModalMessage('Failed to remove photo: ' + (err.response?.data?.message || err.message), 'error');
+                                                }
+                                            }}
+                                            className="absolute top-1 right-1 bg-black/60 hover:bg-red-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-all"
+                                        >
+                                            <X size={12} />
+                                        </button>
+                                        <span className="absolute bottom-1 left-1 bg-black/50 text-white text-[10px] rounded px-1 py-0.5">#{idx + 1}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* -- TAB 15 : Logs -------------------------------------------------- */}
+                {detailViewTab === 15 && (
                     <div className="space-y-6 p-1">
                         {animalLogsLoading ? (
                             <div className="flex items-center justify-center py-12 text-gray-400 gap-2">
