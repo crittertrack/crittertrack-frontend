@@ -2742,27 +2742,52 @@ const computeRelationships = (animal, userAnimals) => {
     if (sireId && map[sireId]) add(map[sireId], 'Sire (Father)');
     if (damId && map[damId]) add(map[damId], 'Dam (Mother)');
 
-    // Gen 1 — Full siblings & half-siblings
+    // Gen 1 — Full siblings & half-siblings; track sibling ids for niece/nephew
+    const siblingIds = new Set();
     userAnimals.forEach(a => {
         if (a.id_public === id) return;
         const aSire = a.fatherId_public || a.sireId_public;
         const aDam = a.motherId_public || a.damId_public;
         const shareSire = sireId && aSire && sireId === aSire;
         const shareDam = damId && aDam && damId === aDam;
-        if (shareSire && shareDam) add(a, 'Full Sibling');
-        else if (shareSire) add(a, 'Half-Sibling (via Sire)');
-        else if (shareDam) add(a, 'Half-Sibling (via Dam)');
+        if (shareSire && shareDam) { add(a, 'Full Sibling'); siblingIds.add(a.id_public); }
+        else if (shareSire) { add(a, 'Half-Sibling (via Sire)'); siblingIds.add(a.id_public); }
+        else if (shareDam) { add(a, 'Half-Sibling (via Dam)'); siblingIds.add(a.id_public); }
     });
 
-    // Gen 2 — Grandparents
+    // Nieces & Nephews — offspring of siblings
+    userAnimals.forEach(a => {
+        if (a.id_public === id) return;
+        const aSire = a.fatherId_public || a.sireId_public;
+        const aDam = a.motherId_public || a.damId_public;
+        if ((aSire && siblingIds.has(aSire)) || (aDam && siblingIds.has(aDam))) {
+            add(a, 'Niece / Nephew');
+        }
+    });
+
+    // Gen 2 — Grandparents; track grandparent ids for aunt/uncle detection
     const sireGrandparentIds = sireId ? new Set(parentsOf(sireId)) : new Set();
     const damGrandparentIds  = damId  ? new Set(parentsOf(damId))  : new Set();
+    const allGrandparentIds  = new Set([...sireGrandparentIds, ...damGrandparentIds]);
     const genTwoIds = new Set();
     sireGrandparentIds.forEach(gpId => {
         if (map[gpId]) { add(map[gpId], 'Paternal Grandparent'); genTwoIds.add(gpId); }
     });
     damGrandparentIds.forEach(gpId => {
         if (map[gpId]) { add(map[gpId], 'Maternal Grandparent'); genTwoIds.add(gpId); }
+    });
+
+    // Aunts & Uncles — siblings of parents (share a grandparent with this animal's parent)
+    userAnimals.forEach(a => {
+        if (a.id_public === id) return;
+        if (a.id_public === sireId || a.id_public === damId) return; // skip parents themselves
+        const aSire = a.fatherId_public || a.sireId_public;
+        const aDam = a.motherId_public || a.damId_public;
+        const sharesPaternalGP = (aSire && sireGrandparentIds.has(aSire)) || (aDam && sireGrandparentIds.has(aDam));
+        const sharesMaternalGP = (aSire && damGrandparentIds.has(aSire)) || (aDam && damGrandparentIds.has(aDam));
+        if (sharesPaternalGP && sharesMaternalGP) add(a, 'Aunt / Uncle');
+        else if (sharesPaternalGP) add(a, 'Paternal Aunt / Uncle');
+        else if (sharesMaternalGP) add(a, 'Maternal Aunt / Uncle');
     });
 
     // Gen 3 — Great-grandparents
@@ -2798,18 +2823,18 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
     const [ownedAnimals, setOwnedAnimals] = useState(userAnimals); // may be pre-seeded from parent or fetched lazily
     const ownedAnimalsLoadedRef = useRef(userAnimals.length > 0);
 
-    // Fetch owned animals lazily when Lineage tab opens (if not pre-seeded by parent)
+    // Fetch ALL animals on the account lazily when Lineage tab opens (no ownership filter)
     useEffect(() => {
         if (detailViewTab !== 5 || ownedAnimalsLoadedRef.current || !authToken) return;
         ownedAnimalsLoadedRef.current = true;
         axios.get(`${API_BASE_URL}/animals`, {
-            headers: { Authorization: `Bearer ${authToken}` },
-            params: { isOwned: 'true' }
+            headers: { Authorization: `Bearer ${authToken}` }
         }).then(res => setOwnedAnimals(res.data || [])).catch(() => {});
     }, [detailViewTab, authToken, API_BASE_URL]);
 
-    // Relationship Insights — computed from owner's animal collection (shown in Lineage tab)
+    // Relationship Insights — computed from all account animals (shown in Lineage tab)
     const relationships = useMemo(() => computeRelationships(animal, ownedAnimals), [animal, ownedAnimals]);
+    const [relInsightsOpen, setRelInsightsOpen] = useState(true);
 
     // Fetch all litters where this animal is sire or dam
     React.useEffect(() => {
@@ -3896,55 +3921,70 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
 
                             {/* Relationship Insights */}
                             {relationships.length > 0 && (
-                                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-3">
-                                    <h3 className="text-lg font-semibold text-gray-700 flex items-center">
-                                        <Network size={20} className="text-blue-600 mr-2" />
-                                        Relationship Insights
-                                        <span className="ml-2 text-xs font-normal text-gray-500 bg-white border border-blue-200 rounded-full px-2 py-0.5">
-                                            {relationships.length} related in your collection
-                                        </span>
-                                    </h3>
-                                    {[
-                                        ['Parents',           ['Sire (Father)', 'Dam (Mother)']],
-                                        ['Siblings',          ['Full Sibling', 'Half-Sibling (via Sire)', 'Half-Sibling (via Dam)']],
-                                        ['Grandparents',      ['Paternal Grandparent', 'Maternal Grandparent']],
-                                        ['Great-Grandparents',['Paternal Great-Grandparent', 'Maternal Great-Grandparent']],
-                                    ].map(([groupLabel, relTypes]) => {
-                                        const group = relationships.filter(r => relTypes.includes(r.rel));
-                                        if (!group.length) return null;
-                                        return (
-                                            <div key={groupLabel}>
-                                                <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{groupLabel}</h4>
-                                                <div className="space-y-2">
-                                                    {group.map(({ animal: rel, rel: relLabel }) => (
-                                                        <div
-                                                            key={rel.id_public}
-                                                            className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-blue-100 hover:border-blue-300 transition-colors cursor-pointer"
-                                                            onClick={() => onViewAnimal && onViewAnimal(rel)}
-                                                        >
-                                                            <div className="flex items-center gap-2 min-w-0">
-                                                                {(rel.imageUrl || rel.photoUrl) ? (
-                                                                    <img src={rel.imageUrl || rel.photoUrl} alt={rel.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200" />
-                                                                ) : (
-                                                                    <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-base">
-                                                                        {getSpeciesEmoji(rel.species)}
+                                <div className="bg-blue-50 rounded-lg border border-blue-200">
+                                    <button
+                                        type="button"
+                                        onClick={() => setRelInsightsOpen(o => !o)}
+                                        className="w-full flex items-center justify-between p-4 text-left"
+                                    >
+                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center">
+                                            <Network size={20} className="text-blue-600 mr-2" />
+                                            Relationship Insights
+                                            <span className="ml-2 text-xs font-normal text-gray-500 bg-white border border-blue-200 rounded-full px-2 py-0.5">
+                                                {relationships.length} related on account
+                                            </span>
+                                        </h3>
+                                        {relInsightsOpen
+                                            ? <ChevronUp size={18} className="text-blue-400 flex-shrink-0" />
+                                            : <ChevronDown size={18} className="text-blue-400 flex-shrink-0" />}
+                                    </button>
+                                    {relInsightsOpen && (
+                                        <div className="px-4 pb-4 space-y-3">
+                                            {[
+                                                ['Parents',            ['Sire (Father)', 'Dam (Mother)']],
+                                                ['Siblings',           ['Full Sibling', 'Half-Sibling (via Sire)', 'Half-Sibling (via Dam)']],
+                                                ['Nieces & Nephews',   ['Niece / Nephew']],
+                                                ['Aunts & Uncles',     ['Aunt / Uncle', 'Paternal Aunt / Uncle', 'Maternal Aunt / Uncle']],
+                                                ['Grandparents',       ['Paternal Grandparent', 'Maternal Grandparent']],
+                                                ['Great-Grandparents', ['Paternal Great-Grandparent', 'Maternal Great-Grandparent']],
+                                            ].map(([groupLabel, relTypes]) => {
+                                                const group = relationships.filter(r => relTypes.includes(r.rel));
+                                                if (!group.length) return null;
+                                                return (
+                                                    <div key={groupLabel}>
+                                                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{groupLabel}</h4>
+                                                        <div className="space-y-2">
+                                                            {group.map(({ animal: rel, rel: relLabel }) => (
+                                                                <div
+                                                                    key={rel.id_public}
+                                                                    className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-blue-100 hover:border-blue-300 transition-colors cursor-pointer"
+                                                                    onClick={() => onViewAnimal && onViewAnimal(rel)}
+                                                                >
+                                                                    <div className="flex items-center gap-2 min-w-0">
+                                                                        {(rel.imageUrl || rel.photoUrl) ? (
+                                                                            <img src={rel.imageUrl || rel.photoUrl} alt={rel.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200" />
+                                                                        ) : (
+                                                                            <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-base">
+                                                                                {getSpeciesEmoji(rel.species)}
+                                                                            </div>
+                                                                        )}
+                                                                        <div className="min-w-0">
+                                                                            <div className="text-sm font-medium text-gray-800 truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}</div>
+                                                                            <div className="text-xs text-gray-500">{rel.species}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
+                                                                        </div>
                                                                     </div>
-                                                                )}
-                                                                <div className="min-w-0">
-                                                                    <div className="text-sm font-medium text-gray-800 truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}</div>
-                                                                    <div className="text-xs text-gray-500">{rel.species}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
+                                                                    <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                                                                        <span className="text-xs text-blue-700 bg-blue-100 rounded-full px-2 py-0.5 font-medium whitespace-nowrap">{relLabel}</span>
+                                                                        <ChevronRight size={14} className="text-gray-400" />
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                            <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                                                                <span className="text-xs text-blue-700 bg-blue-100 rounded-full px-2 py-0.5 font-medium whitespace-nowrap">{relLabel}</span>
-                                                                <ChevronRight size={14} className="text-gray-400" />
-                                                            </div>
+                                                            ))}
                                                         </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
