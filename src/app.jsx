@@ -2889,6 +2889,55 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
     const [relOwnOpen, setRelOwnOpen] = useState(true);
     const [relExternalOpen, setRelExternalOpen] = useState(false);
     const [offspringOpen, setOffspringOpen] = useState(true);
+    const pedigreeIssues = useMemo(() => {
+        const issues = [];
+        const map = {};
+        ownedAnimals.forEach(a => { if (a.id_public) map[a.id_public] = a; });
+        const sireId = animal.fatherId_public || animal.sireId_public;
+        const damId  = animal.motherId_public  || animal.damId_public;
+        const externalParents = globalRels?.parents || [];
+        const sireFull = map[sireId] || (sireId ? externalParents.find(p => p.id_public === sireId) : null);
+        const damFull  = map[damId]  || (damId  ? externalParents.find(p => p.id_public === damId)  : null);
+        const animalBirth = animal.birthDate ? new Date(animal.birthDate) : null;
+        // 1. Self-reference
+        if (sireId && sireId === animal.id_public) issues.push({ severity: 'error', field: 'Sire', message: 'This animal is listed as its own sire — impossible self-reference.' });
+        if (damId  && damId  === animal.id_public) issues.push({ severity: 'error', field: 'Dam',  message: 'This animal is listed as its own dam — impossible self-reference.' });
+        // 2. Broken parent link
+        if (sireId && !sireFull && ownedAnimals.length > 0) issues.push({ severity: 'warning', field: 'Sire', message: 'Sire is linked but not found in your collection or known platform animals.' });
+        if (damId  && !damFull  && ownedAnimals.length > 0) issues.push({ severity: 'warning', field: 'Dam',  message: 'Dam is linked but not found in your collection or known platform animals.' });
+        // 3. Parent born on or after offspring
+        if (animalBirth) {
+            if (sireFull?.birthDate && new Date(sireFull.birthDate) >= animalBirth)
+                issues.push({ severity: 'error', field: 'Sire', message: `Sire "${[sireFull.prefix, sireFull.name].filter(Boolean).join(' ')}" was born on or after this animal — impossible parentage.` });
+            if (damFull?.birthDate && new Date(damFull.birthDate) >= animalBirth)
+                issues.push({ severity: 'error', field: 'Dam',  message: `Dam "${[damFull.prefix, damFull.name].filter(Boolean).join(' ')}" was born on or after this animal — impossible parentage.` });
+        }
+        // 4. Same-sex parents
+        if (sireFull && damFull) {
+            const sg = sireFull.gender; const dg = damFull.gender;
+            if (sg && dg && sg !== 'Unknown' && dg !== 'Unknown' && sg === dg)
+                issues.push({ severity: 'error', field: 'Parents', message: `Both linked parents are ${sg} — a sire/dam pair must be male and female.` });
+        }
+        // 5. Species mismatch
+        if (sireFull?.species && animal.species && sireFull.species !== animal.species)
+            issues.push({ severity: 'warning', field: 'Sire', message: `Sire is ${sireFull.species} but this animal is ${animal.species} — species mismatch.` });
+        if (damFull?.species && animal.species && damFull.species !== animal.species)
+            issues.push({ severity: 'warning', field: 'Dam',  message: `Dam is ${damFull.species} but this animal is ${animal.species} — species mismatch.` });
+        // 6. Circular lineage
+        const seen = new Set();
+        const hasCycle = (pid) => {
+            if (!pid || !map[pid]) return false;
+            if (pid === animal.id_public) return true;
+            if (seen.has(pid)) return false;
+            seen.add(pid);
+            const p = map[pid];
+            return hasCycle(p.fatherId_public || p.sireId_public) || hasCycle(p.motherId_public || p.damId_public);
+        };
+        if (hasCycle(sireId) || hasCycle(damId))
+            issues.push({ severity: 'error', field: 'Lineage', message: 'Circular lineage detected — this animal appears in its own ancestry chain.' });
+        return issues;
+    }, [animal, ownedAnimals, globalRels]);
+    const [pedigreeValidationOpen, setPedigreeValidationOpen] = useState(true);
 
     // Fetch all litters where this animal is sire or dam
     React.useEffect(() => {
@@ -3972,6 +4021,50 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                     />
                                 </div>
                             </div>
+
+                            {/* Pedigree Validation */}
+                            {ownedAnimals.length > 0 && (
+                                <div className={`rounded-lg border ${pedigreeIssues.length > 0 ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
+                                    <button
+                                        type="button"
+                                        onClick={() => setPedigreeValidationOpen(o => !o)}
+                                        className="w-full flex items-center justify-between p-4 text-left"
+                                    >
+                                        <h3 className="text-base font-semibold text-gray-700 flex items-center gap-2">
+                                            {pedigreeIssues.length > 0
+                                                ? <AlertTriangle size={18} className="text-red-500 flex-shrink-0" />
+                                                : <CheckCircle size={18} className="text-green-500 flex-shrink-0" />}
+                                            Pedigree Validation
+                                            {pedigreeIssues.length > 0 && (
+                                                <span className="text-xs font-normal text-red-700 bg-red-100 border border-red-200 rounded-full px-2 py-0.5">
+                                                    {pedigreeIssues.filter(i => i.severity === 'error').length > 0 && `${pedigreeIssues.filter(i => i.severity === 'error').length} error${pedigreeIssues.filter(i => i.severity === 'error').length !== 1 ? 's' : ''}`}
+                                                    {pedigreeIssues.filter(i => i.severity === 'error').length > 0 && pedigreeIssues.filter(i => i.severity === 'warning').length > 0 && ' · '}
+                                                    {pedigreeIssues.filter(i => i.severity === 'warning').length > 0 && `${pedigreeIssues.filter(i => i.severity === 'warning').length} warning${pedigreeIssues.filter(i => i.severity === 'warning').length !== 1 ? 's' : ''}`}
+                                                </span>
+                                            )}
+                                        </h3>
+                                        {pedigreeValidationOpen ? <ChevronUp size={18} className="text-gray-400 flex-shrink-0" /> : <ChevronDown size={18} className="text-gray-400 flex-shrink-0" />}
+                                    </button>
+                                    {pedigreeValidationOpen && (
+                                        <div className="px-4 pb-4">
+                                            {pedigreeIssues.length === 0 ? (
+                                                <p className="text-sm text-green-700">All checks passed — no pedigree issues found.</p>
+                                            ) : (
+                                                <div className="space-y-2">
+                                                    {pedigreeIssues.map((issue, idx) => (
+                                                        <div key={idx} className={`flex items-start gap-2.5 p-2.5 rounded-lg border text-sm ${issue.severity === 'error' ? 'bg-white border-red-200 text-red-800' : 'bg-white border-yellow-200 text-yellow-800'}`}>
+                                                            {issue.severity === 'error'
+                                                                ? <AlertCircle size={15} className="text-red-500 flex-shrink-0 mt-0.5" />
+                                                                : <AlertTriangle size={15} className="text-yellow-500 flex-shrink-0 mt-0.5" />}
+                                                            <div><span className="font-semibold mr-1">{issue.field}:</span>{issue.message}</div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             {/* Relationship Insights */}
                             {(relationships.length > 0 || externalRelGroups.length > 0 || globalRelsLoading) && (
