@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -2292,11 +2293,38 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
     );
 };
 
+// Reusable QR code share modal
+const QRModal = ({ url, title, onClose }) => {
+    const [copied, setCopied] = React.useState(false);
+    const handleCopy = () => navigator.clipboard.writeText(url).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+    return (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60" onClick={onClose}>
+            <div className="bg-white rounded-2xl shadow-2xl p-6 flex flex-col items-center gap-4 w-72" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center justify-between w-full">
+                    <h3 className="font-semibold text-gray-800 text-sm truncate pr-2">{title || 'Share'}</h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+                </div>
+                <div className="p-3 bg-white border border-gray-200 rounded-xl">
+                    <QRCodeSVG value={url} size={196} bgColor="#ffffff" fgColor="#111827" level="M" />
+                </div>
+                <p className="text-xs text-gray-400 break-all text-center leading-relaxed">{url}</p>
+                <button
+                    onClick={handleCopy}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg text-sm transition"
+                >
+                    {copied ? <><CheckCircle size={14} /> Copied!</> : <><Link size={14} /> Copy Link</>}
+                </button>
+            </div>
+        </div>
+    );
+};
+
 // Public Profile View Component - Shows a breeder's public animals
 const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStartMessage, authToken, setModCurrentContext }) => {
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [copySuccess, setCopySuccess] = useState(false);
+    const [showQR, setShowQR] = useState(false);
     const [speciesFilter, setSpeciesFilter] = useState('');
     const [genderFilters, setGenderFilters] = useState({ Male: true, Female: true, Intersex: true, Unknown: true });
     const [statusFilter, setStatusFilter] = useState('');
@@ -2438,6 +2466,14 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         <Link size={16} />
                         {copySuccess ? 'Link Copied!' : 'Share Profile'}
                     </button>
+                    <button
+                        onClick={() => setShowQR(true)}
+                        className="px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition flex items-center gap-1"
+                        title="Show QR code"
+                    >
+                        <QrCode size={16} />
+                    </button>
+                    {showQR && <QRModal url={`${window.location.origin}/user/${freshProfile?.id_public || profile.id_public}`} title={freshProfile?.breederName || freshProfile?.personalName || 'Share Profile'} onClose={() => setShowQR(false)} />}
                     <ReportButton
                         contentType="profile"
                         contentId={profile.id_public}
@@ -2811,6 +2847,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
     const [copySuccess, setCopySuccess] = useState(false);
+    const [showQR, setShowQR] = useState(false);
     const [enclosureInfo, setEnclosureInfo] = useState(null);
     const [animalLogs, setAnimalLogs] = useState(null); // null = not yet fetched
     const [animalLogsLoading, setAnimalLogsLoading] = useState(false);
@@ -3092,6 +3129,13 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 <Link size={14} />
                                 Share
                             </button>
+                            <button
+                                onClick={() => setShowQR(true)}
+                                className="px-1.5 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition flex items-center text-xs"
+                                title="Show QR code"
+                            >
+                                <QrCode size={14} />
+                            </button>
                             {onEdit && (
                                 <button
                                     onClick={() => onEdit(animal)}
@@ -3161,6 +3205,13 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                             >
                                 <Link size={16} />
                                 {copySuccess ? 'Link Copied!' : 'Share'}
+                            </button>
+                            <button
+                                onClick={() => setShowQR(true)}
+                                className="px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition flex items-center gap-1"
+                                title="Show QR code"
+                            >
+                                <QrCode size={16} />
                             </button>
                             {onEdit && (
                                 <button
@@ -5338,6 +5389,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                     </div>
                 )}
 
+                {/* QR Share Modal */}
+                {showQR && <QRModal url={`${window.location.origin}/animal/${animal.id_public}`} title={animal.name} onClose={() => setShowQR(false)} />}
+
                 {/* Pedigree Chart Modal */}
                 {showPedigree && (
                     <PedigreeChart
@@ -6990,6 +7044,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
+    const [showQR, setShowQR] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
     const [animalCOI, setAnimalCOI] = useState(null);
     const [loadingCOI, setLoadingCOI] = useState(false);
@@ -7175,6 +7230,14 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                 <Link size={16} />
                                 {copySuccess ? 'Link Copied!' : 'Share'}
                             </button>
+                            <button
+                                onClick={() => setShowQR(true)}
+                                className="px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition flex items-center gap-1"
+                                title="Show QR code"
+                            >
+                                <QrCode size={16} />
+                            </button>
+                            {showQR && <QRModal url={`${window.location.origin}/animal/${animal.id_public}`} title={animal.name} onClose={() => setShowQR(false)} />}
                             <ReportButton
                                 contentType="animal"
                                 contentId={animal.id_public}
@@ -19778,6 +19841,7 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
     const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
+    const [showQR, setShowQR] = useState(false);
     const [checkingForUpdates, setCheckingForUpdates] = useState(false);
     const [updateAvailable, setUpdateAvailable] = useState(false);
     // Note: Donation button is now globally available via fixed button in top-left corner
@@ -19859,13 +19923,23 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                     <Settings className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
                     Profile Settings
                 </h2>
-                <button
-                    onClick={handleShare}
-                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 sm:gap-2 text-sm sm:text-base self-start sm:self-auto"
-                >
-                    <Link className="w-4 h-4 sm:w-4 sm:h-4" />
-                    {copySuccess ? 'Copied!' : 'Share'}
-                </button>
+                <div className="flex items-center gap-2 self-start sm:self-auto">
+                    <button
+                        onClick={handleShare}
+                        className="px-2 sm:px-3 py-1 sm:py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
+                    >
+                        <Link className="w-4 h-4 sm:w-4 sm:h-4" />
+                        {copySuccess ? 'Copied!' : 'Share'}
+                    </button>
+                    <button
+                        onClick={() => setShowQR(true)}
+                        className="px-2 py-1 sm:py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition flex items-center"
+                        title="Show QR code"
+                    >
+                        <QrCode className="w-4 h-4" />
+                    </button>
+                    {showQR && <QRModal url={`${window.location.origin}/user/${userProfile.id_public}`} title="My Public Profile" onClose={() => setShowQR(false)} />}
+                </div>
             </div>
             <div className="space-y-3 sm:space-y-4 overflow-x-hidden">
                 
@@ -25939,6 +26013,7 @@ const App = () => {
     
     const [showPedigreeChart, setShowPedigreeChart] = useState(false);
     const [copySuccessAnimal, setCopySuccessAnimal] = useState(false);
+    const [showQRAnimal, setShowQRAnimal] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
     const [enlargedImageUrl, setEnlargedImageUrl] = useState(null);
     const [breedingRecordLitters, setBreedingRecordLitters] = useState({});
@@ -28841,6 +28916,14 @@ const App = () => {
                                                         <Link size={18} />
                                                         <span className="text-sm">{copySuccessAnimal ? 'Link Copied!' : 'Share'}</span>
                                                     </button>
+                                                    <button
+                                                        onClick={() => setShowQRAnimal(true)}
+                                                        className="px-2.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition flex items-center"
+                                                        title="Show QR code"
+                                                    >
+                                                        <QrCode size={18} />
+                                                    </button>
+                                                    {showQRAnimal && <QRModal url={`${window.location.origin}/animal/${animalToView.id_public}`} title={animalToView.name} onClose={() => setShowQRAnimal(false)} />}
                                                     {userProfile && animalToView.ownerId_public === userProfile.id_public && !animalToView.isViewOnly && (
                                                         <>
                                                             <button 
