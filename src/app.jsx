@@ -2707,10 +2707,79 @@ const DetailJsonList = ({ label, data, renderItem }) => {
     );
 };
 
+// ==================== RELATIONSHIP INSIGHTS HELPER ====================
+// Computes related animals (up to 3 generations) from the user's own animal collection.
+// Returns array of { animal, rel } sorted by proximity (parents first).
+const computeRelationships = (animal, userAnimals) => {
+    if (!animal || !userAnimals || userAnimals.length === 0) return [];
+    const id = animal.id_public;
+    const sireId = animal.fatherId_public || animal.sireId_public;
+    const damId = animal.motherId_public || animal.damId_public;
+
+    // Quick-lookup map
+    const map = {};
+    userAnimals.forEach(a => { if (a.id_public) map[a.id_public] = a; });
+
+    const results = [];
+    const addedIds = new Set([id]); // prevent duplicates & self-reference
+    const add = (a, rel) => {
+        if (!a || addedIds.has(a.id_public)) return;
+        addedIds.add(a.id_public);
+        results.push({ animal: a, rel });
+    };
+
+    // Helper: return parent ids for any animal id
+    const parentsOf = (pid) => {
+        const p = map[pid];
+        if (!p) return [];
+        return [
+            p.fatherId_public || p.sireId_public,
+            p.motherId_public || p.damId_public
+        ].filter(Boolean);
+    };
+
+    // Gen 1 — Parents
+    if (sireId && map[sireId]) add(map[sireId], 'Sire (Father)');
+    if (damId && map[damId]) add(map[damId], 'Dam (Mother)');
+
+    // Gen 1 — Full siblings & half-siblings
+    userAnimals.forEach(a => {
+        if (a.id_public === id) return;
+        const aSire = a.fatherId_public || a.sireId_public;
+        const aDam = a.motherId_public || a.damId_public;
+        const shareSire = sireId && aSire && sireId === aSire;
+        const shareDam = damId && aDam && damId === aDam;
+        if (shareSire && shareDam) add(a, 'Full Sibling');
+        else if (shareSire) add(a, 'Half-Sibling (via Sire)');
+        else if (shareDam) add(a, 'Half-Sibling (via Dam)');
+    });
+
+    // Gen 2 — Grandparents
+    const sireGrandparentIds = sireId ? new Set(parentsOf(sireId)) : new Set();
+    const damGrandparentIds  = damId  ? new Set(parentsOf(damId))  : new Set();
+    const genTwoIds = new Set();
+    sireGrandparentIds.forEach(gpId => {
+        if (map[gpId]) { add(map[gpId], 'Paternal Grandparent'); genTwoIds.add(gpId); }
+    });
+    damGrandparentIds.forEach(gpId => {
+        if (map[gpId]) { add(map[gpId], 'Maternal Grandparent'); genTwoIds.add(gpId); }
+    });
+
+    // Gen 3 — Great-grandparents
+    genTwoIds.forEach(gpId => {
+        const label = sireGrandparentIds.has(gpId) ? 'Paternal' : 'Maternal';
+        parentsOf(gpId).forEach(ggpId => {
+            if (map[ggpId]) add(map[ggpId], `${label} Great-Grandparent`);
+        });
+    });
+
+    return results;
+};
+
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
-const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onToggleOwned, userProfile }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onToggleOwned, userProfile, userAnimals = [] }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -2726,6 +2795,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
     const [animalLitters, setAnimalLitters] = useState(null);
     const [pedigreeOffspring, setPedigreeOffspring] = useState(null);
     const [expandedPedigreeRecords, setExpandedPedigreeRecords] = useState({});
+
+    // Relationship Insights — computed from owner's animal collection (shown in Lineage tab)
+    const relationships = useMemo(() => computeRelationships(animal, userAnimals), [animal, userAnimals]);
 
     // Fetch all litters where this animal is sire or dam
     React.useEffect(() => {
@@ -3809,6 +3881,60 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                     />
                                 </div>
                             </div>
+
+                            {/* Relationship Insights */}
+                            {relationships.length > 0 && (
+                                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-3">
+                                    <h3 className="text-lg font-semibold text-gray-700 flex items-center">
+                                        <Network size={20} className="text-blue-600 mr-2" />
+                                        Relationship Insights
+                                        <span className="ml-2 text-xs font-normal text-gray-500 bg-white border border-blue-200 rounded-full px-2 py-0.5">
+                                            {relationships.length} related in your collection
+                                        </span>
+                                    </h3>
+                                    {[
+                                        ['Parents',           ['Sire (Father)', 'Dam (Mother)']],
+                                        ['Siblings',          ['Full Sibling', 'Half-Sibling (via Sire)', 'Half-Sibling (via Dam)']],
+                                        ['Grandparents',      ['Paternal Grandparent', 'Maternal Grandparent']],
+                                        ['Great-Grandparents',['Paternal Great-Grandparent', 'Maternal Great-Grandparent']],
+                                    ].map(([groupLabel, relTypes]) => {
+                                        const group = relationships.filter(r => relTypes.includes(r.rel));
+                                        if (!group.length) return null;
+                                        return (
+                                            <div key={groupLabel}>
+                                                <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{groupLabel}</h4>
+                                                <div className="space-y-2">
+                                                    {group.map(({ animal: rel, rel: relLabel }) => (
+                                                        <div
+                                                            key={rel.id_public}
+                                                            className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-blue-100 hover:border-blue-300 transition-colors cursor-pointer"
+                                                            onClick={() => onViewAnimal && onViewAnimal(rel)}
+                                                        >
+                                                            <div className="flex items-center gap-2 min-w-0">
+                                                                {(rel.imageUrl || rel.photoUrl) ? (
+                                                                    <img src={rel.imageUrl || rel.photoUrl} alt={rel.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200" />
+                                                                ) : (
+                                                                    <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-base">
+                                                                        {getSpeciesEmoji(rel.species)}
+                                                                    </div>
+                                                                )}
+                                                                <div className="min-w-0">
+                                                                    <div className="text-sm font-medium text-gray-800 truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}</div>
+                                                                    <div className="text-xs text-gray-500">{rel.species}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                                                                <span className="text-xs text-blue-700 bg-blue-100 rounded-full px-2 py-0.5 font-medium whitespace-nowrap">{relLabel}</span>
+                                                                <ChevronRight size={14} className="text-gray-400" />
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
 
                             {/* 2nd Section: Offspring & Litters - merged litters + pedigree offspring */}
                             {(animalLitters === null || pedigreeOffspring === null) ? (
@@ -28220,6 +28346,7 @@ const App = () => {
                                         onViewAnimal={handleViewAnimal}
                                         onToggleOwned={toggleAnimalOwned}
                                         userProfile={userProfile}
+                                        userAnimals={allAnimalsRaw}
                                     />
                                 );
                             } else {
