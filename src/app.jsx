@@ -2860,6 +2860,28 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
             animals: (globalRels[key] || []).filter(a => !ownedIds.has(a.id_public) && a.id_public !== animal.id_public),
         })).filter(g => g.animals.length > 0);
     }, [globalRels, ownedIds, animal?.id_public]);
+    const getExternalRelLabel = (groupLabel, rel) => {
+        const isMale = rel.gender === 'Male';
+        const isFemale = rel.gender === 'Female';
+        switch (groupLabel) {
+            case 'Parents':
+                if (rel.id_public === animal?.sireId_public) return 'Sire (Father)';
+                if (rel.id_public === animal?.damId_public) return 'Dam (Mother)';
+                return isMale ? 'Sire (Father)' : isFemale ? 'Dam (Mother)' : 'Parent';
+            case 'Siblings':
+                return isMale ? 'Brother' : isFemale ? 'Sister' : 'Sibling';
+            case 'Nieces & Nephews':
+                return isMale ? 'Nephew' : isFemale ? 'Niece' : 'Niece / Nephew';
+            case 'Aunts & Uncles':
+                return isMale ? 'Uncle' : isFemale ? 'Aunt' : 'Aunt / Uncle';
+            case 'Grandparents':
+                return isMale ? 'Grandfather' : isFemale ? 'Grandmother' : 'Grandparent';
+            case 'Great-Grandparents':
+                return isMale ? 'Great-Grandfather' : isFemale ? 'Great-Grandmother' : 'Great-Grandparent';
+            case 'Cousins': return 'Cousin';
+            default: return groupLabel;
+        }
+    };
     const [relInsightsOpen, setRelInsightsOpen] = useState(true);
     const [relOwnOpen, setRelOwnOpen] = useState(true);
     const [relExternalOpen, setRelExternalOpen] = useState(false);
@@ -4019,7 +4041,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                                 )}
                                                                                 <div className="min-w-0">
                                                                                     <div className="text-sm font-medium text-gray-800 truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}</div>
-                                                                                    <div className="text-xs text-gray-500">{rel.species}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
+                                                                                    <div className="text-xs text-gray-500">{rel.gender}{[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ') ? ` · ${[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
                                                                                 </div>
                                                                             </div>
                                                                             <div className="flex items-center gap-2 flex-shrink-0 ml-2">
@@ -4075,11 +4097,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                             )}
                                                                             <div className="min-w-0">
                                                                                 <div className="text-sm font-medium text-gray-800 truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}{rel.suffix ? ` ${rel.suffix}` : ''}</div>
-                                                                                <div className="text-xs text-gray-500">{rel.species}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
+                                                                                <div className="text-xs text-gray-500">{rel.gender}{[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ') ? ` · ${[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
                                                                             </div>
                                                                         </div>
                                                                         <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                                                                            <span className="text-xs text-amber-700 bg-amber-100 rounded-full px-2 py-0.5 font-medium whitespace-nowrap">{{ 'Parents': 'Parent', 'Siblings': 'Sibling', 'Nieces & Nephews': 'Niece / Nephew', 'Aunts & Uncles': 'Aunt / Uncle', 'Grandparents': 'Grandparent', 'Great-Grandparents': 'Great-Grandparent', 'Cousins': 'Cousin' }[groupLabel] || groupLabel}</span>
+                                                                            <span className="text-xs text-amber-700 bg-amber-100 rounded-full px-2 py-0.5 font-medium whitespace-nowrap">{getExternalRelLabel(groupLabel, rel)}</span>
                                                                             <Globe size={13} className="text-amber-400" />
                                                                         </div>
                                                                     </div>
