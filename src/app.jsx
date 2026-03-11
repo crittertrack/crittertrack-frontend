@@ -2865,6 +2865,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
     const getExternalRelLabel = (groupLabel, rel) => {
         const isMale = rel.gender === 'Male';
         const isFemale = rel.gender === 'Female';
+        const side = rel._side === 'paternal' ? 'Paternal ' : rel._side === 'maternal' ? 'Maternal ' : '';
         switch (groupLabel) {
             case 'Parents':
                 if (rel.id_public === animal?.sireId_public) return 'Sire (Father)';
@@ -2875,11 +2876,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
             case 'Nieces & Nephews':
                 return isMale ? 'Nephew' : isFemale ? 'Niece' : 'Niece / Nephew';
             case 'Aunts & Uncles':
-                return isMale ? 'Uncle' : isFemale ? 'Aunt' : 'Aunt / Uncle';
+                return isMale ? `${side}Uncle` : isFemale ? `${side}Aunt` : `${side}Aunt / Uncle`;
             case 'Grandparents':
-                return isMale ? 'Grandfather' : isFemale ? 'Grandmother' : 'Grandparent';
+                return isMale ? `${side}Grandfather` : isFemale ? `${side}Grandmother` : `${side}Grandparent`;
             case 'Great-Grandparents':
-                return isMale ? 'Great-Grandfather' : isFemale ? 'Great-Grandmother' : 'Great-Grandparent';
+                return isMale ? `${side}Great-Grandfather` : isFemale ? `${side}Great-Grandmother` : `${side}Great-Grandparent`;
             case 'Cousins': return 'Cousin';
             default: return groupLabel;
         }
