@@ -229,9 +229,8 @@ const IDLE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes in milliseconds
 const formatDateDisplay = (dateString) => {
     if (!dateString) return '';
     try {
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) return '';
-        return formatDateShort(date);
+        // Pass the raw string to formatDateShort so it can parse as local time
+        return formatDateShort(dateString);
     } catch (e) {
         return dateString; // Return as-is if parsing fails
     }
