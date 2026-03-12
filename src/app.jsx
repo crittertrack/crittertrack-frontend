@@ -22608,7 +22608,10 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
     const fetchDuplicates = async () => {
         setDuplicatesLoading(true);
         try {
-            const res = await axios.get(`${API_BASE_URL}/animals/duplicates`, {
+            const url = `${API_BASE_URL}/animals/duplicates`;
+            console.log('[Duplicates] Fetching from:', url);
+            console.log('[Duplicates] Auth token:', authToken ? 'Present' : 'Missing');
+            const res = await axios.get(url, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             console.log('Duplicates response:', res.data);
@@ -22629,6 +22632,10 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
             setDuplicateGroups(groups);
         } catch (err) {
             console.error('Failed to fetch duplicates:', err);
+            console.error('Error response:', err.response);
+            console.error('Error data:', err.response?.data);
+            console.error('Error status:', err.response?.status);
+            console.error('Error message:', err.response?.data?.message);
             showModalMessage('Error', err.response?.data?.message || 'Failed to load duplicates');
         } finally {
             setDuplicatesLoading(false);
