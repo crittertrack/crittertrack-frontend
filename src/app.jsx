@@ -21064,6 +21064,10 @@ const AnimalList = ({
             return saved !== null ? saved === 'true' : true;
         } catch { return true; }
     });
+    // Archive section collapse states
+    const [archiveSoldCollapsed, setArchiveSoldCollapsed] = useState(false);
+    const [archiveArchivedCollapsed, setArchiveArchivedCollapsed] = useState(false);
+    
     const [publicFilter, setPublicFilter] = useState(() => {
         try {
             return localStorage.getItem('animalList_publicFilter') || '';
@@ -22974,47 +22978,107 @@ const AnimalList = ({
                         {/* Sold/Transferred Animals Section */}
                         {soldTransferredAnimals.length > 0 && (
                             <div className="space-y-3">
-                                <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setArchiveSoldCollapsed(!archiveSoldCollapsed)}
+                                    className="w-full flex items-center gap-2 hover:bg-gray-50 p-2 rounded-lg transition"
+                                >
+                                    <ChevronDown size={16} className={`text-gray-400 transition-transform ${archiveSoldCollapsed ? '-rotate-90' : ''}`} />
                                     <h4 className="font-semibold text-gray-700">Sold/Transferred Animals</h4>
                                     <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">{soldTransferredAnimals.length}</span>
-                                </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                    {soldTransferredAnimals.map(animal => (
-                                        <div key={animal.id_public} className="border border-gray-200 rounded-lg p-3 bg-white hover:shadow-md transition">
-                                            <div className="flex items-start gap-2">
-                                                <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                                                    <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="font-semibold text-gray-800 text-sm truncate">
-                                                        {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500">{animal.species} • {animal.gender || 'Unknown'}</p>
-                                                    <p className="text-xs text-amber-600 mt-1">View-only</p>
-                                                </div>
-                                            </div>
-                                            <div className="mt-2">
-                                                <button
-                                                    onClick={() => onViewAnimal(animal)}
-                                                    className="w-full text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition"
-                                                >
-                                                    View
-                                                </button>
-                                            </div>
+                                </button>
+                                {!archiveSoldCollapsed && (() => {
+                                    // Build unique owner list for dropdown
+                                    const soldOwners = [...new Map(
+                                        soldTransferredAnimals
+                                            .filter(a => a.ownerName)
+                                            .map(a => [a.ownerId_public || a.ownerName, { key: a.ownerId_public || a.ownerName, label: a.ownerName }])
+                                    ).values()].sort((a, b) => a.label.localeCompare(b.label));
+                                    const filteredSoldList = soldOwnerFilter
+                                        ? soldTransferredAnimals.filter(a => (a.ownerId_public || a.ownerName) === soldOwnerFilter)
+                                        : soldTransferredAnimals;
+                                    return (
+                                        <div className="p-2 space-y-2">
+                                            {soldTransferredAnimals.length === 0
+                                                ? <div className="text-sm text-gray-400 text-center py-4">No sold or transferred animals.</div>
+                                                : <>
+                                                    {soldOwners.length > 1 && (
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-xs font-medium text-gray-500 whitespace-nowrap">Filter by recipient:</span>
+                                                            <select
+                                                                value={soldOwnerFilter}
+                                                                onChange={e => setSoldOwnerFilter(e.target.value)}
+                                                                className="flex-1 text-xs border border-gray-300 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-orange-300 focus:border-orange-400 bg-white"
+                                                            >
+                                                                <option value="">All recipients ({soldTransferredAnimals.length})</option>
+                                                                {soldOwners.map(o => (
+                                                                    <option key={o.key} value={o.key}>
+                                                                        {o.label} ({soldTransferredAnimals.filter(a => (a.ownerId_public || a.ownerName) === o.key).length})
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                    )}
+                                                    <div className="space-y-1.5">
+                                                        {filteredSoldList.map(a => (
+                                                            <div
+                                                                key={a.id_public}
+                                                                className="flex items-center bg-white border border-gray-200 rounded-lg px-3 py-2 hover:bg-gray-50 cursor-pointer gap-2"
+                                                                onClick={() => onViewAnimal(a)}
+                                                            >
+                                                                <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
+                                                                    {(a.imageUrl || a.photoUrl) ? (
+                                                                        <AnimalImage src={a.imageUrl || a.photoUrl} alt={a.name} className="w-8 h-8 rounded-full object-cover flex-shrink-0" iconSize={14} />
+                                                                    ) : (
+                                                                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                                                                            <Cat size={14} className="text-gray-400" />
+                                                                        </div>
+                                                                    )}
+                                                                    <div className="min-w-0 flex-1">
+                                                                        <div className="font-semibold text-sm text-gray-800 truncate">
+                                                                            {[a.prefix, a.name || 'Unnamed', a.suffix].filter(Boolean).join(' ')}
+                                                                        </div>
+                                                                        <div className="text-xs text-gray-500 truncate">
+                                                                            {a.species}{a.gender ? ` • ${a.gender}` : ''}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                {a.ownerName && (
+                                                                    <button
+                                                                        className="flex items-center gap-1.5 shrink-0 min-w-0 hover:opacity-80 transition-opacity"
+                                                                        title={`View profile: ${a.ownerName}`}
+                                                                        onClick={e => { e.stopPropagation(); if (a.ownerIdPublic) navigate(`/user/${a.ownerIdPublic}`); }}
+                                                                    >
+                                                                        {a.ownerAvatar
+                                                                            ? <img src={a.ownerAvatar} alt={a.ownerName} className="w-5 h-5 rounded-full object-cover shrink-0 border border-orange-200" />
+                                                                            : <span className="w-5 h-5 rounded-full bg-orange-200 text-orange-700 text-[10px] font-bold flex items-center justify-center shrink-0">{a.ownerName.charAt(0).toUpperCase()}</span>
+                                                                        }
+                                                                        <span className="text-xs text-orange-700 font-medium max-w-[110px] truncate whitespace-nowrap">{a.ownerName}</span>
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </>
+                                            }
                                         </div>
-                                    ))}
-                                </div>
+                                    );
+                                })()}
                             </div>
                         )}
 
                         {/* Archived Animals Section */}
                         {archivedAnimals.length > 0 && (
                             <div className="space-y-3">
-                                <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setArchiveArchivedCollapsed(!archiveArchivedCollapsed)}
+                                    className="w-full flex items-center gap-2 hover:bg-gray-50 p-2 rounded-lg transition"
+                                >
+                                    <ChevronDown size={16} className={`text-gray-400 transition-transform ${archiveArchivedCollapsed ? '-rotate-90' : ''}`} />
                                     <h4 className="font-semibold text-gray-700">Archived Animals</h4>
                                     <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{archivedAnimals.length}</span>
-                                </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                </button>
+                                {!archiveArchivedCollapsed && (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                     {archivedAnimals.map(animal => (
                                         <div key={animal.id_public} className="border border-gray-200 rounded-lg p-3 bg-white hover:shadow-md transition">
                                             <div className="flex items-start gap-2">
