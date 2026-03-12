@@ -2855,11 +2855,13 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
     const ownedAnimalsLoadedRef = useRef(userAnimals.length > 0);
     const [globalRels, setGlobalRels] = useState(null); // null = not yet fetched
     const [globalRelsLoading, setGlobalRelsLoading] = useState(false);
+    const [parentCardKey, setParentCardKey] = useState(0); // increment to force parent cards to refetch
 
     // Fetch ALL animals on the account + global relationships lazily when Lineage tab opens
     useEffect(() => {
         if (detailViewTab !== 5 || ownedAnimalsLoadedRef.current || !authToken || !animal?.id_public) return;
         ownedAnimalsLoadedRef.current = true;
+        setParentCardKey(k => k + 1); // force parent cards to refetch when tab opens
         // Fetch all account animals (no ownership filter)
         axios.get(`${API_BASE_URL}/animals`, {
             headers: { Authorization: `Bearer ${authToken}` }
@@ -4043,6 +4045,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <ViewOnlyParentCard 
+                                        key={`sire-${parentCardKey}`}
                                         parentId={animal.fatherId_public || animal.sireId_public} 
                                         parentType="Sire"
                                         API_BASE_URL={API_BASE_URL}
@@ -4050,6 +4053,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                         authToken={authToken}
                                     />
                                     <ViewOnlyParentCard 
+                                        key={`dam-${parentCardKey}`}
                                         parentId={animal.motherId_public || animal.damId_public} 
                                         parentType="Dam"
                                         API_BASE_URL={API_BASE_URL}
@@ -7030,7 +7034,15 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
     const [pedigreeOffspring, setPedigreeOffspring] = useState(null);
     const [expandedPedigreeRecords, setExpandedPedigreeRecords] = useState({});
     const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
+    const [parentCardKey, setParentCardKey] = useState(0); // increment to force parent cards to refetch
     const { fieldTemplate, getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
+
+    // Force parent cards to refetch when Lineage tab opens
+    React.useEffect(() => {
+        if (detailViewTab === 5) {
+            setParentCardKey(k => k + 1);
+        }
+    }, [detailViewTab]);
 
     // Fetch all litters where this animal is sire or dam
     React.useEffect(() => {
@@ -29933,6 +29945,7 @@ const App = () => {
                                                     </div>
                                                     <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4">
                                                         <ParentCard 
+                                                            key={`father-${parentCardKey}`}
                                                             parentId={animalToView.fatherId_public} 
                                                             parentType="Father"
                                                             authToken={authToken}
@@ -29940,6 +29953,7 @@ const App = () => {
                                                             onViewAnimal={handleViewAnimal}
                                                         />
                                                         <ParentCard 
+                                                            key={`mother-${parentCardKey}`}
                                                             parentId={animalToView.motherId_public} 
                                                             parentType="Mother"
                                                             authToken={authToken}
