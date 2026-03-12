@@ -21145,10 +21145,10 @@ const AnimalList = ({
     
     // Fetch archive data when archive screen is opened
     React.useEffect(() => {
-        if (showArchiveScreen && !archiveLoading && (archivedAnimals.length === 0 && soldTransferredAnimals.length === 0)) {
+        if (showArchiveScreen) {
             fetchArchiveData();
         }
-    }, [showArchiveScreen, archiveLoading, archivedAnimals.length, soldTransferredAnimals.length, fetchArchiveData]);
+    }, [showArchiveScreen, fetchArchiveData]);
     
     // Save filters to localStorage whenever they change
     useEffect(() => {
@@ -22971,6 +22971,42 @@ const AnimalList = ({
                     </div>
                 ) : (
                     <div className="space-y-6">
+                        {/* Sold/Transferred Animals Section */}
+                        {soldTransferredAnimals.length > 0 && (
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <h4 className="font-semibold text-gray-700">Sold/Transferred Animals</h4>
+                                    <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">{soldTransferredAnimals.length}</span>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    {soldTransferredAnimals.map(animal => (
+                                        <div key={animal.id_public} className="border border-gray-200 rounded-lg p-3 bg-white hover:shadow-md transition">
+                                            <div className="flex items-start gap-2">
+                                                <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                                    <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-semibold text-gray-800 text-sm truncate">
+                                                        {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">{animal.species} • {animal.gender || 'Unknown'}</p>
+                                                    <p className="text-xs text-amber-600 mt-1">View-only</p>
+                                                </div>
+                                            </div>
+                                            <div className="mt-2">
+                                                <button
+                                                    onClick={() => onViewAnimal(animal)}
+                                                    className="w-full text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition"
+                                                >
+                                                    View
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         {/* Archived Animals Section */}
                         {archivedAnimals.length > 0 && (
                             <div className="space-y-3">
@@ -23013,42 +23049,6 @@ const AnimalList = ({
                                                 <button
                                                     onClick={() => onViewAnimal(animal)}
                                                     className="flex-1 text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition"
-                                                >
-                                                    View
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Sold/Transferred Animals Section */}
-                        {soldTransferredAnimals.length > 0 && (
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-2">
-                                    <h4 className="font-semibold text-gray-700">Sold/Transferred Animals</h4>
-                                    <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">{soldTransferredAnimals.length}</span>
-                                </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                    {soldTransferredAnimals.map(animal => (
-                                        <div key={animal.id_public} className="border border-gray-200 rounded-lg p-3 bg-white hover:shadow-md transition">
-                                            <div className="flex items-start gap-2">
-                                                <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                                                    <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="font-semibold text-gray-800 text-sm truncate">
-                                                        {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500">{animal.species} • {animal.gender || 'Unknown'}</p>
-                                                    <p className="text-xs text-amber-600 mt-1">View-only</p>
-                                                </div>
-                                            </div>
-                                            <div className="mt-2">
-                                                <button
-                                                    onClick={() => onViewAnimal(animal)}
-                                                    className="w-full text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition"
                                                 >
                                                     View
                                                 </button>
