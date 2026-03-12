@@ -2931,9 +2931,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
         // 1. Self-reference
         if (sireId && sireId === animal.id_public) issues.push({ severity: 'error', field: 'Sire', message: 'This animal is listed as its own sire — impossible self-reference.' });
         if (damId  && damId  === animal.id_public) issues.push({ severity: 'error', field: 'Dam',  message: 'This animal is listed as its own dam — impossible self-reference.' });
-        // 2. Broken parent link
-        if (sireId && !sireFull && ownedAnimals.length > 0) issues.push({ severity: 'warning', field: 'Sire', message: 'Sire is linked but not found in your collection or known platform animals.' });
-        if (damId  && !damFull  && ownedAnimals.length > 0) issues.push({ severity: 'warning', field: 'Dam',  message: 'Dam is linked but not found in your collection or known platform animals.' });
+        // 2. Broken parent link (only after globalRels has finished loading to avoid false positives)
+        if (sireId && !sireFull && ownedAnimals.length > 0 && !globalRelsLoading) issues.push({ severity: 'warning', field: 'Sire', message: 'Sire is linked but not found in your collection or known platform animals.' });
+        if (damId  && !damFull  && ownedAnimals.length > 0 && !globalRelsLoading) issues.push({ severity: 'warning', field: 'Dam',  message: 'Dam is linked but not found in your collection or known platform animals.' });
         // 3. Parent born on or after offspring
         if (animalBirth) {
             if (sireFull?.birthDate && new Date(sireFull.birthDate) >= animalBirth)
@@ -2965,7 +2965,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
         if (hasCycle(sireId) || hasCycle(damId))
             issues.push({ severity: 'error', field: 'Lineage', message: 'Circular lineage detected — this animal appears in its own ancestry chain.' });
         return issues;
-    }, [animal, ownedAnimals, globalRels]);
+    }, [animal, ownedAnimals, globalRels, globalRelsLoading]);
     const [pedigreeValidationOpen, setPedigreeValidationOpen] = useState(true);
 
     // Fetch all litters where this animal is sire or dam
@@ -8731,6 +8731,14 @@ const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal, 
         );
     }
 
+    if (loading) {
+        return (
+            <div className="border-2 border-gray-300 rounded-lg p-4 flex justify-center items-center">
+                <Loader2 size={24} className="animate-spin text-gray-400" />
+            </div>
+        );
+    }
+
     if (notFound || (!foundViaOwned && !parentData?.showOnPublicProfile)) {
         return (
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
@@ -8739,14 +8747,6 @@ const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal, 
                 </div>
                 <p className="text-gray-600 text-sm font-semibold">Private {parentType}</p>
                 <p className="text-xs text-gray-400 mt-0.5">This animal is not public</p>
-            </div>
-        );
-    }
-
-    if (loading) {
-        return (
-            <div className="border-2 border-gray-300 rounded-lg p-4 flex justify-center items-center">
-                <Loader2 size={24} className="animate-spin text-gray-400" />
             </div>
         );
     }
