@@ -21067,6 +21067,10 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
     const [showSuppliesScreen, setShowSuppliesScreen] = useState(false);
     const [supplies, setSupplies] = useState([]);
     const [suppliesLoading, setSuppliesLoading] = useState(false);
+    // Duplicates state
+    const [showDuplicatesScreen, setShowDuplicatesScreen] = useState(false);
+    const [duplicateGroups, setDuplicateGroups] = useState([]);
+    const [duplicatesLoading, setDuplicatesLoading] = useState(false);
     const [supplyForm, setSupplyForm] = useState({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months' });
     const [supplyFormVisible, setSupplyFormVisible] = useState(false);
     const [editingSupplyId, setEditingSupplyId] = useState(null);
@@ -22592,6 +22596,186 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
         );
     };
 
+    // -- Duplicates Screen --------------------------------------------------------
+    const renderDuplicatesScreen = () => {
+        const fetchDuplicates = async () => {
+            setDuplicatesLoading(true);
+            try {
+                const res = await axios.get(`${API_BASE_URL}/animals/duplicates`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                setDuplicateGroups(res.data.groups || []);
+            } catch (err) {
+                showModalMessage('Error', err.response?.data?.message || 'Failed to load duplicates');
+            } finally {
+                setDuplicatesLoading(false);
+            }
+        };
+
+        React.useEffect(() => {
+            if (showDuplicatesScreen && duplicateGroups.length === 0 && !duplicatesLoading) {
+                fetchDuplicates();
+            }
+        }, [showDuplicatesScreen]);
+
+        const handleDismiss = async (id1, id2) => {
+            try {
+                await axios.post(`${API_BASE_URL}/animals/duplicates/dismiss`, 
+                    { id1, id2 },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+                // Remove from UI
+                setDuplicateGroups(prev => prev.map(group => ({
+                    ...group,
+                    duplicates: group.duplicates.filter(d => 
+                        !((group.primary.id_public === id1 && d.animal.id_public === id2) ||
+                          (group.primary.id_public === id2 && d.animal.id_public === id1))
+                    )
+                })).filter(group => group.duplicates.length > 0));
+            } catch (err) {
+                showModalMessage('Error', err.response?.data?.message || 'Failed to dismiss duplicate');
+            }
+        };
+
+        const handleMerge = async (keepId, deleteId) => {
+            const keepAnimal = [...duplicateGroups.flatMap(g => [g.primary, ...g.duplicates.map(d => d.animal)])].find(a => a.id_public === keepId);
+            const deleteAnimal = [...duplicateGroups.flatMap(g => [g.primary, ...g.duplicates.map(d => d.animal)])].find(a => a.id_public === deleteId);
+            
+            if (!window.confirm(`Merge "${deleteAnimal?.name}" into "${keepAnimal?.name}"? This will delete the duplicate and transfer all related data (logs, litters, offspring). This cannot be undone.`)) return;
+
+            try {
+                const res = await axios.post(`${API_BASE_URL}/animals/duplicates/merge`,
+                    { keepId, deleteId },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+                showModalMessage('Success', res.data.message || 'Animals merged successfully');
+                // Remove merged pair from UI
+                setDuplicateGroups(prev => prev.map(group => ({
+                    ...group,
+                    duplicates: group.duplicates.filter(d => d.animal.id_public !== deleteId)
+                })).filter(group => group.duplicates.length > 0));
+                // Refresh animal list
+                fetchAnimals();
+            } catch (err) {
+                showModalMessage('Error', err.response?.data?.message || 'Failed to merge animals');
+            }
+        };
+
+        const formatReasons = (reasons) => {
+            return reasons.map(r => {
+                if (r === 'exact_name') return 'Exact name match';
+                if (r.startsWith('similar_name_')) return `Similar name (${r.split('_')[2]} match)`;
+                if (r === 'same_birthdate_species') return 'Same birthdate & species';
+                if (r === 'same_parents') return 'Same parents';
+                return r;
+            }).join(' • ');
+        };
+
+        return (
+            <div className="mt-4 space-y-4">
+                <div className="flex items-center justify-between">
+                    <button
+                        onClick={() => setShowDuplicatesScreen(false)}
+                        className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-800 transition"
+                    >
+                        <ChevronLeft size={16} />
+                        Back to Management
+                    </button>
+                    <button
+                        onClick={fetchDuplicates}
+                        disabled={duplicatesLoading}
+                        className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition disabled:opacity-50"
+                    >
+                        <RefreshCw size={12} />
+                        Refresh
+                    </button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <Search size={18} className="text-amber-600" />
+                    <h3 className="text-lg font-semibold text-gray-800">Find Duplicate Animals</h3>
+                    <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">{duplicateGroups.length} group{duplicateGroups.length !== 1 ? 's' : ''}</span>
+                </div>
+
+                {duplicatesLoading ? (
+                    <div className="flex justify-center py-12">
+                        <Loader2 size={32} className="animate-spin text-gray-400" />
+                    </div>
+                ) : duplicateGroups.length === 0 ? (
+                    <div className="text-center py-16 text-gray-400">
+                        <div className="text-5xl mb-3">✨</div>
+                        <p className="text-sm font-medium">No duplicate animals found</p>
+                        <p className="text-xs mt-1">Your collection looks clean!</p>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {duplicateGroups.map((group, gIdx) => (
+                            <div key={gIdx} className="border border-amber-200 rounded-lg bg-amber-50/30 p-4 space-y-3">
+                                {group.duplicates.map((dup, dIdx) => (
+                                    <div key={dIdx} className="bg-white rounded-lg border border-gray-200 shadow-sm">
+                                        <div className="p-3 bg-amber-50 border-b border-amber-100 flex items-center justify-between">
+                                            <div className="text-xs text-amber-700 font-medium">
+                                                {formatReasons(dup.reasons)}
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => handleDismiss(group.primary.id_public, dup.animal.id_public)}
+                                                    className="text-xs px-2 py-1 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 rounded transition"
+                                                >
+                                                    Not a duplicate
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        const choice = window.confirm(`Which animal do you want to KEEP?\n\nOK = Keep "${group.primary.name}"\nCancel = Keep "${dup.animal.name}"`);
+                                                        if (choice) {
+                                                            handleMerge(group.primary.id_public, dup.animal.id_public);
+                                                        } else {
+                                                            handleMerge(dup.animal.id_public, group.primary.id_public);
+                                                        }
+                                                    }}
+                                                    className="text-xs px-2 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded transition"
+                                                >
+                                                    Merge
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 divide-x divide-gray-200">
+                                            {[group.primary, dup.animal].map((animal, aIdx) => (
+                                                <div key={aIdx} className="p-3 space-y-2">
+                                                    <div className="flex items-start gap-2">
+                                                        <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                                            <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="font-semibold text-gray-800 text-sm truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</p>
+                                                            <p className="text-xs text-gray-500">{animal.species} • {animal.gender || 'Unknown'}</p>
+                                                            {animal.breederAssignedId && <p className="text-xs text-gray-400">ID: {animal.breederAssignedId}</p>}
+                                                        </div>
+                                                    </div>
+                                                    {animal.birthDate && (
+                                                        <div className="text-xs text-gray-600">
+                                                            <span className="text-gray-400">Born:</span> {new Date(animal.birthDate).toLocaleDateString()}
+                                                        </div>
+                                                    )}
+                                                    {(animal.fatherId_public || animal.sireId_public || animal.motherId_public || animal.damId_public) && (
+                                                        <div className="text-xs text-gray-600">
+                                                            <span className="text-gray-400">Parents:</span> {[animal.fatherId_public || animal.sireId_public, animal.motherId_public || animal.damId_public].filter(Boolean).join(' × ')}
+                                                        </div>
+                                                    )}
+                                                    <div className="text-xs"><span className="text-gray-400">Status:</span> <span className={animal.status === 'Deceased' ? 'text-gray-500' : 'text-green-600'}>{animal.status || 'N/A'}</span></div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     // -- Management View ----------------------------------------------------------
     const renderManagementView = () => {
         const today = new Date();
@@ -23793,7 +23977,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                             <span className="font-medium">Activity Log</span>
                         </button>
                     )}
-                    {animalView === 'management' && !showActivityLogScreen && !showSuppliesScreen && (
+                    {animalView === 'management' && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
                         <button
                             onClick={() => { setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months' }); setEditingSupplyId(null); setSupplyFormVisible(false); setShowSuppliesScreen(true); }}
                             className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 border border-emerald-200 rounded-lg transition font-medium"
@@ -23803,7 +23987,17 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                             <span className="font-medium">Supplies</span>
                         </button>
                     )}
-                    {animalView === 'management' && !showActivityLogScreen && !showSuppliesScreen && (
+                    {animalView === 'management' && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
+                        <button
+                            onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(true); }}
+                            className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-amber-600 hover:text-amber-800 hover:bg-amber-50 border border-amber-200 rounded-lg transition font-medium"
+                            title="Find Duplicate Animals"
+                        >
+                            <Search size={14} className="sm:w-4 sm:h-4" />
+                            <span className="font-medium">Find Duplicates</span>
+                        </button>
+                    )}
+                    {animalView === 'management' && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
                         <button
                             onClick={toggleMgmtAlerts}
                             title={mgmtAlertsEnabled ? 'Management alerts on — click to disable' : 'Management alerts off — click to enable'}
@@ -24028,7 +24222,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
             )}
 
             {animalView === 'management' ? (
-                showActivityLogScreen ? renderActivityLogScreen() : showSuppliesScreen ? renderSuppliesScreen() : renderManagementView()
+                showActivityLogScreen ? renderActivityLogScreen() : showSuppliesScreen ? renderSuppliesScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : renderManagementView()
             ) : (loading && animals.length === 0) ? (
                 /* Skeleton grid — only on very first load before any animals arrive */
                 <div className="space-y-3 sm:space-y-4">
