@@ -22611,8 +22611,24 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
             const res = await axios.get(`${API_BASE_URL}/animals/duplicates`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            setDuplicateGroups(res.data.groups || []);
+            console.log('Duplicates response:', res.data);
+            const groups = res.data.groups || [];
+            
+            // Validate that all animals have id_public
+            groups.forEach((group, gIdx) => {
+                if (!group.primary?.id_public) {
+                    console.error(`Group ${gIdx} primary missing id_public:`, group.primary);
+                }
+                group.duplicates?.forEach((dup, dIdx) => {
+                    if (!dup.animal?.id_public) {
+                        console.error(`Group ${gIdx} duplicate ${dIdx} missing id_public:`, dup.animal);
+                    }
+                });
+            });
+            
+            setDuplicateGroups(groups);
         } catch (err) {
+            console.error('Failed to fetch duplicates:', err);
             showModalMessage('Error', err.response?.data?.message || 'Failed to load duplicates');
         } finally {
             setDuplicatesLoading(false);
@@ -22623,7 +22639,15 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
     const renderDuplicatesScreen = () => {
 
         const handleDismiss = async (id1, id2) => {
+            // Validate IDs before proceeding
+            if (!id1 || !id2) {
+                showModalMessage('Error', 'Invalid animal IDs. Please refresh and try again.');
+                console.error('Invalid IDs for dismiss:', { id1, id2 });
+                return;
+            }
+            
             try {
+                console.log('Dismissing duplicate pair:', { id1, id2 });
                 await axios.post(`${API_BASE_URL}/animals/duplicates/dismiss`, 
                     { id1, id2 },
                     { headers: { Authorization: `Bearer ${authToken}` } }
@@ -22642,12 +22666,26 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
         };
 
         const handleMerge = async (keepId, deleteId) => {
+            // Validate IDs before proceeding
+            if (!keepId || !deleteId) {
+                showModalMessage('Error', 'Invalid animal IDs. Please refresh and try again.');
+                console.error('Invalid IDs for merge:', { keepId, deleteId });
+                return;
+            }
+            
             const keepAnimal = [...duplicateGroups.flatMap(g => [g.primary, ...g.duplicates.map(d => d.animal)])].find(a => a.id_public === keepId);
             const deleteAnimal = [...duplicateGroups.flatMap(g => [g.primary, ...g.duplicates.map(d => d.animal)])].find(a => a.id_public === deleteId);
+            
+            if (!keepAnimal || !deleteAnimal) {
+                showModalMessage('Error', 'Could not find one or both animals. Please refresh and try again.');
+                console.error('Animals not found:', { keepAnimal, deleteAnimal });
+                return;
+            }
             
             if (!window.confirm(`Merge "${deleteAnimal?.name}" into "${keepAnimal?.name}"? This will delete the duplicate and transfer all related data (logs, litters, offspring). This cannot be undone.`)) return;
 
             try {
+                console.log('Merging animals:', { keepId, deleteId });
                 const res = await axios.post(`${API_BASE_URL}/animals/duplicates/merge`,
                     { keepId, deleteId },
                     { headers: { Authorization: `Bearer ${authToken}` } }
