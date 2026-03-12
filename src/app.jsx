@@ -21145,14 +21145,15 @@ const AnimalList = ({
         } finally {
             setArchiveLoading(false);
         }
-    }, [authToken, API_BASE_URL, showModalMessage, setArchiveLoading, setArchivedAnimals, setSoldTransferredAnimals]);
+    }, [authToken, API_BASE_URL, showModalMessage]);
     
     // Fetch archive data when archive screen is opened
     React.useEffect(() => {
         if (showArchiveScreen) {
             fetchArchiveData();
         }
-    }, [showArchiveScreen, fetchArchiveData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showArchiveScreen]);
     
     // Save filters to localStorage whenever they change
     useEffect(() => {
@@ -21414,7 +21415,8 @@ const AnimalList = ({
         };
         window.addEventListener('animal-archived', handleAnimalArchived);
         return () => window.removeEventListener('animal-archived', handleAnimalArchived);
-    }, [fetchAnimals, fetchAllAnimals, showArchiveScreen, fetchArchiveData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fetchAnimals, fetchAllAnimals, showArchiveScreen]);
 
     useEffect(() => { fetchAllAnimals(); }, [fetchAllAnimals]);
     useEffect(() => { fetchAvailableAnimals(); }, [fetchAvailableAnimals]);
