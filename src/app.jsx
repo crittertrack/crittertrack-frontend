@@ -23111,6 +23111,67 @@ const AnimalList = ({
         );
     };
 
+    // -- Shared Management Components ------------------------------------------
+    // All appearance fields that make up "Variety" ? same set as Tab 3 / Appearance section
+    const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph', 'markings', 'eyeColor', 'nailColor', 'carrierTraits', 'size'];
+    const getAnimalVariety = (a) => VARIETY_KEYS.map(k => a[k]).filter(Boolean).join(' ');
+
+    const MgmtAnimalCard = ({ animal, extras }) => (
+        <div
+            className="flex items-center bg-white border border-gray-200 rounded-lg px-3 py-2 hover:bg-gray-50 cursor-pointer gap-2"
+            onClick={() => onViewAnimal && onViewAnimal(animal)}
+        >
+            <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
+                {animal.imageUrl ? (
+                    <img src={animal.imageUrl} alt={animal.name} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                ) : (
+                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                        <Cat size={14} className="text-gray-400" />
+                    </div>
+                )}
+                <div className="min-w-0 flex-1">
+                    <div className="font-semibold text-sm text-gray-800 truncate">
+                        {[animal.prefix, animal.name || 'Unnamed', animal.suffix].filter(Boolean).join(' ')}
+                    </div>
+                    <div className="text-xs text-gray-500 truncate">
+                        {getSpeciesDisplayName(animal.species)}{animal.gender ? ` • ${animal.gender}` : ''}
+                        {animal.dateOfBirth ? ` • ${formatDateShort(animal.dateOfBirth)}` : ''}
+                    </div>
+                    {(() => {
+                        const variety = getAnimalVariety(animal);
+                        const parts = [animal.status, variety].filter(Boolean);
+                        return parts.length > 0 ? (
+                            <div className="text-xs text-gray-400 truncate">{parts.join(' • ')}</div>
+                        ) : null;
+                    })()}
+                </div>
+            </div>
+            {extras && <div className="shrink-0 flex items-center">{extras}</div>}
+        </div>
+    );
+
+    const SectionHeader = ({ sectionKey, icon, title, count, bgClass, onClick }) => {
+        const collapsed = collapsedMgmtSections[sectionKey] || false;
+        return (
+            <div
+                className={`relative flex items-center justify-between ${bgClass} px-3 py-2.5 sm:px-4 sm:py-3 border-b cursor-pointer`}
+                onClick={onClick || (() => setCollapsedMgmtSections(prev => ({ ...prev, [sectionKey]: !prev[sectionKey] })))}
+            >
+                <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
+                    {collapsed
+                        ? <ChevronDown className="w-4 h-4 text-gray-400" />
+                        : <ChevronUp className="w-4 h-4 text-gray-400" />}
+                </div>
+                <div className="flex items-center gap-2">
+                    {icon}
+                    <span className="font-semibold text-gray-800">{title}</span>
+                    <span className="text-xs text-gray-500 bg-white/70 px-2 py-0.5 rounded-full">{count}</span>
+                </div>
+                <div />
+            </div>
+        );
+    };
+
     // -- Management View ----------------------------------------------------------
     const renderManagementView = () => {
         const today = new Date();
@@ -23407,98 +23468,6 @@ const AnimalList = ({
                     logManagementActivity('reproduction_update', animal.id_public, { name: animal.name, species: animal.species, status: reproStatus });
                 })
                 .catch(err => { console.error('Repro status update failed:', err); setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, ...Object.fromEntries(Object.keys(patch).map(k => [k, animal[k]])) } : a)); });
-        };
-
-        // -- Shared helpers --------------------------------------------------------
-        // All appearance fields that make up "Variety" ? same set as Tab 3 / Appearance section
-        const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph', 'markings', 'eyeColor', 'nailColor', 'carrierTraits', 'size'];
-        const getAnimalVariety = (a) => VARIETY_KEYS.map(k => a[k]).filter(Boolean).join(' ');
-
-        // -- Shared card + group components ---------------------------------------
-        const MgmtAnimalCard = ({ animal, extras }) => (
-            <div
-                className="flex items-center bg-white border border-gray-200 rounded-lg px-3 py-2 hover:bg-gray-50 cursor-pointer gap-2"
-                onClick={() => onViewAnimal && onViewAnimal(animal)}
-            >
-                <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
-                    {animal.imageUrl ? (
-                        <img src={animal.imageUrl} alt={animal.name} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
-                    ) : (
-                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                            <Cat size={14} className="text-gray-400" />
-                        </div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-sm text-gray-800 truncate">
-                            {[animal.prefix, animal.name || 'Unnamed', animal.suffix].filter(Boolean).join(' ')}
-                        </div>
-                        <div className="text-xs text-gray-500 truncate">
-                            {getSpeciesDisplayName(animal.species)}{animal.gender ? ` • ${animal.gender}` : ''}
-                            {animal.dateOfBirth ? ` • ${formatDateShort(animal.dateOfBirth)}` : ''}
-                        </div>
-                        {(() => {
-                            const variety = getAnimalVariety(animal);
-                            const parts = [animal.status, variety].filter(Boolean);
-                            return parts.length > 0 ? (
-                                <div className="text-xs text-gray-400 truncate">{parts.join(' • ')}</div>
-                            ) : null;
-                        })()}
-                    </div>
-                </div>
-                {extras && <div className="shrink-0 flex items-center">{extras}</div>}
-            </div>
-        );
-
-        const MgmtGroup = ({ groupKey, label, groupAnimals, headerClass, renderExtras }) => {
-            const isGrpCollapsed = collapsedMgmtGroups[groupKey] || false;
-            return (
-                <div className="border border-gray-200 rounded-lg overflow-hidden">
-                    <div
-                        className={`relative flex items-center justify-between ${headerClass} px-3 py-2 cursor-pointer`}
-                        onClick={() => toggleGroup(groupKey)}
-                    >
-                        <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
-                            {isGrpCollapsed
-                                ? <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
-                                : <ChevronUp className="w-3.5 h-3.5 text-gray-400" />}
-                        </div>
-                        <span className="font-medium text-sm text-gray-800">{label}</span>
-                        <span className="text-xs text-gray-500 bg-white/70 px-2 py-0.5 rounded-full">{groupAnimals.length}</span>
-                    </div>
-                    {!isGrpCollapsed && (
-                        <div className="p-2 space-y-1.5 bg-white">
-                            {groupAnimals.length === 0
-                                ? <div className="text-sm text-gray-400 text-center py-2">None</div>
-                                : groupAnimals.map(a => (
-                                    <MgmtAnimalCard key={a._id || a.id_public} animal={a} extras={renderExtras ? renderExtras(a) : null} />
-                                ))
-                            }
-                        </div>
-                    )}
-                </div>
-            );
-        };
-
-        const SectionHeader = ({ sectionKey, icon, title, count, bgClass }) => {
-            const collapsed = collapsedMgmtSections[sectionKey] || false;
-            return (
-                <div
-                    className={`relative flex items-center justify-between ${bgClass} px-3 py-2.5 sm:px-4 sm:py-3 border-b cursor-pointer`}
-                    onClick={() => toggleSection(sectionKey)}
-                >
-                    <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
-                        {collapsed
-                            ? <ChevronDown className="w-4 h-4 text-gray-400" />
-                            : <ChevronUp className="w-4 h-4 text-gray-400" />}
-                    </div>
-                    <div className="flex items-center gap-2">
-                        {icon}
-                        <span className="font-semibold text-gray-800">{title}</span>
-                        <span className="text-xs text-gray-500 bg-white/70 px-2 py-0.5 rounded-full">{count}</span>
-                    </div>
-                    <div />
-                </div>
-            );
         };
 
         return (
