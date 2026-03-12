@@ -21071,6 +21071,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
     const [showDuplicatesScreen, setShowDuplicatesScreen] = useState(false);
     const [duplicateGroups, setDuplicateGroups] = useState([]);
     const [duplicatesLoading, setDuplicatesLoading] = useState(false);
+    // Archive state
+    const [showArchiveScreen, setShowArchiveScreen] = useState(false);
+    const [archivedAnimals, setArchivedAnimals] = useState([]);
+    const [soldTransferredAnimals, setSoldTransferredAnimals] = useState([]);
+    const [archiveLoading, setArchiveLoading] = useState(false);
     const [supplyForm, setSupplyForm] = useState({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months' });
     const [supplyFormVisible, setSupplyFormVisible] = useState(false);
     const [editingSupplyId, setEditingSupplyId] = useState(null);
@@ -21089,6 +21094,13 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
     const [assigningAnimalId, setAssigningAnimalId] = useState(null);
     const [newCleaningTaskName, setNewCleaningTaskName] = useState('');
     const [newCleaningTaskFreq, setNewCleaningTaskFreq] = useState('');
+    
+    // Fetch archive data when archive screen is opened
+    React.useEffect(() => {
+        if (showArchiveScreen && !archiveLoading && (archivedAnimals.length === 0 && soldTransferredAnimals.length === 0)) {
+            fetchArchiveData();
+        }
+    }, [showArchiveScreen]);
     
     // Save filters to localStorage whenever they change
     useEffect(() => {
@@ -22825,6 +22837,166 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
         );
     };
 
+    // Fetch archived + sold/transferred animals from API
+    const fetchArchiveData = async () => {
+        setArchiveLoading(true);
+        try {
+            const res = await axios.get(`${API_BASE_URL}/animals/archived`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setArchivedAnimals(res.data.archived || []);
+            setSoldTransferredAnimals(res.data.soldTransferred || []);
+        } catch (err) {
+            console.error('Failed to fetch archive data:', err);
+            showModalMessage('Error', err.response?.data?.message || 'Failed to load archive');
+        } finally {
+            setArchiveLoading(false);
+        }
+    };
+
+    // -- Archive Screen -----------------------------------------------------------
+    const renderArchiveScreen = () => {
+        return (
+            <div className="mt-4 space-y-4">
+                <div className="flex items-center justify-between">
+                    <button
+                        onClick={() => setShowArchiveScreen(false)}
+                        className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-800 transition"
+                    >
+                        <ChevronLeft size={16} />
+                        Back
+                    </button>
+                    <button
+                        onClick={fetchArchiveData}
+                        disabled={archiveLoading}
+                        className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition disabled:opacity-50"
+                    >
+                        <RefreshCw size={12} />
+                        Refresh
+                    </button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <Archive size={18} className="text-gray-600" />
+                    <h3 className="text-lg font-semibold text-gray-800">Archive</h3>
+                    <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">
+                        {archivedAnimals.length + soldTransferredAnimals.length} animal{(archivedAnimals.length + soldTransferredAnimals.length) !== 1 ? 's' : ''}
+                    </span>
+                </div>
+
+                {archiveLoading ? (
+                    <div className="flex justify-center py-12">
+                        <Loader2 size={32} className="animate-spin text-gray-400" />
+                    </div>
+                ) : (
+                    <div className="space-y-6">
+                        {/* Archived Animals Section */}
+                        {archivedAnimals.length > 0 && (
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <h4 className="font-semibold text-gray-700">Archived Animals</h4>
+                                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{archivedAnimals.length}</span>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    {archivedAnimals.map(animal => (
+                                        <div key={animal.id_public} className="border border-gray-200 rounded-lg p-3 bg-white hover:shadow-md transition">
+                                            <div className="flex items-start gap-2">
+                                                <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                                    <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-semibold text-gray-800 text-sm truncate">
+                                                        {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">{animal.species} • {animal.gender || 'Unknown'}</p>
+                                                </div>
+                                            </div>
+                                            <div className="mt-2 flex gap-2">
+                                                <button
+                                                    onClick={async () => {
+                                                        try {
+                                                            await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/unarchive`, {}, {
+                                                                headers: { Authorization: `Bearer ${authToken}` }
+                                                            });
+                                                            showModalMessage('Success', 'Animal unarchived');
+                                                            fetchArchiveData();
+                                                            fetchAnimals();
+                                                        } catch (err) {
+                                                            showModalMessage('Error', err.response?.data?.message || 'Failed to unarchive');
+                                                        }
+                                                    }}
+                                                    className="flex-1 text-xs px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded transition"
+                                                >
+                                                    Unarchive
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setAnimalToView(animal);
+                                                        setDetailViewTab(1);
+                                                    }}
+                                                    className="flex-1 text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition"
+                                                >
+                                                    View
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Sold/Transferred Animals Section */}
+                        {soldTransferredAnimals.length > 0 && (
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <h4 className="font-semibold text-gray-700">Sold/Transferred Animals</h4>
+                                    <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">{soldTransferredAnimals.length}</span>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    {soldTransferredAnimals.map(animal => (
+                                        <div key={animal.id_public} className="border border-gray-200 rounded-lg p-3 bg-white hover:shadow-md transition">
+                                            <div className="flex items-start gap-2">
+                                                <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                                    <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-semibold text-gray-800 text-sm truncate">
+                                                        {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">{animal.species} • {animal.gender || 'Unknown'}</p>
+                                                    <p className="text-xs text-amber-600 mt-1">View-only</p>
+                                                </div>
+                                            </div>
+                                            <div className="mt-2">
+                                                <button
+                                                    onClick={() => {
+                                                        setAnimalToView(animal);
+                                                        setDetailViewTab(1);
+                                                    }}
+                                                    className="w-full text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition"
+                                                >
+                                                    View
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {archivedAnimals.length === 0 && soldTransferredAnimals.length === 0 && (
+                            <div className="text-center py-16 text-gray-400">
+                                <Archive size={48} className="mx-auto mb-3 text-gray-300" />
+                                <p className="text-sm font-medium">No archived or transferred animals</p>
+                                <p className="text-xs mt-1">Animals you archive will appear here</p>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     // -- Management View ----------------------------------------------------------
     const renderManagementView = () => {
         const today = new Date();
@@ -24271,7 +24443,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
             )}
 
             {animalView === 'management' ? (
-                showActivityLogScreen ? renderActivityLogScreen() : showSuppliesScreen ? renderSuppliesScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : renderManagementView()
+                showActivityLogScreen ? renderActivityLogScreen() : showSuppliesScreen ? renderSuppliesScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : showArchiveScreen ? renderArchiveScreen() : renderManagementView()
             ) : (loading && animals.length === 0) ? (
                 /* Skeleton grid — only on very first load before any animals arrive */
                 <div className="space-y-3 sm:space-y-4">
@@ -28370,6 +28542,10 @@ const App = () => {
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
                                         <BookOpen size={15} /> Help &amp; Tutorials
                                     </button>
+                                    <button onClick={() => { setShowArchiveScreen(true); setAnimalView('management'); setShowProfileMenu(false); }}
+                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                                        <Archive size={15} /> Archive
+                                    </button>
                                     {['admin', 'moderator'].includes(userProfile?.role) && (
                                         <button onClick={() => { inModeratorMode ? setShowAdminPanel(!showAdminPanel) : setShowModerationAuthModal(true); setShowProfileMenu(false); }}
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
@@ -28461,6 +28637,10 @@ const App = () => {
                                         <button onClick={() => { setShowInfoTab(true); setShowProfileMenu(false); }}
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
                                             <BookOpen size={15} /> Help &amp; Tutorials
+                                        </button>
+                                        <button onClick={() => { setShowArchiveScreen(true); setAnimalView('management'); setShowProfileMenu(false); }}
+                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                                            <Archive size={15} /> Archive
                                         </button>
                                         {['admin', 'moderator'].includes(userProfile?.role) && (
                                             <button onClick={() => { inModeratorMode ? setShowAdminPanel(!showAdminPanel) : setShowModerationAuthModal(true); setShowProfileMenu(false); }}
