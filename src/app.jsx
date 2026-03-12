@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -13768,6 +13768,7 @@ const AnimalForm = ({
     const [editGalleryImages, setEditGalleryImages] = useState(animalToEdit?.extraImages || []);
     const [galleryUploading, setGalleryUploading] = useState(false);
     const [galleryUploadError, setGalleryUploadError] = useState(null);
+    const [movePhotoPrompt, setMovePhotoPrompt] = useState(null); // URL of current profile photo when user selects a new one
     const galleryEditFileRef = useRef(null); // collapse health tab sections
 
     const handleChange = (e) => {
@@ -15685,6 +15686,11 @@ const AnimalForm = ({
                                 imageUrl={animalImagePreview} 
                                 onFileChange={async (e) => {
                                     if (e.target.files && e.target.files[0]) {
+                                        // Offer to move the current saved photo to the gallery
+                                        const oldPhotoUrl = animalToEdit?.imageUrl || animalToEdit?.photoUrl;
+                                        if (oldPhotoUrl && editGalleryImages.length < 20) {
+                                            setMovePhotoPrompt(oldPhotoUrl);
+                                        }
                                         const original = e.target.files[0];
                                         try {
                                             let compressedBlob = null;
@@ -15717,10 +15723,47 @@ const AnimalForm = ({
                                     setAnimalImageFile(null);
                                     setAnimalImagePreview(null);
                                     setDeleteImage(true);
+                                    setMovePhotoPrompt(null);
                                 }}
                                 disabled={loading}
                                 Trash2={Trash2}
                             />
+                            {movePhotoPrompt && animalToEdit && (
+                                <div className="mt-3 flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm">
+                                    <Images size={16} className="text-amber-600 shrink-0" />
+                                    <span className="text-amber-800 flex-1">Move current profile photo to the gallery before replacing it?</span>
+                                    <button
+                                        type="button"
+                                        disabled={galleryUploading}
+                                        onClick={async () => {
+                                            setGalleryUploading(true);
+                                            try {
+                                                const galRes = await axios.post(
+                                                    `${API_BASE_URL}/animals/${animalToEdit.id_public}/gallery`,
+                                                    { url: movePhotoPrompt },
+                                                    { headers: { Authorization: `Bearer ${authToken}` } }
+                                                );
+                                                setEditGalleryImages(galRes.data.extraImages);
+                                            } catch (err) {
+                                                // silently ignore — don't block the photo change
+                                            } finally {
+                                                setGalleryUploading(false);
+                                                setMovePhotoPrompt(null);
+                                            }
+                                        }}
+                                        className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-md text-xs font-medium disabled:opacity-50 shrink-0"
+                                    >
+                                        {galleryUploading ? <Loader2 size={12} className="animate-spin" /> : 'Yes, move it'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setMovePhotoPrompt(null)}
+                                        className="px-3 py-1 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 rounded-md text-xs font-medium shrink-0"
+                                    >
+                                        No
+                                    </button>
+                                </div>
+                            )}
                         </div>
                         
                         {/* Identity Fields */}
