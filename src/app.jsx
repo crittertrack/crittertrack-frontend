@@ -20991,7 +20991,22 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     );
 };
 
-const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, navigate }) => {
+const AnimalList = ({ 
+    authToken, 
+    showModalMessage, 
+    onEditAnimal, 
+    onViewAnimal, 
+    navigate,
+    // Archive props
+    showArchiveScreen,
+    setShowArchiveScreen,
+    archivedAnimals,
+    setArchivedAnimals,
+    soldTransferredAnimals,
+    setSoldTransferredAnimals,
+    archiveLoading,
+    setArchiveLoading
+}) => {
     const [animals, setAnimals] = useState([]);
     const [allAnimalsRaw, setAllAnimalsRaw] = useState([]); // Unfiltered ? used by Management View
     const [availableAnimalsRaw, setAvailableAnimalsRaw] = useState([]); // All user-created animals with status=Available (no ownership filter)
@@ -21092,11 +21107,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
     const [showDuplicatesScreen, setShowDuplicatesScreen] = useState(false);
     const [duplicateGroups, setDuplicateGroups] = useState([]);
     const [duplicatesLoading, setDuplicatesLoading] = useState(false);
-    // Archive state
-    const [showArchiveScreen, setShowArchiveScreen] = useState(false);
-    const [archivedAnimals, setArchivedAnimals] = useState([]);
-    const [soldTransferredAnimals, setSoldTransferredAnimals] = useState([]);
-    const [archiveLoading, setArchiveLoading] = useState(false);
     const [supplyForm, setSupplyForm] = useState({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months' });
     const [supplyFormVisible, setSupplyFormVisible] = useState(false);
     const [editingSupplyId, setEditingSupplyId] = useState(null);
@@ -21115,6 +21125,23 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
     const [assigningAnimalId, setAssigningAnimalId] = useState(null);
     const [newCleaningTaskName, setNewCleaningTaskName] = useState('');
     const [newCleaningTaskFreq, setNewCleaningTaskFreq] = useState('');
+    
+    // Fetch archived + sold/transferred animals from API
+    const fetchArchiveData = useCallback(async () => {
+        setArchiveLoading(true);
+        try {
+            const res = await axios.get(`${API_BASE_URL}/animals/archived`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setArchivedAnimals(res.data.archived || []);
+            setSoldTransferredAnimals(res.data.soldTransferred || []);
+        } catch (err) {
+            console.error('Failed to fetch archive data:', err);
+            showModalMessage('Error', err.response?.data?.message || 'Failed to load archive');
+        } finally {
+            setArchiveLoading(false);
+        }
+    }, [authToken, API_BASE_URL, showModalMessage, setArchiveLoading, setArchivedAnimals, setSoldTransferredAnimals]);
     
     // Fetch archive data when archive screen is opened
     React.useEffect(() => {
@@ -22907,23 +22934,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
             </div>
         );
     };
-
-    // Fetch archived + sold/transferred animals from API
-    const fetchArchiveData = useCallback(async () => {
-        setArchiveLoading(true);
-        try {
-            const res = await axios.get(`${API_BASE_URL}/animals/archived`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            setArchivedAnimals(res.data.archived || []);
-            setSoldTransferredAnimals(res.data.soldTransferred || []);
-        } catch (err) {
-            console.error('Failed to fetch archive data:', err);
-            showModalMessage('Error', err.response?.data?.message || 'Failed to load archive');
-        } finally {
-            setArchiveLoading(false);
-        }
-    }, [authToken, API_BASE_URL, showModalMessage]);
 
     // -- Archive Screen -----------------------------------------------------------
     const renderArchiveScreen = () => {
@@ -26637,6 +26647,12 @@ const App = () => {
     const [communityUsers, setCommunityUsers] = useState([]);
     const scrollContainerRef = useRef(null);
 
+    // Archive states
+    const [showArchiveScreen, setShowArchiveScreen] = useState(false);
+    const [archivedAnimals, setArchivedAnimals] = useState([]);
+    const [soldTransferredAnimals, setSoldTransferredAnimals] = useState([]);
+    const [archiveLoading, setArchiveLoading] = useState(false);
+    
     // Tutorial modal states
     const [showInfoTab, setShowInfoTab] = useState(false);
     const [showAdminPanel, setShowAdminPanel] = useState(false);
@@ -28672,6 +28688,10 @@ const App = () => {
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
                                         <User size={15} /> Profile
                                     </button>
+                                    <button onClick={() => { setShowArchiveScreen(true); setShowProfileMenu(false); navigate('/list'); }}
+                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                                        <Archive size={15} /> Archive
+                                    </button>
                                     <button onClick={() => { setShowInfoTab(true); setShowProfileMenu(false); }}
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
                                         <BookOpen size={15} /> Help &amp; Tutorials
@@ -28763,6 +28783,10 @@ const App = () => {
                                         <button onClick={() => { navigate('/profile'); setShowProfileMenu(false); }}
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
                                             <User size={15} /> Profile
+                                        </button>
+                                        <button onClick={() => { setShowArchiveScreen(true); setShowProfileMenu(false); navigate('/list'); }}
+                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                                            <Archive size={15} /> Archive
                                         </button>
                                         <button onClick={() => { setShowInfoTab(true); setShowProfileMenu(false); }}
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
@@ -29205,6 +29229,14 @@ const App = () => {
                             onEditAnimal={handleEditAnimal} 
                             onViewAnimal={handleViewAnimal}
                             navigate={navigate}
+                            showArchiveScreen={showArchiveScreen}
+                            setShowArchiveScreen={setShowArchiveScreen}
+                            archivedAnimals={archivedAnimals}
+                            setArchivedAnimals={setArchivedAnimals}
+                            soldTransferredAnimals={soldTransferredAnimals}
+                            setSoldTransferredAnimals={setSoldTransferredAnimals}
+                            archiveLoading={archiveLoading}
+                            setArchiveLoading={setArchiveLoading}
                         />
                     } />
                     <Route path="/list" element={
@@ -29214,6 +29246,14 @@ const App = () => {
                             onEditAnimal={handleEditAnimal} 
                             onViewAnimal={handleViewAnimal}
                             navigate={navigate}
+                            showArchiveScreen={showArchiveScreen}
+                            setShowArchiveScreen={setShowArchiveScreen}
+                            archivedAnimals={archivedAnimals}
+                            setArchivedAnimals={setArchivedAnimals}
+                            soldTransferredAnimals={soldTransferredAnimals}
+                            setSoldTransferredAnimals={setSoldTransferredAnimals}
+                            archiveLoading={archiveLoading}
+                            setArchiveLoading={setArchiveLoading}
                         />
                     } />
                     <Route path="/donation" element={<DonationView onBack={() => navigate('/')} authToken={authToken} userProfile={userProfile} />} />
