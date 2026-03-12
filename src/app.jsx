@@ -22949,16 +22949,11 @@ const AnimalList = ({
                 onBack={() => setShowArchiveScreen(false)}
                 archiveLoading={archiveLoading}
                 archivedAnimals={archivedAnimals}
-                soldTransferredAnimals={soldTransferredAnimals}
+                soldTransferredAnimals={soldTransferredRaw.filter(a => a.isViewOnly)}
                 soldOwnerFilter={soldOwnerFilter}
                 setSoldOwnerFilter={setSoldOwnerFilter}
-                archiveArchivedCollapsed={archiveArchivedCollapsed}
-                setArchiveArchivedCollapsed={setArchiveArchivedCollapsed}
                 collapsedMgmtSections={collapsedMgmtSections}
                 setCollapsedMgmtSections={setCollapsedMgmtSections}
-                onViewAnimal={onViewAnimal}
-                getSpeciesDisplayName={getSpeciesDisplayName}
-                formatDateShort={formatDateShort}
                 navigate={navigate}
                 authToken={authToken}
                 API_BASE_URL={API_BASE_URL}

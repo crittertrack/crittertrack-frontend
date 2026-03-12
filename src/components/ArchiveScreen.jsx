@@ -1,16 +1,6 @@
 import React from 'react';
-import { ChevronLeft, RefreshCw, Archive, ArrowLeftRight, ChevronDown, ChevronUp, Cat, Loader2 } from 'lucide-react';
+import { ChevronLeft, RefreshCw, Archive, ArrowLeftRight, Loader2 } from 'lucide-react';
 import axios from 'axios';
-
-const AnimalImage = ({ src, alt, className, iconSize = 20 }) => {
-    return src ? (
-        <img src={src} alt={alt} className={className} />
-    ) : (
-        <div className={`bg-gray-200 flex items-center justify-center ${className}`}>
-            <Cat size={iconSize} className="text-gray-400" />
-        </div>
-    );
-};
 
 const ArchiveScreen = ({
     onBack,
@@ -19,13 +9,8 @@ const ArchiveScreen = ({
     soldTransferredAnimals,
     soldOwnerFilter,
     setSoldOwnerFilter,
-    archiveArchivedCollapsed,
-    setArchiveArchivedCollapsed,
     collapsedMgmtSections,
     setCollapsedMgmtSections,
-    onViewAnimal,
-    getSpeciesDisplayName,
-    formatDateShort,
     navigate,
     authToken,
     API_BASE_URL,
@@ -81,127 +66,109 @@ const ArchiveScreen = ({
                     <Loader2 size={32} className="animate-spin text-gray-400" />
                 </div>
             ) : (
-                <div className="space-y-6">
-                    {/* Sold/Transferred Animals Section */}
-                    {soldTransferredAnimals.length > 0 && (
-                        <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                            <SectionHeader 
-                                sectionKey="soldTransferred"
-                                icon={<ArrowLeftRight size={18} className="text-orange-600" />}
-                                title="Sold / Transferred" 
-                                count={soldTransferredAnimals.length} 
-                                bgClass="bg-orange-50"
-                            />
-                            {!collapsedMgmtSections['soldTransferred'] && (() => {
-                                // Build unique owner list for dropdown
-                                const soldOwners = [...new Map(
-                                    soldTransferredAnimals
-                                        .filter(a => a.ownerName)
-                                        .map(a => [a.ownerId_public || a.ownerName, { key: a.ownerId_public || a.ownerName, label: a.ownerName }])
-                                ).values()].sort((a, b) => a.label.localeCompare(b.label));
-                                const filteredSoldList = soldOwnerFilter
-                                    ? soldTransferredAnimals.filter(a => (a.ownerId_public || a.ownerName) === soldOwnerFilter)
-                                    : soldTransferredAnimals;
-                                return (
-                                    <div className="p-3 space-y-2">
-                                        {soldTransferredAnimals.length === 0
-                                            ? <div className="text-sm text-gray-400 text-center py-4">No sold or transferred animals.</div>
-                                            : <>
-                                                {soldOwners.length > 1 && (
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-xs font-medium text-gray-500 whitespace-nowrap">Filter by recipient:</span>
-                                                        <select
-                                                            value={soldOwnerFilter}
-                                                            onChange={e => setSoldOwnerFilter(e.target.value)}
-                                                            className="flex-1 text-xs border border-gray-300 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-orange-300 focus:border-orange-400 bg-white"
-                                                        >
-                                                            <option value="">All recipients ({soldTransferredAnimals.length})</option>
-                                                            {soldOwners.map(o => (
-                                                                <option key={o.key} value={o.key}>
-                                                                    {o.label} ({soldTransferredAnimals.filter(a => (a.ownerId_public || a.ownerName) === o.key).length})
-                                                                </option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
-                                                )}
-                                                <div className="space-y-1.5">
-                                                    {filteredSoldList.map(a => (
-                                                        <MgmtAnimalCard 
-                                                            key={a._id || a.id_public} 
-                                                            animal={a} 
+                <div className="space-y-3 sm:space-y-4">
 
-                                                            extras={
-                                                                a.ownerName ? (
-                                                                    <button
-                                                                        className="flex items-center gap-1.5 shrink-0 min-w-0 hover:opacity-80 transition-opacity"
-                                                                        title={`View profile: ${a.ownerName}`}
-                                                                        onClick={e => { e.stopPropagation(); if (a.ownerIdPublic) navigate(`/user/${a.ownerIdPublic}`); }}
-                                                                    >
-                                                                        {a.ownerAvatar
-                                                                            ? <img src={a.ownerAvatar} alt={a.ownerName} className="w-5 h-5 rounded-full object-cover shrink-0 border border-orange-200" />
-                                                                            : <span className="w-5 h-5 rounded-full bg-orange-200 text-orange-700 text-[10px] font-bold flex items-center justify-center shrink-0">{a.ownerName.charAt(0).toUpperCase()}</span>
-                                                                        }
-                                                                        <span className="text-xs text-orange-700 font-medium max-w-[110px] truncate whitespace-nowrap">{a.ownerName}</span>
-                                                                    </button>
-                                                                ) : null
-                                                            } 
-                                                        />
-                                                    ))}
+                    {/* -- SOLD / TRANSFERRED -------------------------------- */}
+                    <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                        <SectionHeader
+                            sectionKey="soldTransferred"
+                            icon={<ArrowLeftRight size={18} className="text-orange-600" />}
+                            title="Sold / Transferred"
+                            count={soldTransferredAnimals.length}
+                            bgClass="bg-orange-50"
+                        />
+                        {!collapsedMgmtSections['soldTransferred'] && (() => {
+                            const soldOwners = [...new Map(
+                                soldTransferredAnimals
+                                    .filter(a => a.ownerName)
+                                    .map(a => [a.ownerId_public || a.ownerName, { key: a.ownerId_public || a.ownerName, label: a.ownerName }])
+                            ).values()].sort((a, b) => a.label.localeCompare(b.label));
+                            const filteredSoldList = soldOwnerFilter
+                                ? soldTransferredAnimals.filter(a => (a.ownerId_public || a.ownerName) === soldOwnerFilter)
+                                : soldTransferredAnimals;
+                            return (
+                                <div className="p-3 space-y-2">
+                                    {soldTransferredAnimals.length === 0
+                                        ? <div className="text-sm text-gray-400 text-center py-4">No sold or transferred animals.</div>
+                                        : <>
+                                            {soldOwners.length > 1 && (
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xs font-medium text-gray-500 whitespace-nowrap">Filter by recipient:</span>
+                                                    <select
+                                                        value={soldOwnerFilter}
+                                                        onChange={e => setSoldOwnerFilter(e.target.value)}
+                                                        className="flex-1 text-xs border border-gray-300 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-orange-300 focus:border-orange-400 bg-white"
+                                                    >
+                                                        <option value="">All recipients ({soldTransferredAnimals.length})</option>
+                                                        {soldOwners.map(o => (
+                                                            <option key={o.key} value={o.key}>
+                                                                {o.label} ({soldTransferredAnimals.filter(a => (a.ownerId_public || a.ownerName) === o.key).length})
+                                                            </option>
+                                                        ))}
+                                                    </select>
                                                 </div>
-                                            </>
-                                        }
-                                    </div>
-                                );
-                            })()}
-                        </div>
-                    )}
-
-                    {/* Archived Animals Section */}
-                    {archivedAnimals.length > 0 && (
-                        <div className="space-y-3">
-                            <button
-                                onClick={() => setArchiveArchivedCollapsed(!archiveArchivedCollapsed)}
-                                className="w-full flex items-center gap-2 hover:bg-gray-50 p-2 rounded-lg transition"
-                            >
-                                <ChevronDown size={16} className={`text-gray-400 transition-transform ${archiveArchivedCollapsed ? '-rotate-90' : ''}`} />
-                                <h4 className="font-semibold text-gray-700">Archived Animals</h4>
-                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{archivedAnimals.length}</span>
-                            </button>
-                            {!archiveArchivedCollapsed && (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                    {archivedAnimals.map(animal => (
-                                        <div key={animal.id_public} className="border border-gray-200 rounded-lg p-3 bg-white hover:shadow-md transition">
-                                            <div className="flex items-start gap-2">
-                                                <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                                                    <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="font-semibold text-gray-800 text-sm truncate">
-                                                        {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500">{animal.species} • {animal.gender || 'Unknown'}</p>
-                                                </div>
+                                            )}
+                                            <div className="space-y-1.5">
+                                                {filteredSoldList.map(a => (
+                                                    <MgmtAnimalCard
+                                                        key={a._id || a.id_public}
+                                                        animal={a}
+                                                        extras={
+                                                            a.ownerName ? (
+                                                                <button
+                                                                    className="flex items-center gap-1.5 shrink-0 min-w-0 hover:opacity-80 transition-opacity"
+                                                                    title={`View profile: ${a.ownerName}`}
+                                                                    onClick={e => { e.stopPropagation(); if (a.ownerIdPublic) navigate(`/user/${a.ownerIdPublic}`); }}
+                                                                >
+                                                                    {a.ownerAvatar
+                                                                        ? <img src={a.ownerAvatar} alt={a.ownerName} className="w-5 h-5 rounded-full object-cover shrink-0 border border-orange-200" />
+                                                                        : <span className="w-5 h-5 rounded-full bg-orange-200 text-orange-700 text-[10px] font-bold flex items-center justify-center shrink-0">{a.ownerName.charAt(0).toUpperCase()}</span>
+                                                                    }
+                                                                    <span className="text-xs text-orange-700 font-medium max-w-[110px] truncate whitespace-nowrap">{a.ownerName}</span>
+                                                                </button>
+                                                            ) : null
+                                                        }
+                                                    />
+                                                ))}
                                             </div>
-                                            <div className="mt-2 flex gap-2">
+                                        </>
+                                    }
+                                </div>
+                            );
+                        })()}
+                    </div>
+
+                    {/* -- ARCHIVED ANIMALS -------------------------------- */}
+                    <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                        <SectionHeader
+                            sectionKey="archived"
+                            icon={<Archive size={18} className="text-gray-600" />}
+                            title="Archived Animals"
+                            count={archivedAnimals.length}
+                            bgClass="bg-gray-50"
+                        />
+                        {!collapsedMgmtSections['archived'] && (
+                            <div className="p-3 space-y-1.5">
+                                {archivedAnimals.length === 0
+                                    ? <div className="text-sm text-gray-400 text-center py-4">No archived animals.</div>
+                                    : archivedAnimals.map(a => (
+                                        <MgmtAnimalCard
+                                            key={a._id || a.id_public}
+                                            animal={a}
+                                            extras={
                                                 <button
-                                                    onClick={() => handleUnarchive(animal)}
-                                                    className="flex-1 text-xs px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded transition"
+                                                    onClick={e => { e.stopPropagation(); handleUnarchive(a); }}
+                                                    className="text-xs px-2 py-0.5 rounded font-medium border bg-blue-500 text-white hover:bg-blue-600 border-blue-500 whitespace-nowrap"
                                                 >
                                                     Unarchive
                                                 </button>
-                                                <button
-                                                    onClick={() => onViewAnimal(animal)}
-                                                    className="flex-1 text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition"
-                                                >
-                                                    View
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
+                                            }
+                                        />
+                                    ))
+                                }
+                            </div>
+                        )}
+                    </div>
 
                     {archivedAnimals.length === 0 && soldTransferredAnimals.length === 0 && (
                         <div className="text-center py-16 text-gray-400">
