@@ -18565,8 +18565,25 @@ const AnimalForm = ({
                                             setGalleryUploading(true);
                                             setGalleryUploadError(null);
                                             try {
+                                                // Compress before uploading (target 480KB, under the 500KB server limit)
+                                                let fileToUpload = file;
+                                                try {
+                                                    let compressedBlob = null;
+                                                    try {
+                                                        compressedBlob = await compressImageWithWorker(file, 480 * 1024, { maxWidth: 1920, maxHeight: 1920, startQuality: 0.85 });
+                                                    } catch (_) { compressedBlob = null; }
+                                                    if (!compressedBlob) {
+                                                        try {
+                                                            compressedBlob = await compressImageToMaxSize(file, 480 * 1024, { maxWidth: 1920, maxHeight: 1920, startQuality: 0.85 });
+                                                        } catch (_) {
+                                                            compressedBlob = await compressImageFile(file, { maxWidth: 1920, maxHeight: 1920, quality: 0.82 });
+                                                        }
+                                                    }
+                                                    const baseName = file.name.replace(/\.[^/.]+$/, '') || 'gallery';
+                                                    fileToUpload = new File([compressedBlob], `${baseName}.jpg`, { type: 'image/jpeg' });
+                                                } catch (_) { /* compression failed — try original */ }
                                                 const fd = new FormData();
-                                                fd.append('file', file);
+                                                fd.append('file', fileToUpload);
                                                 const upRes = await axios.post(`${API_BASE_URL}/upload`, fd, {
                                                     headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'multipart/form-data' }
                                                 });
