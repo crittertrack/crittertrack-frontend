@@ -2834,7 +2834,7 @@ const computeRelationships = (animal, userAnimals) => {
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
-const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onToggleOwned, userProfile, userAnimals = [] }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onToggleOwned, userProfile, userAnimals = [] }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -3131,6 +3131,16 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                     Edit
                                 </button>
                             )}
+                            {onArchive && (
+                                <button
+                                    onClick={() => onArchive(animal)}
+                                    className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                    title={animal.archived ? "Unarchive animal" : "Archive animal"}
+                                >
+                                    <Archive size={14} />
+                                    {animal.archived ? 'Unarchive' : 'Archive'}
+                                </button>
+                            )}
                             {onTransfer && (() => {
                                 const iWasTransferredThisAnimal = animal.originalOwnerId && animal.ownerId_public === userProfile?.id_public;
                                 if (iWasTransferredThisAnimal) {
@@ -3199,6 +3209,16 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 >
                                     <Edit size={16} />
                                     Edit
+                                </button>
+                            )}
+                            {onArchive && (
+                                <button
+                                    onClick={() => onArchive(animal)}
+                                    className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-2"
+                                    title={animal.archived ? "Restore from archive" : "Archive animal"}
+                                >
+                                    <Archive size={16} />
+                                    {animal.archived ? 'Unarchive' : 'Archive'}
                                 </button>
                             )}
                             {onTransfer && (() => {
@@ -21035,6 +21055,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
         } catch { return ''; }
     });
     const [bulkDeleteMode, setBulkDeleteMode] = useState({}); // { species: true/false }
+    const [bulkArchiveMode, setBulkArchiveMode] = useState({}); // { species: true/false }
     const [selectedAnimals, setSelectedAnimals] = useState({}); // { species: [id1, id2, ...] }
     const [collapsedSpecies, setCollapsedSpecies] = useState({}); // { species: true/false } - for mobile collapse
     const [userSpeciesOrder, setUserSpeciesOrder] = useState([]); // User's custom species order
@@ -21613,6 +21634,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
         setSelectedAnimals(prev => ({ ...prev, [species]: [] }));
     };
 
+    const toggleBulkArchiveMode = (species) => {
+        setBulkArchiveMode(prev => ({ ...prev, [species]: !prev[species] }));
+        setSelectedAnimals(prev => ({ ...prev, [species]: [] }));
+    };
+
     const toggleAnimalSelection = (species, animalId) => {
         setSelectedAnimals(prev => {
             const current = prev[species] || [];
@@ -21859,6 +21885,38 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
         } catch (error) {
             console.error('Error deleting animals:', error);
             showModalMessage('Error', 'Failed to delete some animals. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleBulkArchive = async (species) => {
+        const selectedIds = selectedAnimals[species] || [];
+        if (selectedIds.length === 0) {
+            showModalMessage('No Selection', 'Please select at least one animal to archive.');
+            return;
+        }
+
+        const confirmArchive = window.confirm(`Archive ${selectedIds.length} animal(s)? They will be hidden from your main lists but remain in pedigrees.`);
+        if (!confirmArchive) return;
+
+        try {
+            setLoading(true);
+            for (const id of selectedIds) {
+                await axios.post(`${API_BASE_URL}/animals/${id}/archive`, {}, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+            }
+            showModalMessage('Success', `Successfully archived ${selectedIds.length} animal(s).`);
+            setBulkArchiveMode(prev => ({ ...prev, [species]: false }));
+            setSelectedAnimals(prev => ({ ...prev, [species]: [] }));
+            await fetchAnimals();
+            if (showArchiveScreen) {
+                await fetchArchiveData();
+            }
+        } catch (error) {
+            console.error('Error archiving animals:', error);
+            showModalMessage('Error', 'Failed to archive some animals. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -24471,7 +24529,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
             ) : (
                 <div className="space-y-3 sm:space-y-4">
                     {speciesNames.map(species => {
-                        const isBulkMode = bulkDeleteMode[species] || false;
+                        const isBulkMode = bulkDeleteMode[species] || bulkArchiveMode[species] || false;
+                        const isArchiveMode = bulkArchiveMode[species] || false;
                         const selected = selectedAnimals[species] || [];
                         const isCollapsed = collapsedSpecies[species] || false;
                         // Skip species that have no visible animals under current filters
@@ -24531,20 +24590,41 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                                             <span className="text-xs text-gray-600 sm:hidden">
                                                 {selected.length}
                                             </span>
-                                            <button
-                                                onClick={() => handleBulkDelete(species)}
-                                                disabled={selected.length === 0}
-                                                className="px-2 sm:px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs sm:text-sm font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                <span className="hidden sm:inline">Delete Selected</span>
-                                                <span className="sm:hidden">Delete</span>
-                                            </button>
-                                            <button
-                                                onClick={() => toggleBulkDeleteMode(species)}
-                                                className="px-2 sm:px-3 py-1 bg-gray-300 hover:bg-gray-400 text-gray-800 text-xs sm:text-sm font-semibold rounded-lg transition"
-                                            >
-                                                Cancel
-                                            </button>
+                                            {isArchiveMode ? (
+                                                <>
+                                                    <button
+                                                        onClick={() => handleBulkArchive(species)}
+                                                        disabled={selected.length === 0}
+                                                        className="px-2 sm:px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs sm:text-sm font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        <span className="hidden sm:inline">Archive Selected</span>
+                                                        <span className="sm:hidden">Archive</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => toggleBulkArchiveMode(species)}
+                                                        className="px-2 sm:px-3 py-1 bg-gray-300 hover:bg-gray-400 text-gray-800 text-xs sm:text-sm font-semibold rounded-lg transition"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <button
+                                                        onClick={() => handleBulkDelete(species)}
+                                                        disabled={selected.length === 0}
+                                                        className="px-2 sm:px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs sm:text-sm font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        <span className="hidden sm:inline">Delete Selected</span>
+                                                        <span className="sm:hidden">Delete</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => toggleBulkDeleteMode(species)}
+                                                        className="px-2 sm:px-3 py-1 bg-gray-300 hover:bg-gray-400 text-gray-800 text-xs sm:text-sm font-semibold rounded-lg transition"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </>
+                                            )}
                                         </>
                                     )}
                                     {!isBulkMode && (
@@ -24578,6 +24658,13 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                                                 title="Delete Multiple"
                                             >
                                                 <Trash2 className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-red-500" />
+                                            </button>
+                                            <button
+                                                onClick={() => toggleBulkArchiveMode(species)}
+                                                className="p-1 sm:p-2 hover:bg-gray-200 rounded-lg transition"
+                                                title="Archive Multiple"
+                                            >
+                                                <Archive className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-gray-600" />
                                             </button>
                                         </>
                                     )}
@@ -27841,6 +27928,49 @@ const App = () => {
         }
     };
 
+    const handleArchiveAnimal = async (animal) => {
+        const isArchived = animal.archived;
+        const action = isArchived ? 'unarchive' : 'archive';
+        const confirmMsg = isArchived 
+            ? `Restore ${animal.name} from archive? It will reappear in your main animal lists.`
+            : `Archive ${animal.name}? It will be hidden from your main lists but remain in pedigrees.`;
+        
+        if (!window.confirm(confirmMsg)) return;
+        
+        try {
+            await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/${action}`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            
+            const successMsg = isArchived 
+                ? `${animal.name} has been restored from archive`
+                : `${animal.name} has been archived`;
+            
+            showModalMessage('Success', successMsg);
+            
+            // Update the animal in view if open
+            if (animalToView && animalToView.id_public === animal.id_public) {
+                setAnimalToView({ ...animalToView, archived: !isArchived });
+            }
+            
+            // Refresh animal lists
+            fetchAnimals();
+            
+            // If currently in archive screen, refresh that too
+            if (showArchiveScreen) {
+                fetchArchiveData();
+            }
+            
+            // Close detail view if archiving (sends back to main list)
+            if (!isArchived) {
+                navigate('/');
+            }
+        } catch (error) {
+            console.error(`Failed to ${action} animal:`, error);
+            showModalMessage('Error', error.response?.data?.message || `Failed to ${action} animal`);
+        }
+    };
+
     const handleDeleteAnimal = async (id_public, animalData = null) => {
         try {
             
@@ -29304,6 +29434,7 @@ const App = () => {
                                         onClose={handleBackFromAnimal}
                                         onCloseAll={handleCloseAllAnimals}
                                         onEdit={handleEditAnimal}
+                                        onArchive={handleArchiveAnimal}
                                         API_BASE_URL={API_BASE_URL}
                                         authToken={authToken}
                                         setShowImageModal={setShowImageModal}
