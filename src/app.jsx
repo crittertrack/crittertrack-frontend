@@ -23120,6 +23120,7 @@ const AnimalList = ({
                                         </div>
                                     ))}
                                 </div>
+                                )}
                             </div>
                         )}
 
