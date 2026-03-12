@@ -22977,16 +22977,11 @@ const AnimalList = ({
                     <div className="space-y-6">
                         {/* Sold/Transferred Animals Section */}
                         {soldTransferredAnimals.length > 0 && (
-                            <div className="space-y-3">
-                                <button
-                                    onClick={() => setArchiveSoldCollapsed(!archiveSoldCollapsed)}
-                                    className="w-full flex items-center gap-2 hover:bg-gray-50 p-2 rounded-lg transition"
-                                >
-                                    <ChevronDown size={16} className={`text-gray-400 transition-transform ${archiveSoldCollapsed ? '-rotate-90' : ''}`} />
-                                    <h4 className="font-semibold text-gray-700">Sold/Transferred Animals</h4>
-                                    <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">{soldTransferredAnimals.length}</span>
-                                </button>
-                                {!archiveSoldCollapsed && (() => {
+                            <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                                <SectionHeader sectionKey="soldTransferred"
+                                    icon={<ArrowLeftRight size={18} className="text-orange-600" />}
+                                    title="Sold / Transferred" count={soldTransferredAnimals.length} bgClass="bg-orange-50" />
+                                {!collapsedMgmtSections['soldTransferred'] && (() => {
                                     // Build unique owner list for dropdown
                                     const soldOwners = [...new Map(
                                         soldTransferredAnimals
@@ -22997,7 +22992,7 @@ const AnimalList = ({
                                         ? soldTransferredAnimals.filter(a => (a.ownerId_public || a.ownerName) === soldOwnerFilter)
                                         : soldTransferredAnimals;
                                     return (
-                                        <div className="p-2 space-y-2">
+                                        <div className="p-3 space-y-2">
                                             {soldTransferredAnimals.length === 0
                                                 ? <div className="text-sm text-gray-400 text-center py-4">No sold or transferred animals.</div>
                                                 : <>
@@ -23020,29 +23015,8 @@ const AnimalList = ({
                                                     )}
                                                     <div className="space-y-1.5">
                                                         {filteredSoldList.map(a => (
-                                                            <div
-                                                                key={a.id_public}
-                                                                className="flex items-center bg-white border border-gray-200 rounded-lg px-3 py-2 hover:bg-gray-50 cursor-pointer gap-2"
-                                                                onClick={() => onViewAnimal(a)}
-                                                            >
-                                                                <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
-                                                                    {(a.imageUrl || a.photoUrl) ? (
-                                                                        <AnimalImage src={a.imageUrl || a.photoUrl} alt={a.name} className="w-8 h-8 rounded-full object-cover flex-shrink-0" iconSize={14} />
-                                                                    ) : (
-                                                                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                                                                            <Cat size={14} className="text-gray-400" />
-                                                                        </div>
-                                                                    )}
-                                                                    <div className="min-w-0 flex-1">
-                                                                        <div className="font-semibold text-sm text-gray-800 truncate">
-                                                                            {[a.prefix, a.name || 'Unnamed', a.suffix].filter(Boolean).join(' ')}
-                                                                        </div>
-                                                                        <div className="text-xs text-gray-500 truncate">
-                                                                            {a.species}{a.gender ? ` • ${a.gender}` : ''}
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                {a.ownerName && (
+                                                            <MgmtAnimalCard key={a._id || a.id_public} animal={a} extras={
+                                                                a.ownerName ? (
                                                                     <button
                                                                         className="flex items-center gap-1.5 shrink-0 min-w-0 hover:opacity-80 transition-opacity"
                                                                         title={`View profile: ${a.ownerName}`}
@@ -23054,8 +23028,8 @@ const AnimalList = ({
                                                                         }
                                                                         <span className="text-xs text-orange-700 font-medium max-w-[110px] truncate whitespace-nowrap">{a.ownerName}</span>
                                                                     </button>
-                                                                )}
-                                                            </div>
+                                                                ) : null
+                                                            } />
                                                         ))}
                                                     </div>
                                                 </>
@@ -24346,6 +24320,16 @@ const AnimalList = ({
                         >
                             <Package size={14} className="sm:w-4 sm:h-4" />
                             <span className="font-medium">Supplies</span>
+                        </button>
+                    )}
+                    {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
+                        <button
+                            onClick={() => setShowArchiveScreen(true)}
+                            className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-purple-600 hover:text-purple-800 hover:bg-purple-50 border border-purple-200 rounded-lg transition font-medium"
+                            title="Archive"
+                        >
+                            <Archive size={14} className="sm:w-4 sm:h-4" />
+                            <span className="font-medium">Archive</span>
                         </button>
                     )}
                     {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
@@ -28753,10 +28737,6 @@ const App = () => {
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
                                         <User size={15} /> Profile
                                     </button>
-                                    <button onClick={() => { setShowArchiveScreen(true); setShowProfileMenu(false); navigate('/list'); }}
-                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
-                                        <Archive size={15} /> Archive
-                                    </button>
                                     <button onClick={() => { setShowInfoTab(true); setShowProfileMenu(false); }}
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
                                         <BookOpen size={15} /> Help &amp; Tutorials
@@ -28848,10 +28828,6 @@ const App = () => {
                                         <button onClick={() => { navigate('/profile'); setShowProfileMenu(false); }}
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
                                             <User size={15} /> Profile
-                                        </button>
-                                        <button onClick={() => { setShowArchiveScreen(true); setShowProfileMenu(false); navigate('/list'); }}
-                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
-                                            <Archive size={15} /> Archive
                                         </button>
                                         <button onClick={() => { setShowInfoTab(true); setShowProfileMenu(false); }}
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
