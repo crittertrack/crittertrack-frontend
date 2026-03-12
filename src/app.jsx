@@ -21121,7 +21121,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
         if (showArchiveScreen && !archiveLoading && (archivedAnimals.length === 0 && soldTransferredAnimals.length === 0)) {
             fetchArchiveData();
         }
-    }, [showArchiveScreen]);
+    }, [showArchiveScreen, archiveLoading, archivedAnimals.length, soldTransferredAnimals.length, fetchArchiveData]);
     
     // Save filters to localStorage whenever they change
     useEffect(() => {
@@ -21371,6 +21371,19 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
         window.addEventListener('animal-updated', handleAnimalUpdated);
         return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
     }, []);
+
+    // Listen for archive events from App component to refresh lists
+    useEffect(() => {
+        const handleAnimalArchived = () => {
+            fetchAnimals();
+            fetchAllAnimals();
+            if (showArchiveScreen) {
+                fetchArchiveData();
+            }
+        };
+        window.addEventListener('animal-archived', handleAnimalArchived);
+        return () => window.removeEventListener('animal-archived', handleAnimalArchived);
+    }, [fetchAnimals, fetchAllAnimals, showArchiveScreen, fetchArchiveData]);
 
     useEffect(() => { fetchAllAnimals(); }, [fetchAllAnimals]);
     useEffect(() => { fetchAvailableAnimals(); }, [fetchAvailableAnimals]);
@@ -22896,7 +22909,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
     };
 
     // Fetch archived + sold/transferred animals from API
-    const fetchArchiveData = async () => {
+    const fetchArchiveData = useCallback(async () => {
         setArchiveLoading(true);
         try {
             const res = await axios.get(`${API_BASE_URL}/animals/archived`, {
@@ -22910,7 +22923,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
         } finally {
             setArchiveLoading(false);
         }
-    };
+    }, [authToken, API_BASE_URL, showModalMessage]);
 
     // -- Archive Screen -----------------------------------------------------------
     const renderArchiveScreen = () => {
@@ -22988,10 +23001,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                                                     Unarchive
                                                 </button>
                                                 <button
-                                                    onClick={() => {
-                                                        setAnimalToView(animal);
-                                                        setDetailViewTab(1);
-                                                    }}
+                                                    onClick={() => onViewAnimal(animal)}
                                                     className="flex-1 text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition"
                                                 >
                                                     View
@@ -23027,10 +23037,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                                             </div>
                                             <div className="mt-2">
                                                 <button
-                                                    onClick={() => {
-                                                        setAnimalToView(animal);
-                                                        setDetailViewTab(1);
-                                                    }}
+                                                    onClick={() => onViewAnimal(animal)}
                                                     className="w-full text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition"
                                                 >
                                                     View
@@ -24242,7 +24249,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                     </button>
 
                     </>)}
-                    {animalView === 'management' && !showActivityLogScreen && !showSuppliesScreen && (
+                    {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
                         <button
                             onClick={() => {
                                 setActivityLogs([]);
@@ -24256,7 +24263,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                             <span className="font-medium">Activity Log</span>
                         </button>
                     )}
-                    {animalView === 'management' && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
+                    {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
                         <button
                             onClick={() => { setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months' }); setEditingSupplyId(null); setSupplyFormVisible(false); setShowSuppliesScreen(true); }}
                             className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 border border-emerald-200 rounded-lg transition font-medium"
@@ -24266,7 +24273,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                             <span className="font-medium">Supplies</span>
                         </button>
                     )}
-                    {animalView === 'management' && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
+                    {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
                         <button
                             onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(true); }}
                             className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-amber-600 hover:text-amber-800 hover:bg-amber-50 border border-amber-200 rounded-lg transition font-medium"
@@ -24276,7 +24283,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                             <span className="font-medium">Find Duplicates</span>
                         </button>
                     )}
-                    {animalView === 'management' && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
+                    {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
                         <button
                             onClick={toggleMgmtAlerts}
                             title={mgmtAlertsEnabled ? 'Management alerts on — click to disable' : 'Management alerts off — click to enable'}
@@ -24300,6 +24307,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
             </h2>
 
             {/* View Toggle: My Animals / Management */}
+            {!showArchiveScreen && (
             <div className="flex border border-gray-200 rounded-xl overflow-hidden shadow-sm mb-4">
                 <button
                     onClick={() => setAnimalView('list')}
@@ -24320,8 +24328,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                     <span>Management</span>
                 </button>
             </div>
+            )}
 
-            {animalView === 'list' && (
+            {animalView === 'list' && !showArchiveScreen && (
             <div className="mb-4 sm:mb-6 p-2 sm:p-4 border rounded-lg bg-gray-50 space-y-2 sm:space-y-3">
                 {/* Search and Add buttons - Stack on mobile */}
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
@@ -24500,8 +24509,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
             </div>
             )}
 
-            {animalView === 'management' ? (
-                showActivityLogScreen ? renderActivityLogScreen() : showSuppliesScreen ? renderSuppliesScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : showArchiveScreen ? renderArchiveScreen() : renderManagementView()
+            {showArchiveScreen ? renderArchiveScreen() : animalView === 'management' ? (
+                showActivityLogScreen ? renderActivityLogScreen() : showSuppliesScreen ? renderSuppliesScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : renderManagementView()
             ) : (loading && animals.length === 0) ? (
                 /* Skeleton grid — only on very first load before any animals arrive */
                 <div className="space-y-3 sm:space-y-4">
@@ -27953,13 +27962,8 @@ const App = () => {
                 setAnimalToView({ ...animalToView, archived: !isArchived });
             }
             
-            // Refresh animal lists
-            fetchAnimals();
-            
-            // If currently in archive screen, refresh that too
-            if (showArchiveScreen) {
-                fetchArchiveData();
-            }
+            // Trigger a refresh event for any listening components (like AnimalList)
+            window.dispatchEvent(new CustomEvent('animal-archived', { detail: { animalId: animal.id_public, archived: !isArchived } }));
             
             // Close detail view if archiving (sends back to main list)
             if (!isArchived) {
@@ -28672,7 +28676,7 @@ const App = () => {
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
                                         <BookOpen size={15} /> Help &amp; Tutorials
                                     </button>
-                                    <button onClick={() => { setShowArchiveScreen(true); setAnimalView('management'); setShowProfileMenu(false); }}
+                                    <button onClick={() => { setShowArchiveScreen(true); setShowProfileMenu(false); }}
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
                                         <Archive size={15} /> Archive
                                     </button>
@@ -28768,7 +28772,7 @@ const App = () => {
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
                                             <BookOpen size={15} /> Help &amp; Tutorials
                                         </button>
-                                        <button onClick={() => { setShowArchiveScreen(true); setAnimalView('management'); setShowProfileMenu(false); }}
+                                        <button onClick={() => { setShowArchiveScreen(true); setShowProfileMenu(false); }}
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
                                             <Archive size={15} /> Archive
                                         </button>
