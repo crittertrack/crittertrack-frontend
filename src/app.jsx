@@ -21381,8 +21381,16 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
 
     // Reset log screen when navigating away from management view
     useEffect(() => {
-        if (animalView !== 'management') { setShowActivityLogScreen(false); setShowSuppliesScreen(false); setSupplyFormVisible(false); }
+        if (animalView !== 'management') { setShowActivityLogScreen(false); setShowSuppliesScreen(false); setSupplyFormVisible(false); setShowDuplicatesScreen(false); }
     }, [animalView]);
+    
+    // Auto-fetch duplicates when duplicates screen opens for the first time
+    useEffect(() => {
+        if (showDuplicatesScreen && duplicateGroups.length === 0 && !duplicatesLoading) {
+            fetchDuplicates();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showDuplicatesScreen]);
 
     // Fire-and-forget management activity logger (called from management handlers)
     const logManagementActivity = useCallback(async (action, targetId_public, details = {}) => {
@@ -22596,27 +22604,23 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
         );
     };
 
+    // Fetch duplicates from API
+    const fetchDuplicates = async () => {
+        setDuplicatesLoading(true);
+        try {
+            const res = await axios.get(`${API_BASE_URL}/animals/duplicates`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setDuplicateGroups(res.data.groups || []);
+        } catch (err) {
+            showModalMessage('Error', err.response?.data?.message || 'Failed to load duplicates');
+        } finally {
+            setDuplicatesLoading(false);
+        }
+    };
+
     // -- Duplicates Screen --------------------------------------------------------
     const renderDuplicatesScreen = () => {
-        const fetchDuplicates = async () => {
-            setDuplicatesLoading(true);
-            try {
-                const res = await axios.get(`${API_BASE_URL}/animals/duplicates`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
-                setDuplicateGroups(res.data.groups || []);
-            } catch (err) {
-                showModalMessage('Error', err.response?.data?.message || 'Failed to load duplicates');
-            } finally {
-                setDuplicatesLoading(false);
-            }
-        };
-
-        React.useEffect(() => {
-            if (showDuplicatesScreen && duplicateGroups.length === 0 && !duplicatesLoading) {
-                fetchDuplicates();
-            }
-        }, [showDuplicatesScreen]);
 
         const handleDismiss = async (id1, id2) => {
             try {
@@ -26162,6 +26166,7 @@ const App = () => {
     const [animalToView, setAnimalToView] = useState(null);
     const [animalViewHistory, setAnimalViewHistory] = useState([]); // Navigation history stack for animals
     const [detailViewTab, setDetailViewTab] = useState(1); // Tab for detail view
+    const [parentCardKey, setParentCardKey] = useState(0); // Force parent cards to refetch when tab opens
     const [showTabs, setShowTabs] = useState(true); // Toggle for collapsible tabs panel
     const [sireData, setSireData] = useState(null);
     const [damData, setDamData] = useState(null);
@@ -26180,6 +26185,13 @@ const App = () => {
             setPublicAnimalViewHistory([]);
         }
     }, [viewingPublicAnimal]);
+    
+    // Force parent cards to refetch when Lineage tab opens
+    React.useEffect(() => {
+        if (detailViewTab === 5) {
+            setParentCardKey(k => k + 1);
+        }
+    }, [detailViewTab]);
     
     // Fetch parent animals when viewing an animal
     React.useEffect(() => {
