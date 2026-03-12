@@ -23054,6 +23054,36 @@ const AnimalList = ({
         const toggleSection = (key) => setCollapsedMgmtSections(prev => ({ ...prev, [key]: !prev[key] }));
         const toggleGroup = (key) => setCollapsedMgmtGroups(prev => ({ ...prev, [key]: !prev[key] }));
 
+        const MgmtGroup = ({ groupKey, label, groupAnimals, headerClass, renderExtras }) => {
+            const isGrpCollapsed = collapsedMgmtGroups[groupKey] || false;
+            return (
+                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <div
+                        className={`relative flex items-center justify-between ${headerClass} px-3 py-2 cursor-pointer`}
+                        onClick={() => toggleGroup(groupKey)}
+                    >
+                        <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
+                            {isGrpCollapsed
+                                ? <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+                                : <ChevronUp className="w-3.5 h-3.5 text-gray-400" />}
+                        </div>
+                        <span className="font-medium text-sm text-gray-800">{label}</span>
+                        <span className="text-xs text-gray-500 bg-white/70 px-2 py-0.5 rounded-full">{groupAnimals.length}</span>
+                    </div>
+                    {!isGrpCollapsed && (
+                        <div className="p-2 space-y-1.5 bg-white">
+                            {groupAnimals.length === 0
+                                ? <div className="text-sm text-gray-400 text-center py-2">None</div>
+                                : groupAnimals.map(a => (
+                                    <MgmtAnimalCard key={a._id || a.id_public} animal={a} extras={renderExtras ? renderExtras(a) : null} />
+                                ))
+                            }
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
         // Enclosure CRUD handlers
         const handleSaveEnclosure = async () => {
             if (enclosureSaving || !enclosureFormData.name.trim()) return;
