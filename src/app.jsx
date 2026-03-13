@@ -2514,23 +2514,11 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     )}
                 </div>
 
-                {/* Right column: email → website → bio (fills remaining height, clips to left col height) — centered */}
-                <div className="flex flex-col items-center gap-1.5 text-center">
-                    {(freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email) && (
-                        <a href={`mailto:${freshProfile?.email || profile.email}`} className="text-sm text-gray-600 flex items-center gap-1.5 hover:text-accent transition break-all">
-                            <Mail size={14} className="text-accent flex-shrink-0" />
-                            {freshProfile?.email || profile.email}
-                        </a>
-                    )}
-                    {(freshProfile?.showWebsiteURL ?? profile.showWebsiteURL) && (freshProfile?.websiteURL || profile.websiteURL) && (
-                        <a href={freshProfile?.websiteURL || profile.websiteURL} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-600 flex items-center gap-1.5 hover:text-accent transition break-all">
-                            <Globe size={14} className="text-accent flex-shrink-0" />
-                            {freshProfile?.websiteURL || profile.websiteURL}
-                        </a>
-                    )}
+                {/* Right column: bio only */}
+                <div className="flex flex-col items-center gap-1.5">
                     {(freshProfile?.showBio ?? profile.showBio ?? true) && (freshProfile?.bio || profile.bio) && (
                         <>
-                            <div className={`w-full flex-1 min-h-0${!bioExpanded ? ' overflow-hidden' : ''}`}>
+                            <div className={`w-full${!bioExpanded ? ' overflow-hidden' : ''}`}>
                                 <p className="text-sm text-gray-700 text-left whitespace-pre-wrap break-words">
                                     {freshProfile?.bio || profile.bio}
                                 </p>
@@ -2544,6 +2532,25 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     )}
                 </div>
             </div>
+
+            {/* Email + website — full width under both columns */}
+            {((freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email)) ||
+             ((freshProfile?.showWebsiteURL ?? profile.showWebsiteURL) && (freshProfile?.websiteURL || profile.websiteURL)) ? (
+                <div className="flex flex-wrap gap-x-6 gap-y-1 mb-4 pb-4 border-b">
+                    {(freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email) && (
+                        <a href={`mailto:${freshProfile?.email || profile.email}`} className="text-sm text-gray-600 flex items-center gap-1.5 hover:text-accent transition break-all">
+                            <Mail size={14} className="text-accent flex-shrink-0" />
+                            {freshProfile?.email || profile.email}
+                        </a>
+                    )}
+                    {(freshProfile?.showWebsiteURL ?? profile.showWebsiteURL) && (freshProfile?.websiteURL || profile.websiteURL) && (
+                        <a href={freshProfile?.websiteURL || profile.websiteURL} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-600 flex items-center gap-1.5 hover:text-accent transition break-all">
+                            <Globe size={14} className="text-accent flex-shrink-0" />
+                            {freshProfile?.websiteURL || profile.websiteURL}
+                        </a>
+                    )}
+                </div>
+            ) : null}
 
             {/* Tab Bar */}
             <div className="flex border-b border-gray-200 mb-6 overflow-x-auto">
