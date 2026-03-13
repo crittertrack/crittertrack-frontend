@@ -2327,6 +2327,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     const [showQR, setShowQR] = useState(false);
     const [activeTab, setActiveTab] = useState('animals');
     const [animalSearch, setAnimalSearch] = useState('');
+    const [bioExpanded, setBioExpanded] = useState(false);
     const [speciesFilter, setSpeciesFilter] = useState('');
     const [genderFilters, setGenderFilters] = useState({ Male: true, Female: true, Intersex: true, Unknown: true });
     const [statusFilter, setStatusFilter] = useState('');
@@ -2489,56 +2490,67 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             </div>
 
             {/* Profile Header */}
-            <div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-6 pb-4 border-b">
+            <div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-4 pb-4 border-b">
                 {profile.profileImage ? (
-                    <img src={profile.profileImage} alt={displayName} className="w-24 h-24 rounded-lg object-cover shadow-md flex-shrink-0" />
+                    <img src={profile.profileImage} alt={displayName} className="w-20 h-20 rounded-lg object-cover shadow-md flex-shrink-0" />
                 ) : (
-                    <div className="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
-                        <User size={48} className="text-gray-400" />
+                    <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
+                        <User size={40} className="text-gray-400" />
                     </div>
                 )}
                 <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">{displayName}</h2>
+                    {/* Name + donation badge */}
+                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                        <h2 className="text-2xl font-bold text-gray-900 break-words leading-tight">{displayName}</h2>
                         <DonationBadge user={freshProfile || profile} size="md" />
                     </div>
-                    <p className="text-gray-600">Public ID: <span className="font-mono text-accent">{freshProfile?.id_public || profile.id_public}</span></p>
-                    <p className="text-sm text-gray-500 mt-1">Member since {memberSince}</p>
-                    
-                    {/* Country - Show if available */}
-                    {(freshProfile?.country || profile.country) && (
-                        <p className="text-sm text-gray-600 mt-1 flex items-center gap-2">
-                            <span className={`${getCountryFlag(freshProfile?.country || profile.country)} inline-block h-5 w-7 flex-shrink-0`}></span>
-                            <span>{getCountryName(freshProfile?.country || profile.country)}{(freshProfile?.country || profile.country) === 'US' && (freshProfile?.state || profile.state) ? `, ${getStateName(freshProfile?.state || profile.state)}` : ''}</span>
-                        </p>
-                    )}
-                    
-                    {/* Bio - Show if available and public */}
+
+                    {/* Compact info row: ID · Member since · Country */}
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-gray-500 mb-2">
+                        <span className="font-mono text-accent font-semibold">{freshProfile?.id_public || profile.id_public}</span>
+                        <span className="text-gray-300">·</span>
+                        <span>Member since {memberSince}</span>
+                        {(freshProfile?.country || profile.country) && (<>
+                            <span className="text-gray-300">·</span>
+                            <span className="flex items-center gap-1">
+                                <span className={`${getCountryFlag(freshProfile?.country || profile.country)} inline-block h-4 w-5 flex-shrink-0`}></span>
+                                <span>{getCountryName(freshProfile?.country || profile.country)}{(freshProfile?.country || profile.country) === 'US' && (freshProfile?.state || profile.state) ? `, ${getStateName(freshProfile?.state || profile.state)}` : ''}</span>
+                            </span>
+                        </>)}
+                    </div>
+
+                    {/* Bio — capped at 4 lines with Read more */}
                     {(freshProfile?.showBio ?? profile.showBio ?? true) && (freshProfile?.bio || profile.bio) && (
-                        <p className="text-sm text-gray-700 mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200 whitespace-pre-wrap break-words">
-                            {freshProfile?.bio || profile.bio}
-                        </p>
+                        <div className="mb-2">
+                            <p className={`text-sm text-gray-700 p-2.5 bg-gray-50 rounded-lg border border-gray-200 whitespace-pre-wrap break-words${!bioExpanded ? ' line-clamp-4' : ''}`}>
+                                {freshProfile?.bio || profile.bio}
+                            </p>
+                            {(freshProfile?.bio || profile.bio || '').length > 180 && (
+                                <button onClick={() => setBioExpanded(v => !v)} className="text-xs text-accent hover:underline mt-0.5 ml-1">
+                                    {bioExpanded ? 'Show less' : 'Read more'}
+                                </button>
+                            )}
+                        </div>
                     )}
-                    
-                    {/* Email - Show if public */}
-                    {(freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email) && (
-                        <p className="text-sm text-gray-700 mt-2 flex items-center gap-2 break-all">
-                            <Mail size={16} className="text-accent flex-shrink-0" />
-                            <a href={`mailto:${freshProfile?.email || profile.email}`} className="hover:text-accent transition underline break-all">
-                                {freshProfile?.email || profile.email}
-                            </a>
-                        </p>
-                    )}
-                    
-                    {/* Website - Show if public */}
-                    {(freshProfile?.showWebsiteURL ?? profile.showWebsiteURL) && (freshProfile?.websiteURL || profile.websiteURL) && (
-                        <p className="text-sm text-gray-700 mt-2 flex items-start gap-2 break-all">
-                            <Globe size={16} className="text-accent flex-shrink-0 mt-0.5" />
-                            <a href={freshProfile?.websiteURL || profile.websiteURL} target="_blank" rel="noopener noreferrer" className="hover:text-accent transition underline break-all">
-                                {freshProfile?.websiteURL || profile.websiteURL}
-                            </a>
-                        </p>
-                    )}
+
+                    {/* Contact row: email + website side by side */}
+                    {((freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email)) ||
+                     ((freshProfile?.showWebsiteURL ?? profile.showWebsiteURL) && (freshProfile?.websiteURL || profile.websiteURL)) ? (
+                        <div className="flex flex-wrap gap-x-5 gap-y-1">
+                            {(freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email) && (
+                                <a href={`mailto:${freshProfile?.email || profile.email}`} className="text-sm text-gray-600 flex items-center gap-1.5 hover:text-accent transition break-all">
+                                    <Mail size={14} className="text-accent flex-shrink-0" />
+                                    {freshProfile?.email || profile.email}
+                                </a>
+                            )}
+                            {(freshProfile?.showWebsiteURL ?? profile.showWebsiteURL) && (freshProfile?.websiteURL || profile.websiteURL) && (
+                                <a href={freshProfile?.websiteURL || profile.websiteURL} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-600 flex items-center gap-1.5 hover:text-accent transition break-all">
+                                    <Globe size={14} className="text-accent flex-shrink-0" />
+                                    {freshProfile?.websiteURL || profile.websiteURL}
+                                </a>
+                            )}
+                        </div>
+                    ) : null}
                 </div>
             </div>
 
@@ -2574,7 +2586,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                     type="text"
                                     value={animalSearch}
                                     onChange={(e) => setAnimalSearch(e.target.value)}
-                                    placeholder="Search by name or ID\u2026"
+                                    placeholder="Search by name or ID…"
                                     className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[160px]"
                                 />
                             </div>
