@@ -19929,15 +19929,6 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 </div>
             </form>
             
-            <div data-tutorial-target="profile-save-cancel" className="flex justify-end mb-4">
-                <button type="submit" form="profile-info-form" disabled={profileLoading}
-                    className="bg-accent hover:bg-accent/90 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
-                >
-                    {profileLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : <Save size={20} className="mr-2" />}
-                    Save Profile Info
-                </button>
-            </div>
-
             <div className="mt-2 border-2 border-red-300 rounded-lg bg-red-50 overflow-x-hidden">
                 <button type="button" onClick={() => setDangerZoneOpen(v => !v)}
                     className="w-full flex items-center justify-between p-4 sm:p-6 text-left hover:bg-red-100 transition"
@@ -19980,6 +19971,15 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     </div>
                 )}
                 </div>}
+            </div>
+
+            <div data-tutorial-target="profile-save-cancel" className="flex justify-end mt-6">
+                <button type="submit" form="profile-info-form" disabled={profileLoading}
+                    className="bg-accent hover:bg-accent/90 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
+                >
+                    {profileLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : <Save size={20} className="mr-2" />}
+                    Save Profile Info
+                </button>
             </div>
         </div>
     );
