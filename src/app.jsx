@@ -19411,6 +19411,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [importLoading, setImportLoading] = useState(false);
     const [importConfirmLoading, setImportConfirmLoading] = useState(false);
     const [importResult, setImportResult] = useState(null);
+    const [importSectionActions, setImportSectionActions] = useState({});
+    const [importConflictsExpanded, setImportConflictsExpanded] = useState({});
 
     const handleImageChange = async (e) => {
         if (e.target.files && e.target.files[0]) {
@@ -19699,6 +19701,13 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 }
             }
             setImportConflictResolutions(defaults);
+            // Default bulk section action to 'skip' for all conflicting sections
+            const sectionDefaults = {};
+            for (const [section, info] of Object.entries(preview)) {
+                if (info.conflicts?.length) sectionDefaults[section] = 'skip';
+            }
+            setImportSectionActions(sectionDefaults);
+            setImportConflictsExpanded({});
         } catch (err) {
             showModalMessage('Parse Failed', err.response?.data?.message || err.message);
         } finally {
@@ -19732,6 +19741,18 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             ...prev,
             [section]: { ...(prev[section] || {}), [key]: action },
         }));
+    };
+
+    const handleSectionBulkAction = (section, action, conflicts) => {
+        setImportSectionActions(prev => ({ ...prev, [section]: action }));
+        setImportConflictResolutions(prev => {
+            const updated = {};
+            for (const conflict of conflicts) {
+                const key = conflict.id_public || conflict.litter_id_public || conflict.name || '';
+                updated[key] = action;
+            }
+            return { ...prev, [section]: updated };
+        });
     };
 
     return (
@@ -20175,37 +20196,66 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
 
                             {/* Conflict resolution */}
                             {Object.entries(importPreview).some(([_s, info]) => info.conflicts?.length > 0) && (
-                                <div className="space-y-4">
+                                <div className="space-y-3">
                                     <p className="text-sm font-semibold text-amber-700 flex items-center gap-1.5">
-                                        <AlertTriangle size={15} /> Resolve conflicts — choose what to do with each duplicate:
+                                        <AlertTriangle size={15} /> Duplicate records found — choose how to handle each section:
                                     </p>
                                     {Object.entries(importPreview).map(([section, info]) => {
                                         if (!info.conflicts?.length) return null;
+                                        const bulkAction = importSectionActions[section] || 'skip';
+                                        const expanded = importConflictsExpanded[section] || false;
                                         return (
-                                            <div key={section} className="rounded border bg-amber-50 p-3">
-                                                <p className="text-xs font-semibold text-gray-600 uppercase mb-2 capitalize">{section}</p>
-                                                <div className="space-y-1">
-                                                    {info.conflicts.map(conflict => {
-                                                        const key = conflict.id_public || conflict.litter_id_public || conflict.name || '';
-                                                        const displayName = conflict.name || conflict.litter_id_public || conflict.id_public || key;
-                                                        const currentAction = importConflictResolutions[section]?.[key] || 'skip';
-                                                        return (
-                                                            <div key={key} className="flex flex-wrap items-center gap-2 text-sm">
-                                                                <span className="font-mono text-xs bg-white border rounded px-1.5 py-0.5">{key}</span>
-                                                                <span className="text-gray-600 flex-1 min-w-0 truncate">{displayName !== key ? displayName : ''}</span>
-                                                                <select
-                                                                    value={currentAction}
-                                                                    onChange={e => setConflictResolution(section, key, e.target.value)}
-                                                                    className="text-xs border rounded px-2 py-1 bg-white"
-                                                                >
-                                                                    <option value="skip">Skip</option>
-                                                                    <option value="overwrite">Overwrite</option>
-                                                                    <option value="createNew">Create as new</option>
-                                                                </select>
-                                                            </div>
-                                                        );
-                                                    })}
+                                            <div key={section} className="rounded border bg-amber-50 overflow-hidden">
+                                                {/* Section header: bulk action */}
+                                                <div className="flex flex-wrap items-center gap-2 px-3 py-2.5">
+                                                    <span className="text-xs font-semibold text-gray-700 uppercase capitalize flex-1">{section}</span>
+                                                    <span className="text-xs text-amber-700 bg-amber-100 rounded-full px-2 py-0.5 font-medium">
+                                                        {info.conflicts.length} duplicate{info.conflicts.length !== 1 ? 's' : ''}
+                                                    </span>
+                                                    <select
+                                                        value={bulkAction}
+                                                        onChange={e => handleSectionBulkAction(section, e.target.value, info.conflicts)}
+                                                        className="text-xs border rounded px-2 py-1 bg-white font-medium"
+                                                    >
+                                                        <option value="skip">Skip all</option>
+                                                        <option value="overwrite">Overwrite all</option>
+                                                        <option value="createNew">Create all as new</option>
+                                                    </select>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setImportConflictsExpanded(prev => ({ ...prev, [section]: !prev[section] }))}
+                                                        className="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-0.5 whitespace-nowrap"
+                                                    >
+                                                        {expanded ? 'Hide' : 'Override individually'}
+                                                        {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                                                    </button>
                                                 </div>
+                                                {/* Per-item overrides (collapsed by default) */}
+                                                {expanded && (
+                                                    <div className="border-t bg-white px-3 pb-3 pt-2 space-y-1 max-h-52 overflow-y-auto">
+                                                        {info.conflicts.map(conflict => {
+                                                            const key = conflict.id_public || conflict.litter_id_public || conflict.name || '';
+                                                            const displayName = conflict.name || conflict.litter_id_public || conflict.id_public || key;
+                                                            const currentAction = importConflictResolutions[section]?.[key] || bulkAction;
+                                                            const isOverridden = currentAction !== bulkAction;
+                                                            return (
+                                                                <div key={key} className="flex flex-wrap items-center gap-2 text-xs py-0.5">
+                                                                    <span className="font-mono bg-gray-100 border rounded px-1.5 py-0.5">{key}</span>
+                                                                    <span className="text-gray-500 flex-1 min-w-0 truncate">{displayName !== key ? displayName : ''}</span>
+                                                                    <select
+                                                                        value={currentAction}
+                                                                        onChange={e => setConflictResolution(section, key, e.target.value)}
+                                                                        className={`text-xs border rounded px-2 py-0.5 ${isOverridden ? 'bg-blue-50 border-blue-300 font-semibold' : 'bg-white'}`}
+                                                                    >
+                                                                        <option value="skip">Skip</option>
+                                                                        <option value="overwrite">Overwrite</option>
+                                                                        <option value="createNew">Create as new</option>
+                                                                    </select>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
                                             </div>
                                         );
                                     })}
