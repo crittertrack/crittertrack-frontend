@@ -2489,12 +2489,12 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 </div>
             </div>
 
-            {/* Profile Header — two columns */}
+            {/* Profile Header — two equal columns */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-4 pb-4 border-b">
-                {/* Left: name, avatar, meta */}
-                <div className="flex flex-col items-center sm:items-start gap-2">
-                    <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
-                        <h2 className="text-xl font-bold text-gray-900 leading-tight text-center sm:text-left">{displayName}</h2>
+                {/* Left column: name → avatar → ctu → member since → country — centered */}
+                <div className="flex flex-col items-center gap-1.5 text-center">
+                    <div className="flex items-center justify-center gap-2 flex-wrap">
+                        <h2 className="text-xl font-bold text-gray-900 leading-tight">{displayName}</h2>
                         <DonationBadge user={freshProfile || profile} size="sm" />
                     </div>
                     {profile.profileImage ? (
@@ -2504,50 +2504,43 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             <User size={40} className="text-gray-400" />
                         </div>
                     )}
-                    <div className="flex flex-col gap-0.5 text-xs text-gray-500 text-center sm:text-left">
-                        <span className="font-mono text-accent font-semibold">{freshProfile?.id_public || profile.id_public}</span>
-                        <span>Member since {memberSince}</span>
-                        {(freshProfile?.country || profile.country) && (
-                            <span className="flex items-center gap-1 justify-center sm:justify-start">
-                                <span className={`${getCountryFlag(freshProfile?.country || profile.country)} inline-block h-3.5 w-5 flex-shrink-0`}></span>
-                                <span>{getCountryName(freshProfile?.country || profile.country)}{(freshProfile?.country || profile.country) === 'US' && (freshProfile?.state || profile.state) ? `, ${getStateName(freshProfile?.state || profile.state)}` : ''}</span>
-                            </span>
-                        )}
-                    </div>
+                    <span className="font-mono text-accent font-semibold text-sm">{freshProfile?.id_public || profile.id_public}</span>
+                    <span className="text-xs text-gray-500">Member since {memberSince}</span>
+                    {(freshProfile?.country || profile.country) && (
+                        <span className="flex items-center justify-center gap-1 text-xs text-gray-500">
+                            <span className={`${getCountryFlag(freshProfile?.country || profile.country)} inline-block h-3.5 w-5 flex-shrink-0`}></span>
+                            <span>{getCountryName(freshProfile?.country || profile.country)}{(freshProfile?.country || profile.country) === 'US' && (freshProfile?.state || profile.state) ? `, ${getStateName(freshProfile?.state || profile.state)}` : ''}</span>
+                        </span>
+                    )}
                 </div>
 
-                {/* Right: contact + bio */}
-                <div className="min-w-0 flex flex-col gap-2">
-                    {/* Email + website */}
-                    {(((freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email)) ||
-                      ((freshProfile?.showWebsiteURL ?? profile.showWebsiteURL) && (freshProfile?.websiteURL || profile.websiteURL))) && (
-                        <div className="flex flex-wrap gap-x-5 gap-y-1">
-                            {(freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email) && (
-                                <a href={`mailto:${freshProfile?.email || profile.email}`} className="text-sm text-gray-600 flex items-center gap-1.5 hover:text-accent transition break-all">
-                                    <Mail size={14} className="text-accent flex-shrink-0" />
-                                    {freshProfile?.email || profile.email}
-                                </a>
-                            )}
-                            {(freshProfile?.showWebsiteURL ?? profile.showWebsiteURL) && (freshProfile?.websiteURL || profile.websiteURL) && (
-                                <a href={freshProfile?.websiteURL || profile.websiteURL} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-600 flex items-center gap-1.5 hover:text-accent transition break-all">
-                                    <Globe size={14} className="text-accent flex-shrink-0" />
-                                    {freshProfile?.websiteURL || profile.websiteURL}
-                                </a>
-                            )}
-                        </div>
+                {/* Right column: email → website → bio (fills remaining height, clips to left col height) — centered */}
+                <div className="flex flex-col items-center gap-1.5 text-center">
+                    {(freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email) && (
+                        <a href={`mailto:${freshProfile?.email || profile.email}`} className="text-sm text-gray-600 flex items-center gap-1.5 hover:text-accent transition break-all">
+                            <Mail size={14} className="text-accent flex-shrink-0" />
+                            {freshProfile?.email || profile.email}
+                        </a>
                     )}
-                    {/* Bio */}
+                    {(freshProfile?.showWebsiteURL ?? profile.showWebsiteURL) && (freshProfile?.websiteURL || profile.websiteURL) && (
+                        <a href={freshProfile?.websiteURL || profile.websiteURL} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-600 flex items-center gap-1.5 hover:text-accent transition break-all">
+                            <Globe size={14} className="text-accent flex-shrink-0" />
+                            {freshProfile?.websiteURL || profile.websiteURL}
+                        </a>
+                    )}
                     {(freshProfile?.showBio ?? profile.showBio ?? true) && (freshProfile?.bio || profile.bio) && (
-                        <div>
-                            <p className={`text-sm text-gray-700 p-2.5 bg-gray-50 rounded-lg border border-gray-200 whitespace-pre-wrap break-words${!bioExpanded ? ' line-clamp-4' : ''}`}>
-                                {freshProfile?.bio || profile.bio}
-                            </p>
+                        <>
+                            <div className={`w-full flex-1 min-h-0${!bioExpanded ? ' overflow-hidden' : ''}`}>
+                                <p className="text-sm text-gray-700 text-left whitespace-pre-wrap break-words">
+                                    {freshProfile?.bio || profile.bio}
+                                </p>
+                            </div>
                             {(freshProfile?.bio || profile.bio || '').length > 200 && (
-                                <button onClick={() => setBioExpanded(v => !v)} className="text-xs text-accent hover:underline mt-0.5 ml-1">
+                                <button onClick={() => setBioExpanded(v => !v)} className="text-xs text-accent hover:underline mt-0.5">
                                     {bioExpanded ? 'Show less' : 'Read more'}
                                 </button>
                             )}
-                        </div>
+                        </>
                     )}
                 </div>
             </div>
