@@ -4255,9 +4255,13 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 const litterItems = (animalLitters || []).map(l => ({ ...l, _recordType: 'litter' }));
                                 const pedItems = (pedigreeOffspring || []).map(l => ({ ...l, _recordType: 'pedigree' }));
                                 const allRecords = [...litterItems, ...pedItems].sort((a, b) => {
-                                    if (!a.birthDate) return 1;
-                                    if (!b.birthDate) return -1;
-                                    return new Date(b.birthDate) - new Date(a.birthDate);
+                                    if (a.isPlanned && !b.isPlanned) return -1;
+                                    if (!a.isPlanned && b.isPlanned) return 1;
+                                    const aDate = a.birthDate || a.matingDate;
+                                    const bDate = b.birthDate || b.matingDate;
+                                    if (!aDate) return 1;
+                                    if (!bDate) return -1;
+                                    return new Date(bDate) - new Date(aDate);
                                 });
                                 if (allRecords.length === 0) return null;
                                 return (
@@ -4284,13 +4288,17 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                 <div className="flex-1 sm:hidden">
                                                                     <div className="flex justify-between items-start mb-1">
                                                                         <p className="font-bold text-gray-800 text-sm">{displayName || <span className="text-gray-400 font-normal">Unnamed Litter</span>}</p>
-                                                                        {lid && <span className="text-xs font-mono bg-purple-100 px-1.5 py-0.5 rounded text-purple-700 ml-2">{lid}</span>}
+                                                                        <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                                                                            {lid && <span className="text-xs font-mono bg-purple-100 px-1.5 py-0.5 rounded text-purple-700">{lid}</span>}
+                                                                            {litter.isPlanned && <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5">⏳ Planned</span>}
+                                                                        </div>
                                                                     </div>
                                                                     <div className="text-xs text-gray-600 flex gap-2 flex-wrap items-center">
-                                                                        {litter.birthDate && <span>{formatDate(litter.birthDate)}</span>}
+                                                                        {!litter.isPlanned && litter.birthDate && <span>{formatDate(litter.birthDate)}</span>}
+                                                                        {litter.isPlanned && litter.matingDate && <span className="text-indigo-600">{formatDate(litter.matingDate)}</span>}
                                                                         {mate?.name && <span className="truncate max-w-[120px]">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
                                                                         {litter.inbreedingCoefficient != null && <span className="text-gray-500">{litter.inbreedingCoefficient.toFixed(2)}%</span>}
-                                                                        {(litter.litterSizeBorn != null || litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
+                                                                        {!litter.isPlanned && (litter.litterSizeBorn != null || litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
                                                                             <span className="inline-flex items-center gap-1 whitespace-nowrap">
                                                                                 {litter.litterSizeBorn != null && <span className="font-bold text-gray-900">{litter.litterSizeBorn}</span>}
                                                                                 {litter.litterSizeBorn != null && (litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && <span className="text-gray-400">—</span>}
@@ -4311,13 +4319,19 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                 <div className="hidden sm:grid flex-1 grid-cols-6 gap-3 items-center min-w-0">
                                                                     <div className="min-w-0">
                                                                         <p className="font-bold text-gray-800 text-sm truncate">{displayName || <span className="text-gray-400 font-normal text-xs">Unnamed</span>}</p>
+                                                                        {litter.isPlanned && <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5 inline-block mt-0.5">⏳ Planned</span>}
                                                                     </div>
                                                                     <div className="min-w-0">
                                                                         {lid ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block w-fit">{lid}</span> : <span className="text-xs text-gray-400">—</span>}
                                                                     </div>
                                                                     <div>
-                                                                        <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Birth</span>
-                                                                        <span className="text-sm font-semibold text-gray-800">{formatDate(litter.birthDate) || '—'}</span>
+                                                                        {litter.isPlanned ? (<>
+                                                                            <span className="text-indigo-400 text-[10px] uppercase tracking-wide font-semibold block">Mating</span>
+                                                                            <span className="text-sm font-semibold text-indigo-700">{formatDate(litter.matingDate) || '—'}</span>
+                                                                        </>) : (<>
+                                                                            <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Birth</span>
+                                                                            <span className="text-sm font-semibold text-gray-800">{formatDate(litter.birthDate) || '—'}</span>
+                                                                        </>)}
                                                                     </div>
                                                                     <div className="min-w-0">
                                                                         <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Mate</span>
@@ -4328,19 +4342,24 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                         <span className="text-sm font-semibold text-gray-800">{litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : '—'}</span>
                                                                     </div>
                                                                     <div>
-                                                                        <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Born</span>
-                                                                        <div className="flex items-center gap-1.5">
-                                                                            <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
-                                                                            {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
-                                                                                <span className="text-xs ml-1">
-                                                                                    <span className="text-blue-500 font-semibold">{litter.maleCount ?? 0}M</span>
-                                                                                    <span className="text-gray-400 mx-0.5">/</span>
-                                                                                    <span className="text-pink-500 font-semibold">{litter.femaleCount ?? 0}F</span>
-                                                                                    <span className="text-gray-400 mx-0.5">/</span>
-                                                                                    <span className="text-purple-500 font-semibold">{litter.unknownCount ?? 0}U</span>
-                                                                                </span>
-                                                                            )}
-                                                                        </div>
+                                                                        {litter.isPlanned ? (<>
+                                                                            <span className="text-indigo-400 text-[10px] uppercase tracking-wide font-semibold block">Due</span>
+                                                                            <span className="text-sm font-semibold text-indigo-700">{formatDate(litter.expectedDueDate) || '—'}</span>
+                                                                        </>) : (<>
+                                                                            <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Born</span>
+                                                                            <div className="flex items-center gap-1.5">
+                                                                                <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
+                                                                                {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
+                                                                                    <span className="text-xs ml-1">
+                                                                                        <span className="text-blue-500 font-semibold">{litter.maleCount ?? 0}M</span>
+                                                                                        <span className="text-gray-400 mx-0.5">/</span>
+                                                                                        <span className="text-pink-500 font-semibold">{litter.femaleCount ?? 0}F</span>
+                                                                                        <span className="text-gray-400 mx-0.5">/</span>
+                                                                                        <span className="text-purple-500 font-semibold">{litter.unknownCount ?? 0}U</span>
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+                                                                        </>)}
                                                                     </div>
                                                                 </div>
                                                                 <ChevronDown size={18} className={`text-gray-400 transition-transform flex-shrink-0 ml-2 ${isExpanded ? 'rotate-180' : ''}`} />
@@ -4393,19 +4412,19 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                         <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">
                                                                             <h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-2">Breeding &amp; Birth</h4>
                                                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2 text-sm">
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Mating Date</div><div className="font-semibold text-gray-800">{formatDate(litter.matingDate || litter.pairingDate) || '—'}</div></div>
+                                                                                {(litter.matingDate || litter.pairingDate) && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Mating Date</div><div className="font-semibold text-gray-800">{formatDate(litter.matingDate || litter.pairingDate)}</div></div>}
                                                                                 {litter.expectedDueDate && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Expected Due Date</div><div className="font-semibold text-gray-800">{formatDate(litter.expectedDueDate)}</div></div>}
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Breeding Method</div><div className="font-semibold text-gray-800">{litter.breedingMethod || '—'}</div></div>
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Breeding Condition</div><div className="font-semibold text-gray-800">{litter.breedingConditionAtTime || '—'}</div></div>
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Outcome</div><div className={`font-semibold ${litter.outcome === 'Successful' ? 'text-green-600' : litter.outcome === 'Unsuccessful' ? 'text-red-500' : 'text-gray-800'}`}>{litter.outcome || '—'}</div></div>
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Birth Method</div><div className="font-semibold text-gray-800">{litter.birthMethod || '—'}</div></div>
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(litter.birthDate) || '—'}</div></div>
-                                                                                {litter.weaningDate && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaning Date</div><div className="font-semibold text-gray-800">{formatDate(litter.weaningDate)}</div></div>}
+                                                                                {litter.breedingMethod && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Breeding Method</div><div className="font-semibold text-gray-800">{litter.breedingMethod}</div></div>}
+                                                                                {litter.breedingConditionAtTime && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Breeding Condition</div><div className="font-semibold text-gray-800">{litter.breedingConditionAtTime}</div></div>}
+                                                                                {litter.outcome && !(litter.isPlanned && litter.outcome === 'Unknown') && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Outcome</div><div className={`font-semibold ${litter.outcome === 'Successful' ? 'text-green-600' : litter.outcome === 'Unsuccessful' ? 'text-red-500' : 'text-gray-800'}`}>{litter.outcome}</div></div>}
+                                                                                {!litter.isPlanned && litter.birthMethod && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Birth Method</div><div className="font-semibold text-gray-800">{litter.birthMethod}</div></div>}
+                                                                                {!litter.isPlanned && litter.birthDate && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(litter.birthDate)}</div></div>}
+                                                                                {!litter.isPlanned && litter.weaningDate && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaning Date</div><div className="font-semibold text-gray-800">{formatDate(litter.weaningDate)}</div></div>}
                                                                             </div>
                                                                         </div>
                                                                     )}
                                                                     {/* -- 3. Stats bar ----------------------------------------- */}
-                                                                    <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">
+                                                                    {!litter.isPlanned && <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">
                                                                         <div className="grid grid-cols-2 divide-x divide-gray-200">
                                                                             <div className="grid grid-cols-3 pr-3">
                                                                                 <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Born</div><div className="text-lg font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</div></div>
@@ -4418,7 +4437,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                                                                 <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Unknown</div><div className="text-lg font-bold text-purple-500">{litter.unknownCount ?? 0}</div></div>
                                                                             </div>
                                                                         </div>
-                                                                    </div>
+                                                                    </div>}
                                                                     {/* -- 4. Notes --------------------------------------------- */}
                                                                     {litter.notes && <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm"><h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1">Notes</h4><p className="text-sm text-gray-700 italic leading-relaxed">{litter.notes}</p></div>}
                                                                     {/* -- 5. Linked Offspring ---------------------------------- */}
@@ -6064,9 +6083,13 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 const litterItems = (animalLitters || []).map(l => ({ ...l, _recordType: 'litter' }));
                                 const pedItems = (pedigreeOffspring || []).map(l => ({ ...l, _recordType: 'pedigree' }));
                                 const allRecords = [...litterItems, ...pedItems].sort((a, b) => {
-                                    if (!a.birthDate) return 1;
-                                    if (!b.birthDate) return -1;
-                                    return new Date(b.birthDate) - new Date(a.birthDate);
+                                    if (a.isPlanned && !b.isPlanned) return -1;
+                                    if (!a.isPlanned && b.isPlanned) return 1;
+                                    const aDate = a.birthDate || a.matingDate;
+                                    const bDate = b.birthDate || b.matingDate;
+                                    if (!aDate) return 1;
+                                    if (!bDate) return -1;
+                                    return new Date(bDate) - new Date(aDate);
                                 });
                                 if (allRecords.length === 0) return null;
                                 return (
@@ -6090,13 +6113,17 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                                 <div className="flex-1 sm:hidden">
                                                                     <div className="flex justify-between items-start mb-1">
                                                                         <p className="font-bold text-gray-800 text-sm">{displayName || <span className="text-gray-400 font-normal">Unnamed Litter</span>}</p>
-                                                                        {lid && <span className="text-xs font-mono bg-purple-100 px-1.5 py-0.5 rounded text-purple-700 ml-2">{lid}</span>}
+                                                                        <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                                                                            {lid && <span className="text-xs font-mono bg-purple-100 px-1.5 py-0.5 rounded text-purple-700">{lid}</span>}
+                                                                            {litter.isPlanned && <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5">⏳ Planned</span>}
+                                                                        </div>
                                                                     </div>
                                                                     <div className="text-xs text-gray-600 flex gap-2 flex-wrap items-center">
-                                                                        {litter.birthDate && <span>{formatDate(litter.birthDate)}</span>}
+                                                                        {!litter.isPlanned && litter.birthDate && <span>{formatDate(litter.birthDate)}</span>}
+                                                                        {litter.isPlanned && litter.matingDate && <span className="text-indigo-600">{formatDate(litter.matingDate)}</span>}
                                                                         {mate?.name && <span className="truncate max-w-[120px]">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
                                                                         {litter.inbreedingCoefficient != null && <span className="text-gray-500">{litter.inbreedingCoefficient.toFixed(2)}%</span>}
-                                                                        {(litter.litterSizeBorn != null || litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
+                                                                        {!litter.isPlanned && (litter.litterSizeBorn != null || litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
                                                                             <span className="inline-flex items-center gap-1 whitespace-nowrap">
                                                                                 {litter.litterSizeBorn != null && <span className="font-bold text-gray-900">{litter.litterSizeBorn}</span>}
                                                                                 {litter.litterSizeBorn != null && (litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && <span className="text-gray-400">—</span>}
@@ -6117,13 +6144,19 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                                 <div className="hidden sm:grid flex-1 grid-cols-6 gap-3 items-center min-w-0">
                                                                     <div className="min-w-0">
                                                                         <p className="font-bold text-gray-800 text-sm truncate">{displayName || <span className="text-gray-400 font-normal text-xs">Unnamed</span>}</p>
+                                                                        {litter.isPlanned && <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5 inline-block mt-0.5">⏳ Planned</span>}
                                                                     </div>
                                                                     <div className="min-w-0">
                                                                         {lid ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block w-fit">{lid}</span> : <span className="text-xs text-gray-400">—</span>}
                                                                     </div>
                                                                     <div>
-                                                                        <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Birth</span>
-                                                                        <span className="text-sm font-semibold text-gray-800">{formatDate(litter.birthDate) || '—'}</span>
+                                                                        {litter.isPlanned ? (<>
+                                                                            <span className="text-indigo-400 text-[10px] uppercase tracking-wide font-semibold block">Mating</span>
+                                                                            <span className="text-sm font-semibold text-indigo-700">{formatDate(litter.matingDate) || '—'}</span>
+                                                                        </>) : (<>
+                                                                            <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Birth</span>
+                                                                            <span className="text-sm font-semibold text-gray-800">{formatDate(litter.birthDate) || '—'}</span>
+                                                                        </>)}
                                                                     </div>
                                                                     <div className="min-w-0">
                                                                         <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Mate</span>
@@ -6134,19 +6167,24 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                                         <span className="text-sm font-semibold text-gray-800">{litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : '—'}</span>
                                                                     </div>
                                                                     <div>
-                                                                        <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Born</span>
-                                                                        <div className="flex items-center gap-1.5">
-                                                                            <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
-                                                                            {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
-                                                                                <span className="text-xs ml-1">
-                                                                                    <span className="text-blue-500 font-semibold">{litter.maleCount ?? 0}M</span>
-                                                                                    <span className="text-gray-400 mx-0.5">/</span>
-                                                                                    <span className="text-pink-500 font-semibold">{litter.femaleCount ?? 0}F</span>
-                                                                                    <span className="text-gray-400 mx-0.5">/</span>
-                                                                                    <span className="text-purple-500 font-semibold">{litter.unknownCount ?? 0}U</span>
-                                                                                </span>
-                                                                            )}
-                                                                        </div>
+                                                                        {litter.isPlanned ? (<>
+                                                                            <span className="text-indigo-400 text-[10px] uppercase tracking-wide font-semibold block">Due</span>
+                                                                            <span className="text-sm font-semibold text-indigo-700">{formatDate(litter.expectedDueDate) || '—'}</span>
+                                                                        </>) : (<>
+                                                                            <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Born</span>
+                                                                            <div className="flex items-center gap-1.5">
+                                                                                <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
+                                                                                {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
+                                                                                    <span className="text-xs ml-1">
+                                                                                        <span className="text-blue-500 font-semibold">{litter.maleCount ?? 0}M</span>
+                                                                                        <span className="text-gray-400 mx-0.5">/</span>
+                                                                                        <span className="text-pink-500 font-semibold">{litter.femaleCount ?? 0}F</span>
+                                                                                        <span className="text-gray-400 mx-0.5">/</span>
+                                                                                        <span className="text-purple-500 font-semibold">{litter.unknownCount ?? 0}U</span>
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+                                                                        </>)}
                                                                     </div>
                                                                 </div>
                                                                 <ChevronDown size={18} className={`text-gray-400 transition-transform flex-shrink-0 ml-2 ${isExpanded ? 'rotate-180' : ''}`} />
@@ -6199,19 +6237,19 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                                         <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">
                                                                             <h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-2">Breeding &amp; Birth</h4>
                                                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2 text-sm">
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Mating Date</div><div className="font-semibold text-gray-800">{formatDate(litter.matingDate || litter.pairingDate) || '—'}</div></div>
+                                                                                {(litter.matingDate || litter.pairingDate) && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Mating Date</div><div className="font-semibold text-gray-800">{formatDate(litter.matingDate || litter.pairingDate)}</div></div>}
                                                                                 {litter.expectedDueDate && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Expected Due Date</div><div className="font-semibold text-gray-800">{formatDate(litter.expectedDueDate)}</div></div>}
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Breeding Method</div><div className="font-semibold text-gray-800">{litter.breedingMethod || '—'}</div></div>
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Breeding Condition</div><div className="font-semibold text-gray-800">{litter.breedingConditionAtTime || '—'}</div></div>
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Outcome</div><div className={`font-semibold ${litter.outcome === 'Successful' ? 'text-green-600' : litter.outcome === 'Unsuccessful' ? 'text-red-500' : 'text-gray-800'}`}>{litter.outcome || '—'}</div></div>
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Birth Method</div><div className="font-semibold text-gray-800">{litter.birthMethod || '—'}</div></div>
-                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(litter.birthDate) || '—'}</div></div>
-                                                                                {litter.weaningDate && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaning Date</div><div className="font-semibold text-gray-800">{formatDate(litter.weaningDate)}</div></div>}
+                                                                                {litter.breedingMethod && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Breeding Method</div><div className="font-semibold text-gray-800">{litter.breedingMethod}</div></div>}
+                                                                                {litter.breedingConditionAtTime && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Breeding Condition</div><div className="font-semibold text-gray-800">{litter.breedingConditionAtTime}</div></div>}
+                                                                                {litter.outcome && !(litter.isPlanned && litter.outcome === 'Unknown') && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Outcome</div><div className={`font-semibold ${litter.outcome === 'Successful' ? 'text-green-600' : litter.outcome === 'Unsuccessful' ? 'text-red-500' : 'text-gray-800'}`}>{litter.outcome}</div></div>}
+                                                                                {!litter.isPlanned && litter.birthMethod && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Birth Method</div><div className="font-semibold text-gray-800">{litter.birthMethod}</div></div>}
+                                                                                {!litter.isPlanned && litter.birthDate && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(litter.birthDate)}</div></div>}
+                                                                                {!litter.isPlanned && litter.weaningDate && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaning Date</div><div className="font-semibold text-gray-800">{formatDate(litter.weaningDate)}</div></div>}
                                                                             </div>
                                                                         </div>
                                                                     )}
                                                                     {/* -- 3. Stats bar ----------------------------------------- */}
-                                                                    <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">
+                                                                    {!litter.isPlanned && <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">
                                                                         <div className="grid grid-cols-2 divide-x divide-gray-200">
                                                                             <div className="grid grid-cols-3 pr-3">
                                                                                 <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Born</div><div className="text-lg font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</div></div>
@@ -6224,7 +6262,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                                                 <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Unknown</div><div className="text-lg font-bold text-purple-500">{litter.unknownCount ?? 0}</div></div>
                                                                             </div>
                                                                         </div>
-                                                                    </div>
+                                                                    </div>}
                                                                     {/* -- 4. Notes --------------------------------------------- */}
                                                                     {litter.notes && <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm"><h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1">Notes</h4><p className="text-sm text-gray-700 italic leading-relaxed">{litter.notes}</p></div>}
                                                                     {/* -- 5. Linked Offspring ---------------------------------- */}
