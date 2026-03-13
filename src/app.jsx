@@ -11436,14 +11436,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         {/* Col 1: Litter name */}
                                         <div className="min-w-0">
                                             <p className="font-bold text-gray-800 text-sm truncate">{litter.breedingPairCodeName || <span className="text-gray-400 font-normal text-xs">Unnamed</span>}</p>
-                                            {litter.isPlanned && <span className="text-[10px] font-semibold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded inline-block mt-0.5">Planned</span>}
                                         </div>
-                                        {/* Col 2: CTL + date together */}
+                                        {/* Col 2: CTL + date / planned status */}
                                         <div className="min-w-0">
                                             {litter.litter_id_public
                                                 ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block mb-0.5 w-fit">{litter.litter_id_public}</span>
                                                 : <span className="text-xs text-gray-400">—</span>}
-                                            <span className="text-xs text-gray-500">{formatDate(litter.birthDate) || '—'}</span>
+                                            {litter.isPlanned
+                                                ? <span className="text-xs font-semibold text-indigo-600">⏳ Planned mating</span>
+                                                : <span className="text-xs text-gray-500">{formatDate(litter.birthDate) || '—'}</span>}
                                         </div>
                                         {/* Col 3: Sire */}
                                         <div className="min-w-0">
@@ -11466,19 +11467,22 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </div>
                                         {/* Col 6: Born with M/F/U */}
                                         <div>
-                                            <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Born</span>
-                                            <div className="flex items-center gap-1.5">
-                                                <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
-                                                {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
-                                                    <span className="text-xs ml-1">
-                                                        <span className="text-blue-500 font-semibold">{litter.maleCount ?? 0}M</span>
-                                                        <span className="text-gray-400 mx-0.5">/</span>
-                                                        <span className="text-pink-500 font-semibold">{litter.femaleCount ?? 0}F</span>
-                                                        <span className="text-gray-400 mx-0.5">/</span>
-                                                        <span className="text-purple-500 font-semibold">{litter.unknownCount ?? 0}U</span>
-                                                    </span>
-                                                )}
-                                            </div>
+                                            <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">{litter.isPlanned ? 'Status' : 'Born'}</span>
+                                            {litter.isPlanned
+                                                ? <span className="text-xs font-semibold text-indigo-500">Awaiting birth</span>
+                                                : <div className="flex items-center gap-1.5">
+                                                    <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
+                                                    {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
+                                                        <span className="text-xs ml-1">
+                                                            <span className="text-blue-500 font-semibold">{litter.maleCount ?? 0}M</span>
+                                                            <span className="text-gray-400 mx-0.5">/</span>
+                                                            <span className="text-pink-500 font-semibold">{litter.femaleCount ?? 0}F</span>
+                                                            <span className="text-gray-400 mx-0.5">/</span>
+                                                            <span className="text-purple-500 font-semibold">{litter.unknownCount ?? 0}U</span>
+                                                        </span>
+                                                    )}
+                                                  </div>
+                                            }
                                         </div>
                                     </div>
                                     <ChevronDown
