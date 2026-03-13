@@ -11265,14 +11265,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Breeding Condition Notes</label>
-                                        <textarea
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Breeding Condition</label>
+                                        <select
                                             value={matingData.breedingConditionAtTime}
                                             onChange={(e) => setMatingData({...matingData, breedingConditionAtTime: e.target.value})}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 text-sm"
-                                            rows="2"
-                                            placeholder="e.g. animals in peak condition, seasonal notes..."
-                                        />
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-sm"
+                                        >
+                                            <option value="">Select Condition...</option>
+                                            <option value="Good">Good</option>
+                                            <option value="Okay">Okay</option>
+                                            <option value="Poor">Poor</option>
+                                        </select>
                                     </div>
                                 </div>
                             )}
