@@ -9245,6 +9245,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         } catch {}
     };
 
+    // Mating quick-add form state
+    const [showAddMatingForm, setShowAddMatingForm] = useState(false);
+    const [matingData, setMatingData] = useState({ sireId_public: '', damId_public: '', matingDate: '', expectedDueDate: '', breedingMethod: 'Natural', breedingConditionAtTime: '', species: '', notes: '' });
+    const [selectedMatingSire, setSelectedMatingSire] = useState(null);
+    const [selectedMatingDam, setSelectedMatingDam] = useState(null);
+    const [showMatingBreedingDetails, setShowMatingBreedingDetails] = useState(false);
+    const [matingCOI, setMatingCOI] = useState(null);
+    const [matingCalcCOI, setMatingCalcCOI] = useState(false);
+
     // Test Pairing modal state
     const [showTestPairingModal, setShowTestPairingModal] = useState(false);
     const [tpSireId, setTpSireId] = useState('');
@@ -9542,8 +9551,90 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             setSelectedTpDamAnimal(animal || null);
             setTpCOI(null);
             setTpError(null);
+        } else if (modalTarget === 'sire-mating') {
+            setMatingData(prev => ({...prev, sireId_public: animal?.id_public || '', species: prev.species || animal?.species || ''}));
+            setSelectedMatingSire(animal || null);
+            setMatingCOI(null);
+        } else if (modalTarget === 'dam-mating') {
+            setMatingData(prev => ({...prev, damId_public: animal?.id_public || '', species: prev.species || animal?.species || ''}));
+            setSelectedMatingDam(animal || null);
+            setMatingCOI(null);
         }
         setModalTarget(null);
+    };
+
+    // Auto-calculate COI for mating form when both parents are selected
+    useEffect(() => {
+        if (!matingData.sireId_public || !matingData.damId_public) { setMatingCOI(null); return; }
+        const sireId = matingData.sireId_public;
+        const damId = matingData.damId_public;
+        const cacheKey = `${sireId}:${damId}`;
+        if (coiCacheRef.current[cacheKey] != null) { setMatingCOI(coiCacheRef.current[cacheKey]); return; }
+        setMatingCalcCOI(true);
+        setMatingCOI(null);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000);
+        axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
+            params: { sireId, damId, generations: 20 },
+            headers: { Authorization: `Bearer ${authToken}` },
+            signal: controller.signal,
+        }).then(res => {
+            const val = res.data.inbreedingCoefficient ?? 0;
+            coiCacheRef.current[cacheKey] = val;
+            setMatingCOI(val);
+        }).catch(() => {}).finally(() => { clearTimeout(timeout); setMatingCalcCOI(false); });
+    }, [matingData.sireId_public, matingData.damId_public]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const resetMatingForm = () => {
+        setMatingData({ sireId_public: '', damId_public: '', matingDate: '', expectedDueDate: '', breedingMethod: 'Natural', breedingConditionAtTime: '', species: '', notes: '' });
+        setSelectedMatingSire(null);
+        setSelectedMatingDam(null);
+        setShowMatingBreedingDetails(false);
+        setMatingCOI(null);
+        setMatingCalcCOI(false);
+    };
+
+    const handleSubmitMating = async (e) => {
+        e.preventDefault();
+        if (!matingData.sireId_public || !matingData.damId_public) {
+            showModalMessage('Error', 'Please select both a Sire and a Dam');
+            return;
+        }
+        try {
+            const sire = myAnimals.find(a => a.id_public === matingData.sireId_public) || selectedMatingSire;
+            const dam = myAnimals.find(a => a.id_public === matingData.damId_public) || selectedMatingDam;
+            if (!sire || !dam) {
+                showModalMessage('Error', 'Selected parents not found. Please re-select sire and dam.');
+                return;
+            }
+            const payload = {
+                sireId_public: matingData.sireId_public,
+                damId_public: matingData.damId_public,
+                species: matingData.species || sire.species,
+                matingDate: matingData.matingDate || null,
+                expectedDueDate: matingData.expectedDueDate || null,
+                breedingMethod: matingData.breedingMethod || 'Natural',
+                breedingConditionAtTime: matingData.breedingConditionAtTime || null,
+                notes: matingData.notes || '',
+                isPlanned: true,
+                numberBorn: 0,
+            };
+            const resp = await axios.post(`${API_BASE_URL}/litters`, payload, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            if (matingCOI != null) {
+                axios.put(`${API_BASE_URL}/litters/${resp.data.litterId_backend}`, { inbreedingCoefficient: matingCOI }, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                }).catch(() => {});
+            }
+            showModalMessage('Success', 'Planned mating recorded! Edit the entry to add birth details when the litter arrives.');
+            setShowAddMatingForm(false);
+            resetMatingForm();
+            fetchLitters();
+        } catch (error) {
+            console.error('Error recording planned mating:', error);
+            showModalMessage('Error', error.response?.data?.message || 'Failed to record mating');
+        }
     };
 
     // -- Litter form save-time reconciliation ---------------------------------
@@ -10365,6 +10456,21 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     >
                         <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
+                    {/* + Mating button */}
+                    <button
+                        onClick={() => {
+                            if (!showAddMatingForm) { setShowAddForm(false); setEditingLitter(null); }
+                            setShowAddMatingForm(!showAddMatingForm);
+                            if (showAddMatingForm) resetMatingForm();
+                        }}
+                        className={`flex items-center gap-1 sm:gap-2 font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg text-sm sm:text-base border transition-colors ${showAddMatingForm ? 'bg-indigo-100 border-indigo-300 text-indigo-700 hover:bg-indigo-200' : 'bg-white border-indigo-300 text-indigo-600 hover:bg-indigo-50'}`}
+                        title="Record a planned mating"
+                    >
+                        {showAddMatingForm ? <X className="w-4 h-4" /> : <Heart className="w-4 h-4" />}
+                        <span className="hidden sm:inline">{showAddMatingForm ? 'Cancel' : '+ Mating'}</span>
+                        <span className="sm:hidden">{showAddMatingForm ? '' : 'Mate'}</span>
+                    </button>
+                    {/* + Litter button */}
                     <button
                         onClick={() => {
                             if (showAddForm) {
@@ -10390,14 +10496,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     linkedOffspringIds: []
                                 });
                             }
+                            if (!showAddForm) setShowAddMatingForm(false);
                             setShowAddForm(!showAddForm);
                         }}
                         data-tutorial-target="new-litter-btn"
                         className="bg-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
                     >
                         {showAddForm ? <X className="w-4 h-4 sm:w-5 sm:h-5" /> : <Plus className="w-4 h-4 sm:w-5 sm:h-5" />}
-                        <span className="hidden sm:inline">{showAddForm ? 'Cancel' : 'New Litter'}</span>
-                        <span className="sm:hidden">{showAddForm ? '' : 'New'}</span>
+                        <span className="hidden sm:inline">{showAddForm ? 'Cancel' : '+ Litter'}</span>
+                        <span className="sm:hidden">{showAddForm ? '' : 'Litter'}</span>
                     </button>
                 </div>
             </div>
@@ -11063,6 +11170,137 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             </div>
             )}
 
+            {/* Planned Mating Quick-Add Modal */}
+            {showAddMatingForm && (
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg">
+                        <div className="flex justify-between items-center border-b p-4">
+                            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                <Heart size={18} className="text-indigo-500" />
+                                Record Planned Mating
+                            </h3>
+                            <button onClick={() => { setShowAddMatingForm(false); resetMatingForm(); }} className="text-gray-500 hover:text-gray-800">
+                                <X size={22} />
+                            </button>
+                        </div>
+                        <form onSubmit={handleSubmitMating} className="p-4 space-y-4 overflow-y-auto max-h-[75vh]">
+                            {/* Sire */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Sire (Father) <span className="text-red-500">*</span></label>
+                                <button
+                                    type="button"
+                                    onClick={() => setModalTarget('sire-mating')}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-left hover:bg-gray-50 transition focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+                                >
+                                    {matingData.sireId_public ? (
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <div className="font-medium">{(myAnimals.find(a => a.id_public === matingData.sireId_public) || selectedMatingSire)?.name || 'Unknown'}</div>
+                                                <div className="text-xs text-gray-500">{matingData.sireId_public}</div>
+                                            </div>
+                                        </div>
+                                    ) : <span className="text-gray-400">Select Sire...</span>}
+                                </button>
+                            </div>
+                            {/* Dam */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Dam (Mother) <span className="text-red-500">*</span></label>
+                                <button
+                                    type="button"
+                                    onClick={() => setModalTarget('dam-mating')}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-left hover:bg-gray-50 transition focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+                                >
+                                    {matingData.damId_public ? (
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <div className="font-medium">{(myAnimals.find(a => a.id_public === matingData.damId_public) || selectedMatingDam)?.name || 'Unknown'}</div>
+                                                <div className="text-xs text-gray-500">{matingData.damId_public}</div>
+                                            </div>
+                                        </div>
+                                    ) : <span className="text-gray-400">Select Dam...</span>}
+                                </button>
+                            </div>
+                            {/* COI display */}
+                            {(matingCalcCOI || matingCOI != null) && (
+                                <div className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg ${matingCalcCOI ? 'bg-gray-50 text-gray-500' : matingCOI <= 5 ? 'bg-green-50 text-green-700' : matingCOI <= 12.5 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>
+                                    {matingCalcCOI
+                                        ? <><span className="inline-block w-4 h-4 rounded-full border-2 border-gray-300 border-t-gray-600 animate-spin" /> Calculating COI...</>
+                                        : <><span className="font-semibold">Predicted COI:</span> {matingCOI.toFixed(2)}%
+                                            {matingCOI === 0 && <span className="text-xs ml-1">(unrelated)</span>}
+                                            {matingCOI > 12.5 && <span className="text-xs ml-1">(⚠ high)</span>}
+                                          </>
+                                    }
+                                </div>
+                            )}
+                            {/* Mating Date */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Mating Date</label>
+                                <DatePicker value={matingData.matingDate} onChange={(e) => setMatingData({...matingData, matingDate: e.target.value})} className="px-3 py-2" />
+                                <p className="text-xs text-gray-500 mt-1">Shows on calendar as "Mated"</p>
+                            </div>
+                            {/* Expected Due Date */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Expected Due Date</label>
+                                <DatePicker value={matingData.expectedDueDate} onChange={(e) => setMatingData({...matingData, expectedDueDate: e.target.value})} className="px-3 py-2" />
+                                <p className="text-xs text-gray-500 mt-1">Shows on calendar as "Due"</p>
+                            </div>
+                            {/* Expandable breeding details */}
+                            <button
+                                type="button"
+                                onClick={() => setShowMatingBreedingDetails(p => !p)}
+                                className="flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+                            >
+                                {showMatingBreedingDetails ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                                {showMatingBreedingDetails ? 'Hide breeding details' : '+ Breeding details (optional)'}
+                            </button>
+                            {showMatingBreedingDetails && (
+                                <div className="space-y-3 p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Breeding Method</label>
+                                        <select
+                                            value={matingData.breedingMethod}
+                                            onChange={(e) => setMatingData({...matingData, breedingMethod: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-sm"
+                                        >
+                                            <option value="Natural">Natural</option>
+                                            <option value="AI">Artificial Insemination</option>
+                                            <option value="Assisted">Assisted</option>
+                                            <option value="Unknown">Unknown</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Breeding Condition Notes</label>
+                                        <textarea
+                                            value={matingData.breedingConditionAtTime}
+                                            onChange={(e) => setMatingData({...matingData, breedingConditionAtTime: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 text-sm"
+                                            rows="2"
+                                            placeholder="e.g. animals in peak condition, seasonal notes..."
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                            {/* Notes */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                                <textarea
+                                    value={matingData.notes}
+                                    onChange={(e) => setMatingData({...matingData, notes: e.target.value})}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 text-sm"
+                                    rows="2"
+                                    placeholder="Any notes about this mating..."
+                                />
+                            </div>
+                            <p className="text-xs text-gray-500">The entry will appear as <span className="font-semibold text-indigo-600">Planned</span> until you edit it and add a birth date.</p>
+                            <div className="flex gap-3 justify-end border-t pt-3">
+                                <button type="button" onClick={() => { setShowAddMatingForm(false); resetMatingForm(); }} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-semibold text-sm">Cancel</button>
+                                <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-5 rounded-lg text-sm">Save Mating</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
             {/* Litter List */}
             {viewMode === 'list' && (
             <div className="space-y-4">
@@ -11140,10 +11378,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         const offspringLoading = isExpanded && litterOffspringMap[litter._id] === undefined;
                         
                         return (
-                            <div key={litter._id} className="border-2 border-gray-200 rounded-lg bg-white hover:shadow-md transition" data-tutorial-target="litter-card">
+                            <div key={litter._id} className={`border-2 ${litter.isPlanned ? 'border-dashed border-indigo-300 bg-indigo-50/20' : 'border-gray-200 bg-white'} rounded-lg hover:shadow-md transition`} data-tutorial-target="litter-card">
                                 {/* Compact Header - Always Visible */}
                                 <div 
-                                    className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50"
+                                    className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50/80"
                                     onClick={() => setExpandedLitter(isExpanded ? null : litter._id)}
                                 >
                                     {/* Mobile layout: stacked info */}
@@ -11151,12 +11389,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         <div className="flex justify-between items-start mb-1">
                                             <div className="flex-1">
                                                 <p className="font-bold text-gray-800 text-sm">
+                                                    {litter.isPlanned && <span className="text-[10px] font-semibold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded mr-2">Planned</span>}
                                                     {litter.litter_id_public && <span className="text-xs font-mono bg-gray-100 px-1.5 py-0.5 rounded mr-2">{litter.litter_id_public}</span>}
                                                     {litter.breedingPairCodeName && <span className="truncate">{litter.breedingPairCodeName}</span>}
                                                     {!litter.breedingPairCodeName && !litter.litter_id_public && <span>Unnamed Litter</span>}
                                                 </p>
                                             </div>
-                                            <span className="text-xs font-semibold text-gray-700 ml-2">{litter.litterSizeBorn ?? litter.numberBorn ?? 0} pups</span>
+                                            <span className="text-xs font-semibold text-gray-700 ml-2">{litter.isPlanned ? 'Planned' : `${litter.litterSizeBorn ?? litter.numberBorn ?? 0} pups`}</span>
                                         </div>
                                         <div className="flex gap-3 text-xs text-gray-600">
                                             <span><span className="font-medium">S:</span> {sire ? `${sire.prefix ? `${sire.prefix} ` : ''}${sire.name}${sire.suffix ? ` ${sire.suffix}` : ''}` : litter.sireId_public}</span>
@@ -11180,6 +11419,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         {/* Col 1: Litter name */}
                                         <div className="min-w-0">
                                             <p className="font-bold text-gray-800 text-sm truncate">{litter.breedingPairCodeName || <span className="text-gray-400 font-normal text-xs">Unnamed</span>}</p>
+                                            {litter.isPlanned && <span className="text-[10px] font-semibold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded inline-block mt-0.5">Planned</span>}
                                         </div>
                                         {/* Col 2: CTL + date together */}
                                         <div className="min-w-0">
@@ -11826,10 +12066,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     <button
                                                         key={i}
                                                         onClick={() => setCalendarTooltip(t => (t && t.key === `${dateKey}-${i}`) ? null : { key: `${dateKey}-${i}`, litter: ev.litter, type: ev.type })}
-                                                        className={`w-full text-left px-1.5 py-0.5 rounded text-xs truncate transition-colors ${st.bg}`}
-                                                        title={`${st.label}: ${getLitterName(ev.litter)} (${getSireDam(ev.litter)})`}
+                                                        className={`w-full text-left px-1.5 py-0.5 rounded text-xs truncate transition-colors ${st.bg}${ev.litter.isPlanned ? ' border-dashed opacity-80' : ''}`}
+                                                        title={`${ev.litter.isPlanned ? '[Planned] ' : ''}${st.label}: ${getLitterName(ev.litter)} (${getSireDam(ev.litter)})`}
                                                     >
-                                                        {getPillLabel(ev)}
+                                                        {ev.litter.isPlanned && '~ '}{getPillLabel(ev)}
                                                     </button>
                                                 );
                                             })}
@@ -12072,6 +12312,42 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     LoadingSpinner={LoadingSpinner}
                     requiredGender={['Female', 'Intersex', 'Unknown']}
                     species={formData.species || undefined}
+                />
+            )}
+
+            {/* Mating Form — Sire Modal */}
+            {modalTarget === 'sire-mating' && (
+                <ParentSearchModal
+                    title="Select Sire"
+                    onSelect={handleSelectOtherParentForLitter}
+                    onClose={() => setModalTarget(null)}
+                    authToken={authToken}
+                    showModalMessage={showModalMessage}
+                    API_BASE_URL={API_BASE_URL}
+                    X={X}
+                    Search={Search}
+                    Loader2={Loader2}
+                    LoadingSpinner={LoadingSpinner}
+                    requiredGender={['Male', 'Intersex', 'Unknown']}
+                    species={matingData.species || undefined}
+                />
+            )}
+
+            {/* Mating Form — Dam Modal */}
+            {modalTarget === 'dam-mating' && (
+                <ParentSearchModal
+                    title="Select Dam"
+                    onSelect={handleSelectOtherParentForLitter}
+                    onClose={() => setModalTarget(null)}
+                    authToken={authToken}
+                    showModalMessage={showModalMessage}
+                    API_BASE_URL={API_BASE_URL}
+                    X={X}
+                    Search={Search}
+                    Loader2={Loader2}
+                    LoadingSpinner={LoadingSpinner}
+                    requiredGender={['Female', 'Intersex', 'Unknown']}
+                    species={matingData.species || undefined}
                 />
             )}
 
