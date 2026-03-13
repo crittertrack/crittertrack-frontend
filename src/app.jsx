@@ -25892,6 +25892,8 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                 ? 'bg-orange-100 border-orange-400' 
                                                 : notification.type === 'litter_assignment'
                                                 ? 'bg-green-50 border-green-300'
+                                                : notification.type === 'mating_reminder'
+                                                ? 'bg-indigo-50 border-indigo-300'
                                                 : !notification.read ? 'bg-primary/20 border-primary' : 'bg-white'
                                         }`}>
                                             {/* Moderation Notice Header */}
@@ -25906,6 +25908,13 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                 <div className="flex items-center text-green-700 font-semibold mb-2 text-sm">
                                                     <span className="mr-2">🐣</span>
                                                     <span>Litter Assignment — {notification.parentType === 'sire' ? 'Sire' : 'Dam'}</span>
+                                                </div>
+                                            )}
+                                            {/* Mating Reminder Header */}
+                                            {notification.type === 'mating_reminder' && (
+                                                <div className="flex items-center text-indigo-700 font-semibold mb-2 text-sm">
+                                                    <span className="mr-2">🐾</span>
+                                                    <span>Planned Mating — Today!</span>
                                                 </div>
                                             )}
                                             <div className="flex items-start space-x-3 mb-2">
@@ -25934,7 +25943,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                         />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-500">
-                                                            {notification.type === 'litter_assignment' ? <span className="text-3xl">🐣</span> : <AlertCircle size={28} />}
+                                                            {notification.type === 'litter_assignment' ? <span className="text-3xl">🐣</span> : notification.type === 'mating_reminder' ? <span className="text-3xl">🐾</span> : <AlertCircle size={28} />}
                                                         </div>
                                                     )}
                                                 </div>
