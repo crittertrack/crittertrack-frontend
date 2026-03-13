@@ -19662,14 +19662,14 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             onChange={(e) => {
                                 const val = e.target.value;
                                 if (val.split('\n').length > 15) return;
-                                if (val.length > 1200) return;
+                                if (val.length > 1000) return;
                                 setBio(val);
                             }}
                             rows="4"
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none" 
                             disabled={profileLoading}
                         />
-                        {bio && <p className="text-xs text-gray-500 mt-1">{bio.length}/1200 characters · {bio.split('\n').length}/15 lines</p>}
+                        {bio && <p className="text-xs text-gray-500 mt-1">{bio.length}/1000 characters · {bio.split('\n').length}/15 lines</p>}
 
                         <select value={country} onChange={(e) => { setCountry(e.target.value); if (e.target.value !== 'US') setUsState(''); }}
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading}>
