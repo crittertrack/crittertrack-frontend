@@ -19633,7 +19633,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             </div>
             
             {/* Settings Tabs */}
-            <div className="flex border-b border-gray-200 mb-6 overflow-x-auto">
+            <div className="flex flex-wrap border-b border-gray-200 mb-6">
                 {[
                     { id: 'profile',        label: 'Profile' },
                     { id: 'info-adoption',  label: 'Info & Adoption' },
@@ -19641,7 +19641,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     { id: 'account',        label: 'Account' },
                 ].map(tab => (
                     <button key={tab.id} type="button" onClick={() => setSettingsTab(tab.id)}
-                        className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition whitespace-nowrap -mb-px ${settingsTab === tab.id ? 'border-accent text-accent' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                        className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${settingsTab === tab.id ? 'border-accent text-accent' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >{tab.label}</button>
                 ))}
             </div>
@@ -19659,13 +19659,13 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 </div>
 
                 <div className="space-y-4 min-w-0">
-                    <div data-tutorial-target="name-fields">
+                    <div data-tutorial-target="name-fields" className="space-y-4">
                         <input type="text" name="personalName" placeholder="Personal Name *" value={personalName} onChange={(e) => setPersonalName(e.target.value)} required 
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
                         <input type="text" name="breederName" placeholder="Breeder Name (Optional)" value={breederName} onChange={(e) => setBreederName(e.target.value)}
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
                     </div>
-                    <div data-tutorial-target="website-country-fields">
+                    <div data-tutorial-target="website-country-fields" className="space-y-4">
                         <input type="url" name="websiteURL" placeholder="Website URL (Optional) e.g., https://example.com" value={websiteURL} onChange={(e) => setWebsiteURL(e.target.value)}
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
                         <input type="url" name="socialMediaURL" placeholder="Social Media Link (Optional) e.g., https://instagram.com/yourpage" value={socialMediaURL} onChange={(e) => setSocialMediaURL(e.target.value)}
