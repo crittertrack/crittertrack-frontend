@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2 } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2 } from 'lucide-react';
 import ArchiveScreen from './components/ArchiveScreen';
 import { QRCodeSVG } from 'qrcode.react';
 import jsPDF from 'jspdf';
@@ -19396,6 +19396,22 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [dangerZoneOpen, setDangerZoneOpen] = useState(false);
     const [settingsTab, setSettingsTab] = useState('profile');
 
+    // Data Portability — Export
+    const [exportSections, setExportSections] = useState({ animals: true, litters: true, enclosures: true, supplies: true, budget: true });
+    const [exportFormat, setExportFormat] = useState('json');
+    const [exportIncludeArchived, setExportIncludeArchived] = useState(false);
+    const [exportIncludeSold, setExportIncludeSold] = useState(false);
+    const [exportEmbedImages, setExportEmbedImages] = useState(false);
+    const [exportLoading, setExportLoading] = useState(false);
+
+    // Data Portability — Import
+    const [importFile, setImportFile] = useState(null);
+    const [importPreview, setImportPreview] = useState(null);
+    const [importConflictResolutions, setImportConflictResolutions] = useState({});
+    const [importLoading, setImportLoading] = useState(false);
+    const [importConfirmLoading, setImportConfirmLoading] = useState(false);
+    const [importResult, setImportResult] = useState(null);
+
     const handleImageChange = async (e) => {
         if (e.target.files && e.target.files[0]) {
             const original = e.target.files[0];
@@ -19614,6 +19630,108 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         } finally {
             setDeleteLoading(false);
         }
+    };
+
+    // ── Data Portability handlers ─────────────────────────────────────────────
+
+    const handleExport = async () => {
+        const selectedSections = Object.entries(exportSections)
+            .filter(([, v]) => v)
+            .map(([k]) => k)
+            .join(',');
+        if (!selectedSections) return;
+        setExportLoading(true);
+        try {
+            const params = new URLSearchParams({
+                sections: selectedSections,
+                format: exportFormat,
+                includeArchived: String(exportIncludeArchived),
+                includeSold: String(exportIncludeSold),
+                embedImages: String(exportEmbedImages),
+            });
+            const response = await fetch(`${API_BASE_URL}/export?${params}`, {
+                headers: { Authorization: `Bearer ${authToken}` },
+            });
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.message || `Export failed (${response.status})`);
+            }
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const ts = new Date().toISOString().slice(0, 10);
+            a.download = exportFormat === 'csv' ? `crittertrack_export_${ts}.zip` : `crittertrack_export_${ts}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            showModalMessage('Export Failed', err.message);
+        } finally {
+            setExportLoading(false);
+        }
+    };
+
+    const handleImportPreview = async () => {
+        if (!importFile) return;
+        setImportLoading(true);
+        setImportPreview(null);
+        setImportResult(null);
+        setImportConflictResolutions({});
+        try {
+            const formData = new FormData();
+            formData.append('file', importFile);
+            const resp = await axios.post(`${API_BASE_URL}/import`, formData, {
+                headers: { Authorization: `Bearer ${authToken}` },
+            });
+            const preview = resp.data.preview || {};
+            setImportPreview(preview);
+            // Default all conflicts to 'skip'
+            const defaults = {};
+            for (const [section, info] of Object.entries(preview)) {
+                if (info.conflicts?.length) {
+                    defaults[section] = {};
+                    for (const conflict of info.conflicts) {
+                        const key = conflict.id_public || conflict.litter_id_public || conflict.name || '';
+                        defaults[section][key] = 'skip';
+                    }
+                }
+            }
+            setImportConflictResolutions(defaults);
+        } catch (err) {
+            showModalMessage('Parse Failed', err.response?.data?.message || err.message);
+        } finally {
+            setImportLoading(false);
+        }
+    };
+
+    const handleImportConfirm = async () => {
+        if (!importFile || !importPreview) return;
+        setImportConfirmLoading(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', importFile);
+            formData.append('confirm', 'true');
+            formData.append('conflictResolutions', JSON.stringify(importConflictResolutions));
+            const resp = await axios.post(`${API_BASE_URL}/import`, formData, {
+                headers: { Authorization: `Bearer ${authToken}` },
+            });
+            setImportResult(resp.data);
+            setImportPreview(null);
+            setImportFile(null);
+        } catch (err) {
+            showModalMessage('Import Failed', err.response?.data?.message || err.message);
+        } finally {
+            setImportConfirmLoading(false);
+        }
+    };
+
+    const setConflictResolution = (section, key, action) => {
+        setImportConflictResolutions(prev => ({
+            ...prev,
+            [section]: { ...(prev[section] || {}), [key]: action },
+        }));
     };
 
     return (
@@ -19943,7 +20061,200 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     </button>
                 </div>
             </form>
-            
+
+            {/* ── Data Portability ───────────────────────────────────────────── */}
+            <div className="mt-6 mb-6 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden space-y-6">
+                <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Data Portability</h3>
+                <p className="text-sm text-gray-500 -mt-2">Export your records as a backup, or import data from a previous CritterTrack export.</p>
+
+                {/* ── Export ────────────────────────────────────────────────── */}
+                <div>
+                    <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2"><Download size={16} /> Export</h4>
+
+                    <p className="text-xs text-gray-500 mb-3">Select which sections to include:</p>
+                    <div className="flex flex-wrap gap-x-4 gap-y-2 mb-4">
+                        {['animals','litters','enclosures','supplies','budget'].map(s => (
+                            <label key={s} className="flex items-center gap-1.5 text-sm cursor-pointer">
+                                <input type="checkbox" checked={exportSections[s]} onChange={() => setExportSections(prev => ({ ...prev, [s]: !prev[s] }))}
+                                    className="rounded" />
+                                <span className="capitalize">{s}</span>
+                            </label>
+                        ))}
+                    </div>
+
+                    <p className="text-xs text-gray-500 mb-2">Format:</p>
+                    <div className="flex gap-5 mb-4">
+                        {[['json','JSON (single file)'],['csv','CSV (zip bundle)']].map(([val, label]) => (
+                            <label key={val} className="flex items-center gap-1.5 text-sm cursor-pointer">
+                                <input type="radio" name="exportFmt" value={val} checked={exportFormat === val} onChange={() => setExportFormat(val)} />
+                                {label}
+                            </label>
+                        ))}
+                    </div>
+
+                    <div className="flex flex-wrap gap-x-5 gap-y-2 mb-4 text-sm">
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" checked={exportIncludeArchived} onChange={e => setExportIncludeArchived(e.target.checked)} className="rounded" />
+                            Include archived
+                        </label>
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" checked={exportIncludeSold} onChange={e => setExportIncludeSold(e.target.checked)} className="rounded" />
+                            Include sold animals
+                        </label>
+                        {exportFormat === 'json' && (
+                            <label className="flex items-center gap-1.5 cursor-pointer">
+                                <input type="checkbox" checked={exportEmbedImages} onChange={e => setExportEmbedImages(e.target.checked)} className="rounded" />
+                                Embed images (base64)
+                            </label>
+                        )}
+                    </div>
+
+                    <button
+                        onClick={handleExport}
+                        disabled={exportLoading || !Object.values(exportSections).some(Boolean)}
+                        className="bg-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+                    >
+                        {exportLoading ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} />}
+                        Export Data
+                    </button>
+                </div>
+
+                {/* ── Import ────────────────────────────────────────────────── */}
+                <div className="border-t pt-5">
+                    <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2"><Upload size={16} /> Import</h4>
+                    <p className="text-xs text-gray-500 mb-3">Upload a <code>.json</code> or <code>.zip</code> (CSV bundle) previously exported from CritterTrack.</p>
+
+                    {/* File picker */}
+                    <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition mb-4 relative">
+                        <input type="file" accept=".json,.zip" className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                            onChange={e => { setImportFile(e.target.files?.[0] || null); setImportPreview(null); setImportResult(null); }} />
+                        {importFile
+                            ? <p className="text-sm font-medium text-gray-700 flex items-center gap-1.5"><FileText size={16} />{importFile.name}</p>
+                            : <>
+                                <Upload size={22} className="text-gray-400 mb-1" />
+                                <p className="text-sm text-gray-500">Click or drag to upload .json / .zip</p>
+                              </>
+                        }
+                    </label>
+
+                    {importFile && !importPreview && !importResult && (
+                        <button onClick={handleImportPreview} disabled={importLoading}
+                            className="bg-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+                        >
+                            {importLoading ? <Loader2 className="animate-spin" size={16} /> : <FileText size={16} />}
+                            Preview Import
+                        </button>
+                    )}
+
+                    {/* Import preview */}
+                    {importPreview && (
+                        <div className="space-y-4 mt-2">
+                            <h5 className="font-semibold text-gray-700">Preview</h5>
+                            <div className="overflow-x-auto rounded border">
+                                <table className="min-w-full text-sm">
+                                    <thead className="bg-gray-100">
+                                        <tr>
+                                            <th className="px-3 py-2 text-left font-medium text-gray-600">Section</th>
+                                            <th className="px-3 py-2 text-left font-medium text-gray-600">Records</th>
+                                            <th className="px-3 py-2 text-left font-medium text-gray-600">New</th>
+                                            <th className="px-3 py-2 text-left font-medium text-gray-600">Conflicts</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y">
+                                        {Object.entries(importPreview).map(([section, info]) => (
+                                            <tr key={section} className="hover:bg-gray-50">
+                                                <td className="px-3 py-2 capitalize font-medium">{section}</td>
+                                                <td className="px-3 py-2">{info.total}</td>
+                                                <td className="px-3 py-2 text-green-700">{info.new}</td>
+                                                <td className="px-3 py-2 text-amber-600">{info.conflicts?.length || 0}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Conflict resolution */}
+                            {Object.entries(importPreview).some(([_s, info]) => info.conflicts?.length > 0) && (
+                                <div className="space-y-4">
+                                    <p className="text-sm font-semibold text-amber-700 flex items-center gap-1.5">
+                                        <AlertTriangle size={15} /> Resolve conflicts — choose what to do with each duplicate:
+                                    </p>
+                                    {Object.entries(importPreview).map(([section, info]) => {
+                                        if (!info.conflicts?.length) return null;
+                                        return (
+                                            <div key={section} className="rounded border bg-amber-50 p-3">
+                                                <p className="text-xs font-semibold text-gray-600 uppercase mb-2 capitalize">{section}</p>
+                                                <div className="space-y-1">
+                                                    {info.conflicts.map(conflict => {
+                                                        const key = conflict.id_public || conflict.litter_id_public || conflict.name || '';
+                                                        const displayName = conflict.name || conflict.litter_id_public || conflict.id_public || key;
+                                                        const currentAction = importConflictResolutions[section]?.[key] || 'skip';
+                                                        return (
+                                                            <div key={key} className="flex flex-wrap items-center gap-2 text-sm">
+                                                                <span className="font-mono text-xs bg-white border rounded px-1.5 py-0.5">{key}</span>
+                                                                <span className="text-gray-600 flex-1 min-w-0 truncate">{displayName !== key ? displayName : ''}</span>
+                                                                <select
+                                                                    value={currentAction}
+                                                                    onChange={e => setConflictResolution(section, key, e.target.value)}
+                                                                    className="text-xs border rounded px-2 py-1 bg-white"
+                                                                >
+                                                                    <option value="skip">Skip</option>
+                                                                    <option value="overwrite">Overwrite</option>
+                                                                    <option value="createNew">Create as new</option>
+                                                                </select>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            <div className="flex gap-3 pt-1">
+                                <button onClick={handleImportConfirm} disabled={importConfirmLoading}
+                                    className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+                                >
+                                    {importConfirmLoading ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle size={16} />}
+                                    Confirm Import
+                                </button>
+                                <button onClick={() => { setImportPreview(null); setImportFile(null); }}
+                                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Import result */}
+                    {importResult && (
+                        <div className="mt-3 p-4 rounded-lg border bg-green-50 border-green-200">
+                            <p className="font-semibold text-green-800 flex items-center gap-1.5 mb-2"><CheckCircle size={16} /> Import complete</p>
+                            {importResult.written && (
+                                <div className="text-sm text-gray-700 space-y-0.5 mb-2">
+                                    {Object.entries(importResult.written).map(([s, n]) => (
+                                        <p key={s}><span className="capitalize font-medium">{s}</span>: {n} written{importResult.skipped?.[s] ? `, ${importResult.skipped[s]} skipped` : ''}</p>
+                                    ))}
+                                </div>
+                            )}
+                            {importResult.errors?.length > 0 && (
+                                <div className="mt-2">
+                                    <p className="text-sm font-semibold text-red-700 flex items-center gap-1"><AlertTriangle size={13} /> {importResult.errors.length} error(s):</p>
+                                    <ul className="text-xs text-red-600 list-disc list-inside mt-1 space-y-0.5 max-h-32 overflow-y-auto">
+                                        {importResult.errors.map((e, i) => (
+                                            <li key={i}>[{e.section}] {e.id}: {e.error}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                            <button onClick={() => setImportResult(null)} className="mt-3 text-xs text-gray-500 hover:text-gray-700 underline">Dismiss</button>
+                        </div>
+                    )}
+                </div>
+            </div>
+
             <div className="mt-2 border-2 border-red-300 rounded-lg bg-red-50 overflow-x-hidden">
                 <button type="button" onClick={() => setDangerZoneOpen(v => !v)}
                     className="w-full flex items-center justify-between p-4 sm:p-6 text-left hover:bg-red-100 transition"
