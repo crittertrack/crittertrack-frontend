@@ -4539,6 +4539,19 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                                     </div>}
                                                                     {/* -- 4. Notes --------------------------------------------- */}
                                                                     {litter.notes && <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm"><h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1">Notes</h4><p className="text-sm text-gray-700 italic leading-relaxed">{litter.notes}</p></div>}
+                                                                    {/* -- 4b. Photos ----------------------------------------- */}
+                                                                    {!litter.isPlanned && litter.images && litter.images.length > 0 && (
+                                                                        <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">
+                                                                            <h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-2">Photos</h4>
+                                                                            <div className="flex flex-wrap gap-2">
+                                                                                {litter.images.map((img, idx) => (
+                                                                                    <div key={img.r2Key || idx} className="w-20 h-20 rounded-lg overflow-hidden border border-gray-200">
+                                                                                        <img src={img.url} alt={"Gallery " + (idx + 1)} className="w-full h-full object-cover cursor-pointer" onClick={() => window.open(img.url, '_blank')} />
+                                                                                    </div>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
                                                                     {/* -- 5. Linked Offspring ---------------------------------- */}
                                                                     {lid && breedingRecordOffspring[lid] === undefined && (
                                                                         <div className="bg-white p-3 rounded border border-purple-100">
@@ -6364,6 +6377,19 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                                     </div>}
                                                                     {/* -- 4. Notes --------------------------------------------- */}
                                                                     {litter.notes && <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm"><h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1">Notes</h4><p className="text-sm text-gray-700 italic leading-relaxed">{litter.notes}</p></div>}
+                                                                    {/* -- 4b. Photos ----------------------------------------- */}
+                                                                    {!litter.isPlanned && litter.images && litter.images.length > 0 && (
+                                                                        <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">
+                                                                            <h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-2">Photos</h4>
+                                                                            <div className="flex flex-wrap gap-2">
+                                                                                {litter.images.map((img, idx) => (
+                                                                                    <div key={img.r2Key || idx} className="w-20 h-20 rounded-lg overflow-hidden border border-gray-200">
+                                                                                        <img src={img.url} alt={"Gallery " + (idx + 1)} className="w-full h-full object-cover cursor-pointer" onClick={() => window.open(img.url, '_blank')} />
+                                                                                    </div>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
                                                                     {/* -- 5. Linked Offspring ---------------------------------- */}
                                                                     {lid && breedingRecordOffspring[lid] === undefined && (
                                                                         <div className="bg-white p-3 rounded border border-purple-100">
@@ -8067,6 +8093,19 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                                         </div>
                                                                     </div>
                                                                     {litter.notes && <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm"><h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1">Notes</h4><p className="text-sm text-gray-700 italic leading-relaxed">{litter.notes}</p></div>}
+                                                                    {/* -- 4b. Photos ----------------------------------------- */}
+                                                                    {!litter.isPlanned && litter.images && litter.images.length > 0 && (
+                                                                        <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">
+                                                                            <h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-2">Photos</h4>
+                                                                            <div className="flex flex-wrap gap-2">
+                                                                                {litter.images.map((img, idx) => (
+                                                                                    <div key={img.r2Key || idx} className="w-20 h-20 rounded-lg overflow-hidden border border-gray-200">
+                                                                                        <img src={img.url} alt={"Gallery " + (idx + 1)} className="w-full h-full object-cover cursor-pointer" onClick={() => window.open(img.url, '_blank')} />
+                                                                                    </div>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
                                                                     {lid && breedingRecordOffspring[lid] === undefined && (
                                                                         <div className="bg-white p-3 rounded border border-purple-100">
                                                                             <div className="text-sm font-semibold text-gray-700 mb-3">Offspring</div>
@@ -9346,6 +9385,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [availableToLink, setAvailableToLink] = useState({ litter: null, animals: [] });
     const [expandedLitter, setExpandedLitter] = useState(null);
     const [editingLitter, setEditingLitter] = useState(null);
+    const [litterImages, setLitterImages] = useState([]);
+    const [litterImageUploading, setLitterImageUploading] = useState(false);
     const [modalTarget, setModalTarget] = useState(null);
     const [showSpeciesPicker, setShowSpeciesPicker] = useState(false);
     const [selectedSireAnimal, setSelectedSireAnimal] = useState(null);
@@ -10275,6 +10316,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         };
 
         setEditingLitter(litter._id);
+        setLitterImages(litter.images || []);
         // Restore cached parent animal objects for display (supports global animals)
         setSelectedSireAnimal(litter.sire || null);
         setSelectedDamAnimal(litter.dam || null);
@@ -10303,6 +10345,40 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         });
         setShowAddForm(true);
         setExpandedLitter(null);
+    };
+
+    const handleLitterImageUpload = async (file) => {
+        if (litterImages.length >= 5) {
+            showModalMessage('Error', 'Maximum of 5 images per litter');
+            return;
+        }
+        setLitterImageUploading(true);
+        try {
+            const compressedBlob = await compressImageToMaxSize(file, 480 * 1024, { maxWidth: 1920, maxHeight: 1920, startQuality: 0.85 });
+            const fd = new FormData();
+            fd.append('image', compressedBlob, file.name || 'litter-photo.jpg');
+            const resp = await axios.post(`${API_BASE_URL}/litters/${editingLitter}/images`, fd, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setLitterImages(resp.data.images || []);
+            setLitters(prev => prev.map(l => l._id === editingLitter || l.litterId_backend === editingLitter ? { ...l, images: resp.data.images } : l));
+        } catch (err) {
+            showModalMessage('Error', err.response?.data?.message || 'Failed to upload image');
+        } finally {
+            setLitterImageUploading(false);
+        }
+    };
+
+    const handleLitterImageDelete = async (r2Key) => {
+        try {
+            const resp = await axios.delete(`${API_BASE_URL}/litters/${editingLitter}/images/${encodeURIComponent(r2Key)}`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setLitterImages(resp.data.images || []);
+            setLitters(prev => prev.map(l => l._id === editingLitter || l.litterId_backend === editingLitter ? { ...l, images: resp.data.images } : l));
+        } catch (err) {
+            showModalMessage('Error', err.response?.data?.message || 'Failed to delete image');
+        }
     };
 
     const handleUpdateLitter = async (e) => {
@@ -10380,6 +10456,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             showModalMessage('Success', 'Litter updated successfully!');
             setShowAddForm(false);
             setEditingLitter(null);
+            setLitterImages([]);
             setSelectedSireAnimal(null);
             setSelectedDamAnimal(null);
             setFormData({
@@ -11320,6 +11397,53 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         placeholder="Additional notes about this litter..."
                                     />
                                 </div>
+
+                                {/* Litter Photos — only shown when editing an existing born litter */}
+                                {editingLitter && (() => {
+                                    const thisLitter = litters.find(l => l._id === editingLitter || l.litterId_backend === editingLitter);
+                                    return thisLitter && !thisLitter.isPlanned;
+                                })() && (
+                                    <div className="mb-2 p-4 border border-amber-200 rounded-lg bg-amber-50">
+                                        <h4 className="text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                            <span>📷</span> Litter Photos
+                                            <span className="text-xs font-normal text-gray-400">({litterImages.length}/5)</span>
+                                        </h4>
+
+                                        {/* Thumbnail grid */}
+                                        {litterImages.length > 0 && (
+                                            <div className="flex flex-wrap gap-2 mb-3">
+                                                {litterImages.map((img, idx) => (
+                                                    <div key={img.r2Key || idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 group">
+                                                        <img src={img.url} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleLitterImageDelete(img.r2Key)}
+                                                            className="absolute top-0.5 right-0.5 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                                                            title="Remove photo"
+                                                        >✕</button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* Upload button */}
+                                        {litterImages.length < 5 && (
+                                            <label className={`flex items-center gap-2 px-3 py-2 border-2 border-dashed border-amber-400 rounded-lg cursor-pointer hover:bg-amber-100 transition w-fit text-sm font-medium text-amber-700 ${litterImageUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                                                <input
+                                                    type="file"
+                                                    accept="image/png,image/jpeg"
+                                                    className="hidden"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files?.[0];
+                                                        if (file) { handleLitterImageUpload(file); e.target.value = ''; }
+                                                    }}
+                                                />
+                                                {litterImageUploading ? '⏳ Uploading…' : '+ Add Photo'}
+                                            </label>
+                                        )}
+                                        <p className="text-xs text-gray-400 mt-2">PNG or JPEG, max 500 KB each. Up to 5 photos.</p>
+                                    </div>
+                                )}
                             </form>
                     </div>
 
@@ -11329,11 +11453,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             onClick={() => {
                                 setShowAddForm(false);
                                 setEditingLitter(null);
+                                setLitterImages([]);
                             }}
                             className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-semibold"
                         >
-                            Cancel
-                        </button>
+                            Cancel</button>
                         <button
                             type="submit"
                             form="litter-form"
