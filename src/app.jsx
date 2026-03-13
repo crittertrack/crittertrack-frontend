@@ -9388,7 +9388,25 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [litterImages, setLitterImages] = useState([]);
     const [litterImageUploading, setLitterImageUploading] = useState(false);
     const [pendingLitterImages, setPendingLitterImages] = useState([]);
-    const [litterPhotoViewer, setLitterPhotoViewer] = useState(null); // { images: [], index: N }
+    const [showLitterImageModal, setShowLitterImageModal] = useState(false);
+    const [enlargedLitterImageUrl, setEnlargedLitterImageUrl] = useState(null);
+
+    const handleLitterImageDownload = async (imageUrl) => {
+        try {
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = `crittertrack-litter-${Date.now()}.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+            console.error('Failed to download image:', error);
+        }
+    };
     const [modalTarget, setModalTarget] = useState(null);
     const [showSpeciesPicker, setShowSpeciesPicker] = useState(false);
     const [selectedSireAnimal, setSelectedSireAnimal] = useState(null);
@@ -12097,7 +12115,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     {litter.images.map((img, idx) => (
                                                         <button
                                                             key={img.r2Key || idx}
-                                                            onClick={(e) => { e.stopPropagation(); setLitterPhotoViewer({ images: litter.images, index: idx }); }}
+                                                            onClick={(e) => { e.stopPropagation(); setEnlargedLitterImageUrl(img.url); setShowLitterImageModal(true); }}
                                                             className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden border border-gray-200 hover:border-blue-400 hover:shadow-md transition flex-shrink-0 focus:outline-none"
                                                         >
                                                             <img src={img.url} alt={`Litter photo ${idx + 1}`} className="w-full h-full object-cover" />
@@ -12947,6 +12965,36 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     LoadingSpinner={LoadingSpinner}
                     requiredGender={['Female', 'Intersex', 'Unknown']}
                 />
+            )}
+
+            {/* Litter Photo Modal */}
+            {showLitterImageModal && enlargedLitterImageUrl && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[9999] p-4"
+                    onClick={() => setShowLitterImageModal(false)}
+                >
+                    <div className="relative max-w-7xl max-h-full flex flex-col items-center gap-4">
+                        <button
+                            onClick={(e) => { e.stopPropagation(); setShowLitterImageModal(false); }}
+                            className="self-end text-white hover:text-gray-300 transition"
+                        >
+                            <X size={32} />
+                        </button>
+                        <img
+                            src={enlargedLitterImageUrl}
+                            alt="Litter photo"
+                            className="max-w-full max-h-[75vh] object-contain"
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                        <button
+                            onClick={(e) => { e.stopPropagation(); handleLitterImageDownload(enlargedLitterImageUrl); }}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition"
+                        >
+                            <Download size={20} />
+                            Download Image
+                        </button>
+                    </div>
+                </div>
             )}
         </div>
     );
@@ -32974,65 +33022,6 @@ const PublicProfilePage = () => {
                 />
             )}
             
-            {/* Litter Photo Lightbox */}
-            {litterPhotoViewer && (
-                <div
-                    className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center"
-                    onClick={() => setLitterPhotoViewer(null)}
-                >
-                    {/* Prev */}
-                    {litterPhotoViewer.images.length > 1 && (
-                        <button
-                            className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white rounded-full p-2 transition z-10"
-                            onClick={(e) => { e.stopPropagation(); setLitterPhotoViewer(v => ({ ...v, index: (v.index - 1 + v.images.length) % v.images.length })); }}
-                        >
-                            <ChevronLeft size={28} />
-                        </button>
-                    )}
-                    {/* Image */}
-                    <img
-                        src={litterPhotoViewer.images[litterPhotoViewer.index].url}
-                        alt="Litter photo"
-                        className="max-h-[90vh] max-w-[90vw] rounded-xl shadow-2xl object-contain"
-                        onClick={(e) => e.stopPropagation()}
-                    />
-                    {/* Next */}
-                    {litterPhotoViewer.images.length > 1 && (
-                        <button
-                            className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white rounded-full p-2 transition z-10"
-                            onClick={(e) => { e.stopPropagation(); setLitterPhotoViewer(v => ({ ...v, index: (v.index + 1) % v.images.length })); }}
-                        >
-                            <ChevronRight size={28} />
-                        </button>
-                    )}
-                    {/* Download */}
-                    <a
-                        href={litterPhotoViewer.images[litterPhotoViewer.index].url}
-                        download
-                        target="_blank"
-                        rel="noreferrer"
-                        className="absolute top-4 right-14 bg-white/20 hover:bg-white/40 text-white rounded-full p-1.5 transition"
-                        onClick={(e) => e.stopPropagation()}
-                        title="Download"
-                    >
-                        <Download size={20} />
-                    </a>
-                    {/* Close */}
-                    <button
-                        className="absolute top-4 right-4 bg-white/20 hover:bg-white/40 text-white rounded-full p-1.5 transition"
-                        onClick={() => setLitterPhotoViewer(null)}
-                    >
-                        <X size={20} />
-                    </button>
-                    {/* Counter */}
-                    {litterPhotoViewer.images.length > 1 && (
-                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-sm">
-                            {litterPhotoViewer.index + 1} / {litterPhotoViewer.images.length}
-                        </div>
-                    )}
-                </div>
-            )}
-
             {/* Modal for moderation action feedback */}
             {showModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
