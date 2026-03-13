@@ -9387,6 +9387,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [editingLitter, setEditingLitter] = useState(null);
     const [litterImages, setLitterImages] = useState([]);
     const [litterImageUploading, setLitterImageUploading] = useState(false);
+    const [pendingLitterImages, setPendingLitterImages] = useState([]);
     const [modalTarget, setModalTarget] = useState(null);
     const [showSpeciesPicker, setShowSpeciesPicker] = useState(false);
     const [selectedSireAnimal, setSelectedSireAnimal] = useState(null);
@@ -9963,6 +9964,24 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
             const litterId = litterResponse.data.litterId_backend;
 
+            // Upload any images that were staged during creation
+            if (pendingLitterImages.length > 0) {
+                for (const { file } of pendingLitterImages) {
+                    try {
+                        const compressedBlob = await compressImageToMaxSize(file, 480 * 1024, { maxWidth: 1920, maxHeight: 1920, startQuality: 0.85 });
+                        const fd = new FormData();
+                        fd.append('image', compressedBlob, file.name || 'litter-photo.jpg');
+                        const imgResp = await axios.post(`${API_BASE_URL}/litters/${litterId}/images`, fd, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        });
+                        litterResponse.data.images = imgResp.data.images;
+                    } catch (err) {
+                        console.error('Failed to upload litter image:', err);
+                    }
+                }
+                setPendingLitterImages([]);
+            }
+
             // Optimistic update — add new litter to state immediately so it shows without waiting for refetch
             setLitters(prev => [litterResponse.data, ...prev]);
 
@@ -10052,6 +10071,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             
             showModalMessage('Success', successMsg);
             setShowAddForm(false);
+            setPendingLitterImages(prev => { prev.forEach(item => URL.revokeObjectURL(item.previewUrl)); return []; });
             setSelectedSireAnimal(null);
             setSelectedDamAnimal(null);
             setFormData({
@@ -10802,6 +10822,78 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                         <div className="flex-grow overflow-y-auto p-4">
                             <form onSubmit={editingLitter ? handleUpdateLitter : handleSubmit} id="litter-form" className="space-y-4">
+                                {/* Litter Photos — top of form, always visible for born litters */}
+                                {(editingLitter ? (() => { const tl = litters.find(l => l._id === editingLitter || l.litterId_backend === editingLitter); return tl && !tl.isPlanned; })() : true) && (
+                                    <div className="mb-2 p-4 border border-amber-200 rounded-lg bg-amber-50">
+                                        <h4 className="text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                            <span>📷</span> Litter Photos
+                                            <span className="text-xs font-normal text-gray-400">({editingLitter ? litterImages.length : pendingLitterImages.length}/5)</span>
+                                        </h4>
+
+                                        {/* Thumbnail grid */}
+                                        {editingLitter ? (
+                                            litterImages.length > 0 && (
+                                                <div className="flex flex-wrap gap-2 mb-3">
+                                                    {litterImages.map((img, idx) => (
+                                                        <div key={img.r2Key || idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 group">
+                                                            <img src={img.url} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleLitterImageDelete(img.r2Key)}
+                                                                className="absolute top-0.5 right-0.5 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                title="Remove photo"
+                                                            >✕</button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )
+                                        ) : (
+                                            pendingLitterImages.length > 0 && (
+                                                <div className="flex flex-wrap gap-2 mb-3">
+                                                    {pendingLitterImages.map((item, idx) => (
+                                                        <div key={idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 group">
+                                                            <img src={item.previewUrl} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    URL.revokeObjectURL(item.previewUrl);
+                                                                    setPendingLitterImages(prev => prev.filter((_, i) => i !== idx));
+                                                                }}
+                                                                className="absolute top-0.5 right-0.5 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                title="Remove photo"
+                                            >✕</button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )
+                                        )}
+
+                                        {/* Upload button */}
+                                        {(editingLitter ? litterImages.length : pendingLitterImages.length) < 5 && (
+                                            <label className={`flex items-center gap-2 px-3 py-2 border-2 border-dashed border-amber-400 rounded-lg cursor-pointer hover:bg-amber-100 transition w-fit text-sm font-medium text-amber-700 ${litterImageUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                                                <input
+                                                    type="file"
+                                                    accept="image/png,image/jpeg"
+                                                    className="hidden"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files?.[0];
+                                                        if (!file) return;
+                                                        if (editingLitter) {
+                                                            handleLitterImageUpload(file);
+                                                        } else {
+                                                            if (pendingLitterImages.length >= 5) return;
+                                                            setPendingLitterImages(prev => [...prev, { file, previewUrl: URL.createObjectURL(file) }]);
+                                                        }
+                                                        e.target.value = '';
+                                                    }}
+                                                />
+                                                {litterImageUploading ? '⏳ Uploading…' : '+ Add Photo'}
+                                            </label>
+                                        )}
+                                        <p className="text-xs text-gray-400 mt-2">{editingLitter ? 'PNG or JPEG, max 500 KB each. Up to 5 photos.' : 'Photos will be uploaded when you save the litter.'}</p>
+                                    </div>
+                                )}
+
                                 {/* Auto-assigned CTL-ID (read-only) */}
                                 {editingLitter && editingLitter.litter_id_public && (
                                     <div>
@@ -11398,52 +11490,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     />
                                 </div>
 
-                                {/* Litter Photos — only shown when editing an existing born litter */}
-                                {editingLitter && (() => {
-                                    const thisLitter = litters.find(l => l._id === editingLitter || l.litterId_backend === editingLitter);
-                                    return thisLitter && !thisLitter.isPlanned;
-                                })() && (
-                                    <div className="mb-2 p-4 border border-amber-200 rounded-lg bg-amber-50">
-                                        <h4 className="text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                            <span>📷</span> Litter Photos
-                                            <span className="text-xs font-normal text-gray-400">({litterImages.length}/5)</span>
-                                        </h4>
-
-                                        {/* Thumbnail grid */}
-                                        {litterImages.length > 0 && (
-                                            <div className="flex flex-wrap gap-2 mb-3">
-                                                {litterImages.map((img, idx) => (
-                                                    <div key={img.r2Key || idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 group">
-                                                        <img src={img.url} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleLitterImageDelete(img.r2Key)}
-                                                            className="absolute top-0.5 right-0.5 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                                                            title="Remove photo"
-                                                        >✕</button>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-
-                                        {/* Upload button */}
-                                        {litterImages.length < 5 && (
-                                            <label className={`flex items-center gap-2 px-3 py-2 border-2 border-dashed border-amber-400 rounded-lg cursor-pointer hover:bg-amber-100 transition w-fit text-sm font-medium text-amber-700 ${litterImageUploading ? 'opacity-50 pointer-events-none' : ''}`}>
-                                                <input
-                                                    type="file"
-                                                    accept="image/png,image/jpeg"
-                                                    className="hidden"
-                                                    onChange={(e) => {
-                                                        const file = e.target.files?.[0];
-                                                        if (file) { handleLitterImageUpload(file); e.target.value = ''; }
-                                                    }}
-                                                />
-                                                {litterImageUploading ? '⏳ Uploading…' : '+ Add Photo'}
-                                            </label>
-                                        )}
-                                        <p className="text-xs text-gray-400 mt-2">PNG or JPEG, max 500 KB each. Up to 5 photos.</p>
-                                    </div>
-                                )}
                             </form>
                     </div>
 
@@ -11454,6 +11500,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 setShowAddForm(false);
                                 setEditingLitter(null);
                                 setLitterImages([]);
+                                pendingLitterImages.forEach(item => URL.revokeObjectURL(item.previewUrl));
+                                setPendingLitterImages([]);
                             }}
                             className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-semibold"
                         >
