@@ -19393,6 +19393,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [passwordLoading, setPasswordLoading] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [dangerZoneOpen, setDangerZoneOpen] = useState(false);
 
     const handleImageChange = async (e) => {
         if (e.target.files && e.target.files[0]) {
@@ -19630,7 +19631,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 </button>
             </div>
             
-            <form onSubmit={handleProfileUpdate} className="space-y-6 mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
+            <form id="profile-info-form" onSubmit={handleProfileUpdate} className="space-y-6 mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Public Profile Information</h3>
                 
                 <div data-tutorial-target="profile-image-upload">
@@ -19836,14 +19837,6 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     </div>
                 </div>
 
-                <div data-tutorial-target="profile-save-cancel" className="flex justify-end pt-2">
-                    <button type="submit" disabled={profileLoading}
-                        className="bg-accent hover:bg-accent/90 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
-                    >
-                        {profileLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : <Save size={20} className="mr-2" />}
-                        Save Profile Info
-                    </button>
-                </div>
             </form>
 
             {/* Info & Adoption Section */}
@@ -19936,8 +19929,23 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 </div>
             </form>
             
-            <div className="mt-8 p-4 sm:p-6 border-2 border-red-300 rounded-lg bg-red-50 overflow-x-hidden">
-                <h3 className="text-xl font-semibold text-red-800 border-b border-red-200 pb-2 mb-4">Danger Zone</h3>
+            <div data-tutorial-target="profile-save-cancel" className="flex justify-end mb-4">
+                <button type="submit" form="profile-info-form" disabled={profileLoading}
+                    className="bg-accent hover:bg-accent/90 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
+                >
+                    {profileLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : <Save size={20} className="mr-2" />}
+                    Save Profile Info
+                </button>
+            </div>
+
+            <div className="mt-2 border-2 border-red-300 rounded-lg bg-red-50 overflow-x-hidden">
+                <button type="button" onClick={() => setDangerZoneOpen(v => !v)}
+                    className="w-full flex items-center justify-between p-4 sm:p-6 text-left hover:bg-red-100 transition"
+                >
+                    <h3 className="text-xl font-semibold text-red-800">Danger Zone</h3>
+                    {dangerZoneOpen ? <ChevronUp size={20} className="text-red-400" /> : <ChevronDown size={20} className="text-red-400" />}
+                </button>
+                {dangerZoneOpen && <div className="px-4 sm:px-6 pb-6">
                 <p className="text-sm text-gray-700 mb-4">
                     Deleting your account is permanent and cannot be undone. All your animals, litters, and profile data will be permanently deleted.
                 </p>
@@ -19971,6 +19979,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         </div>
                     </div>
                 )}
+                </div>}
             </div>
         </div>
     );
