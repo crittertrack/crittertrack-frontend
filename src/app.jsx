@@ -10738,8 +10738,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <DatePicker
                                                 value={formData.matingDate || ''}
                                                 onChange={(e) => setFormData({...formData, matingDate: e.target.value})}
+                                                maxDate={editingLitter && litters.find(l => l._id === editingLitter)?.isPlanned ? undefined : new Date()}
                                                 className="px-3 py-2"
                                             />
+                                            {!(editingLitter && litters.find(l => l._id === editingLitter)?.isPlanned) && (
+                                                <p className="text-xs text-gray-400 mt-1">Use + Mating to schedule a future mating</p>
+                                            )}
                                         </div>
 
                                         {/* Expected Due Date */}
@@ -11616,7 +11620,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                             <div className="font-semibold text-gray-800">{litter.breedingCondition || litter.breedingConditionAtTime}</div>
                                                         </div>
                                                     )}
-                                                    {litter.outcome && (
+                                                    {litter.outcome && !(litter.isPlanned && litter.outcome === 'Unknown') && (
                                                         <div>
                                                             <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Outcome</div>
                                                             <div className={`font-semibold ${litter.outcome === 'Successful' ? 'text-green-600' : litter.outcome === 'Unsuccessful' ? 'text-red-500' : 'text-gray-800'}`}>{litter.outcome}</div>
@@ -25853,15 +25857,18 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
         }
     };
 
+    const matingReminderNotifications = notifications.filter(n => n.type === 'mating_reminder');
     const pendingNotifications = notifications.filter(n => 
         n.status === 'pending' && 
         n.type !== 'broadcast' && 
-        n.type !== 'announcement'
+        n.type !== 'announcement' &&
+        n.type !== 'mating_reminder'
     );
     const otherNotifications = notifications.filter(n => 
         n.status !== 'pending' && 
         n.type !== 'broadcast' && 
-        n.type !== 'announcement'
+        n.type !== 'announcement' &&
+        n.type !== 'mating_reminder'
     );
 
     return (
@@ -25883,6 +25890,23 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                         <p className="text-center text-gray-500 py-8">No notifications</p>
                     ) : (
                         <>
+                            {/* Mating Reminder Banner */}
+                            {matingReminderNotifications.length > 0 && (
+                                <div className="rounded-xl border-2 border-indigo-300 bg-indigo-50 overflow-hidden">
+                                    <div className="flex items-center gap-2 px-3 py-2 bg-indigo-100 border-b border-indigo-200">
+                                        <span className="text-sm font-bold text-indigo-800">🐾 Planned Mating Reminder{matingReminderNotifications.length !== 1 ? 's' : ''}</span>
+                                    </div>
+                                    {matingReminderNotifications.map(n => (
+                                        <div key={n._id} className="flex items-start gap-3 px-3 py-2.5 border-b border-indigo-100 last:border-0">
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm text-indigo-900 font-medium">{n.message}</p>
+                                                <p className="text-xs text-indigo-500 mt-0.5">{new Date(n.createdAt).toLocaleString('en-GB')}</p>
+                                            </div>
+                                            <button onClick={() => handleDelete(n._id)} className="p-0.5 text-indigo-300 hover:text-indigo-600 flex-shrink-0" title="Dismiss"><X size={14} /></button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                             {pendingNotifications.length > 0 && (
                                 <div>
                                     <h4 className="font-bold text-gray-700 mb-2">Pending Requests</h4>
