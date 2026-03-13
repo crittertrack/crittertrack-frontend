@@ -10456,56 +10456,52 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     >
                         <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
-                    {/* + Mating button */}
-                    <button
-                        onClick={() => {
-                            if (!showAddMatingForm) { setShowAddForm(false); setEditingLitter(null); }
-                            setShowAddMatingForm(!showAddMatingForm);
-                            if (showAddMatingForm) resetMatingForm();
-                        }}
-                        className={`flex items-center gap-1 sm:gap-2 font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg text-sm sm:text-base border transition-colors ${showAddMatingForm ? 'bg-indigo-100 border-indigo-300 text-indigo-700 hover:bg-indigo-200' : 'bg-white border-indigo-300 text-indigo-600 hover:bg-indigo-50'}`}
-                        title="Record a planned mating"
-                    >
-                        {showAddMatingForm ? <X className="w-4 h-4" /> : <Heart className="w-4 h-4" />}
-                        <span className="hidden sm:inline">{showAddMatingForm ? 'Cancel' : '+ Mating'}</span>
-                        <span className="sm:hidden">{showAddMatingForm ? '' : 'Mate'}</span>
-                    </button>
-                    {/* + Litter button */}
-                    <button
-                        onClick={() => {
-                            if (showAddForm) {
-                                // Clear search filters and editing state when closing form
-                                // setSireSearch('');
-                                // setDamSearch('');
-                                // setSireSpeciesFilter('');
-                                // setDamSpeciesFilter('');
-                                setEditingLitter(null);
-                                setPredictedCOI(null);
-                                setFormData({
-                                    breedingPairCodeName: '',
-                                    sireId_public: '',
-                                    damId_public: '',
-                                    otherParent1Id_public: '',
-                                    otherParent1Role: '',
-                                    otherParent2Id_public: '',
-                                    otherParent2Role: '',
-                                    birthDate: '',
-                                    maleCount: '',
-                                    femaleCount: '',
-                                    notes: '',
-                                    linkedOffspringIds: []
-                                });
-                            }
-                            if (!showAddForm) setShowAddMatingForm(false);
-                            setShowAddForm(!showAddForm);
-                        }}
-                        data-tutorial-target="new-litter-btn"
-                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
-                    >
-                        {showAddForm ? <X className="w-4 h-4 sm:w-5 sm:h-5" /> : <Plus className="w-4 h-4 sm:w-5 sm:h-5" />}
-                        <span className="hidden sm:inline">{showAddForm ? 'Cancel' : '+ Litter'}</span>
-                        <span className="sm:hidden">{showAddForm ? '' : 'Litter'}</span>
-                    </button>
+                    {/* + Mating / + Litter — grouped so they never split across rows */}
+                    <div className="flex rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+                        {/* + Mating button */}
+                        <button
+                            onClick={() => {
+                                if (!showAddMatingForm) { setShowAddForm(false); setEditingLitter(null); }
+                                setShowAddMatingForm(!showAddMatingForm);
+                                if (showAddMatingForm) resetMatingForm();
+                            }}
+                            className={`flex items-center gap-1 px-3 py-1.5 text-sm font-medium transition-colors border-r border-gray-200 ${showAddMatingForm ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200' : 'bg-white text-indigo-600 hover:bg-indigo-50'}`}
+                            title="Record a planned mating"
+                        >
+                            {showAddMatingForm ? <X size={14} /> : <Heart size={14} />}
+                            <span>{showAddMatingForm ? 'Cancel' : '+ Mating'}</span>
+                        </button>
+                        {/* + Litter button */}
+                        <button
+                            onClick={() => {
+                                if (showAddForm) {
+                                    setEditingLitter(null);
+                                    setPredictedCOI(null);
+                                    setFormData({
+                                        breedingPairCodeName: '',
+                                        sireId_public: '',
+                                        damId_public: '',
+                                        otherParent1Id_public: '',
+                                        otherParent1Role: '',
+                                        otherParent2Id_public: '',
+                                        otherParent2Role: '',
+                                        birthDate: '',
+                                        maleCount: '',
+                                        femaleCount: '',
+                                        notes: '',
+                                        linkedOffspringIds: []
+                                    });
+                                }
+                                if (!showAddForm) setShowAddMatingForm(false);
+                                setShowAddForm(!showAddForm);
+                            }}
+                            data-tutorial-target="new-litter-btn"
+                            className={`flex items-center gap-1 px-3 py-1.5 text-sm font-medium transition-colors ${showAddForm ? 'bg-primary/90 text-black hover:bg-primary/80' : 'bg-primary text-black hover:bg-primary/90'}`}
+                        >
+                            {showAddForm ? <X size={14} /> : <Plus size={14} />}
+                            <span>{showAddForm ? 'Cancel' : '+ Litter'}</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
