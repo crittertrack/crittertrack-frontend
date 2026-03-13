@@ -9247,6 +9247,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
     // Mating quick-add form state
     const [showAddMatingForm, setShowAddMatingForm] = useState(false);
+    const [editingMatingId, setEditingMatingId] = useState(null); // null = create, set = edit
+    const [matingEditChoice, setMatingEditChoice] = useState(null); // litter object awaiting edit/convert choice
     const [matingData, setMatingData] = useState({ sireId_public: '', damId_public: '', matingDate: '', expectedDueDate: '', breedingMethod: 'Natural', breedingConditionAtTime: '', species: '', notes: '' });
     const [selectedMatingSire, setSelectedMatingSire] = useState(null);
     const [selectedMatingDam, setSelectedMatingDam] = useState(null);
@@ -9594,6 +9596,27 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         setShowMatingSpeciesPicker(false);
         setMatingCOI(null);
         setMatingCalcCOI(false);
+        setEditingMatingId(null);
+    };
+
+    const handleEditMating = (litter) => {
+        const fmt = (d) => !d ? '' : (typeof d === 'string' && d.match(/^\d{4}-\d{2}-\d{2}/) ? d.split('T')[0] : new Date(d).toISOString().split('T')[0]);
+        setEditingMatingId(litter._id);
+        setMatingData({
+            sireId_public: litter.sireId_public || '',
+            damId_public: litter.damId_public || '',
+            matingDate: fmt(litter.matingDate || litter.pairingDate),
+            expectedDueDate: fmt(litter.expectedDueDate),
+            breedingMethod: litter.breedingMethod || 'Natural',
+            breedingConditionAtTime: litter.breedingConditionAtTime || '',
+            species: litter.sire?.species || litter.dam?.species || '',
+            notes: litter.notes || '',
+        });
+        setSelectedMatingSire(litter.sire || null);
+        setSelectedMatingDam(litter.dam || null);
+        if (litter.inbreedingCoefficient != null) setMatingCOI(litter.inbreedingCoefficient);
+        setMatingEditChoice(null);
+        setShowAddMatingForm(true);
     };
 
     const handleSubmitMating = async (e) => {
@@ -9621,15 +9644,24 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 isPlanned: true,
                 numberBorn: 0,
             };
-            const resp = await axios.post(`${API_BASE_URL}/litters`, payload, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            let litterBackendId;
+            if (editingMatingId) {
+                await axios.put(`${API_BASE_URL}/litters/${editingMatingId}`, payload, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                litterBackendId = editingMatingId;
+            } else {
+                const resp = await axios.post(`${API_BASE_URL}/litters`, payload, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                litterBackendId = resp.data.litterId_backend;
+            }
             if (matingCOI != null) {
-                axios.put(`${API_BASE_URL}/litters/${resp.data.litterId_backend}`, { inbreedingCoefficient: matingCOI }, {
+                axios.put(`${API_BASE_URL}/litters/${litterBackendId}`, { inbreedingCoefficient: matingCOI }, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 }).catch(() => {});
             }
-            showModalMessage('Success', 'Planned mating recorded! Edit the entry to add birth details when the litter arrives.');
+            showModalMessage('Success', editingMatingId ? 'Planned mating updated!' : 'Planned mating recorded! Edit the entry to add birth details when the litter arrives.');
             setShowAddMatingForm(false);
             resetMatingForm();
             fetchLitters();
@@ -10738,12 +10770,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <DatePicker
                                                 value={formData.matingDate || ''}
                                                 onChange={(e) => setFormData({...formData, matingDate: e.target.value})}
-                                                maxDate={editingLitter && litters.find(l => l._id === editingLitter)?.isPlanned ? undefined : new Date()}
+                                                maxDate={new Date()}
                                                 className="px-3 py-2"
                                             />
-                                            {!(editingLitter && litters.find(l => l._id === editingLitter)?.isPlanned) && (
-                                                <p className="text-xs text-gray-400 mt-1">Use + Mating to schedule a future mating</p>
-                                            )}
+                                            <p className="text-xs text-gray-400 mt-1">Use + Mating to schedule a future mating</p>
                                         </div>
 
                                         {/* Expected Due Date */}
@@ -11179,7 +11209,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         <div className="flex justify-between items-center border-b p-4">
                             <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
                                 <Heart size={18} className="text-indigo-500" />
-                                Record Planned Mating
+                                {editingMatingId ? 'Edit Planned Mating' : 'Record Planned Mating'}
                             </h3>
                             <button onClick={() => { setShowAddMatingForm(false); resetMatingForm(); }} className="text-gray-500 hover:text-gray-800">
                                 <X size={22} />
@@ -11253,14 +11283,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             {/* Mating Date */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Mating Date</label>
-                                <DatePicker value={matingData.matingDate} onChange={(e) => setMatingData({...matingData, matingDate: e.target.value})} className="px-3 py-2" />
-                                <p className="text-xs text-gray-500 mt-1">Shows on calendar as "Mated"</p>
+                                <DatePicker value={matingData.matingDate} onChange={(e) => setMatingData({...matingData, matingDate: e.target.value})} minDate={new Date()} className="px-3 py-2" />
+                                <p className="text-xs text-gray-500 mt-1">Today or future — shows on calendar as "Mated"</p>
                             </div>
                             {/* Expected Due Date */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Expected Due Date</label>
-                                <DatePicker value={matingData.expectedDueDate} onChange={(e) => setMatingData({...matingData, expectedDueDate: e.target.value})} className="px-3 py-2" />
-                                <p className="text-xs text-gray-500 mt-1">Shows on calendar as "Due"</p>
+                                <DatePicker value={matingData.expectedDueDate} onChange={(e) => setMatingData({...matingData, expectedDueDate: e.target.value})} minDate={matingData.matingDate ? new Date(matingData.matingDate) : new Date()} className="px-3 py-2" />
+                                <p className="text-xs text-gray-500 mt-1">Must be on or after mating date — shows on calendar as "Due"</p>
                             </div>
                             {/* Expandable breeding details */}
                             <button
@@ -11318,6 +11348,44 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-5 rounded-lg text-sm">Save Mating</button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Mating Edit Choice Modal */}
+            {matingEditChoice && (
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6">
+                        <h3 className="text-lg font-bold text-gray-800 mb-1">Planned Mating</h3>
+                        <p className="text-sm text-gray-500 mb-5">
+                            {matingEditChoice.litter_id_public && <span className="font-mono bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded text-xs mr-2">{matingEditChoice.litter_id_public}</span>}
+                            {[matingEditChoice.sire?.prefix, matingEditChoice.sire?.name].filter(Boolean).join(' ') || matingEditChoice.sireId_public || '?'}
+                            {' × '}
+                            {[matingEditChoice.dam?.prefix, matingEditChoice.dam?.name].filter(Boolean).join(' ') || matingEditChoice.damId_public || '?'}
+                        </p>
+                        <div className="space-y-3">
+                            <button
+                                onClick={() => handleEditMating(matingEditChoice)}
+                                className="w-full flex items-center gap-3 px-4 py-3 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition text-left"
+                            >
+                                <Heart size={18} className="text-indigo-500 flex-shrink-0" />
+                                <div>
+                                    <div className="font-semibold text-indigo-800 text-sm">Edit Mating</div>
+                                    <div className="text-xs text-indigo-500">Update sire, dam, dates or notes</div>
+                                </div>
+                            </button>
+                            <button
+                                onClick={() => { handleEditLitter(matingEditChoice); setMatingEditChoice(null); }}
+                                className="w-full flex items-center gap-3 px-4 py-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition text-left"
+                            >
+                                <ClipboardList size={18} className="text-green-600 flex-shrink-0" />
+                                <div>
+                                    <div className="font-semibold text-green-800 text-sm">Convert to Litter</div>
+                                    <div className="text-xs text-green-600">Record birth date and offspring details</div>
+                                </div>
+                            </button>
+                        </div>
+                        <button onClick={() => setMatingEditChoice(null)} className="mt-4 w-full text-center text-sm text-gray-400 hover:text-gray-600">Cancel</button>
                     </div>
                 </div>
             )}
@@ -11502,7 +11570,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleEditLitter(litter);
+                                                    if (litter.isPlanned) { setMatingEditChoice(litter); } else { handleEditLitter(litter); }
                                                 }}
                                                 className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
                                             >
@@ -25137,11 +25205,11 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
         const sireDam = `${sn} \u00d7 ${dn}`;
         const callId = l.litter_id_public;
 
-        // Mating due — matingDate is today only (not overdue) and litter not yet born
+        // Mating due — matingDate within 7 days (upcoming) and litter not yet born
         if (l.matingDate && !l.birthDate) {
             const mated = new Date(l.matingDate); mated.setHours(0, 0, 0, 0);
             const diff = Math.round((mated - today) / 86400000);
-            if (diff === 0) {
+            if (diff >= 0 && diff <= 7) {
                 const key = `${l._id}-mated`;
                 if (!dismissed[key]) urgentItems.push({ key, type: 'mated', pairName, sireDam, callId, diff });
             }
@@ -25209,7 +25277,9 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
                 <div className="divide-y divide-purple-200">
                     {urgentItems.map(item => {
                         const cfg = typeConfig[item.type] || typeConfig.due;
-                        const statusText = item.diff === 0
+                        const statusText = item.type === 'mated' && item.diff > 0
+                            ? `In ${item.diff} day${item.diff !== 1 ? 's' : ''}`
+                            : item.diff === 0
                             ? 'Due today'
                             : `${Math.abs(item.diff)} day${Math.abs(item.diff) !== 1 ? 's' : ''} overdue`;
                         return (
@@ -25857,18 +25927,15 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
         }
     };
 
-    const matingReminderNotifications = notifications.filter(n => n.type === 'mating_reminder');
     const pendingNotifications = notifications.filter(n => 
         n.status === 'pending' && 
         n.type !== 'broadcast' && 
-        n.type !== 'announcement' &&
-        n.type !== 'mating_reminder'
+        n.type !== 'announcement'
     );
     const otherNotifications = notifications.filter(n => 
         n.status !== 'pending' && 
         n.type !== 'broadcast' && 
-        n.type !== 'announcement' &&
-        n.type !== 'mating_reminder'
+        n.type !== 'announcement'
     );
 
     return (
@@ -25890,23 +25957,6 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                         <p className="text-center text-gray-500 py-8">No notifications</p>
                     ) : (
                         <>
-                            {/* Mating Reminder Banner */}
-                            {matingReminderNotifications.length > 0 && (
-                                <div className="rounded-xl border-2 border-indigo-300 bg-indigo-50 overflow-hidden">
-                                    <div className="flex items-center gap-2 px-3 py-2 bg-indigo-100 border-b border-indigo-200">
-                                        <span className="text-sm font-bold text-indigo-800">🐾 Planned Mating Reminder{matingReminderNotifications.length !== 1 ? 's' : ''}</span>
-                                    </div>
-                                    {matingReminderNotifications.map(n => (
-                                        <div key={n._id} className="flex items-start gap-3 px-3 py-2.5 border-b border-indigo-100 last:border-0">
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm text-indigo-900 font-medium">{n.message}</p>
-                                                <p className="text-xs text-indigo-500 mt-0.5">{new Date(n.createdAt).toLocaleString('en-GB')}</p>
-                                            </div>
-                                            <button onClick={() => handleDelete(n._id)} className="p-0.5 text-indigo-300 hover:text-indigo-600 flex-shrink-0" title="Dismiss"><X size={14} /></button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
                             {pendingNotifications.length > 0 && (
                                 <div>
                                     <h4 className="font-bold text-gray-700 mb-2">Pending Requests</h4>
