@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images } from 'lucide-react';
+import ArchiveScreen from './components/ArchiveScreen';
 import { QRCodeSVG } from 'qrcode.react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -2834,7 +2835,7 @@ const computeRelationships = (animal, userAnimals) => {
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
-const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onToggleOwned, userProfile, userAnimals = [] }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onToggleOwned, userProfile, userAnimals = [] }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -2855,11 +2856,13 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
     const ownedAnimalsLoadedRef = useRef(userAnimals.length > 0);
     const [globalRels, setGlobalRels] = useState(null); // null = not yet fetched
     const [globalRelsLoading, setGlobalRelsLoading] = useState(false);
+    const [parentCardKey, setParentCardKey] = useState(0); // increment to force parent cards to refetch
 
     // Fetch ALL animals on the account + global relationships lazily when Lineage tab opens
     useEffect(() => {
         if (detailViewTab !== 5 || ownedAnimalsLoadedRef.current || !authToken || !animal?.id_public) return;
         ownedAnimalsLoadedRef.current = true;
+        setParentCardKey(k => k + 1); // force parent cards to refetch when tab opens
         // Fetch all account animals (no ownership filter)
         axios.get(`${API_BASE_URL}/animals`, {
             headers: { Authorization: `Bearer ${authToken}` }
@@ -2931,9 +2934,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
         // 1. Self-reference
         if (sireId && sireId === animal.id_public) issues.push({ severity: 'error', field: 'Sire', message: 'This animal is listed as its own sire — impossible self-reference.' });
         if (damId  && damId  === animal.id_public) issues.push({ severity: 'error', field: 'Dam',  message: 'This animal is listed as its own dam — impossible self-reference.' });
-        // 2. Broken parent link
-        if (sireId && !sireFull && ownedAnimals.length > 0) issues.push({ severity: 'warning', field: 'Sire', message: 'Sire is linked but not found in your collection or known platform animals.' });
-        if (damId  && !damFull  && ownedAnimals.length > 0) issues.push({ severity: 'warning', field: 'Dam',  message: 'Dam is linked but not found in your collection or known platform animals.' });
+        // 2. Broken parent link (only after globalRels has finished loading to avoid false positives)
+        if (sireId && !sireFull && ownedAnimals.length > 0 && !globalRelsLoading) issues.push({ severity: 'warning', field: 'Sire', message: 'Sire is linked but not found in your collection or known platform animals.' });
+        if (damId  && !damFull  && ownedAnimals.length > 0 && !globalRelsLoading) issues.push({ severity: 'warning', field: 'Dam',  message: 'Dam is linked but not found in your collection or known platform animals.' });
         // 3. Parent born on or after offspring
         if (animalBirth) {
             if (sireFull?.birthDate && new Date(sireFull.birthDate) >= animalBirth)
@@ -2965,7 +2968,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
         if (hasCycle(sireId) || hasCycle(damId))
             issues.push({ severity: 'error', field: 'Lineage', message: 'Circular lineage detected — this animal appears in its own ancestry chain.' });
         return issues;
-    }, [animal, ownedAnimals, globalRels]);
+    }, [animal, ownedAnimals, globalRels, globalRelsLoading]);
     const [pedigreeValidationOpen, setPedigreeValidationOpen] = useState(true);
 
     // Fetch all litters where this animal is sire or dam
@@ -3129,6 +3132,16 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                     Edit
                                 </button>
                             )}
+                            {onArchive && (
+                                <button
+                                    onClick={() => onArchive(animal)}
+                                    className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                    title={animal.archived ? "Unarchive animal" : "Archive animal"}
+                                >
+                                    <Archive size={14} />
+                                    {animal.archived ? 'Unarchive' : 'Archive'}
+                                </button>
+                            )}
                             {onTransfer && (() => {
                                 const iWasTransferredThisAnimal = animal.originalOwnerId && animal.ownerId_public === userProfile?.id_public;
                                 if (iWasTransferredThisAnimal) {
@@ -3197,6 +3210,16 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 >
                                     <Edit size={16} />
                                     Edit
+                                </button>
+                            )}
+                            {onArchive && (
+                                <button
+                                    onClick={() => onArchive(animal)}
+                                    className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-2"
+                                    title={animal.archived ? "Restore from archive" : "Archive animal"}
+                                >
+                                    <Archive size={16} />
+                                    {animal.archived ? 'Unarchive' : 'Archive'}
                                 </button>
                             )}
                             {onTransfer && (() => {
@@ -4043,6 +4066,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <ViewOnlyParentCard 
+                                        key={`sire-${parentCardKey}`}
                                         parentId={animal.fatherId_public || animal.sireId_public} 
                                         parentType="Sire"
                                         API_BASE_URL={API_BASE_URL}
@@ -4050,6 +4074,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                         authToken={authToken}
                                     />
                                     <ViewOnlyParentCard 
+                                        key={`dam-${parentCardKey}`}
                                         parentId={animal.motherId_public || animal.damId_public} 
                                         parentType="Dam"
                                         API_BASE_URL={API_BASE_URL}
@@ -7068,7 +7093,15 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
     const [pedigreeOffspring, setPedigreeOffspring] = useState(null);
     const [expandedPedigreeRecords, setExpandedPedigreeRecords] = useState({});
     const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
+    const [parentCardKey, setParentCardKey] = useState(0); // increment to force parent cards to refetch
     const { fieldTemplate, getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
+
+    // Force parent cards to refetch when Lineage tab opens
+    React.useEffect(() => {
+        if (detailViewTab === 5) {
+            setParentCardKey(k => k + 1);
+        }
+    }, [detailViewTab]);
 
     // Fetch all litters where this animal is sire or dam
     React.useEffect(() => {
@@ -8769,6 +8802,14 @@ const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal, 
         );
     }
 
+    if (loading) {
+        return (
+            <div className="border-2 border-gray-300 rounded-lg p-4 flex justify-center items-center">
+                <Loader2 size={24} className="animate-spin text-gray-400" />
+            </div>
+        );
+    }
+
     if (notFound || (!foundViaOwned && !parentData?.showOnPublicProfile)) {
         return (
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
@@ -8777,14 +8818,6 @@ const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal, 
                 </div>
                 <p className="text-gray-600 text-sm font-semibold">Private {parentType}</p>
                 <p className="text-xs text-gray-400 mt-0.5">This animal is not public</p>
-            </div>
-        );
-    }
-
-    if (loading) {
-        return (
-            <div className="border-2 border-gray-300 rounded-lg p-4 flex justify-center items-center">
-                <Loader2 size={24} className="animate-spin text-gray-400" />
             </div>
         );
     }
@@ -14199,6 +14232,7 @@ const AnimalForm = ({
     const [editGalleryImages, setEditGalleryImages] = useState(animalToEdit?.extraImages || []);
     const [galleryUploading, setGalleryUploading] = useState(false);
     const [galleryUploadError, setGalleryUploadError] = useState(null);
+    const [movePhotoPrompt, setMovePhotoPrompt] = useState(null); // URL of current profile photo when user selects a new one
     const galleryEditFileRef = useRef(null); // collapse health tab sections
 
     const handleChange = (e) => {
@@ -16116,6 +16150,11 @@ const AnimalForm = ({
                                 imageUrl={animalImagePreview} 
                                 onFileChange={async (e) => {
                                     if (e.target.files && e.target.files[0]) {
+                                        // Offer to move the current saved photo to the gallery
+                                        const oldPhotoUrl = animalToEdit?.imageUrl || animalToEdit?.photoUrl;
+                                        if (oldPhotoUrl && editGalleryImages.length < 20) {
+                                            setMovePhotoPrompt(oldPhotoUrl);
+                                        }
                                         const original = e.target.files[0];
                                         try {
                                             let compressedBlob = null;
@@ -16148,10 +16187,47 @@ const AnimalForm = ({
                                     setAnimalImageFile(null);
                                     setAnimalImagePreview(null);
                                     setDeleteImage(true);
+                                    setMovePhotoPrompt(null);
                                 }}
                                 disabled={loading}
                                 Trash2={Trash2}
                             />
+                            {movePhotoPrompt && animalToEdit && (
+                                <div className="mt-3 flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm">
+                                    <Images size={16} className="text-amber-600 shrink-0" />
+                                    <span className="text-amber-800 flex-1">Move current profile photo to the gallery before replacing it?</span>
+                                    <button
+                                        type="button"
+                                        disabled={galleryUploading}
+                                        onClick={async () => {
+                                            setGalleryUploading(true);
+                                            try {
+                                                const galRes = await axios.post(
+                                                    `${API_BASE_URL}/animals/${animalToEdit.id_public}/gallery`,
+                                                    { url: movePhotoPrompt },
+                                                    { headers: { Authorization: `Bearer ${authToken}` } }
+                                                );
+                                                setEditGalleryImages(galRes.data.extraImages);
+                                            } catch (err) {
+                                                // silently ignore — don't block the photo change
+                                            } finally {
+                                                setGalleryUploading(false);
+                                                setMovePhotoPrompt(null);
+                                            }
+                                        }}
+                                        className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-md text-xs font-medium disabled:opacity-50 shrink-0"
+                                    >
+                                        {galleryUploading ? <Loader2 size={12} className="animate-spin" /> : 'Yes, move it'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setMovePhotoPrompt(null)}
+                                        className="px-3 py-1 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 rounded-md text-xs font-medium shrink-0"
+                                    >
+                                        No
+                                    </button>
+                                </div>
+                            )}
                         </div>
                         
                         {/* Identity Fields */}
@@ -18953,8 +19029,25 @@ const AnimalForm = ({
                                             setGalleryUploading(true);
                                             setGalleryUploadError(null);
                                             try {
+                                                // Compress before uploading (target 480KB, under the 500KB server limit)
+                                                let fileToUpload = file;
+                                                try {
+                                                    let compressedBlob = null;
+                                                    try {
+                                                        compressedBlob = await compressImageWithWorker(file, 480 * 1024, { maxWidth: 1920, maxHeight: 1920, startQuality: 0.85 });
+                                                    } catch (_) { compressedBlob = null; }
+                                                    if (!compressedBlob) {
+                                                        try {
+                                                            compressedBlob = await compressImageToMaxSize(file, 480 * 1024, { maxWidth: 1920, maxHeight: 1920, startQuality: 0.85 });
+                                                        } catch (_) {
+                                                            compressedBlob = await compressImageFile(file, { maxWidth: 1920, maxHeight: 1920, quality: 0.82 });
+                                                        }
+                                                    }
+                                                    const baseName = file.name.replace(/\.[^/.]+$/, '') || 'gallery';
+                                                    fileToUpload = new File([compressedBlob], `${baseName}.jpg`, { type: 'image/jpeg' });
+                                                } catch (_) { /* compression failed — try original */ }
                                                 const fd = new FormData();
-                                                fd.append('file', file);
+                                                fd.append('file', fileToUpload);
                                                 const upRes = await axios.post(`${API_BASE_URL}/upload`, fd, {
                                                     headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'multipart/form-data' }
                                                 });
@@ -21330,7 +21423,22 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     );
 };
 
-const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, navigate }) => {
+const AnimalList = ({ 
+    authToken, 
+    showModalMessage, 
+    onEditAnimal, 
+    onViewAnimal, 
+    navigate,
+    // Archive props
+    showArchiveScreen,
+    setShowArchiveScreen,
+    archivedAnimals,
+    setArchivedAnimals,
+    soldTransferredAnimals,
+    setSoldTransferredAnimals,
+    archiveLoading,
+    setArchiveLoading
+}) => {
     const [animals, setAnimals] = useState([]);
     const [allAnimalsRaw, setAllAnimalsRaw] = useState([]); // Unfiltered ? used by Management View
     const [availableAnimalsRaw, setAvailableAnimalsRaw] = useState([]); // All user-created animals with status=Available (no ownership filter)
@@ -21388,12 +21496,17 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
             return saved !== null ? saved === 'true' : true;
         } catch { return true; }
     });
+    // Archive section collapse states
+    const [archiveSoldCollapsed, setArchiveSoldCollapsed] = useState(false);
+    const [archiveArchivedCollapsed, setArchiveArchivedCollapsed] = useState(false);
+    
     const [publicFilter, setPublicFilter] = useState(() => {
         try {
             return localStorage.getItem('animalList_publicFilter') || '';
         } catch { return ''; }
     });
     const [bulkDeleteMode, setBulkDeleteMode] = useState({}); // { species: true/false }
+    const [bulkArchiveMode, setBulkArchiveMode] = useState({}); // { species: true/false }
     const [selectedAnimals, setSelectedAnimals] = useState({}); // { species: [id1, id2, ...] }
     const [collapsedSpecies, setCollapsedSpecies] = useState({}); // { species: true/false } - for mobile collapse
     const [userSpeciesOrder, setUserSpeciesOrder] = useState([]); // User's custom species order
@@ -21426,6 +21539,10 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
     const [showSuppliesScreen, setShowSuppliesScreen] = useState(false);
     const [supplies, setSupplies] = useState([]);
     const [suppliesLoading, setSuppliesLoading] = useState(false);
+    // Duplicates state
+    const [showDuplicatesScreen, setShowDuplicatesScreen] = useState(false);
+    const [duplicateGroups, setDuplicateGroups] = useState([]);
+    const [duplicatesLoading, setDuplicatesLoading] = useState(false);
     const [supplyForm, setSupplyForm] = useState({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months' });
     const [supplyFormVisible, setSupplyFormVisible] = useState(false);
     const [editingSupplyId, setEditingSupplyId] = useState(null);
@@ -21444,6 +21561,31 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
     const [assigningAnimalId, setAssigningAnimalId] = useState(null);
     const [newCleaningTaskName, setNewCleaningTaskName] = useState('');
     const [newCleaningTaskFreq, setNewCleaningTaskFreq] = useState('');
+    
+    // Fetch archived + sold/transferred animals from API
+    const fetchArchiveData = useCallback(async () => {
+        setArchiveLoading(true);
+        try {
+            const res = await axios.get(`${API_BASE_URL}/animals/archived`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setArchivedAnimals(res.data.archived || []);
+            setSoldTransferredAnimals(res.data.soldTransferred || []);
+        } catch (err) {
+            console.error('Failed to fetch archive data:', err);
+            showModalMessage('Error', err.response?.data?.message || 'Failed to load archive');
+        } finally {
+            setArchiveLoading(false);
+        }
+    }, [authToken, API_BASE_URL, showModalMessage]);
+    
+    // Fetch archive data when archive screen is opened
+    React.useEffect(() => {
+        if (showArchiveScreen) {
+            fetchArchiveData();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showArchiveScreen]);
     
     // Save filters to localStorage whenever they change
     useEffect(() => {
@@ -21694,6 +21836,20 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
         return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
     }, []);
 
+    // Listen for archive events from App component to refresh lists
+    useEffect(() => {
+        const handleAnimalArchived = () => {
+            fetchAnimals();
+            fetchAllAnimals();
+            if (showArchiveScreen) {
+                fetchArchiveData();
+            }
+        };
+        window.addEventListener('animal-archived', handleAnimalArchived);
+        return () => window.removeEventListener('animal-archived', handleAnimalArchived);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fetchAnimals, fetchAllAnimals, showArchiveScreen]);
+
     useEffect(() => { fetchAllAnimals(); }, [fetchAllAnimals]);
     useEffect(() => { fetchAvailableAnimals(); }, [fetchAvailableAnimals]);
     useEffect(() => { fetchSoldTransferred(); }, [fetchSoldTransferred]);
@@ -21736,8 +21892,16 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
 
     // Reset log screen when navigating away from management view
     useEffect(() => {
-        if (animalView !== 'management') { setShowActivityLogScreen(false); setShowSuppliesScreen(false); setSupplyFormVisible(false); }
+        if (animalView !== 'management') { setShowActivityLogScreen(false); setShowSuppliesScreen(false); setSupplyFormVisible(false); setShowDuplicatesScreen(false); }
     }, [animalView]);
+    
+    // Auto-fetch duplicates when duplicates screen opens for the first time
+    useEffect(() => {
+        if (showDuplicatesScreen && duplicateGroups.length === 0 && !duplicatesLoading) {
+            fetchDuplicates();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showDuplicatesScreen]);
 
     // Fire-and-forget management activity logger (called from management handlers)
     const logManagementActivity = useCallback(async (action, targetId_public, details = {}) => {
@@ -21945,6 +22109,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
 
     const toggleBulkDeleteMode = (species) => {
         setBulkDeleteMode(prev => ({ ...prev, [species]: !prev[species] }));
+        setSelectedAnimals(prev => ({ ...prev, [species]: [] }));
+    };
+
+    const toggleBulkArchiveMode = (species) => {
+        setBulkArchiveMode(prev => ({ ...prev, [species]: !prev[species] }));
         setSelectedAnimals(prev => ({ ...prev, [species]: [] }));
     };
 
@@ -22194,6 +22363,38 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
         } catch (error) {
             console.error('Error deleting animals:', error);
             showModalMessage('Error', 'Failed to delete some animals. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleBulkArchive = async (species) => {
+        const selectedIds = selectedAnimals[species] || [];
+        if (selectedIds.length === 0) {
+            showModalMessage('No Selection', 'Please select at least one animal to archive.');
+            return;
+        }
+
+        const confirmArchive = window.confirm(`Archive ${selectedIds.length} animal(s)? They will be hidden from your main lists but remain in pedigrees.`);
+        if (!confirmArchive) return;
+
+        try {
+            setLoading(true);
+            for (const id of selectedIds) {
+                await axios.post(`${API_BASE_URL}/animals/${id}/archive`, {}, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+            }
+            showModalMessage('Success', `Successfully archived ${selectedIds.length} animal(s).`);
+            setBulkArchiveMode(prev => ({ ...prev, [species]: false }));
+            setSelectedAnimals(prev => ({ ...prev, [species]: [] }));
+            await fetchAnimals();
+            if (showArchiveScreen) {
+                await fetchArchiveData();
+            }
+        } catch (error) {
+            console.error('Error archiving animals:', error);
+            showModalMessage('Error', 'Failed to archive some animals. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -22951,6 +23152,312 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
         );
     };
 
+    // Fetch duplicates from API
+    const fetchDuplicates = async () => {
+        setDuplicatesLoading(true);
+        try {
+            const url = `${API_BASE_URL}/animals/duplicates`;
+            console.log('[Duplicates] Fetching from:', url);
+            console.log('[Duplicates] Auth token:', authToken ? 'Present' : 'Missing');
+            const res = await axios.get(url, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            console.log('Duplicates response:', res.data);
+            const groups = res.data.groups || [];
+            
+            // Validate that all animals have id_public
+            groups.forEach((group, gIdx) => {
+                if (!group.primary?.id_public) {
+                    console.error(`Group ${gIdx} primary missing id_public:`, group.primary);
+                }
+                group.duplicates?.forEach((dup, dIdx) => {
+                    if (!dup.animal?.id_public) {
+                        console.error(`Group ${gIdx} duplicate ${dIdx} missing id_public:`, dup.animal);
+                    }
+                });
+            });
+            
+            setDuplicateGroups(groups);
+        } catch (err) {
+            console.error('Failed to fetch duplicates:', err);
+            console.error('Error response:', err.response);
+            console.error('Error data:', err.response?.data);
+            console.error('Error status:', err.response?.status);
+            console.error('Error message:', err.response?.data?.message);
+            showModalMessage('Error', err.response?.data?.message || 'Failed to load duplicates');
+        } finally {
+            setDuplicatesLoading(false);
+        }
+    };
+
+    // -- Duplicates Screen --------------------------------------------------------
+    const renderDuplicatesScreen = () => {
+
+        const handleDismiss = async (id1, id2) => {
+            // Validate IDs before proceeding
+            if (!id1 || !id2) {
+                showModalMessage('Error', 'Invalid animal IDs. Please refresh and try again.');
+                console.error('Invalid IDs for dismiss:', { id1, id2 });
+                return;
+            }
+            
+            try {
+                console.log('Dismissing duplicate pair:', { id1, id2 });
+                await axios.post(`${API_BASE_URL}/animals/duplicates/dismiss`, 
+                    { id1, id2 },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+                // Remove from UI
+                setDuplicateGroups(prev => prev.map(group => ({
+                    ...group,
+                    duplicates: group.duplicates.filter(d => 
+                        !((group.primary.id_public === id1 && d.animal.id_public === id2) ||
+                          (group.primary.id_public === id2 && d.animal.id_public === id1))
+                    )
+                })).filter(group => group.duplicates.length > 0));
+            } catch (err) {
+                showModalMessage('Error', err.response?.data?.message || 'Failed to dismiss duplicate');
+            }
+        };
+
+        const handleMerge = async (keepId, deleteId) => {
+            // Validate IDs before proceeding
+            if (!keepId || !deleteId) {
+                showModalMessage('Error', 'Invalid animal IDs. Please refresh and try again.');
+                console.error('Invalid IDs for merge:', { keepId, deleteId });
+                return;
+            }
+            
+            const keepAnimal = [...duplicateGroups.flatMap(g => [g.primary, ...g.duplicates.map(d => d.animal)])].find(a => a.id_public === keepId);
+            const deleteAnimal = [...duplicateGroups.flatMap(g => [g.primary, ...g.duplicates.map(d => d.animal)])].find(a => a.id_public === deleteId);
+            
+            if (!keepAnimal || !deleteAnimal) {
+                showModalMessage('Error', 'Could not find one or both animals. Please refresh and try again.');
+                console.error('Animals not found:', { keepAnimal, deleteAnimal });
+                return;
+            }
+            
+            if (!window.confirm(`Merge "${deleteAnimal?.name}" into "${keepAnimal?.name}"? This will delete the duplicate and transfer all related data (logs, litters, offspring). This cannot be undone.`)) return;
+
+            try {
+                console.log('Merging animals:', { keepId, deleteId });
+                const res = await axios.post(`${API_BASE_URL}/animals/duplicates/merge`,
+                    { keepId, deleteId },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+                showModalMessage('Success', res.data.message || 'Animals merged successfully');
+                // Remove merged pair from UI
+                setDuplicateGroups(prev => prev.map(group => ({
+                    ...group,
+                    duplicates: group.duplicates.filter(d => d.animal.id_public !== deleteId)
+                })).filter(group => group.duplicates.length > 0));
+                // Refresh animal list
+                fetchAnimals();
+            } catch (err) {
+                showModalMessage('Error', err.response?.data?.message || 'Failed to merge animals');
+            }
+        };
+
+        const formatReasons = (reasons) => {
+            return reasons.map(r => {
+                if (r === 'exact_name') return 'Exact name match';
+                if (r.startsWith('similar_name_')) return `Similar name (${r.split('_')[2]} match)`;
+                if (r === 'same_birthdate_species') return 'Same birthdate & species';
+                if (r === 'same_parents') return 'Same parents';
+                return r;
+            }).join(' • ');
+        };
+
+        return (
+            <div className="mt-4 space-y-4">
+                <div className="flex items-center justify-between">
+                    <button
+                        onClick={() => setShowDuplicatesScreen(false)}
+                        className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-800 transition"
+                    >
+                        <ChevronLeft size={16} />
+                        Back to Management
+                    </button>
+                    <button
+                        onClick={fetchDuplicates}
+                        disabled={duplicatesLoading}
+                        className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition disabled:opacity-50"
+                    >
+                        <RefreshCw size={12} />
+                        Refresh
+                    </button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <Search size={18} className="text-amber-600" />
+                    <h3 className="text-lg font-semibold text-gray-800">Find Duplicate Animals</h3>
+                    <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">{duplicateGroups.length} group{duplicateGroups.length !== 1 ? 's' : ''}</span>
+                </div>
+
+                {duplicatesLoading ? (
+                    <div className="flex justify-center py-12">
+                        <Loader2 size={32} className="animate-spin text-gray-400" />
+                    </div>
+                ) : duplicateGroups.length === 0 ? (
+                    <div className="text-center py-16 text-gray-400">
+                        <div className="text-5xl mb-3">✨</div>
+                        <p className="text-sm font-medium">No duplicate animals found</p>
+                        <p className="text-xs mt-1">Your collection looks clean!</p>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {duplicateGroups.map((group, gIdx) => (
+                            <div key={gIdx} className="border border-amber-200 rounded-lg bg-amber-50/30 p-4 space-y-3">
+                                {group.duplicates.map((dup, dIdx) => (
+                                    <div key={dIdx} className="bg-white rounded-lg border border-gray-200 shadow-sm">
+                                        <div className="p-3 bg-amber-50 border-b border-amber-100 flex items-center justify-between">
+                                            <div className="text-xs text-amber-700 font-medium">
+                                                {formatReasons(dup.reasons)}
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => handleDismiss(group.primary.id_public, dup.animal.id_public)}
+                                                    className="text-xs px-2 py-1 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 rounded transition"
+                                                >
+                                                    Not a duplicate
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        const choice = window.confirm(`Which animal do you want to KEEP?\n\nOK = Keep "${group.primary.name}"\nCancel = Keep "${dup.animal.name}"`);
+                                                        if (choice) {
+                                                            handleMerge(group.primary.id_public, dup.animal.id_public);
+                                                        } else {
+                                                            handleMerge(dup.animal.id_public, group.primary.id_public);
+                                                        }
+                                                    }}
+                                                    className="text-xs px-2 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded transition"
+                                                >
+                                                    Merge
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 divide-x divide-gray-200">
+                                            {[group.primary, dup.animal].map((animal, aIdx) => (
+                                                <div key={aIdx} className="p-3 space-y-2">
+                                                    <div className="flex items-start gap-2">
+                                                        <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                                            <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="font-semibold text-gray-800 text-sm truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</p>
+                                                            <p className="text-xs text-gray-500">{animal.species} • {animal.gender || 'Unknown'}</p>
+                                                            {animal.breederAssignedId && <p className="text-xs text-gray-400">ID: {animal.breederAssignedId}</p>}
+                                                        </div>
+                                                    </div>
+                                                    {animal.birthDate && (
+                                                        <div className="text-xs text-gray-600">
+                                                            <span className="text-gray-400">Born:</span> {new Date(animal.birthDate).toLocaleDateString()}
+                                                        </div>
+                                                    )}
+                                                    {(animal.fatherId_public || animal.sireId_public || animal.motherId_public || animal.damId_public) && (
+                                                        <div className="text-xs text-gray-600">
+                                                            <span className="text-gray-400">Parents:</span> {[animal.fatherId_public || animal.sireId_public, animal.motherId_public || animal.damId_public].filter(Boolean).join(' × ')}
+                                                        </div>
+                                                    )}
+                                                    <div className="text-xs"><span className="text-gray-400">Status:</span> <span className={animal.status === 'Deceased' ? 'text-gray-500' : 'text-green-600'}>{animal.status || 'N/A'}</span></div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    // -- Archive Screen -----------------------------------------------------------
+    const renderArchiveScreen = () => {
+        return (
+            <ArchiveScreen
+                onBack={() => setShowArchiveScreen(false)}
+                archiveLoading={archiveLoading}
+                archivedAnimals={archivedAnimals}
+                soldTransferredAnimals={soldTransferredRaw.filter(a => a.isViewOnly)}
+                soldOwnerFilter={soldOwnerFilter}
+                setSoldOwnerFilter={setSoldOwnerFilter}
+                collapsedMgmtSections={collapsedMgmtSections}
+                setCollapsedMgmtSections={setCollapsedMgmtSections}
+                navigate={navigate}
+                authToken={authToken}
+                API_BASE_URL={API_BASE_URL}
+                showModalMessage={showModalMessage}
+                fetchArchiveData={fetchArchiveData}
+                fetchAnimals={fetchAnimals}
+                MgmtAnimalCard={MgmtAnimalCard}
+                SectionHeader={SectionHeader}
+            />
+        );
+    };
+
+    // -- Shared Management Components ------------------------------------------
+    // All appearance fields that make up "Variety" ? same set as Tab 3 / Appearance section
+    const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph', 'markings', 'eyeColor', 'nailColor', 'carrierTraits', 'size'];
+    const getAnimalVariety = (a) => VARIETY_KEYS.map(k => a[k]).filter(Boolean).join(' ');
+
+    const MgmtAnimalCard = ({ animal, extras }) => (
+        <div
+            className="flex items-center bg-white border border-gray-200 rounded-lg px-3 py-2 hover:bg-gray-50 cursor-pointer gap-2"
+            onClick={() => onViewAnimal && onViewAnimal(animal)}
+        >
+            <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
+                {animal.imageUrl ? (
+                    <img src={animal.imageUrl} alt={animal.name} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                ) : (
+                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                        <Cat size={14} className="text-gray-400" />
+                    </div>
+                )}
+                <div className="min-w-0 flex-1">
+                    <div className="font-semibold text-sm text-gray-800 truncate">
+                        {[animal.prefix, animal.name || 'Unnamed', animal.suffix].filter(Boolean).join(' ')}
+                    </div>
+                    <div className="text-xs text-gray-500 truncate">
+                        {getSpeciesDisplayName(animal.species)}{animal.gender ? ` • ${animal.gender}` : ''}
+                        {animal.dateOfBirth ? ` • ${formatDateShort(animal.dateOfBirth)}` : ''}
+                    </div>
+                    {(() => {
+                        const variety = getAnimalVariety(animal);
+                        const parts = [animal.status, variety].filter(Boolean);
+                        return parts.length > 0 ? (
+                            <div className="text-xs text-gray-400 truncate">{parts.join(' • ')}</div>
+                        ) : null;
+                    })()}
+                </div>
+            </div>
+            {extras && <div className="shrink-0 flex items-center">{extras}</div>}
+        </div>
+    );
+
+    const SectionHeader = ({ sectionKey, icon, title, count, bgClass, onClick }) => {
+        const collapsed = collapsedMgmtSections[sectionKey] || false;
+        return (
+            <div
+                className={`relative flex items-center justify-between ${bgClass} px-3 py-2.5 sm:px-4 sm:py-3 border-b cursor-pointer`}
+                onClick={onClick || (() => setCollapsedMgmtSections(prev => ({ ...prev, [sectionKey]: !prev[sectionKey] })))}
+            >
+                <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
+                    {collapsed
+                        ? <ChevronDown className="w-4 h-4 text-gray-400" />
+                        : <ChevronUp className="w-4 h-4 text-gray-400" />}
+                </div>
+                <div className="flex items-center gap-2">
+                    {icon}
+                    <span className="font-semibold text-gray-800">{title}</span>
+                    <span className="text-xs text-gray-500 bg-white/70 px-2 py-0.5 rounded-full">{count}</span>
+                </div>
+                <div />
+            </div>
+        );
+    };
+
     // -- Management View ----------------------------------------------------------
     const renderManagementView = () => {
         const today = new Date();
@@ -22972,6 +23479,36 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
 
         const toggleSection = (key) => setCollapsedMgmtSections(prev => ({ ...prev, [key]: !prev[key] }));
         const toggleGroup = (key) => setCollapsedMgmtGroups(prev => ({ ...prev, [key]: !prev[key] }));
+
+        const MgmtGroup = ({ groupKey, label, groupAnimals, headerClass, renderExtras }) => {
+            const isGrpCollapsed = collapsedMgmtGroups[groupKey] || false;
+            return (
+                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <div
+                        className={`relative flex items-center justify-between ${headerClass} px-3 py-2 cursor-pointer`}
+                        onClick={() => toggleGroup(groupKey)}
+                    >
+                        <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
+                            {isGrpCollapsed
+                                ? <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+                                : <ChevronUp className="w-3.5 h-3.5 text-gray-400" />}
+                        </div>
+                        <span className="font-medium text-sm text-gray-800">{label}</span>
+                        <span className="text-xs text-gray-500 bg-white/70 px-2 py-0.5 rounded-full">{groupAnimals.length}</span>
+                    </div>
+                    {!isGrpCollapsed && (
+                        <div className="p-2 space-y-1.5 bg-white">
+                            {groupAnimals.length === 0
+                                ? <div className="text-sm text-gray-400 text-center py-2">None</div>
+                                : groupAnimals.map(a => (
+                                    <MgmtAnimalCard key={a._id || a.id_public} animal={a} extras={renderExtras ? renderExtras(a) : null} />
+                                ))
+                            }
+                        </div>
+                    )}
+                </div>
+            );
+        };
 
         // Enclosure CRUD handlers
         const handleSaveEnclosure = async () => {
@@ -23247,98 +23784,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                     logManagementActivity('reproduction_update', animal.id_public, { name: animal.name, species: animal.species, status: reproStatus });
                 })
                 .catch(err => { console.error('Repro status update failed:', err); setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, ...Object.fromEntries(Object.keys(patch).map(k => [k, animal[k]])) } : a)); });
-        };
-
-        // -- Shared helpers --------------------------------------------------------
-        // All appearance fields that make up "Variety" ? same set as Tab 3 / Appearance section
-        const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph', 'markings', 'eyeColor', 'nailColor', 'carrierTraits', 'size'];
-        const getAnimalVariety = (a) => VARIETY_KEYS.map(k => a[k]).filter(Boolean).join(' ');
-
-        // -- Shared card + group components ---------------------------------------
-        const MgmtAnimalCard = ({ animal, extras }) => (
-            <div
-                className="flex items-center bg-white border border-gray-200 rounded-lg px-3 py-2 hover:bg-gray-50 cursor-pointer gap-2"
-                onClick={() => onViewAnimal && onViewAnimal(animal)}
-            >
-                <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
-                    {animal.imageUrl ? (
-                        <img src={animal.imageUrl} alt={animal.name} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
-                    ) : (
-                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                            <Cat size={14} className="text-gray-400" />
-                        </div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-sm text-gray-800 truncate">
-                            {[animal.prefix, animal.name || 'Unnamed', animal.suffix].filter(Boolean).join(' ')}
-                        </div>
-                        <div className="text-xs text-gray-500 truncate">
-                            {getSpeciesDisplayName(animal.species)}{animal.gender ? ` • ${animal.gender}` : ''}
-                            {animal.dateOfBirth ? ` • ${formatDateShort(animal.dateOfBirth)}` : ''}
-                        </div>
-                        {(() => {
-                            const variety = getAnimalVariety(animal);
-                            const parts = [animal.status, variety].filter(Boolean);
-                            return parts.length > 0 ? (
-                                <div className="text-xs text-gray-400 truncate">{parts.join(' • ')}</div>
-                            ) : null;
-                        })()}
-                    </div>
-                </div>
-                {extras && <div className="shrink-0 flex items-center">{extras}</div>}
-            </div>
-        );
-
-        const MgmtGroup = ({ groupKey, label, groupAnimals, headerClass, renderExtras }) => {
-            const isGrpCollapsed = collapsedMgmtGroups[groupKey] || false;
-            return (
-                <div className="border border-gray-200 rounded-lg overflow-hidden">
-                    <div
-                        className={`relative flex items-center justify-between ${headerClass} px-3 py-2 cursor-pointer`}
-                        onClick={() => toggleGroup(groupKey)}
-                    >
-                        <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
-                            {isGrpCollapsed
-                                ? <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
-                                : <ChevronUp className="w-3.5 h-3.5 text-gray-400" />}
-                        </div>
-                        <span className="font-medium text-sm text-gray-800">{label}</span>
-                        <span className="text-xs text-gray-500 bg-white/70 px-2 py-0.5 rounded-full">{groupAnimals.length}</span>
-                    </div>
-                    {!isGrpCollapsed && (
-                        <div className="p-2 space-y-1.5 bg-white">
-                            {groupAnimals.length === 0
-                                ? <div className="text-sm text-gray-400 text-center py-2">None</div>
-                                : groupAnimals.map(a => (
-                                    <MgmtAnimalCard key={a._id || a.id_public} animal={a} extras={renderExtras ? renderExtras(a) : null} />
-                                ))
-                            }
-                        </div>
-                    )}
-                </div>
-            );
-        };
-
-        const SectionHeader = ({ sectionKey, icon, title, count, bgClass }) => {
-            const collapsed = collapsedMgmtSections[sectionKey] || false;
-            return (
-                <div
-                    className={`relative flex items-center justify-between ${bgClass} px-3 py-2.5 sm:px-4 sm:py-3 border-b cursor-pointer`}
-                    onClick={() => toggleSection(sectionKey)}
-                >
-                    <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
-                        {collapsed
-                            ? <ChevronDown className="w-4 h-4 text-gray-400" />
-                            : <ChevronUp className="w-4 h-4 text-gray-400" />}
-                    </div>
-                    <div className="flex items-center gap-2">
-                        {icon}
-                        <span className="font-semibold text-gray-800">{title}</span>
-                        <span className="text-xs text-gray-500 bg-white/70 px-2 py-0.5 rounded-full">{count}</span>
-                    </div>
-                    <div />
-                </div>
-            );
         };
 
         return (
@@ -24138,7 +24583,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                     </button>
 
                     </>)}
-                    {animalView === 'management' && !showActivityLogScreen && !showSuppliesScreen && (
+                    {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
                         <button
                             onClick={() => {
                                 setActivityLogs([]);
@@ -24152,7 +24597,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                             <span className="font-medium">Activity Log</span>
                         </button>
                     )}
-                    {animalView === 'management' && !showActivityLogScreen && !showSuppliesScreen && (
+                    {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
                         <button
                             onClick={() => { setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months' }); setEditingSupplyId(null); setSupplyFormVisible(false); setShowSuppliesScreen(true); }}
                             className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 border border-emerald-200 rounded-lg transition font-medium"
@@ -24162,7 +24607,27 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                             <span className="font-medium">Supplies</span>
                         </button>
                     )}
-                    {animalView === 'management' && !showActivityLogScreen && !showSuppliesScreen && (
+                    {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
+                        <button
+                            onClick={() => setShowArchiveScreen(true)}
+                            className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-purple-600 hover:text-purple-800 hover:bg-purple-50 border border-purple-200 rounded-lg transition font-medium"
+                            title="Archive"
+                        >
+                            <Archive size={14} className="sm:w-4 sm:h-4" />
+                            <span className="font-medium">Archive</span>
+                        </button>
+                    )}
+                    {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
+                        <button
+                            onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(true); }}
+                            className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-amber-600 hover:text-amber-800 hover:bg-amber-50 border border-amber-200 rounded-lg transition font-medium"
+                            title="Find Duplicate Animals"
+                        >
+                            <Search size={14} className="sm:w-4 sm:h-4" />
+                            <span className="font-medium">Find Duplicates</span>
+                        </button>
+                    )}
+                    {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
                         <button
                             onClick={toggleMgmtAlerts}
                             title={mgmtAlertsEnabled ? 'Management alerts on — click to disable' : 'Management alerts off — click to enable'}
@@ -24186,6 +24651,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
             </h2>
 
             {/* View Toggle: My Animals / Management */}
+            {!showArchiveScreen && (
             <div className="flex border border-gray-200 rounded-xl overflow-hidden shadow-sm mb-4">
                 <button
                     onClick={() => setAnimalView('list')}
@@ -24206,8 +24672,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                     <span>Management</span>
                 </button>
             </div>
+            )}
 
-            {animalView === 'list' && (
+            {animalView === 'list' && !showArchiveScreen && (
             <div className="mb-4 sm:mb-6 p-2 sm:p-4 border rounded-lg bg-gray-50 space-y-2 sm:space-y-3">
                 {/* Search and Add buttons - Stack on mobile */}
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
@@ -24386,8 +24853,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
             </div>
             )}
 
-            {animalView === 'management' ? (
-                showActivityLogScreen ? renderActivityLogScreen() : showSuppliesScreen ? renderSuppliesScreen() : renderManagementView()
+            {showArchiveScreen ? renderArchiveScreen() : animalView === 'management' ? (
+                showActivityLogScreen ? renderActivityLogScreen() : showSuppliesScreen ? renderSuppliesScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : renderManagementView()
             ) : (loading && animals.length === 0) ? (
                 /* Skeleton grid — only on very first load before any animals arrive */
                 <div className="space-y-3 sm:space-y-4">
@@ -24415,7 +24882,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
             ) : (
                 <div className="space-y-3 sm:space-y-4">
                     {speciesNames.map(species => {
-                        const isBulkMode = bulkDeleteMode[species] || false;
+                        const isBulkMode = bulkDeleteMode[species] || bulkArchiveMode[species] || false;
+                        const isArchiveMode = bulkArchiveMode[species] || false;
                         const selected = selectedAnimals[species] || [];
                         const isCollapsed = collapsedSpecies[species] || false;
                         // Skip species that have no visible animals under current filters
@@ -24475,20 +24943,41 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                                             <span className="text-xs text-gray-600 sm:hidden">
                                                 {selected.length}
                                             </span>
-                                            <button
-                                                onClick={() => handleBulkDelete(species)}
-                                                disabled={selected.length === 0}
-                                                className="px-2 sm:px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs sm:text-sm font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                <span className="hidden sm:inline">Delete Selected</span>
-                                                <span className="sm:hidden">Delete</span>
-                                            </button>
-                                            <button
-                                                onClick={() => toggleBulkDeleteMode(species)}
-                                                className="px-2 sm:px-3 py-1 bg-gray-300 hover:bg-gray-400 text-gray-800 text-xs sm:text-sm font-semibold rounded-lg transition"
-                                            >
-                                                Cancel
-                                            </button>
+                                            {isArchiveMode ? (
+                                                <>
+                                                    <button
+                                                        onClick={() => handleBulkArchive(species)}
+                                                        disabled={selected.length === 0}
+                                                        className="px-2 sm:px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs sm:text-sm font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        <span className="hidden sm:inline">Archive Selected</span>
+                                                        <span className="sm:hidden">Archive</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => toggleBulkArchiveMode(species)}
+                                                        className="px-2 sm:px-3 py-1 bg-gray-300 hover:bg-gray-400 text-gray-800 text-xs sm:text-sm font-semibold rounded-lg transition"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <button
+                                                        onClick={() => handleBulkDelete(species)}
+                                                        disabled={selected.length === 0}
+                                                        className="px-2 sm:px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs sm:text-sm font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        <span className="hidden sm:inline">Delete Selected</span>
+                                                        <span className="sm:hidden">Delete</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => toggleBulkDeleteMode(species)}
+                                                        className="px-2 sm:px-3 py-1 bg-gray-300 hover:bg-gray-400 text-gray-800 text-xs sm:text-sm font-semibold rounded-lg transition"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </>
+                                            )}
                                         </>
                                     )}
                                     {!isBulkMode && (
@@ -24522,6 +25011,13 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, n
                                                 title="Delete Multiple"
                                             >
                                                 <Trash2 className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-red-500" />
+                                            </button>
+                                            <button
+                                                onClick={() => toggleBulkArchiveMode(species)}
+                                                className="p-1 sm:p-2 hover:bg-gray-200 rounded-lg transition"
+                                                title="Archive Multiple"
+                                            >
+                                                <Archive className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-gray-600" />
                                             </button>
                                         </>
                                     )}
@@ -26353,6 +26849,7 @@ const App = () => {
     const [animalToView, setAnimalToView] = useState(null);
     const [animalViewHistory, setAnimalViewHistory] = useState([]); // Navigation history stack for animals
     const [detailViewTab, setDetailViewTab] = useState(1); // Tab for detail view
+    const [parentCardKey, setParentCardKey] = useState(0); // Force parent cards to refetch when tab opens
     const [showTabs, setShowTabs] = useState(true); // Toggle for collapsible tabs panel
     const [sireData, setSireData] = useState(null);
     const [damData, setDamData] = useState(null);
@@ -26371,6 +26868,13 @@ const App = () => {
             setPublicAnimalViewHistory([]);
         }
     }, [viewingPublicAnimal]);
+    
+    // Force parent cards to refetch when Lineage tab opens
+    React.useEffect(() => {
+        if (detailViewTab === 5) {
+            setParentCardKey(k => k + 1);
+        }
+    }, [detailViewTab]);
     
     // Fetch parent animals when viewing an animal
     React.useEffect(() => {
@@ -26503,6 +27007,12 @@ const App = () => {
     const [communityUsers, setCommunityUsers] = useState([]);
     const scrollContainerRef = useRef(null);
 
+    // Archive states
+    const [showArchiveScreen, setShowArchiveScreen] = useState(false);
+    const [archivedAnimals, setArchivedAnimals] = useState([]);
+    const [soldTransferredAnimals, setSoldTransferredAnimals] = useState([]);
+    const [archiveLoading, setArchiveLoading] = useState(false);
+    
     // Tutorial modal states
     const [showInfoTab, setShowInfoTab] = useState(false);
     const [showAdminPanel, setShowAdminPanel] = useState(false);
@@ -27803,6 +28313,44 @@ const App = () => {
         }
     };
 
+    const handleArchiveAnimal = async (animal) => {
+        const isArchived = animal.archived;
+        const action = isArchived ? 'unarchive' : 'archive';
+        const confirmMsg = isArchived 
+            ? `Restore ${animal.name} from archive? It will reappear in your main animal lists.`
+            : `Archive ${animal.name}? It will be hidden from your main lists but remain in pedigrees.`;
+        
+        if (!window.confirm(confirmMsg)) return;
+        
+        try {
+            await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/${action}`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            
+            const successMsg = isArchived 
+                ? `${animal.name} has been restored from archive`
+                : `${animal.name} has been archived`;
+            
+            showModalMessage('Success', successMsg);
+            
+            // Update the animal in view if open
+            if (animalToView && animalToView.id_public === animal.id_public) {
+                setAnimalToView({ ...animalToView, archived: !isArchived });
+            }
+            
+            // Trigger a refresh event for any listening components (like AnimalList)
+            window.dispatchEvent(new CustomEvent('animal-archived', { detail: { animalId: animal.id_public, archived: !isArchived } }));
+            
+            // Close detail view if archiving (sends back to main list)
+            if (!isArchived) {
+                navigate('/');
+            }
+        } catch (error) {
+            console.error(`Failed to ${action} animal:`, error);
+            showModalMessage('Error', error.response?.data?.message || `Failed to ${action} animal`);
+        }
+    };
+
     const handleDeleteAnimal = async (id_public, animalData = null) => {
         try {
             
@@ -29033,6 +29581,14 @@ const App = () => {
                             onEditAnimal={handleEditAnimal} 
                             onViewAnimal={handleViewAnimal}
                             navigate={navigate}
+                            showArchiveScreen={showArchiveScreen}
+                            setShowArchiveScreen={setShowArchiveScreen}
+                            archivedAnimals={archivedAnimals}
+                            setArchivedAnimals={setArchivedAnimals}
+                            soldTransferredAnimals={soldTransferredAnimals}
+                            setSoldTransferredAnimals={setSoldTransferredAnimals}
+                            archiveLoading={archiveLoading}
+                            setArchiveLoading={setArchiveLoading}
                         />
                     } />
                     <Route path="/list" element={
@@ -29042,6 +29598,14 @@ const App = () => {
                             onEditAnimal={handleEditAnimal} 
                             onViewAnimal={handleViewAnimal}
                             navigate={navigate}
+                            showArchiveScreen={showArchiveScreen}
+                            setShowArchiveScreen={setShowArchiveScreen}
+                            archivedAnimals={archivedAnimals}
+                            setArchivedAnimals={setArchivedAnimals}
+                            soldTransferredAnimals={soldTransferredAnimals}
+                            setSoldTransferredAnimals={setSoldTransferredAnimals}
+                            archiveLoading={archiveLoading}
+                            setArchiveLoading={setArchiveLoading}
                         />
                     } />
                     <Route path="/donation" element={<DonationView onBack={() => navigate('/')} authToken={authToken} userProfile={userProfile} />} />
@@ -29258,6 +29822,7 @@ const App = () => {
                                         onClose={handleBackFromAnimal}
                                         onCloseAll={handleCloseAllAnimals}
                                         onEdit={handleEditAnimal}
+                                        onArchive={handleArchiveAnimal}
                                         API_BASE_URL={API_BASE_URL}
                                         authToken={authToken}
                                         setShowImageModal={setShowImageModal}
@@ -30330,6 +30895,7 @@ const App = () => {
                                                     </div>
                                                     <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4">
                                                         <ParentCard 
+                                                            key={`father-${parentCardKey}`}
                                                             parentId={animalToView.fatherId_public} 
                                                             parentType="Father"
                                                             authToken={authToken}
@@ -30337,6 +30903,7 @@ const App = () => {
                                                             onViewAnimal={handleViewAnimal}
                                                         />
                                                         <ParentCard 
+                                                            key={`mother-${parentCardKey}`}
                                                             parentId={animalToView.motherId_public} 
                                                             parentType="Mother"
                                                             authToken={authToken}
