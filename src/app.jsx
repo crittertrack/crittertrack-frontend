@@ -2490,9 +2490,9 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             </div>
 
             {/* Profile Header — two columns */}
-            <div className="flex flex-col sm:flex-row gap-6 mb-4 pb-4 border-b">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-4 pb-4 border-b">
                 {/* Left: name, avatar, meta */}
-                <div className="flex flex-col items-center sm:items-start gap-2 sm:w-48 flex-shrink-0">
+                <div className="flex flex-col items-center sm:items-start gap-2">
                     <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
                         <h2 className="text-xl font-bold text-gray-900 leading-tight text-center sm:text-left">{displayName}</h2>
                         <DonationBadge user={freshProfile || profile} size="sm" />
@@ -2517,7 +2517,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 </div>
 
                 {/* Right: contact + bio */}
-                <div className="flex-1 min-w-0 flex flex-col gap-2">
+                <div className="min-w-0 flex flex-col gap-2">
                     {/* Email + website */}
                     {(((freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email)) ||
                       ((freshProfile?.showWebsiteURL ?? profile.showWebsiteURL) && (freshProfile?.websiteURL || profile.websiteURL))) && (
