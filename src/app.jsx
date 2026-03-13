@@ -12097,7 +12097,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     {litter.images.map((img, idx) => (
                                                         <button
                                                             key={img.r2Key || idx}
-                                                            onClick={() => setLitterPhotoViewer({ images: litter.images, index: idx })}
+                                                            onClick={(e) => { e.stopPropagation(); setLitterPhotoViewer({ images: litter.images, index: idx }); }}
                                                             className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden border border-gray-200 hover:border-blue-400 hover:shadow-md transition flex-shrink-0 focus:outline-none"
                                                         >
                                                             <img src={img.url} alt={`Litter photo ${idx + 1}`} className="w-full h-full object-cover" />
@@ -33005,6 +33005,18 @@ const PublicProfilePage = () => {
                             <ChevronRight size={28} />
                         </button>
                     )}
+                    {/* Download */}
+                    <a
+                        href={litterPhotoViewer.images[litterPhotoViewer.index].url}
+                        download
+                        target="_blank"
+                        rel="noreferrer"
+                        className="absolute top-4 right-14 bg-white/20 hover:bg-white/40 text-white rounded-full p-1.5 transition"
+                        onClick={(e) => e.stopPropagation()}
+                        title="Download"
+                    >
+                        <Download size={20} />
+                    </a>
                     {/* Close */}
                     <button
                         className="absolute top-4 right-4 bg-white/20 hover:bg-white/40 text-white rounded-full p-1.5 transition"
