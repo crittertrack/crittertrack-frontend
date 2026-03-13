@@ -11577,14 +11577,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                 <span className="hidden sm:inline">Edit</span>
                                             </button>
-                                            <button
+                                            {!litter.isPlanned && <button
                                                 onClick={() => handleLinkAnimals(litter)}
                                                 data-tutorial-target="link-animals-btn"
                                                 className="flex items-center gap-1 bg-primary hover:bg-primary/90 text-black font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
                                             >
                                                 <Link className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                 <span className="hidden sm:inline">Link</span>
-                                            </button>
+                                            </button>}
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
@@ -11717,7 +11717,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         )}
 
                                         {/* -- 3. Litter Stats: left = counts, right = sex ------------ */}
-                                        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4 shadow-sm">
+                                        {!litter.isPlanned && <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4 shadow-sm">
                                             <div className="flex flex-col sm:grid sm:grid-cols-2 sm:divide-x divide-gray-200 gap-3 sm:gap-0">
                                                 {/* Left: Born / Stillborn / Weaned */}
                                                 <div className="grid grid-cols-3 sm:pr-4">
@@ -11750,7 +11750,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </div>}
 
                                         {/* -- 5. Notes ---------------------------------------------- */}
                                         {litter.notes && (
@@ -11924,7 +11924,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         )}
 
                                         {/* Add Offspring Section */}
-                                        {addingOffspring && addingOffspring._id === litter._id ? (
+                                        {!litter.isPlanned && addingOffspring && addingOffspring._id === litter._id ? (
                                             <div className="bg-white rounded-lg border-2 border-primary p-4">
                                                 <h4 className="text-sm font-bold text-gray-700 mb-3">Add New Offspring</h4>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
@@ -12000,7 +12000,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     </button>
                                                 </div>
                                             </div>
-                                        ) : (
+                                        ) : !litter.isPlanned ? (
                                             <button
                                                 onClick={() => handleAddOffspringToLitter(litter)}
                                                 className="flex items-center gap-1 bg-accent hover:bg-accent/90 text-white font-semibold px-3 py-2 rounded-lg text-sm"
@@ -12008,7 +12008,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 <Plus size={16} />
                                                 Add Offspring
                                             </button>
-                                        )}
+                                        ) : null}
                                     </div>
                                 )}
                             </div>
