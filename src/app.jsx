@@ -19394,6 +19394,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [dangerZoneOpen, setDangerZoneOpen] = useState(false);
+    const [settingsTab, setSettingsTab] = useState('profile');
 
     const handleImageChange = async (e) => {
         if (e.target.files && e.target.files[0]) {
@@ -19631,7 +19632,22 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 </button>
             </div>
             
-            <form id="profile-info-form" onSubmit={handleProfileUpdate} className="space-y-6 mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
+            {/* Settings Tabs */}
+            <div className="flex border-b border-gray-200 mb-6 overflow-x-auto">
+                {[
+                    { id: 'profile',        label: 'Profile' },
+                    { id: 'info-adoption',  label: 'Info & Adoption' },
+                    { id: 'directory',      label: 'Directory' },
+                    { id: 'account',        label: 'Account' },
+                ].map(tab => (
+                    <button key={tab.id} type="button" onClick={() => setSettingsTab(tab.id)}
+                        className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition whitespace-nowrap -mb-px ${settingsTab === tab.id ? 'border-accent text-accent' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    >{tab.label}</button>
+                ))}
+            </div>
+
+            {settingsTab === 'profile' && <>
+            <form id="profile-info-form" onSubmit={handleProfileUpdate} className="space-y-6 mb-4 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Public Profile Information</h3>
                 
                 <div data-tutorial-target="profile-image-upload">
@@ -19838,65 +19854,64 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 </div>
 
             </form>
-
-            {/* Info & Adoption Section */}
-            <div className="mb-8 border rounded-lg bg-gray-50 overflow-hidden">
-                <button
-                    type="button"
-                    onClick={() => setBreederInfoOpen(v => !v)}
-                    className="w-full flex items-center justify-between px-4 sm:px-6 py-4 text-left hover:bg-gray-100 transition"
+            <div className="flex justify-end mb-2">
+                <button type="submit" form="profile-info-form" disabled={profileLoading}
+                    className="bg-accent hover:bg-accent/90 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
                 >
-                    <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
-                        <ClipboardList size={20} className="text-primary-dark" />
-                        Info &amp; Adoption
-                    </h3>
-                    {breederInfoOpen ? <ChevronUp size={20} className="text-gray-500" /> : <ChevronDown size={20} className="text-gray-500" />}
+                    {profileLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : <Save size={20} className="mr-2" />}
+                    Save Profile Info
                 </button>
-                {breederInfoOpen && (
-                    <form onSubmit={handleBreederInfoSave} className="border-t px-4 sm:px-6 pb-6 space-y-4">
-                        <p className="text-sm text-gray-500 mt-4">Shown on your public profile under the <strong>Info &amp; Adoption</strong> tab. Leave fields blank to hide them.</p>
-                        {[
-                            { key: 'aboutProgram',       label: 'About My Program / Breeding Goals' },
-                            { key: 'adoptionRules',      label: 'Adoption / Rehoming Rules' },
-                            { key: 'careRequirements',   label: 'House / Care Requirements for Adopters' },
-                            { key: 'healthGuarantee',    label: 'Health Guarantee' },
-                            { key: 'waitlistInfo',       label: 'Waitlist Info' },
-                            { key: 'pricingNotes',       label: 'Pricing / Fee Notes' },
-                            { key: 'contactPreferences', label: 'Contact Preferences' },
-                        ].map(({ key, label }) => (
-                            <div key={key}>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-                                <textarea
-                                    value={breederInfo[key]}
-                                    onChange={(e) => setBreederInfo(v => ({ ...v, [key]: e.target.value }))}
-                                    rows="3"
-                                    maxLength="2000"
-                                    placeholder={`Enter ${label.toLowerCase()}\u2026`}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none"
-                                    disabled={breederInfoLoading}
-                                />
-                                {breederInfo[key] && <p className="text-xs text-gray-400 mt-0.5 text-right">{breederInfo[key].length}/2000</p>}
-                            </div>
-                        ))}
-                        <div className="flex justify-end pt-2">
-                            <button type="submit" disabled={breederInfoLoading}
-                                className="bg-accent hover:bg-accent/90 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
-                            >
-                                {breederInfoLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : <Save size={20} className="mr-2" />}
-                                Save Info &amp; Adoption
-                            </button>
-                        </div>
-                    </form>
-                )}
             </div>
+            </>}
 
+            {settingsTab === 'info-adoption' && <>
+            <form onSubmit={handleBreederInfoSave} className="space-y-4 p-4 sm:p-6 border rounded-lg bg-gray-50">
+                <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Info &amp; Adoption</h3>
+                <p className="text-sm text-gray-500">Shown on your public profile under the <strong>Info &amp; Adoption</strong> tab. Leave fields blank to hide them.</p>
+                {[
+                    { key: 'aboutProgram',       label: 'About My Program / Breeding Goals' },
+                    { key: 'adoptionRules',      label: 'Adoption / Rehoming Rules' },
+                    { key: 'careRequirements',   label: 'House / Care Requirements for Adopters' },
+                    { key: 'healthGuarantee',    label: 'Health Guarantee' },
+                    { key: 'waitlistInfo',       label: 'Waitlist Info' },
+                    { key: 'pricingNotes',       label: 'Pricing / Fee Notes' },
+                    { key: 'contactPreferences', label: 'Contact Preferences' },
+                ].map(({ key, label }) => (
+                    <div key={key}>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+                        <textarea
+                            value={breederInfo[key]}
+                            onChange={(e) => setBreederInfo(v => ({ ...v, [key]: e.target.value }))}
+                            rows="3"
+                            maxLength="2000"
+                            placeholder={`Enter ${label.toLowerCase()}\u2026`}
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none"
+                            disabled={breederInfoLoading}
+                        />
+                        {breederInfo[key] && <p className="text-xs text-gray-400 mt-0.5 text-right">{breederInfo[key].length}/2000</p>}
+                    </div>
+                ))}
+                <div className="flex justify-end pt-2">
+                    <button type="submit" disabled={breederInfoLoading}
+                        className="bg-accent hover:bg-accent/90 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
+                    >
+                        {breederInfoLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : <Save size={20} className="mr-2" />}
+                        Save Info &amp; Adoption
+                    </button>
+                </div>
+            </form>
+            </>}
+
+            {settingsTab === 'directory' && <>
             <BreederDirectorySettings
                 authToken={authToken}
                 API_BASE_URL={API_BASE_URL}
                 showModalMessage={showModalMessage}
                 userProfile={userProfile}
             />
-            
+            </>}
+
+            {settingsTab === 'account' && <>
             <form onSubmit={handleEmailUpdate} className="space-y-4 mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Change Email Address</h3>
                 <input type="email" placeholder="New Email Address *" value={email} onChange={(e) => setEmail(e.target.value)} required 
@@ -19972,15 +19987,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 )}
                 </div>}
             </div>
-
-            <div data-tutorial-target="profile-save-cancel" className="flex justify-end mt-6">
-                <button type="submit" form="profile-info-form" disabled={profileLoading}
-                    className="bg-accent hover:bg-accent/90 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
-                >
-                    {profileLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : <Save size={20} className="mr-2" />}
-                    Save Profile Info
-                </button>
-            </div>
+            </>}
         </div>
     );
 };
