@@ -2489,53 +2489,38 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 </div>
             </div>
 
-            {/* Profile Header */}
-            <div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-4 pb-4 border-b">
-                {profile.profileImage ? (
-                    <img src={profile.profileImage} alt={displayName} className="w-20 h-20 rounded-lg object-cover shadow-md flex-shrink-0" />
-                ) : (
-                    <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
-                        <User size={40} className="text-gray-400" />
+            {/* Profile Header — two columns */}
+            <div className="flex flex-col sm:flex-row gap-6 mb-4 pb-4 border-b">
+                {/* Left: name, avatar, meta */}
+                <div className="flex flex-col items-center sm:items-start gap-2 sm:w-48 flex-shrink-0">
+                    <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
+                        <h2 className="text-xl font-bold text-gray-900 leading-tight text-center sm:text-left">{displayName}</h2>
+                        <DonationBadge user={freshProfile || profile} size="sm" />
                     </div>
-                )}
-                <div className="min-w-0 flex-1">
-                    {/* Name + donation badge */}
-                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                        <h2 className="text-2xl font-bold text-gray-900 break-words leading-tight">{displayName}</h2>
-                        <DonationBadge user={freshProfile || profile} size="md" />
-                    </div>
-
-                    {/* Compact info row: ID · Member since · Country */}
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-gray-500 mb-2">
-                        <span className="font-mono text-accent font-semibold">{freshProfile?.id_public || profile.id_public}</span>
-                        <span className="text-gray-300">·</span>
-                        <span>Member since {memberSince}</span>
-                        {(freshProfile?.country || profile.country) && (<>
-                            <span className="text-gray-300">·</span>
-                            <span className="flex items-center gap-1">
-                                <span className={`${getCountryFlag(freshProfile?.country || profile.country)} inline-block h-4 w-5 flex-shrink-0`}></span>
-                                <span>{getCountryName(freshProfile?.country || profile.country)}{(freshProfile?.country || profile.country) === 'US' && (freshProfile?.state || profile.state) ? `, ${getStateName(freshProfile?.state || profile.state)}` : ''}</span>
-                            </span>
-                        </>)}
-                    </div>
-
-                    {/* Bio — capped at 4 lines with Read more */}
-                    {(freshProfile?.showBio ?? profile.showBio ?? true) && (freshProfile?.bio || profile.bio) && (
-                        <div className="mb-2">
-                            <p className={`text-sm text-gray-700 p-2.5 bg-gray-50 rounded-lg border border-gray-200 whitespace-pre-wrap break-words${!bioExpanded ? ' line-clamp-4' : ''}`}>
-                                {freshProfile?.bio || profile.bio}
-                            </p>
-                            {(freshProfile?.bio || profile.bio || '').length > 180 && (
-                                <button onClick={() => setBioExpanded(v => !v)} className="text-xs text-accent hover:underline mt-0.5 ml-1">
-                                    {bioExpanded ? 'Show less' : 'Read more'}
-                                </button>
-                            )}
+                    {profile.profileImage ? (
+                        <img src={profile.profileImage} alt={displayName} className="w-24 h-24 rounded-lg object-cover shadow-md" />
+                    ) : (
+                        <div className="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center shadow-md">
+                            <User size={40} className="text-gray-400" />
                         </div>
                     )}
+                    <div className="flex flex-col gap-0.5 text-xs text-gray-500 text-center sm:text-left">
+                        <span className="font-mono text-accent font-semibold">{freshProfile?.id_public || profile.id_public}</span>
+                        <span>Member since {memberSince}</span>
+                        {(freshProfile?.country || profile.country) && (
+                            <span className="flex items-center gap-1 justify-center sm:justify-start">
+                                <span className={`${getCountryFlag(freshProfile?.country || profile.country)} inline-block h-3.5 w-5 flex-shrink-0`}></span>
+                                <span>{getCountryName(freshProfile?.country || profile.country)}{(freshProfile?.country || profile.country) === 'US' && (freshProfile?.state || profile.state) ? `, ${getStateName(freshProfile?.state || profile.state)}` : ''}</span>
+                            </span>
+                        )}
+                    </div>
+                </div>
 
-                    {/* Contact row: email + website side by side */}
-                    {((freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email)) ||
-                     ((freshProfile?.showWebsiteURL ?? profile.showWebsiteURL) && (freshProfile?.websiteURL || profile.websiteURL)) ? (
+                {/* Right: contact + bio */}
+                <div className="flex-1 min-w-0 flex flex-col gap-2">
+                    {/* Email + website */}
+                    {(((freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email)) ||
+                      ((freshProfile?.showWebsiteURL ?? profile.showWebsiteURL) && (freshProfile?.websiteURL || profile.websiteURL))) && (
                         <div className="flex flex-wrap gap-x-5 gap-y-1">
                             {(freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email) && (
                                 <a href={`mailto:${freshProfile?.email || profile.email}`} className="text-sm text-gray-600 flex items-center gap-1.5 hover:text-accent transition break-all">
@@ -2550,7 +2535,20 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 </a>
                             )}
                         </div>
-                    ) : null}
+                    )}
+                    {/* Bio */}
+                    {(freshProfile?.showBio ?? profile.showBio ?? true) && (freshProfile?.bio || profile.bio) && (
+                        <div>
+                            <p className={`text-sm text-gray-700 p-2.5 bg-gray-50 rounded-lg border border-gray-200 whitespace-pre-wrap break-words${!bioExpanded ? ' line-clamp-4' : ''}`}>
+                                {freshProfile?.bio || profile.bio}
+                            </p>
+                            {(freshProfile?.bio || profile.bio || '').length > 200 && (
+                                <button onClick={() => setBioExpanded(v => !v)} className="text-xs text-accent hover:underline mt-0.5 ml-1">
+                                    {bioExpanded ? 'Show less' : 'Read more'}
+                                </button>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 
