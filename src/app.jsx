@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2 } from 'lucide-react';
 import ArchiveScreen from './components/ArchiveScreen';
 import { QRCodeSVG } from 'qrcode.react';
 import jsPDF from 'jspdf';
@@ -2518,25 +2518,24 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 <div className="flex flex-col items-center gap-1.5">
                     {(freshProfile?.showBio ?? profile.showBio ?? true) && (freshProfile?.bio || profile.bio) && (
                         <>
-                            <div className={`w-full${!bioExpanded ? ' overflow-hidden' : ''}`}>
-                                <p className="text-sm text-gray-700 text-left whitespace-pre-wrap break-words">
-                                    {freshProfile?.bio || profile.bio}
-                                </p>
-                            </div>
-                            {(freshProfile?.bio || profile.bio || '').length > 200 && (
+                            <p className={`w-full text-sm text-gray-700 text-left whitespace-pre-wrap break-words${!bioExpanded ? ' line-clamp-[15]' : ''}`}>
+                                {freshProfile?.bio || profile.bio}
+                            </p>
+                            {(freshProfile?.bio || profile.bio || '').split('\n').length > 15 || (freshProfile?.bio || profile.bio || '').length > 600 ? (
                                 <button onClick={() => setBioExpanded(v => !v)} className="text-xs text-accent hover:underline mt-0.5">
                                     {bioExpanded ? 'Show less' : 'Read more'}
                                 </button>
-                            )}
+                            ) : null}
                         </>
                     )}
                 </div>
             </div>
 
-            {/* Email + website — full width under both columns */}
+            {/* Email + website + social — full width under both columns */}
             {((freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email)) ||
-             ((freshProfile?.showWebsiteURL ?? profile.showWebsiteURL) && (freshProfile?.websiteURL || profile.websiteURL)) ? (
-                <div className="flex flex-wrap gap-x-6 gap-y-1 mb-4 pb-4 border-b">
+             ((freshProfile?.showWebsiteURL ?? profile.showWebsiteURL) && (freshProfile?.websiteURL || profile.websiteURL)) ||
+             ((freshProfile?.showSocialMediaURL ?? profile.showSocialMediaURL) && (freshProfile?.socialMediaURL || profile.socialMediaURL)) ? (
+                <div className="flex flex-wrap justify-center gap-x-6 gap-y-1 mb-4 pb-4 border-b">
                     {(freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email) && (
                         <a href={`mailto:${freshProfile?.email || profile.email}`} className="text-sm text-gray-600 flex items-center gap-1.5 hover:text-accent transition break-all">
                             <Mail size={14} className="text-accent flex-shrink-0" />
@@ -2547,6 +2546,12 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         <a href={freshProfile?.websiteURL || profile.websiteURL} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-600 flex items-center gap-1.5 hover:text-accent transition break-all">
                             <Globe size={14} className="text-accent flex-shrink-0" />
                             {freshProfile?.websiteURL || profile.websiteURL}
+                        </a>
+                    )}
+                    {(freshProfile?.showSocialMediaURL ?? profile.showSocialMediaURL) && (freshProfile?.socialMediaURL || profile.socialMediaURL) && (
+                        <a href={freshProfile?.socialMediaURL || profile.socialMediaURL} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-600 flex items-center gap-1.5 hover:text-accent transition break-all">
+                            <Share2 size={14} className="text-accent flex-shrink-0" />
+                            {freshProfile?.socialMediaURL || profile.socialMediaURL}
                         </a>
                     )}
                 </div>
@@ -19333,6 +19338,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [showBreederName, setShowBreederName] = useState(userProfile.showBreederName ?? false); 
     const [websiteURL, setWebsiteURL] = useState(userProfile.websiteURL || '');
     const [showWebsiteURL, setShowWebsiteURL] = useState(userProfile.showWebsiteURL ?? false);
+    const [socialMediaURL, setSocialMediaURL] = useState(userProfile.socialMediaURL || '');
+    const [showSocialMediaURL, setShowSocialMediaURL] = useState(userProfile.showSocialMediaURL ?? false);
     const [showEmailPublic, setShowEmailPublic] = useState(userProfile.showEmailPublic ?? false); 
     const [showGeneticCodePublic, setShowGeneticCodePublic] = useState(userProfile.showGeneticCodePublic ?? false);
     const [showRemarksPublic, setShowRemarksPublic] = useState(userProfile.showRemarksPublic ?? false);
@@ -19420,6 +19427,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             showBreederName: showBreederName,
             websiteURL: websiteURL || null,
             showWebsiteURL: websiteURL ? showWebsiteURL : false,
+            socialMediaURL: socialMediaURL || null,
+            showSocialMediaURL: socialMediaURL ? showSocialMediaURL : false,
             showEmailPublic: showEmailPublic,
             showGeneticCodePublic: showGeneticCodePublic,
             showRemarksPublic: showRemarksPublic,
@@ -19642,6 +19651,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     <div data-tutorial-target="website-country-fields">
                         <input type="url" name="websiteURL" placeholder="Website URL (Optional) e.g., https://example.com" value={websiteURL} onChange={(e) => setWebsiteURL(e.target.value)}
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
+                        <input type="url" name="socialMediaURL" placeholder="Social Media Link (Optional) e.g., https://instagram.com/yourpage" value={socialMediaURL} onChange={(e) => setSocialMediaURL(e.target.value)}
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
                     
                         <textarea 
                             name="bio" 
@@ -19732,6 +19743,13 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 <input type="checkbox" checked={showWebsiteURL} onChange={(e) => setShowWebsiteURL(e.target.checked)} 
                                     className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
                                 <span>Display **Website URL** on your public profile card.</span>
+                            </label>
+                        )}
+                        {socialMediaURL && (
+                            <label className="flex items-center space-x-2 text-sm text-gray-700">
+                                <input type="checkbox" checked={showSocialMediaURL} onChange={(e) => setShowSocialMediaURL(e.target.checked)} 
+                                    className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
+                                <span>Display **Social Media Link** on your public profile card.</span>
                             </label>
                         )}
                         
@@ -20603,6 +20621,14 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                             (userProfile.showWebsiteURL ?? false) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
                             {(userProfile.showWebsiteURL ?? false) ? 'Public' : 'Private'}
+                        </span>
+                    </div>
+                    <div className="flex justify-between items-center gap-2 py-1.5 sm:py-2">
+                        <span className="text-xs sm:text-sm text-gray-800 truncate flex-1">Social Media Link</span>
+                        <span className={`px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold rounded-full whitespace-nowrap ${ 
+                            (userProfile.showSocialMediaURL ?? false) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                            {(userProfile.showSocialMediaURL ?? false) ? 'Public' : 'Private'}
                         </span>
                     </div>
 
