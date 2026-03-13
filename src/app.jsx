@@ -12078,9 +12078,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 const addEvent = (dateVal, type, litter) => {
                     if (!dateVal) return;
                     let d;
-                    try { d = new Date(dateVal); if (isNaN(d.getTime())) return; } catch(e) { return; }
+                    try {
+                        // Parse as local time to avoid UTC-offset date shifting
+                        const s = typeof dateVal === 'string' ? dateVal.substring(0, 10) : null;
+                        d = s ? new Date(s + 'T00:00:00') : new Date(dateVal);
+                        if (isNaN(d.getTime())) return;
+                    } catch(e) { return; }
                     const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
                     if (!eventMap[k]) eventMap[k] = [];
+                    // Skip if this litter already has an event on this day (prevents duplicates when dates coincide)
+                    if (eventMap[k].some(e => e.litter._id === litter._id)) return;
                     eventMap[k].push({ type, litter });
                 };
                 litters.forEach(l => {
@@ -25234,6 +25241,7 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
     if (!enabled || loading) return null;
 
     const today = new Date(); today.setHours(0, 0, 0, 0);
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
     const urgentItems = [];
 
     litters.forEach(l => {
@@ -25243,33 +25251,47 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
         const sireDam = `${sn} \u00d7 ${dn}`;
         const callId = l.litter_id_public;
 
-        // Mating due — matingDate within 7 days (upcoming) and litter not yet born
+        // Parse a stored date string as LOCAL midnight to avoid UTC timezone shifting
+        const parseLocalDate = (v) => {
+            if (!v) return null;
+            const s = typeof v === 'string' ? v.substring(0, 10) : null;
+            const d = s ? new Date(s + 'T00:00:00') : new Date(v);
+            return isNaN(d.getTime()) ? null : d;
+        };
+
+        // Mating due — matingDate within 7 days (upcoming or today) and litter not yet born
         if (l.matingDate && !l.birthDate) {
-            const mated = new Date(l.matingDate); mated.setHours(0, 0, 0, 0);
-            const diff = Math.round((mated - today) / 86400000);
-            if (diff >= 0 && diff <= 7) {
-                const key = `${l._id}-mated`;
-                if (!dismissed[key]) urgentItems.push({ key, type: 'mated', pairName, sireDam, callId, diff });
+            const mated = parseLocalDate(l.matingDate);
+            if (mated) {
+                const diff = Math.round((mated - today) / 86400000);
+                if (diff >= 0 && diff <= 7) {
+                    const key = `${l._id}-mated-${todayStr}`;
+                    if (!dismissed[key]) urgentItems.push({ key, type: 'mated', pairName, sireDam, callId, diff });
+                }
             }
         }
 
         // Expected Birth — only if NOT already born
         if (l.expectedDueDate && !l.birthDate) {
-            const due = new Date(l.expectedDueDate); due.setHours(0, 0, 0, 0);
-            const diff = Math.round((due - today) / 86400000);
-            if (diff <= 0) {
-                const key = `${l._id}-due`;
-                if (!dismissed[key]) urgentItems.push({ key, type: 'due', pairName, sireDam, callId, diff });
+            const due = parseLocalDate(l.expectedDueDate);
+            if (due) {
+                const diff = Math.round((due - today) / 86400000);
+                if (diff <= 0) {
+                    const key = `${l._id}-due-${todayStr}`;
+                    if (!dismissed[key]) urgentItems.push({ key, type: 'due', pairName, sireDam, callId, diff });
+                }
             }
         }
 
         // Weaning
         if (l.weaningDate) {
-            const wean = new Date(l.weaningDate); wean.setHours(0, 0, 0, 0);
-            const diff = Math.round((wean - today) / 86400000);
-            if (diff <= 0) {
-                const key = `${l._id}-weaned`;
-                if (!dismissed[key]) urgentItems.push({ key, type: 'weaned', pairName, sireDam, callId, diff });
+            const wean = parseLocalDate(l.weaningDate);
+            if (wean) {
+                const diff = Math.round((wean - today) / 86400000);
+                if (diff <= 0) {
+                    const key = `${l._id}-weaned-${todayStr}`;
+                    if (!dismissed[key]) urgentItems.push({ key, type: 'weaned', pairName, sireDam, callId, diff });
+                }
             }
         }
     });
