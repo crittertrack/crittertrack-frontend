@@ -2325,6 +2325,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     const [loading, setLoading] = useState(true);
     const [copySuccess, setCopySuccess] = useState(false);
     const [showQR, setShowQR] = useState(false);
+    const [activeTab, setActiveTab] = useState('animals');
+    const [animalSearch, setAnimalSearch] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState('');
     const [genderFilters, setGenderFilters] = useState({ Male: true, Female: true, Intersex: true, Unknown: true });
     const [statusFilter, setStatusFilter] = useState('');
@@ -2414,8 +2416,16 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         // Filter by selected genders
         if (!genderFilters[animal.gender]) return false;
         if (statusFilter && animal.status !== statusFilter) return false;
+        if (animalSearch) {
+            const q = animalSearch.toLowerCase();
+            const name = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ').toLowerCase();
+            if (!name.includes(q) && !(animal.id_public || '').toLowerCase().includes(q)) return false;
+        }
         return true;
     });
+
+    const hasBreederInfo = !!(freshProfile?.breederInfo &&
+        Object.values(freshProfile.breederInfo).some(v => typeof v === 'string' && v.trim()));
 
     const groupedAnimals = filteredAnimals.reduce((groups, animal) => {
         const species = animal.species || 'Unspecified';
@@ -2479,7 +2489,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             </div>
 
             {/* Profile Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6 pb-6 border-b">
+            <div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-6 pb-4 border-b">
                 {profile.profileImage ? (
                     <img src={profile.profileImage} alt={displayName} className="w-24 h-24 rounded-lg object-cover shadow-md flex-shrink-0" />
                 ) : (
@@ -2532,14 +2542,42 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 </div>
             </div>
 
-            {/* Public Animals */}
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">Public Animals ({filteredAnimals.length})</h3>
-            
+            {/* Tab Bar */}
+            <div className="flex border-b border-gray-200 mb-6 overflow-x-auto">
+                <button
+                    onClick={() => setActiveTab('animals')}
+                    className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition whitespace-nowrap -mb-px ${activeTab === 'animals' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                >
+                    Animals ({animals.length})
+                </button>
+                {hasBreederInfo && (
+                    <button
+                        onClick={() => setActiveTab('info-adoption')}
+                        className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition whitespace-nowrap -mb-px ${activeTab === 'info-adoption' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    >
+                        Info &amp; Adoption
+                    </button>
+                )}
+            </div>
+
+            {/* Animals Tab */}
+            {activeTab === 'animals' && (<>
             {/* Filters */}
             <div className="mb-6 p-4 border rounded-lg bg-gray-50">
-                    {/* Species dropdown, Gender icons, and Status dropdown - all in one row */}
+                    {/* Search + Species dropdown, Gender icons, and Status dropdown */}
                     <div className="flex flex-col sm:flex-row gap-3 justify-between">
                         <div className="flex gap-3 items-center flex-wrap">
+                            {/* Name / ID search */}
+                            <div className="flex gap-2 items-center">
+                                <Search size={16} className="text-gray-400 flex-shrink-0" />
+                                <input
+                                    type="text"
+                                    value={animalSearch}
+                                    onChange={(e) => setAnimalSearch(e.target.value)}
+                                    placeholder="Search by name or ID\u2026"
+                                    className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[160px]"
+                                />
+                            </div>
                             {/* Species dropdown */}
                             <div className="flex gap-2 items-center" data-tutorial-target="species-filter">
                                 <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
@@ -2693,6 +2731,27 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                     );
                                 })}
                             </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+            </>)}
+
+            {/* Info & Adoption Tab */}
+            {activeTab === 'info-adoption' && hasBreederInfo && (
+                <div className="space-y-5">
+                    {[
+                        { key: 'aboutProgram',       label: 'About My Program / Breeding Goals' },
+                        { key: 'adoptionRules',      label: 'Adoption / Rehoming Rules' },
+                        { key: 'careRequirements',   label: 'House / Care Requirements for Adopters' },
+                        { key: 'healthGuarantee',    label: 'Health Guarantee' },
+                        { key: 'waitlistInfo',       label: 'Waitlist Info' },
+                        { key: 'pricingNotes',       label: 'Pricing / Fee Notes' },
+                        { key: 'contactPreferences', label: 'Contact Preferences' },
+                    ].filter(f => (freshProfile?.breederInfo?.[f.key] || '').trim()).map(f => (
+                        <div key={f.key} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{f.label}</h4>
+                            <div className="text-gray-800 whitespace-pre-wrap text-sm leading-relaxed">{freshProfile.breederInfo[f.key]}</div>
                         </div>
                     ))}
                 </div>
@@ -19273,6 +19332,17 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [emailNotificationPreference, setEmailNotificationPreference] = useState(userProfile.emailNotificationPreference || 'none');
     const [country, setCountry] = useState(userProfile.country || '');
     const [usState, setUsState] = useState(userProfile.state || '');
+    const [breederInfoOpen, setBreederInfoOpen] = useState(false);
+    const [breederInfoLoading, setBreederInfoLoading] = useState(false);
+    const [breederInfo, setBreederInfo] = useState({
+        aboutProgram:       userProfile.breederInfo?.aboutProgram       || '',
+        adoptionRules:      userProfile.breederInfo?.adoptionRules      || '',
+        careRequirements:   userProfile.breederInfo?.careRequirements   || '',
+        healthGuarantee:    userProfile.breederInfo?.healthGuarantee    || '',
+        waitlistInfo:       userProfile.breederInfo?.waitlistInfo       || '',
+        pricingNotes:       userProfile.breederInfo?.pricingNotes       || '',
+        contactPreferences: userProfile.breederInfo?.contactPreferences || '',
+    });
 
     // Keep allowMessages in sync if userProfile updates (e.g., after save or refetch)
     useEffect(() => {
@@ -19437,6 +19507,22 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             showModalMessage('Error', error.response?.data?.message || 'Failed to update profile information.');
         } finally {
             setProfileLoading(false);
+        }
+    };
+
+    const handleBreederInfoSave = async (e) => {
+        e.preventDefault();
+        setBreederInfoLoading(true);
+        try {
+            await axios.put(`${API_BASE_URL}/users/profile`, { breederInfo }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            showModalMessage('Success', 'Info & Adoption page saved successfully.');
+            if (onSaveSuccess) await onSaveSuccess();
+        } catch (error) {
+            showModalMessage('Error', error.response?.data?.message || 'Failed to save Info & Adoption content.');
+        } finally {
+            setBreederInfoLoading(false);
         }
     };
 
@@ -19727,6 +19813,57 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     </button>
                 </div>
             </form>
+
+            {/* Info & Adoption Section */}
+            <div className="mb-8 border rounded-lg bg-gray-50 overflow-hidden">
+                <button
+                    type="button"
+                    onClick={() => setBreederInfoOpen(v => !v)}
+                    className="w-full flex items-center justify-between px-4 sm:px-6 py-4 text-left hover:bg-gray-100 transition"
+                >
+                    <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                        <ClipboardList size={20} className="text-primary-dark" />
+                        Info &amp; Adoption
+                    </h3>
+                    {breederInfoOpen ? <ChevronUp size={20} className="text-gray-500" /> : <ChevronDown size={20} className="text-gray-500" />}
+                </button>
+                {breederInfoOpen && (
+                    <form onSubmit={handleBreederInfoSave} className="border-t px-4 sm:px-6 pb-6 space-y-4">
+                        <p className="text-sm text-gray-500 mt-4">Shown on your public profile under the <strong>Info &amp; Adoption</strong> tab. Leave fields blank to hide them.</p>
+                        {[
+                            { key: 'aboutProgram',       label: 'About My Program / Breeding Goals' },
+                            { key: 'adoptionRules',      label: 'Adoption / Rehoming Rules' },
+                            { key: 'careRequirements',   label: 'House / Care Requirements for Adopters' },
+                            { key: 'healthGuarantee',    label: 'Health Guarantee' },
+                            { key: 'waitlistInfo',       label: 'Waitlist Info' },
+                            { key: 'pricingNotes',       label: 'Pricing / Fee Notes' },
+                            { key: 'contactPreferences', label: 'Contact Preferences' },
+                        ].map(({ key, label }) => (
+                            <div key={key}>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+                                <textarea
+                                    value={breederInfo[key]}
+                                    onChange={(e) => setBreederInfo(v => ({ ...v, [key]: e.target.value }))}
+                                    rows="3"
+                                    maxLength="2000"
+                                    placeholder={`Enter ${label.toLowerCase()}\u2026`}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none"
+                                    disabled={breederInfoLoading}
+                                />
+                                {breederInfo[key] && <p className="text-xs text-gray-400 mt-0.5 text-right">{breederInfo[key].length}/2000</p>}
+                            </div>
+                        ))}
+                        <div className="flex justify-end pt-2">
+                            <button type="submit" disabled={breederInfoLoading}
+                                className="bg-accent hover:bg-accent/90 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
+                            >
+                                {breederInfoLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : <Save size={20} className="mr-2" />}
+                                Save Info &amp; Adoption
+                            </button>
+                        </div>
+                    </form>
+                )}
+            </div>
 
             <BreederDirectorySettings
                 authToken={authToken}
