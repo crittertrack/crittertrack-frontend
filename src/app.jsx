@@ -9388,6 +9388,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [litterImages, setLitterImages] = useState([]);
     const [litterImageUploading, setLitterImageUploading] = useState(false);
     const [pendingLitterImages, setPendingLitterImages] = useState([]);
+    const [litterPhotoViewer, setLitterPhotoViewer] = useState(null); // { images: [], index: N }
     const [modalTarget, setModalTarget] = useState(null);
     const [showSpeciesPicker, setShowSpeciesPicker] = useState(false);
     const [selectedSireAnimal, setSelectedSireAnimal] = useState(null);
@@ -11887,6 +11888,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             }
                                         </div>
                                     </div>
+                                    {(litter.images?.length > 0) && (
+                                        <span className="flex items-center gap-0.5 text-[11px] text-gray-400 mr-1 flex-shrink-0">
+                                            <Images size={12} />
+                                            <span>{litter.images.length}</span>
+                                        </span>
+                                    )}
                                     <ChevronDown
                                         size={18}
                                         className={`text-gray-400 transition-transform flex-shrink-0 ml-2 ${isExpanded ? 'rotate-180' : ''}`}
@@ -12081,6 +12088,24 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 </div>
                                             </div>
                                         </div>}
+
+                                        {/* -- 4. Photos -------------------------------------------- */}
+                                        {!litter.isPlanned && litter.images?.length > 0 && (
+                                            <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4 shadow-sm">
+                                                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Photos</h4>
+                                                <div className="flex gap-2 flex-wrap">
+                                                    {litter.images.map((img, idx) => (
+                                                        <button
+                                                            key={img.r2Key || idx}
+                                                            onClick={() => setLitterPhotoViewer({ images: litter.images, index: idx })}
+                                                            className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden border border-gray-200 hover:border-blue-400 hover:shadow-md transition flex-shrink-0 focus:outline-none"
+                                                        >
+                                                            <img src={img.url} alt={`Litter photo ${idx + 1}`} className="w-full h-full object-cover" />
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {/* -- 5. Notes ---------------------------------------------- */}
                                         {litter.notes && (
@@ -32949,6 +32974,53 @@ const PublicProfilePage = () => {
                 />
             )}
             
+            {/* Litter Photo Lightbox */}
+            {litterPhotoViewer && (
+                <div
+                    className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center"
+                    onClick={() => setLitterPhotoViewer(null)}
+                >
+                    {/* Prev */}
+                    {litterPhotoViewer.images.length > 1 && (
+                        <button
+                            className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white rounded-full p-2 transition z-10"
+                            onClick={(e) => { e.stopPropagation(); setLitterPhotoViewer(v => ({ ...v, index: (v.index - 1 + v.images.length) % v.images.length })); }}
+                        >
+                            <ChevronLeft size={28} />
+                        </button>
+                    )}
+                    {/* Image */}
+                    <img
+                        src={litterPhotoViewer.images[litterPhotoViewer.index].url}
+                        alt="Litter photo"
+                        className="max-h-[90vh] max-w-[90vw] rounded-xl shadow-2xl object-contain"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                    {/* Next */}
+                    {litterPhotoViewer.images.length > 1 && (
+                        <button
+                            className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white rounded-full p-2 transition z-10"
+                            onClick={(e) => { e.stopPropagation(); setLitterPhotoViewer(v => ({ ...v, index: (v.index + 1) % v.images.length })); }}
+                        >
+                            <ChevronRight size={28} />
+                        </button>
+                    )}
+                    {/* Close */}
+                    <button
+                        className="absolute top-4 right-4 bg-white/20 hover:bg-white/40 text-white rounded-full p-1.5 transition"
+                        onClick={() => setLitterPhotoViewer(null)}
+                    >
+                        <X size={20} />
+                    </button>
+                    {/* Counter */}
+                    {litterPhotoViewer.images.length > 1 && (
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-sm">
+                            {litterPhotoViewer.index + 1} / {litterPhotoViewer.images.length}
+                        </div>
+                    )}
+                </div>
+            )}
+
             {/* Modal for moderation action feedback */}
             {showModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
