@@ -10458,20 +10458,20 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     </button>
                     {/* + Mating / + Litter — grouped so they never split across rows */}
                     <div className="flex rounded-lg overflow-hidden border border-gray-200 shadow-sm">
-                        {/* + Mating button */}
+                        {/* Mating button */}
                         <button
                             onClick={() => {
                                 if (!showAddMatingForm) { setShowAddForm(false); setEditingLitter(null); }
                                 setShowAddMatingForm(!showAddMatingForm);
                                 if (showAddMatingForm) resetMatingForm();
                             }}
-                            className={`flex items-center gap-1 px-3 py-1.5 text-sm font-medium transition-colors border-r border-gray-200 ${showAddMatingForm ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200' : 'bg-white text-indigo-600 hover:bg-indigo-50'}`}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors border-r border-gray-200 ${showAddMatingForm ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
                             title="Record a planned mating"
                         >
-                            {showAddMatingForm ? <X size={14} /> : <Heart size={14} />}
-                            <span>{showAddMatingForm ? 'Cancel' : '+ Mating'}</span>
+                            {showAddMatingForm ? <X size={14} /> : <Plus size={14} />}
+                            <span>Mating</span>
                         </button>
-                        {/* + Litter button */}
+                        {/* Litter button */}
                         <button
                             onClick={() => {
                                 if (showAddForm) {
@@ -10496,10 +10496,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 setShowAddForm(!showAddForm);
                             }}
                             data-tutorial-target="new-litter-btn"
-                            className={`flex items-center gap-1 px-3 py-1.5 text-sm font-medium transition-colors ${showAddForm ? 'bg-primary/90 text-black hover:bg-primary/80' : 'bg-primary text-black hover:bg-primary/90'}`}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors ${showAddForm ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
                         >
                             {showAddForm ? <X size={14} /> : <Plus size={14} />}
-                            <span>{showAddForm ? 'Cancel' : '+ Litter'}</span>
+                            <span>Litter</span>
                         </button>
                     </div>
                 </div>
