@@ -10465,7 +10465,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 setShowAddMatingForm(!showAddMatingForm);
                                 if (showAddMatingForm) resetMatingForm();
                             }}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors border-r border-gray-200 ${showAddMatingForm ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors border-r border-gray-200 ${showAddMatingForm ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-primary text-black hover:bg-primary-dark'}`}
                             title="Record a planned mating"
                         >
                             {showAddMatingForm ? <X size={14} /> : <Plus size={14} />}
@@ -10496,7 +10496,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 setShowAddForm(!showAddForm);
                             }}
                             data-tutorial-target="new-litter-btn"
-                            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors ${showAddForm ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors ${showAddForm ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-primary text-black hover:bg-primary-dark'}`}
                         >
                             {showAddForm ? <X size={14} /> : <Plus size={14} />}
                             <span>Litter</span>
