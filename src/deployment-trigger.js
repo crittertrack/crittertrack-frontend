@@ -1,4 +1,4 @@
-// Force deployment trigger - emoji/character fixes + admin message alerts + carrier traits
-// Date: 2026-03-01
-// Purpose: Force cache refresh for all users
-export const DEPLOYMENT_TIMESTAMP = '2026-03-01T22:00:00Z';
+// Force deployment trigger - planned mating isPlanned flag + card visual clarity
+// Date: 2026-03-13
+// Purpose: Deploy isPlanned schema field + planned mating card UI changes
+export const DEPLOYMENT_TIMESTAMP = '2026-03-13T00:00:00Z';
