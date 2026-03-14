@@ -3171,8 +3171,10 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     </div>
                 );
 
-                const BreakdownTable = ({ title, data, colLabel = 'Species', colValue = 'Count' }) => {
-                    const entries = Object.entries(data).sort((a, b) => b[1] - a[1]);
+                const BreakdownTable = ({ title, data, sortByValue = true }) => {
+                    const entries = sortByValue
+                        ? Object.entries(data).sort((a, b) => b[1] - a[1])
+                        : Object.entries(data);
                     if (!entries.length) return null;
                     const max = entries[0][1];
                     return (
@@ -3215,12 +3217,12 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 <BreakdownTable title="Pairings by Species" data={littersBySpecies} />
                             )}
                             {Object.keys(littersByYear).length > 0 && (
-                                <BreakdownTable title="Pairings by Year" data={
+                                <BreakdownTable title="Pairings by Year" sortByValue={false} data={
                                     Object.fromEntries(Object.entries(littersByYear).sort((a,b) => b[0].localeCompare(a[0])))
                                 } />
                             )}
                             {Object.keys(offspringByYear).length > 0 && (
-                                <BreakdownTable title="Offspring by Year" data={
+                                <BreakdownTable title="Offspring by Year" sortByValue={false} data={
                                     Object.fromEntries(Object.entries(offspringByYear).sort((a,b) => b[0].localeCompare(a[0])))
                                 } />
                             )}
