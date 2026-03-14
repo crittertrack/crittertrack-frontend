@@ -2346,6 +2346,12 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     const [genderFilters, setGenderFilters] = useState({ Male: true, Female: true, Intersex: true, Unknown: true });
     const [statusFilter, setStatusFilter] = useState('');
     const [freshProfile, setFreshProfile] = useState(profile);
+    const [expandedInfoFields, setExpandedInfoFields] = useState(new Set());
+    const toggleInfoField = (key) => setExpandedInfoFields(prev => {
+        const next = new Set(prev);
+        next.has(key) ? next.delete(key) : next.add(key);
+        return next;
+    });
     
     // Set moderator context when viewing this profile
     useEffect(() => {
@@ -2771,7 +2777,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 
             {/* Info & Adoption Tab */}
             {activeTab === 'info-adoption' && hasBreederInfo && (
-                <div className="space-y-5">
+                <div className="space-y-2">
                     {[
                         { key: 'aboutProgram',       label: 'About My Program / Breeding Goals' },
                         { key: 'adoptionRules',      label: 'Adoption / Rehoming Rules' },
@@ -2782,20 +2788,47 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         { key: 'waitlistInfo',       label: 'Waitlist and Booking Info' },
                         { key: 'pricingNotes',       label: 'Pricing / Fee Notes' },
                         { key: 'contactPreferences', label: 'Contact Preferences' },
-                    ].filter(f => (freshProfile?.breederInfo?.[f.key] || '').trim()).map(f => (
-                        <div key={f.key} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{f.label}</h4>
-                            <div className="text-gray-800 text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: renderBreederInfoMarkdown(freshProfile.breederInfo[f.key]) }} />
-                        </div>
-                    ))}
+                    ].filter(f => (freshProfile?.breederInfo?.[f.key] || '').trim()).map(f => {
+                        const isOpen = expandedInfoFields.has(f.key);
+                        return (
+                            <div key={f.key} className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+                                <button
+                                    type="button"
+                                    onClick={() => toggleInfoField(f.key)}
+                                    className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-100 transition"
+                                >
+                                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{f.label}</span>
+                                    {isOpen ? <ChevronUp size={15} className="text-gray-400 shrink-0" /> : <ChevronDown size={15} className="text-gray-400 shrink-0" />}
+                                </button>
+                                {isOpen && (
+                                    <div className="px-4 pb-4 text-gray-800 text-sm leading-relaxed border-t border-gray-200 pt-3"
+                                        dangerouslySetInnerHTML={{ __html: renderBreederInfoMarkdown(freshProfile.breederInfo[f.key]) }} />
+                                )}
+                            </div>
+                        );
+                    })}
                     {(freshProfile?.breederInfo?.customFields || [])
                         .filter(cf => cf.title?.trim() && cf.value?.trim())
-                        .map((cf, idx) => (
-                            <div key={`custom-${idx}`} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                                <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{cf.title}</h4>
-                                <div className="text-gray-800 text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: renderBreederInfoMarkdown(cf.value) }} />
-                            </div>
-                        ))
+                        .map((cf, idx) => {
+                            const key = `custom-${idx}`;
+                            const isOpen = expandedInfoFields.has(key);
+                            return (
+                                <div key={key} className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+                                    <button
+                                        type="button"
+                                        onClick={() => toggleInfoField(key)}
+                                        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-100 transition"
+                                    >
+                                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{cf.title}</span>
+                                        {isOpen ? <ChevronUp size={15} className="text-gray-400 shrink-0" /> : <ChevronDown size={15} className="text-gray-400 shrink-0" />}
+                                    </button>
+                                    {isOpen && (
+                                        <div className="px-4 pb-4 text-gray-800 text-sm leading-relaxed border-t border-gray-200 pt-3"
+                                            dangerouslySetInnerHTML={{ __html: renderBreederInfoMarkdown(cf.value) }} />
+                                    )}
+                                </div>
+                            );
+                        })
                     }
                 </div>
             )}
