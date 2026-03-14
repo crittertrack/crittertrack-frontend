@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2 } from 'lucide-react';
 import ArchiveScreen from './components/ArchiveScreen';
 import { QRCodeSVG } from 'qrcode.react';
 import jsPDF from 'jspdf';
@@ -2319,6 +2319,20 @@ const QRModal = ({ url, title, onClose }) => {
     );
 };
 
+// Safely renders bold/italic markdown in breeder info text.
+// HTML entities are escaped first to prevent XSS, then markdown syntax is applied.
+const renderBreederInfoMarkdown = (text) => {
+    if (!text) return '';
+    const escaped = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    return escaped
+        .replace(/\*\*(.+?)\*\*/gs, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/gs, '<em>$1</em>')
+        .replace(/\n/g, '<br>');
+};
+
 // Public Profile View Component - Shows a breeder's public animals
 const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStartMessage, authToken, setModCurrentContext }) => {
     const [animals, setAnimals] = useState([]);
@@ -2327,10 +2341,18 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     const [showQR, setShowQR] = useState(false);
     const [activeTab, setActiveTab] = useState('animals');
     const [animalSearch, setAnimalSearch] = useState('');
+    const [bioExpanded, setBioExpanded] = useState(false);
     const [speciesFilter, setSpeciesFilter] = useState('');
     const [genderFilters, setGenderFilters] = useState({ Male: true, Female: true, Intersex: true, Unknown: true });
     const [statusFilter, setStatusFilter] = useState('');
     const [freshProfile, setFreshProfile] = useState(profile);
+    const [expandedInfoFields, setExpandedInfoFields] = useState(new Set());
+    const [publicLitters, setPublicLitters] = useState([]);
+    const toggleInfoField = (key) => setExpandedInfoFields(prev => {
+        const next = new Set(prev);
+        next.has(key) ? next.delete(key) : next.add(key);
+        return next;
+    });
     
     // Set moderator context when viewing this profile
     useEffect(() => {
@@ -2391,6 +2413,19 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         }
     }, [profile, API_BASE_URL]);
 
+    useEffect(() => {
+        const fetchPublicLitters = async () => {
+            if (!profile?.id_public) return;
+            try {
+                const resp = await axios.get(`${API_BASE_URL}/public/litters/user/${profile.id_public}`);
+                setPublicLitters(resp.data || []);
+            } catch {
+                setPublicLitters([]);
+            }
+        };
+        fetchPublicLitters();
+    }, [profile?.id_public, API_BASE_URL]);
+
     const memberSince = (freshProfile?.createdAt || profile.createdAt)
         ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.createdAt || profile.createdAt))
         : ((freshProfile?.updatedAt || profile.updatedAt) ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.updatedAt || profile.updatedAt)) : 'Unknown');
@@ -2425,7 +2460,10 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     });
 
     const hasBreederInfo = !!(freshProfile?.breederInfo &&
-        Object.values(freshProfile.breederInfo).some(v => typeof v === 'string' && v.trim()));
+        (Object.entries(freshProfile.breederInfo)
+            .some(([k, v]) => k !== 'customFields' && typeof v === 'string' && v.trim()) ||
+         (Array.isArray(freshProfile.breederInfo.customFields) &&
+          freshProfile.breederInfo.customFields.some(cf => cf.title?.trim() && cf.value?.trim()))));
 
     const groupedAnimals = filteredAnimals.reduce((groups, animal) => {
         const species = animal.species || 'Unspecified';
@@ -2488,74 +2526,104 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 </div>
             </div>
 
-            {/* Profile Header */}
-            <div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-6 pb-4 border-b">
-                {profile.profileImage ? (
-                    <img src={profile.profileImage} alt={displayName} className="w-24 h-24 rounded-lg object-cover shadow-md flex-shrink-0" />
-                ) : (
-                    <div className="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
-                        <User size={48} className="text-gray-400" />
+            {/* Profile Header — two equal columns */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-4 pb-4 border-b">
+                {/* Left column: name → avatar → ctu → member since → country — centered */}
+                <div className="flex flex-col items-center gap-1.5 text-center">
+                    <div className="flex items-center justify-center gap-2 flex-wrap">
+                        <h2 className="text-xl font-bold text-gray-900 leading-tight">{displayName}</h2>
+                        <DonationBadge user={freshProfile || profile} size="sm" />
                     </div>
-                )}
-                <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">{displayName}</h2>
-                        <DonationBadge user={freshProfile || profile} size="md" />
-                    </div>
-                    <p className="text-gray-600">Public ID: <span className="font-mono text-accent">{freshProfile?.id_public || profile.id_public}</span></p>
-                    <p className="text-sm text-gray-500 mt-1">Member since {memberSince}</p>
-                    
-                    {/* Country - Show if available */}
+                    {profile.profileImage ? (
+                        <img src={profile.profileImage} alt={displayName} className="w-24 h-24 rounded-lg object-cover shadow-md" />
+                    ) : (
+                        <div className="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center shadow-md">
+                            <User size={40} className="text-gray-400" />
+                        </div>
+                    )}
+                    <span className="font-mono text-accent font-semibold text-sm">{freshProfile?.id_public || profile.id_public}</span>
+                    <span className="text-xs text-gray-500">Member since {memberSince}</span>
                     {(freshProfile?.country || profile.country) && (
-                        <p className="text-sm text-gray-600 mt-1 flex items-center gap-2">
-                            <span className={`${getCountryFlag(freshProfile?.country || profile.country)} inline-block h-5 w-7 flex-shrink-0`}></span>
+                        <span className="flex items-center justify-center gap-1 text-xs text-gray-500">
+                            <span className={`${getCountryFlag(freshProfile?.country || profile.country)} inline-block h-3.5 w-5 flex-shrink-0`}></span>
                             <span>{getCountryName(freshProfile?.country || profile.country)}{(freshProfile?.country || profile.country) === 'US' && (freshProfile?.state || profile.state) ? `, ${getStateName(freshProfile?.state || profile.state)}` : ''}</span>
-                        </p>
+                        </span>
                     )}
-                    
-                    {/* Bio - Show if available and public */}
+                </div>
+
+                {/* Right column: bio only */}
+                <div className="flex flex-col items-center gap-1.5">
                     {(freshProfile?.showBio ?? profile.showBio ?? true) && (freshProfile?.bio || profile.bio) && (
-                        <p className="text-sm text-gray-700 mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200 whitespace-pre-wrap break-words">
-                            {freshProfile?.bio || profile.bio}
-                        </p>
-                    )}
-                    
-                    {/* Email - Show if public */}
-                    {(freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email) && (
-                        <p className="text-sm text-gray-700 mt-2 flex items-center gap-2 break-all">
-                            <Mail size={16} className="text-accent flex-shrink-0" />
-                            <a href={`mailto:${freshProfile?.email || profile.email}`} className="hover:text-accent transition underline break-all">
-                                {freshProfile?.email || profile.email}
-                            </a>
-                        </p>
-                    )}
-                    
-                    {/* Website - Show if public */}
-                    {(freshProfile?.showWebsiteURL ?? profile.showWebsiteURL) && (freshProfile?.websiteURL || profile.websiteURL) && (
-                        <p className="text-sm text-gray-700 mt-2 flex items-start gap-2 break-all">
-                            <Globe size={16} className="text-accent flex-shrink-0 mt-0.5" />
-                            <a href={freshProfile?.websiteURL || profile.websiteURL} target="_blank" rel="noopener noreferrer" className="hover:text-accent transition underline break-all">
-                                {freshProfile?.websiteURL || profile.websiteURL}
-                            </a>
-                        </p>
+                        <>
+                            <p className={`w-full text-sm text-gray-700 text-left whitespace-pre-wrap break-words${!bioExpanded ? ' line-clamp-[15]' : ''}`}>
+                                {freshProfile?.bio || profile.bio}
+                            </p>
+                            {(freshProfile?.bio || profile.bio || '').split('\n').length > 15 || (freshProfile?.bio || profile.bio || '').length > 600 ? (
+                                <button onClick={() => setBioExpanded(v => !v)} className="text-xs text-accent hover:underline mt-0.5">
+                                    {bioExpanded ? 'Show less' : 'Read more'}
+                                </button>
+                            ) : null}
+                        </>
                     )}
                 </div>
             </div>
 
+            {/* Email + website + social — full width under both columns */}
+            {((freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email)) ||
+             ((freshProfile?.showWebsiteURL ?? profile.showWebsiteURL) && (freshProfile?.websiteURL || profile.websiteURL)) ||
+             ((freshProfile?.showSocialMediaURL ?? profile.showSocialMediaURL) && (freshProfile?.socialMediaURL || profile.socialMediaURL)) ? (
+                <div className="flex flex-wrap justify-center gap-x-6 gap-y-1 mb-4 pb-4 border-b">
+                    {(freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email) && (
+                        <a href={`mailto:${freshProfile?.email || profile.email}`} className="text-sm text-gray-600 flex items-center gap-1.5 hover:text-accent transition break-all">
+                            <Mail size={14} className="text-accent flex-shrink-0" />
+                            {freshProfile?.email || profile.email}
+                        </a>
+                    )}
+                    {(freshProfile?.showWebsiteURL ?? profile.showWebsiteURL) && (freshProfile?.websiteURL || profile.websiteURL) && (
+                        <a href={freshProfile?.websiteURL || profile.websiteURL} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-600 flex items-center gap-1.5 hover:text-accent transition break-all">
+                            <Globe size={14} className="text-accent flex-shrink-0" />
+                            {freshProfile?.websiteURL || profile.websiteURL}
+                        </a>
+                    )}
+                    {(freshProfile?.showSocialMediaURL ?? profile.showSocialMediaURL) && (freshProfile?.socialMediaURL || profile.socialMediaURL) && (
+                        <a href={freshProfile?.socialMediaURL || profile.socialMediaURL} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-600 flex items-center gap-1.5 hover:text-accent transition break-all">
+                            <Share2 size={14} className="text-accent flex-shrink-0" />
+                            {freshProfile?.socialMediaURL || profile.socialMediaURL}
+                        </a>
+                    )}
+                </div>
+            ) : null}
+
             {/* Tab Bar */}
-            <div className="flex border-b border-gray-200 mb-6 overflow-x-auto">
+            <div className="flex flex-wrap border-b border-gray-200 mb-6">
                 <button
                     onClick={() => setActiveTab('animals')}
-                    className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition whitespace-nowrap -mb-px ${activeTab === 'animals' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'animals' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                 >
                     Animals ({animals.length})
                 </button>
                 {hasBreederInfo && (
                     <button
                         onClick={() => setActiveTab('info-adoption')}
-                        className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition whitespace-nowrap -mb-px ${activeTab === 'info-adoption' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                        className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'info-adoption' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                         Info &amp; Adoption
+                    </button>
+                )}
+                {publicLitters.length > 0 && (
+                    <button
+                        onClick={() => setActiveTab('litters')}
+                        className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'litters' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    >
+                        Litters
+                    </button>
+                )}
+                {animals.some(a => a.isForSale || a.availableForBreeding) && (
+                    <button
+                        onClick={() => setActiveTab('for-sale-stud')}
+                        className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'for-sale-stud' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    >
+                        For Sale / Stud
                     </button>
                 )}
             </div>
@@ -2574,7 +2642,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                     type="text"
                                     value={animalSearch}
                                     onChange={(e) => setAnimalSearch(e.target.value)}
-                                    placeholder="Search by name or ID\u2026"
+                                    placeholder="Search by name or ID…"
                                     className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[160px]"
                                 />
                             </div>
@@ -2737,25 +2805,229 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             )}
             </>)}
 
+            {/* For Sale / Stud Tab */}
+            {activeTab === 'for-sale-stud' && (() => {
+                const forSale = animals.filter(a => a.isForSale);
+                const forStud = animals.filter(a => a.availableForBreeding);
+                const AnimalSaleCard = ({ animal }) => {
+                    const imgSrc = animal.imageUrl || animal.photoUrl || null;
+                    const isSale = animal.isForSale;
+                    const isStud = animal.availableForBreeding;
+                    const priceLabel = isSale
+                        ? (animal.salePriceCurrency === 'Negotiable' || !animal.salePriceAmount
+                            ? 'Negotiable'
+                            : `${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount}`)
+                        : null;
+                    const studLabel = isStud
+                        ? (animal.studFeeCurrency === 'Negotiable' || !animal.studFeeAmount
+                            ? 'Negotiable'
+                            : `${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount}`)
+                        : null;
+                    const ageStr = animal.birthDate ? (() => {
+                        const months = Math.floor((Date.now() - new Date(animal.birthDate)) / (1000 * 60 * 60 * 24 * 30.44));
+                        return months < 24 ? `${months}mo` : `${Math.floor(months / 12)}yr`;
+                    })() : null;
+                    return (
+                        <div onClick={() => onViewAnimal(animal)}
+                            className="bg-white rounded-xl border-2 border-gray-200 hover:border-primary hover:shadow-md transition cursor-pointer overflow-hidden flex flex-col"
+                        >
+                            <div className="relative h-36 bg-gray-50 flex items-center justify-center">
+                                {imgSrc
+                                    ? <img src={imgSrc} alt={animal.name} className="max-h-32 max-w-full object-contain" />
+                                    : <Cat size={40} className="text-gray-300" />}
+                                {animal.gender && (
+                                    <span className="absolute top-2 right-2">
+                                        {animal.gender === 'Male' ? <Mars size={16} strokeWidth={2.5} className="text-primary" /> : animal.gender === 'Female' ? <Venus size={16} strokeWidth={2.5} className="text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars size={16} strokeWidth={2.5} className="text-purple-500" /> : null}
+                                    </span>
+                                )}
+                            </div>
+                            <div className="p-3 flex flex-col gap-1.5 flex-1">
+                                <p className="text-sm font-semibold text-gray-800 line-clamp-1">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</p>
+                                <p className="text-xs text-gray-500">{animal.species}{ageStr ? ` · ${ageStr}` : ''}</p>
+                                {isSale && priceLabel && (
+                                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 rounded-full px-2 py-0.5 w-fit">
+                                        <DollarSign size={11} /> {priceLabel}
+                                    </span>
+                                )}
+                                {isStud && studLabel && (
+                                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-purple-700 bg-purple-50 border border-purple-200 rounded-full px-2 py-0.5 w-fit">
+                                        <Heart size={11} /> Stud · {studLabel}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    );
+                };
+                return (
+                    <div className="space-y-8">
+                        {forSale.length > 0 && (
+                            <div>
+                                <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                    <DollarSign size={16} className="text-green-600" /> For Sale <span className="text-sm font-normal text-gray-400">({forSale.length})</span>
+                                </h3>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                    {forSale.map(a => <AnimalSaleCard key={a.id_public} animal={a} />)}
+                                </div>
+                            </div>
+                        )}
+                        {forStud.length > 0 && (
+                            <div>
+                                <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                    <Heart size={16} className="text-purple-500" /> Available for Stud <span className="text-sm font-normal text-gray-400">({forStud.length})</span>
+                                </h3>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                    {forStud.map(a => <AnimalSaleCard key={a.id_public} animal={a} />)}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
+            })()}
+
             {/* Info & Adoption Tab */}
             {activeTab === 'info-adoption' && hasBreederInfo && (
-                <div className="space-y-5">
+                <div className="space-y-2">
                     {[
                         { key: 'aboutProgram',       label: 'About My Program / Breeding Goals' },
                         { key: 'adoptionRules',      label: 'Adoption / Rehoming Rules' },
-                        { key: 'careRequirements',   label: 'House / Care Requirements for Adopters' },
+                        { key: 'careRequirements',   label: 'House / Care Requirements for Adopters' }, // legacy field
+                        { key: 'enclosureCare',      label: 'Enclosure / Enclosure Care Requirements' },
+                        { key: 'routineCare',        label: 'Routine Care (Food, Medical, etc.)' },
                         { key: 'healthGuarantee',    label: 'Health Guarantee' },
-                        { key: 'waitlistInfo',       label: 'Waitlist Info' },
+                        { key: 'waitlistInfo',       label: 'Waitlist and Booking Info' },
                         { key: 'pricingNotes',       label: 'Pricing / Fee Notes' },
                         { key: 'contactPreferences', label: 'Contact Preferences' },
-                    ].filter(f => (freshProfile?.breederInfo?.[f.key] || '').trim()).map(f => (
-                        <div key={f.key} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{f.label}</h4>
-                            <div className="text-gray-800 whitespace-pre-wrap text-sm leading-relaxed">{freshProfile.breederInfo[f.key]}</div>
-                        </div>
-                    ))}
+                    ].filter(f => (freshProfile?.breederInfo?.[f.key] || '').trim()).map(f => {
+                        const isOpen = expandedInfoFields.has(f.key);
+                        return (
+                            <div key={f.key} className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+                                <button
+                                    type="button"
+                                    onClick={() => toggleInfoField(f.key)}
+                                    className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-100 transition"
+                                >
+                                    <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">{f.label}</span>
+                                    {isOpen ? <ChevronUp size={15} className="text-gray-400 shrink-0" /> : <ChevronDown size={15} className="text-gray-400 shrink-0" />}
+                                </button>
+                                {isOpen && (
+                                    <div className="px-4 pb-4 text-gray-800 text-sm leading-relaxed border-t border-gray-200 pt-3"
+                                        dangerouslySetInnerHTML={{ __html: renderBreederInfoMarkdown(freshProfile.breederInfo[f.key]) }} />
+                                )}
+                            </div>
+                        );
+                    })}
+                    {(freshProfile?.breederInfo?.customFields || [])
+                        .filter(cf => cf.title?.trim() && cf.value?.trim())
+                        .map((cf, idx) => {
+                            const key = `custom-${idx}`;
+                            const isOpen = expandedInfoFields.has(key);
+                            return (
+                                <div key={key} className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+                                    <button
+                                        type="button"
+                                        onClick={() => toggleInfoField(key)}
+                                        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-100 transition"
+                                    >
+                                        <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">{cf.title}</span>
+                                        {isOpen ? <ChevronUp size={15} className="text-gray-400 shrink-0" /> : <ChevronDown size={15} className="text-gray-400 shrink-0" />}
+                                    </button>
+                                    {isOpen && (
+                                        <div className="px-4 pb-4 text-gray-800 text-sm leading-relaxed border-t border-gray-200 pt-3"
+                                            dangerouslySetInnerHTML={{ __html: renderBreederInfoMarkdown(cf.value) }} />
+                                    )}
+                                </div>
+                            );
+                        })
+                    }
                 </div>
             )}
+
+            {/* Litters Tab */}
+            {activeTab === 'litters' && publicLitters.length > 0 && (() => {
+                const formatLitterDate = (d) => d ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(d)) : null;
+                const planned = publicLitters.filter(l => l.isPlanned);
+                const born    = publicLitters.filter(l => !l.isPlanned);
+                const LitterPublicCard = ({ l }) => (
+                    <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-2.5">
+                        {/* Header row: pair name + status badge */}
+                        <div className="flex flex-wrap items-center gap-2">
+                            {l.isPlanned
+                                ? <span className="text-xs font-semibold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">Planned</span>
+                                : <span className="text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Born</span>}
+                            {l.litter_id_public && <span className="text-xs font-mono bg-purple-100 text-purple-700 px-2 py-0.5 rounded">{l.litter_id_public}</span>}
+                            {l.breedingPairCodeName && <span className="text-sm font-semibold text-gray-800">{l.breedingPairCodeName}</span>}
+                        </div>
+                        {/* Sire × Dam */}
+                        {(l.sirePrefixName || l.sireId_public || l.damPrefixName || l.damId_public) && (
+                            <p className="text-sm text-gray-600">
+                                <span className="font-medium text-gray-700">Sire:</span> {l.sirePrefixName || l.sireId_public || '—'}
+                                <span className="mx-2 text-gray-400">×</span>
+                                <span className="font-medium text-gray-700">Dam:</span> {l.damPrefixName || l.damId_public || '—'}
+                            </p>
+                        )}
+                        {/* Dates */}
+                        <div className="flex flex-wrap gap-3 text-xs text-gray-500">
+                            {l.matingDate && <span><span className="font-medium">Mated:</span> {formatLitterDate(l.matingDate)}</span>}
+                            {l.expectedDueDate && l.isPlanned && <span><span className="font-medium">Due:</span> {formatLitterDate(l.expectedDueDate)}</span>}
+                            {l.birthDate && !l.isPlanned && <span><span className="font-medium">Born:</span> {formatLitterDate(l.birthDate)}</span>}
+                        </div>
+                        {/* Offspring counts */}
+                        {!l.isPlanned && (l.litterSizeBorn != null) && (
+                            <div className="flex items-center gap-2 text-xs">
+                                <span className="font-semibold text-gray-700">{l.litterSizeBorn} born</span>
+                                {(l.maleCount != null || l.femaleCount != null || l.unknownCount != null) && (
+                                    <span>
+                                        <span className="text-blue-500 font-semibold">{l.maleCount ?? 0}M</span>
+                                        <span className="text-gray-400 mx-0.5">/</span>
+                                        <span className="text-pink-500 font-semibold">{l.femaleCount ?? 0}F</span>
+                                        <span className="text-gray-400 mx-0.5">/</span>
+                                        <span className="text-purple-500 font-semibold">{l.unknownCount ?? 0}U</span>
+                                    </span>
+                                )}
+                            </div>
+                        )}
+                        {/* Photo strip */}
+                        {l.images?.length > 0 && (
+                            <div className="flex gap-1.5 overflow-x-auto">
+                                {l.images.slice(0, 5).map((img, i) => (
+                                    <img key={i} src={img.url} alt="" className="h-16 w-16 rounded-lg object-cover flex-shrink-0 border border-gray-200" />
+                                ))}
+                                {l.images.length > 5 && (
+                                    <div className="h-16 w-16 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 border border-gray-200 text-xs text-gray-500 font-medium">+{l.images.length - 5}</div>
+                                )}
+                            </div>
+                        )}
+                        {/* Notes */}
+                        {l.notes?.trim() && (
+                            <p className="text-sm text-gray-600 leading-relaxed border-t border-gray-100 pt-2">{l.notes}</p>
+                        )}
+                    </div>
+                );
+                return (
+                    <div className="space-y-8">
+                        {planned.length > 0 && (
+                            <div>
+                                <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                    <Calendar size={16} className="text-indigo-500" /> Planned Litters <span className="text-sm font-normal text-gray-400">({planned.length})</span>
+                                </h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {planned.map(l => <LitterPublicCard key={l._id} l={l} />)}
+                                </div>
+                            </div>
+                        )}
+                        {born.length > 0 && (
+                            <div>
+                                <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                    <Sparkles size={16} className="text-green-500" /> Past Litters <span className="text-sm font-normal text-gray-400">({born.length})</span>
+                                </h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {born.map(l => <LitterPublicCard key={l._id} l={l} />)}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
+            })()}
         </div>
     );
 };
@@ -4524,6 +4796,19 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                                     </div>}
                                                                     {/* -- 4. Notes --------------------------------------------- */}
                                                                     {litter.notes && <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm"><h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1">Notes</h4><p className="text-sm text-gray-700 italic leading-relaxed">{litter.notes}</p></div>}
+                                                                    {/* -- 4b. Photos ----------------------------------------- */}
+                                                                    {!litter.isPlanned && litter.images && litter.images.length > 0 && (
+                                                                        <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">
+                                                                            <h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-2">Photos</h4>
+                                                                            <div className="flex flex-wrap gap-2">
+                                                                                {litter.images.map((img, idx) => (
+                                                                                    <div key={img.r2Key || idx} className="w-20 h-20 rounded-lg overflow-hidden border border-gray-200">
+                                                                                        <img src={img.url} alt={"Gallery " + (idx + 1)} className="w-full h-full object-cover cursor-pointer" onClick={() => window.open(img.url, '_blank')} />
+                                                                                    </div>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
                                                                     {/* -- 5. Linked Offspring ---------------------------------- */}
                                                                     {lid && breedingRecordOffspring[lid] === undefined && (
                                                                         <div className="bg-white p-3 rounded border border-purple-100">
@@ -6349,6 +6634,19 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                                     </div>}
                                                                     {/* -- 4. Notes --------------------------------------------- */}
                                                                     {litter.notes && <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm"><h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1">Notes</h4><p className="text-sm text-gray-700 italic leading-relaxed">{litter.notes}</p></div>}
+                                                                    {/* -- 4b. Photos ----------------------------------------- */}
+                                                                    {!litter.isPlanned && litter.images && litter.images.length > 0 && (
+                                                                        <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">
+                                                                            <h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-2">Photos</h4>
+                                                                            <div className="flex flex-wrap gap-2">
+                                                                                {litter.images.map((img, idx) => (
+                                                                                    <div key={img.r2Key || idx} className="w-20 h-20 rounded-lg overflow-hidden border border-gray-200">
+                                                                                        <img src={img.url} alt={"Gallery " + (idx + 1)} className="w-full h-full object-cover cursor-pointer" onClick={() => window.open(img.url, '_blank')} />
+                                                                                    </div>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
                                                                     {/* -- 5. Linked Offspring ---------------------------------- */}
                                                                     {lid && breedingRecordOffspring[lid] === undefined && (
                                                                         <div className="bg-white p-3 rounded border border-purple-100">
@@ -8052,6 +8350,19 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                                         </div>
                                                                     </div>
                                                                     {litter.notes && <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm"><h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1">Notes</h4><p className="text-sm text-gray-700 italic leading-relaxed">{litter.notes}</p></div>}
+                                                                    {/* -- 4b. Photos ----------------------------------------- */}
+                                                                    {!litter.isPlanned && litter.images && litter.images.length > 0 && (
+                                                                        <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">
+                                                                            <h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-2">Photos</h4>
+                                                                            <div className="flex flex-wrap gap-2">
+                                                                                {litter.images.map((img, idx) => (
+                                                                                    <div key={img.r2Key || idx} className="w-20 h-20 rounded-lg overflow-hidden border border-gray-200">
+                                                                                        <img src={img.url} alt={"Gallery " + (idx + 1)} className="w-full h-full object-cover cursor-pointer" onClick={() => window.open(img.url, '_blank')} />
+                                                                                    </div>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
                                                                     {lid && breedingRecordOffspring[lid] === undefined && (
                                                                         <div className="bg-white p-3 rounded border border-purple-100">
                                                                             <div className="text-sm font-semibold text-gray-700 mb-3">Offspring</div>
@@ -9331,6 +9642,28 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [availableToLink, setAvailableToLink] = useState({ litter: null, animals: [] });
     const [expandedLitter, setExpandedLitter] = useState(null);
     const [editingLitter, setEditingLitter] = useState(null);
+    const [litterImages, setLitterImages] = useState([]);
+    const [litterImageUploading, setLitterImageUploading] = useState(false);
+    const [pendingLitterImages, setPendingLitterImages] = useState([]);
+    const [showLitterImageModal, setShowLitterImageModal] = useState(false);
+    const [enlargedLitterImageUrl, setEnlargedLitterImageUrl] = useState(null);
+
+    const handleLitterImageDownload = async (imageUrl) => {
+        try {
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = `crittertrack-litter-${Date.now()}.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+            console.error('Failed to download image:', error);
+        }
+    };
     const [modalTarget, setModalTarget] = useState(null);
     const [showSpeciesPicker, setShowSpeciesPicker] = useState(false);
     const [selectedSireAnimal, setSelectedSireAnimal] = useState(null);
@@ -9907,6 +10240,24 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
             const litterId = litterResponse.data.litterId_backend;
 
+            // Upload any images that were staged during creation
+            if (pendingLitterImages.length > 0) {
+                for (const { file } of pendingLitterImages) {
+                    try {
+                        const compressedBlob = await compressImageToMaxSize(file, 480 * 1024, { maxWidth: 1920, maxHeight: 1920, startQuality: 0.85 });
+                        const fd = new FormData();
+                        fd.append('image', compressedBlob, file.name || 'litter-photo.jpg');
+                        const imgResp = await axios.post(`${API_BASE_URL}/litters/${litterId}/images`, fd, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        });
+                        litterResponse.data.images = imgResp.data.images;
+                    } catch (err) {
+                        console.error('Failed to upload litter image:', err);
+                    }
+                }
+                setPendingLitterImages([]);
+            }
+
             // Optimistic update — add new litter to state immediately so it shows without waiting for refetch
             setLitters(prev => [litterResponse.data, ...prev]);
 
@@ -9996,6 +10347,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             
             showModalMessage('Success', successMsg);
             setShowAddForm(false);
+            setPendingLitterImages(prev => { prev.forEach(item => URL.revokeObjectURL(item.previewUrl)); return []; });
             setSelectedSireAnimal(null);
             setSelectedDamAnimal(null);
             setFormData({
@@ -10241,6 +10593,19 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
     };
 
+    const toggleLitterPublic = async (litter) => {
+        const newVal = !litter.showOnPublicProfile;
+        setLitters(prev => prev.map(l => l._id === litter._id ? { ...l, showOnPublicProfile: newVal } : l));
+        try {
+            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, { showOnPublicProfile: newVal }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+        } catch (err) {
+            // Revert on failure
+            setLitters(prev => prev.map(l => l._id === litter._id ? { ...l, showOnPublicProfile: !newVal } : l));
+        }
+    };
+
     const handleEditLitter = (litter) => {
         // Format birthDate and matingDate for date inputs
         // Date inputs expect YYYY-MM-DD format
@@ -10260,6 +10625,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         };
 
         setEditingLitter(litter._id);
+        setLitterImages(litter.images || []);
         // Restore cached parent animal objects for display (supports global animals)
         setSelectedSireAnimal(litter.sire || null);
         setSelectedDamAnimal(litter.dam || null);
@@ -10288,6 +10654,46 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         });
         setShowAddForm(true);
         setExpandedLitter(null);
+    };
+
+    const handleLitterImageUpload = async (file) => {
+        if (litterImages.length >= 5) {
+            showModalMessage('Error', 'Maximum of 5 images per litter');
+            return;
+        }
+        // Show local preview immediately while uploading
+        const localPreview = URL.createObjectURL(file);
+        setLitterImages(prev => [...prev, { url: localPreview, r2Key: '__uploading__' }]);
+        setLitterImageUploading(true);
+        try {
+            const compressedBlob = await compressImageToMaxSize(file, 480 * 1024, { maxWidth: 1920, maxHeight: 1920, startQuality: 0.85 });
+            const fd = new FormData();
+            fd.append('image', compressedBlob, file.name || 'litter-photo.jpg');
+            const resp = await axios.post(`${API_BASE_URL}/litters/${editingLitter}/images`, fd, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            URL.revokeObjectURL(localPreview);
+            setLitterImages(resp.data.images || []);
+            setLitters(prev => prev.map(l => l._id === editingLitter || l.litterId_backend === editingLitter ? { ...l, images: resp.data.images } : l));
+        } catch (err) {
+            URL.revokeObjectURL(localPreview);
+            setLitterImages(prev => prev.filter(img => img.r2Key !== '__uploading__'));
+            showModalMessage('Error', err.response?.data?.message || 'Failed to upload image');
+        } finally {
+            setLitterImageUploading(false);
+        }
+    };
+
+    const handleLitterImageDelete = async (r2Key) => {
+        try {
+            const resp = await axios.delete(`${API_BASE_URL}/litters/${editingLitter}/images/${encodeURIComponent(r2Key)}`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setLitterImages(resp.data.images || []);
+            setLitters(prev => prev.map(l => l._id === editingLitter || l.litterId_backend === editingLitter ? { ...l, images: resp.data.images } : l));
+        } catch (err) {
+            showModalMessage('Error', err.response?.data?.message || 'Failed to delete image');
+        }
     };
 
     const handleUpdateLitter = async (e) => {
@@ -10365,6 +10771,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             showModalMessage('Success', 'Litter updated successfully!');
             setShowAddForm(false);
             setEditingLitter(null);
+            setLitterImages([]);
             setSelectedSireAnimal(null);
             setSelectedDamAnimal(null);
             setFormData({
@@ -10710,6 +11117,85 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                         <div className="flex-grow overflow-y-auto p-4">
                             <form onSubmit={editingLitter ? handleUpdateLitter : handleSubmit} id="litter-form" className="space-y-4">
+                                {/* Litter Photos — top of form, always visible for born litters */}
+                                {(editingLitter ? (() => { const tl = litters.find(l => l._id === editingLitter || l.litterId_backend === editingLitter); return tl && !tl.isPlanned; })() : true) && (
+                                    <div className="mb-2 p-4 border border-amber-200 rounded-lg bg-amber-50">
+                                        <h4 className="text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                            <span>📷</span> Litter Photos
+                                            <span className="text-xs font-normal text-gray-400">({editingLitter ? litterImages.filter(i => i.r2Key !== '__uploading__').length : pendingLitterImages.length}/5)</span>
+                                        </h4>
+
+                                        {/* Thumbnail grid */}
+                                        {editingLitter ? (
+                                            litterImages.length > 0 && (
+                                                <div className="flex flex-wrap gap-2 mb-3">
+                                                    {litterImages.map((img, idx) => (
+                                                        <div key={img.r2Key || idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 group">
+                                                            <img src={img.url} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
+                                                            {img.r2Key === '__uploading__' ? (
+                                                                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                                                                    <span className="text-white text-xs">⏳</span>
+                                                                </div>
+                                                            ) : (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleLitterImageDelete(img.r2Key)}
+                                                                className="absolute top-0.5 right-0.5 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                title="Remove photo"
+                                                            >✕</button>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )
+                                        ) : (
+                                            pendingLitterImages.length > 0 && (
+                                                <div className="flex flex-wrap gap-2 mb-3">
+                                                    {pendingLitterImages.map((item, idx) => (
+                                                        <div key={idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 group">
+                                                            <img src={item.previewUrl} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    URL.revokeObjectURL(item.previewUrl);
+                                                                    setPendingLitterImages(prev => prev.filter((_, i) => i !== idx));
+                                                                }}
+                                                                className="absolute top-0.5 right-0.5 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                title="Remove photo"
+                                            >✕</button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )
+                                        )}
+
+                                        {/* Upload button */}
+                                        {(editingLitter ? litterImages.length : pendingLitterImages.length) < 5 && (
+                                            <label className={`flex items-center gap-2 px-3 py-2 border-2 border-dashed border-amber-400 rounded-lg cursor-pointer hover:bg-amber-100 transition w-fit text-sm font-medium text-amber-700 ${litterImageUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                                                <input
+                                                    type="file"
+                                                    accept="image/png,image/jpeg"
+                                                    className="hidden"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files?.[0];
+                                                        if (!file) return;
+                                                        if (editingLitter) {
+                                                            handleLitterImageUpload(file);
+                                                        } else {
+                                                            if (pendingLitterImages.length >= 5) return;
+                                                            const previewUrl = URL.createObjectURL(file);
+                                                            setPendingLitterImages(prev => [...prev, { file, previewUrl }]);
+                                                        }
+                                                        e.target.value = '';
+                                                    }}
+                                                />
+                                                {litterImageUploading ? '⏳ Uploading…' : '+ Add Photo'}
+                                            </label>
+                                        )}
+                                        <p className="text-xs text-gray-400 mt-2">{editingLitter ? 'PNG or JPEG, max 500 KB each. Up to 5 photos.' : 'Photos will be uploaded when you save the litter.'}</p>
+                                    </div>
+                                )}
+
                                 {/* Auto-assigned CTL-ID (read-only) */}
                                 {editingLitter && editingLitter.litter_id_public && (
                                     <div>
@@ -11305,6 +11791,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         placeholder="Additional notes about this litter..."
                                     />
                                 </div>
+
                             </form>
                     </div>
 
@@ -11314,11 +11801,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             onClick={() => {
                                 setShowAddForm(false);
                                 setEditingLitter(null);
+                                setLitterImages([]);
+                                pendingLitterImages.forEach(item => URL.revokeObjectURL(item.previewUrl));
+                                setPendingLitterImages([]);
                             }}
                             className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-semibold"
                         >
-                            Cancel
-                        </button>
+                            Cancel</button>
                         <button
                             type="submit"
                             form="litter-form"
@@ -11603,6 +12092,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50/80"
                                     onClick={() => setExpandedLitter(isExpanded ? null : litter._id)}
                                 >
+                                    {/* Public profile toggle — before litter name */}
+                                    <button
+                                        type="button"
+                                        onClick={(e) => { e.stopPropagation(); toggleLitterPublic(litter); }}
+                                        title={litter.showOnPublicProfile ? 'Shown on public profile — click to hide' : 'Hidden from public profile — click to show'}
+                                        className={`flex-shrink-0 mr-2 p-1 rounded transition ${litter.showOnPublicProfile ? 'text-green-500 hover:text-green-600' : 'text-gray-400 hover:text-gray-600'}`}
+                                    >
+                                        {litter.showOnPublicProfile ? <Eye size={15} /> : <EyeOff size={15} />}
+                                    </button>
                                     {/* Mobile layout: stacked info */}
                                     <div className="flex-1 sm:hidden">
                                         <div className="flex justify-between items-start mb-1">
@@ -11687,6 +12185,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             }
                                         </div>
                                     </div>
+                                    {(litter.images?.length > 0) && (
+                                        <span className="flex items-center gap-0.5 text-[11px] text-gray-400 mr-1 flex-shrink-0">
+                                            <Images size={12} />
+                                            <span>{litter.images.length}</span>
+                                        </span>
+                                    )}
                                     <ChevronDown
                                         size={18}
                                         className={`text-gray-400 transition-transform flex-shrink-0 ml-2 ${isExpanded ? 'rotate-180' : ''}`}
@@ -11881,6 +12385,24 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 </div>
                                             </div>
                                         </div>}
+
+                                        {/* -- 4. Photos -------------------------------------------- */}
+                                        {!litter.isPlanned && litter.images?.length > 0 && (
+                                            <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4 shadow-sm">
+                                                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Photos</h4>
+                                                <div className="flex gap-2 flex-wrap">
+                                                    {litter.images.map((img, idx) => (
+                                                        <button
+                                                            key={img.r2Key || idx}
+                                                            onClick={(e) => { e.stopPropagation(); setEnlargedLitterImageUrl(img.url); setShowLitterImageModal(true); }}
+                                                            className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden border border-gray-200 hover:border-blue-400 hover:shadow-md transition flex-shrink-0 focus:outline-none"
+                                                        >
+                                                            <img src={img.url} alt={`Litter photo ${idx + 1}`} className="w-full h-full object-cover" />
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {/* -- 5. Notes ---------------------------------------------- */}
                                         {litter.notes && (
@@ -12722,6 +13244,36 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     LoadingSpinner={LoadingSpinner}
                     requiredGender={['Female', 'Intersex', 'Unknown']}
                 />
+            )}
+
+            {/* Litter Photo Modal */}
+            {showLitterImageModal && enlargedLitterImageUrl && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[9999] p-4"
+                    onClick={() => setShowLitterImageModal(false)}
+                >
+                    <div className="relative max-w-7xl max-h-full flex flex-col items-center gap-4">
+                        <button
+                            onClick={(e) => { e.stopPropagation(); setShowLitterImageModal(false); }}
+                            className="self-end text-white hover:text-gray-300 transition"
+                        >
+                            <X size={32} />
+                        </button>
+                        <img
+                            src={enlargedLitterImageUrl}
+                            alt="Litter photo"
+                            className="max-w-full max-h-[75vh] object-contain"
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                        <button
+                            onClick={(e) => { e.stopPropagation(); handleLitterImageDownload(enlargedLitterImageUrl); }}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition"
+                        >
+                            <Download size={20} />
+                            Download Image
+                        </button>
+                    </div>
+                </div>
             )}
         </div>
     );
@@ -19314,6 +19866,44 @@ const UserProfileCard = ({ userProfile }) => {
     );
 };
 
+// Textarea with a small Bold/Italic formatting toolbar.
+// Uses onMouseDown + e.preventDefault() so the textarea never loses focus/selection.
+const FormattedTextarea = ({ value, onChange, rows, maxLength, placeholder, disabled, className }) => {
+    const taRef = useRef(null);
+    const applyFormat = (prefix, suffix) => {
+        const ta = taRef.current;
+        if (!ta) return;
+        const start = ta.selectionStart;
+        const end = ta.selectionEnd;
+        const selected = value.slice(start, end);
+        const newValue = value.slice(0, start) + prefix + selected + suffix + value.slice(end);
+        onChange({ target: { value: newValue } });
+        requestAnimationFrame(() => {
+            if (!taRef.current) return;
+            taRef.current.focus();
+            taRef.current.setSelectionRange(start + prefix.length, end + prefix.length);
+        });
+    };
+    return (
+        <div>
+            <div className="flex gap-1 mb-1.5">
+                <button type="button" disabled={disabled}
+                    onMouseDown={(e) => { e.preventDefault(); applyFormat('**', '**'); }}
+                    className="px-2 py-0.5 text-xs font-bold border border-gray-300 rounded bg-white hover:bg-gray-100 disabled:opacity-40 transition leading-5"
+                    title="Bold (**text**)"
+                >B</button>
+                <button type="button" disabled={disabled}
+                    onMouseDown={(e) => { e.preventDefault(); applyFormat('*', '*'); }}
+                    className="px-2 py-0.5 text-xs italic border border-gray-300 rounded bg-white hover:bg-gray-100 disabled:opacity-40 transition leading-5"
+                    title="Italic (*text*)"
+                >I</button>
+            </div>
+            <textarea ref={taRef} value={value} onChange={onChange} rows={rows} maxLength={maxLength}
+                placeholder={placeholder} disabled={disabled} className={className} />
+        </div>
+    );
+};
+
 const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCancel, authToken }) => {
     console.log('[ProfileEditForm] userProfile.allowMessages:', userProfile.allowMessages);
     
@@ -19323,6 +19913,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [showBreederName, setShowBreederName] = useState(userProfile.showBreederName ?? false); 
     const [websiteURL, setWebsiteURL] = useState(userProfile.websiteURL || '');
     const [showWebsiteURL, setShowWebsiteURL] = useState(userProfile.showWebsiteURL ?? false);
+    const [socialMediaURL, setSocialMediaURL] = useState(userProfile.socialMediaURL || '');
+    const [showSocialMediaURL, setShowSocialMediaURL] = useState(userProfile.showSocialMediaURL ?? false);
     const [showEmailPublic, setShowEmailPublic] = useState(userProfile.showEmailPublic ?? false); 
     const [showGeneticCodePublic, setShowGeneticCodePublic] = useState(userProfile.showGeneticCodePublic ?? false);
     const [showRemarksPublic, setShowRemarksPublic] = useState(userProfile.showRemarksPublic ?? false);
@@ -19337,11 +19929,13 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [breederInfo, setBreederInfo] = useState({
         aboutProgram:       userProfile.breederInfo?.aboutProgram       || '',
         adoptionRules:      userProfile.breederInfo?.adoptionRules      || '',
-        careRequirements:   userProfile.breederInfo?.careRequirements   || '',
+        enclosureCare:      userProfile.breederInfo?.enclosureCare      || '',
+        routineCare:        userProfile.breederInfo?.routineCare        || '',
         healthGuarantee:    userProfile.breederInfo?.healthGuarantee    || '',
         waitlistInfo:       userProfile.breederInfo?.waitlistInfo       || '',
         pricingNotes:       userProfile.breederInfo?.pricingNotes       || '',
         contactPreferences: userProfile.breederInfo?.contactPreferences || '',
+        customFields:       userProfile.breederInfo?.customFields       || [],
     });
 
     // Keep allowMessages in sync if userProfile updates (e.g., after save or refetch)
@@ -19353,6 +19947,21 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         setCountry(userProfile.country || '');
         setUsState(userProfile.country === 'US' ? (userProfile.state || '') : '');
     }, [userProfile.allowMessages, userProfile.emailNotificationPreference, userProfile.country, userProfile.state]);
+
+    // Keep breederInfo form fields in sync when userProfile updates after save/refetch
+    useEffect(() => {
+        setBreederInfo({
+            aboutProgram:       userProfile.breederInfo?.aboutProgram       || '',
+            adoptionRules:      userProfile.breederInfo?.adoptionRules      || '',
+            enclosureCare:      userProfile.breederInfo?.enclosureCare      || '',
+            routineCare:        userProfile.breederInfo?.routineCare        || '',
+            healthGuarantee:    userProfile.breederInfo?.healthGuarantee    || '',
+            waitlistInfo:       userProfile.breederInfo?.waitlistInfo       || '',
+            pricingNotes:       userProfile.breederInfo?.pricingNotes       || '',
+            contactPreferences: userProfile.breederInfo?.contactPreferences || '',
+            customFields:       userProfile.breederInfo?.customFields       || [],
+        });
+    }, [userProfile.breederInfo]);
     
     console.log('[ProfileEditForm] Initial allowMessages state:', allowMessages);
 
@@ -19376,6 +19985,26 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [passwordLoading, setPasswordLoading] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [dangerZoneOpen, setDangerZoneOpen] = useState(false);
+    const [settingsTab, setSettingsTab] = useState('profile');
+
+    // Data Portability — Export
+    const [exportSections, setExportSections] = useState({ animals: true, litters: true, enclosures: true, supplies: true, budget: true });
+    const [exportFormat, setExportFormat] = useState('json');
+    const [exportIncludeArchived, setExportIncludeArchived] = useState(false);
+    const [exportIncludeSold, setExportIncludeSold] = useState(false);
+    const [exportEmbedImages, setExportEmbedImages] = useState(false);
+    const [exportLoading, setExportLoading] = useState(false);
+
+    // Data Portability — Import
+    const [importFile, setImportFile] = useState(null);
+    const [importPreview, setImportPreview] = useState(null);
+    const [importConflictResolutions, setImportConflictResolutions] = useState({});
+    const [importLoading, setImportLoading] = useState(false);
+    const [importConfirmLoading, setImportConfirmLoading] = useState(false);
+    const [importResult, setImportResult] = useState(null);
+    const [importSectionActions, setImportSectionActions] = useState({});
+    const [importConflictsExpanded, setImportConflictsExpanded] = useState({});
 
     const handleImageChange = async (e) => {
         if (e.target.files && e.target.files[0]) {
@@ -19410,6 +20039,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             showBreederName: showBreederName,
             websiteURL: websiteURL || null,
             showWebsiteURL: websiteURL ? showWebsiteURL : false,
+            socialMediaURL: socialMediaURL || null,
+            showSocialMediaURL: socialMediaURL ? showSocialMediaURL : false,
             showEmailPublic: showEmailPublic,
             showGeneticCodePublic: showGeneticCodePublic,
             showRemarksPublic: showRemarksPublic,
@@ -19595,6 +20226,127 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         }
     };
 
+    // ── Data Portability handlers ─────────────────────────────────────────────
+
+    const handleExport = async () => {
+        const selectedSections = Object.entries(exportSections)
+            .filter(([, v]) => v)
+            .map(([k]) => k)
+            .join(',');
+        if (!selectedSections) return;
+        setExportLoading(true);
+        try {
+            const params = new URLSearchParams({
+                sections: selectedSections,
+                format: exportFormat,
+                includeArchived: String(exportIncludeArchived),
+                includeSold: String(exportIncludeSold),
+                embedImages: String(exportEmbedImages),
+            });
+            const response = await fetch(`${API_BASE_URL}/export?${params}`, {
+                headers: { Authorization: `Bearer ${authToken}` },
+            });
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.message || `Export failed (${response.status})`);
+            }
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const ts = new Date().toISOString().slice(0, 10);
+            a.download = exportFormat === 'csv' ? `crittertrack_export_${ts}.zip` : `crittertrack_export_${ts}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            showModalMessage('Export Failed', err.message);
+        } finally {
+            setExportLoading(false);
+        }
+    };
+
+    const handleImportPreview = async () => {
+        if (!importFile) return;
+        setImportLoading(true);
+        setImportPreview(null);
+        setImportResult(null);
+        setImportConflictResolutions({});
+        try {
+            const formData = new FormData();
+            formData.append('file', importFile);
+            const resp = await axios.post(`${API_BASE_URL}/import`, formData, {
+                headers: { Authorization: `Bearer ${authToken}` },
+            });
+            const preview = resp.data.preview || {};
+            setImportPreview(preview);
+            // Default all conflicts to 'skip'
+            const defaults = {};
+            for (const [section, info] of Object.entries(preview)) {
+                if (info.conflicts?.length) {
+                    defaults[section] = {};
+                    for (const conflict of info.conflicts) {
+                        const key = conflict.id_public || conflict.litter_id_public || conflict.name || '';
+                        defaults[section][key] = 'skip';
+                    }
+                }
+            }
+            setImportConflictResolutions(defaults);
+            // Default bulk section action to 'skip' for all conflicting sections
+            const sectionDefaults = {};
+            for (const [section, info] of Object.entries(preview)) {
+                if (info.conflicts?.length) sectionDefaults[section] = 'skip';
+            }
+            setImportSectionActions(sectionDefaults);
+            setImportConflictsExpanded({});
+        } catch (err) {
+            showModalMessage('Parse Failed', err.response?.data?.message || err.message);
+        } finally {
+            setImportLoading(false);
+        }
+    };
+
+    const handleImportConfirm = async () => {
+        if (!importFile || !importPreview) return;
+        setImportConfirmLoading(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', importFile);
+            formData.append('confirm', 'true');
+            formData.append('conflictResolutions', JSON.stringify(importConflictResolutions));
+            const resp = await axios.post(`${API_BASE_URL}/import`, formData, {
+                headers: { Authorization: `Bearer ${authToken}` },
+            });
+            setImportResult(resp.data);
+            setImportPreview(null);
+            setImportFile(null);
+        } catch (err) {
+            showModalMessage('Import Failed', err.response?.data?.message || err.message);
+        } finally {
+            setImportConfirmLoading(false);
+        }
+    };
+
+    const setConflictResolution = (section, key, action) => {
+        setImportConflictResolutions(prev => ({
+            ...prev,
+            [section]: { ...(prev[section] || {}), [key]: action },
+        }));
+    };
+
+    const handleSectionBulkAction = (section, action, conflicts) => {
+        setImportSectionActions(prev => ({ ...prev, [section]: action }));
+        setImportConflictResolutions(prev => {
+            const updated = {};
+            for (const conflict of conflicts) {
+                const key = conflict.id_public || conflict.litter_id_public || conflict.name || '';
+                updated[key] = action;
+            }
+            return { ...prev, [section]: updated };
+        });
+    };
+
     return (
         <div className="w-full max-w-5xl bg-white p-6 rounded-xl shadow-lg">
             <div className="flex justify-between items-center mb-6 border-b pb-4">
@@ -19611,7 +20363,22 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 </button>
             </div>
             
-            <form onSubmit={handleProfileUpdate} className="space-y-6 mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
+            {/* Settings Tabs */}
+            <div className="flex flex-wrap border-b border-gray-200 mb-6">
+                {[
+                    { id: 'profile',        label: 'Profile' },
+                    { id: 'info-adoption',  label: 'Info & Adoption' },
+                    { id: 'directory',      label: 'Directory' },
+                    { id: 'account',        label: 'Account' },
+                ].map(tab => (
+                    <button key={tab.id} type="button" onClick={() => setSettingsTab(tab.id)}
+                        className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${settingsTab === tab.id ? 'border-accent text-accent' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    >{tab.label}</button>
+                ))}
+            </div>
+
+            {settingsTab === 'profile' && <>
+            <form id="profile-info-form" onSubmit={handleProfileUpdate} className="space-y-6 mb-4 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Public Profile Information</h3>
                 
                 <div data-tutorial-target="profile-image-upload">
@@ -19623,27 +20390,33 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 </div>
 
                 <div className="space-y-4 min-w-0">
-                    <div data-tutorial-target="name-fields">
+                    <div data-tutorial-target="name-fields" className="space-y-4">
                         <input type="text" name="personalName" placeholder="Personal Name *" value={personalName} onChange={(e) => setPersonalName(e.target.value)} required 
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
                         <input type="text" name="breederName" placeholder="Breeder Name (Optional)" value={breederName} onChange={(e) => setBreederName(e.target.value)}
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
                     </div>
-                    <div data-tutorial-target="website-country-fields">
+                    <div data-tutorial-target="website-country-fields" className="space-y-4">
                         <input type="url" name="websiteURL" placeholder="Website URL (Optional) e.g., https://example.com" value={websiteURL} onChange={(e) => setWebsiteURL(e.target.value)}
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
+                        <input type="url" name="socialMediaURL" placeholder="Social Media Link (Optional) e.g., https://instagram.com/yourpage" value={socialMediaURL} onChange={(e) => setSocialMediaURL(e.target.value)}
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
                     
                         <textarea 
                             name="bio" 
                             placeholder="Bio (Optional) - Tell other breeders about yourself and your breeding program" 
                             value={bio} 
-                            onChange={(e) => setBio(e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (val.split('\n').length > 15) return;
+                                if (val.length > 1000) return;
+                                setBio(val);
+                            }}
                             rows="4"
-                            maxLength="500"
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none" 
                             disabled={profileLoading}
                         />
-                        {bio && <p className="text-xs text-gray-500 mt-1">{bio.length}/500 characters</p>}
+                        {bio && <p className="text-xs text-gray-500 mt-1">{bio.length}/1000 characters · {bio.split('\n').length}/15 lines</p>}
 
                         <select value={country} onChange={(e) => { setCountry(e.target.value); if (e.target.value !== 'US') setUsState(''); }}
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading}>
@@ -19722,6 +20495,13 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 <input type="checkbox" checked={showWebsiteURL} onChange={(e) => setShowWebsiteURL(e.target.checked)} 
                                     className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
                                 <span>Display **Website URL** on your public profile card.</span>
+                            </label>
+                        )}
+                        {socialMediaURL && (
+                            <label className="flex items-center space-x-2 text-sm text-gray-700">
+                                <input type="checkbox" checked={showSocialMediaURL} onChange={(e) => setShowSocialMediaURL(e.target.checked)} 
+                                    className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
+                                <span>Display **Social Media Link** on your public profile card.</span>
                             </label>
                         )}
                         
@@ -19804,74 +20584,135 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     </div>
                 </div>
 
-                <div data-tutorial-target="profile-save-cancel" className="flex justify-end pt-2">
-                    <button type="submit" disabled={profileLoading}
+            </form>
+            <div className="flex justify-end mb-2">
+                <button type="submit" form="profile-info-form" disabled={profileLoading}
+                    className="bg-accent hover:bg-accent/90 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
+                >
+                    {profileLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : <Save size={20} className="mr-2" />}
+                    Save Profile Info
+                </button>
+            </div>
+            </>}
+
+            {settingsTab === 'info-adoption' && <>
+            <form onSubmit={handleBreederInfoSave} className="space-y-4 p-4 sm:p-6 border rounded-lg bg-gray-50">
+                <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Info &amp; Adoption</h3>
+                <p className="text-sm text-gray-500">Shown on your public profile under the <strong>Info &amp; Adoption</strong> tab. Leave fields blank to hide them.</p>
+                {[
+                    { key: 'aboutProgram',       label: 'About My Program / Breeding Goals' },
+                    { key: 'adoptionRules',      label: 'Adoption / Rehoming Rules' },
+                    { key: 'enclosureCare',      label: 'Enclosure / Enclosure Care Requirements' },
+                    { key: 'routineCare',        label: 'Routine Care (Food, Medical, etc.)' },
+                    { key: 'healthGuarantee',    label: 'Health Guarantee' },
+                    { key: 'waitlistInfo',       label: 'Waitlist and Booking Info' },
+                    { key: 'pricingNotes',       label: 'Pricing / Fee Notes' },
+                    { key: 'contactPreferences', label: 'Contact Preferences' },
+                ].map(({ key, label }) => (
+                    <div key={key}>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+                        <FormattedTextarea
+                            value={breederInfo[key]}
+                            onChange={(e) => setBreederInfo(v => ({ ...v, [key]: e.target.value }))}
+                            rows={3}
+                            maxLength={2000}
+                            placeholder={`Enter ${label.toLowerCase()}\u2026`}
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none"
+                            disabled={breederInfoLoading}
+                        />
+                        {breederInfo[key] && <p className="text-xs text-gray-400 mt-0.5 text-right">{breederInfo[key].length}/2000</p>}
+                    </div>
+                ))}
+
+                {/* Custom Fields */}
+                <div className="border-t border-gray-200 pt-4">
+                    <div className="flex items-center justify-between mb-3">
+                        <div>
+                            <h4 className="text-sm font-semibold text-gray-700">Custom Fields</h4>
+                            <p className="text-xs text-gray-400 mt-0.5">Add your own sections with custom titles. Up to 10 fields.</p>
+                        </div>
+                        {breederInfo.customFields.length < 10 && (
+                            <button
+                                type="button"
+                                disabled={breederInfoLoading}
+                                onClick={() => setBreederInfo(v => ({ ...v, customFields: [...v.customFields, { title: '', value: '' }] }))}
+                                className="flex items-center gap-1.5 text-sm font-medium text-accent hover:text-accent/80 disabled:opacity-50 transition"
+                            >
+                                <Plus size={15} /> Add Field
+                            </button>
+                        )}
+                    </div>
+                    {breederInfo.customFields.length === 0 && (
+                        <p className="text-sm text-gray-400 italic">No custom fields yet. Click &ldquo;Add Field&rdquo; to create one.</p>
+                    )}
+                    <div className="space-y-4">
+                        {breederInfo.customFields.map((cf, idx) => (
+                            <div key={idx} className="border border-gray-200 rounded-lg p-3 bg-white">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <input
+                                        type="text"
+                                        value={cf.title}
+                                        onChange={(e) => {
+                                            const updated = breederInfo.customFields.map((f, i) => i === idx ? { ...f, title: e.target.value } : f);
+                                            setBreederInfo(v => ({ ...v, customFields: updated }));
+                                        }}
+                                        maxLength="100"
+                                        placeholder="Section title (e.g. Transport Policy)"
+                                        className="flex-1 p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border"
+                                        disabled={breederInfoLoading}
+                                    />
+                                    <button
+                                        type="button"
+                                        disabled={breederInfoLoading}
+                                        onClick={() => {
+                                            const updated = breederInfo.customFields.filter((_, i) => i !== idx);
+                                            setBreederInfo(v => ({ ...v, customFields: updated }));
+                                        }}
+                                        className="p-1.5 text-gray-400 hover:text-red-500 transition rounded"
+                                        title="Remove field"
+                                    >
+                                        <X size={16} />
+                                    </button>
+                                </div>
+                                <FormattedTextarea
+                                    value={cf.value}
+                                    onChange={(e) => {
+                                        const updated = breederInfo.customFields.map((f, i) => i === idx ? { ...f, value: e.target.value } : f);
+                                        setBreederInfo(v => ({ ...v, customFields: updated }));
+                                    }}
+                                    rows={3}
+                                    maxLength={2000}
+                                    placeholder={"Enter content\u2026"}
+                                    className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none"
+                                    disabled={breederInfoLoading}
+                                />
+                                {cf.value && <p className="text-xs text-gray-400 mt-0.5 text-right">{cf.value.length}/2000</p>}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                    <button type="submit" disabled={breederInfoLoading}
                         className="bg-accent hover:bg-accent/90 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
                     >
-                        {profileLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : <Save size={20} className="mr-2" />}
-                        Save Profile Info
+                        {breederInfoLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : <Save size={20} className="mr-2" />}
+                        Save Info &amp; Adoption
                     </button>
                 </div>
             </form>
+            </>}
 
-            {/* Info & Adoption Section */}
-            <div className="mb-8 border rounded-lg bg-gray-50 overflow-hidden">
-                <button
-                    type="button"
-                    onClick={() => setBreederInfoOpen(v => !v)}
-                    className="w-full flex items-center justify-between px-4 sm:px-6 py-4 text-left hover:bg-gray-100 transition"
-                >
-                    <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
-                        <ClipboardList size={20} className="text-primary-dark" />
-                        Info &amp; Adoption
-                    </h3>
-                    {breederInfoOpen ? <ChevronUp size={20} className="text-gray-500" /> : <ChevronDown size={20} className="text-gray-500" />}
-                </button>
-                {breederInfoOpen && (
-                    <form onSubmit={handleBreederInfoSave} className="border-t px-4 sm:px-6 pb-6 space-y-4">
-                        <p className="text-sm text-gray-500 mt-4">Shown on your public profile under the <strong>Info &amp; Adoption</strong> tab. Leave fields blank to hide them.</p>
-                        {[
-                            { key: 'aboutProgram',       label: 'About My Program / Breeding Goals' },
-                            { key: 'adoptionRules',      label: 'Adoption / Rehoming Rules' },
-                            { key: 'careRequirements',   label: 'House / Care Requirements for Adopters' },
-                            { key: 'healthGuarantee',    label: 'Health Guarantee' },
-                            { key: 'waitlistInfo',       label: 'Waitlist Info' },
-                            { key: 'pricingNotes',       label: 'Pricing / Fee Notes' },
-                            { key: 'contactPreferences', label: 'Contact Preferences' },
-                        ].map(({ key, label }) => (
-                            <div key={key}>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-                                <textarea
-                                    value={breederInfo[key]}
-                                    onChange={(e) => setBreederInfo(v => ({ ...v, [key]: e.target.value }))}
-                                    rows="3"
-                                    maxLength="2000"
-                                    placeholder={`Enter ${label.toLowerCase()}\u2026`}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none"
-                                    disabled={breederInfoLoading}
-                                />
-                                {breederInfo[key] && <p className="text-xs text-gray-400 mt-0.5 text-right">{breederInfo[key].length}/2000</p>}
-                            </div>
-                        ))}
-                        <div className="flex justify-end pt-2">
-                            <button type="submit" disabled={breederInfoLoading}
-                                className="bg-accent hover:bg-accent/90 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
-                            >
-                                {breederInfoLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : <Save size={20} className="mr-2" />}
-                                Save Info &amp; Adoption
-                            </button>
-                        </div>
-                    </form>
-                )}
-            </div>
-
+            {settingsTab === 'directory' && <>
             <BreederDirectorySettings
                 authToken={authToken}
                 API_BASE_URL={API_BASE_URL}
                 showModalMessage={showModalMessage}
                 userProfile={userProfile}
             />
-            
+            </>}
+
+            {settingsTab === 'account' && <>
             <form onSubmit={handleEmailUpdate} className="space-y-4 mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Change Email Address</h3>
                 <input type="email" placeholder="New Email Address *" value={email} onChange={(e) => setEmail(e.target.value)} required 
@@ -19903,9 +20744,237 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     </button>
                 </div>
             </form>
-            
-            <div className="mt-8 p-4 sm:p-6 border-2 border-red-300 rounded-lg bg-red-50 overflow-x-hidden">
-                <h3 className="text-xl font-semibold text-red-800 border-b border-red-200 pb-2 mb-4">Danger Zone</h3>
+
+            {/* ── Data Portability ───────────────────────────────────────────── */}
+            <div className="mt-6 mb-6 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden space-y-6">
+                <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Data Portability</h3>
+                <p className="text-sm text-gray-500 -mt-2">Export your records as a backup, or import data from a previous CritterTrack export.</p>
+
+                {/* ── Export ────────────────────────────────────────────────── */}
+                <div>
+                    <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2"><Download size={16} /> Export</h4>
+
+                    <p className="text-xs text-gray-500 mb-3">Select which sections to include:</p>
+                    <div className="flex flex-wrap gap-x-4 gap-y-2 mb-4">
+                        {['animals','litters','enclosures','supplies','budget'].map(s => (
+                            <label key={s} className="flex items-center gap-1.5 text-sm cursor-pointer">
+                                <input type="checkbox" checked={exportSections[s]} onChange={() => setExportSections(prev => ({ ...prev, [s]: !prev[s] }))}
+                                    className="rounded" />
+                                <span className="capitalize">{s}</span>
+                            </label>
+                        ))}
+                    </div>
+
+                    <p className="text-xs text-gray-500 mb-2">Format:</p>
+                    <div className="flex gap-5 mb-4">
+                        {[['json','JSON (single file)'],['csv','CSV (zip bundle)']].map(([val, label]) => (
+                            <label key={val} className="flex items-center gap-1.5 text-sm cursor-pointer">
+                                <input type="radio" name="exportFmt" value={val} checked={exportFormat === val} onChange={() => setExportFormat(val)} />
+                                {label}
+                            </label>
+                        ))}
+                    </div>
+
+                    <div className="flex flex-wrap gap-x-5 gap-y-2 mb-4 text-sm">
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" checked={exportIncludeArchived} onChange={e => setExportIncludeArchived(e.target.checked)} className="rounded" />
+                            Include archived
+                        </label>
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" checked={exportIncludeSold} onChange={e => setExportIncludeSold(e.target.checked)} className="rounded" />
+                            Include sold animals
+                        </label>
+                        {exportFormat === 'json' && (
+                            <label className="flex items-center gap-1.5 cursor-pointer">
+                                <input type="checkbox" checked={exportEmbedImages} onChange={e => setExportEmbedImages(e.target.checked)} className="rounded" />
+                                Embed images (base64)
+                            </label>
+                        )}
+                    </div>
+
+                    <button
+                        onClick={handleExport}
+                        disabled={exportLoading || !Object.values(exportSections).some(Boolean)}
+                        className="bg-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+                    >
+                        {exportLoading ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} />}
+                        Export Data
+                    </button>
+                </div>
+
+                {/* ── Import ────────────────────────────────────────────────── */}
+                <div className="border-t pt-5">
+                    <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2"><Upload size={16} /> Import</h4>
+                    <p className="text-xs text-gray-500 mb-3">Upload a <code>.json</code> or <code>.zip</code> (CSV bundle) previously exported from CritterTrack.</p>
+
+                    {/* File picker */}
+                    <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition mb-4 relative">
+                        <input type="file" accept=".json,.zip" className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                            onChange={e => { setImportFile(e.target.files?.[0] || null); setImportPreview(null); setImportResult(null); }} />
+                        {importFile
+                            ? <p className="text-sm font-medium text-gray-700 flex items-center gap-1.5"><FileText size={16} />{importFile.name}</p>
+                            : <>
+                                <Upload size={22} className="text-gray-400 mb-1" />
+                                <p className="text-sm text-gray-500">Click or drag to upload .json / .zip</p>
+                              </>
+                        }
+                    </label>
+
+                    {importFile && !importPreview && !importResult && (
+                        <button onClick={handleImportPreview} disabled={importLoading}
+                            className="bg-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+                        >
+                            {importLoading ? <Loader2 className="animate-spin" size={16} /> : <FileText size={16} />}
+                            Preview Import
+                        </button>
+                    )}
+
+                    {/* Import preview */}
+                    {importPreview && (
+                        <div className="space-y-4 mt-2">
+                            <h5 className="font-semibold text-gray-700">Preview</h5>
+                            <div className="overflow-x-auto rounded border">
+                                <table className="min-w-full text-sm">
+                                    <thead className="bg-gray-100">
+                                        <tr>
+                                            <th className="px-3 py-2 text-left font-medium text-gray-600">Section</th>
+                                            <th className="px-3 py-2 text-left font-medium text-gray-600">Records</th>
+                                            <th className="px-3 py-2 text-left font-medium text-gray-600">New</th>
+                                            <th className="px-3 py-2 text-left font-medium text-gray-600">Conflicts</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y">
+                                        {Object.entries(importPreview).map(([section, info]) => (
+                                            <tr key={section} className="hover:bg-gray-50">
+                                                <td className="px-3 py-2 capitalize font-medium">{section}</td>
+                                                <td className="px-3 py-2">{info.total}</td>
+                                                <td className="px-3 py-2 text-green-700">{info.new}</td>
+                                                <td className="px-3 py-2 text-amber-600">{info.conflicts?.length || 0}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Conflict resolution */}
+                            {Object.entries(importPreview).some(([_s, info]) => info.conflicts?.length > 0) && (
+                                <div className="space-y-3">
+                                    <p className="text-sm font-semibold text-amber-700 flex items-center gap-1.5">
+                                        <AlertTriangle size={15} /> Duplicate records found — choose how to handle each section:
+                                    </p>
+                                    {Object.entries(importPreview).map(([section, info]) => {
+                                        if (!info.conflicts?.length) return null;
+                                        const bulkAction = importSectionActions[section] || 'skip';
+                                        const expanded = importConflictsExpanded[section] || false;
+                                        return (
+                                            <div key={section} className="rounded border bg-amber-50 overflow-hidden">
+                                                {/* Section header: bulk action */}
+                                                <div className="flex flex-wrap items-center gap-2 px-3 py-2.5">
+                                                    <span className="text-xs font-semibold text-gray-700 uppercase capitalize flex-1">{section}</span>
+                                                    <span className="text-xs text-amber-700 bg-amber-100 rounded-full px-2 py-0.5 font-medium">
+                                                        {info.conflicts.length} duplicate{info.conflicts.length !== 1 ? 's' : ''}
+                                                    </span>
+                                                    <select
+                                                        value={bulkAction}
+                                                        onChange={e => handleSectionBulkAction(section, e.target.value, info.conflicts)}
+                                                        className="text-xs border rounded px-2 py-1 bg-white font-medium"
+                                                    >
+                                                        <option value="skip">Skip all</option>
+                                                        <option value="overwrite">Overwrite all</option>
+                                                        <option value="createNew">Create all as new</option>
+                                                    </select>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setImportConflictsExpanded(prev => ({ ...prev, [section]: !prev[section] }))}
+                                                        className="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-0.5 whitespace-nowrap"
+                                                    >
+                                                        {expanded ? 'Hide' : 'Override individually'}
+                                                        {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                                                    </button>
+                                                </div>
+                                                {/* Per-item overrides (collapsed by default) */}
+                                                {expanded && (
+                                                    <div className="border-t bg-white px-3 pb-3 pt-2 space-y-1 max-h-52 overflow-y-auto">
+                                                        {info.conflicts.map(conflict => {
+                                                            const key = conflict.id_public || conflict.litter_id_public || conflict.name || '';
+                                                            const displayName = conflict.name || conflict.litter_id_public || conflict.id_public || key;
+                                                            const currentAction = importConflictResolutions[section]?.[key] || bulkAction;
+                                                            const isOverridden = currentAction !== bulkAction;
+                                                            return (
+                                                                <div key={key} className="flex flex-wrap items-center gap-2 text-xs py-0.5">
+                                                                    <span className="font-mono bg-gray-100 border rounded px-1.5 py-0.5">{key}</span>
+                                                                    <span className="text-gray-500 flex-1 min-w-0 truncate">{displayName !== key ? displayName : ''}</span>
+                                                                    <select
+                                                                        value={currentAction}
+                                                                        onChange={e => setConflictResolution(section, key, e.target.value)}
+                                                                        className={`text-xs border rounded px-2 py-0.5 ${isOverridden ? 'bg-blue-50 border-blue-300 font-semibold' : 'bg-white'}`}
+                                                                    >
+                                                                        <option value="skip">Skip</option>
+                                                                        <option value="overwrite">Overwrite</option>
+                                                                        <option value="createNew">Create as new</option>
+                                                                    </select>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            <div className="flex gap-3 pt-1">
+                                <button onClick={handleImportConfirm} disabled={importConfirmLoading}
+                                    className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+                                >
+                                    {importConfirmLoading ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle size={16} />}
+                                    Confirm Import
+                                </button>
+                                <button onClick={() => { setImportPreview(null); setImportFile(null); }}
+                                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Import result */}
+                    {importResult && (
+                        <div className="mt-3 p-4 rounded-lg border bg-green-50 border-green-200">
+                            <p className="font-semibold text-green-800 flex items-center gap-1.5 mb-2"><CheckCircle size={16} /> Import complete</p>
+                            {importResult.written && (
+                                <div className="text-sm text-gray-700 space-y-0.5 mb-2">
+                                    {Object.entries(importResult.written).map(([s, n]) => (
+                                        <p key={s}><span className="capitalize font-medium">{s}</span>: {n} written{importResult.skipped?.[s] ? `, ${importResult.skipped[s]} skipped` : ''}</p>
+                                    ))}
+                                </div>
+                            )}
+                            {importResult.errors?.length > 0 && (
+                                <div className="mt-2">
+                                    <p className="text-sm font-semibold text-red-700 flex items-center gap-1"><AlertTriangle size={13} /> {importResult.errors.length} error(s):</p>
+                                    <ul className="text-xs text-red-600 list-disc list-inside mt-1 space-y-0.5 max-h-32 overflow-y-auto">
+                                        {importResult.errors.map((e, i) => (
+                                            <li key={i}>[{e.section}] {e.id}: {e.error}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                            <button onClick={() => setImportResult(null)} className="mt-3 text-xs text-gray-500 hover:text-gray-700 underline">Dismiss</button>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <div className="mt-2 border-2 border-red-300 rounded-lg bg-red-50 overflow-x-hidden">
+                <button type="button" onClick={() => setDangerZoneOpen(v => !v)}
+                    className="w-full flex items-center justify-between p-4 sm:p-6 text-left hover:bg-red-100 transition"
+                >
+                    <h3 className="text-xl font-semibold text-red-800">Danger Zone</h3>
+                    {dangerZoneOpen ? <ChevronUp size={20} className="text-red-400" /> : <ChevronDown size={20} className="text-red-400" />}
+                </button>
+                {dangerZoneOpen && <div className="px-4 sm:px-6 pb-6">
                 <p className="text-sm text-gray-700 mb-4">
                     Deleting your account is permanent and cannot be undone. All your animals, litters, and profile data will be permanently deleted.
                 </p>
@@ -19939,7 +21008,9 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         </div>
                     </div>
                 )}
+                </div>}
             </div>
+            </>}
         </div>
     );
 };
@@ -20593,6 +21664,14 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                             (userProfile.showWebsiteURL ?? false) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
                             {(userProfile.showWebsiteURL ?? false) ? 'Public' : 'Private'}
+                        </span>
+                    </div>
+                    <div className="flex justify-between items-center gap-2 py-1.5 sm:py-2">
+                        <span className="text-xs sm:text-sm text-gray-800 truncate flex-1">Social Media Link</span>
+                        <span className={`px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold rounded-full whitespace-nowrap ${ 
+                            (userProfile.showSocialMediaURL ?? false) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                            {(userProfile.showSocialMediaURL ?? false) ? 'Public' : 'Private'}
                         </span>
                     </div>
 
