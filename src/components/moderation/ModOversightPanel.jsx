@@ -10,7 +10,8 @@ const REPORT_TYPES = [
     { value: 'all', label: 'All Types' },
     { value: 'profile', label: 'Profiles' },
     { value: 'animal', label: 'Animals' },
-    { value: 'message', label: 'Messages' }
+    { value: 'message', label: 'Messages' },
+    { value: 'rating', label: 'Ratings' }
 ];
 
 const STATUS_FILTERS = [
@@ -90,6 +91,12 @@ const formatReporter = (report = {}) => {
 };
 
 const getSubjectTitle = (report = {}) => {
+    if (report.ratingId) {
+        const r = report.ratingId;
+        const rater = r.raterName || r.raterId_public || 'Unknown';
+        return `Rating · ★${r.score ?? '?'} by ${rater}`;
+    }
+
     if (report.reportedAnimalId) {
         const animal = report.reportedAnimalId;
         return `Animal · ${animal.name || animal.id_public || 'Unknown'}`;
@@ -119,6 +126,11 @@ const getSubjectTitle = (report = {}) => {
 };
 
 const getSubjectOwner = (report = {}) => {
+    if (report.ratingId) {
+        const targetId = report.targetId_public || report.ratingId?.targetId_public;
+        return targetId ? `Breeder: ${targetId}` : 'Unknown breeder';
+    }
+
     if (report.reportedAnimalId) {
         const owner = report.reportedAnimalId.ownerId;
         if (owner && typeof owner === 'object') {
@@ -386,7 +398,7 @@ export default function ModOversightPanel({
 
     // Get report type from report object
     const getReportType = (report) => {
-        if (report.reportedAnimalId) return 'animal';
+    if (report.ratingId) return 'rating';
         if (report.messageId || report.conversationMessages?.length > 0) return 'message';
         return 'profile';
     };
@@ -574,7 +586,9 @@ export default function ModOversightPanel({
             let actualType = reportType;
             if (reportType === 'all') {
                 // Infer type from the report content
-                if (selectedReport.reportedAnimalId) {
+                if (selectedReport.ratingId) {
+                    actualType = 'rating';
+                } else if (selectedReport.reportedAnimalId) {
                     actualType = 'animal';
                 } else if (selectedReport.messageId || selectedReport.conversationMessages?.length > 0) {
                     actualType = 'message';
@@ -650,7 +664,8 @@ export default function ModOversightPanel({
         
         setNoteLoading(true);
         try {
-            const reportType = selectedReport.messageId || selectedReport.conversationMessages ? 'message' :
+            const reportType = selectedReport.ratingId ? 'rating' :
+                              selectedReport.messageId || selectedReport.conversationMessages ? 'message' :
                               selectedReport.reportedAnimalId ? 'animal' : 'profile';
             
             const response = await fetch(
@@ -689,7 +704,8 @@ export default function ModOversightPanel({
         
         setNoteLoading(true);
         try {
-            const reportType = selectedReport.messageId || selectedReport.conversationMessages ? 'message' :
+            const reportType = selectedReport.ratingId ? 'rating' :
+                              selectedReport.messageId || selectedReport.conversationMessages ? 'message' :
                               selectedReport.reportedAnimalId ? 'animal' : 'profile';
             
             const response = await fetch(
@@ -725,7 +741,8 @@ export default function ModOversightPanel({
         
         setNoteLoading(true);
         try {
-            const reportType = selectedReport.messageId || selectedReport.conversationMessages ? 'message' :
+            const reportType = selectedReport.ratingId ? 'rating' :
+                              selectedReport.messageId || selectedReport.conversationMessages ? 'message' :
                               selectedReport.reportedAnimalId ? 'animal' : 'profile';
             
             const response = await fetch(
@@ -1339,6 +1356,74 @@ export default function ModOversightPanel({
                                         </div>
                                     </div>
                                 )}
+
+                                {/* Rating Content Section - for rating reports */}
+                                {getReportType(selectedReport) === 'rating' && selectedReport.ratingId && (() => {
+                                    const r = selectedReport.ratingId;
+                                    return (
+                                        <div className="mod-detail-section">
+                                            <strong>Reported Rating:</strong>
+                                            <div style={{
+                                                backgroundColor: '#f5f5f5',
+                                                padding: '12px',
+                                                borderRadius: '8px',
+                                                marginTop: '8px',
+                                                border: '1px solid #e0e0e0'
+                                            }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                                    <div style={{ display: 'flex', gap: '2px' }}>
+                                                        {[1,2,3,4,5].map(n => (
+                                                            <span key={n} style={{ color: n <= r.score ? '#f59e0b' : '#d1d5db', fontSize: '18px' }}>★</span>
+                                                        ))}
+                                                    </div>
+                                                    <span style={{ fontWeight: 'bold', fontSize: '14px' }}>{r.score}/5</span>
+                                                </div>
+                                                <div style={{ fontSize: '13px', color: '#555', marginBottom: '4px' }}>
+                                                    <strong>Rated by:</strong> {r.raterName || r.raterId_public || 'Unknown'}
+                                                </div>
+                                                <div style={{ fontSize: '13px', color: '#555', marginBottom: '8px' }}>
+                                                    <strong>Target breeder:</strong> {selectedReport.targetId_public || r.targetId_public || 'Unknown'}
+                                                </div>
+                                                {r.comment?.trim() && (
+                                                    <div style={{ backgroundColor: '#fff', padding: '8px', borderRadius: '4px', fontSize: '13px', whiteSpace: 'pre-wrap', border: '1px solid #e0e0e0' }}>
+                                                        {r.comment}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div style={{ marginTop: '12px' }}>
+                                                <button
+                                                    style={{
+                                                        padding: '6px 14px',
+                                                        backgroundColor: '#fee2e2',
+                                                        color: '#dc2626',
+                                                        border: '1px solid #fca5a5',
+                                                        borderRadius: '6px',
+                                                        cursor: 'pointer',
+                                                        fontSize: '13px',
+                                                        fontWeight: '600'
+                                                    }}
+                                                    onClick={async () => {
+                                                        if (!window.confirm('Remove this rating from the platform? This cannot be undone.')) return;
+                                                        try {
+                                                            const resp = await fetch(`${baseUrl}/moderation/ratings/${r._id}`, {
+                                                                method: 'DELETE',
+                                                                headers: { Authorization: `Bearer ${authToken}` }
+                                                            });
+                                                            if (!resp.ok) throw new Error('Failed to remove rating');
+                                                            await fetchReports();
+                                                            setSelectedReport(null);
+                                                            if (onActionTaken) onActionTaken();
+                                                        } catch (err) {
+                                                            setError(err.message);
+                                                        }
+                                                    }}
+                                                >
+                                                    Remove Rating
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
 
                                 {/* Discussion Thread */}
                                 <div className="mod-detail-section discussion-section">

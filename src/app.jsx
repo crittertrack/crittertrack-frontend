@@ -2353,11 +2353,67 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     const [ratingForm, setRatingForm] = useState({ score: 0, comment: '' });
     const [submittingRating, setSubmittingRating] = useState(false);
     const [canRate, setCanRate] = useState(false);           // auth + not own profile
+    const [reportingRating, setReportingRating] = useState(null);   // rating object being reported
+    const [reportRatingReason, setReportRatingReason] = useState('');
+    const [reportRatingLoading, setReportRatingLoading] = useState(false);
+    const [reportRatingSuccess, setReportRatingSuccess] = useState(null); // _id of successfully reported rating
+    const [removingRatingId, setRemovingRatingId] = useState(null);
     const toggleInfoField = (key) => setExpandedInfoFields(prev => {
         const next = new Set(prev);
         next.has(key) ? next.delete(key) : next.add(key);
         return next;
     });
+
+    const currentUserPublicId = useMemo(() => {
+        if (!authToken) return null;
+        try { return JSON.parse(atob(authToken.split('.')[1])).id_public; } catch { return null; }
+    }, [authToken]);
+
+    const isModOrAdmin = useMemo(() => {
+        if (!authToken) return false;
+        try { const role = JSON.parse(atob(authToken.split('.')[1])).role; return ['moderator', 'admin'].includes(role); } catch { return false; }
+    }, [authToken]);
+
+    const handleReportRating = async (ratingId) => {
+        if (!reportRatingReason.trim()) return;
+        setReportRatingLoading(true);
+        try {
+            await axios.post(`${API_BASE_URL}/reports/rating`, {
+                ratingId,
+                targetId_public: freshProfile?.id_public || profile.id_public,
+                reason: reportRatingReason.trim()
+            }, { headers: { Authorization: `Bearer ${authToken}` } });
+            setReportingRating(null);
+            setReportRatingReason('');
+            setReportRatingSuccess(ratingId);
+            setTimeout(() => setReportRatingSuccess(null), 3000);
+        } catch (err) {
+            console.error('Failed to submit rating report', err);
+        } finally {
+            setReportRatingLoading(false);
+        }
+    };
+
+    const handleModRemoveRating = async (ratingId) => {
+        if (!window.confirm('Remove this rating? This cannot be undone.')) return;
+        setRemovingRatingId(ratingId);
+        try {
+            await axios.delete(`${API_BASE_URL}/moderation/ratings/${ratingId}`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            const pub = await axios.get(`${API_BASE_URL}/public/ratings/${profile.id_public}`);
+            setRatingData({
+                average: pub.data?.average ?? 0,
+                count: pub.data?.count ?? 0,
+                distribution: pub.data?.distribution ?? {1:0,2:0,3:0,4:0,5:0},
+                ratings: pub.data?.ratings ?? [],
+            });
+        } catch (err) {
+            console.error('Failed to remove rating', err);
+        } finally {
+            setRemovingRatingId(null);
+        }
+    };
     
     // Set moderator context when viewing this profile
     useEffect(() => {
@@ -3401,12 +3457,63 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                 </div>
                                                 <span className="text-xs font-semibold text-gray-700">{r.raterName || r.raterId_public}</span>
                                             </div>
-                                            <span className="text-xs text-gray-400 shrink-0">
-                                                {new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(r.createdAt))}
-                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs text-gray-400 shrink-0">
+                                                    {new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(r.createdAt))}
+                                                </span>
+                                                {isModOrAdmin && (
+                                                    <button
+                                                        onClick={() => handleModRemoveRating(r._id)}
+                                                        disabled={removingRatingId === r._id}
+                                                        className="text-xs px-2 py-0.5 rounded bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition disabled:opacity-40"
+                                                        title="Remove this rating (moderator)"
+                                                    >
+                                                        {removingRatingId === r._id ? '…' : 'Remove'}
+                                                    </button>
+                                                )}
+                                                {authToken && r.raterId_public !== currentUserPublicId && !isModOrAdmin && (
+                                                    <button
+                                                        onClick={() => { setReportingRating(r); setReportRatingReason(''); }}
+                                                        className="text-xs px-2 py-0.5 rounded bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100 transition"
+                                                        title="Report this rating"
+                                                    >
+                                                        ⚠ Report
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                         {r.comment?.trim() && (
                                             <p className="text-sm text-gray-600 leading-relaxed">{r.comment}</p>
+                                        )}
+                                        {reportRatingSuccess === r._id && (
+                                            <p className="text-xs text-green-600 font-medium">Report submitted. Thank you.</p>
+                                        )}
+                                        {reportingRating?._id === r._id && (
+                                            <div className="mt-2 space-y-2 border-t border-gray-100 pt-2">
+                                                <p className="text-xs font-semibold text-gray-600">Why are you reporting this rating?</p>
+                                                <textarea
+                                                    value={reportRatingReason}
+                                                    onChange={(e) => setReportRatingReason(e.target.value.slice(0, 500))}
+                                                    placeholder="Describe the issue (required)…"
+                                                    rows={2}
+                                                    className="w-full p-2 border border-gray-300 rounded-lg text-xs resize-none focus:ring-primary focus:border-primary"
+                                                />
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => handleReportRating(r._id)}
+                                                        disabled={!reportRatingReason.trim() || reportRatingLoading}
+                                                        className="px-3 py-1 bg-primary hover:bg-primary/90 text-black text-xs font-semibold rounded-lg transition disabled:opacity-40"
+                                                    >
+                                                        {reportRatingLoading ? 'Submitting…' : 'Submit Report'}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => { setReportingRating(null); setReportRatingReason(''); }}
+                                                        className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-semibold rounded-lg transition"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            </div>
                                         )}
                                     </div>
                                 ))}
