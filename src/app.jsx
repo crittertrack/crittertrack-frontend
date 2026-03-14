@@ -2694,12 +2694,14 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         For Sale / Stud
                     </button>
                 )}
-                <button
-                    onClick={() => setActiveTab('stats')}
-                    className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'stats' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
-                >
-                    Stats
-                </button>
+                {(freshProfile?.showStatsTab ?? true) && (
+                    <button
+                        onClick={() => setActiveTab('stats')}
+                        className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'stats' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    >
+                        Stats
+                    </button>
+                )}
                 <button
                     onClick={() => setActiveTab('ratings')}
                     className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'ratings' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
@@ -3129,7 +3131,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             })()}
 
             {/* Stats Tab */}
-            {activeTab === 'stats' && (() => {
+            {activeTab === 'stats' && (freshProfile?.showStatsTab ?? true) && (() => {
                 // ---- compute stats from existing state ----
                 const animalsBySpecies = animals.reduce((acc, a) => {
                     const s = a.species || 'Unspecified';
@@ -20347,6 +20349,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [showRemarksPublic, setShowRemarksPublic] = useState(userProfile.showRemarksPublic ?? false);
     const [bio, setBio] = useState(userProfile.bio || '');
     const [showBio, setShowBio] = useState(userProfile.showBio ?? true);
+    const [showStatsTab, setShowStatsTab] = useState(userProfile.showStatsTab ?? true);
     const [allowMessages, setAllowMessages] = useState(userProfile.allowMessages === undefined ? true : !!userProfile.allowMessages);
     const [emailNotificationPreference, setEmailNotificationPreference] = useState(userProfile.emailNotificationPreference || 'none');
     const [country, setCountry] = useState(userProfile.country || '');
@@ -20473,6 +20476,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             showRemarksPublic: showRemarksPublic,
             bio: bio || null,
             showBio: bio ? showBio : true,
+            showStatsTab: showStatsTab,
             allowMessages: allowMessages,
             emailNotificationPreference: emailNotificationPreference,
             country: country || null,
@@ -20939,6 +20943,11 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 <span>Display **Bio** on your public profile card.</span>
                             </label>
                         )}
+                        <label className="flex items-center space-x-2 text-sm text-gray-700">
+                            <input type="checkbox" checked={showStatsTab} onChange={(e) => setShowStatsTab(e.target.checked)} 
+                                className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
+                            <span>Show **Stats** tab on your public profile.</span>
+                        </label>
                     </div>
 
                     <div data-tutorial-target="messaging-preferences" className="pt-4 space-y-2 border-t border-gray-200">
@@ -22108,6 +22117,15 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                             (userProfile.showBio ?? true) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
                             {(userProfile.showBio ?? true) ? 'Public' : 'Private'}
+                        </span>
+                    </div>
+
+                    <div className="flex justify-between items-center gap-2 py-1.5 sm:py-2">
+                        <span className="text-xs sm:text-sm text-gray-800 truncate flex-1">Stats Tab</span>
+                        <span className={`px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold rounded-full whitespace-nowrap ${ 
+                            (userProfile.showStatsTab ?? true) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                            {(userProfile.showStatsTab ?? true) ? 'Visible' : 'Hidden'}
                         </span>
                     </div>
 
