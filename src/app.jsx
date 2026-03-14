@@ -10612,6 +10612,28 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
     };
 
+    const toggleAllPublic = async () => {
+        const allPublic = filteredLitters.every(l => l.showOnPublicProfile);
+        const newVal = !allPublic;
+        setLitters(prev => prev.map(l =>
+            filteredLitters.some(fl => fl._id === l._id) ? { ...l, showOnPublicProfile: newVal } : l
+        ));
+        try {
+            await Promise.all(
+                filteredLitters.map(l =>
+                    axios.put(`${API_BASE_URL}/litters/${l._id}`, { showOnPublicProfile: newVal }, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    })
+                )
+            );
+        } catch (err) {
+            // Revert on failure
+            setLitters(prev => prev.map(l =>
+                filteredLitters.some(fl => fl._id === l._id) ? { ...l, showOnPublicProfile: !newVal } : l
+            ));
+        }
+    };
+
     const toggleLitterPublic = async (litter) => {
         const newVal = !litter.showOnPublicProfile;
         setLitters(prev => prev.map(l => l._id === litter._id ? { ...l, showOnPublicProfile: newVal } : l));
@@ -12062,6 +12084,22 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </option>
                                     ))}
                                 </select>
+                            </div>
+                            <div className="flex items-center gap-2 ml-auto">
+                                {filteredLitters.length > 0 && (
+                                    <button
+                                        onClick={toggleAllPublic}
+                                        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition ${
+                                            filteredLitters.every(l => l.showOnPublicProfile)
+                                                ? 'bg-green-50 border-green-300 text-green-700 hover:bg-green-100'
+                                                : 'bg-gray-100 border-gray-300 text-gray-600 hover:bg-gray-200'
+                                        }`}
+                                        title={filteredLitters.every(l => l.showOnPublicProfile) ? 'Hide all from public profile' : 'Show all on public profile'}
+                                    >
+                                        {filteredLitters.every(l => l.showOnPublicProfile) ? <Eye size={13} /> : <EyeOff size={13} />}
+                                        {filteredLitters.every(l => l.showOnPublicProfile) ? 'All Public' : 'Make All Public'}
+                                    </button>
+                                )}
                             </div>
                             <div className="flex items-center gap-2">
                                 <label htmlFor="litter-year-filter" className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Year:</label>
