@@ -2333,8 +2333,24 @@ const renderBreederInfoMarkdown = (text) => {
         .replace(/\n/g, '<br>');
 };
 
+// Reusable star row — defined at module level so React never unmounts/remounts it between renders
+const RatingStarRow = ({ score, interactive, onSelect }) => (
+    <div className="flex gap-1">
+        {[1,2,3,4,5].map(n => (
+            <button
+                key={n}
+                type="button"
+                onClick={() => interactive && onSelect && onSelect(n)}
+                className={`text-2xl leading-none transition ${interactive ? 'hover:scale-110 cursor-pointer' : 'cursor-default'} ${n <= score ? 'text-amber-400' : 'text-gray-200'}`}
+                aria-label={`${n} star`}
+                disabled={!interactive}
+            >★</button>
+        ))}
+    </div>
+);
+
 // Public Profile View Component - Shows a breeder's public animals
-const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStartMessage, authToken, setModCurrentContext }) => {
+const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStartMessage, authToken, setModCurrentContext, currentUserIdPublic = null, currentUserRole = 'user' }) => {
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [copySuccess, setCopySuccess] = useState(false);
@@ -2348,11 +2364,116 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     const [freshProfile, setFreshProfile] = useState(profile);
     const [expandedInfoFields, setExpandedInfoFields] = useState(new Set());
     const [publicLitters, setPublicLitters] = useState([]);
+    const [ratingData, setRatingData] = useState({ average: 0, count: 0, distribution: {1:0,2:0,3:0,4:0,5:0}, ratings: [] });
+    const [myRating, setMyRating] = useState(null);         // own existing rating object or null
+    const [ratingForm, setRatingForm] = useState({ score: 0, comment: '' });
+    const [submittingRating, setSubmittingRating] = useState(false);
+    const [canRate, setCanRate] = useState(false);           // auth + not own profile
+    const [reportingRating, setReportingRating] = useState(null);   // rating object being reported
+    const [reportRatingReason, setReportRatingReason] = useState('');
+    const [reportRatingLoading, setReportRatingLoading] = useState(false);
+    const [reportRatingSuccess, setReportRatingSuccess] = useState(null); // _id of successfully reported rating
+    const [removingRatingId, setRemovingRatingId] = useState(null);
+    const [ratingError, setRatingError] = useState('');
     const toggleInfoField = (key) => setExpandedInfoFields(prev => {
         const next = new Set(prev);
         next.has(key) ? next.delete(key) : next.add(key);
         return next;
     });
+
+    const isModOrAdmin = ['moderator', 'admin'].includes(currentUserRole);
+
+    const handleSubmitRating = async () => {
+        if (!ratingForm.score || ratingForm.score < 1) return;
+        setSubmittingRating(true);
+        setRatingError('');
+        try {
+            const resp = await axios.post(
+                `${API_BASE_URL}/ratings/${freshProfile?.id_public || profile.id_public}`,
+                { score: ratingForm.score, comment: ratingForm.comment },
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+            setMyRating(resp.data?.rating || { score: ratingForm.score, comment: ratingForm.comment });
+            const pub = await axios.get(`${API_BASE_URL}/public/ratings/${freshProfile?.id_public || profile.id_public}`);
+            setRatingData({
+                average: pub.data?.average ?? 0,
+                count: pub.data?.count ?? 0,
+                distribution: pub.data?.distribution ?? {1:0,2:0,3:0,4:0,5:0},
+                ratings: pub.data?.ratings ?? [],
+            });
+        } catch (err) {
+            console.error('Failed to submit rating', err);
+            setRatingError(err.response?.data?.message || 'Failed to submit rating. Please try again.');
+        } finally {
+            setSubmittingRating(false);
+        }
+    };
+
+    const handleDeleteRating = async () => {
+        setSubmittingRating(true);
+        setRatingError('');
+        try {
+            await axios.delete(
+                `${API_BASE_URL}/ratings/${freshProfile?.id_public || profile.id_public}`,
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+            setMyRating(null);
+            setRatingForm({ score: 0, comment: '' });
+            const pub = await axios.get(`${API_BASE_URL}/public/ratings/${freshProfile?.id_public || profile.id_public}`);
+            setRatingData({
+                average: pub.data?.average ?? 0,
+                count: pub.data?.count ?? 0,
+                distribution: pub.data?.distribution ?? {1:0,2:0,3:0,4:0,5:0},
+                ratings: pub.data?.ratings ?? [],
+            });
+        } catch (err) {
+            console.error('Failed to delete rating', err);
+            setRatingError(err.response?.data?.message || 'Failed to remove rating. Please try again.');
+        } finally {
+            setSubmittingRating(false);
+        }
+    };
+
+    const handleReportRating = async (ratingId) => {
+        if (!reportRatingReason.trim()) return;
+        setReportRatingLoading(true);
+        try {
+            await axios.post(`${API_BASE_URL}/reports/rating`, {
+                ratingId,
+                targetId_public: freshProfile?.id_public || profile.id_public,
+                reason: reportRatingReason.trim()
+            }, { headers: { Authorization: `Bearer ${authToken}` } });
+            setReportingRating(null);
+            setReportRatingReason('');
+            setReportRatingSuccess(ratingId);
+            setTimeout(() => setReportRatingSuccess(null), 3000);
+        } catch (err) {
+            console.error('Failed to submit rating report', err);
+        } finally {
+            setReportRatingLoading(false);
+        }
+    };
+
+    const handleModRemoveRating = async (ratingId) => {
+        if (!window.confirm('Remove this rating? This cannot be undone.')) return;
+        setRemovingRatingId(ratingId);
+        try {
+            await axios.delete(`${API_BASE_URL}/moderation/ratings/${ratingId}`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            const pub = await axios.get(`${API_BASE_URL}/public/ratings/${profile.id_public}`);
+            setRatingData({
+                average: pub.data?.average ?? 0,
+                count: pub.data?.count ?? 0,
+                distribution: pub.data?.distribution ?? {1:0,2:0,3:0,4:0,5:0},
+                ratings: pub.data?.ratings ?? [],
+            });
+        } catch (err) {
+            console.error('Failed to remove rating', err);
+        } finally {
+            setRemovingRatingId(null);
+        }
+    };
     
     // Set moderator context when viewing this profile
     useEffect(() => {
@@ -2425,6 +2546,43 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         };
         fetchPublicLitters();
     }, [profile?.id_public, API_BASE_URL]);
+
+    useEffect(() => {
+        const fetchRatings = async () => {
+            if (!profile?.id_public) return;
+            try {
+                const resp = await axios.get(`${API_BASE_URL}/public/ratings/${profile.id_public}`);
+                const data = resp.data || {};
+                setRatingData({
+                    average: data.average ?? 0,
+                    count: data.count ?? 0,
+                    distribution: data.distribution ?? {1:0,2:0,3:0,4:0,5:0},
+                    ratings: data.ratings ?? [],
+                });
+            } catch {
+                setRatingData({ average: 0, count: 0, distribution: {1:0,2:0,3:0,4:0,5:0}, ratings: [] });
+            }
+            // canRate: logged in + not viewing own profile
+            const canRateNow = !!authToken && !!profile?.id_public && profile.id_public !== currentUserIdPublic;
+            setCanRate(canRateNow);
+
+            // If authenticated, fetch own existing rating for this breeder
+            if (authToken) {
+                try {
+                    const resp = await axios.get(`${API_BASE_URL}/ratings/${profile.id_public}/mine`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    if (resp.data?.score) {
+                        setMyRating(resp.data);
+                        setRatingForm({ score: resp.data.score, comment: resp.data.comment || '' });
+                    }
+                } catch (err) {
+                    // 401/403/network — ignore, canRate already set above
+                }
+            }
+        };
+        fetchRatings();
+    }, [profile?.id_public, API_BASE_URL, authToken, currentUserIdPublic]);
 
     const memberSince = (freshProfile?.createdAt || profile.createdAt)
         ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.createdAt || profile.createdAt))
@@ -2542,6 +2700,13 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         </div>
                     )}
                     <span className="font-mono text-accent font-semibold text-sm">{freshProfile?.id_public || profile.id_public}</span>
+                    {ratingData.count > 0 && (
+                        <button onClick={() => setActiveTab('ratings')} className="flex items-center gap-1 text-xs text-amber-500 font-semibold hover:text-amber-600 transition" title="See ratings">
+                            <span>★</span>
+                            <span>{ratingData.average.toFixed(1)}</span>
+                            <span className="text-gray-400 font-normal">({ratingData.count})</span>
+                        </button>
+                    )}
                     <span className="text-xs text-gray-500">Member since {memberSince}</span>
                     {(freshProfile?.country || profile.country) && (
                         <span className="flex items-center justify-center gap-1 text-xs text-gray-500">
@@ -2549,6 +2714,26 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             <span>{getCountryName(freshProfile?.country || profile.country)}{(freshProfile?.country || profile.country) === 'US' && (freshProfile?.state || profile.state) ? `, ${getStateName(freshProfile?.state || profile.state)}` : ''}</span>
                         </span>
                     )}
+                    {/* Breeding status pills */}
+                    {(() => {
+                        const bs = freshProfile?.breedingStatus || profile.breedingStatus;
+                        if (!bs) return null;
+                        const active = Object.entries(bs).filter(([, v]) => v === 'breeder' || v === 'retired');
+                        if (!active.length) return null;
+                        return (
+                            <div className="flex flex-wrap justify-center gap-2 mt-1">
+                                {active.map(([species, status]) => (
+                                    <div key={species} className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-full border border-gray-200">
+                                        {status === 'breeder'
+                                            ? <Star size={12} className="text-primary" />
+                                            : <Moon size={12} className="text-gray-500" />}
+                                        <span className="text-xs font-medium text-gray-800">{getSpeciesDisplayName(species)}</span>
+                                        <span className="text-xs text-gray-400">({status === 'breeder' ? 'Active' : 'Retired'})</span>
+                                    </div>
+                                ))}
+                            </div>
+                        );
+                    })()}
                 </div>
 
                 {/* Right column: bio only */}
@@ -2595,17 +2780,17 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             ) : null}
 
             {/* Tab Bar */}
-            <div className="flex flex-wrap border-b border-gray-200 mb-6">
+            <div className="flex border-b border-gray-200 mb-6">
                 <button
                     onClick={() => setActiveTab('animals')}
-                    className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'animals' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    className={`flex-1 text-center px-2 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'animals' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                 >
                     Animals ({animals.length})
                 </button>
                 {hasBreederInfo && (
                     <button
                         onClick={() => setActiveTab('info-adoption')}
-                        className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'info-adoption' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                        className={`flex-1 text-center px-2 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'info-adoption' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                         Info &amp; Adoption
                     </button>
@@ -2613,19 +2798,33 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 {publicLitters.length > 0 && (
                     <button
                         onClick={() => setActiveTab('litters')}
-                        className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'litters' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                        className={`flex-1 text-center px-2 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'litters' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
-                        Litters
+                        Pairings ({publicLitters.length})
                     </button>
                 )}
                 {animals.some(a => a.isForSale || a.availableForBreeding) && (
                     <button
                         onClick={() => setActiveTab('for-sale-stud')}
-                        className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'for-sale-stud' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                        className={`flex-1 text-center px-2 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'for-sale-stud' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
-                        For Sale / Stud
+                        For Sale / Stud ({animals.filter(a => a.isForSale || a.availableForBreeding).length})
                     </button>
                 )}
+                {(freshProfile?.showStatsTab ?? true) && (
+                    <button
+                        onClick={() => setActiveTab('stats')}
+                        className={`flex-1 text-center px-2 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'stats' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    >
+                        Stats
+                    </button>
+                )}
+                <button
+                    onClick={() => setActiveTab('ratings')}
+                    className={`flex-1 text-center px-2 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'ratings' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                >
+                    Ratings{ratingData.count > 0 && ` (${ratingData.count})`}
+                </button>
             </div>
 
             {/* Animals Tab */}
@@ -2968,13 +3167,26 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 };
                 const LitterPublicCard = ({ l }) => (
                     <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-2.5">
-                        {/* Header row: pair name + status badge */}
-                        <div className="flex flex-wrap items-center gap-2">
-                            {l.isPlanned
-                                ? <span className="text-xs font-semibold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">Planned</span>
-                                : <span className="text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Born</span>}
-                            {l.litter_id_public && <span className="text-xs font-mono bg-purple-100 text-purple-700 px-2 py-0.5 rounded">{l.litter_id_public}</span>}
-                            {l.breedingPairCodeName && <span className="text-sm font-semibold text-gray-800">{l.breedingPairCodeName}</span>}
+                        {/* Header row: badges left, counts right */}
+                        <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2 flex-1">
+                                {l.breedingPairCodeName && <span className="text-sm font-semibold text-gray-800">{l.breedingPairCodeName}</span>}
+                                {l.litter_id_public && <span className="text-xs font-mono bg-purple-100 text-purple-700 px-2 py-0.5 rounded">{l.litter_id_public}</span>}
+                            </div>
+                            {!l.isPlanned && l.litterSizeBorn != null && (
+                                <div className="flex items-center gap-1.5 text-xs ml-auto flex-shrink-0">
+                                    <span className="font-semibold text-gray-700">{l.litterSizeBorn} born</span>
+                                    {(l.maleCount != null || l.femaleCount != null || l.unknownCount != null) && (
+                                        <span>
+                                            <span className="text-blue-500 font-semibold">{l.maleCount ?? 0}M</span>
+                                            <span className="text-gray-400 mx-0.5">/</span>
+                                            <span className="text-pink-500 font-semibold">{l.femaleCount ?? 0}F</span>
+                                            <span className="text-gray-400 mx-0.5">/</span>
+                                            <span className="text-purple-500 font-semibold">{l.unknownCount ?? 0}U</span>
+                                        </span>
+                                    )}
+                                </div>
+                            )}
                         </div>
                         {/* Sire × Dam mini-cards */}
                         {(l.sireAnimal || l.damAnimal) && (
@@ -2985,26 +3197,13 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             </div>
                         )}
                         {/* Dates */}
-                        <div className="flex flex-wrap gap-3 text-xs text-gray-500">
+                        <div className="flex flex-wrap justify-center gap-3 text-xs text-gray-500">
                             {l.matingDate && <span><span className="font-medium">{l.isPlanned ? 'Planned Mating:' : 'Mated:'}</span> {formatLitterDate(l.matingDate)}</span>}
                             {l.expectedDueDate && l.isPlanned && <span><span className="font-medium">Due:</span> {formatLitterDate(l.expectedDueDate)}</span>}
                             {l.birthDate && !l.isPlanned && <span><span className="font-medium">Born:</span> {formatLitterDate(l.birthDate)}</span>}
+
                         </div>
-                        {/* Offspring counts */}
-                        {!l.isPlanned && (l.litterSizeBorn != null) && (
-                            <div className="flex items-center gap-2 text-xs">
-                                <span className="font-semibold text-gray-700">{l.litterSizeBorn} born</span>
-                                {(l.maleCount != null || l.femaleCount != null || l.unknownCount != null) && (
-                                    <span>
-                                        <span className="text-blue-500 font-semibold">{l.maleCount ?? 0}M</span>
-                                        <span className="text-gray-400 mx-0.5">/</span>
-                                        <span className="text-pink-500 font-semibold">{l.femaleCount ?? 0}F</span>
-                                        <span className="text-gray-400 mx-0.5">/</span>
-                                        <span className="text-purple-500 font-semibold">{l.unknownCount ?? 0}U</span>
-                                    </span>
-                                )}
-                            </div>
-                        )}
+
                         {/* Photo strip */}
                         {l.images?.length > 0 && (
                             <div className="flex gap-1.5 overflow-x-auto">
@@ -3027,7 +3226,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         {planned.length > 0 && (
                             <div>
                                 <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Calendar size={16} className="text-indigo-500" /> Planned Litters <span className="text-sm font-normal text-gray-400">({planned.length})</span>
+                                    <Calendar size={16} className="text-indigo-500" /> Planned Pairings <span className="text-sm font-normal text-gray-400">({planned.length})</span>
                                 </h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {planned.map(l => <LitterPublicCard key={l._id} l={l} />)}
@@ -3037,11 +3236,290 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         {born.length > 0 && (
                             <div>
                                 <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Sparkles size={16} className="text-green-500" /> Past Litters <span className="text-sm font-normal text-gray-400">({born.length})</span>
+                                    <Sparkles size={16} className="text-green-500" /> Past Pairings <span className="text-sm font-normal text-gray-400">({born.length})</span>
                                 </h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {born.map(l => <LitterPublicCard key={l._id} l={l} />)}
                                 </div>
+                            </div>
+                        )}
+                    </div>
+                );
+            })()}
+
+            {/* Stats Tab */}
+            {activeTab === 'stats' && (freshProfile?.showStatsTab ?? true) && (() => {
+                // ---- compute stats from existing state ----
+                const animalsBySpecies = animals.reduce((acc, a) => {
+                    const s = a.species || 'Unspecified';
+                    acc[s] = (acc[s] || 0) + 1;
+                    return acc;
+                }, {});
+
+                const bornLitters = publicLitters.filter(l => !l.isPlanned);
+                const plannedLitters = publicLitters.filter(l => l.isPlanned);
+
+                const totalOffspring = bornLitters.reduce((sum, l) => sum + (l.litterSizeBorn ?? 0), 0);
+
+                const littersBySpecies = {};
+                const offspringBySpecies = {};
+                bornLitters.forEach(l => {
+                    const s = l.sireAnimal?.species || l.damAnimal?.species || 'Unspecified';
+                    littersBySpecies[s] = (littersBySpecies[s] || 0) + 1;
+                    offspringBySpecies[s] = (offspringBySpecies[s] || 0) + (l.litterSizeBorn ?? 0);
+                });
+
+                const littersByYear = {};
+                const offspringByYear = {};
+                bornLitters.forEach(l => {
+                    if (!l.birthDate) return;
+                    const yr = new Date(l.birthDate).getFullYear().toString();
+                    littersByYear[yr] = (littersByYear[yr] || 0) + 1;
+                    offspringByYear[yr] = (offspringByYear[yr] || 0) + (l.litterSizeBorn ?? 0);
+                });
+
+                const availableForSale = animals.filter(a => a.isForSale).length;
+                const availableForStud = animals.filter(a => a.availableForBreeding).length;
+                const withBreederStatus = animals.filter(a => a.status === 'Breeder').length;
+
+                const StatCard = ({ label, value, sub }) => (
+                    <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1">
+                        <span className="text-2xl font-bold text-gray-900">{value}</span>
+                        <span className="text-sm font-medium text-gray-700">{label}</span>
+                        {sub && <span className="text-xs text-gray-400">{sub}</span>}
+                    </div>
+                );
+
+                const BreakdownTable = ({ title, data, sortByValue = true }) => {
+                    const entries = sortByValue
+                        ? Object.entries(data).sort((a, b) => b[1] - a[1])
+                        : Object.entries(data).sort((a, b) => b[0].localeCompare(a[0]));
+                    if (!entries.length) return null;
+                    const max = Math.max(...entries.map(([, v]) => v));
+                    return (
+                        <div className="bg-white border border-gray-200 rounded-xl p-4">
+                            <h4 className="text-sm font-semibold text-gray-700 mb-3">{title}</h4>
+                            <div className="space-y-2">
+                                {entries.map(([key, val]) => (
+                                    <div key={key} className="flex items-center gap-3">
+                                        <span className="text-xs text-gray-600 w-28 shrink-0 truncate">{key}</span>
+                                        <div className="flex-1 bg-gray-100 rounded-full h-2">
+                                            <div className="bg-primary h-2 rounded-full" style={{ width: `${max > 0 ? Math.round((val / max) * 100) : 0}%` }} />
+                                        </div>
+                                        <span className="text-xs font-semibold text-gray-700 w-6 text-right shrink-0">{val}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                };
+
+                return (
+                    <div className="space-y-6">
+                        {/* Summary cards */}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                            <StatCard label="Total Animals" value={animals.length} />
+                            <StatCard label="With Breeder Status" value={withBreederStatus} />
+                            <StatCard label="Total Pairings" value={publicLitters.length} />
+                            <StatCard label="Total Offspring" value={totalOffspring} />
+                            <StatCard label="Planned Matings" value={plannedLitters.length} />
+                            <StatCard label="Available for Sale" value={availableForSale} />
+                            <StatCard label="Available for Stud" value={availableForStud} />
+                        </div>
+
+                        {/* Breakdowns */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {Object.keys(animalsBySpecies).length > 1 && (
+                                <BreakdownTable title="Animals by Species" data={animalsBySpecies} />
+                            )}
+                            {Object.keys(littersBySpecies).length > 1 && (
+                                <BreakdownTable title="Pairings by Species" data={littersBySpecies} />
+                            )}
+                            {Object.keys(littersByYear).length > 0 && (
+                                <BreakdownTable title="Pairings by Year" sortByValue={false} data={littersByYear} />
+                            )}
+                            {Object.keys(offspringByYear).length > 0 && (
+                                <BreakdownTable title="Offspring by Year" sortByValue={false} data={offspringByYear} />
+                            )}
+                            {Object.keys(offspringBySpecies).length > 1 && (
+                                <BreakdownTable title="Offspring by Species" data={offspringBySpecies} />
+                            )}
+                        </div>
+
+                        {animals.length === 0 && publicLitters.length === 0 && (
+                            <div className="text-center py-12 text-gray-400">
+                                <p className="text-sm">No public data available yet.</p>
+                            </div>
+                        )}
+                    </div>
+                );
+            })()}
+
+            {/* Ratings Tab */}
+            {activeTab === 'ratings' && (() => {
+                const maxDist = Math.max(...Object.values(ratingData.distribution), 1);
+
+                return (
+                    <div className="space-y-6">
+                        {/* Aggregate */}
+                        {ratingData.count > 0 ? (
+                            <div className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col sm:flex-row gap-6 items-center sm:items-start">
+                                {/* Big average */}
+                                <div className="flex flex-col items-center gap-1 shrink-0">
+                                    <span className="text-5xl font-bold text-gray-900">{ratingData.average.toFixed(1)}</span>
+                                    <div className="flex gap-0.5">
+                                        {[1,2,3,4,5].map(n => (
+                                            <span key={n} className={`text-xl ${n <= Math.round(ratingData.average) ? 'text-amber-400' : 'text-gray-200'}`}>★</span>
+                                        ))}
+                                    </div>
+                                    <span className="text-xs text-gray-400">{ratingData.count} {ratingData.count === 1 ? 'rating' : 'ratings'}</span>
+                                </div>
+                                {/* Distribution bars */}
+                                <div className="flex-1 space-y-1.5 w-full">
+                                    {[5,4,3,2,1].map(n => (
+                                        <div key={n} className="flex items-center gap-2">
+                                            <span className="text-xs text-gray-500 w-3 shrink-0">{n}</span>
+                                            <span className="text-amber-400 text-xs shrink-0">★</span>
+                                            <div className="flex-1 bg-gray-100 rounded-full h-2">
+                                                <div
+                                                    className="bg-amber-400 h-2 rounded-full transition-all"
+                                                    style={{ width: `${Math.round(((ratingData.distribution[n] || 0) / maxDist) * 100)}%` }}
+                                                />
+                                            </div>
+                                            <span className="text-xs text-gray-400 w-4 text-right shrink-0">{ratingData.distribution[n] || 0}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-center py-8 text-gray-400">
+                                <p className="text-3xl mb-2">☆</p>
+                                <p className="text-sm">No ratings yet.</p>
+                            </div>
+                        )}
+
+                        {/* Rate / Edit form */}
+                        {canRate && (
+                            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3">
+                                <h4 className="text-sm font-semibold text-gray-700">
+                                    {myRating ? 'Edit Your Rating' : 'Rate This User'}
+                                </h4>
+                                <RatingStarRow
+                                    score={ratingForm.score}
+                                    interactive
+                                    onSelect={(n) => setRatingForm(prev => ({ ...prev, score: n }))}
+                                />
+                                <textarea
+                                    value={ratingForm.comment}
+                                    onChange={(e) => setRatingForm(prev => ({ ...prev, comment: e.target.value.slice(0, 500) }))}
+                                    placeholder="Optional comment (max 500 characters)…"
+                                    rows={3}
+                                    className="w-full p-2.5 border border-gray-300 rounded-lg text-sm resize-none focus:ring-primary focus:border-primary transition"
+                                />
+                                {ratingError && (
+                                    <p className="text-xs text-red-500 font-medium">{ratingError}</p>
+                                )}
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={handleSubmitRating}
+                                        disabled={!ratingForm.score || submittingRating}
+                                        className="px-4 py-2 bg-primary hover:bg-primary/90 text-black text-sm font-semibold rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed"
+                                    >
+                                        {submittingRating ? 'Saving…' : (myRating ? 'Update Rating' : 'Submit Rating')}
+                                    </button>
+                                    {myRating && (
+                                        <button
+                                            type="button"
+                                            onClick={handleDeleteRating}
+                                            disabled={submittingRating}
+                                            className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-semibold rounded-lg border border-red-200 transition disabled:opacity-40"
+                                        >
+                                            Remove
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                        {!authToken && (
+                            <p className="text-center text-sm text-gray-400">Sign in to leave a rating.</p>
+                        )}
+
+                        {/* Reviews list */}
+                        {ratingData.ratings.length > 0 && (
+                            <div className="space-y-3">
+                                <h4 className="text-sm font-semibold text-gray-700">Recent Reviews</h4>
+                                {ratingData.ratings.map((r, i) => (
+                                    <div key={i} className="bg-white border border-gray-100 rounded-xl p-4 space-y-1.5">
+                                        <div className="flex items-center justify-between gap-2">
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex gap-0.5">
+                                                    {[1,2,3,4,5].map(n => (
+                                                        <span key={n} className={`text-sm ${n <= r.score ? 'text-amber-400' : 'text-gray-200'}`}>★</span>
+                                                    ))}
+                                                </div>
+                                                <span className="text-xs font-semibold text-gray-700">{r.raterName || r.raterId_public}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs text-gray-400 shrink-0">
+                                                    {new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(r.createdAt))}
+                                                </span>
+                                                {isModOrAdmin && (
+                                                    <button
+                                                        onClick={() => handleModRemoveRating(r._id)}
+                                                        disabled={removingRatingId === r._id}
+                                                        className="text-xs px-2 py-0.5 rounded bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition disabled:opacity-40"
+                                                        title="Remove this rating (moderator)"
+                                                    >
+                                                        {removingRatingId === r._id ? '…' : 'Remove'}
+                                                    </button>
+                                                )}
+                                                {authToken && r.raterId_public !== currentUserIdPublic && !isModOrAdmin && (
+                                                    <button
+                                                        onClick={() => { setReportingRating(r); setReportRatingReason(''); }}
+                                                        className="text-xs px-2 py-0.5 rounded bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100 transition"
+                                                        title="Report this rating"
+                                                    >
+                                                        ⚠ Report
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                        {r.comment?.trim() && (
+                                            <p className="text-sm text-gray-600 leading-relaxed">{r.comment}</p>
+                                        )}
+                                        {reportRatingSuccess === r._id && (
+                                            <p className="text-xs text-green-600 font-medium">Report submitted. Thank you.</p>
+                                        )}
+                                        {reportingRating?._id === r._id && (
+                                            <div className="mt-2 space-y-2 border-t border-gray-100 pt-2">
+                                                <p className="text-xs font-semibold text-gray-600">Why are you reporting this rating?</p>
+                                                <textarea
+                                                    value={reportRatingReason}
+                                                    onChange={(e) => setReportRatingReason(e.target.value.slice(0, 500))}
+                                                    placeholder="Describe the issue (required)…"
+                                                    rows={2}
+                                                    className="w-full p-2 border border-gray-300 rounded-lg text-xs resize-none focus:ring-primary focus:border-primary"
+                                                />
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => handleReportRating(r._id)}
+                                                        disabled={!reportRatingReason.trim() || reportRatingLoading}
+                                                        className="px-3 py-1 bg-primary hover:bg-primary/90 text-black text-xs font-semibold rounded-lg transition disabled:opacity-40"
+                                                    >
+                                                        {reportRatingLoading ? 'Submitting…' : 'Submit Report'}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => { setReportingRating(null); setReportRatingReason(''); }}
+                                                        className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-semibold rounded-lg transition"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </div>
@@ -10612,6 +11090,28 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
     };
 
+    const toggleAllPublic = async () => {
+        const allPublic = filteredLitters.every(l => l.showOnPublicProfile);
+        const newVal = !allPublic;
+        setLitters(prev => prev.map(l =>
+            filteredLitters.some(fl => fl._id === l._id) ? { ...l, showOnPublicProfile: newVal } : l
+        ));
+        try {
+            await Promise.all(
+                filteredLitters.map(l =>
+                    axios.put(`${API_BASE_URL}/litters/${l._id}`, { showOnPublicProfile: newVal }, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    })
+                )
+            );
+        } catch (err) {
+            // Revert on failure
+            setLitters(prev => prev.map(l =>
+                filteredLitters.some(fl => fl._id === l._id) ? { ...l, showOnPublicProfile: !newVal } : l
+            ));
+        }
+    };
+
     const toggleLitterPublic = async (litter) => {
         const newVal = !litter.showOnPublicProfile;
         setLitters(prev => prev.map(l => l._id === litter._id ? { ...l, showOnPublicProfile: newVal } : l));
@@ -11908,12 +12408,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             </div>
                             {/* COI display */}
                             {(matingCalcCOI || matingCOI != null) && (
-                                <div className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg ${matingCalcCOI ? 'bg-gray-50 text-gray-500' : matingCOI <= 5 ? 'bg-green-50 text-green-700' : matingCOI <= 12.5 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>
+                                <div className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg ${matingCalcCOI ? 'bg-gray-50 text-gray-500' : 'bg-gray-50 text-gray-700'}`}>
                                     {matingCalcCOI
                                         ? <><span className="inline-block w-4 h-4 rounded-full border-2 border-gray-300 border-t-gray-600 animate-spin" /> Calculating COI...</>
                                         : <><span className="font-semibold">Predicted COI:</span> {matingCOI.toFixed(2)}%
                                             {matingCOI === 0 && <span className="text-xs ml-1">(unrelated)</span>}
-                                            {matingCOI > 12.5 && <span className="text-xs ml-1">(⚠ high)</span>}
                                           </>
                                     }
                                 </div>
@@ -12062,6 +12561,22 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </option>
                                     ))}
                                 </select>
+                            </div>
+                            <div className="flex items-center gap-2 ml-auto">
+                                {filteredLitters.length > 0 && (
+                                    <button
+                                        onClick={toggleAllPublic}
+                                        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition ${
+                                            filteredLitters.every(l => l.showOnPublicProfile)
+                                                ? 'bg-green-50 border-green-300 text-green-700 hover:bg-green-100'
+                                                : 'bg-gray-100 border-gray-300 text-gray-600 hover:bg-gray-200'
+                                        }`}
+                                        title={filteredLitters.every(l => l.showOnPublicProfile) ? 'Hide all from public profile' : 'Show all on public profile'}
+                                    >
+                                        {filteredLitters.every(l => l.showOnPublicProfile) ? <Eye size={13} /> : <EyeOff size={13} />}
+                                        {filteredLitters.every(l => l.showOnPublicProfile) ? 'All Public' : 'Make All Public'}
+                                    </button>
+                                )}
                             </div>
                             <div className="flex items-center gap-2">
                                 <label htmlFor="litter-year-filter" className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Year:</label>
@@ -19939,6 +20454,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [showRemarksPublic, setShowRemarksPublic] = useState(userProfile.showRemarksPublic ?? false);
     const [bio, setBio] = useState(userProfile.bio || '');
     const [showBio, setShowBio] = useState(userProfile.showBio ?? true);
+    const [showStatsTab, setShowStatsTab] = useState(userProfile.showStatsTab ?? true);
     const [allowMessages, setAllowMessages] = useState(userProfile.allowMessages === undefined ? true : !!userProfile.allowMessages);
     const [emailNotificationPreference, setEmailNotificationPreference] = useState(userProfile.emailNotificationPreference || 'none');
     const [country, setCountry] = useState(userProfile.country || '');
@@ -20006,6 +20522,17 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [dangerZoneOpen, setDangerZoneOpen] = useState(false);
     const [settingsTab, setSettingsTab] = useState('profile');
+    const [myReceivedRatings, setMyReceivedRatings] = useState(null);
+    const [myReceivedRatingsLoading, setMyReceivedRatingsLoading] = useState(false);
+
+    useEffect(() => {
+        if (settingsTab !== 'ratings' || !userProfile?.id_public) return;
+        setMyReceivedRatingsLoading(true);
+        axios.get(`${API_BASE_URL}/public/ratings/${userProfile.id_public}`)
+            .then(r => setMyReceivedRatings(r.data))
+            .catch(() => setMyReceivedRatings({ ratings: [], average: 0, count: 0 }))
+            .finally(() => setMyReceivedRatingsLoading(false));
+    }, [settingsTab, userProfile?.id_public]);
 
     // Data Portability — Export
     const [exportSections, setExportSections] = useState({ animals: true, litters: true, enclosures: true, supplies: true, budget: true });
@@ -20065,6 +20592,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             showRemarksPublic: showRemarksPublic,
             bio: bio || null,
             showBio: bio ? showBio : true,
+            showStatsTab: showStatsTab,
             allowMessages: allowMessages,
             emailNotificationPreference: emailNotificationPreference,
             country: country || null,
@@ -20388,6 +20916,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     { id: 'profile',        label: 'Profile' },
                     { id: 'info-adoption',  label: 'Info & Adoption' },
                     { id: 'directory',      label: 'Directory' },
+                    { id: 'ratings',        label: 'Ratings' },
                     { id: 'account',        label: 'Account' },
                 ].map(tab => (
                     <button key={tab.id} type="button" onClick={() => setSettingsTab(tab.id)}
@@ -20531,6 +21060,11 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 <span>Display **Bio** on your public profile card.</span>
                             </label>
                         )}
+                        <label className="flex items-center space-x-2 text-sm text-gray-700">
+                            <input type="checkbox" checked={showStatsTab} onChange={(e) => setShowStatsTab(e.target.checked)} 
+                                className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
+                            <span>Show **Stats** tab on your public profile.</span>
+                        </label>
                     </div>
 
                     <div data-tutorial-target="messaging-preferences" className="pt-4 space-y-2 border-t border-gray-200">
@@ -20729,6 +21263,55 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 showModalMessage={showModalMessage}
                 userProfile={userProfile}
             />
+            </>}
+
+            {settingsTab === 'ratings' && <>
+            <div className="p-4 sm:p-6 border rounded-lg bg-gray-50">
+                <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Ratings Received</h3>
+                {myReceivedRatingsLoading ? (
+                    <div className="flex justify-center py-8"><Loader2 className="animate-spin" size={28} /></div>
+                ) : !myReceivedRatings || myReceivedRatings.count === 0 ? (
+                    <p className="text-gray-500 text-sm py-4 text-center">No ratings yet.</p>
+                ) : (
+                    <>
+                        <div className="flex items-center gap-4 mb-6 p-4 bg-white rounded-lg border">
+                            <div className="text-center">
+                                <div className="text-3xl font-bold text-gray-800">{myReceivedRatings.average.toFixed(1)}</div>
+                                <div className="text-yellow-400 text-xl">
+                                    {[1,2,3,4,5].map(n => <span key={n}>{n <= Math.round(myReceivedRatings.average) ? '★' : '☆'}</span>)}
+                                </div>
+                                <div className="text-xs text-gray-500">{myReceivedRatings.count} rating{myReceivedRatings.count !== 1 ? 's' : ''}</div>
+                            </div>
+                            <div className="flex-1 space-y-1">
+                                {[5,4,3,2,1].map(star => (
+                                    <div key={star} className="flex items-center gap-2 text-xs">
+                                        <span className="w-4 text-right text-gray-500">{star}</span>
+                                        <span className="text-yellow-400">★</span>
+                                        <div className="flex-1 bg-gray-200 rounded-full h-2">
+                                            <div className="bg-yellow-400 h-2 rounded-full" style={{ width: `${myReceivedRatings.count > 0 ? ((myReceivedRatings.distribution?.[star] || 0) / myReceivedRatings.count) * 100 : 0}%` }} />
+                                        </div>
+                                        <span className="w-4 text-gray-500">{myReceivedRatings.distribution?.[star] || 0}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="space-y-3">
+                            {myReceivedRatings.ratings.map(r => (
+                                <div key={r._id} className="bg-white rounded-lg border p-4">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <span className="font-semibold text-gray-800 text-sm">{r.raterName || r.raterId_public}</span>
+                                        <span className="text-yellow-400 text-sm">
+                                            {[1,2,3,4,5].map(n => <span key={n}>{n <= r.score ? '★' : '☆'}</span>)}
+                                        </span>
+                                    </div>
+                                    {r.comment && <p className="text-gray-600 text-sm mt-1">{r.comment}</p>}
+                                    <p className="text-xs text-gray-400 mt-2">{new Date(r.createdAt).toLocaleDateString()}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                )}
+            </div>
             </>}
 
             {settingsTab === 'account' && <>
@@ -21700,6 +22283,15 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                             (userProfile.showBio ?? true) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
                             {(userProfile.showBio ?? true) ? 'Public' : 'Private'}
+                        </span>
+                    </div>
+
+                    <div className="flex justify-between items-center gap-2 py-1.5 sm:py-2">
+                        <span className="text-xs sm:text-sm text-gray-800 truncate flex-1">Stats Tab</span>
+                        <span className={`px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold rounded-full whitespace-nowrap ${ 
+                            (userProfile.showStatsTab ?? true) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                            {(userProfile.showStatsTab ?? true) ? 'Visible' : 'Hidden'}
                         </span>
                     </div>
 
@@ -29778,6 +30370,8 @@ const App = () => {
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
                         setModCurrentContext={setModCurrentContext}
+                        currentUserIdPublic={userProfile?.id_public}
+                        currentUserRole={userProfile?.role}
                     />
 
                     {/* Moderator Action Sidebar - Shows in moderator mode even when viewing public profiles */}
@@ -32218,7 +32812,7 @@ const App = () => {
                                                                                         {breedingRecordLitters?.[record.litterId]?.maleCount != null && <div><div className="text-gray-600 text-xs">Males</div><div className="text-2xl font-bold text-blue-500">{breedingRecordLitters[record.litterId].maleCount}</div></div>}
                                                                                         {breedingRecordLitters?.[record.litterId]?.femaleCount != null && <div><div className="text-gray-600 text-xs">Females</div><div className="text-2xl font-bold text-pink-500">{breedingRecordLitters[record.litterId].femaleCount}</div></div>}
                                                                                         {breedingRecordLitters?.[record.litterId]?.unknownCount != null && breedingRecordLitters[record.litterId].unknownCount > 0 && <div><div className="text-gray-600 text-xs">Unknown / Intersex</div><div className="text-2xl font-bold text-gray-600">{breedingRecordLitters[record.litterId].unknownCount}</div></div>}
-                                                                                        {breedingRecordLitters?.[record.litterId]?.inbreedingCoefficient != null && <div><div className="text-gray-600 text-xs">COI</div><div className="text-xl font-bold text-orange-600">{breedingRecordLitters[record.litterId].inbreedingCoefficient.toFixed(2)}%</div></div>}
+                                                                                        {breedingRecordLitters?.[record.litterId]?.inbreedingCoefficient != null && <div><div className="text-gray-600 text-xs">COI</div><div className="text-xl font-bold text-gray-700">{breedingRecordLitters[record.litterId].inbreedingCoefficient.toFixed(2)}%</div></div>}
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
@@ -33419,6 +34013,8 @@ const PublicProfilePage = () => {
                 API_BASE_URL={API_BASE_URL}
                 authToken={authToken}
                 setModCurrentContext={setModCurrentContext}
+                currentUserIdPublic={userProfile?.id_public}
+                currentUserRole={userProfile?.role}
                 onStartMessage={authToken ? () => {
                     // Navigate to dashboard with message param to open conversation
                     navigate(`/?message=${profile.id_public}`);
