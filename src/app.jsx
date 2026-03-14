@@ -3176,7 +3176,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 const BreakdownTable = ({ title, data, sortByValue = true }) => {
                     const entries = sortByValue
                         ? Object.entries(data).sort((a, b) => b[1] - a[1])
-                        : Object.entries(data);
+                        : Object.entries(data).sort((a, b) => b[0].localeCompare(a[0]));
                     if (!entries.length) return null;
                     const max = Math.max(...entries.map(([, v]) => v));
                     return (
@@ -3219,14 +3219,10 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 <BreakdownTable title="Pairings by Species" data={littersBySpecies} />
                             )}
                             {Object.keys(littersByYear).length > 0 && (
-                                <BreakdownTable title="Pairings by Year" sortByValue={false} data={
-                                    Object.fromEntries(Object.entries(littersByYear).sort((a,b) => b[0].localeCompare(a[0])))
-                                } />
+                                <BreakdownTable title="Pairings by Year" sortByValue={false} data={littersByYear} />
                             )}
                             {Object.keys(offspringByYear).length > 0 && (
-                                <BreakdownTable title="Offspring by Year" sortByValue={false} data={
-                                    Object.fromEntries(Object.entries(offspringByYear).sort((a,b) => b[0].localeCompare(a[0])))
-                                } />
+                                <BreakdownTable title="Offspring by Year" sortByValue={false} data={offspringByYear} />
                             )}
                             {Object.keys(offspringBySpecies).length > 1 && (
                                 <BreakdownTable title="Offspring by Species" data={offspringBySpecies} />
