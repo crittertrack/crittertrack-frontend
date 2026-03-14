@@ -3402,7 +3402,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         {canRate && (
                             <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3">
                                 <h4 className="text-sm font-semibold text-gray-700">
-                                    {myRating ? 'Edit Your Rating' : 'Rate This Breeder'}
+                                    {myRating ? 'Edit Your Rating' : 'Rate This User'}
                                 </h4>
                                 <RatingStarRow
                                     score={ratingForm.score}
