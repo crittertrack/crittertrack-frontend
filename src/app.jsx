@@ -2971,11 +2971,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         {/* Header row: badges left, counts right */}
                         <div className="flex items-center gap-2">
                             <div className="flex flex-wrap items-center gap-2 flex-1">
-                                {l.isPlanned
-                                    ? <span className="text-xs font-semibold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">Planned</span>
-                                    : <span className="text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Born</span>}
-                                {l.litter_id_public && <span className="text-xs font-mono bg-purple-100 text-purple-700 px-2 py-0.5 rounded">{l.litter_id_public}</span>}
                                 {l.breedingPairCodeName && <span className="text-sm font-semibold text-gray-800">{l.breedingPairCodeName}</span>}
+                                {l.litter_id_public && <span className="text-xs font-mono bg-purple-100 text-purple-700 px-2 py-0.5 rounded">{l.litter_id_public}</span>}
                             </div>
                             {!l.isPlanned && l.litterSizeBorn != null && (
                                 <div className="flex items-center gap-1.5 text-xs ml-auto flex-shrink-0">
@@ -3001,7 +2998,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             </div>
                         )}
                         {/* Dates */}
-                        <div className="flex flex-wrap gap-3 text-xs text-gray-500">
+                        <div className="flex flex-wrap justify-center gap-3 text-xs text-gray-500">
                             {l.matingDate && <span><span className="font-medium">{l.isPlanned ? 'Planned Mating:' : 'Mated:'}</span> {formatLitterDate(l.matingDate)}</span>}
                             {l.expectedDueDate && l.isPlanned && <span><span className="font-medium">Due:</span> {formatLitterDate(l.expectedDueDate)}</span>}
                             {l.birthDate && !l.isPlanned && <span><span className="font-medium">Born:</span> {formatLitterDate(l.birthDate)}</span>}
