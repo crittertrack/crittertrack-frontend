@@ -3161,7 +3161,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 
                 const availableForSale = animals.filter(a => a.isForSale).length;
                 const availableForStud = animals.filter(a => a.availableForBreeding).length;
-                const withBreederStatus = availableForStud; // same field
+                const withBreederStatus = animals.filter(a => a.status === 'Breeder').length;
 
                 const StatCard = ({ label, value, sub }) => (
                     <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1">
@@ -3198,12 +3198,12 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         {/* Summary cards */}
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                             <StatCard label="Total Animals" value={animals.length} />
-                            <StatCard label="Pairings on Record" value={bornLitters.length} />
+                            <StatCard label="Total Pairings" value={publicLitters.length} />
                             <StatCard label="Total Offspring" value={totalOffspring} />
+                            <StatCard label="With Breeder Status" value={withBreederStatus} />
                             <StatCard label="Planned Matings" value={plannedLitters.length} />
                             <StatCard label="Available for Sale" value={availableForSale} />
                             <StatCard label="Available for Stud" value={availableForStud} />
-                            {withBreederStatus > 0 && <StatCard label="With Stud Status" value={withBreederStatus} />}
                         </div>
 
                         {/* Breakdowns */}
@@ -3211,7 +3211,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             {Object.keys(animalsBySpecies).length > 1 && (
                                 <BreakdownTable title="Animals by Species" data={animalsBySpecies} />
                             )}
-                            {Object.keys(littersBySpecies).length > 0 && (
+                            {Object.keys(littersBySpecies).length > 1 && (
                                 <BreakdownTable title="Pairings by Species" data={littersBySpecies} />
                             )}
                             {Object.keys(littersByYear).length > 0 && (
