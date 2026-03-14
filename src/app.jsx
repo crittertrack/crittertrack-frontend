@@ -3198,9 +3198,9 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         {/* Summary cards */}
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                             <StatCard label="Total Animals" value={animals.length} />
+                            <StatCard label="With Breeder Status" value={withBreederStatus} />
                             <StatCard label="Total Pairings" value={publicLitters.length} />
                             <StatCard label="Total Offspring" value={totalOffspring} />
-                            <StatCard label="With Breeder Status" value={withBreederStatus} />
                             <StatCard label="Planned Matings" value={plannedLitters.length} />
                             <StatCard label="Available for Sale" value={availableForSale} />
                             <StatCard label="Available for Stud" value={availableForStud} />
