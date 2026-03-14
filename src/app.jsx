@@ -19696,6 +19696,21 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         setCountry(userProfile.country || '');
         setUsState(userProfile.country === 'US' ? (userProfile.state || '') : '');
     }, [userProfile.allowMessages, userProfile.emailNotificationPreference, userProfile.country, userProfile.state]);
+
+    // Keep breederInfo form fields in sync when userProfile updates after save/refetch
+    useEffect(() => {
+        setBreederInfo({
+            aboutProgram:       userProfile.breederInfo?.aboutProgram       || '',
+            adoptionRules:      userProfile.breederInfo?.adoptionRules      || '',
+            enclosureCare:      userProfile.breederInfo?.enclosureCare      || '',
+            routineCare:        userProfile.breederInfo?.routineCare        || '',
+            healthGuarantee:    userProfile.breederInfo?.healthGuarantee    || '',
+            waitlistInfo:       userProfile.breederInfo?.waitlistInfo       || '',
+            pricingNotes:       userProfile.breederInfo?.pricingNotes       || '',
+            contactPreferences: userProfile.breederInfo?.contactPreferences || '',
+            customFields:       userProfile.breederInfo?.customFields       || [],
+        });
+    }, [userProfile.breederInfo]);
     
     console.log('[ProfileEditForm] Initial allowMessages state:', allowMessages);
 
