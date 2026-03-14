@@ -2549,6 +2549,26 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             <span>{getCountryName(freshProfile?.country || profile.country)}{(freshProfile?.country || profile.country) === 'US' && (freshProfile?.state || profile.state) ? `, ${getStateName(freshProfile?.state || profile.state)}` : ''}</span>
                         </span>
                     )}
+                    {/* Breeding status pills */}
+                    {(() => {
+                        const bs = freshProfile?.breedingStatus || profile.breedingStatus;
+                        if (!bs) return null;
+                        const active = Object.entries(bs).filter(([, v]) => v === 'breeder' || v === 'retired');
+                        if (!active.length) return null;
+                        return (
+                            <div className="flex flex-wrap justify-center gap-2 mt-1">
+                                {active.map(([species, status]) => (
+                                    <div key={species} className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-full border border-gray-200">
+                                        {status === 'breeder'
+                                            ? <Star size={12} className="text-primary" />
+                                            : <Moon size={12} className="text-gray-500" />}
+                                        <span className="text-xs font-medium text-gray-800">{getSpeciesDisplayName(species)}</span>
+                                        <span className="text-xs text-gray-400">({status === 'breeder' ? 'Active' : 'Retired'})</span>
+                                    </div>
+                                ))}
+                            </div>
+                        );
+                    })()}
                 </div>
 
                 {/* Right column: bio only */}
