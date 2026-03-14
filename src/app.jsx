@@ -3178,7 +3178,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         ? Object.entries(data).sort((a, b) => b[1] - a[1])
                         : Object.entries(data);
                     if (!entries.length) return null;
-                    const max = entries[0][1];
+                    const max = Math.max(...entries.map(([, v]) => v));
                     return (
                         <div className="bg-white border border-gray-200 rounded-xl p-4">
                             <h4 className="text-sm font-semibold text-gray-700 mb-3">{title}</h4>
