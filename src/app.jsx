@@ -12408,12 +12408,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             </div>
                             {/* COI display */}
                             {(matingCalcCOI || matingCOI != null) && (
-                                <div className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg ${matingCalcCOI ? 'bg-gray-50 text-gray-500' : matingCOI <= 5 ? 'bg-green-50 text-green-700' : matingCOI <= 12.5 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>
+                                <div className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg ${matingCalcCOI ? 'bg-gray-50 text-gray-500' : 'bg-gray-50 text-gray-700'}`}>
                                     {matingCalcCOI
                                         ? <><span className="inline-block w-4 h-4 rounded-full border-2 border-gray-300 border-t-gray-600 animate-spin" /> Calculating COI...</>
                                         : <><span className="font-semibold">Predicted COI:</span> {matingCOI.toFixed(2)}%
                                             {matingCOI === 0 && <span className="text-xs ml-1">(unrelated)</span>}
-                                            {matingCOI > 12.5 && <span className="text-xs ml-1">(⚠ high)</span>}
                                           </>
                                     }
                                 </div>
@@ -32752,7 +32751,7 @@ const App = () => {
                                                                                         {breedingRecordLitters?.[record.litterId]?.maleCount != null && <div><div className="text-gray-600 text-xs">Males</div><div className="text-2xl font-bold text-blue-500">{breedingRecordLitters[record.litterId].maleCount}</div></div>}
                                                                                         {breedingRecordLitters?.[record.litterId]?.femaleCount != null && <div><div className="text-gray-600 text-xs">Females</div><div className="text-2xl font-bold text-pink-500">{breedingRecordLitters[record.litterId].femaleCount}</div></div>}
                                                                                         {breedingRecordLitters?.[record.litterId]?.unknownCount != null && breedingRecordLitters[record.litterId].unknownCount > 0 && <div><div className="text-gray-600 text-xs">Unknown / Intersex</div><div className="text-2xl font-bold text-gray-600">{breedingRecordLitters[record.litterId].unknownCount}</div></div>}
-                                                                                        {breedingRecordLitters?.[record.litterId]?.inbreedingCoefficient != null && <div><div className="text-gray-600 text-xs">COI</div><div className="text-xl font-bold text-orange-600">{breedingRecordLitters[record.litterId].inbreedingCoefficient.toFixed(2)}%</div></div>}
+                                                                                        {breedingRecordLitters?.[record.litterId]?.inbreedingCoefficient != null && <div><div className="text-gray-600 text-xs">COI</div><div className="text-xl font-bold text-gray-700">{breedingRecordLitters[record.litterId].inbreedingCoefficient.toFixed(2)}%</div></div>}
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
