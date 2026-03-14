@@ -2775,7 +2775,9 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     {[
                         { key: 'aboutProgram',       label: 'About My Program / Breeding Goals' },
                         { key: 'adoptionRules',      label: 'Adoption / Rehoming Rules' },
-                        { key: 'careRequirements',   label: 'House / Care Requirements for Adopters' },
+                        { key: 'careRequirements',   label: 'House / Care Requirements for Adopters' }, // legacy field
+                        { key: 'enclosureCare',      label: 'Enclosure / Enclosure Care Requirements' },
+                        { key: 'routineCare',        label: 'Routine Care (Food, Medical, etc.)' },
                         { key: 'healthGuarantee',    label: 'Health Guarantee' },
                         { key: 'waitlistInfo',       label: 'Waitlist Info' },
                         { key: 'pricingNotes',       label: 'Pricing / Fee Notes' },
@@ -19676,7 +19678,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [breederInfo, setBreederInfo] = useState({
         aboutProgram:       userProfile.breederInfo?.aboutProgram       || '',
         adoptionRules:      userProfile.breederInfo?.adoptionRules      || '',
-        careRequirements:   userProfile.breederInfo?.careRequirements   || '',
+        enclosureCare:      userProfile.breederInfo?.enclosureCare      || '',
+        routineCare:        userProfile.breederInfo?.routineCare        || '',
         healthGuarantee:    userProfile.breederInfo?.healthGuarantee    || '',
         waitlistInfo:       userProfile.breederInfo?.waitlistInfo       || '',
         pricingNotes:       userProfile.breederInfo?.pricingNotes       || '',
@@ -20333,7 +20336,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 {[
                     { key: 'aboutProgram',       label: 'About My Program / Breeding Goals' },
                     { key: 'adoptionRules',      label: 'Adoption / Rehoming Rules' },
-                    { key: 'careRequirements',   label: 'House / Care Requirements for Adopters' },
+                    { key: 'enclosureCare',      label: 'Enclosure / Enclosure Care Requirements' },
+                    { key: 'routineCare',        label: 'Routine Care (Food, Medical, etc.)' },
                     { key: 'healthGuarantee',    label: 'Health Guarantee' },
                     { key: 'waitlistInfo',       label: 'Waitlist Info' },
                     { key: 'pricingNotes',       label: 'Pricing / Fee Notes' },
