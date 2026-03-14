@@ -2333,6 +2333,22 @@ const renderBreederInfoMarkdown = (text) => {
         .replace(/\n/g, '<br>');
 };
 
+// Reusable star row — defined at module level so React never unmounts/remounts it between renders
+const RatingStarRow = ({ score, interactive, onSelect }) => (
+    <div className="flex gap-1">
+        {[1,2,3,4,5].map(n => (
+            <button
+                key={n}
+                type="button"
+                onClick={() => interactive && onSelect && onSelect(n)}
+                className={`text-2xl leading-none transition ${interactive ? 'hover:scale-110 cursor-pointer' : 'cursor-default'} ${n <= score ? 'text-amber-400' : 'text-gray-200'}`}
+                aria-label={`${n} star`}
+                disabled={!interactive}
+            >★</button>
+        ))}
+    </div>
+);
+
 // Public Profile View Component - Shows a breeder's public animals
 const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStartMessage, authToken, setModCurrentContext, currentUserIdPublic = null, currentUserRole = 'user' }) => {
     const [animals, setAnimals] = useState([]);
@@ -2358,6 +2374,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     const [reportRatingLoading, setReportRatingLoading] = useState(false);
     const [reportRatingSuccess, setReportRatingSuccess] = useState(null); // _id of successfully reported rating
     const [removingRatingId, setRemovingRatingId] = useState(null);
+    const [ratingError, setRatingError] = useState('');
     const toggleInfoField = (key) => setExpandedInfoFields(prev => {
         const next = new Set(prev);
         next.has(key) ? next.delete(key) : next.add(key);
@@ -2365,6 +2382,57 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     });
 
     const isModOrAdmin = ['moderator', 'admin'].includes(currentUserRole);
+
+    const handleSubmitRating = async () => {
+        if (!ratingForm.score || ratingForm.score < 1) return;
+        setSubmittingRating(true);
+        setRatingError('');
+        try {
+            const resp = await axios.post(
+                `${API_BASE_URL}/ratings/${freshProfile?.id_public || profile.id_public}`,
+                { score: ratingForm.score, comment: ratingForm.comment },
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+            setMyRating(resp.data?.rating || { score: ratingForm.score, comment: ratingForm.comment });
+            const pub = await axios.get(`${API_BASE_URL}/public/ratings/${freshProfile?.id_public || profile.id_public}`);
+            setRatingData({
+                average: pub.data?.average ?? 0,
+                count: pub.data?.count ?? 0,
+                distribution: pub.data?.distribution ?? {1:0,2:0,3:0,4:0,5:0},
+                ratings: pub.data?.ratings ?? [],
+            });
+        } catch (err) {
+            console.error('Failed to submit rating', err);
+            setRatingError(err.response?.data?.message || 'Failed to submit rating. Please try again.');
+        } finally {
+            setSubmittingRating(false);
+        }
+    };
+
+    const handleDeleteRating = async () => {
+        setSubmittingRating(true);
+        setRatingError('');
+        try {
+            await axios.delete(
+                `${API_BASE_URL}/ratings/${freshProfile?.id_public || profile.id_public}`,
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+            setMyRating(null);
+            setRatingForm({ score: 0, comment: '' });
+            const pub = await axios.get(`${API_BASE_URL}/public/ratings/${freshProfile?.id_public || profile.id_public}`);
+            setRatingData({
+                average: pub.data?.average ?? 0,
+                count: pub.data?.count ?? 0,
+                distribution: pub.data?.distribution ?? {1:0,2:0,3:0,4:0,5:0},
+                ratings: pub.data?.ratings ?? [],
+            });
+        } catch (err) {
+            console.error('Failed to delete rating', err);
+            setRatingError(err.response?.data?.message || 'Failed to remove rating. Please try again.');
+        } finally {
+            setSubmittingRating(false);
+        }
+    };
 
     const handleReportRating = async (ratingId) => {
         if (!reportRatingReason.trim()) return;
@@ -3289,69 +3357,6 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 
             {/* Ratings Tab */}
             {activeTab === 'ratings' && (() => {
-                const StarRow = ({ score, interactive, onSelect }) => (
-                    <div className="flex gap-1">
-                        {[1,2,3,4,5].map(n => (
-                            <button
-                                key={n}
-                                type="button"
-                                onClick={() => interactive && onSelect && onSelect(n)}
-                                className={`text-2xl leading-none transition ${interactive ? 'hover:scale-110 cursor-pointer' : 'cursor-default'} ${n <= score ? 'text-amber-400' : 'text-gray-200'}`}
-                                aria-label={`${n} star`}
-                                disabled={!interactive}
-                            >★</button>
-                        ))}
-                    </div>
-                );
-
-                const handleSubmitRating = async () => {
-                    if (!ratingForm.score || ratingForm.score < 1) return;
-                    setSubmittingRating(true);
-                    try {
-                        const resp = await axios.post(
-                            `${API_BASE_URL}/ratings/${profile.id_public}`,
-                            { score: ratingForm.score, comment: ratingForm.comment },
-                            { headers: { Authorization: `Bearer ${authToken}` } }
-                        );
-                        setMyRating(resp.data?.rating || { score: ratingForm.score, comment: ratingForm.comment });
-                        // Refresh public ratings
-                        const pub = await axios.get(`${API_BASE_URL}/public/ratings/${profile.id_public}`);
-                        setRatingData({
-                            average: pub.data?.average ?? 0,
-                            count: pub.data?.count ?? 0,
-                            distribution: pub.data?.distribution ?? {1:0,2:0,3:0,4:0,5:0},
-                            ratings: pub.data?.ratings ?? [],
-                        });
-                    } catch (err) {
-                        console.error('Failed to submit rating', err);
-                    } finally {
-                        setSubmittingRating(false);
-                    }
-                };
-
-                const handleDeleteRating = async () => {
-                    setSubmittingRating(true);
-                    try {
-                        await axios.delete(
-                            `${API_BASE_URL}/ratings/${profile.id_public}`,
-                            { headers: { Authorization: `Bearer ${authToken}` } }
-                        );
-                        setMyRating(null);
-                        setRatingForm({ score: 0, comment: '' });
-                        const pub = await axios.get(`${API_BASE_URL}/public/ratings/${profile.id_public}`);
-                        setRatingData({
-                            average: pub.data?.average ?? 0,
-                            count: pub.data?.count ?? 0,
-                            distribution: pub.data?.distribution ?? {1:0,2:0,3:0,4:0,5:0},
-                            ratings: pub.data?.ratings ?? [],
-                        });
-                    } catch (err) {
-                        console.error('Failed to delete rating', err);
-                    } finally {
-                        setSubmittingRating(false);
-                    }
-                };
-
                 const maxDist = Math.max(...Object.values(ratingData.distribution), 1);
 
                 return (
@@ -3399,7 +3404,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 <h4 className="text-sm font-semibold text-gray-700">
                                     {myRating ? 'Edit Your Rating' : 'Rate This Breeder'}
                                 </h4>
-                                <StarRow
+                                <RatingStarRow
                                     score={ratingForm.score}
                                     interactive
                                     onSelect={(n) => setRatingForm(prev => ({ ...prev, score: n }))}
@@ -3411,8 +3416,12 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                     rows={3}
                                     className="w-full p-2.5 border border-gray-300 rounded-lg text-sm resize-none focus:ring-primary focus:border-primary transition"
                                 />
+                                {ratingError && (
+                                    <p className="text-xs text-red-500 font-medium">{ratingError}</p>
+                                )}
                                 <div className="flex gap-2">
                                     <button
+                                        type="button"
                                         onClick={handleSubmitRating}
                                         disabled={!ratingForm.score || submittingRating}
                                         className="px-4 py-2 bg-primary hover:bg-primary/90 text-black text-sm font-semibold rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed"
@@ -3421,6 +3430,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                     </button>
                                     {myRating && (
                                         <button
+                                            type="button"
                                             onClick={handleDeleteRating}
                                             disabled={submittingRating}
                                             className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-semibold rounded-lg border border-red-200 transition disabled:opacity-40"
