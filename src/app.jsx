@@ -20464,7 +20464,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     }}
                                     rows={3}
                                     maxLength={2000}
-                                    placeholder="Enter content\u2026"
+                                    placeholder={"Enter content\u2026"}
                                     className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none"
                                     disabled={breederInfoLoading}
                                 />
