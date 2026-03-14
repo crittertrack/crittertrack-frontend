@@ -20522,6 +20522,17 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [dangerZoneOpen, setDangerZoneOpen] = useState(false);
     const [settingsTab, setSettingsTab] = useState('profile');
+    const [myReceivedRatings, setMyReceivedRatings] = useState(null);
+    const [myReceivedRatingsLoading, setMyReceivedRatingsLoading] = useState(false);
+
+    useEffect(() => {
+        if (settingsTab !== 'ratings' || !userProfile?.id_public) return;
+        setMyReceivedRatingsLoading(true);
+        axios.get(`${API_BASE_URL}/public/ratings/${userProfile.id_public}`)
+            .then(r => setMyReceivedRatings(r.data))
+            .catch(() => setMyReceivedRatings({ ratings: [], average: 0, count: 0 }))
+            .finally(() => setMyReceivedRatingsLoading(false));
+    }, [settingsTab, userProfile?.id_public]);
 
     // Data Portability — Export
     const [exportSections, setExportSections] = useState({ animals: true, litters: true, enclosures: true, supplies: true, budget: true });
@@ -20905,6 +20916,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     { id: 'profile',        label: 'Profile' },
                     { id: 'info-adoption',  label: 'Info & Adoption' },
                     { id: 'directory',      label: 'Directory' },
+                    { id: 'ratings',        label: 'Ratings' },
                     { id: 'account',        label: 'Account' },
                 ].map(tab => (
                     <button key={tab.id} type="button" onClick={() => setSettingsTab(tab.id)}
@@ -21251,6 +21263,55 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 showModalMessage={showModalMessage}
                 userProfile={userProfile}
             />
+            </>}
+
+            {settingsTab === 'ratings' && <>
+            <div className="p-4 sm:p-6 border rounded-lg bg-gray-50">
+                <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Ratings Received</h3>
+                {myReceivedRatingsLoading ? (
+                    <div className="flex justify-center py-8"><Loader2 className="animate-spin" size={28} /></div>
+                ) : !myReceivedRatings || myReceivedRatings.count === 0 ? (
+                    <p className="text-gray-500 text-sm py-4 text-center">No ratings yet.</p>
+                ) : (
+                    <>
+                        <div className="flex items-center gap-4 mb-6 p-4 bg-white rounded-lg border">
+                            <div className="text-center">
+                                <div className="text-3xl font-bold text-gray-800">{myReceivedRatings.average.toFixed(1)}</div>
+                                <div className="text-yellow-400 text-xl">
+                                    {[1,2,3,4,5].map(n => <span key={n}>{n <= Math.round(myReceivedRatings.average) ? '★' : '☆'}</span>)}
+                                </div>
+                                <div className="text-xs text-gray-500">{myReceivedRatings.count} rating{myReceivedRatings.count !== 1 ? 's' : ''}</div>
+                            </div>
+                            <div className="flex-1 space-y-1">
+                                {[5,4,3,2,1].map(star => (
+                                    <div key={star} className="flex items-center gap-2 text-xs">
+                                        <span className="w-4 text-right text-gray-500">{star}</span>
+                                        <span className="text-yellow-400">★</span>
+                                        <div className="flex-1 bg-gray-200 rounded-full h-2">
+                                            <div className="bg-yellow-400 h-2 rounded-full" style={{ width: `${myReceivedRatings.count > 0 ? ((myReceivedRatings.distribution?.[star] || 0) / myReceivedRatings.count) * 100 : 0}%` }} />
+                                        </div>
+                                        <span className="w-4 text-gray-500">{myReceivedRatings.distribution?.[star] || 0}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="space-y-3">
+                            {myReceivedRatings.ratings.map(r => (
+                                <div key={r._id} className="bg-white rounded-lg border p-4">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <span className="font-semibold text-gray-800 text-sm">{r.raterName || r.raterId_public}</span>
+                                        <span className="text-yellow-400 text-sm">
+                                            {[1,2,3,4,5].map(n => <span key={n}>{n <= r.score ? '★' : '☆'}</span>)}
+                                        </span>
+                                    </div>
+                                    {r.comment && <p className="text-gray-600 text-sm mt-1">{r.comment}</p>}
+                                    <p className="text-xs text-gray-400 mt-2">{new Date(r.createdAt).toLocaleDateString()}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                )}
+            </div>
             </>}
 
             {settingsTab === 'account' && <>
