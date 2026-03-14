@@ -1320,6 +1320,20 @@ const KEY_FEATURES_LESSONS = [
           'Add offspring creates new animals',
           'Delete removes litter (careful!)'
         ]
+      },
+      {
+        stepNumber: 9,
+        title: 'Show a Litter on Your Public Profile',
+        content: 'Each litter card has an Eye / EyeOff icon at the very left of the compact header, before the litter name. Click it to toggle public visibility: green Eye = this litter is shown on your public breeder profile, grey EyeOff = hidden. A "Litters" tab automatically appears on your public profile once at least one litter is marked public. The public card shows the pairing name, litter ID badge, sire × dam, status badge (Planned / Born), dates, a photo thumbnail strip, and any notes.',
+        highlightElement: '[data-tutorial-target="litter-card"]',
+        tips: [
+          'Eye/EyeOff icon is the first element on each litter card',
+          'Green Eye = shown publicly, Grey EyeOff = hidden from profile',
+          'Litters tab only appears on your public profile when at least 1 litter is public',
+          'Notes are always shown when a litter is public',
+          'Photos (if uploaded) display as a thumbnail strip on the public card',
+          'Works for both planned and born litters'
+        ]
       }
     ]
   },
@@ -1447,6 +1461,19 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 11,
+        title: 'Info & Adoption Settings Tab',
+        content: 'In your Settings, open the "Info & Adoption" tab to fill in detailed information about your breeding program for visitors to your public profile. Fields include: About My Program, Adoption / Rehoming Rules, Enclosure & Routine Care Requirements, Health Guarantee, Waitlist and Booking Info, Pricing / Fee Notes, Contact Preferences — plus up to 10 fully custom fields with your own title and content. Use the bold/italic toolbar to format your text. Each filled section appears as a collapsible accordion on your public profile\'s "Info & Adoption" tab.',
+        tips: [
+          'Found under Settings → Info & Adoption tab',
+          'All fields are optional — only filled sections appear publicly',
+          'Up to 10 custom fields with your own titles',
+          'Bold and italic formatting toolbar available',
+          'Sections display as collapsible accordions on your public profile',
+          'Save after editing to publish changes'
+        ]
+      },
+      {
+        stepNumber: 12,
         title: 'Save or Cancel',
         content: 'Use the Save button to keep your changes or Cancel to discard them. Changes are applied immediately upon save.',
         highlightElement: '[data-tutorial-target="profile-save-cancel"]',
@@ -1457,7 +1484,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 12,
+        stepNumber: 13,
         title: 'Move to Budget',
         content: 'Now let\'s explore the Budget section to understand financial tracking. Click the "Budget" button in the header.',
         highlightElement: '[data-tutorial-target="budget-btn"]',
@@ -1897,17 +1924,56 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 1,
         title: 'Public Profile Overview',
-        content: 'Your public profile is how other breeders find and learn about you. It shows your information, animals (if public), and enables connections.',
+        content: 'Your public profile is how other breeders find and learn about you. It is organised into up to four tabs that appear automatically once you have content: Animals (always visible), For Sale / Stud (appears when you have animals marked for sale or stud), Info & Adoption (appears when you have breeder info filled in Settings), and Litters (appears when you have at least one litter toggled public in Litter Management).',
         highlightElement: '[data-tutorial-target="public-profile-section"]',
         hideHighlightPrompt: true,
         tips: [
-          'Professional identity',
-          'Shows your breeding program',
-          'Attracts other breeders'
+          'Tabs appear automatically — no manual setup needed',
+          'Animals tab is always shown',
+          'For Sale / Stud tab requires animals marked for sale or stud',
+          'Info & Adoption tab requires fields filled in Settings',
+          'Litters tab requires at least one litter toggled public'
         ]
       },
       {
         stepNumber: 2,
+        title: 'For Sale / Stud Tab',
+        content: 'The "For Sale / Stud" tab shows two sections: animals you have listed for sale (with price) and animals available for stud services (with fee). Animals appear here when they are both set to Public AND have "Available for Sale" or "Available for Stud" enabled in their Status & Privacy tab. Visitors can see the price/fee, gender, species, and photo at a glance.',
+        hideHighlightPrompt: true,
+        tips: [
+          'Animal must be Public AND marked For Sale or For Stud',
+          'Set price/fee or mark as Negotiable',
+          'Tab is hidden if you have no animals listed',
+          'Also feeds into the global Marketplace'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Info & Adoption Tab',
+        content: 'The "Info & Adoption" tab shows your breeding program information as collapsible accordions: About My Program, Adoption Rules, Care Requirements, Health Guarantee, Waitlist Info, Pricing Notes, Contact Preferences, and any custom fields you have added. Fill these fields in Settings → Info & Adoption tab. The tab is hidden if none of the fields are filled.',
+        hideHighlightPrompt: true,
+        tips: [
+          'Fill fields in Settings → Info & Adoption tab',
+          'Only filled sections are shown publicly',
+          'Up to 10 custom fields with your own titles',
+          'Formatting (bold, italic) is preserved in the public view',
+          'Tab is hidden entirely if no fields are filled'
+        ]
+      },
+      {
+        stepNumber: 4,
+        title: 'Litters Tab',
+        content: 'The "Litters" tab shows litters you have chosen to share publicly. Toggle any litter public using the Eye / EyeOff icon on each litter card in Litter Management. Public litter cards display the pair name and ID, sire × dam names, a status badge (Planned or Born), relevant dates, a photo strip (if you have uploaded litter photos), and your notes. Litters are grouped into Planned and Past (born).',
+        hideHighlightPrompt: true,
+        tips: [
+          'Toggle per-litter from Litter Management (Eye icon at start of card)',
+          'Planned and born litters appear in separate groups',
+          'Photos and notes are shown if present',
+          'Tab hidden until at least one litter is set public'
+        ]
+      },
+      {
+        stepNumber: 5,
         title: 'Profile Visibility Control',
         content: 'Use visibility toggles to control what appears on your public profile. You can be selective about what you share while maintaining community connections.',
         highlightElement: '[data-tutorial-target="profile-visibility"]',
@@ -1919,19 +1985,7 @@ const ADVANCED_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 3,
-        title: 'Public Animal Profiles',
-        content: 'When you make an animal public, other users can see its profile including lineage, genetics, breeding history, and availability.',
-        highlightElement: '[data-tutorial-target="public-animal-profile"]',
-        hideHighlightPrompt: true,
-        tips: [
-          'Market your breeding stock',
-          'Show off prize animals',
-          'Attract interested buyers'
-        ]
-      },
-      {
-        stepNumber: 4,
+        stepNumber: 6,
         title: 'Sharing Animals',
         content: 'First, open an existing animal from your collection to view its details. Then, click the "Share" button to copy the unique link to your clipboard. You can share this link with other breeders so they can view the full pedigree and contact you about the animal.',
         highlightElement: '[data-tutorial-target="share-animal-btn"]',
