@@ -2958,16 +2958,24 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             {l.breedingPairCodeName && <span className="text-sm font-semibold text-gray-800">{l.breedingPairCodeName}</span>}
                         </div>
                         {/* Sire × Dam */}
-                        {(l.sirePrefixName || l.sireId_public || l.damPrefixName || l.damId_public) && (
-                            <p className="text-sm text-gray-600">
-                                <span className="font-medium text-gray-700">Sire:</span> {l.sirePrefixName || l.sireId_public || '—'}
-                                <span className="mx-2 text-gray-400">×</span>
-                                <span className="font-medium text-gray-700">Dam:</span> {l.damPrefixName || l.damId_public || '—'}
-                            </p>
-                        )}
+                        {(l.sireId_public || l.damId_public) && (() => {
+                            const fmt = (prefix, name, suffix, prefixName, id) => {
+                                if (name) return [prefix, name, suffix].filter(Boolean).join(' ');
+                                return prefixName || id || '—';
+                            };
+                            const sireLabel = fmt(l.sirePrefix, l.sireName, l.sireSuffix, l.sirePrefixName, l.sireId_public);
+                            const damLabel  = fmt(l.damPrefix,  l.damName,  l.damSuffix,  l.damPrefixName,  l.damId_public);
+                            return (
+                                <p className="text-sm text-gray-600">
+                                    <span className="font-medium text-gray-700">Sire:</span> {sireLabel}
+                                    <span className="mx-2 text-gray-400">×</span>
+                                    <span className="font-medium text-gray-700">Dam:</span> {damLabel}
+                                </p>
+                            );
+                        })()}
                         {/* Dates */}
                         <div className="flex flex-wrap gap-3 text-xs text-gray-500">
-                            {l.matingDate && <span><span className="font-medium">Mated:</span> {formatLitterDate(l.matingDate)}</span>}
+                            {l.matingDate && <span><span className="font-medium">{l.isPlanned ? 'Planned Mating:' : 'Mated:'}</span> {formatLitterDate(l.matingDate)}</span>}
                             {l.expectedDueDate && l.isPlanned && <span><span className="font-medium">Due:</span> {formatLitterDate(l.expectedDueDate)}</span>}
                             {l.birthDate && !l.isPlanned && <span><span className="font-medium">Born:</span> {formatLitterDate(l.birthDate)}</span>}
                         </div>
