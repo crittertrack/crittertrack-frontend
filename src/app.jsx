@@ -2347,6 +2347,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     const [statusFilter, setStatusFilter] = useState('');
     const [freshProfile, setFreshProfile] = useState(profile);
     const [expandedInfoFields, setExpandedInfoFields] = useState(new Set());
+    const [publicLitters, setPublicLitters] = useState([]);
     const toggleInfoField = (key) => setExpandedInfoFields(prev => {
         const next = new Set(prev);
         next.has(key) ? next.delete(key) : next.add(key);
@@ -2411,6 +2412,19 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             fetchPublicAnimals();
         }
     }, [profile, API_BASE_URL]);
+
+    useEffect(() => {
+        const fetchPublicLitters = async () => {
+            if (!profile?.id_public) return;
+            try {
+                const resp = await axios.get(`${API_BASE_URL}/public/litters/user/${profile.id_public}`);
+                setPublicLitters(resp.data || []);
+            } catch {
+                setPublicLitters([]);
+            }
+        };
+        fetchPublicLitters();
+    }, [profile?.id_public, API_BASE_URL]);
 
     const memberSince = (freshProfile?.createdAt || profile.createdAt)
         ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.createdAt || profile.createdAt))
@@ -2602,6 +2616,14 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'info-adoption' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                         Info &amp; Adoption
+                    </button>
+                )}
+                {publicLitters.length > 0 && (
+                    <button
+                        onClick={() => setActiveTab('litters')}
+                        className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'litters' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    >
+                        Litters
                     </button>
                 )}
             </div>
@@ -2919,6 +2941,93 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     }
                 </div>
             )}
+
+            {/* Litters Tab */}
+            {activeTab === 'litters' && publicLitters.length > 0 && (() => {
+                const formatLitterDate = (d) => d ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(d)) : null;
+                const planned = publicLitters.filter(l => l.isPlanned);
+                const born    = publicLitters.filter(l => !l.isPlanned);
+                const LitterPublicCard = ({ l }) => (
+                    <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-2.5">
+                        {/* Header row: pair name + status badge */}
+                        <div className="flex flex-wrap items-center gap-2">
+                            {l.isPlanned
+                                ? <span className="text-xs font-semibold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">Planned</span>
+                                : <span className="text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Born</span>}
+                            {l.litter_id_public && <span className="text-xs font-mono bg-purple-100 text-purple-700 px-2 py-0.5 rounded">{l.litter_id_public}</span>}
+                            {l.breedingPairCodeName && <span className="text-sm font-semibold text-gray-800">{l.breedingPairCodeName}</span>}
+                        </div>
+                        {/* Sire × Dam */}
+                        {(l.sirePrefixName || l.sireId_public || l.damPrefixName || l.damId_public) && (
+                            <p className="text-sm text-gray-600">
+                                <span className="font-medium text-gray-700">Sire:</span> {l.sirePrefixName || l.sireId_public || '—'}
+                                <span className="mx-2 text-gray-400">×</span>
+                                <span className="font-medium text-gray-700">Dam:</span> {l.damPrefixName || l.damId_public || '—'}
+                            </p>
+                        )}
+                        {/* Dates */}
+                        <div className="flex flex-wrap gap-3 text-xs text-gray-500">
+                            {l.matingDate && <span><span className="font-medium">Mated:</span> {formatLitterDate(l.matingDate)}</span>}
+                            {l.expectedDueDate && l.isPlanned && <span><span className="font-medium">Due:</span> {formatLitterDate(l.expectedDueDate)}</span>}
+                            {l.birthDate && !l.isPlanned && <span><span className="font-medium">Born:</span> {formatLitterDate(l.birthDate)}</span>}
+                        </div>
+                        {/* Offspring counts */}
+                        {!l.isPlanned && (l.litterSizeBorn != null) && (
+                            <div className="flex items-center gap-2 text-xs">
+                                <span className="font-semibold text-gray-700">{l.litterSizeBorn} born</span>
+                                {(l.maleCount != null || l.femaleCount != null || l.unknownCount != null) && (
+                                    <span>
+                                        <span className="text-blue-500 font-semibold">{l.maleCount ?? 0}M</span>
+                                        <span className="text-gray-400 mx-0.5">/</span>
+                                        <span className="text-pink-500 font-semibold">{l.femaleCount ?? 0}F</span>
+                                        <span className="text-gray-400 mx-0.5">/</span>
+                                        <span className="text-purple-500 font-semibold">{l.unknownCount ?? 0}U</span>
+                                    </span>
+                                )}
+                            </div>
+                        )}
+                        {/* Photo strip */}
+                        {l.images?.length > 0 && (
+                            <div className="flex gap-1.5 overflow-x-auto">
+                                {l.images.slice(0, 5).map((img, i) => (
+                                    <img key={i} src={img.url} alt="" className="h-16 w-16 rounded-lg object-cover flex-shrink-0 border border-gray-200" />
+                                ))}
+                                {l.images.length > 5 && (
+                                    <div className="h-16 w-16 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 border border-gray-200 text-xs text-gray-500 font-medium">+{l.images.length - 5}</div>
+                                )}
+                            </div>
+                        )}
+                        {/* Notes */}
+                        {l.notes?.trim() && (
+                            <p className="text-sm text-gray-600 leading-relaxed border-t border-gray-100 pt-2">{l.notes}</p>
+                        )}
+                    </div>
+                );
+                return (
+                    <div className="space-y-8">
+                        {planned.length > 0 && (
+                            <div>
+                                <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                    <Calendar size={16} className="text-indigo-500" /> Planned Litters <span className="text-sm font-normal text-gray-400">({planned.length})</span>
+                                </h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {planned.map(l => <LitterPublicCard key={l._id} l={l} />)}
+                                </div>
+                            </div>
+                        )}
+                        {born.length > 0 && (
+                            <div>
+                                <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                    <Sparkles size={16} className="text-green-500" /> Past Litters <span className="text-sm font-normal text-gray-400">({born.length})</span>
+                                </h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {born.map(l => <LitterPublicCard key={l._id} l={l} />)}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
+            })()}
         </div>
     );
 };
@@ -10484,6 +10593,19 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
     };
 
+    const toggleLitterPublic = async (litter) => {
+        const newVal = !litter.showOnPublicProfile;
+        setLitters(prev => prev.map(l => l._id === litter._id ? { ...l, showOnPublicProfile: newVal } : l));
+        try {
+            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, { showOnPublicProfile: newVal }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+        } catch (err) {
+            // Revert on failure
+            setLitters(prev => prev.map(l => l._id === litter._id ? { ...l, showOnPublicProfile: !newVal } : l));
+        }
+    };
+
     const handleEditLitter = (litter) => {
         // Format birthDate and matingDate for date inputs
         // Date inputs expect YYYY-MM-DD format
@@ -12060,6 +12182,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <span>{litter.images.length}</span>
                                         </span>
                                     )}
+                                    <button
+                                        type="button"
+                                        onClick={(e) => { e.stopPropagation(); toggleLitterPublic(litter); }}
+                                        title={litter.showOnPublicProfile ? 'Shown on public profile — click to hide' : 'Hidden from public profile — click to show'}
+                                        className={`flex-shrink-0 ml-1 p-1 rounded transition ${litter.showOnPublicProfile ? 'text-green-500 hover:text-green-600' : 'text-gray-300 hover:text-gray-400'}`}
+                                    >
+                                        {litter.showOnPublicProfile ? <Eye size={14} /> : <EyeOff size={14} />}
+                                    </button>
                                     <ChevronDown
                                         size={18}
                                         className={`text-gray-400 transition-transform flex-shrink-0 ml-2 ${isExpanded ? 'rotate-180' : ''}`}
