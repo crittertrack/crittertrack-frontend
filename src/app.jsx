@@ -12092,6 +12092,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50/80"
                                     onClick={() => setExpandedLitter(isExpanded ? null : litter._id)}
                                 >
+                                    {/* Public profile toggle — before litter name */}
+                                    <button
+                                        type="button"
+                                        onClick={(e) => { e.stopPropagation(); toggleLitterPublic(litter); }}
+                                        title={litter.showOnPublicProfile ? 'Shown on public profile — click to hide' : 'Hidden from public profile — click to show'}
+                                        className={`flex-shrink-0 mr-2 p-1 rounded transition ${litter.showOnPublicProfile ? 'text-green-500 hover:text-green-600' : 'text-gray-400 hover:text-gray-600'}`}
+                                    >
+                                        {litter.showOnPublicProfile ? <Eye size={15} /> : <EyeOff size={15} />}
+                                    </button>
                                     {/* Mobile layout: stacked info */}
                                     <div className="flex-1 sm:hidden">
                                         <div className="flex justify-between items-start mb-1">
@@ -12182,14 +12191,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <span>{litter.images.length}</span>
                                         </span>
                                     )}
-                                    <button
-                                        type="button"
-                                        onClick={(e) => { e.stopPropagation(); toggleLitterPublic(litter); }}
-                                        title={litter.showOnPublicProfile ? 'Shown on public profile — click to hide' : 'Hidden from public profile — click to show'}
-                                        className={`flex-shrink-0 ml-1 p-1 rounded transition ${litter.showOnPublicProfile ? 'text-green-500 hover:text-green-600' : 'text-gray-300 hover:text-gray-400'}`}
-                                    >
-                                        {litter.showOnPublicProfile ? <Eye size={14} /> : <EyeOff size={14} />}
-                                    </button>
                                     <ChevronDown
                                         size={18}
                                         className={`text-gray-400 transition-transform flex-shrink-0 ml-2 ${isExpanded ? 'rotate-180' : ''}`}
