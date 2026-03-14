@@ -2797,7 +2797,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                     onClick={() => toggleInfoField(f.key)}
                                     className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-100 transition"
                                 >
-                                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{f.label}</span>
+                                    <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">{f.label}</span>
                                     {isOpen ? <ChevronUp size={15} className="text-gray-400 shrink-0" /> : <ChevronDown size={15} className="text-gray-400 shrink-0" />}
                                 </button>
                                 {isOpen && (
@@ -2819,7 +2819,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                         onClick={() => toggleInfoField(key)}
                                         className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-100 transition"
                                     >
-                                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{cf.title}</span>
+                                        <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">{cf.title}</span>
                                         {isOpen ? <ChevronUp size={15} className="text-gray-400 shrink-0" /> : <ChevronDown size={15} className="text-gray-400 shrink-0" />}
                                     </button>
                                     {isOpen && (
