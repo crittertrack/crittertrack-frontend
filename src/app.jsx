@@ -2947,6 +2947,25 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 const formatLitterDate = (d) => d ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(d)) : null;
                 const planned = publicLitters.filter(l => l.isPlanned);
                 const born    = publicLitters.filter(l => !l.isPlanned);
+                const ParentMiniCard = ({ role, animal }) => {
+                    if (!animal) return null;
+                    const imgUrl = animal.imageUrl || animal.photoUrl || null;
+                    const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+                    const isSire = role === 'Sire';
+                    return (
+                        <div className="flex-1 flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-100 min-w-0">
+                            {imgUrl
+                                ? <img src={imgUrl} alt={fullName} className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-gray-200" />
+                                : <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold ${isSire ? 'bg-blue-300' : 'bg-pink-300'}`}>{isSire ? '♂' : '♀'}</div>
+                            }
+                            <div className="min-w-0">
+                                <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">{role}</p>
+                                <p className="text-xs font-semibold text-gray-800 truncate">{fullName || animal.id_public}</p>
+                                <p className="text-[10px] font-mono text-gray-400">{animal.id_public}</p>
+                            </div>
+                        </div>
+                    );
+                };
                 const LitterPublicCard = ({ l }) => (
                     <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-2.5">
                         {/* Header row: pair name + status badge */}
@@ -2957,22 +2976,14 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             {l.litter_id_public && <span className="text-xs font-mono bg-purple-100 text-purple-700 px-2 py-0.5 rounded">{l.litter_id_public}</span>}
                             {l.breedingPairCodeName && <span className="text-sm font-semibold text-gray-800">{l.breedingPairCodeName}</span>}
                         </div>
-                        {/* Sire × Dam */}
-                        {(l.sireId_public || l.damId_public) && (() => {
-                            const fmt = (prefix, name, suffix, prefixName, id) => {
-                                if (name) return [prefix, name, suffix].filter(Boolean).join(' ');
-                                return prefixName || id || '—';
-                            };
-                            const sireLabel = fmt(l.sirePrefix, l.sireName, l.sireSuffix, l.sirePrefixName, l.sireId_public);
-                            const damLabel  = fmt(l.damPrefix,  l.damName,  l.damSuffix,  l.damPrefixName,  l.damId_public);
-                            return (
-                                <p className="text-sm text-gray-600">
-                                    <span className="font-medium text-gray-700">Sire:</span> {sireLabel}
-                                    <span className="mx-2 text-gray-400">×</span>
-                                    <span className="font-medium text-gray-700">Dam:</span> {damLabel}
-                                </p>
-                            );
-                        })()}
+                        {/* Sire × Dam mini-cards */}
+                        {(l.sireAnimal || l.damAnimal) && (
+                            <div className="flex items-center gap-2">
+                                <ParentMiniCard role="Sire" animal={l.sireAnimal} />
+                                <span className="text-gray-300 text-base font-light flex-shrink-0">×</span>
+                                <ParentMiniCard role="Dam" animal={l.damAnimal} />
+                            </div>
+                        )}
                         {/* Dates */}
                         <div className="flex flex-wrap gap-3 text-xs text-gray-500">
                             {l.matingDate && <span><span className="font-medium">{l.isPlanned ? 'Planned Mating:' : 'Mated:'}</span> {formatLitterDate(l.matingDate)}</span>}
