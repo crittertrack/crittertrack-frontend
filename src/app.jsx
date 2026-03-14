@@ -2334,7 +2334,7 @@ const renderBreederInfoMarkdown = (text) => {
 };
 
 // Public Profile View Component - Shows a breeder's public animals
-const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStartMessage, authToken, setModCurrentContext }) => {
+const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStartMessage, authToken, setModCurrentContext, currentUserIdPublic = null, currentUserRole = 'user' }) => {
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [copySuccess, setCopySuccess] = useState(false);
@@ -2364,15 +2364,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         return next;
     });
 
-    const currentUserPublicId = useMemo(() => {
-        if (!authToken) return null;
-        try { return JSON.parse(atob(authToken.split('.')[1])).id_public; } catch { return null; }
-    }, [authToken]);
-
-    const isModOrAdmin = useMemo(() => {
-        if (!authToken) return false;
-        try { const role = JSON.parse(atob(authToken.split('.')[1])).role; return ['moderator', 'admin'].includes(role); } catch { return false; }
-    }, [authToken]);
+    const isModOrAdmin = ['moderator', 'admin'].includes(currentUserRole);
 
     const handleReportRating = async (ratingId) => {
         if (!reportRatingReason.trim()) return;
@@ -2502,26 +2494,27 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             } catch {
                 setRatingData({ average: 0, count: 0, distribution: {1:0,2:0,3:0,4:0,5:0}, ratings: [] });
             }
-            // If authenticated, try to get own rating and check if we can rate
+            // canRate: logged in + not viewing own profile
+            const canRateNow = !!authToken && !!profile?.id_public && profile.id_public !== currentUserIdPublic;
+            setCanRate(canRateNow);
+
+            // If authenticated, fetch own existing rating for this breeder
             if (authToken) {
                 try {
                     const resp = await axios.get(`${API_BASE_URL}/ratings/${profile.id_public}/mine`, {
                         headers: { Authorization: `Bearer ${authToken}` }
                     });
-                    // 200 means we can rate (not own profile)
-                    setCanRate(true);
                     if (resp.data?.score) {
                         setMyRating(resp.data);
                         setRatingForm({ score: resp.data.score, comment: resp.data.comment || '' });
                     }
                 } catch (err) {
-                    // 403 = own profile; 401 = not authed — either way can't rate
-                    setCanRate(false);
+                    // 401/403/network — ignore, canRate already set above
                 }
             }
         };
         fetchRatings();
-    }, [profile?.id_public, API_BASE_URL, authToken]);
+    }, [profile?.id_public, API_BASE_URL, authToken, currentUserIdPublic]);
 
     const memberSince = (freshProfile?.createdAt || profile.createdAt)
         ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.createdAt || profile.createdAt))
@@ -3471,7 +3464,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                         {removingRatingId === r._id ? '…' : 'Remove'}
                                                     </button>
                                                 )}
-                                                {authToken && r.raterId_public !== currentUserPublicId && !isModOrAdmin && (
+                                                {authToken && r.raterId_public !== currentUserIdPublic && !isModOrAdmin && (
                                                     <button
                                                         onClick={() => { setReportingRating(r); setReportRatingReason(''); }}
                                                         className="text-xs px-2 py-0.5 rounded bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100 transition"
@@ -30307,6 +30300,8 @@ const App = () => {
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
                         setModCurrentContext={setModCurrentContext}
+                        currentUserIdPublic={userProfile?.id_public}
+                        currentUserRole={userProfile?.role}
                     />
 
                     {/* Moderator Action Sidebar - Shows in moderator mode even when viewing public profiles */}
@@ -33948,6 +33943,8 @@ const PublicProfilePage = () => {
                 API_BASE_URL={API_BASE_URL}
                 authToken={authToken}
                 setModCurrentContext={setModCurrentContext}
+                currentUserIdPublic={userProfile?.id_public}
+                currentUserRole={userProfile?.role}
                 onStartMessage={authToken ? () => {
                     // Navigate to dashboard with message param to open conversation
                     navigate(`/?message=${profile.id_public}`);
