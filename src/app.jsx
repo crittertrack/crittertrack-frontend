@@ -2780,17 +2780,17 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             ) : null}
 
             {/* Tab Bar */}
-            <div className="flex flex-wrap border-b border-gray-200 mb-6">
+            <div className="flex border-b border-gray-200 mb-6">
                 <button
                     onClick={() => setActiveTab('animals')}
-                    className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'animals' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    className={`flex-1 text-center px-2 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'animals' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                 >
                     Animals ({animals.length})
                 </button>
                 {hasBreederInfo && (
                     <button
                         onClick={() => setActiveTab('info-adoption')}
-                        className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'info-adoption' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                        className={`flex-1 text-center px-2 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'info-adoption' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                         Info &amp; Adoption
                     </button>
@@ -2798,32 +2798,32 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 {publicLitters.length > 0 && (
                     <button
                         onClick={() => setActiveTab('litters')}
-                        className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'litters' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                        className={`flex-1 text-center px-2 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'litters' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
-                        Pairings
+                        Pairings ({publicLitters.length})
                     </button>
                 )}
                 {animals.some(a => a.isForSale || a.availableForBreeding) && (
                     <button
                         onClick={() => setActiveTab('for-sale-stud')}
-                        className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'for-sale-stud' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                        className={`flex-1 text-center px-2 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'for-sale-stud' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
-                        For Sale / Stud
+                        For Sale / Stud ({animals.filter(a => a.isForSale || a.availableForBreeding).length})
                     </button>
                 )}
                 {(freshProfile?.showStatsTab ?? true) && (
                     <button
                         onClick={() => setActiveTab('stats')}
-                        className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'stats' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                        className={`flex-1 text-center px-2 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'stats' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                         Stats
                     </button>
                 )}
                 <button
                     onClick={() => setActiveTab('ratings')}
-                    className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'ratings' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    className={`flex-1 text-center px-2 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'ratings' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                 >
-                    Ratings{ratingData.count > 0 && <span className="ml-1 text-amber-500">★</span>}
+                    Ratings{ratingData.count > 0 && ` (${ratingData.count})`}
                 </button>
             </div>
 
