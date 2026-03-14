@@ -2603,6 +2603,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 
     // Apply filters
     const filteredAnimals = animals.filter(animal => {
+        if (animal.isOwned === false) return false;
         if (speciesFilter && animal.species !== speciesFilter) return false;
         // Show nothing if both genders are unchecked
         if (!genderFilters.Male && !genderFilters.Female) return false;
@@ -2785,7 +2786,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     onClick={() => setActiveTab('animals')}
                     className={`flex-1 text-center px-2 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'animals' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                 >
-                    Animals ({animals.length})
+                    Animals ({animals.filter(a => a.isOwned !== false).length})
                 </button>
                 {hasBreederInfo && (
                     <button
