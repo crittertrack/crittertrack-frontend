@@ -2779,7 +2779,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         { key: 'enclosureCare',      label: 'Enclosure / Enclosure Care Requirements' },
                         { key: 'routineCare',        label: 'Routine Care (Food, Medical, etc.)' },
                         { key: 'healthGuarantee',    label: 'Health Guarantee' },
-                        { key: 'waitlistInfo',       label: 'Waitlist Info' },
+                        { key: 'waitlistInfo',       label: 'Waitlist and Booking Info' },
                         { key: 'pricingNotes',       label: 'Pricing / Fee Notes' },
                         { key: 'contactPreferences', label: 'Contact Preferences' },
                     ].filter(f => (freshProfile?.breederInfo?.[f.key] || '').trim()).map(f => (
@@ -20354,7 +20354,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     { key: 'enclosureCare',      label: 'Enclosure / Enclosure Care Requirements' },
                     { key: 'routineCare',        label: 'Routine Care (Food, Medical, etc.)' },
                     { key: 'healthGuarantee',    label: 'Health Guarantee' },
-                    { key: 'waitlistInfo',       label: 'Waitlist Info' },
+                    { key: 'waitlistInfo',       label: 'Waitlist and Booking Info' },
                     { key: 'pricingNotes',       label: 'Pricing / Fee Notes' },
                     { key: 'contactPreferences', label: 'Contact Preferences' },
                 ].map(({ key, label }) => (
