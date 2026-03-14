@@ -2426,7 +2426,10 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     });
 
     const hasBreederInfo = !!(freshProfile?.breederInfo &&
-        Object.values(freshProfile.breederInfo).some(v => typeof v === 'string' && v.trim()));
+        (Object.entries(freshProfile.breederInfo)
+            .some(([k, v]) => k !== 'customFields' && typeof v === 'string' && v.trim()) ||
+         (Array.isArray(freshProfile.breederInfo.customFields) &&
+          freshProfile.breederInfo.customFields.some(cf => cf.title?.trim() && cf.value?.trim()))));
 
     const groupedAnimals = filteredAnimals.reduce((groups, animal) => {
         const species = animal.species || 'Unspecified';
@@ -2769,6 +2772,15 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             <div className="text-gray-800 whitespace-pre-wrap text-sm leading-relaxed">{freshProfile.breederInfo[f.key]}</div>
                         </div>
                     ))}
+                    {(freshProfile?.breederInfo?.customFields || [])
+                        .filter(cf => cf.title?.trim() && cf.value?.trim())
+                        .map((cf, idx) => (
+                            <div key={`custom-${idx}`} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                                <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{cf.title}</h4>
+                                <div className="text-gray-800 whitespace-pre-wrap text-sm leading-relaxed">{cf.value}</div>
+                            </div>
+                        ))
+                    }
                 </div>
             )}
         </div>
@@ -19617,6 +19629,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         waitlistInfo:       userProfile.breederInfo?.waitlistInfo       || '',
         pricingNotes:       userProfile.breederInfo?.pricingNotes       || '',
         contactPreferences: userProfile.breederInfo?.contactPreferences || '',
+        customFields:       userProfile.breederInfo?.customFields       || [],
     });
 
     // Keep allowMessages in sync if userProfile updates (e.g., after save or refetch)
@@ -20288,6 +20301,75 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         {breederInfo[key] && <p className="text-xs text-gray-400 mt-0.5 text-right">{breederInfo[key].length}/2000</p>}
                     </div>
                 ))}
+
+                {/* Custom Fields */}
+                <div className="border-t border-gray-200 pt-4">
+                    <div className="flex items-center justify-between mb-3">
+                        <div>
+                            <h4 className="text-sm font-semibold text-gray-700">Custom Fields</h4>
+                            <p className="text-xs text-gray-400 mt-0.5">Add your own sections with custom titles. Up to 10 fields.</p>
+                        </div>
+                        {breederInfo.customFields.length < 10 && (
+                            <button
+                                type="button"
+                                disabled={breederInfoLoading}
+                                onClick={() => setBreederInfo(v => ({ ...v, customFields: [...v.customFields, { title: '', value: '' }] }))}
+                                className="flex items-center gap-1.5 text-sm font-medium text-accent hover:text-accent/80 disabled:opacity-50 transition"
+                            >
+                                <Plus size={15} /> Add Field
+                            </button>
+                        )}
+                    </div>
+                    {breederInfo.customFields.length === 0 && (
+                        <p className="text-sm text-gray-400 italic">No custom fields yet. Click &ldquo;Add Field&rdquo; to create one.</p>
+                    )}
+                    <div className="space-y-4">
+                        {breederInfo.customFields.map((cf, idx) => (
+                            <div key={idx} className="border border-gray-200 rounded-lg p-3 bg-white">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <input
+                                        type="text"
+                                        value={cf.title}
+                                        onChange={(e) => {
+                                            const updated = breederInfo.customFields.map((f, i) => i === idx ? { ...f, title: e.target.value } : f);
+                                            setBreederInfo(v => ({ ...v, customFields: updated }));
+                                        }}
+                                        maxLength="100"
+                                        placeholder="Section title (e.g. Transport Policy)"
+                                        className="flex-1 p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border"
+                                        disabled={breederInfoLoading}
+                                    />
+                                    <button
+                                        type="button"
+                                        disabled={breederInfoLoading}
+                                        onClick={() => {
+                                            const updated = breederInfo.customFields.filter((_, i) => i !== idx);
+                                            setBreederInfo(v => ({ ...v, customFields: updated }));
+                                        }}
+                                        className="p-1.5 text-gray-400 hover:text-red-500 transition rounded"
+                                        title="Remove field"
+                                    >
+                                        <X size={16} />
+                                    </button>
+                                </div>
+                                <textarea
+                                    value={cf.value}
+                                    onChange={(e) => {
+                                        const updated = breederInfo.customFields.map((f, i) => i === idx ? { ...f, value: e.target.value } : f);
+                                        setBreederInfo(v => ({ ...v, customFields: updated }));
+                                    }}
+                                    rows="3"
+                                    maxLength="2000"
+                                    placeholder="Enter content\u2026"
+                                    className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none"
+                                    disabled={breederInfoLoading}
+                                />
+                                {cf.value && <p className="text-xs text-gray-400 mt-0.5 text-right">{cf.value.length}/2000</p>}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
                 <div className="flex justify-end pt-2">
                     <button type="submit" disabled={breederInfoLoading}
                         className="bg-accent hover:bg-accent/90 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
