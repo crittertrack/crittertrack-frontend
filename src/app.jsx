@@ -2348,6 +2348,11 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     const [freshProfile, setFreshProfile] = useState(profile);
     const [expandedInfoFields, setExpandedInfoFields] = useState(new Set());
     const [publicLitters, setPublicLitters] = useState([]);
+    const [ratingData, setRatingData] = useState({ average: 0, count: 0, distribution: {1:0,2:0,3:0,4:0,5:0}, ratings: [] });
+    const [myRating, setMyRating] = useState(null);         // own existing rating object or null
+    const [ratingForm, setRatingForm] = useState({ score: 0, comment: '' });
+    const [submittingRating, setSubmittingRating] = useState(false);
+    const [canRate, setCanRate] = useState(false);           // auth + not own profile
     const toggleInfoField = (key) => setExpandedInfoFields(prev => {
         const next = new Set(prev);
         next.has(key) ? next.delete(key) : next.add(key);
@@ -2425,6 +2430,42 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         };
         fetchPublicLitters();
     }, [profile?.id_public, API_BASE_URL]);
+
+    useEffect(() => {
+        const fetchRatings = async () => {
+            if (!profile?.id_public) return;
+            try {
+                const resp = await axios.get(`${API_BASE_URL}/public/ratings/${profile.id_public}`);
+                const data = resp.data || {};
+                setRatingData({
+                    average: data.average ?? 0,
+                    count: data.count ?? 0,
+                    distribution: data.distribution ?? {1:0,2:0,3:0,4:0,5:0},
+                    ratings: data.ratings ?? [],
+                });
+            } catch {
+                setRatingData({ average: 0, count: 0, distribution: {1:0,2:0,3:0,4:0,5:0}, ratings: [] });
+            }
+            // If authenticated, try to get own rating and check if we can rate
+            if (authToken) {
+                try {
+                    const resp = await axios.get(`${API_BASE_URL}/ratings/${profile.id_public}/mine`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    // 200 means we can rate (not own profile)
+                    setCanRate(true);
+                    if (resp.data?.score) {
+                        setMyRating(resp.data);
+                        setRatingForm({ score: resp.data.score, comment: resp.data.comment || '' });
+                    }
+                } catch (err) {
+                    // 403 = own profile; 401 = not authed — either way can't rate
+                    setCanRate(false);
+                }
+            }
+        };
+        fetchRatings();
+    }, [profile?.id_public, API_BASE_URL, authToken]);
 
     const memberSince = (freshProfile?.createdAt || profile.createdAt)
         ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.createdAt || profile.createdAt))
@@ -2542,6 +2583,13 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         </div>
                     )}
                     <span className="font-mono text-accent font-semibold text-sm">{freshProfile?.id_public || profile.id_public}</span>
+                    {ratingData.count > 0 && (
+                        <button onClick={() => setActiveTab('ratings')} className="flex items-center gap-1 text-xs text-amber-500 font-semibold hover:text-amber-600 transition" title="See ratings">
+                            <span>★</span>
+                            <span>{ratingData.average.toFixed(1)}</span>
+                            <span className="text-gray-400 font-normal">({ratingData.count})</span>
+                        </button>
+                    )}
                     <span className="text-xs text-gray-500">Member since {memberSince}</span>
                     {(freshProfile?.country || profile.country) && (
                         <span className="flex items-center justify-center gap-1 text-xs text-gray-500">
@@ -2638,6 +2686,18 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         Pairings
                     </button>
                 )}
+                <button
+                    onClick={() => setActiveTab('stats')}
+                    className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'stats' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                >
+                    Stats
+                </button>
+                <button
+                    onClick={() => setActiveTab('ratings')}
+                    className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'ratings' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                >
+                    Ratings{ratingData.count > 0 && <span className="ml-1 text-amber-500">★</span>}
+                </button>
                 {animals.some(a => a.isForSale || a.availableForBreeding) && (
                     <button
                         onClick={() => setActiveTab('for-sale-stud')}
@@ -3062,6 +3122,294 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {born.map(l => <LitterPublicCard key={l._id} l={l} />)}
                                 </div>
+                            </div>
+                        )}
+                    </div>
+                );
+            })()}
+
+            {/* Stats Tab */}
+            {activeTab === 'stats' && (() => {
+                // ---- compute stats from existing state ----
+                const animalsBySpecies = animals.reduce((acc, a) => {
+                    const s = a.species || 'Unspecified';
+                    acc[s] = (acc[s] || 0) + 1;
+                    return acc;
+                }, {});
+
+                const bornLitters = publicLitters.filter(l => !l.isPlanned);
+                const plannedLitters = publicLitters.filter(l => l.isPlanned);
+
+                const totalOffspring = bornLitters.reduce((sum, l) => sum + (l.litterSizeBorn ?? 0), 0);
+
+                const littersBySpecies = {};
+                const offspringBySpecies = {};
+                bornLitters.forEach(l => {
+                    const s = l.sireAnimal?.species || l.damAnimal?.species || 'Unspecified';
+                    littersBySpecies[s] = (littersBySpecies[s] || 0) + 1;
+                    offspringBySpecies[s] = (offspringBySpecies[s] || 0) + (l.litterSizeBorn ?? 0);
+                });
+
+                const littersByYear = {};
+                const offspringByYear = {};
+                bornLitters.forEach(l => {
+                    if (!l.birthDate) return;
+                    const yr = new Date(l.birthDate).getFullYear().toString();
+                    littersByYear[yr] = (littersByYear[yr] || 0) + 1;
+                    offspringByYear[yr] = (offspringByYear[yr] || 0) + (l.litterSizeBorn ?? 0);
+                });
+
+                const availableForSale = animals.filter(a => a.isForSale).length;
+                const availableForStud = animals.filter(a => a.availableForBreeding).length;
+                const withBreederStatus = availableForStud; // same field
+
+                const StatCard = ({ label, value, sub }) => (
+                    <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1">
+                        <span className="text-2xl font-bold text-gray-900">{value}</span>
+                        <span className="text-sm font-medium text-gray-700">{label}</span>
+                        {sub && <span className="text-xs text-gray-400">{sub}</span>}
+                    </div>
+                );
+
+                const BreakdownTable = ({ title, data, colLabel = 'Species', colValue = 'Count' }) => {
+                    const entries = Object.entries(data).sort((a, b) => b[1] - a[1]);
+                    if (!entries.length) return null;
+                    const max = entries[0][1];
+                    return (
+                        <div className="bg-white border border-gray-200 rounded-xl p-4">
+                            <h4 className="text-sm font-semibold text-gray-700 mb-3">{title}</h4>
+                            <div className="space-y-2">
+                                {entries.map(([key, val]) => (
+                                    <div key={key} className="flex items-center gap-3">
+                                        <span className="text-xs text-gray-600 w-28 shrink-0 truncate">{key}</span>
+                                        <div className="flex-1 bg-gray-100 rounded-full h-2">
+                                            <div className="bg-primary h-2 rounded-full" style={{ width: `${max > 0 ? Math.round((val / max) * 100) : 0}%` }} />
+                                        </div>
+                                        <span className="text-xs font-semibold text-gray-700 w-6 text-right shrink-0">{val}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                };
+
+                return (
+                    <div className="space-y-6">
+                        {/* Summary cards */}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                            <StatCard label="Total Animals" value={animals.length} />
+                            <StatCard label="Pairings on Record" value={bornLitters.length} />
+                            <StatCard label="Total Offspring" value={totalOffspring} />
+                            <StatCard label="Planned Matings" value={plannedLitters.length} />
+                            <StatCard label="Available for Sale" value={availableForSale} />
+                            <StatCard label="Available for Stud" value={availableForStud} />
+                            {withBreederStatus > 0 && <StatCard label="With Stud Status" value={withBreederStatus} />}
+                        </div>
+
+                        {/* Breakdowns */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {Object.keys(animalsBySpecies).length > 1 && (
+                                <BreakdownTable title="Animals by Species" data={animalsBySpecies} />
+                            )}
+                            {Object.keys(littersBySpecies).length > 0 && (
+                                <BreakdownTable title="Pairings by Species" data={littersBySpecies} />
+                            )}
+                            {Object.keys(littersByYear).length > 0 && (
+                                <BreakdownTable title="Pairings by Year" data={
+                                    Object.fromEntries(Object.entries(littersByYear).sort((a,b) => b[0].localeCompare(a[0])))
+                                } />
+                            )}
+                            {Object.keys(offspringByYear).length > 0 && (
+                                <BreakdownTable title="Offspring by Year" data={
+                                    Object.fromEntries(Object.entries(offspringByYear).sort((a,b) => b[0].localeCompare(a[0])))
+                                } />
+                            )}
+                            {Object.keys(offspringBySpecies).length > 1 && (
+                                <BreakdownTable title="Offspring by Species" data={offspringBySpecies} />
+                            )}
+                        </div>
+
+                        {animals.length === 0 && publicLitters.length === 0 && (
+                            <div className="text-center py-12 text-gray-400">
+                                <p className="text-sm">No public data available yet.</p>
+                            </div>
+                        )}
+                    </div>
+                );
+            })()}
+
+            {/* Ratings Tab */}
+            {activeTab === 'ratings' && (() => {
+                const StarRow = ({ score, interactive, onSelect }) => (
+                    <div className="flex gap-1">
+                        {[1,2,3,4,5].map(n => (
+                            <button
+                                key={n}
+                                type="button"
+                                onClick={() => interactive && onSelect && onSelect(n)}
+                                className={`text-2xl leading-none transition ${interactive ? 'hover:scale-110 cursor-pointer' : 'cursor-default'} ${n <= score ? 'text-amber-400' : 'text-gray-200'}`}
+                                aria-label={`${n} star`}
+                                disabled={!interactive}
+                            >★</button>
+                        ))}
+                    </div>
+                );
+
+                const handleSubmitRating = async () => {
+                    if (!ratingForm.score || ratingForm.score < 1) return;
+                    setSubmittingRating(true);
+                    try {
+                        const resp = await axios.post(
+                            `${API_BASE_URL}/ratings/${profile.id_public}`,
+                            { score: ratingForm.score, comment: ratingForm.comment },
+                            { headers: { Authorization: `Bearer ${authToken}` } }
+                        );
+                        setMyRating(resp.data?.rating || { score: ratingForm.score, comment: ratingForm.comment });
+                        // Refresh public ratings
+                        const pub = await axios.get(`${API_BASE_URL}/public/ratings/${profile.id_public}`);
+                        setRatingData({
+                            average: pub.data?.average ?? 0,
+                            count: pub.data?.count ?? 0,
+                            distribution: pub.data?.distribution ?? {1:0,2:0,3:0,4:0,5:0},
+                            ratings: pub.data?.ratings ?? [],
+                        });
+                    } catch (err) {
+                        console.error('Failed to submit rating', err);
+                    } finally {
+                        setSubmittingRating(false);
+                    }
+                };
+
+                const handleDeleteRating = async () => {
+                    setSubmittingRating(true);
+                    try {
+                        await axios.delete(
+                            `${API_BASE_URL}/ratings/${profile.id_public}`,
+                            { headers: { Authorization: `Bearer ${authToken}` } }
+                        );
+                        setMyRating(null);
+                        setRatingForm({ score: 0, comment: '' });
+                        const pub = await axios.get(`${API_BASE_URL}/public/ratings/${profile.id_public}`);
+                        setRatingData({
+                            average: pub.data?.average ?? 0,
+                            count: pub.data?.count ?? 0,
+                            distribution: pub.data?.distribution ?? {1:0,2:0,3:0,4:0,5:0},
+                            ratings: pub.data?.ratings ?? [],
+                        });
+                    } catch (err) {
+                        console.error('Failed to delete rating', err);
+                    } finally {
+                        setSubmittingRating(false);
+                    }
+                };
+
+                const maxDist = Math.max(...Object.values(ratingData.distribution), 1);
+
+                return (
+                    <div className="space-y-6">
+                        {/* Aggregate */}
+                        {ratingData.count > 0 ? (
+                            <div className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col sm:flex-row gap-6 items-center sm:items-start">
+                                {/* Big average */}
+                                <div className="flex flex-col items-center gap-1 shrink-0">
+                                    <span className="text-5xl font-bold text-gray-900">{ratingData.average.toFixed(1)}</span>
+                                    <div className="flex gap-0.5">
+                                        {[1,2,3,4,5].map(n => (
+                                            <span key={n} className={`text-xl ${n <= Math.round(ratingData.average) ? 'text-amber-400' : 'text-gray-200'}`}>★</span>
+                                        ))}
+                                    </div>
+                                    <span className="text-xs text-gray-400">{ratingData.count} {ratingData.count === 1 ? 'rating' : 'ratings'}</span>
+                                </div>
+                                {/* Distribution bars */}
+                                <div className="flex-1 space-y-1.5 w-full">
+                                    {[5,4,3,2,1].map(n => (
+                                        <div key={n} className="flex items-center gap-2">
+                                            <span className="text-xs text-gray-500 w-3 shrink-0">{n}</span>
+                                            <span className="text-amber-400 text-xs shrink-0">★</span>
+                                            <div className="flex-1 bg-gray-100 rounded-full h-2">
+                                                <div
+                                                    className="bg-amber-400 h-2 rounded-full transition-all"
+                                                    style={{ width: `${Math.round(((ratingData.distribution[n] || 0) / maxDist) * 100)}%` }}
+                                                />
+                                            </div>
+                                            <span className="text-xs text-gray-400 w-4 text-right shrink-0">{ratingData.distribution[n] || 0}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-center py-8 text-gray-400">
+                                <p className="text-3xl mb-2">☆</p>
+                                <p className="text-sm">No ratings yet.</p>
+                            </div>
+                        )}
+
+                        {/* Rate / Edit form */}
+                        {canRate && (
+                            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3">
+                                <h4 className="text-sm font-semibold text-gray-700">
+                                    {myRating ? 'Edit Your Rating' : 'Rate This Breeder'}
+                                </h4>
+                                <StarRow
+                                    score={ratingForm.score}
+                                    interactive
+                                    onSelect={(n) => setRatingForm(prev => ({ ...prev, score: n }))}
+                                />
+                                <textarea
+                                    value={ratingForm.comment}
+                                    onChange={(e) => setRatingForm(prev => ({ ...prev, comment: e.target.value.slice(0, 500) }))}
+                                    placeholder="Optional comment (max 500 characters)…"
+                                    rows={3}
+                                    className="w-full p-2.5 border border-gray-300 rounded-lg text-sm resize-none focus:ring-primary focus:border-primary transition"
+                                />
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={handleSubmitRating}
+                                        disabled={!ratingForm.score || submittingRating}
+                                        className="px-4 py-2 bg-primary hover:bg-primary/90 text-black text-sm font-semibold rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed"
+                                    >
+                                        {submittingRating ? 'Saving…' : (myRating ? 'Update Rating' : 'Submit Rating')}
+                                    </button>
+                                    {myRating && (
+                                        <button
+                                            onClick={handleDeleteRating}
+                                            disabled={submittingRating}
+                                            className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-semibold rounded-lg border border-red-200 transition disabled:opacity-40"
+                                        >
+                                            Remove
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                        {!authToken && (
+                            <p className="text-center text-sm text-gray-400">Sign in to leave a rating.</p>
+                        )}
+
+                        {/* Reviews list */}
+                        {ratingData.ratings.length > 0 && (
+                            <div className="space-y-3">
+                                <h4 className="text-sm font-semibold text-gray-700">Recent Reviews</h4>
+                                {ratingData.ratings.map((r, i) => (
+                                    <div key={i} className="bg-white border border-gray-100 rounded-xl p-4 space-y-1.5">
+                                        <div className="flex items-center justify-between gap-2">
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex gap-0.5">
+                                                    {[1,2,3,4,5].map(n => (
+                                                        <span key={n} className={`text-sm ${n <= r.score ? 'text-amber-400' : 'text-gray-200'}`}>★</span>
+                                                    ))}
+                                                </div>
+                                                <span className="text-xs font-semibold text-gray-700">{r.raterName || r.raterId_public}</span>
+                                            </div>
+                                            <span className="text-xs text-gray-400 shrink-0">
+                                                {new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(r.createdAt))}
+                                            </span>
+                                        </div>
+                                        {r.comment?.trim() && (
+                                            <p className="text-sm text-gray-600 leading-relaxed">{r.comment}</p>
+                                        )}
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </div>
