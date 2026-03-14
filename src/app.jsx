@@ -2319,6 +2319,20 @@ const QRModal = ({ url, title, onClose }) => {
     );
 };
 
+// Safely renders bold/italic markdown in breeder info text.
+// HTML entities are escaped first to prevent XSS, then markdown syntax is applied.
+const renderBreederInfoMarkdown = (text) => {
+    if (!text) return '';
+    const escaped = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    return escaped
+        .replace(/\*\*(.+?)\*\*/gs, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/gs, '<em>$1</em>')
+        .replace(/\n/g, '<br>');
+};
+
 // Public Profile View Component - Shows a breeder's public animals
 const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStartMessage, authToken, setModCurrentContext }) => {
     const [animals, setAnimals] = useState([]);
@@ -2769,7 +2783,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     ].filter(f => (freshProfile?.breederInfo?.[f.key] || '').trim()).map(f => (
                         <div key={f.key} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                             <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{f.label}</h4>
-                            <div className="text-gray-800 whitespace-pre-wrap text-sm leading-relaxed">{freshProfile.breederInfo[f.key]}</div>
+                            <div className="text-gray-800 text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: renderBreederInfoMarkdown(freshProfile.breederInfo[f.key]) }} />
                         </div>
                     ))}
                     {(freshProfile?.breederInfo?.customFields || [])
@@ -2777,7 +2791,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         .map((cf, idx) => (
                             <div key={`custom-${idx}`} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                                 <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{cf.title}</h4>
-                                <div className="text-gray-800 whitespace-pre-wrap text-sm leading-relaxed">{cf.value}</div>
+                                <div className="text-gray-800 text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: renderBreederInfoMarkdown(cf.value) }} />
                             </div>
                         ))
                     }
@@ -19599,6 +19613,44 @@ const UserProfileCard = ({ userProfile }) => {
     );
 };
 
+// Textarea with a small Bold/Italic formatting toolbar.
+// Uses onMouseDown + e.preventDefault() so the textarea never loses focus/selection.
+const FormattedTextarea = ({ value, onChange, rows, maxLength, placeholder, disabled, className }) => {
+    const taRef = useRef(null);
+    const applyFormat = (prefix, suffix) => {
+        const ta = taRef.current;
+        if (!ta) return;
+        const start = ta.selectionStart;
+        const end = ta.selectionEnd;
+        const selected = value.slice(start, end);
+        const newValue = value.slice(0, start) + prefix + selected + suffix + value.slice(end);
+        onChange({ target: { value: newValue } });
+        requestAnimationFrame(() => {
+            if (!taRef.current) return;
+            taRef.current.focus();
+            taRef.current.setSelectionRange(start + prefix.length, end + prefix.length);
+        });
+    };
+    return (
+        <div>
+            <div className="flex gap-1 mb-1.5">
+                <button type="button" disabled={disabled}
+                    onMouseDown={(e) => { e.preventDefault(); applyFormat('**', '**'); }}
+                    className="px-2 py-0.5 text-xs font-bold border border-gray-300 rounded bg-white hover:bg-gray-100 disabled:opacity-40 transition leading-5"
+                    title="Bold (**text**)"
+                >B</button>
+                <button type="button" disabled={disabled}
+                    onMouseDown={(e) => { e.preventDefault(); applyFormat('*', '*'); }}
+                    className="px-2 py-0.5 text-xs italic border border-gray-300 rounded bg-white hover:bg-gray-100 disabled:opacity-40 transition leading-5"
+                    title="Italic (*text*)"
+                >I</button>
+            </div>
+            <textarea ref={taRef} value={value} onChange={onChange} rows={rows} maxLength={maxLength}
+                placeholder={placeholder} disabled={disabled} className={className} />
+        </div>
+    );
+};
+
 const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCancel, authToken }) => {
     console.log('[ProfileEditForm] userProfile.allowMessages:', userProfile.allowMessages);
     
@@ -20289,11 +20341,11 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 ].map(({ key, label }) => (
                     <div key={key}>
                         <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-                        <textarea
+                        <FormattedTextarea
                             value={breederInfo[key]}
                             onChange={(e) => setBreederInfo(v => ({ ...v, [key]: e.target.value }))}
-                            rows="3"
-                            maxLength="2000"
+                            rows={3}
+                            maxLength={2000}
                             placeholder={`Enter ${label.toLowerCase()}\u2026`}
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none"
                             disabled={breederInfoLoading}
@@ -20352,14 +20404,14 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                         <X size={16} />
                                     </button>
                                 </div>
-                                <textarea
+                                <FormattedTextarea
                                     value={cf.value}
                                     onChange={(e) => {
                                         const updated = breederInfo.customFields.map((f, i) => i === idx ? { ...f, value: e.target.value } : f);
                                         setBreederInfo(v => ({ ...v, customFields: updated }));
                                     }}
-                                    rows="3"
-                                    maxLength="2000"
+                                    rows={3}
+                                    maxLength={2000}
                                     placeholder="Enter content\u2026"
                                     className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none"
                                     disabled={breederInfoLoading}
