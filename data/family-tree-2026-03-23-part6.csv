@@ -1,81 +1,81 @@
-ID,Full Name,Name,Prefix,Suffix,Species,Sex,Birth Date,Sire ID,Dam ID,Genetic Code,Color,Eye Color,Owner CTU ID,Owned
-CTC263,MM Taragon,Taragon,MM,,Fancy Mouse,Female,2023-12-26,CTC199,CTC200,,Brindle,,CTU1,No
-CTC190,MM Topnotch,Topnotch,MM,,Fancy Mouse,Female,2023-12-26,CTC199,CTC200,,Black,,CTU1,No
-CTC262,MM Jumpstart,Jumpstart,MM,,Fancy Mouse,Female,2023-10-30,CTC191,CTC192,,Brindle Pied,,CTU1,No
-CTC189,MM Jackpot,Jackpot,MM,,Fancy Mouse,Male,2023-10-30,CTC191,CTC192,,Brindle Pied,,CTU1,No
-CTC387,MM Flogging Molly,Flogging Molly,MM,,Fancy Mouse,Female,2023-10-22,CTC383,CTC386,,Brindle Pied,,CTU1,No
-CTC230,MM Abundance,Abundance,MM,,Fancy Mouse,Female,2023-09-18,CTC36,CTC229,,Black Pied,,CTU1,No
-CTC293,MM Zipper,Zipper,MM,,Fancy Mouse,Female,2023-09-13,CTC291,CTC292,,Black Tan Pied,,CTU1,No
-CTC191,MM Ventura,Ventura,MM,,Fancy Mouse,Male,2023-08-29,CTC201,CTC202,,Black Pied,,CTU1,No
-CTC200,MM Victoria's Secret,Victoria's Secret,MM,,Fancy Mouse,Female,2023-08-29,CTC201,CTC202,,Brindle Pied,,CTU1,No
-CTC35,MM Nugget,Nugget,MM,,Fancy Mouse,Female,2023-07-22,CTC36,CTC37,,Dominant Red,,CTU1,No
-CTC193,MM Skeletor,Skeletor,MM,,Fancy Mouse,Male,2023-04-24,CTC194,CTC195,,Black Hereford,,CTU1,No
-CTC36,MM Quantum,Quantum,MM,,Fancy Mouse,Male,2023-03-15,CTC38,CTC39,,Black Pied,,CTU1,No
-CTC268,MM Kingfish,Kingfish,MM,,Fancy Mouse,Male,2022-12-15,CTC196,CTC39,,Black,,CTU1,No
-CTC195,MM Inola,Inola,MM,,Fancy Mouse,Female,2022-12-15,CTC196,CTC39,,Black,,CTU1,No
-CTC166,MM Halibut,Halibut,MM,,Fancy Mouse,Male,2022-06-10,,,,Blue,,CTU1,No
-CTC201,MM Yeshua,Yeshua,MM,,Fancy Mouse,Male,2022-06-09,CTC203,CTC204,,Brindle Pied,,CTU1,No
-CTC228,MM Imperial Stout,Imperial Stout,MM,,Fancy Mouse,Male,2022-06-09,CTC203,CTC204,,Brindle Pied,,CTU1,No
-CTC229,MM Yours Truly,Yours Truly,MM,,Fancy Mouse,Female,2022-06-09,CTC203,CTC204,,Brindle Pied,,CTU1,No
-CTC167,MM Burrata,Burrata,MM,,Fancy Mouse,Female,2022-06-01,,,,Blue,,CTU1,No
-CTC162,MM Vitello Tonato,Vitello Tonato,MM,,Fancy Mouse,Male,2022-03-01,CTC163,CTC164,,Lilac Tan,,CTU1,No
-CTC382,MM Naomi,Naomi,MM,,Fancy Mouse,Female,2022-02-19,CTC373,CTC381,,Black Pied,,CTU1,No
-CTC289,MM Red Hot Firecracker,Red Hot Firecracker,MM,,Fancy Mouse,Male,2022-01-07,CTC288,CTC287,,Dominant Red Pied,,CTU1,No
-CTC769,MM Zense,Zense,MM,,Fancy Mouse,Male,2021-12-30,,,,Black,,CTU2,No
-CTC380,MM Atlas,Atlas,MM,,Fancy Mouse,Male,2021-11-01,CTC220,CTC221,,Brindle Pied,,CTU1,No
-CTC204,MM Starlight Sterre,Starlight Sterre,MM,,Fancy Mouse,Female,2021-11-01,CTC220,CTC221,,Brindle Pied,,CTU1,No
-CTC165,MM Calamari,Calamari,MM,,Fancy Mouse,Female,2021-09-04,CTC787,CTC788,,Black,,CTU1,No
-CTC381,MM Peyton,Peyton,MM,,Fancy Mouse,Female,2021-07-31,,,,Black Pied,,CTU1,No
-CTC384,MM Brindle Pied,Brindle Pied,MM,,Fancy Mouse,Female,2021-07-01,CTC380,,,Brindle Pied,,CTU1,No
-CTC203,MM Chocolate Chip Cookie,Chocolate Chip Cookie,MM,,Fancy Mouse,Male,2021-06-26,CTC205,CTC206,,Black Pied,,CTU1,No
-CTC788,MM Peen,Peen,MM,,Fancy Mouse,Female,2021-06-20,CTC217,CTC372,,Dominant Red,,CTU1,Yes
-CTC379,MM Hogara,Hogara,MM,,Fancy Mouse,Male,2021-04-02,CTC365,CTC378,,Blue,,CTU1,No
-CTC247,MM Abeltje,Abeltje,MM,,Fancy Mouse,Male,2021-03-31,CTC248,CTC249,,Tricolor,,CTU1,No
-CTC377,MM Ryu,Ryu,MM,,Fancy Mouse,Male,2021-03-29,CTC217,CTC376,,Dominant Red Pied,,CTU1,No
-CTC206,MM Salt Junior,Salt Junior,MM,,Fancy Mouse,Female,2021-03-28,CTC217,CTC219,,Dominant Red Pied,,CTU1,No
-CTC375,MM Hayao,Hayao,MM,,Fancy Mouse,Male,2021-03-25,CTC233,CTC2184,,Brindle,,CTU1,No
-CTC2185,MM Tomoe,Tomoe,MM,,Fancy Mouse,Female,2021-03-25,CTC233,CTC374,,Brindle Pied,,CTU1,Yes
-CTC2186,MM Sango,Sango,MM,,Fancy Mouse,Female,2021-03-25,CTC233,CTC2184,,Brindle,,CTU1,Yes
-CTC238,MM Taiyo,Taiyo,MM,,Fancy Mouse,Male,2021-02-04,,,,Brindle Pied,,CTU1,No
-CTC2191,MM Chiharu,Chiharu,MM,,Fancy Mouse,Female,2021-01-31,CTC233,CTC2180,,Brindle Pied,,CTU1,Yes
-CTC2192,MM Himeka,Himeka,MM,,Fancy Mouse,Female,2021-01-31,CTC233,CTC2180,,Brindle,,CTU1,Yes
-CTC2190,MM Komijn,Komijn,MM,,Fancy Mouse,Female,2021-01-31,CTC233,CTC2180,,Brindle,,CTU1,Yes
-CTC2193,MM Eiko,Eiko,MM,,Fancy Mouse,Female,2021-01-31,CTC233,CTC2180,,Brindle Splashed,,CTU1,Yes
-CTC221,MM Laluna,Laluna,MM,,Fancy Mouse,Female,2021-01-20,CTC222,CTC225,,Brindle Pied,,CTU1,No
-CTC2187,MM J5-M4,J5-M4,MM,,Fancy Mouse,Male,2021-01-18,CTC233,CTC234,,Black Eye White,,CTU1,Yes
-CTC232,MM Chico,Chico,MM,,Fancy Mouse,Male,2021-01-18,CTC233,CTC234,,Brindle Pied,,CTU1,No
-CTC2188,MM J5-F4,J5-F4,MM,,Fancy Mouse,Female,2021-01-18,CTC233,CTC234,,Black Eye White,,CTU1,Yes
-CTC220,MM Pador,Pador,MM,,Fancy Mouse,Male,2021-01-14,CTC42,CTC41,,Brindle,,CTU1,No
-CTC373,MM Glennfiddich,Glennfiddich,MM,,Fancy Mouse,Male,2021-01-14,CTC42,CTC372,,Brindle Pied,,CTU1,No
-CTC239,MM Eevee,Eevee,MM,,Fancy Mouse,Female,2021-01-14,CTC240,CTC241,,Blue Tricolor,,CTU1,No
-CTC40,MM Kinnori,Kinnori,MM,,Fancy Mouse,Male,2021-01-14,CTC42,CTC41,,Brindle Tricolor,,CTU1,No
-CTC2189,MM Ichiyo,Ichiyo,MM,,Fancy Mouse,Female,2021-01-13,CTC233,CTC2183,,Brindle Pied,,CTU1,Yes
-CTC369,MM Fuyuki,Fuyuki,MM,,Fancy Mouse,Male,2021-01-13,CTC240,CTC368,,Chocolate Tricolor Fox,,CTU1,No
-CTC367,MM Miuna,Miuna,MM,,Fancy Mouse,Female,2021-01-12,CTC365,CTC366,,Blue Tan,,CTU1,No
-CTC364,MM Yuri,Yuri,MM,,Fancy Mouse,Female,2021-01-12,CTC363,CTC253,,Chocolate Pied,,CTU1,No
-CTC175,MM Amako,Amako,MM,,Fancy Mouse,Female,2021-01-11,CTC176,CTC177,,Brindle Tricolor,,CTU1,No
-CTC2184,CM Silke,Silke,CM,,Fancy Mouse,Female,2021-01-01,,,,Brindle,,CTU2,Yes
-CTC2173,MM Naya,Naya,MM,,Fancy Mouse,Female,2020-12-20,CTC242,CTC784,,Tricolor,,CTU1,Yes
-CTC2174,MM Moffel,Moffel,MM,,Fancy Mouse,Female,2020-12-20,CTC242,CTC784,,Splashed Fox,,CTU1,Yes
-CTC2175,MM Gaga,Gaga,MM,,Fancy Mouse,Female,2020-12-20,CTC242,CTC784,,Sealpoint Siamese,,CTU1,Yes
-CTC783,MM Diego,Diego,MM,,Fancy Mouse,Male,2020-11-09,CTC242,CTC784,,Colorpoint Beige,,CTU1,No
-CTC250,MM Saydie,Saydie,MM,,Fancy Mouse,Female,2020-10-16,CTC252,CTC251,,Splashed,,CTU1,No
-CTC368,MM Pip,Pip,MM,,Fancy Mouse,Female,2020-09-03,CTC242,,,Tricolor,,CTU1,No
-CTC2176,MM Pip,Pip,MM,,Fancy Mouse,Female,2020-09-03,CTC242,,,Tricolor,,CTU1,Yes
-CTC252,MM Peter,Peter,MM,,Fancy Mouse,Male,2020-08-08,CTC233,CTC253,,Pink Eye White,,CTU1,No
-CTC249,MM Hope,Hope,MM,,Fancy Mouse,Female,2020-08-06,CTC226,CTC227,,Brindle Pied,,CTU1,No
-CTC225,MM Hayley,Hayley,MM,,Fancy Mouse,Female,2020-08-06,CTC226,CTC227,,Brindle Pied,,CTU1,No
-CTC2164,MM W2-F3,W2-F3,MM,,Fancy Mouse,Female,2020-08-06,CTC226,CTC227,,Brindle Whitebelly,,CTU1,Yes
-CTC2170,MM I4-F3,I4-F3,MM,,Fancy Mouse,Female,2020-07-29,CTC46,CTC2167,,Sable,,CTU1,Yes
-CTC2169,MM I4-F2,I4-F2,MM,,Fancy Mouse,Female,2020-07-29,CTC46,CTC2167,,Black Tan,,CTU1,Yes
-CTC2168,MM I4-F1,I4-F1,MM,,Fancy Mouse,Female,2020-07-29,CTC46,CTC2167,,Black Tan,,CTU1,Yes
-CTC2178,MM Q2-M1,Q2-M1,MM,,Fancy Mouse,Male,2020-07-27,CTC233,CTC2177,,Brindle Pied,,CTU1,Yes
-CTC241,MM Luciana,Luciana,MM,,Fancy Mouse,Female,2020-07-15,CTC242,CTC243,,Blue Tricolor,,CTU1,No
-CTC2163,MM Gavin,Gavin,MM,,Fancy Mouse,Male,2020-07-15,CTC242,CTC243,,Color Point Blue Pied,,CTU1,Yes
-CTC217,MM Caramel Swirl,Caramel Swirl,MM,,Fancy Mouse,Male,2020-07-14,CTC46,CTC218,,Dominant Red Pied,,CTU1,No
-CTC285,MM Flame,Flame,MM,,Fancy Mouse,Male,2020-07-14,CTC46,CTC218,,Dominant Red,,CTU1,No
-CTC2162,MM N2-F2,N2-F2,MM,,Fancy Mouse,Female,2020-07-14,CTC244,CTC245,,Blue Beige Pied,,CTU1,Yes
-CTC2161,MM Sadie,Sadie,MM,,Fancy Mouse,Female,2020-07-14,CTC244,CTC245,,Blue Tricolor,,CTU1,Yes
-CTC2160,MM N2-M4,N2-M4,MM,,Fancy Mouse,Male,2020-07-14,CTC244,CTC245,,Blue Tricolor,,CTU1,Yes
-CTC2159,MM Djennah,Djennah,MM,,Fancy Mouse,Female,2020-07-14,CTC46,CTC218,,Dom. Red Pied,,CTU1,Yes
-CTC2158,MM E4-F3,E4-F3,MM,,Fancy Mouse,Female,2020-07-14,CTC46,CTC218,,Chocolate Tan Pied,,CTU1,Yes
+ID,Full Name,Name,Prefix,Suffix,Sex,Birth Date,Sire ID,Dam ID,Owner CTU ID,Owned
+CTC263,MM Taragon,Taragon,MM,,Female,2023-12-26,CTC199,CTC200,CTU1,No
+CTC190,MM Topnotch,Topnotch,MM,,Female,2023-12-26,CTC199,CTC200,CTU1,No
+CTC262,MM Jumpstart,Jumpstart,MM,,Female,2023-10-30,CTC191,CTC192,CTU1,No
+CTC189,MM Jackpot,Jackpot,MM,,Male,2023-10-30,CTC191,CTC192,CTU1,No
+CTC387,MM Flogging Molly,Flogging Molly,MM,,Female,2023-10-22,CTC383,CTC386,CTU1,No
+CTC230,MM Abundance,Abundance,MM,,Female,2023-09-18,CTC36,CTC229,CTU1,No
+CTC293,MM Zipper,Zipper,MM,,Female,2023-09-13,CTC291,CTC292,CTU1,No
+CTC191,MM Ventura,Ventura,MM,,Male,2023-08-29,CTC201,CTC202,CTU1,No
+CTC200,MM Victoria's Secret,Victoria's Secret,MM,,Female,2023-08-29,CTC201,CTC202,CTU1,No
+CTC35,MM Nugget,Nugget,MM,,Female,2023-07-22,CTC36,CTC37,CTU1,No
+CTC193,MM Skeletor,Skeletor,MM,,Male,2023-04-24,CTC194,CTC195,CTU1,No
+CTC36,MM Quantum,Quantum,MM,,Male,2023-03-15,CTC38,CTC39,CTU1,No
+CTC268,MM Kingfish,Kingfish,MM,,Male,2022-12-15,CTC196,CTC39,CTU1,No
+CTC195,MM Inola,Inola,MM,,Female,2022-12-15,CTC196,CTC39,CTU1,No
+CTC166,MM Halibut,Halibut,MM,,Male,2022-06-10,,,CTU1,No
+CTC201,MM Yeshua,Yeshua,MM,,Male,2022-06-09,CTC203,CTC204,CTU1,No
+CTC228,MM Imperial Stout,Imperial Stout,MM,,Male,2022-06-09,CTC203,CTC204,CTU1,No
+CTC229,MM Yours Truly,Yours Truly,MM,,Female,2022-06-09,CTC203,CTC204,CTU1,No
+CTC167,MM Burrata,Burrata,MM,,Female,2022-06-01,,,CTU1,No
+CTC162,MM Vitello Tonato,Vitello Tonato,MM,,Male,2022-03-01,CTC163,CTC164,CTU1,No
+CTC382,MM Naomi,Naomi,MM,,Female,2022-02-19,CTC373,CTC381,CTU1,No
+CTC289,MM Red Hot Firecracker,Red Hot Firecracker,MM,,Male,2022-01-07,CTC288,CTC287,CTU1,No
+CTC769,MM Zense,Zense,MM,,Male,2021-12-30,,,CTU2,No
+CTC380,MM Atlas,Atlas,MM,,Male,2021-11-01,CTC220,CTC221,CTU1,No
+CTC204,MM Starlight Sterre,Starlight Sterre,MM,,Female,2021-11-01,CTC220,CTC221,CTU1,No
+CTC165,MM Calamari,Calamari,MM,,Female,2021-09-04,CTC787,CTC788,CTU1,No
+CTC381,MM Peyton,Peyton,MM,,Female,2021-07-31,,,CTU1,No
+CTC384,MM Brindle Pied,Brindle Pied,MM,,Female,2021-07-01,CTC380,,CTU1,No
+CTC203,MM Chocolate Chip Cookie,Chocolate Chip Cookie,MM,,Male,2021-06-26,CTC205,CTC206,CTU1,No
+CTC788,MM Peen,Peen,MM,,Female,2021-06-20,CTC217,CTC372,CTU1,Yes
+CTC379,MM Hogara,Hogara,MM,,Male,2021-04-02,CTC365,CTC378,CTU1,No
+CTC247,MM Abeltje,Abeltje,MM,,Male,2021-03-31,CTC248,CTC249,CTU1,No
+CTC377,MM Ryu,Ryu,MM,,Male,2021-03-29,CTC217,CTC376,CTU1,No
+CTC206,MM Salt Junior,Salt Junior,MM,,Female,2021-03-28,CTC217,CTC219,CTU1,No
+CTC375,MM Hayao,Hayao,MM,,Male,2021-03-25,CTC233,CTC2184,CTU1,No
+CTC2185,MM Tomoe,Tomoe,MM,,Female,2021-03-25,CTC233,CTC374,CTU1,Yes
+CTC2186,MM Sango,Sango,MM,,Female,2021-03-25,CTC233,CTC2184,CTU1,Yes
+CTC238,MM Taiyo,Taiyo,MM,,Male,2021-02-04,,,CTU1,No
+CTC2191,MM Chiharu,Chiharu,MM,,Female,2021-01-31,CTC233,CTC2180,CTU1,Yes
+CTC2192,MM Himeka,Himeka,MM,,Female,2021-01-31,CTC233,CTC2180,CTU1,Yes
+CTC2190,MM Komijn,Komijn,MM,,Female,2021-01-31,CTC233,CTC2180,CTU1,Yes
+CTC2193,MM Eiko,Eiko,MM,,Female,2021-01-31,CTC233,CTC2180,CTU1,Yes
+CTC221,MM Laluna,Laluna,MM,,Female,2021-01-20,CTC222,CTC225,CTU1,No
+CTC2187,MM J5-M4,J5-M4,MM,,Male,2021-01-18,CTC233,CTC234,CTU1,Yes
+CTC232,MM Chico,Chico,MM,,Male,2021-01-18,CTC233,CTC234,CTU1,No
+CTC2188,MM J5-F4,J5-F4,MM,,Female,2021-01-18,CTC233,CTC234,CTU1,Yes
+CTC220,MM Pador,Pador,MM,,Male,2021-01-14,CTC42,CTC41,CTU1,No
+CTC373,MM Glennfiddich,Glennfiddich,MM,,Male,2021-01-14,CTC42,CTC372,CTU1,No
+CTC239,MM Eevee,Eevee,MM,,Female,2021-01-14,CTC240,CTC241,CTU1,No
+CTC40,MM Kinnori,Kinnori,MM,,Male,2021-01-14,CTC42,CTC41,CTU1,No
+CTC2189,MM Ichiyo,Ichiyo,MM,,Female,2021-01-13,CTC233,CTC2183,CTU1,Yes
+CTC369,MM Fuyuki,Fuyuki,MM,,Male,2021-01-13,CTC240,CTC368,CTU1,No
+CTC367,MM Miuna,Miuna,MM,,Female,2021-01-12,CTC365,CTC366,CTU1,No
+CTC364,MM Yuri,Yuri,MM,,Female,2021-01-12,CTC363,CTC253,CTU1,No
+CTC175,MM Amako,Amako,MM,,Female,2021-01-11,CTC176,CTC177,CTU1,No
+CTC2184,CM Silke,Silke,CM,,Female,2021-01-01,,,CTU2,Yes
+CTC2173,MM Naya,Naya,MM,,Female,2020-12-20,CTC242,CTC784,CTU1,Yes
+CTC2174,MM Moffel,Moffel,MM,,Female,2020-12-20,CTC242,CTC784,CTU1,Yes
+CTC2175,MM Gaga,Gaga,MM,,Female,2020-12-20,CTC242,CTC784,CTU1,Yes
+CTC783,MM Diego,Diego,MM,,Male,2020-11-09,CTC242,CTC784,CTU1,No
+CTC250,MM Saydie,Saydie,MM,,Female,2020-10-16,CTC252,CTC251,CTU1,No
+CTC368,MM Pip,Pip,MM,,Female,2020-09-03,CTC242,,CTU1,No
+CTC2176,MM Pip,Pip,MM,,Female,2020-09-03,CTC242,,CTU1,Yes
+CTC252,MM Peter,Peter,MM,,Male,2020-08-08,CTC233,CTC253,CTU1,No
+CTC249,MM Hope,Hope,MM,,Female,2020-08-06,CTC226,CTC227,CTU1,No
+CTC225,MM Hayley,Hayley,MM,,Female,2020-08-06,CTC226,CTC227,CTU1,No
+CTC2164,MM W2-F3,W2-F3,MM,,Female,2020-08-06,CTC226,CTC227,CTU1,Yes
+CTC2170,MM I4-F3,I4-F3,MM,,Female,2020-07-29,CTC46,CTC2167,CTU1,Yes
+CTC2169,MM I4-F2,I4-F2,MM,,Female,2020-07-29,CTC46,CTC2167,CTU1,Yes
+CTC2168,MM I4-F1,I4-F1,MM,,Female,2020-07-29,CTC46,CTC2167,CTU1,Yes
+CTC2178,MM Q2-M1,Q2-M1,MM,,Male,2020-07-27,CTC233,CTC2177,CTU1,Yes
+CTC241,MM Luciana,Luciana,MM,,Female,2020-07-15,CTC242,CTC243,CTU1,No
+CTC2163,MM Gavin,Gavin,MM,,Male,2020-07-15,CTC242,CTC243,CTU1,Yes
+CTC217,MM Caramel Swirl,Caramel Swirl,MM,,Male,2020-07-14,CTC46,CTC218,CTU1,No
+CTC285,MM Flame,Flame,MM,,Male,2020-07-14,CTC46,CTC218,CTU1,No
+CTC2162,MM N2-F2,N2-F2,MM,,Female,2020-07-14,CTC244,CTC245,CTU1,Yes
+CTC2161,MM Sadie,Sadie,MM,,Female,2020-07-14,CTC244,CTC245,CTU1,Yes
+CTC2160,MM N2-M4,N2-M4,MM,,Male,2020-07-14,CTC244,CTC245,CTU1,Yes
+CTC2159,MM Djennah,Djennah,MM,,Female,2020-07-14,CTC46,CTC218,CTU1,Yes
+CTC2158,MM E4-F3,E4-F3,MM,,Female,2020-07-14,CTC46,CTC218,CTU1,Yes
