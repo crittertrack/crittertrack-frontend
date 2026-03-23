@@ -20485,7 +20485,7 @@ const FormattedTextarea = ({ value, onChange, rows, maxLength, placeholder, disa
     );
 };
 
-const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCancel, authToken }) => {
+const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCancel, authToken, breedingLineDefs = [], animalBreedingLines = {}, saveBreedingLineDefs, toggleAnimalBreedingLine, BL_PRESETS_APP = [] }) => {
     console.log('[ProfileEditForm] userProfile.allowMessages:', userProfile.allowMessages);
     
     const [personalName, setPersonalName] = useState(userProfile.personalName);
@@ -20569,30 +20569,6 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [dangerZoneOpen, setDangerZoneOpen] = useState(false);
     const [settingsTab, setSettingsTab] = useState('profile');
-    // ── Breeding Lines (personal, localStorage-backed) ────────────────────────────
-    const BL_PRESETS = ['#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#3b82f6','#6366f1','#a855f7','#ec4899','#64748b'];
-    const [breedingLineDefs, setBreedingLineDefs] = useState(() => {
-        try { const s = localStorage.getItem('ct_bldefs'); if (s) return JSON.parse(s); } catch {}
-        return Array.from({ length: 10 }, (_, i) => ({ id: i, name: '', color: BL_PRESETS[i] }));
-    });
-    const [animalBreedingLines, setAnimalBreedingLines] = useState(() => {
-        try { const s = localStorage.getItem('ct_blassign'); if (s) return JSON.parse(s); } catch {}
-        return {};
-    });
-    const saveBreedingLineDefs = (defs) => {
-        setBreedingLineDefs(defs);
-        try { localStorage.setItem('ct_bldefs', JSON.stringify(defs)); } catch {}
-    };
-    const toggleAnimalBreedingLine = (animalId, lineId) => {
-        setAnimalBreedingLines(prev => {
-            const current = prev[animalId] || [];
-            const updated = current.includes(lineId) ? current.filter(id => id !== lineId) : [...current, lineId];
-            const next = { ...prev, [animalId]: updated };
-            try { localStorage.setItem('ct_blassign', JSON.stringify(next)); } catch {}
-            return next;
-        });
-    };
-    // ─────────────────────────────────────────────────────────────────────────────
     const [myReceivedRatings, setMyReceivedRatings] = useState(null);
     const [myReceivedRatingsLoading, setMyReceivedRatingsLoading] = useState(false);
 
@@ -21395,11 +21371,11 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             <div key={line.id} className="flex items-center gap-3 flex-wrap">
                                 <span className="text-sm text-gray-400 w-4 text-right">{idx + 1}</span>
                                 <div className="flex gap-1">
-                                    {BL_PRESETS.map(color => (
+                                    {BL_PRESETS_APP.map(color => (
                                         <button
                                             key={color}
                                             type="button"
-                                            onClick={() => saveBreedingLineDefs(breedingLineDefs.map((l, i) => i === idx ? { ...l, color } : l))}
+                                            onClick={() => saveBreedingLineDefs(breedingLineDefs.map((l, i) => i === idx ? { ...l, color } : l), animalBreedingLines)}
                                             style={{ backgroundColor: color, outline: line.color === color ? '3px solid #374151' : 'none', outlineOffset: '2px' }}
                                             className="w-5 h-5 rounded-full transition hover:scale-110 flex-shrink-0"
                                             title={color}
@@ -21411,14 +21387,14 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     placeholder={`Line ${idx + 1} name`}
                                     value={line.name}
                                     maxLength={30}
-                                    onChange={(e) => saveBreedingLineDefs(breedingLineDefs.map((l, i) => i === idx ? { ...l, name: e.target.value } : l))}
+                                    onChange={(e) => saveBreedingLineDefs(breedingLineDefs.map((l, i) => i === idx ? { ...l, name: e.target.value } : l), animalBreedingLines)}
                                     className="flex-1 min-w-[120px] p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary"
                                 />
                                 <span style={{ color: line.color }} className="text-xl leading-none" title={line.name || `Line ${idx + 1}`}>&#x25C6;</span>
                             </div>
                         ))}
                     </div>
-                    <p className="text-xs text-gray-400">Changes are saved automatically to this browser.</p>
+                    <p className="text-xs text-gray-400">Changes are saved to your account automatically.</p>
                 </div>
             )}
 
@@ -22248,7 +22224,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
     );
 };
 
-const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToken, onProfileUpdated, onProfileEditButtonClicked }) => {
+const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToken, onProfileUpdated, onProfileEditButtonClicked, breedingLineDefs, animalBreedingLines, saveBreedingLineDefs, toggleAnimalBreedingLine, BL_PRESETS_APP }) => {
     const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
@@ -22322,7 +22298,12 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                     setIsEditing(false);
                 }} 
                 onCancel={() => setIsEditing(false)} 
-                authToken={authToken} 
+                authToken={authToken}
+                breedingLineDefs={breedingLineDefs}
+                animalBreedingLines={animalBreedingLines}
+                saveBreedingLineDefs={saveBreedingLineDefs}
+                toggleAnimalBreedingLine={toggleAnimalBreedingLine}
+                BL_PRESETS_APP={BL_PRESETS_APP}
             />
         );
     }
@@ -23372,7 +23353,10 @@ const AnimalList = ({
     soldTransferredAnimals,
     setSoldTransferredAnimals,
     archiveLoading,
-    setArchiveLoading
+    setArchiveLoading,
+    // Breeding lines (display-only for cards)
+    breedingLineDefs = [],
+    animalBreedingLines = {}
 }) => {
     const [animals, setAnimals] = useState([]);
     const [allAnimalsRaw, setAllAnimalsRaw] = useState([]); // Unfiltered ? used by Management View
@@ -23380,16 +23364,6 @@ const AnimalList = ({
     const [soldTransferredRaw, setSoldTransferredRaw] = useState([]); // View-only/transferred animals — shown in Management > Sold/Transferred section
     const [soldOwnerFilter, setSoldOwnerFilter] = useState(''); // Filter sold/transferred section by recipient owner
     const [loading, setLoading] = useState(true);
-    // Breeding lines (read-only display for AnimalCard diamonds)
-    const BL_PRESETS_LIST = ['#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#3b82f6','#6366f1','#a855f7','#ec4899','#64748b'];
-    const [breedingLineDefs, setBreedingLineDefs] = useState(() => {
-        try { const s = localStorage.getItem('ct_bldefs'); if (s) return JSON.parse(s); } catch {}
-        return Array.from({ length: 10 }, (_, i) => ({ id: i, name: '', color: BL_PRESETS_LIST[i] }));
-    });
-    const [animalBreedingLines, setAnimalBreedingLines] = useState(() => {
-        try { const s = localStorage.getItem('ct_blassign'); if (s) return JSON.parse(s); } catch {}
-        return {};
-    });
     
     // Load filters from localStorage or use defaults
     const [statusFilter, setStatusFilter] = useState(() => {
@@ -28806,7 +28780,7 @@ const App = () => {
     const [animalToView, setAnimalToView] = useState(null);
     const [animalViewHistory, setAnimalViewHistory] = useState([]); // Navigation history stack for animals
     const [detailViewTab, setDetailViewTab] = useState(1); // Tab for detail view
-    // ── Breeding Lines (personal, localStorage-backed) ──────────────────────────────────────
+    // ── Breeding Lines ────────────────────────────────────────────────────────────
     const BL_PRESETS_APP = ['#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#3b82f6','#6366f1','#a855f7','#ec4899','#64748b'];
     const [breedingLineDefs, setBreedingLineDefs] = useState(() => {
         try { const s = localStorage.getItem('ct_bldefs'); if (s) return JSON.parse(s); } catch {}
@@ -28816,16 +28790,48 @@ const App = () => {
         try { const s = localStorage.getItem('ct_blassign'); if (s) return JSON.parse(s); } catch {}
         return {};
     });
+    // Load from backend on login (overrides localStorage with server truth)
+    React.useEffect(() => {
+        if (!authToken) return;
+        axios.get(`${API_BASE_URL}/users/breeding-lines`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(r => {
+                if (Array.isArray(r.data.breedingLineDefs) && r.data.breedingLineDefs.length > 0) {
+                    setBreedingLineDefs(r.data.breedingLineDefs);
+                    try { localStorage.setItem('ct_bldefs', JSON.stringify(r.data.breedingLineDefs)); } catch {}
+                }
+                if (r.data.animalBreedingLines && Object.keys(r.data.animalBreedingLines).length > 0) {
+                    setAnimalBreedingLines(r.data.animalBreedingLines);
+                    try { localStorage.setItem('ct_blassign', JSON.stringify(r.data.animalBreedingLines)); } catch {}
+                }
+            })
+            .catch(() => {}); // Silent fail — use localStorage fallback
+    }, [authToken]);
+    const saveBreedingLineDefs = (defs, currentAssignments) => {
+        setBreedingLineDefs(defs);
+        try { localStorage.setItem('ct_bldefs', JSON.stringify(defs)); } catch {}
+        if (authToken) {
+            axios.put(`${API_BASE_URL}/users/breeding-lines`,
+                { breedingLineDefs: defs, animalBreedingLines: currentAssignments },
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            ).catch(() => {});
+        }
+    };
     const toggleAnimalBreedingLine = (animalId, lineId) => {
         setAnimalBreedingLines(prev => {
             const current = prev[animalId] || [];
             const updated = current.includes(lineId) ? current.filter(id => id !== lineId) : [...current, lineId];
             const next = { ...prev, [animalId]: updated };
             try { localStorage.setItem('ct_blassign', JSON.stringify(next)); } catch {}
+            if (authToken) {
+                axios.put(`${API_BASE_URL}/users/breeding-lines`,
+                    { breedingLineDefs, animalBreedingLines: next },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                ).catch(() => {});
+            }
             return next;
         });
     };
-    // ───────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────────
     const [parentCardKey, setParentCardKey] = useState(0); // Force parent cards to refetch when tab opens
     const [showTabs, setShowTabs] = useState(true); // Toggle for collapsible tabs panel
     const [sireData, setSireData] = useState(null);
@@ -31568,6 +31574,8 @@ const App = () => {
                             setSoldTransferredAnimals={setSoldTransferredAnimals}
                             archiveLoading={archiveLoading}
                             setArchiveLoading={setArchiveLoading}
+                            breedingLineDefs={breedingLineDefs}
+                            animalBreedingLines={animalBreedingLines}
                         />
                     } />
                     <Route path="/list" element={
@@ -31585,6 +31593,8 @@ const App = () => {
                             setSoldTransferredAnimals={setSoldTransferredAnimals}
                             archiveLoading={archiveLoading}
                             setArchiveLoading={setArchiveLoading}
+                            breedingLineDefs={breedingLineDefs}
+                            animalBreedingLines={animalBreedingLines}
                         />
                     } />
                     <Route path="/donation" element={<DonationView onBack={() => navigate('/')} authToken={authToken} userProfile={userProfile} />} />
@@ -31654,7 +31664,7 @@ const App = () => {
                             onBack={() => navigate('/')}
                         />
                     } />
-                    <Route path="/profile" element={<ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} />} />
+                    <Route path="/profile" element={<ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} saveBreedingLineDefs={saveBreedingLineDefs} toggleAnimalBreedingLine={toggleAnimalBreedingLine} BL_PRESETS_APP={BL_PRESETS_APP} />} />
                     <Route path="/breeder-directory" element={
                         <BreederDirectory
                             authToken={authToken}
