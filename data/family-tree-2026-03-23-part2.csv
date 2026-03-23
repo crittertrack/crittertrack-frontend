@@ -1,4 +1,74 @@
 ID,Full Name,Name,Prefix,Suffix,Species,Sex,Birth Date,Sire ID,Dam ID,Genetic Code,Color,Eye Color,Owner CTU ID,Owned
+CTC804,DM Vitan,Vitan,DM,,Fancy Mouse,Male,2025-12-07,CTC521,CTC516,a/a ch/ch go/go Re/re,Siamese,,CTU2,Yes
+CTC622,MM Chardonay,Chardonay,MM,,Fancy Mouse,Female,2025-12-05,CTC53,CTC107,,Fawn,,CTU7,Yes
+CTC623,MM Chikaka,Chikaka,MM,,Fancy Mouse,Female,2025-12-05,CTC53,CTC107,,Pink Eye White,,CTU1,No
+CTC624,M1,M1,,,Fancy Mouse,Male,2025-12-05,CTC53,CTC107,,Pink Eye White,,CTU1,No
+CTC626,MM B15-M3,B15-M3,MM,,Fancy Mouse,Male,2025-12-05,CTC53,CTC107,,Pink Eye White (Siamese + PE),,CTU1,No
+CTC625,MM B15-M2,B15-M2,MM,,Fancy Mouse,Male,2025-12-05,CTC53,CTC107,,Pink Eye White (Siamese + PE),,CTU1,No
+CTC619,MM A15-M2,A15-M2,MM,,Fancy Mouse,Male,2025-12-03,CTC20,CTC105,,Lilac Pied,,CTU1,No
+CTC620,MM A15-M3,A15-M3,MM,,Fancy Mouse,Male,2025-12-03,CTC20,CTC105,,Blue Pied,,CTU1,No
+CTC618,MM Armani,Armani,MM,,Fancy Mouse,Male,2025-12-03,CTC20,CTC105,a/a b/b d/d s/s go/go Sa/sa rst/rst,Lilac Pied,,CTU2,Yes
+CTC621,MM A15-F1,A15-F1,MM,,Fancy Mouse,Female,2025-12-03,CTC20,CTC105,,Blue Pied,,CTU1,No
+CTC591,MM Fiddich,Fiddich,MM,,Fancy Mouse,Female,2025-11-20,CTC25,CTC104,,Blue Splashed,,CTU1,No
+CTC593,MM Zira,Zira,MM,,Fancy Mouse,Female,2025-11-20,CTC25,CTC104,a/a B/b ch/ch S/s Spl/spl go/go,Splashed,,CTU9,Yes
+CTC595,MM Z14-M2,Z14-M2,MM,,Fancy Mouse,Male,2025-11-20,CTC25,CTC104,,Splashed,,CTU1,No
+CTC594,MM Z14-M4,Z14-M4,MM,,Fancy Mouse,Male,2025-11-20,CTC25,CTC104,,Blue Splashed,,CTU1,No
+CTC590,MM Blitz,Blitz,MM,,Fancy Mouse,Male,2025-11-20,CTC25,CTC104,a/a B/b ch/ch S/s Spl/spl go/go sa/sa,Splashed,,CTU24,Yes
+CTC588,MM Z14-M3,Z14-M3,MM,,Fancy Mouse,Male,2025-11-20,CTC25,CTC104,,Blue Splashed,,CTU1,No
+CTC589,MM Z14-M1,Z14-M1,MM,,Fancy Mouse,Male,2025-11-20,CTC25,CTC104,,Blue Splashed,,CTU1,No
+CTC592,MM Zumi,Zumi,MM,,Fancy Mouse,Female,2025-11-20,CTC25,CTC104,a/a B/b ch/ch S/s Spl/spl go/go,Splashed,,CTU9,Yes
+CTC586,MM Y14-M1,Y14-M1,MM,,Fancy Mouse,Male,2025-11-19,CTC54,CTC103,,Black Merle,,CTU2,No
+CTC587,MM Yeera,Yeera,MM,,Fancy Mouse,Female,2025-11-19,CTC54,CTC103,,Black Merle,,CTU2,Yes
+CTC566,MM U14-M1 Elise,U14-M1,MM,Elise,Fancy Mouse,Male,2025-11-17,CTC20,CTC76,,Lilac Pied,,CTU2,No
+CTC567,MM U14-M2 Kassy,U14-M2,MM,Kassy,Fancy Mouse,Male,2025-11-17,CTC20,CTC76,,Blue Pied,,CTU2,No
+CTC568,MM Unix,Unix,MM,,Fancy Mouse,Male,2025-11-17,CTC20,CTC76,a/a D/d s/s go/go sa/sa Rst/rst,Black Pied,,CTU2,Yes
+CTC569,MM U14-M4,U14-M4,MM,,Fancy Mouse,Male,2025-11-17,CTC20,CTC76,,Black,,CTU1,No
+CTC570,MM Unita,Unita,MM,,Fancy Mouse,Female,2025-11-17,CTC20,CTC76,,Lilac Pied,,CTU2,Yes
+CTC571,MM Uvala,Uvala,MM,,Fancy Mouse,Female,2025-11-17,CTC20,CTC76,,Blue,,CTU2,Yes
+CTC572,MM Upsy,Upsy,MM,,Fancy Mouse,Female,2025-11-17,CTC20,CTC76,,Black Pied,,CTU2,Yes
+CTC573,MM Umbra,Umbra,MM,,Fancy Mouse,Female,2025-11-17,CTC20,CTC76,,Black,,CTU2,Yes
+CTC574,MM Voodoo Kassy,Voodoo,MM,Kassy,Fancy Mouse,Male,2025-11-17,CTC20,CTC99,a/a b/b d/d s/s go/go Re/re sa/sa Rst/rst,Lilac Pied,,CTU2,No
+CTC576,MM Opal,Opal,MM,,Fancy Mouse,Female,2025-11-17,CTC20,CTC99,,Blue Pied,,CTU7,Yes
+CTC575,MM Pearl,Pearl,MM,,Fancy Mouse,Female,2025-11-17,CTC20,CTC99,,Blue Pied,,CTU7,Yes
+CTC577,MM W14-M1,W14-M1,MM,,Fancy Mouse,Male,2025-11-17,CTC17,CTC98,,Blue Splashed,,CTU1,No
+CTC578,MM W14-M2,W14-M2,MM,,Fancy Mouse,Male,2025-11-17,CTC17,CTC98,,Blue Splashed,,CTU1,No
+CTC579,MM Wicky,Wicky,MM,,Fancy Mouse,Female,2025-11-17,CTC17,CTC98,,Blue Splashed,,CTU2,Yes
+CTC580,MM Whoopy,Whoopy,MM,,Fancy Mouse,Female,2025-11-17,CTC17,CTC98,,Blue Splashed,,CTU2,Yes
+CTC581,MM Gin,Gin,MM,,Fancy Mouse,Female,2025-11-17,CTC17,CTC98,,Blue Splashed,,CTU7,Yes
+CTC582,MM Brownie,Brownie,MM,,Fancy Mouse,Male,2025-11-17,CTC16,CTC100,,Chocolate Tan Pied,,CTU7,Yes
+CTC583,MM Xavi,Xavi,MM,,Fancy Mouse,Male,2025-11-17,CTC16,CTC100,a/a b/b s/s Rn/rn go/go Sa/sa,Chocolate Pied,,CTU2,Yes
+CTC585,MM Overbaked,Overbaked,MM,,Fancy Mouse,Female,2025-11-17,CTC16,CTC100,,Black Pied,,CTU7,Yes
+CTC584,MM Xayah,Xayah,MM,,Fancy Mouse,Female,2025-11-17,CTC16,CTC100,a/a B/b s/s Rn/rn go/go Sa/sa,Black,,CTU9,Yes
+CTC991,M3 Zaya,Zaya,M3,,Fancy Mouse,Female,2025-11-16,,,,Siamese,,CTU2,Yes
+CTC807,MF Cotija,Cotija,MF,,Fancy Mouse,Female,2025-11-11,CTC526,CTC336,a/a ch/ch p/p S/s go/go Re/re sa/sa,Pink Eye White,,CTU2,Yes
+CTC806,MF Tamala,Tamala,MF,,Fancy Mouse,Female,2025-11-11,CTC526,CTC336,,Sealpoint Siamese,,CTU2,Yes
+CTC558,MM Tetsu,Tetsu,MM,,Fancy Mouse,Male,2025-11-04,CTC22,CTC79,a/a d/d s/s Rn/rn go/go,Blue,,CTU9,Yes
+CTC355,MM Tapioka,Tapioka,MM,,Fancy Mouse,Female,2025-11-04,CTC22,CTC79,a/a d/d s/s Rn/rn go/go Re/re,Blue Pied,,CTU2,No
+CTC557,MM Sally,Sally,MM,,Fancy Mouse,Female,2025-10-30,CTC53,CTC102,a/a B/b E/e rn/rn go/go,Black Merle,,CTU2,Yes
+CTC556,MM Hans,Hans,MM,,Fancy Mouse,Male,2025-10-30,CTC53,CTC102,,Recessive Red Merle,,CTU5,Yes
+CTC555,MM S14-M1,S14-M1,MM,,Fancy Mouse,Male,2025-10-30,CTC53,CTC102,,,,CTU1,No
+CTC554,MM Skol,Skol,MM,,Fancy Mouse,Male,2025-10-30,CTC53,CTC102,a/a b/b E/e rn/rn Go/go,chocolat,,CTU9,Yes
+CTC353,MM Special,Special,MM,,Fancy Mouse,Male,2025-10-30,CTC53,CTC102,a/a b/b E/e S/s rn/rn Go/go,Chocolate Calico,,CTU2,Yes
+CTC354,MM Sunny,Sunny,MM,,Fancy Mouse,Female,2025-10-30,CTC53,CTC102,a/a B/b e/e rn/rn Go/go,Recessive Red Merle,,CTU2,Yes
+CTC551,MM Rio,Rio,MM,,Fancy Mouse,Male,2025-10-24,CTC21,CTC78,,Tricolor,,CTU7,Yes
+CTC553,MM R14-F4,R14-F4,MM,,Fancy Mouse,Female,2025-10-24,,,,,,CTU1,No
+CTC352,MM Ramona,Ramona,MM,,Fancy Mouse,Female,2025-10-24,CTC21,CTC78,a/a ch/ch s/s Spl/spl go/go Re/re Sa/sa,Tricolor,,CTU2,Yes
+CTC351,MM Rogue,Rogue,MM,,Fancy Mouse,Female,2025-10-24,CTC21,CTC78,a/a ch/ch d/d s/s Spl/spl go/go Re/re Sa/sa rst/rst,Blue Tricolor,,CTU2,Yes
+CTC350,MM Ryder,Ryder,MM,,Fancy Mouse,Male,2025-10-24,CTC21,CTC78,a/a B/b ch/ch D/d s/s Spl/spl go/go Re/re Sa/sa,Tricolor,,CTU2,Yes
+CTC349,MM Royce,Royce,MM,,Fancy Mouse,Male,2025-10-24,CTC21,CTC78,a/a B/b ch/ch d/d s/s Spl/spl go/go Sa/sa rst/rst,Blue Tricolor,,CTU2,Yes
+CTC547,MM Q14-F1,Q14-F1,MM,,Fancy Mouse,Female,2025-10-20,CTC11,CTC97,,,,CTU1,No
+CTC546,MM Quix,Quix,MM,,Fancy Mouse,Male,2025-10-20,CTC11,CTC97,a/a B/b S/s go/go Re/re,Black,,CTU2,No
+CTC347,MM Qutie,Qutie,MM,,Fancy Mouse,Female,2025-10-20,CTC11,CTC97,a/a B/b s/s go/go Re/re,Black Pied,,CTU2,Yes
+CTC348,MM Quana,Quana,MM,,Fancy Mouse,Female,2025-10-20,CTC11,CTC97,a/a B/b s/s go/go Re/re,Black Pied,,CTU2,Yes
+CTC542,MM Prism,Prism,MM,,Fancy Mouse,Male,2025-10-18,CTC15,CTC101,a/a e/e rn/rn Go/go,Red recessif,,CTU2,Yes
+CTC346,MM Cruella,Cruella,MM,,Fancy Mouse,Female,2025-10-18,CTC15,CTC101,,Black Merle Pied,,CTU5,Yes
+CTC545,MM P14-F8,P14-F8,MM,,Fancy Mouse,Female,2025-10-18,CTC15,CTC101,,,,CTU1,No
+CTC544,MM Pixel,Pixel,MM,,Fancy Mouse,Female,2025-10-18,CTC15,CTC101,a/a E/e s/s rn/rn Go/go,Black,,CTU9,Yes
+CTC543,MM P14-F6,P14-F6,MM,,Fancy Mouse,Female,2025-10-18,CTC15,CTC101,,,,CTU1,No
+CTC344,MM Calico,Calico,MM,,Fancy Mouse,Female,2025-10-18,CTC15,CTC101,a/a E/e rn/rn go/go,Black Calico,,CTU2,Yes
+CTC345,MM Primadonna,Primadonna,MM,,Fancy Mouse,Female,2025-10-18,CTC15,CTC101,a/a E/e s/s rn/rn Go/go,Black Merle Pied,,CTU2,Yes
+CTC1027,DM Kaia,Kaia,DM,,Fancy Mouse,Female,2025-10-05,CTC517,CTC510,a/a d/d go/go Re/re,Blue,,CTU2,Yes
+CTC809,RM Ripton,Ripton,RM,,Fancy Mouse,Male,2025-09-14,CTC808,CTC1123,at/a D/d go/go Re/re,Black Tan,,CTU2,Yes
 CTC521,MF Simba,Simba,MF,,Fancy Mouse,Male,2025-09-13,CTC340,CTC129,,Sealpoint Siamese,,CTU5,No
 CTC559,MF Jake,Jake,MF,,Fancy Mouse,Male,2025-09-13,CTC340,CTC129,,Blue Tan,,CTU5,Yes
 CTC520,MF Pocahontas,Pocahontas,MF,,Fancy Mouse,Female,2025-09-13,CTC340,CTC129,,Black Tan,,CTU1,No
@@ -9,143 +79,3 @@ CTC342,MM Nameless Kassy,Nameless,MM,Kassy,Fancy Mouse,Female,2025-09-12,CTC340,
 CTC341,MM Neela,Neela,MM,,Fancy Mouse,Female,2025-09-12,CTC340,CTC337,a/a d/d go/go Re/re,Blue,,CTU2,Yes
 CTC990,M3 Rumi,Rumi,M3,,Fancy Mouse,Male,2025-08-26,CTC1125,CTC1124,a/a ch/ch d/d Spl/spl Go/go Re/re sa/sa,Blue Splashed,,CTU2,Yes
 CTC525,MM Mirage,Mirage,MM,,Fancy Mouse,Female,2025-08-21,CTC14,CTC523,,Black Tan,,CTU5,Yes
-CTC565,MM O14-F5,O14-F5,MM,,Fancy Mouse,Female,2025-08-21,CTC14,CTC523,,Agouti Dilute,,CTU1,No
-CTC564,MM O14-F6,O14-F6,MM,,Fancy Mouse,Female,2025-08-21,CTC14,CTC523,,Agouti Dilute Fox,,CTU1,No
-CTC522,MM Violet,Violet,MM,,Fancy Mouse,Female,2025-08-21,CTC14,CTC523,,Black Tan,,CTU5,No
-CTC151,MM Nayeli,Nayeli,MM,,Fancy Mouse,Female,2025-08-10,CTC69,CTC70,at/a ch/ch Spl/spl Rn/rn go/go Re/re,Splashed Fox,,CTU2,Yes
-CTC518,MM Nani,Nani,MM,,Fancy Mouse,Female,2025-08-10,CTC69,CTC70,,Splashed Fox,,CTU1,No
-CTC25,MM Nolan,Nolan,MM,,Fancy Mouse,Male,2025-08-10,CTC69,CTC70,a/a B/B ch/ch D/d Rn/rn go/go Sa/sa Rst/Rst,Sealpoint Siamese,,CTU2,Yes
-CTC519,FS Tinkerbell,Tinkerbell,FS,,Fancy Mouse,Female,2025-08-10,,,a/a b/b ch/ch s/s Spl/spl go/go,Chocolate Tricolor,,CTU2,Yes
-CTC150,MM Maddox,Maddox,MM,,Fancy Mouse,Female,2025-08-09,CTC61,CTC68,a/a ch/cch d/d go/go Re/re,Blue Burmese,,CTU2,Yes
-CTC672,MM Binx,Binx,MM,,Fancy Mouse,Male,2025-08-09,CTC61,CTC68,,Blue Splashed,,CTU24,Yes
-CTC517,MM Remy,Remy,MM,,Fancy Mouse,Male,2025-08-09,CTC61,CTC68,a/a d/d,Blue Burmese,,CTU5,No
-CTC24,MM Mickah,Mickah,MM,,Fancy Mouse,Male,2025-08-09,CTC61,CTC68,,Bluepoint Siamese,,CTU1,No
-CTC149,MM Leah,Leah,MM,,Fancy Mouse,Female,2025-08-07,CTC66,CTC67,a/a D/d rn/rn go/go Re/re sa/sa,Black Merle,,CTU2,No
-CTC148,MM London,London,MM,,Fancy Mouse,Female,2025-08-07,CTC66,CTC67,a/a D/d s/s rn/rn go/go Re/re sa/sa,Black Merle Pied,,CTU2,No
-CTC22,MM Laszlo,Laszlo,MM,,Fancy Mouse,Male,2025-08-07,CTC66,CTC67,a/a D/d s/s rn/rn go/go Re/re Sa/sa,Black Merle Pied,,CTU2,No
-CTC23,MM Legend,Legend,MM,,Fancy Mouse,Male,2025-08-07,CTC66,CTC67,a/a D/d P/p go/go Re/re Sa/sa,Black,,CTU2,No
-CTC562,MM Lilo,Lilo,MM,,Fancy Mouse,Female,2025-08-07,CTC66,CTC67,,Black,,CTU1,No
-CTC147,MM Lainey,Lainey,MM,,Fancy Mouse,Female,2025-08-07,CTC66,CTC67,a/a d/d s/s go/go Sa/sa,Blue Pied,,CTU2,Yes
-CTC144,MF Daifuku,Daifuku,MF,,Fancy Mouse,Female,2025-08-06,CTC330,CTC184,a/a C/cch d/d S/s go/go Re/re sa/sa rst/rst,Blue,,CTU2,Yes
-CTC514,MF Destiny,Destiny,MF,,Fancy Mouse,Female,2025-08-06,CTC330,CTC184,,Blue,,CTU5,No
-CTC515,MF Donut,Donut,MF,,Fancy Mouse,Female,2025-08-06,CTC330,CTC184,,Blue,,CTU1,No
-CTC516,MM Kiara,Kiara,MM,,Fancy Mouse,Female,2025-08-06,CTC65,CTC331,,Sealpoint Siamese,,CTU5,Yes
-CTC20,MF Daikon Marion,Daikon,MF,Marion,Fancy Mouse,Male,2025-08-06,CTC330,CTC184,a/a B/b C/cch d/d S/s go/go Re/re Sa/sa rst/rst,Blue,,CTU2,No
-CTC21,MM Knox,Knox,MM,,Fancy Mouse,Male,2025-08-06,CTC65,CTC331,a/a ch/ch D/d s/s Spl/spl go/go Re/re sa/sa,Tricolor,,CTU24,Yes
-CTC146,MM Kadee,Kadee,MM,,Fancy Mouse,Female,2025-08-06,CTC65,CTC331,a/a ch/ch go/go Re/re,Sealpoint Siamese,,CTU2,Yes
-CTC145,MM Keira,Keira,MM,,Fancy Mouse,Female,2025-08-06,CTC65,CTC331,a/a ch/ch s/s Spl/spl go/go Re/re,Tricolor,,CTU2,Yes
-CTC142,MM Jazlin,Jazlin,MM,,Fancy Mouse,Female,2025-08-04,CTC314,CTC77,a/a ch/ch d/d Spl/spl go/go Re/re sa/sa,Blue Splashed,,CTU2,Yes
-CTC143,MM Jaylee,Jaylee,MM,,Fancy Mouse,Female,2025-08-04,CTC314,CTC77,a/a ch/ch d/d Spl/spl go/go Re/re sa/sa,Blue Splashed,,CTU2,No
-CTC19,DA Wonder,Wonder,DA,,Fancy Mouse,Male,2025-08-03,CTC63,CTC64,,Blue Pied,,CTU5,Yes
-CTC512,MM Indie,Indie,MM,,Fancy Mouse,Female,2025-08-03,CTC56,CTC513,,Black Pied,,CTU5,Yes
-CTC511,MM Harriet,Harriet,MM,,Fancy Mouse,Female,2025-07-27,CTC504,CTC488,,Sealpoint Siamese,,CTU5,Yes
-CTC141,MM Ginny,Ginny,MM,,Fancy Mouse,Female,2025-07-25,CTC329,CTC328,a/a d/d go/go Re/re,Blue,,CTU2,Yes
-CTC510,MM Neytiri,Neytiri,MM,,Fancy Mouse,Female,2025-07-25,CTC329,CTC328,a/a d/d,Blue,,CTU2,No
-CTC139,MM Femme,Femme,MM,,Fancy Mouse,Female,2025-07-24,CTC61,CTC62,a/a ch/ch d/d go/go Re/re Rst/rst,Bluepoint Siamese,,CTU2,Yes
-CTC140,MM Fedora,Fedora,MM,,Fancy Mouse,Female,2025-07-24,CTC61,CTC62,a/a ch/cch d/d go/go Re/re Rst/rst,Blue Burmese,,CTU2,No
-CTC18,MM Fenno,Fenno,MM,,Fancy Mouse,Male,2025-07-24,CTC61,CTC62,,Blue Splashed,,CTU1,No
-CTC17,MM Fynn,Fynn,MM,,Fancy Mouse,Male,2025-07-24,CTC61,CTC62,,Bluepoint Siamese,,CTU1,No
-CTC508,MM Duchess,Duchess,MM,,Fancy Mouse,Female,2025-07-22,CTC61,CTC327,,Sealpoint Himalayan,,CTU5,Yes
-CTC509,MM Alice,Alice,MM,,Fancy Mouse,Female,2025-07-22,CTC61,CTC327,,Stone,,CTU1,No
-CTC131,MM Emory,Emory,MM,,Fancy Mouse,Female,2025-07-22,CTC14,CTC326,a/a ch/cch s/s Go/go,Burmese Pied,,CTU2,No
-CTC132,MM Emmy,Emmy,MM,,Fancy Mouse,Female,2025-07-22,CTC14,CTC326,a/a ce/ch s/s Go/go,Colorpoint Beige Pied,,CTU2,No
-CTC133,MM Dakota Marion,Dakota,MM,Marion,Fancy Mouse,Female,2025-07-22,CTC61,CTC327,a/a ch/ch D/d go/go Re/re Sa/sa,Sealpoint Siamese,,CTU2,No
-CTC134,MM Dica,Dica,MM,,Fancy Mouse,Female,2025-07-22,CTC61,CTC327,a/a c/cch D/d go/go Re/re Sa/sa,Stone,,CTU2,Yes
-CTC135,MM Deedee,Deedee,MM,,Fancy Mouse,Female,2025-07-22,CTC61,CTC327,a/a c/cch D/d go/go Re/re Sa/sa,Stone,,CTU2,Yes
-CTC130,MM Cally,Cally,MM,,Fancy Mouse,Female,2025-07-21,CTC11,CTC325,a/a ch/cch s/s Spl/spl Go/go,Tricolor,,CTU9,Yes
-CTC54,MM Bianco,Bianco,MM,,Fancy Mouse,Male,2025-07-21,CTC53,CTC60,a/a ch/ch D/d E/e rn/rn go/go,Sealpoint Siamese Merle,,CTU2,Yes
-CTC129,MF Bagel,Bagel,MF,,Fancy Mouse,Female,2025-06-23,CTC321,CTC323,at/a ch/ch D/d go/go Sa/sa rst/rst,Sealpoint Siamese Fox,,CTU2,No
-CTC337,MF Almond,Almond,MF,,Fancy Mouse,Female,2025-06-22,CTC330,CTC336,,Stone,,CTU5,Yes
-CTC128,MM Zorica Marion,Zorica,MM,Marion,Fancy Mouse,Female,2025-06-13,CTC61,CTC320,a/a ce/ch D/d S/s go/go Re/re,Colorpoint Beige,,CTU2,No
-CTC127,MM Yeva,Yeva,MM,,Fancy Mouse,Female,2025-06-13,CTC316,CTC317,a/a d/d P/p S/s Rn/rn go/go Re/re sa/sa,Blue,,CTU2,Yes
-CTC699,MM's (Silver) Spoon,(Silver) Spoon,MM's,,Fancy Mouse,Female,2025-06-13,CTC316,CTC317,,"Dove, Satin",,CTU10,Yes
-CTC126,MM Atari,Atari,MM,,Fancy Mouse,Female,2025-06-10,CTC58,CTC59,at/a b/b rn/rn Go/go Re/re,Chocolate Merle Tan,,CTU2,Yes
-CTC16,MM Voltari,Voltari,MM,,Fancy Mouse,Male,2025-05-18,CTC58,CTC59,at/a B/b s/s rn/rn go/go,Black Tan Merle Pied,,CTU2,No
-CTC707,MM's Bubbles,Bubbles,MM's,,Fancy Mouse,Female,2025-05-17,CTC314,CTC315,,,,CTU10,Yes
-CTC124,MM Ursula,Ursula,MM,,Fancy Mouse,Female,2025-05-17,CTC314,CTC315,at/a b/b C/ch go/go Re/re Sa/sa,Chocolate Tan,,CTU2,No
-CTC125,MM Ultima,Ultima,MM,,Fancy Mouse,Female,2025-05-17,CTC314,CTC315,at/a B/b C/ch S/s go/go Re/re sa/sa,Black Tan,,CTU2,No
-CTC526,MM Oscar,Oscar,MM,,Fancy Mouse,Male,2025-05-17,CTC14,CTC473,,Agouti Colorpoint Beige Pied,,CTU7,Yes
-CTC527,MM Speedy Gonzales.,Speedy Gonzales.,MM,,Fancy Mouse,Female,2025-05-17,CTC14,CTC473,,Agouti Burmese Pied,,CTU7,Yes
-CTC507,MM Maribel,Maribel,MM,,Fancy Mouse,Female,2025-05-17,CTC314,CTC315,,Black Tan Pied,,CTU5,Yes
-CTC123,MM Marla,Marla,MM,,Fancy Mouse,Female,2025-05-16,CTC307,CTC308,at/a C/ch s/s go/go Re/re sa/sa Rst/rst,Black Tan Pied,,CTU2,No
-CTC329,MM Parker,Parker,MM,,Fancy Mouse,Male,2025-05-15,CTC11,CTC306,,Blue,,CTU1,No
-CTC122,MM Primrose,Primrose,MM,,Fancy Mouse,Female,2025-05-15,CTC11,CTC306,a/a d/d go/go Re/re,Blue,,CTU2,No
-CTC698,MM's Lazuli (Lazeltje),Lazuli (Lazeltje),MM's,,Fancy Mouse,Male,2025-05-15,CTC11,CTC306,,,,CTU10,Yes
-CTC66,MM Omega,Omega,MM,,Fancy Mouse,Male,2025-05-14,CTC316,CTC317,,Blue,,CTU1,No
-CTC116,M3 Mavi,Mavi,M3,,Fancy Mouse,Female,2025-04-22,,,a/a d/d go/go,Blue,,CTU2,No
-CTC118,MM Myrrh,Myrrh,MM,,Fancy Mouse,Female,2025-04-22,CTC305,CTC300,a/a b/b s/s go/go Re/re,Chocolate Pied,,CTU2,Yes
-CTC119,MM Manisha,Manisha,MM,,Fancy Mouse,Female,2025-04-22,CTC305,CTC300,a/a B/b s/s go/go Re/re,Black Pied,,CTU2,No
-CTC120,MM Meadow,Meadow,MM,,Fancy Mouse,Female,2025-04-22,CTC305,CTC300,a/a b/b s/s go/go Re/re,Chocolate Pied,,CTU2,No
-CTC121,MM Melina,Melina,MM,,Fancy Mouse,Female,2025-04-22,CTC305,CTC300,a/a B/b s/s go/go Re/re,Black Pied,,CTU2,No
-CTC117,M3 Navy,Navy,M3,,Fancy Mouse,Female,2025-04-22,,,,Blue,,CTU1,No
-CTC506,MM Koda,Koda,MM,,Fancy Mouse,Male,2025-04-22,CTC305,CTC300,,Chocolate Pied,,CTU5,Yes
-CTC115,MM Lottie,Lottie,MM,,Fancy Mouse,Female,2025-04-19,CTC283,CTC297,a/a s/s go/go,Black Pied,,CTU2,Yes
-CTC114,MM Lexi,Lexi,MM,,Fancy Mouse,Female,2025-04-19,CTC283,CTC297,a/a s/s go/go Rst/rst,Black Pied,,CTU2,Yes
-CTC113,MM Kenzie,Kenzie,MM,,Fancy Mouse,Female,2025-04-17,CTC278,CTC296,a/a s/s go/go,Black Pied,,CTU2,No
-CTC112,MM Journey,Journey,MM,,Fancy Mouse,Female,2025-04-17,CTC283,CTC284,,Tricolor,,CTU1,No
-CTC111,MM Jimena,Jimena,MM,,Fancy Mouse,Female,2025-04-17,CTC283,CTC284,a/a s/s Go/go Rst/rst,Black Pied,,CTU2,Yes
-CTC110,MM Ivey,Ivey,MM,,Fancy Mouse,Female,2025-04-16,CTC278,CTC280,a/a B/b C/C D/d s/s Go/go,Black Pied,,CTU2,No
-CTC109,MM Habiba Marion,Habiba,MM,Marion,Fancy Mouse,Female,2025-04-14,CTC271,CTC270,a/a B/b ch/ch D/d S/s go/go Re/re Sa/sa,Sealpoint Siamese,,CTU2,No
-CTC108,MM Haidera,Haidera,MM,,Fancy Mouse,Female,2025-04-14,CTC271,CTC270,a/a b/b d/d S/s go/go Re/re Sa/sa,Lilac,,CTU1,No
-CTC53,MM Gianni,Gianni,MM,,Fancy Mouse,Male,2025-04-12,CTC56,CTC57,a/a B/b C/ch D/D e/e P/p S/s rn/rn go/go,Recessive Red Merle,,CTU5,Yes
-CTC504,MM Gryffin,Gryffin,MM,,Fancy Mouse,Male,2025-04-12,CTC56,CTC57,,Recessive Fawn Merle,,CTU1,No
-CTC107,MM Gabriella,Gabriella,MM,,Fancy Mouse,Female,2025-04-12,CTC56,CTC57,a/a C/ch e/e p/p go/go Re/re,Recessive Fawn,,CTU1,No
-CTC105,MLP Wyna,Wyna,MLP,,Fancy Mouse,Female,2025-04-06,CTC181,CTC183,,Blue Pied,,CTU2,No
-CTC104,MLP Wayla,Wayla,MLP,,Fancy Mouse,Female,2025-04-06,CTC181,CTC183,,Chocolate Tricolor,,CTU2,No
-CTC103,RM Doria,Doria,RM,,Fancy Mouse,Female,2025-04-06,,,a/a rn/rn go/go,Black Merle,,CTU2,No
-CTC106,MLP Wende,Wende,MLP,,Fancy Mouse,Female,2025-04-06,CTC181,CTC183,,Blue Pied,,CTU2,No
-CTC184,MLP Tutu,Tutu,MLP,,Fancy Mouse,Female,2025-04-06,CTC181,CTC183,,Blue Pied,,CTU1,No
-CTC102,MM Daevy,Daevy,MM,,Fancy Mouse,Female,2025-04-02,CTC264,CTC265,a/a b/b E/e S/s rn/rn Go/go Sa/sa,Chocolate Merle,,CTU2,No
-CTC101,MM Delcia,Delcia,MM,,Fancy Mouse,Female,2025-04-02,CTC264,CTC265,,Recessive Red Merle,,CTU1,No
-CTC100,MLP Vivian,Vivian,MLP,,Fancy Mouse,Female,2025-03-22,CTC152,CTC179,,Chocolate Pied,,CTU2,No
-CTC98,MLP Violet,Violet,MLP,,Fancy Mouse,Female,2025-03-22,CTC152,CTC179,,Lilac Pied,,CTU2,No
-CTC99,MLP Vajen,Vajen,MLP,,Fancy Mouse,Female,2025-03-22,CTC152,CTC179,,Blue Pied,,CTU2,No
-CTC15,BE Charlie,Charlie,BE,,Fancy Mouse,Male,2025-03-16,,,a/a B/b E/e S/s rn/rn go/go,Black Merle,,CTU2,No
-CTC503,MM Assamese Fish Curry,Assamese Fish Curry,MM,,Fancy Mouse,Male,2025-03-04,CTC483,CTC501,,Burmese,,CTU1,No
-CTC502,MM Asante,Asante,MM,,Fancy Mouse,Female,2025-03-04,CTC483,CTC501,,Splashed,,CTU4,Yes
-CTC496,MM Zazu,Zazu,MM,,Fancy Mouse,Female,2025-03-03,CTC185,CTC186,,Dominant Red Pied,,CTU1,No
-CTC493,MM Zyan,Zyan,MM,,Fancy Mouse,Male,2025-03-03,CTC185,CTC186,,Black Pied,,CTU1,No
-CTC494,MM Zongzi,Zongzi,MM,,Fancy Mouse,Female,2025-03-03,CTC185,CTC186,,Black,,CTU1,No
-CTC495,MM Zizi,Zizi,MM,,Fancy Mouse,Female,2025-03-03,CTC185,CTC186,,Dominant Red Tricolor,,CTU1,No
-CTC498,MM Xiaolongbao,Xiaolongbao,MM,,Fancy Mouse,Female,2025-03-03,CTC483,CTC497,,Black Pied,,CTU1,No
-CTC499,MM Yaki Onigiri,Yaki Onigiri,MM,,Fancy Mouse,Female,2025-03-03,CTC311,CTC435,,Dominant Red Splashed,,CTU1,No
-CTC500,MM YakiSoba,YakiSoba,MM,,Fancy Mouse,Female,2025-03-03,CTC311,CTC435,,Black,,CTU1,No
-CTC78,MM Zelesta,Zelesta,MM,,Fancy Mouse,Female,2025-03-03,CTC185,CTC186,,Tricolor,,CTU1,No
-CTC79,MM Zoltara,Zoltara,MM,,Fancy Mouse,Female,2025-03-03,CTC185,CTC186,,Black,,CTU2,No
-CTC328,MM Winnie the Blue,Winnie the Blue,MM,,Fancy Mouse,Female,2025-03-02,CTC185,CTC322,,Blue,,CTU1,No
-CTC492,MM Wakai Wakame,Wakai Wakame,MM,,Fancy Mouse,Female,2025-03-02,CTC185,CTC322,,Splashed,,CTU1,No
-CTC491,MM Willow,Willow,MM,,Fancy Mouse,Male,2025-03-02,CTC185,CTC322,,Dominant Red,,CTU1,No
-CTC323,MM Taco,Taco,MM,,Fancy Mouse,Female,2025-03-02,CTC185,CTC322,,Splashed,,CTU1,No
-CTC338,MM Triple X,Triple X,MM,,Fancy Mouse,Male,2025-03-02,CTC185,CTC322,,Splashed,,CTU1,No
-CTC327,MM Unica,Unica,MM,,Fancy Mouse,Female,2025-02-28,CTC313,CTC310,,Sealpoint Himalayan,,CTU1,No
-CTC314,MM Uros,Uros,MM,,Fancy Mouse,Male,2025-02-28,CTC313,CTC310,,Splashed,,CTU1,No
-CTC321,MM Texmex,Texmex,MM,,Fancy Mouse,Male,2025-02-28,CTC313,CTC310,,Splashed,,CTU1,No
-CTC336,MM Burrito,Burrito,MM,,Fancy Mouse,Female,2025-02-28,CTC313,CTC310,,Pink Eye White,,CTU1,No
-CTC490,MM Umai Udon,Umai Udon,MM,,Fancy Mouse,Male,2025-02-28,CTC313,CTC310,,Sealpoint Himalayan,,CTU1,No
-CTC489,MM Uriel,Uriel,MM,,Fancy Mouse,Male,2025-02-28,CTC313,CTC310,,Splashed,,CTU4,Yes
-CTC488,MM Ursula,Ursula,MM,,Fancy Mouse,Female,2025-02-28,CTC313,CTC310,,Sealpoint Siamese,,CTU1,No
-CTC487,MM Usukuchi Shoyu,Usukuchi Shoyu,MM,,Fancy Mouse,Female,2025-02-28,CTC313,CTC310,,Pink Eye White,,CTU1,No
-CTC485,MM Teemo,Teemo,MM,,Fancy Mouse,Male,2025-02-25,CTC483,CTC484,,Colorpoint Beige Pied,,CTU1,No
-CTC486,MM Tatufa Tofu,Tatufa Tofu,MM,,Fancy Mouse,Female,2025-02-25,CTC483,CTC484,,Colorpoint Beige,,CTU1,No
-CTC513,Arianna,Arianna,,,Fancy Mouse,Female,2025-02-14,,,,Splashed,,CTU7,Yes
-CTC77,Azzura,Azzura,,,Fancy Mouse,Female,2025-02-14,CTC531,CTC532,,Blue Splashed,,CTU2,No
-CTC70,Bianca,Bianca,,,Fancy Mouse,Female,2025-02-14,CTC531,CTC532,,Splashed Fox,,CTU2,No
-CTC68,Chiara,Chiara,,,Fancy Mouse,Female,2025-02-14,CTC531,CTC532,,Blue Splashed,,CTU2,No
-CTC67,Giulia,Giulia,,,Fancy Mouse,Female,2025-02-14,CTC531,CTC532,,Black,,CTU2,No
-CTC331,Sofia,Sofia,,,Fancy Mouse,Female,2025-02-14,,,,Splashed,,CTU1,No
-CTC523,Allegra,Allegra,,,Fancy Mouse,Female,2025-02-13,,,,Black Tan,,CTU1,No
-CTC76,MLP Raylin,Raylin,MLP,,Fancy Mouse,Female,2025-01-15,CTC152,CTC153,,Black Pied,,CTU2,No
-CTC482,MM Utara,Utara,MM,,Fancy Mouse,Female,2025-01-08,CTC411,CTC402,,Brindle Pied,,CTU1,No
-CTC14,BF Sami,Sami,BF,,Fancy Mouse,Male,2025-01-05,,,A/at ce/cch s/s Spl/spl go/go Re/re,Agouti Tricolor Fox,,CTU2,Yes
-CTC481,MM Tigerlily,Tigerlily,MM,,Fancy Mouse,Female,2025-01-04,CTC411,CTC416,,Brindle Pied,,CTU1,No
-CTC480,MM Tabita,Tabita,MM,,Fancy Mouse,Female,2025-01-04,CTC411,CTC416,,Black Tan Pied,,CTU4,Yes
-CTC808,MM Aslan,Aslan,MM,,Fancy Mouse,Male,2025-01-02,CTC26,CTC28,,Blue,,CTU1,Yes
-CTC11,MM Rizzo,Rizzo,MM,,Fancy Mouse,Male,2025-01-02,CTC26,CTC28,a/a B/B C/cch D/d S/s go/go Re/re,Black,,CTU2,Yes
-CTC283,MM Quincy,Quincy,MM,,Fancy Mouse,Male,2025-01-01,CTC185,CTC282,,Black Pied,,CTU1,No
-CTC278,MM Poco Loco,Poco Loco,MM,,Fancy Mouse,Male,2025-01-01,CTC274,CTC277,,Black Pied,,CTU1,No
-CTC1123,RM Fergie,Fergie,RM,,Fancy Mouse,Female,2025-01-01,CTC29,,,Dominant Red Tan,,CTU2,No
-CTC1124,RM Marten Sable,Marten Sable,RM,,Fancy Mouse,Female,2025-01-01,CTC29,,,Marten Sable,,CTU2,No
-CTC479,MM Quaker,Quaker,MM,,Fancy Mouse,Male,2025-01-01,CTC185,CTC282,,Brindle,,CTU1,No
-CTC1125,RM BEW,BEW,RM,,Fancy Mouse,Male,2025-01-01,,,,Black Eye White,,CTU2,No
-CTC478,MM Nabrina,Nabrina,MM,,Fancy Mouse,Female,2024-12-29,CTC443,CTC410,,Black Tan,,CTU1,No
-CTC656,MM's Nelson,Nelson,MM's,,Fancy Mouse,Male,2024-12-29,CTC443,CTC410,,,,CTU10,Yes
