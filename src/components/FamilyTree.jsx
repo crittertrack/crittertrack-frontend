@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { ArrowLeft, Loader2, Search, X, Users } from 'lucide-react';
+import { ArrowLeft, Download, Loader2, Search, X, Users } from 'lucide-react';
 import ReactFlow, { 
     Background, 
     Controls, 
@@ -249,6 +249,52 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         
         fetchAnimalsAndBuildGraph();
     }, [authToken]);
+
+    // Export all animals as a CSV for breeding line analysis
+    const downloadCSV = () => {
+        if (allAnimals.length === 0) return;
+
+        const headers = [
+            'ID', 'Full Name', 'Name', 'Prefix', 'Suffix',
+            'Species', 'Sex', 'Birth Date',
+            'Sire ID', 'Dam ID',
+            'Genetic Code', 'Color', 'Eye Color',
+            'Owned'
+        ];
+
+        const escape = (val) => {
+            const str = val == null ? '' : String(val);
+            return str.includes(',') || str.includes('"') || str.includes('\n')
+                ? `"${str.replace(/"/g, '""')}"`
+                : str;
+        };
+
+        const rows = allAnimals.map(a => [
+            escape(a.id_public),
+            escape([a.prefix, a.name, a.suffix].filter(Boolean).join(' ')),
+            escape(a.name),
+            escape(a.prefix),
+            escape(a.suffix),
+            escape(a.species),
+            escape(a.sex || a.gender),
+            escape(a.birthDate ? new Date(a.birthDate).toISOString().split('T')[0] : ''),
+            escape(a.sireId_public || a.fatherId_public),
+            escape(a.damId_public || a.motherId_public),
+            escape(a.geneticCode),
+            escape(a.color),
+            escape(a.eyeColor),
+            escape(a.isOwned ? 'Yes' : 'No')
+        ].join(','));
+
+        const csv = [headers.join(','), ...rows].join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `family-tree-${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
 
     // Build graph from animals data
     const buildGraph = (animals) => {
@@ -1008,9 +1054,20 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                 <h1 className="text-2xl font-bold text-gray-800">Family Tree</h1>
                             </div>
                         </div>
-                        <div className="text-sm text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg">
-                            <Users size={16} className="inline mr-1.5" />
-                            {allAnimals.length} Animals in Tree
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={downloadCSV}
+                                disabled={allAnimals.length === 0}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition"
+                                title="Export all animals as CSV for analysis"
+                            >
+                                <Download size={15} />
+                                Export CSV
+                            </button>
+                            <div className="text-sm text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg">
+                                <Users size={16} className="inline mr-1.5" />
+                                {allAnimals.length} Animals in Tree
+                            </div>
                         </div>
                     </div>
                 </div>
