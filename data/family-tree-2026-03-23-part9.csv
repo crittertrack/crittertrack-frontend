@@ -1,81 +1,81 @@
-ID,Full Name,Name,Prefix,Suffix,Sex,Birth Date,Sire ID,Dam ID,Owner CTU ID,Owned
-CTC223,LvD Felix,Felix,LvD,,Male,2020-01-01,,,,No
-CTC224,PvK Gracie,Gracie,PvK,,Female,2020-01-01,,,,No
-CTC227,FR Ryoka,Ryoka,FR,,Female,2020-01-01,,,,No
-CTC233,PvK Carlisle,Carlisle,PvK,,Male,2020-02-02,,,,No
-CTC242,LvD Alec,Alec,LvD,,Male,2020-02-20,,,,No
-CTC243,CM Bluberry,Bluberry,CM,,Female,2020-04-24,,,,No
-CTC244,LvD Mateo,Mateo,LvD,,Male,2020-02-20,,,,No
-CTC246,HM Juniper,Juniper,HM,,Female,2019-01-01,,,,No
-CTC248,Captain Fluff,Captain Fluff,,,Male,2021-01-01,,,,No
-CTC251,AK Glowe,Glowe,AK,,Female,2020-08-15,,,,No
-CTC253,AR Fata Morgana,Fata Morgana,AR,,Female,2020-02-02,CTC254,CTC255,,No
-CTC258,RVE Baco,Baco,RVE,,Male,2018-01-01,,,,No
-CTC259,RVE Mimi,Mimi,RVE,,Female,2018-01-01,,,,No
-CTC260,RVE Scar,Scar,RVE,,Male,2019-01-01,,,,No
-CTC261,PvK Emma,Emma,PvK,,Female,2019-01-01,,,,No
-CTC264,Chicken Wing,Chicken Wing,,,Male,2024-10-16,,,,No
-CTC266,LGM Twilight,Twilight,LGM,,Male,2023-07-27,,,,No
-CTC267,TnS Emiko,Emiko,TnS,,Female,2023-08-07,,,,Yes
-CTC269,RM Banda,Banda,RM,,Female,2024-06-01,,,,No
-CTC271,NOX Rocco,Rocco,NOX,,Male,2024-12-31,,,,No
-CTC272,TRM Diesel,Diesel,TRM,,Male,2023-12-16,,,,No
-CTC276,TnS Likona,Likona,TnS,,Female,2023-10-13,CTC735,CTC736,,Yes
-CTC281,TnS Pikachu,Pikachu,TnS,,Male,2024-02-10,CTC733,CTC791,,Yes
-CTC288,LB Ghost,Ghost,LB,,Male,2022-01-01,,,,No
-CTC292,MK Zigzagoon,Zigzagoon,MK,,Female,2022-12-24,,,,No
-CTC301,TnS Unichi,Unichi,TnS,,Male,2023-12-04,CTC758,CTC759,,Yes
-CTC302,TnS Grandity,Grandity,TnS,,Female,2023-08-16,CTC764,CTC765,,Yes
-CTC304,TnS Erina,Erina,TnS,,Female,2024-01-14,CTC733,CTC734,,Yes
-CTC307,NOX Floyd,Floyd,NOX,,Male,2024-12-19,,,,No
-CTC31,Mysigonek Qasimir,Qasimir,Mysigonek,,Male,2024-03-07,,,,No
-CTC311,TnS Yoshi,Yoshi,TnS,,Male,2024-01-02,CTC953,CTC954,,Yes
-CTC312,BE Avalanche,Avalanche,BE,,Female,2024-03-25,,,,No
-CTC315,RR Ciaran,Ciaran,RR,,Female,2025-01-05,,,,No
-CTC316,NOX Valor,Valor,NOX,,Male,2024-12-26,,,,No
-CTC317,M3 Thalia,Thalia,M3,,Female,2024-11-24,,,,No
-CTC318,PvK Rocky Road,Rocky Road,PvK,,Male,2024-02-01,,,,No
-CTC330,MMM Bucket,Bucket,MMM,,Male,2025-01-21,CTC529,CTC530,,No
-CTC34,SR Scooby,Scooby,SR,,Male,2023-04-09,,,,No
-CTC358,SB Vidar,Vidar,SB,,Male,2020-01-01,,,,No
-CTC359,PvK Marble,Marble,PvK,,Female,2020-01-01,,,,No
-CTC360,M3 Leviathan,Leviathan,M3,,Male,2020-01-01,,,,No
-CTC361,MJ Kappa,Kappa,MJ,,Female,2020-01-01,,,,No
-CTC363,LvD Chiro,Chiro,LvD,,Male,2020-07-01,,,,No
-CTC365,FR Calypso,Calypso,FR,,Male,2020-02-26,,,,No
-CTC366,AK Lexie,Lexie,AK,,Female,2021-01-01,,,,No
-CTC374,CM Briley,Briley,CM,,Female,2021-01-01,,,,No
-CTC376,CM Penny,Penny,CM,,Female,2021-01-01,,,,No
-CTC378,AK Felicity,Felicity,AK,,Female,2021-01-01,,,,No
-CTC38,Mohanah Chedomir,Chedomir,Mohanah,,Male,2022-01-26,,,,No
-CTC400,TnS Kaito,Kaito,TnS,,Male,2023-10-11,CTC792,CTC794,,Yes
-CTC41,CM Noelle,Noelle,CM,,Female,2020-01-01,,,,No
-CTC418,M&M Kitsy,Kitsy,M&M,,Female,2023-12-11,,,,No
-CTC43,HV Mirabel,Mirabel,HV,,Female,2019-08-02,CTC44,CTC45,,No
-CTC47,PvK Loki,Loki,PvK,,Male,2019-01-12,CTC51,CTC52,,No
-CTC48,FF Amelie,Amelie,FF,,Female,2019-01-23,CTC49,CTC50,,No
-CTC483,Unknown,Unknown,,,Male,2025-01-01,,,,No
-CTC484,Shelby,Shelby,,,Female,2025-01-01,,,,No
-CTC497,Macy,Macy,,,Female,2024-10-13,,,,No
-CTC531,Pino,Pino,,,Male,2024-07-09,,,,No
-CTC532,Mother,Mother,,,Female,2024-08-06,,,,No
-CTC56,NOX Spencer,Spencer,NOX,,Male,2024-12-26,,,,No
-CTC58,M3 Cooper,Cooper,M3,,Male,2025-03-02,,,,No
-CTC59,RM Safiya,Safiya,RM,,Female,2024-11-18,,,,No
-CTC60,LH Lucia,Lucia,LH,,Female,2025-03-02,,,,No
-CTC61,MMM Quattro,Quattro,MMM,,Male,2025-01-21,CTC529,CTC530,,No
-CTC62,LH Yara,Yara,LH,,Female,2025-03-02,,,,No
-CTC63,DA MP2-M2,MP2-M2,DA,,Male,2025-05-30,,,,No
-CTC64,NOX Misu,Misu,NOX,,Female,2024-11-11,,,,No
-CTC65,M3 Mottley,Mottley,M3,,Male,2025-04-08,,,,No
-CTC69,RM Breezer,Breezer,RM,,Male,2025-04-06,,,,No
-CTC784,FR Tikka,Tikka,FR,,Female,2020-02-20,,,,No
-CTC787,MMM Iyabo,Iyabo,MMM,,Male,2021-01-08,CTC789,CTC790,,No
-CTC792,TnS Nesshin,Nesshin,TnS,,Male,2023-03-14,CTC741,CTC742,,Yes
-CTC97,M3 Mika,Mika,M3,,Female,2025-03-16,,,,No
-CTC157,PLX Coco,Coco,PLX,,Male,2023-06-06,CTC158,CTC159,,No
-CTC159,PLX Dawa,Dawa,PLX,,Female,2023-01-05,CTC160,CTC161,,No
-CTC170,TnS Kobus,Kobus,TnS,,Male,2022-01-30,CTC172,CTC173,,Yes
-CTC235,KW Nyota,Nyota,KW,,Female,2021-11-11,CTC236,CTC237,,No
-CTC680,M1,M1,,,Male,2026-01-30,CTC679,CTC630,,Yes
-CTC681,F1,F1,,,Female,2026-01-30,CTC679,CTC630,,Yes
+ID,Full Name,Name,Prefix,Sex,Sire ID,Dam ID,Owner CTU ID,Owned
+CTC223,LvD Felix,Felix,LvD,Male,,,,No
+CTC224,PvK Gracie,Gracie,PvK,Female,,,,No
+CTC227,FR Ryoka,Ryoka,FR,Female,,,,No
+CTC233,PvK Carlisle,Carlisle,PvK,Male,,,,No
+CTC242,LvD Alec,Alec,LvD,Male,,,,No
+CTC243,CM Bluberry,Bluberry,CM,Female,,,,No
+CTC244,LvD Mateo,Mateo,LvD,Male,,,,No
+CTC246,HM Juniper,Juniper,HM,Female,,,,No
+CTC248,Captain Fluff,Captain Fluff,,Male,,,,No
+CTC251,AK Glowe,Glowe,AK,Female,,,,No
+CTC253,AR Fata Morgana,Fata Morgana,AR,Female,CTC254,CTC255,,No
+CTC258,RVE Baco,Baco,RVE,Male,,,,No
+CTC259,RVE Mimi,Mimi,RVE,Female,,,,No
+CTC260,RVE Scar,Scar,RVE,Male,,,,No
+CTC261,PvK Emma,Emma,PvK,Female,,,,No
+CTC264,Chicken Wing,Chicken Wing,,Male,,,,No
+CTC266,LGM Twilight,Twilight,LGM,Male,,,,No
+CTC267,TnS Emiko,Emiko,TnS,Female,,,,Yes
+CTC269,RM Banda,Banda,RM,Female,,,,No
+CTC271,NOX Rocco,Rocco,NOX,Male,,,,No
+CTC272,TRM Diesel,Diesel,TRM,Male,,,,No
+CTC276,TnS Likona,Likona,TnS,Female,CTC735,CTC736,,Yes
+CTC281,TnS Pikachu,Pikachu,TnS,Male,CTC733,CTC791,,Yes
+CTC288,LB Ghost,Ghost,LB,Male,,,,No
+CTC292,MK Zigzagoon,Zigzagoon,MK,Female,,,,No
+CTC301,TnS Unichi,Unichi,TnS,Male,CTC758,CTC759,,Yes
+CTC302,TnS Grandity,Grandity,TnS,Female,CTC764,CTC765,,Yes
+CTC304,TnS Erina,Erina,TnS,Female,CTC733,CTC734,,Yes
+CTC307,NOX Floyd,Floyd,NOX,Male,,,,No
+CTC31,Mysigonek Qasimir,Qasimir,Mysigonek,Male,,,,No
+CTC311,TnS Yoshi,Yoshi,TnS,Male,CTC953,CTC954,,Yes
+CTC312,BE Avalanche,Avalanche,BE,Female,,,,No
+CTC315,RR Ciaran,Ciaran,RR,Female,,,,No
+CTC316,NOX Valor,Valor,NOX,Male,,,,No
+CTC317,M3 Thalia,Thalia,M3,Female,,,,No
+CTC318,PvK Rocky Road,Rocky Road,PvK,Male,,,,No
+CTC330,MMM Bucket,Bucket,MMM,Male,CTC529,CTC530,,No
+CTC34,SR Scooby,Scooby,SR,Male,,,,No
+CTC358,SB Vidar,Vidar,SB,Male,,,,No
+CTC359,PvK Marble,Marble,PvK,Female,,,,No
+CTC360,M3 Leviathan,Leviathan,M3,Male,,,,No
+CTC361,MJ Kappa,Kappa,MJ,Female,,,,No
+CTC363,LvD Chiro,Chiro,LvD,Male,,,,No
+CTC365,FR Calypso,Calypso,FR,Male,,,,No
+CTC366,AK Lexie,Lexie,AK,Female,,,,No
+CTC374,CM Briley,Briley,CM,Female,,,,No
+CTC376,CM Penny,Penny,CM,Female,,,,No
+CTC378,AK Felicity,Felicity,AK,Female,,,,No
+CTC38,Mohanah Chedomir,Chedomir,Mohanah,Male,,,,No
+CTC400,TnS Kaito,Kaito,TnS,Male,CTC792,CTC794,,Yes
+CTC41,CM Noelle,Noelle,CM,Female,,,,No
+CTC418,M&M Kitsy,Kitsy,M&M,Female,,,,No
+CTC43,HV Mirabel,Mirabel,HV,Female,CTC44,CTC45,,No
+CTC47,PvK Loki,Loki,PvK,Male,CTC51,CTC52,,No
+CTC48,FF Amelie,Amelie,FF,Female,CTC49,CTC50,,No
+CTC483,Unknown,Unknown,,Male,,,,No
+CTC484,Shelby,Shelby,,Female,,,,No
+CTC497,Macy,Macy,,Female,,,,No
+CTC531,Pino,Pino,,Male,,,,No
+CTC532,Mother,Mother,,Female,,,,No
+CTC56,NOX Spencer,Spencer,NOX,Male,,,,No
+CTC58,M3 Cooper,Cooper,M3,Male,,,,No
+CTC59,RM Safiya,Safiya,RM,Female,,,,No
+CTC60,LH Lucia,Lucia,LH,Female,,,,No
+CTC61,MMM Quattro,Quattro,MMM,Male,CTC529,CTC530,,No
+CTC62,LH Yara,Yara,LH,Female,,,,No
+CTC63,DA MP2-M2,MP2-M2,DA,Male,,,,No
+CTC64,NOX Misu,Misu,NOX,Female,,,,No
+CTC65,M3 Mottley,Mottley,M3,Male,,,,No
+CTC69,RM Breezer,Breezer,RM,Male,,,,No
+CTC784,FR Tikka,Tikka,FR,Female,,,,No
+CTC787,MMM Iyabo,Iyabo,MMM,Male,CTC789,CTC790,,No
+CTC792,TnS Nesshin,Nesshin,TnS,Male,CTC741,CTC742,,Yes
+CTC97,M3 Mika,Mika,M3,Female,,,,No
+CTC157,PLX Coco,Coco,PLX,Male,CTC158,CTC159,,No
+CTC159,PLX Dawa,Dawa,PLX,Female,CTC160,CTC161,,No
+CTC170,TnS Kobus,Kobus,TnS,Male,CTC172,CTC173,,Yes
+CTC235,KW Nyota,Nyota,KW,Female,CTC236,CTC237,,No
+CTC680,M1,M1,,Male,CTC679,CTC630,,Yes
+CTC681,F1,F1,,Female,CTC679,CTC630,,Yes

@@ -1,81 +1,81 @@
-ID,Full Name,Name,Prefix,Suffix,Sex,Birth Date,Sire ID,Dam ID,Owner CTU ID,Owned
-CTC663,SLM's Blacka,Blacka,SLM's,,Female,2025-03-26,CTC601,CTC705,,Yes
-CTC700,SLM's Big Boy,Big Boy,SLM's,,Male,2025-03-24,CTC601,CTC701,,Yes
-CTC744,TnS Nobu,Nobu,TnS,,Female,2022-01-17,CTC950,CTC951,,Yes
-CTC761,TnS Benihime,Benihime,TnS,,Female,2022-12-02,CTC745,CTC771,,Yes
-CTC955,TnS Dankei,Dankei,TnS,,Male,2022-06-06,CTC957,CTC958,,Yes
-CTC980,TnS Ningyo,Ningyo,TnS,,Male,2022-08-18,CTC172,CTC982,,Yes
-CTC1236,MD Joep,Joep,MD,,Male,2026-01-24,CTC816,CTC815,,Yes
-CTC168,LK Lily Iglehart,Lily Iglehart,LK,,Female,2023-11-05,CTC169,CTC178,,No
-CTC211,HV Annakin,Annakin,HV,,Male,2019-11-02,CTC215,CTC216,,No
-CTC212,HV Catalia,Catalia,HV,,Female,2019-07-15,CTC213,CTC214,,No
-CTC628,SLM'S Steelix,Steelix,SLM'S,,Female,2025-08-13,CTC703,CTC663,,Yes
-CTC679,SLM's No Name,No Name,SLM's,,Male,2025-12-05,CTC662,CTC664,,Yes
-CTC737,TnS Merlin,Merlin,TnS,,Male,2022-08-10,CTC743,CTC744,,Yes
-CTC739,Ray's Ramen,Ramen,Ray's,,Male,2022-03-01,,,,No
-CTC745,LB Oishii,Oishii,LB,,Male,2022-03-06,,,,No
-CTC749,TnS Kiseki,Kiseki,TnS,,Male,2020-03-23,CTC751,CTC752,,Yes
-CTC750,TnS Hiyori,Hiyori,TnS,,Female,2020-07-11,CTC912,CTC937,,Yes
-CTC753,From MouseHouse Amai,Amai,From MouseHouse,,Male,2022-03-10,,,,No
-CTC756,ECLS Kiba,Kiba,ECLS,,Male,2020-07-27,CTC882,CTC891,,No
-CTC757,TnS Terumi,Terumi,TnS,,Female,2020-10-08,CTC749,CTC942,,Yes
-CTC763,FM Sumire,Sumire,FM,,Female,2022-06-30,CTC896,CTC897,,No
-CTC768,TnS Iroha,Iroha,TnS,,Female,2022-02-11,CTC947,CTC948,,Yes
-CTC776,ECLS Hoshi,Hoshi,ECLS,,Male,2020-05-05,CTC909,CTC910,,No
-CTC777,TnS Hanako,Hanako,TnS,,Female,2020-05-04,CTC894,CTC902,,Yes
-CTC779,Ray's Qiqi,Qiqi,Ray's,,Female,2022-02-20,,,,No
-CTC782,TnS Akimi,Akimi,TnS,,Female,2021-03-23,CTC943,CTC944,,Yes
-CTC878,Kuro,Kuro,,,Male,2021-02-10,CTC880,CTC881,,No
-CTC879,ECLS Hiroaki,Hiroaki,ECLS,,Female,2020-10-12,CTC882,CTC883,,No
-CTC887,TnS Fawny,Fawny,TnS,,Male,2021-01-12,CTC889,CTC890,,Yes
-CTC888,TnS Hibiki,Hibiki,TnS,,Female,2021-01-22,,,,Yes
-CTC900,TnS Mizore,Mizore,TnS,,Female,2020-08-31,CTC901,CTC902,,Yes
-CTC911,TnS Ayame,Ayame,TnS,,Female,2020-08-04,CTC912,CTC752,,Yes
-CTC912,C&C Kenshin,Kenshin,C&C,,Male,2020-02-19,,,,No
-CTC913,TnS Guimauve,Guimauve,TnS,,Male,2020-03-15,CTC892,CTC915,,Yes
-CTC914,C&C Suki,Suki,C&C,,Female,2020-06-08,,,,No
-CTC935,TnS Zeroyo,Zeroyo,TnS,,Female,2019-06-15,CTC905,CTC936,,Yes
-CTC950,TnS Misao,Misao,TnS,,Male,2021-09-02,CTC749,CTC900,,Yes
-CTC960,TnS Dolly,Dolly,TnS,,Female,2020-12-10,CTC901,CTC962,,Yes
-CTC973,TnS Wataru,Wataru,TnS,,Male,2020-04-29,CTC969,CTC946,,Yes
-CTC974,TnS Yoko,Yoko,TnS,,Female,2020-04-26,CTC945,CTC975,,Yes
-CTC984,TnS Sunao,Sunao,TnS,,Female,2021-05-19,CTC901,CTC967,,Yes
-CTC662,SLM's HachiMitsu,HachiMitsu,SLM's,,Male,2025-08-13,CTC703,CTC663,,Yes
-CTC664,SLM's Midnight,Midnight,SLM's,,Female,2025-06-25,CTC700,CTC702,,Yes
-CTC967,TnS Himeko,Himeko,TnS,,Female,2020-11-16,CTC776,CTC968,,Yes
-CTC171,MP Sniper,Sniper,MP,,Female,2022-08-10,,,,No
-CTC178,Betty,Betty,,,Female,2023-03-05,,,,No
-CTC213,TU Tygo,Tygo,TU,,Male,2019-01-27,,,,No
-CTC214,TU Maeve,Maeve,TU,,Female,2019-03-12,,,,No
-CTC215,MS Black Elah,Black Elah,MS,,Male,2019-01-01,,,,No
-CTC216,AM Leana,Leana,AM,,Female,2019-01-01,,,,No
-CTC701,SLM's Snow White,Snow White,SLM's,,Female,2025-01-13,,,,Yes
-CTC703,SLM's Onyx,Onyx,SLM's,,Male,2025-01-21,,,,Yes
-CTC705,SLM's Si,Si,SLM's,,Female,2025-01-07,,,,Yes
-CTC743,Ray's Dekret,Dekret,Ray's,,Male,2021-12-03,,,,No
-CTC751,TnS Hiroo,Hiroo,TnS,,Male,2018-10-11,CTC917,CTC918,,Yes
-CTC752,FF Yuko,Yuko,FF,,Female,2019-10-20,,,,No
-CTC816,PM Mika,Mika,PM,,Male,2025-10-20,,,,Yes
-CTC880,Akito,Akito,,,Male,2020-02-15,,,,No
-CTC881,Toriko,Toriko,,,Female,2020-03-10,,,,No
-CTC882,Aki,Aki,,,Male,2020-01-01,,,,No
-CTC883,ECLS Biscotte,Biscotte,ECLS,,Female,2020-02-20,CTC884,CTC885,,No
-CTC889,TnS Shuga,Shuga,TnS,,Male,2020-04-24,CTC892,CTC893,,Yes
-CTC890,ECLS Kyoko,Kyoko,ECLS,,Female,2020-07-27,CTC882,CTC891,,No
-CTC891,ECLS Hikari,Hikari,ECLS,,Female,2020-03-01,,,,No
-CTC892,Jin,Jin,,,Male,2019-03-07,,,,No
-CTC894,Rei,Rei,,,Male,2019-03-05,,,,No
-CTC896,Mohanah Auguste,Auguste,Mohanah,,Male,2022-02-01,,CTC898,,No
-CTC897,MS Prune,Prune,MS,,Female,2022-02-01,,,,No
-CTC901,TnS Mamoru,Mamoru,TnS,,Male,2020-03-30,CTC903,CTC904,,Yes
-CTC902,FF Kotoe,Kotoe,FF,,Female,2019-10-19,,,,No
-CTC905,TnS Bourbillon,Bourbillon,TnS,,Male,2018-03-26,CTC907,CTC908,,Yes
-CTC909,Kinder,Kinder,,,Male,2020-02-01,,,,No
-CTC910,ECLS Ruby,Ruby,ECLS,,Female,2019-02-01,,,,No
-CTC915,TnS Hinata,Hinata,TnS,,Female,2019-08-19,CTC751,CTC916,,Yes
-CTC936,TnS Towa,Towa,TnS,,Female,2018-10-11,CTC917,CTC918,,Yes
-CTC937,TnS Seiko,Seiko,TnS,,Female,2020-01-20,CTC903,CTC938,,Yes
-CTC942,TnS Kanade,Kanade,TnS,,Female,2020-03-30,CTC903,CTC904,,Yes
-CTC943,TnS Asaki,Asaki,TnS,,Male,2020-08-25,CTC945,CTC946,,Yes
-CTC944,TnS Haruna,Haruna,TnS,,Female,2020-05-04,CTC894,CTC902,,Yes
-CTC945,FF Suzaku,Suzaku,FF,,Male,2019-10-29,,,,No
+ID,Full Name,Name,Prefix,Sex,Sire ID,Dam ID,Owner CTU ID,Owned
+CTC663,SLM's Blacka,Blacka,SLM's,Female,CTC601,CTC705,,Yes
+CTC700,SLM's Big Boy,Big Boy,SLM's,Male,CTC601,CTC701,,Yes
+CTC744,TnS Nobu,Nobu,TnS,Female,CTC950,CTC951,,Yes
+CTC761,TnS Benihime,Benihime,TnS,Female,CTC745,CTC771,,Yes
+CTC955,TnS Dankei,Dankei,TnS,Male,CTC957,CTC958,,Yes
+CTC980,TnS Ningyo,Ningyo,TnS,Male,CTC172,CTC982,,Yes
+CTC1236,MD Joep,Joep,MD,Male,CTC816,CTC815,,Yes
+CTC168,LK Lily Iglehart,Lily Iglehart,LK,Female,CTC169,CTC178,,No
+CTC211,HV Annakin,Annakin,HV,Male,CTC215,CTC216,,No
+CTC212,HV Catalia,Catalia,HV,Female,CTC213,CTC214,,No
+CTC628,SLM'S Steelix,Steelix,SLM'S,Female,CTC703,CTC663,,Yes
+CTC679,SLM's No Name,No Name,SLM's,Male,CTC662,CTC664,,Yes
+CTC737,TnS Merlin,Merlin,TnS,Male,CTC743,CTC744,,Yes
+CTC739,Ray's Ramen,Ramen,Ray's,Male,,,,No
+CTC745,LB Oishii,Oishii,LB,Male,,,,No
+CTC749,TnS Kiseki,Kiseki,TnS,Male,CTC751,CTC752,,Yes
+CTC750,TnS Hiyori,Hiyori,TnS,Female,CTC912,CTC937,,Yes
+CTC753,From MouseHouse Amai,Amai,From MouseHouse,Male,,,,No
+CTC756,ECLS Kiba,Kiba,ECLS,Male,CTC882,CTC891,,No
+CTC757,TnS Terumi,Terumi,TnS,Female,CTC749,CTC942,,Yes
+CTC763,FM Sumire,Sumire,FM,Female,CTC896,CTC897,,No
+CTC768,TnS Iroha,Iroha,TnS,Female,CTC947,CTC948,,Yes
+CTC776,ECLS Hoshi,Hoshi,ECLS,Male,CTC909,CTC910,,No
+CTC777,TnS Hanako,Hanako,TnS,Female,CTC894,CTC902,,Yes
+CTC779,Ray's Qiqi,Qiqi,Ray's,Female,,,,No
+CTC782,TnS Akimi,Akimi,TnS,Female,CTC943,CTC944,,Yes
+CTC878,Kuro,Kuro,,Male,CTC880,CTC881,,No
+CTC879,ECLS Hiroaki,Hiroaki,ECLS,Female,CTC882,CTC883,,No
+CTC887,TnS Fawny,Fawny,TnS,Male,CTC889,CTC890,,Yes
+CTC888,TnS Hibiki,Hibiki,TnS,Female,,,,Yes
+CTC900,TnS Mizore,Mizore,TnS,Female,CTC901,CTC902,,Yes
+CTC911,TnS Ayame,Ayame,TnS,Female,CTC912,CTC752,,Yes
+CTC912,C&C Kenshin,Kenshin,C&C,Male,,,,No
+CTC913,TnS Guimauve,Guimauve,TnS,Male,CTC892,CTC915,,Yes
+CTC914,C&C Suki,Suki,C&C,Female,,,,No
+CTC935,TnS Zeroyo,Zeroyo,TnS,Female,CTC905,CTC936,,Yes
+CTC950,TnS Misao,Misao,TnS,Male,CTC749,CTC900,,Yes
+CTC960,TnS Dolly,Dolly,TnS,Female,CTC901,CTC962,,Yes
+CTC973,TnS Wataru,Wataru,TnS,Male,CTC969,CTC946,,Yes
+CTC974,TnS Yoko,Yoko,TnS,Female,CTC945,CTC975,,Yes
+CTC984,TnS Sunao,Sunao,TnS,Female,CTC901,CTC967,,Yes
+CTC662,SLM's HachiMitsu,HachiMitsu,SLM's,Male,CTC703,CTC663,,Yes
+CTC664,SLM's Midnight,Midnight,SLM's,Female,CTC700,CTC702,,Yes
+CTC967,TnS Himeko,Himeko,TnS,Female,CTC776,CTC968,,Yes
+CTC171,MP Sniper,Sniper,MP,Female,,,,No
+CTC178,Betty,Betty,,Female,,,,No
+CTC213,TU Tygo,Tygo,TU,Male,,,,No
+CTC214,TU Maeve,Maeve,TU,Female,,,,No
+CTC215,MS Black Elah,Black Elah,MS,Male,,,,No
+CTC216,AM Leana,Leana,AM,Female,,,,No
+CTC701,SLM's Snow White,Snow White,SLM's,Female,,,,Yes
+CTC703,SLM's Onyx,Onyx,SLM's,Male,,,,Yes
+CTC705,SLM's Si,Si,SLM's,Female,,,,Yes
+CTC743,Ray's Dekret,Dekret,Ray's,Male,,,,No
+CTC751,TnS Hiroo,Hiroo,TnS,Male,CTC917,CTC918,,Yes
+CTC752,FF Yuko,Yuko,FF,Female,,,,No
+CTC816,PM Mika,Mika,PM,Male,,,,Yes
+CTC880,Akito,Akito,,Male,,,,No
+CTC881,Toriko,Toriko,,Female,,,,No
+CTC882,Aki,Aki,,Male,,,,No
+CTC883,ECLS Biscotte,Biscotte,ECLS,Female,CTC884,CTC885,,No
+CTC889,TnS Shuga,Shuga,TnS,Male,CTC892,CTC893,,Yes
+CTC890,ECLS Kyoko,Kyoko,ECLS,Female,CTC882,CTC891,,No
+CTC891,ECLS Hikari,Hikari,ECLS,Female,,,,No
+CTC892,Jin,Jin,,Male,,,,No
+CTC894,Rei,Rei,,Male,,,,No
+CTC896,Mohanah Auguste,Auguste,Mohanah,Male,,CTC898,,No
+CTC897,MS Prune,Prune,MS,Female,,,,No
+CTC901,TnS Mamoru,Mamoru,TnS,Male,CTC903,CTC904,,Yes
+CTC902,FF Kotoe,Kotoe,FF,Female,,,,No
+CTC905,TnS Bourbillon,Bourbillon,TnS,Male,CTC907,CTC908,,Yes
+CTC909,Kinder,Kinder,,Male,,,,No
+CTC910,ECLS Ruby,Ruby,ECLS,Female,,,,No
+CTC915,TnS Hinata,Hinata,TnS,Female,CTC751,CTC916,,Yes
+CTC936,TnS Towa,Towa,TnS,Female,CTC917,CTC918,,Yes
+CTC937,TnS Seiko,Seiko,TnS,Female,CTC903,CTC938,,Yes
+CTC942,TnS Kanade,Kanade,TnS,Female,CTC903,CTC904,,Yes
+CTC943,TnS Asaki,Asaki,TnS,Male,CTC945,CTC946,,Yes
+CTC944,TnS Haruna,Haruna,TnS,Female,CTC894,CTC902,,Yes
+CTC945,FF Suzaku,Suzaku,FF,Male,,,,No

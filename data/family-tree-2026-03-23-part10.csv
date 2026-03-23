@@ -1,81 +1,81 @@
-ID,Full Name,Name,Prefix,Suffix,Sex,Birth Date,Sire ID,Dam ID,Owner CTU ID,Owned
-CTC682,F2,F2,,,Female,2026-01-30,CTC679,CTC630,,Yes
-CTC683,M2,M2,,,Male,2026-01-30,CTC679,CTC630,,Yes
-CTC684,M3,M3,,,Male,2026-01-30,CTC679,CTC630,,Yes
-CTC685,F4,F4,,,Female,2026-01-30,CTC679,CTC630,,Yes
-CTC686,F3,F3,,,Female,2026-01-30,CTC679,CTC630,,Yes
-CTC735,TnS Qoro,Qoro,TnS,,Male,2023-04-16,CTC739,CTC740,,Yes
-CTC738,TnS Liyuu,Liyuu,TnS,,Female,2022-07-31,CTC745,CTC746,,Yes
-CTC742,TnS Okiru,Okiru,TnS,,Female,2022-08-26,CTC753,CTC754,,Yes
-CTC758,TnS Zettai,Zettai,TnS,,Male,2023-06-11,CTC760,CTC761,,Yes
-CTC762,TnS Hachiman,Hachiman,TnS,,Male,2022-07-16,CTC778,CTC779,,Yes
-CTC764,TnS Poteto,Poteto,TnS,,Male,2023-04-06,CTC766,CTC767,,Yes
-CTC766,TnS Suiteki,Suiteki,TnS,,Male,2021-11-09,CTC781,CTC782,,Yes
-CTC771,TnS Bakebi,Bakebi,TnS,,Female,2022-05-29,CTC772,CTC773,,Yes
-CTC791,TnS Umai,Umai,TnS,,Female,2023-05-11,CTC792,CTC793,,Yes
-CTC793,TnS Onu,Onu,TnS,,Female,2022-10-11,CTC753,CTC740,,Yes
-CTC951,TnS Nanami,Nanami,TnS,,Female,2021-06-15,CTC781,CTC780,,Yes
-CTC956,TnS Likka,Likka,TnS,,Female,2022-08-08,CTC950,CTC970,,Yes
-CTC957,MLP Brie,Brie,MLP,,Male,2021-09-06,CTC959,CTC960,,No
-CTC981,TnS Bimyo,Bimyo,TnS,,Female,2022-11-28,CTC781,CTC985,,Yes
-CTC982,TnS Shoji,Shoji,TnS,,Female,2022-01-25,CTC983,CTC984,,Yes
-CTC1055,DA Whimsy,Whimsy,DA,,Male,2025-08-03,CTC63,CTC64,,Yes
-CTC1860,SLM's Oddy,Oddy,SLM's,,Male,2026-01-30,CTC679,CTC630,,Yes
-CTC1861,SLM's Pasta,Pasta,SLM's,,Male,2026-01-30,CTC679,CTC630,,Yes
-CTC1968,SLM's Yūzu,Yūzu,SLM's,,Male,2026-01-30,CTC679,CTC630,,Yes
-CTC2244,SLM's Uzu,Uzu,SLM's,,Male,2026-01-30,CTC679,CTC630,,Yes
-CTC2245,SLM's Ted,Ted,SLM's,,Male,2026-01-24,CTC631,CTC658,,Yes
-CTC2246,SLM's Toes,Toes,SLM's,,Male,2026-01-24,CTC597,CTC628,,Yes
-CTC154,JW Ravi,Ravi,JW,,Male,2024-03-08,,,,Yes
-CTC155,MOW Maya,Maya,MOW,,Female,2024-12-09,,,,Yes
-CTC156,MLP Anna,Anna,MLP,,Female,2024-04-04,CTC157,CTC168,,Yes
-CTC172,TnS Jiro,Jiro,TnS,,Male,2020-12-02,CTC776,CTC777,,Yes
-CTC174,TnS Sasori,Sasori,TnS,,Male,2020-10-10,CTC913,CTC914,,Yes
-CTC180,JW Rose,Rose,JW,,Female,2024-02-15,,,,Yes
-CTC182,JW Sara,Sara,JW,,Female,2024-07-16,,,,Yes
-CTC197,BE Brindles,Brindles,BE,,Female,2023-01-01,,,,No
-CTC207,HV Emerald,Emerald,HV,,Male,2020-03-22,CTC211,CTC212,,No
-CTC254,PvK Gimli,Gimli,PvK,,Male,2020-01-01,,,,No
-CTC279,PvK Java,Java,PvK,,Female,2024-02-19,,,,No
-CTC286,LB Blcky,Blcky,LB,,Female,2020-01-01,,,,No
-CTC290,CMM Black Eye White,Black Eye White,CMM,,Female,2023-01-01,,,,No
-CTC295,M&M Praline,Praline,M&M,,Female,2024-06-10,,,,No
-CTC298,TnS Shina,Shina,TnS,,Female,2021-04-25,CTC878,CTC879,,Yes
-CTC30,RM Lola,Lola,RM,,Female,2024-01-01,,,,No
-CTC371,TOM Astrid,Astrid,TOM,,Female,2020-03-10,,,,No
-CTC385,MJ Lila,Lila,MJ,,Female,2022-06-20,,,,No
-CTC44,YR Pride,Pride,YR,,Male,2018-12-05,,,,No
-CTC45,AM Betty,Betty,AM,,Female,2019-01-08,,,,No
-CTC49,FF Red Sable,Red Sable,FF,,Male,2019-01-01,,,,No
-CTC50,FF Jazz,Jazz,FF,,Female,2019-01-01,,,,No
-CTC51,PvK Argente Brindle,Argente Brindle,PvK,,Male,2019-01-01,,,,No
-CTC52,PvK Tricolor,Tricolor,PvK,,Female,2019-01-01,,,,No
-CTC529,TnS Panikku,Panikku,TnS,,Male,2023-10-31,,,,Yes
-CTC530,MMM Daenerys,Daenerys,MMM,,Female,2024-06-28,,,,No
-CTC601,SLM'S Dobby von Zaandam,Dobby von Zaandam,SLM'S,,Male,2025-01-13,,,,Yes
-CTC657,SLM's Cocoa,Cocoa,SLM's,,Female,2025-06-22,,,,Yes
-CTC733,TnS Liichi,Liichi,TnS,,Male,2023-10-13,CTC735,CTC736,,Yes
-CTC734,TnS Fuyumi,Fuyumi,TnS,,Female,2023-01-16,CTC737,CTC738,,Yes
-CTC736,TnS Nozomu,Nozomu,TnS,,Female,2023-03-14,CTC741,CTC742,,Yes
-CTC741,LB Irie,Irie,LB,,Male,2022-03-06,,,,No
-CTC748,TnS Inoko,Inoko,TnS,,Female,2021-01-04,CTC749,CTC750,,Yes
-CTC755,TnS Misuzu,Misuzu,TnS,,Female,2021-03-25,CTC756,CTC757,,Yes
-CTC759,TnS Harumi,Harumi,TnS,,Female,2023-01-20,CTC762,CTC763,,Yes
-CTC765,TnS Peji,Peji,TnS,,Female,2022-09-10,CTC739,CTC768,,Yes
-CTC774,TnS Naoko,Naoko,TnS,,Female,2021-02-04,CTC174,CTC911,,Yes
-CTC780,TnS Natsuki,Natsuki,TnS,,Female,2020-06-24,CTC912,CTC935,,Yes
-CTC789,MMM Abracadabra,Abracadabra,MMM,,Male,2020-08-10,,,,No
-CTC790,MMM A+,A+,MMM,,Female,2020-08-10,,,,No
-CTC794,TnS Noboru,Noboru,TnS,,Female,2023-03-14,CTC741,CTC742,,Yes
-CTC814,PM Bambi,Bambi,PM,,Female,2025-06-11,,,,Yes
-CTC815,PM Splash,Splash,PM,,Female,2025-06-11,,,,Yes
-CTC886,TnS Teruko,Teruko,TnS,,Female,2021-07-29,CTC887,CTC888,,Yes
-CTC899,TnS Mitsurin,Mitsurin,TnS,,Female,2021-02-11,CTC749,CTC900,,Yes
-CTC952,TnS Mizuki,Mizuki,TnS,,Female,2021-03-25,CTC756,CTC757,,Yes
-CTC953,TnS Jigoku,Jigoku,TnS,,Male,2023-01-27,CTC955,CTC956,,Yes
-CTC954,TnS Yuushou,Yuushou,TnS,,Female,2023-05-30,CTC980,CTC981,,Yes
-CTC961,HV Dash,Dash,HV,,Male,2020-03-31,CTC211,CTC45,,No
-CTC971,TnS Kami,Kami,TnS,,Female,2021-04-14,CTC912,CTC972,,Yes
-CTC972,TnS Ibuki,Ibuki,TnS,,Female,2020-10-26,CTC973,CTC974,,Yes
-CTC986,Iwa,Iwa,,,Female,2021-03-01,,,,No
-CTC169,MW Bertus,Bertus,MW,,Male,2022-12-19,CTC170,CTC171,,No
+ID,Full Name,Name,Prefix,Sex,Sire ID,Dam ID,Owner CTU ID,Owned
+CTC682,F2,F2,,Female,CTC679,CTC630,,Yes
+CTC683,M2,M2,,Male,CTC679,CTC630,,Yes
+CTC684,M3,M3,,Male,CTC679,CTC630,,Yes
+CTC685,F4,F4,,Female,CTC679,CTC630,,Yes
+CTC686,F3,F3,,Female,CTC679,CTC630,,Yes
+CTC735,TnS Qoro,Qoro,TnS,Male,CTC739,CTC740,,Yes
+CTC738,TnS Liyuu,Liyuu,TnS,Female,CTC745,CTC746,,Yes
+CTC742,TnS Okiru,Okiru,TnS,Female,CTC753,CTC754,,Yes
+CTC758,TnS Zettai,Zettai,TnS,Male,CTC760,CTC761,,Yes
+CTC762,TnS Hachiman,Hachiman,TnS,Male,CTC778,CTC779,,Yes
+CTC764,TnS Poteto,Poteto,TnS,Male,CTC766,CTC767,,Yes
+CTC766,TnS Suiteki,Suiteki,TnS,Male,CTC781,CTC782,,Yes
+CTC771,TnS Bakebi,Bakebi,TnS,Female,CTC772,CTC773,,Yes
+CTC791,TnS Umai,Umai,TnS,Female,CTC792,CTC793,,Yes
+CTC793,TnS Onu,Onu,TnS,Female,CTC753,CTC740,,Yes
+CTC951,TnS Nanami,Nanami,TnS,Female,CTC781,CTC780,,Yes
+CTC956,TnS Likka,Likka,TnS,Female,CTC950,CTC970,,Yes
+CTC957,MLP Brie,Brie,MLP,Male,CTC959,CTC960,,No
+CTC981,TnS Bimyo,Bimyo,TnS,Female,CTC781,CTC985,,Yes
+CTC982,TnS Shoji,Shoji,TnS,Female,CTC983,CTC984,,Yes
+CTC1055,DA Whimsy,Whimsy,DA,Male,CTC63,CTC64,,Yes
+CTC1860,SLM's Oddy,Oddy,SLM's,Male,CTC679,CTC630,,Yes
+CTC1861,SLM's Pasta,Pasta,SLM's,Male,CTC679,CTC630,,Yes
+CTC1968,SLM's Yūzu,Yūzu,SLM's,Male,CTC679,CTC630,,Yes
+CTC2244,SLM's Uzu,Uzu,SLM's,Male,CTC679,CTC630,,Yes
+CTC2245,SLM's Ted,Ted,SLM's,Male,CTC631,CTC658,,Yes
+CTC2246,SLM's Toes,Toes,SLM's,Male,CTC597,CTC628,,Yes
+CTC154,JW Ravi,Ravi,JW,Male,,,,Yes
+CTC155,MOW Maya,Maya,MOW,Female,,,,Yes
+CTC156,MLP Anna,Anna,MLP,Female,CTC157,CTC168,,Yes
+CTC172,TnS Jiro,Jiro,TnS,Male,CTC776,CTC777,,Yes
+CTC174,TnS Sasori,Sasori,TnS,Male,CTC913,CTC914,,Yes
+CTC180,JW Rose,Rose,JW,Female,,,,Yes
+CTC182,JW Sara,Sara,JW,Female,,,,Yes
+CTC197,BE Brindles,Brindles,BE,Female,,,,No
+CTC207,HV Emerald,Emerald,HV,Male,CTC211,CTC212,,No
+CTC254,PvK Gimli,Gimli,PvK,Male,,,,No
+CTC279,PvK Java,Java,PvK,Female,,,,No
+CTC286,LB Blcky,Blcky,LB,Female,,,,No
+CTC290,CMM Black Eye White,Black Eye White,CMM,Female,,,,No
+CTC295,M&M Praline,Praline,M&M,Female,,,,No
+CTC298,TnS Shina,Shina,TnS,Female,CTC878,CTC879,,Yes
+CTC30,RM Lola,Lola,RM,Female,,,,No
+CTC371,TOM Astrid,Astrid,TOM,Female,,,,No
+CTC385,MJ Lila,Lila,MJ,Female,,,,No
+CTC44,YR Pride,Pride,YR,Male,,,,No
+CTC45,AM Betty,Betty,AM,Female,,,,No
+CTC49,FF Red Sable,Red Sable,FF,Male,,,,No
+CTC50,FF Jazz,Jazz,FF,Female,,,,No
+CTC51,PvK Argente Brindle,Argente Brindle,PvK,Male,,,,No
+CTC52,PvK Tricolor,Tricolor,PvK,Female,,,,No
+CTC529,TnS Panikku,Panikku,TnS,Male,,,,Yes
+CTC530,MMM Daenerys,Daenerys,MMM,Female,,,,No
+CTC601,SLM'S Dobby von Zaandam,Dobby von Zaandam,SLM'S,Male,,,,Yes
+CTC657,SLM's Cocoa,Cocoa,SLM's,Female,,,,Yes
+CTC733,TnS Liichi,Liichi,TnS,Male,CTC735,CTC736,,Yes
+CTC734,TnS Fuyumi,Fuyumi,TnS,Female,CTC737,CTC738,,Yes
+CTC736,TnS Nozomu,Nozomu,TnS,Female,CTC741,CTC742,,Yes
+CTC741,LB Irie,Irie,LB,Male,,,,No
+CTC748,TnS Inoko,Inoko,TnS,Female,CTC749,CTC750,,Yes
+CTC755,TnS Misuzu,Misuzu,TnS,Female,CTC756,CTC757,,Yes
+CTC759,TnS Harumi,Harumi,TnS,Female,CTC762,CTC763,,Yes
+CTC765,TnS Peji,Peji,TnS,Female,CTC739,CTC768,,Yes
+CTC774,TnS Naoko,Naoko,TnS,Female,CTC174,CTC911,,Yes
+CTC780,TnS Natsuki,Natsuki,TnS,Female,CTC912,CTC935,,Yes
+CTC789,MMM Abracadabra,Abracadabra,MMM,Male,,,,No
+CTC790,MMM A+,A+,MMM,Female,,,,No
+CTC794,TnS Noboru,Noboru,TnS,Female,CTC741,CTC742,,Yes
+CTC814,PM Bambi,Bambi,PM,Female,,,,Yes
+CTC815,PM Splash,Splash,PM,Female,,,,Yes
+CTC886,TnS Teruko,Teruko,TnS,Female,CTC887,CTC888,,Yes
+CTC899,TnS Mitsurin,Mitsurin,TnS,Female,CTC749,CTC900,,Yes
+CTC952,TnS Mizuki,Mizuki,TnS,Female,CTC756,CTC757,,Yes
+CTC953,TnS Jigoku,Jigoku,TnS,Male,CTC955,CTC956,,Yes
+CTC954,TnS Yuushou,Yuushou,TnS,Female,CTC980,CTC981,,Yes
+CTC961,HV Dash,Dash,HV,Male,CTC211,CTC45,,No
+CTC971,TnS Kami,Kami,TnS,Female,CTC912,CTC972,,Yes
+CTC972,TnS Ibuki,Ibuki,TnS,Female,CTC973,CTC974,,Yes
+CTC986,Iwa,Iwa,,Female,,,,No
+CTC169,MW Bertus,Bertus,MW,Male,CTC170,CTC171,,No
