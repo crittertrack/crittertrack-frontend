@@ -23433,6 +23433,7 @@ const AnimalList = ({
             return localStorage.getItem('animalList_statusFilterMating') === 'true';
         } catch { return false; }
     });
+    const [blFilter, setBlFilter] = useState([]); // array of line IDs to filter by (empty = no filter)
     const [ownedFilterActive, setOwnedFilterActive] = useState(() => {
         try {
             const saved = localStorage.getItem('animalList_ownedFilterActive');
@@ -23901,7 +23902,15 @@ const AnimalList = ({
     }, [authToken, API_BASE_URL]);
 
     const groupedAnimals = useMemo(() => {
-        return animals.reduce((groups, animal) => {
+        let source = animals;
+        // Apply breeding line filter client-side so it reacts instantly without re-fetching
+        if (blFilter.length > 0) {
+            source = source.filter(a => {
+                const assigned = animalBreedingLines[a.id_public] || [];
+                return blFilter.some(lineId => assigned.includes(lineId));
+            });
+        }
+        return source.reduce((groups, animal) => {
             const species = animal.species || 'Unspecified Species';
             if (!groups[species]) {
                 groups[species] = [];
@@ -23909,7 +23918,7 @@ const AnimalList = ({
             groups[species].push(animal);
             return groups;
         }, {});
-    }, [animals]);
+    }, [animals, blFilter, animalBreedingLines]);
     
     const speciesNames = useMemo(() => {
         return [...allUserSpecies].sort((a, b) => {
@@ -23988,7 +23997,8 @@ const AnimalList = ({
         statusFilterNursing ||
         statusFilterMating ||
         !ownedFilterActive ||
-        publicFilter !== ''
+        publicFilter !== '' ||
+        blFilter.length > 0
     );
     
     const handleClearFilters = () => {
@@ -24002,6 +24012,7 @@ const AnimalList = ({
         setStatusFilterMating(false);
         setOwnedFilterActive(true);
         setPublicFilter('');
+        setBlFilter([]);
     };
     
     const handleRefresh = async () => {
@@ -26805,6 +26816,30 @@ const AnimalList = ({
                         <span className="hidden sm:inline">Nursing</span>
                     </button>
                 </div>
+
+                {/* Line 4: Breeding Line filters (only shown when user has named lines) */}
+                {breedingLineDefs.some(l => l.name) && (
+                    <div className="flex flex-wrap justify-center items-center gap-2">
+                        <span className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">Breeding Line:</span>
+                        {breedingLineDefs.filter(l => l.name).map(line => {
+                            const isActive = blFilter.includes(line.id);
+                            return (
+                                <button
+                                    key={line.id}
+                                    onClick={() => setBlFilter(prev => isActive ? prev.filter(id => id !== line.id) : [...prev, line.id])}
+                                    title={line.name}
+                                    className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm border ${
+                                        isActive ? 'text-white border-transparent' : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300'
+                                    }`}
+                                    style={isActive ? { backgroundColor: line.color, borderColor: line.color } : {}}
+                                >
+                                    <span style={{ color: isActive ? 'white' : line.color }} className="text-base leading-none">&#x25C6;</span>
+                                    {line.name}
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
             )}
 
