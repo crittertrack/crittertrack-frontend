@@ -20572,6 +20572,12 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [myReceivedRatings, setMyReceivedRatings] = useState(null);
     const [myReceivedRatingsLoading, setMyReceivedRatingsLoading] = useState(false);
 
+    // Breeding lines — local draft state (not saved until user clicks Save)
+    const [localBLDefs, setLocalBLDefs] = useState(breedingLineDefs);
+    const [blSaving, setBlSaving] = useState(false);
+    const [blSaved, setBlSaved] = useState(false);
+    useEffect(() => { setLocalBLDefs(breedingLineDefs); }, [breedingLineDefs]);
+
     useEffect(() => {
         if (settingsTab !== 'ratings' || !userProfile?.id_public) return;
         setMyReceivedRatingsLoading(true);
@@ -21367,7 +21373,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">&#x1F4A0; Breeding Lines</h3>
                     <p className="text-sm text-gray-600">Define up to 10 personal breeding lines. These are private and only visible to you. Assign them to animals in the animal&apos;s detail view under the Identification tab.</p>
                     <div className="space-y-3">
-                        {breedingLineDefs.map((line, idx) => (
+                        {localBLDefs.map((line, idx) => (
                             <div key={line.id} className="flex items-center gap-3 flex-wrap">
                                 <span className="text-sm text-gray-400 w-4 text-right">{idx + 1}</span>
                                 <div className="flex gap-1">
@@ -21375,7 +21381,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                         <button
                                             key={color}
                                             type="button"
-                                            onClick={() => saveBreedingLineDefs(breedingLineDefs.map((l, i) => i === idx ? { ...l, color } : l), animalBreedingLines)}
+                                            onClick={() => setLocalBLDefs(localBLDefs.map((l, i) => i === idx ? { ...l, color } : l))}
                                             style={{ backgroundColor: color, outline: line.color === color ? '3px solid #374151' : 'none', outlineOffset: '2px' }}
                                             className="w-5 h-5 rounded-full transition hover:scale-110 flex-shrink-0"
                                             title={color}
@@ -21387,14 +21393,32 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     placeholder={`Line ${idx + 1} name`}
                                     value={line.name}
                                     maxLength={30}
-                                    onChange={(e) => saveBreedingLineDefs(breedingLineDefs.map((l, i) => i === idx ? { ...l, name: e.target.value } : l), animalBreedingLines)}
+                                    onChange={(e) => setLocalBLDefs(localBLDefs.map((l, i) => i === idx ? { ...l, name: e.target.value } : l))}
                                     className="flex-1 min-w-[120px] p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary"
                                 />
                                 <span style={{ color: line.color }} className="text-xl leading-none" title={line.name || `Line ${idx + 1}`}>&#x25C6;</span>
                             </div>
                         ))}
                     </div>
-                    <p className="text-xs text-gray-400">Changes are saved to your account automatically.</p>
+                    <div className="flex items-center gap-3 pt-1">
+                        <button
+                            type="button"
+                            disabled={blSaving}
+                            onClick={async () => {
+                                setBlSaving(true);
+                                setBlSaved(false);
+                                await saveBreedingLineDefs(localBLDefs, animalBreedingLines);
+                                setBlSaving(false);
+                                setBlSaved(true);
+                                setTimeout(() => setBlSaved(false), 3000);
+                            }}
+                            className="bg-primary hover:bg-primary-dark text-black font-bold py-2 px-5 rounded-lg shadow-md transition duration-150 flex items-center gap-2 disabled:opacity-50"
+                        >
+                            {blSaving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
+                            {blSaving ? 'Saving…' : 'Save Breeding Lines'}
+                        </button>
+                        {blSaved && <span className="text-sm text-green-600 font-medium">&#x2713; Saved to your account!</span>}
+                    </div>
                 </div>
             )}
 
@@ -28810,11 +28834,12 @@ const App = () => {
         setBreedingLineDefs(defs);
         try { localStorage.setItem('ct_bldefs', JSON.stringify(defs)); } catch {}
         if (authToken) {
-            axios.put(`${API_BASE_URL}/users/breeding-lines`,
+            return axios.put(`${API_BASE_URL}/users/breeding-lines`,
                 { breedingLineDefs: defs, animalBreedingLines: currentAssignments },
                 { headers: { Authorization: `Bearer ${authToken}` } }
             ).catch(() => {});
         }
+        return Promise.resolve();
     };
     const toggleAnimalBreedingLine = (animalId, lineId) => {
         setAnimalBreedingLines(prev => {
