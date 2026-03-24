@@ -11547,9 +11547,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         return bDate - aDate;
     });
 
+    const litterStats = filteredLitters.reduce((acc, l) => {
+        acc.litters++;
+        acc.males   += l.maleCount   ?? 0;
+        acc.females += l.femaleCount ?? 0;
+        acc.unknown += l.unknownCount ?? 0;
+        return acc;
+    }, { litters: 0, males: 0, females: 0, unknown: 0 });
+
     return (
         <div className="w-full max-w-6xl bg-white p-3 sm:p-6 rounded-xl shadow-lg">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
                 <h2 className="text-xl sm:text-3xl font-bold text-gray-800 flex items-center">
                     <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
                     Litter Management
@@ -11642,6 +11650,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         </button>
                     </div>
                 </div>
+            </div>
+
+            {/* Stats bar */}
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 mb-4 sm:mb-6 pl-0.5">
+                <span><span className="font-semibold text-gray-700">{litterStats.litters}</span> Litters</span>
+                <span className="text-gray-300">|</span>
+                <span><span className="font-semibold text-blue-600">{litterStats.males}</span> Males</span>
+                <span className="text-gray-300">|</span>
+                <span><span className="font-semibold text-pink-500">{litterStats.females}</span> Females</span>
+                <span className="text-gray-300">|</span>
+                <span><span className="font-semibold text-gray-500">{litterStats.unknown}</span> Unknown</span>
             </div>
 
             {loading && litters.length === 0 && (
