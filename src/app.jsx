@@ -28842,19 +28842,17 @@ const App = () => {
         return Promise.resolve();
     };
     const toggleAnimalBreedingLine = (animalId, lineId) => {
-        setAnimalBreedingLines(prev => {
-            const current = prev[animalId] || [];
-            const updated = current.includes(lineId) ? current.filter(id => id !== lineId) : [...current, lineId];
-            const next = { ...prev, [animalId]: updated };
-            try { localStorage.setItem('ct_blassign', JSON.stringify(next)); } catch {}
-            if (authToken) {
-                axios.put(`${API_BASE_URL}/users/breeding-lines`,
-                    { breedingLineDefs, animalBreedingLines: next },
-                    { headers: { Authorization: `Bearer ${authToken}` } }
-                ).catch(() => {});
-            }
-            return next;
-        });
+        const current = animalBreedingLines[animalId] || [];
+        const updated = current.includes(lineId) ? current.filter(id => id !== lineId) : [...current, lineId];
+        const next = { ...animalBreedingLines, [animalId]: updated };
+        setAnimalBreedingLines(next);
+        try { localStorage.setItem('ct_blassign', JSON.stringify(next)); } catch {}
+        if (authToken) {
+            axios.put(`${API_BASE_URL}/users/breeding-lines`,
+                { breedingLineDefs, animalBreedingLines: next },
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            ).catch(err => console.error('Failed to save breeding line assignment:', err));
+        }
     };
     // ─────────────────────────────────────────────────────────────────────────────
     const [parentCardKey, setParentCardKey] = useState(0); // Force parent cards to refetch when tab opens
