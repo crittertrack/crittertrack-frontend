@@ -10469,12 +10469,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     const storedFemales = litter.femaleCount  ?? 0;
                     const storedUnknown = litter.unknownCount ?? 0;
                     const storedBorn    = litter.litterSizeBorn ?? litter.numberBorn ?? 0;
-                    // Gender counts: use linked offspring as ground truth so a gender
-                    // change on a linked animal correctly decrements the old gender
-                    // and increments the new one (mirrors calcLitterCounts logic).
-                    const newMales   = linkedMales;
-                    const newFemales = linkedFemales;
-                    const newUnknown = linkedUnknown;
+                    // Keep the higher of linked vs manually-entered counts — linked offspring
+                    // may be a subset of the actual litter (unlinked/stillborn animals exist).
+                    const newMales   = Math.max(linkedMales, storedMales);
+                    const newFemales = Math.max(linkedFemales, storedFemales);
+                    const newUnknown = Math.max(linkedUnknown, storedUnknown);
                     // Total born: keep the higher value — stored may include
                     // unlinked / stillborn animals that aren't in the offspring list.
                     const newBorn    = Math.max(storedBorn, linkedTotal);
