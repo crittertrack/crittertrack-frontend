@@ -629,7 +629,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                                     headers: { Authorization: `Bearer ${authToken}` }
                                 });
                                 animalInfo = response.data;
-                                foundViaOwned = true; // User has legitimate access (sold/transferred animal)
+                                // Do NOT set foundViaOwned = true here — animal is accessible but not owned.
+                                // This ensures the showOnPublicProfile check below still applies,
+                                // consistent with how ViewOnlyParentCard handles the same case.
                             } catch (error2) {
                                 console.log(`Animal ${id} not accessible via owned or related endpoints:`, error2.message);
                             }
