@@ -8,6 +8,8 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.13.2",
+    "csv-parse": "^6.2.1",
+    "csv-stringify": "^6.7.0",
     "dagre": "^0.8.5",
     "flag-icons": "^7.5.0",
     "html2canvas": "^1.4.1",

@@ -3664,7 +3664,7 @@ const computeRelationships = (animal, userAnimals) => {
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
-const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onToggleOwned, userProfile, userAnimals = [] }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onToggleOwned, userProfile, userAnimals = [], breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -4866,6 +4866,29 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                     </div>
                                 </div>
                             )}
+                            {/* Breeding Lines */}
+                            {(() => {
+                                const namedLines = breedingLineDefs.filter(l => l.name);
+                                if (namedLines.length === 0 || !toggleAnimalBreedingLine) return null;
+                                const assignedIds = animalBreedingLines[animal.id_public] || [];
+                                return (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3">
+                                        <h3 className="text-lg font-semibold text-gray-700">&#x1F4A0; Breeding Lines</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {namedLines.map(l => {
+                                                const assigned = assignedIds.includes(l.id);
+                                                return (
+                                                    <button key={l.id} type="button"
+                                                        onClick={() => toggleAnimalBreedingLine(animal.id_public, l.id)}
+                                                        style={{ borderColor: l.color, color: assigned ? '#fff' : l.color, backgroundColor: assigned ? l.color : 'transparent' }}
+                                                        className="flex items-center gap-1.5 px-3 py-1 rounded-full border-2 text-sm font-medium transition"
+                                                    ><span>&#x25C6;</span> {l.name}</button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
                         </div>
                     )}
 
@@ -6272,7 +6295,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 // ==================== VIEW-ONLY PRIVATE ANIMAL DETAIL (SOLD/TRANSFERRED) ====================
 // Identical to PrivateAnimalDetail but without edit/delete and privacy controls
 // Used for animals you have view-only access to (sold, transferred, purchased)
-const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, showModalMessage, onViewAnimal }) => {
+const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, showModalMessage, onViewAnimal, breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -6874,6 +6897,29 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                     </div>
                                 </div>
                             )}
+                            {/* Breeding Lines */}
+                            {(() => {
+                                const namedLines = breedingLineDefs.filter(l => l.name);
+                                if (namedLines.length === 0 || !toggleAnimalBreedingLine) return null;
+                                const assignedIds = animalBreedingLines[animal.id_public] || [];
+                                return (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3">
+                                        <h3 className="text-lg font-semibold text-gray-700">&#x1F4A0; Breeding Lines</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {namedLines.map(l => {
+                                                const assigned = assignedIds.includes(l.id);
+                                                return (
+                                                    <button key={l.id} type="button"
+                                                        onClick={() => toggleAnimalBreedingLine(animal.id_public, l.id)}
+                                                        style={{ borderColor: l.color, color: assigned ? '#fff' : l.color, backgroundColor: assigned ? l.color : 'transparent' }}
+                                                        className="flex items-center gap-1.5 px-3 py-1 rounded-full border-2 text-sm font-medium transition"
+                                                    ><span>&#x25C6;</span> {l.name}</button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
 
                             {/* Origin */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
@@ -12088,7 +12134,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     {/* Total Born (auto-computed) */}
                                     {formData.litterSizeBorn > 0 && (
                                         <div className="mt-2 p-2 rounded-md bg-green-50 border border-green-200">
-                                            <p className="text-xs text-green-800">? <strong>Total Born auto-set to {formData.litterSizeBorn}</strong> ({formData.maleCount || 0}M + {formData.femaleCount || 0}F + {formData.unknownCount || 0}U)</p>
+                                            <p className="text-xs text-green-800">🔢 <strong>Total Born auto-set to {formData.litterSizeBorn}</strong> ({formData.maleCount || 0}M + {formData.femaleCount || 0}F + {formData.unknownCount || 0}U)</p>
                                         </div>
                                     )}
                                 </div>
@@ -20439,7 +20485,7 @@ const FormattedTextarea = ({ value, onChange, rows, maxLength, placeholder, disa
     );
 };
 
-const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCancel, authToken }) => {
+const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCancel, authToken, breedingLineDefs = [], animalBreedingLines = {}, saveBreedingLineDefs, toggleAnimalBreedingLine, BL_PRESETS_APP = [] }) => {
     console.log('[ProfileEditForm] userProfile.allowMessages:', userProfile.allowMessages);
     
     const [personalName, setPersonalName] = useState(userProfile.personalName);
@@ -20914,11 +20960,12 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             {/* Settings Tabs */}
             <div className="flex flex-wrap border-b border-gray-200 mb-6">
                 {[
-                    { id: 'profile',        label: 'Profile' },
-                    { id: 'info-adoption',  label: 'Info & Adoption' },
-                    { id: 'directory',      label: 'Directory' },
-                    { id: 'ratings',        label: 'Ratings' },
-                    { id: 'account',        label: 'Account' },
+                    { id: 'profile',         label: 'Profile' },
+                    { id: 'info-adoption',   label: 'Info & Adoption' },
+                    { id: 'directory',       label: 'Directory' },
+                    { id: 'ratings',         label: 'Ratings' },
+                    { id: 'breeding-lines',  label: 'Breeding Lines' },
+                    { id: 'account',         label: 'Account' },
                 ].map(tab => (
                     <button key={tab.id} type="button" onClick={() => setSettingsTab(tab.id)}
                         className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${settingsTab === tab.id ? 'border-accent text-accent' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
@@ -21314,6 +21361,42 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 )}
             </div>
             </>}
+
+            {settingsTab === 'breeding-lines' && (
+                <div className="p-4 sm:p-6 border rounded-lg bg-gray-50 space-y-5">
+                    <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">&#x1F4A0; Breeding Lines</h3>
+                    <p className="text-sm text-gray-600">Define up to 10 personal breeding lines. These are private and only visible to you. Assign them to animals in the animal&apos;s detail view under the Identification tab.</p>
+                    <div className="space-y-3">
+                        {breedingLineDefs.map((line, idx) => (
+                            <div key={line.id} className="flex items-center gap-3 flex-wrap">
+                                <span className="text-sm text-gray-400 w-4 text-right">{idx + 1}</span>
+                                <div className="flex gap-1">
+                                    {BL_PRESETS_APP.map(color => (
+                                        <button
+                                            key={color}
+                                            type="button"
+                                            onClick={() => saveBreedingLineDefs(breedingLineDefs.map((l, i) => i === idx ? { ...l, color } : l), animalBreedingLines)}
+                                            style={{ backgroundColor: color, outline: line.color === color ? '3px solid #374151' : 'none', outlineOffset: '2px' }}
+                                            className="w-5 h-5 rounded-full transition hover:scale-110 flex-shrink-0"
+                                            title={color}
+                                        />
+                                    ))}
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder={`Line ${idx + 1} name`}
+                                    value={line.name}
+                                    maxLength={30}
+                                    onChange={(e) => saveBreedingLineDefs(breedingLineDefs.map((l, i) => i === idx ? { ...l, name: e.target.value } : l), animalBreedingLines)}
+                                    className="flex-1 min-w-[120px] p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary"
+                                />
+                                <span style={{ color: line.color }} className="text-xl leading-none" title={line.name || `Line ${idx + 1}`}>&#x25C6;</span>
+                            </div>
+                        ))}
+                    </div>
+                    <p className="text-xs text-gray-400">Changes are saved to your account automatically.</p>
+                </div>
+            )}
 
             {settingsTab === 'account' && <>
             <form onSubmit={handleEmailUpdate} className="space-y-4 mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
@@ -22141,7 +22224,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
     );
 };
 
-const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToken, onProfileUpdated, onProfileEditButtonClicked }) => {
+const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToken, onProfileUpdated, onProfileEditButtonClicked, breedingLineDefs, animalBreedingLines, saveBreedingLineDefs, toggleAnimalBreedingLine, BL_PRESETS_APP }) => {
     const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
@@ -22215,7 +22298,12 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                     setIsEditing(false);
                 }} 
                 onCancel={() => setIsEditing(false)} 
-                authToken={authToken} 
+                authToken={authToken}
+                breedingLineDefs={breedingLineDefs}
+                animalBreedingLines={animalBreedingLines}
+                saveBreedingLineDefs={saveBreedingLineDefs}
+                toggleAnimalBreedingLine={toggleAnimalBreedingLine}
+                BL_PRESETS_APP={BL_PRESETS_APP}
             />
         );
     }
@@ -23265,7 +23353,10 @@ const AnimalList = ({
     soldTransferredAnimals,
     setSoldTransferredAnimals,
     archiveLoading,
-    setArchiveLoading
+    setArchiveLoading,
+    // Breeding lines (display-only for cards)
+    breedingLineDefs = [],
+    animalBreedingLines = {}
 }) => {
     const [animals, setAnimals] = useState([]);
     const [allAnimalsRaw, setAllAnimalsRaw] = useState([]); // Unfiltered ? used by Management View
@@ -24357,7 +24448,19 @@ const AnimalList = ({
                         {isSelectable && <div></div>}
                         <div className="text-[9px] sm:text-[10px] md:text-xs text-gray-500">{animal.id_public}</div>
                     </div>
-                    
+                    {/* Breeding line diamonds */}
+                    {(() => {
+                        const assignedIds = animalBreedingLines[animal.id_public] || [];
+                        const activeLines = breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name);
+                        if (activeLines.length === 0) return null;
+                        return (
+                            <div className="w-full px-2 pb-1 flex flex-wrap gap-0.5 justify-center">
+                                {activeLines.map(l => (
+                                    <span key={l.id} title={l.name} style={{ color: l.color }} className="text-sm leading-none">&#x25C6;</span>
+                                ))}
+                            </div>
+                        );
+                    })()}
                     {/* Status bar at bottom */}
                     <div className={`w-full py-0.5 sm:py-1 text-center border-t border-gray-300 mt-auto ${
                         animal.isViewOnly ? 'bg-orange-100' : 'bg-gray-100'
@@ -28677,6 +28780,58 @@ const App = () => {
     const [animalToView, setAnimalToView] = useState(null);
     const [animalViewHistory, setAnimalViewHistory] = useState([]); // Navigation history stack for animals
     const [detailViewTab, setDetailViewTab] = useState(1); // Tab for detail view
+    // ── Breeding Lines ────────────────────────────────────────────────────────────
+    const BL_PRESETS_APP = ['#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#3b82f6','#6366f1','#a855f7','#ec4899','#64748b'];
+    const [breedingLineDefs, setBreedingLineDefs] = useState(() => {
+        try { const s = localStorage.getItem('ct_bldefs'); if (s) return JSON.parse(s); } catch {}
+        return Array.from({ length: 10 }, (_, i) => ({ id: i, name: '', color: BL_PRESETS_APP[i] }));
+    });
+    const [animalBreedingLines, setAnimalBreedingLines] = useState(() => {
+        try { const s = localStorage.getItem('ct_blassign'); if (s) return JSON.parse(s); } catch {}
+        return {};
+    });
+    // Load from backend on login (overrides localStorage with server truth)
+    React.useEffect(() => {
+        if (!authToken) return;
+        axios.get(`${API_BASE_URL}/users/breeding-lines`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(r => {
+                if (Array.isArray(r.data.breedingLineDefs) && r.data.breedingLineDefs.length > 0) {
+                    setBreedingLineDefs(r.data.breedingLineDefs);
+                    try { localStorage.setItem('ct_bldefs', JSON.stringify(r.data.breedingLineDefs)); } catch {}
+                }
+                if (r.data.animalBreedingLines && Object.keys(r.data.animalBreedingLines).length > 0) {
+                    setAnimalBreedingLines(r.data.animalBreedingLines);
+                    try { localStorage.setItem('ct_blassign', JSON.stringify(r.data.animalBreedingLines)); } catch {}
+                }
+            })
+            .catch(() => {}); // Silent fail — use localStorage fallback
+    }, [authToken]);
+    const saveBreedingLineDefs = (defs, currentAssignments) => {
+        setBreedingLineDefs(defs);
+        try { localStorage.setItem('ct_bldefs', JSON.stringify(defs)); } catch {}
+        if (authToken) {
+            axios.put(`${API_BASE_URL}/users/breeding-lines`,
+                { breedingLineDefs: defs, animalBreedingLines: currentAssignments },
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            ).catch(() => {});
+        }
+    };
+    const toggleAnimalBreedingLine = (animalId, lineId) => {
+        setAnimalBreedingLines(prev => {
+            const current = prev[animalId] || [];
+            const updated = current.includes(lineId) ? current.filter(id => id !== lineId) : [...current, lineId];
+            const next = { ...prev, [animalId]: updated };
+            try { localStorage.setItem('ct_blassign', JSON.stringify(next)); } catch {}
+            if (authToken) {
+                axios.put(`${API_BASE_URL}/users/breeding-lines`,
+                    { breedingLineDefs, animalBreedingLines: next },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                ).catch(() => {});
+            }
+            return next;
+        });
+    };
+    // ─────────────────────────────────────────────────────────────────────────────
     const [parentCardKey, setParentCardKey] = useState(0); // Force parent cards to refetch when tab opens
     const [showTabs, setShowTabs] = useState(true); // Toggle for collapsible tabs panel
     const [sireData, setSireData] = useState(null);
@@ -31419,6 +31574,8 @@ const App = () => {
                             setSoldTransferredAnimals={setSoldTransferredAnimals}
                             archiveLoading={archiveLoading}
                             setArchiveLoading={setArchiveLoading}
+                            breedingLineDefs={breedingLineDefs}
+                            animalBreedingLines={animalBreedingLines}
                         />
                     } />
                     <Route path="/list" element={
@@ -31436,6 +31593,8 @@ const App = () => {
                             setSoldTransferredAnimals={setSoldTransferredAnimals}
                             archiveLoading={archiveLoading}
                             setArchiveLoading={setArchiveLoading}
+                            breedingLineDefs={breedingLineDefs}
+                            animalBreedingLines={animalBreedingLines}
                         />
                     } />
                     <Route path="/donation" element={<DonationView onBack={() => navigate('/')} authToken={authToken} userProfile={userProfile} />} />
@@ -31505,7 +31664,7 @@ const App = () => {
                             onBack={() => navigate('/')}
                         />
                     } />
-                    <Route path="/profile" element={<ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} />} />
+                    <Route path="/profile" element={<ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} saveBreedingLineDefs={saveBreedingLineDefs} toggleAnimalBreedingLine={toggleAnimalBreedingLine} BL_PRESETS_APP={BL_PRESETS_APP} />} />
                     <Route path="/breeder-directory" element={
                         <BreederDirectory
                             authToken={authToken}
@@ -31666,6 +31825,9 @@ const App = () => {
                                         onViewAnimal={handleViewAnimal}
                                         onToggleOwned={toggleAnimalOwned}
                                         userProfile={userProfile}
+                                        breedingLineDefs={breedingLineDefs}
+                                        animalBreedingLines={animalBreedingLines}
+                                        toggleAnimalBreedingLine={toggleAnimalBreedingLine}
                                     />
                                 );
                             } else {
@@ -31681,6 +31843,9 @@ const App = () => {
                                         setEnlargedImageUrl={setEnlargedImageUrl}
                                         showModalMessage={showModalMessage}
                                         onViewAnimal={handleViewAnimal}
+                                        breedingLineDefs={breedingLineDefs}
+                                        animalBreedingLines={animalBreedingLines}
+                                        toggleAnimalBreedingLine={toggleAnimalBreedingLine}
                                     />
                                 );
                             }
