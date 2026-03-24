@@ -10469,16 +10469,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     const storedFemales = litter.femaleCount  ?? 0;
                     const storedUnknown = litter.unknownCount ?? 0;
                     const storedBorn    = litter.litterSizeBorn ?? litter.numberBorn ?? 0;
-                    // Keep the higher of linked vs manually-entered counts — linked offspring
-                    // may be a subset of the actual litter (unlinked/stillborn animals exist).
-                    const newMales   = Math.max(linkedMales, storedMales);
-                    const newFemales = Math.max(linkedFemales, storedFemales);
-                    const newUnknown = Math.max(linkedUnknown, storedUnknown);
-                    // Total born: keep the higher value — stored may include
-                    // unlinked / stillborn animals that aren't in the offspring list.
-                    const newBorn    = Math.max(storedBorn, linkedTotal);
-                    if (newMales !== storedMales || newFemales !== storedFemales || newUnknown !== storedUnknown || newBorn !== storedBorn) {
-                        const patch = { maleCount: newMales || null, femaleCount: newFemales || null, unknownCount: newUnknown || null, litterSizeBorn: newBorn || null, numberBorn: newBorn || null };
+                    // Only auto-update total born if linked offspring exceed stored value.
+                    // Never overwrite manually-entered gender counts.
+                    const newBorn = Math.max(storedBorn, linkedTotal);
+                    if (newBorn !== storedBorn) {
+                        const patch = { litterSizeBorn: newBorn || null, numberBorn: newBorn || null };
                         setLitters(prev => prev.map(l => l._id === litter._id ? { ...l, ...patch } : l));
                         axios.put(`${API_BASE_URL}/litters/${litter._id}`, patch, { headers: { Authorization: `Bearer ${authToken}` } }).catch(() => {});
                     }
@@ -10684,15 +10679,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     // Rule 1: gender sum > total ? bump total (silent)
     // Rule 2: stillborn or weaned > total ? warn, do NOT auto-correct
     const reconcileLitterFormCounts = (fd, linkedAnimals = []) => {
-        const maleCount    = linkedAnimals.length > 0
-            ? linkedAnimals.filter(a => a.gender === 'Male').length
-            : (parseInt(fd.maleCount) || 0);
-        const femaleCount  = linkedAnimals.length > 0
-            ? linkedAnimals.filter(a => a.gender === 'Female').length
-            : (parseInt(fd.femaleCount) || 0);
-        const unknownCount = linkedAnimals.length > 0
-            ? linkedAnimals.filter(a => a.gender !== 'Male' && a.gender !== 'Female').length
-            : (parseInt(fd.unknownCount) || 0);
+        const linkedMales   = linkedAnimals.filter(a => a.gender === 'Male').length;
+        const linkedFemales = linkedAnimals.filter(a => a.gender === 'Female').length;
+        const linkedUnknown = linkedAnimals.filter(a => a.gender !== 'Male' && a.gender !== 'Female').length;
+        // Always keep manual entries — only enforce minimum equal to linked count
+        const maleCount    = Math.max(parseInt(fd.maleCount)    || 0, linkedMales);
+        const femaleCount  = Math.max(parseInt(fd.femaleCount)  || 0, linkedFemales);
+        const unknownCount = Math.max(parseInt(fd.unknownCount) || 0, linkedUnknown);
         const genderSum    = maleCount + femaleCount + unknownCount;
         const linkedCount  = linkedAnimals.length;
         const manualTotal  = parseInt(fd.litterSizeBorn) || 0;
@@ -10986,11 +10979,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const addedAnimal = availableToLink.animals.find(a => a.id_public === animalId);
             const existingOffspring = myAnimals.filter(a => (litter.offspringIds_public || []).includes(a.id_public));
             const allLinked = [...existingOffspring, ...(addedAnimal ? [addedAnimal] : [])];
-            const counts = calcLitterCounts(litter, allLinked);
+            // Only bump total born if linked count exceeds stored value — never touch gender counts
+            const newBorn = Math.max(litter.litterSizeBorn || 0, allLinked.length);
 
             await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
                 offspringIds_public: updatedOffspringIds,
-                ...counts
+                litterSizeBorn: newBorn || null,
+                numberBorn: newBorn || null,
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
@@ -11027,11 +11022,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const updatedOffspringIds = [...(litter.offspringIds_public || []), ...animalIdsToAdd];
             const existingOffspring = myAnimals.filter(a => (litter.offspringIds_public || []).includes(a.id_public));
             const allLinked = [...existingOffspring, ...availableToLink.animals];
-            const counts = calcLitterCounts(litter, allLinked);
+            // Only bump total born if linked count exceeds stored value — never touch gender counts
+            const newBorn = Math.max(litter.litterSizeBorn || 0, allLinked.length);
 
             await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
                 offspringIds_public: updatedOffspringIds,
-                ...counts
+                litterSizeBorn: newBorn || null,
+                numberBorn: newBorn || null,
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
@@ -11063,10 +11060,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         try {
             const updatedOffspringIds = (litter.offspringIds_public || []).filter(id => id !== animalId_public);
             const remainingOffspring = (litterOffspringMap[litter._id] || []).filter(a => a.id_public !== animalId_public);
-            const counts = calcLitterCounts(litter, remainingOffspring);
+            // Only update the link list — never modify gender counts or total born on unlink
             await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
                 offspringIds_public: updatedOffspringIds,
-                ...counts
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
