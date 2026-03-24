@@ -10406,7 +10406,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const response = await axios.get(`${API_BASE_URL}/litters`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            const littersData = response.data || [];
+            const littersData = Array.isArray(response.data) ? response.data : [];
             
             // Set litters immediately so UI can render
             setLitters(littersData);
@@ -10456,7 +10456,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 axios.get(`${API_BASE_URL}/litters/${litter.litter_id_public}/offspring`, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 }).then(res => {
-                    const offspring = res.data || [];
+                    const offspring = Array.isArray(res.data) ? res.data : [];
                     setLitterOffspringMap(prev => ({ ...prev, [litter._id]: offspring }));
 
                     // Silently reconcile counts if linked offspring exceed stored values
@@ -16255,7 +16255,7 @@ const AnimalForm = ({
                 { headers: { Authorization: `Bearer ${authToken}` } }
             );
             
-            let filtered = response.data || [];
+            let filtered = Array.isArray(response.data) ? response.data : [];
             
             // Filter: current animal as sire/dam/other parent
             // Only show litters that match current animal's gender role
