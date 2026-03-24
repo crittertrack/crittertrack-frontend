@@ -2089,9 +2089,9 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                 setAnimalResults([]);
             } else {
                 // Search for animals globally
-                const idMatch = searchTerm.trim().match(/^\s*(?:CT[- ]?)?(\d+)\s*$/i);
+                const idMatch = searchTerm.trim().match(/^\s*(?:CTC?[- ]?)?(\d+)\s*$/i);
                 const url = idMatch
-                    ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(idMatch[1])}`
+                    ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent('CTC' + idMatch[1])}`
                     : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(searchTerm.trim())}`;
                 console.log('Fetching animals from:', url);
                 const response = await axios.get(url);
