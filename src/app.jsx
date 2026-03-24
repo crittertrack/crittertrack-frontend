@@ -28814,6 +28814,9 @@ const App = () => {
         try { const s = localStorage.getItem('ct_blassign'); if (s) return JSON.parse(s); } catch {}
         return {};
     });
+    // Ref so toggleAnimalBreedingLine always reads the latest defs without stale closure issues
+    const breedingLineDefsRef = React.useRef(breedingLineDefs);
+    React.useEffect(() => { breedingLineDefsRef.current = breedingLineDefs; }, [breedingLineDefs]);
     // Load from backend on login (overrides localStorage with server truth)
     React.useEffect(() => {
         if (!authToken) return;
@@ -28849,7 +28852,7 @@ const App = () => {
         try { localStorage.setItem('ct_blassign', JSON.stringify(next)); } catch {}
         if (authToken) {
             axios.put(`${API_BASE_URL}/users/breeding-lines`,
-                { breedingLineDefs, animalBreedingLines: next },
+                { breedingLineDefs: breedingLineDefsRef.current, animalBreedingLines: next },
                 { headers: { Authorization: `Bearer ${authToken}` } }
             ).catch(err => console.error('Failed to save breeding line assignment:', err));
         }
