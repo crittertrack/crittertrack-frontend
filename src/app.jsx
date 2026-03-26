@@ -181,7 +181,7 @@ const getDonationBadge = (user) => {
             type: 'diamond',
             icon: '💎',
             title: 'Monthly Supporter',
-            className: 'bg-gradient-to-r from-blue-400 to-purple-500 text-white'
+            className: 'bg-gradient-to-r from-blue-400 to-pink-500 text-white'
         };
     }
     
