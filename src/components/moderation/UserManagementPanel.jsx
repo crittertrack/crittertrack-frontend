@@ -67,14 +67,16 @@ const UserManagementPanel = () => {
             if (type === 'monthly') {
                 body.monthlyDonationActive = !badgeUser?.monthlyDonationActive;
             }
-            await axios.patch(
+            const response = await axios.patch(
                 `${API_URL}/admin/users/${userId}/donation-badge`,
                 body,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             await fetchUsers();
-            setShowBadgeModal(false);
-            setBadgeUser(null);
+            // Update badgeUser with the latest user data from response
+            if (response.data && response.data.user) {
+                setBadgeUser(response.data.user);
+            }
         } catch (err) {
             console.error('Error updating donation badge:', err);
         }
