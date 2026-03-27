@@ -3191,7 +3191,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     );
                 };
                 const LitterPublicCard = ({ l }) => (
-                    <div className="bg-white rounded-xl border border-gray-200 p-4 pb-6 space-y-2.5 relative">
+                    <div className="bg-white rounded-xl border border-gray-300 p-4 pb-6 space-y-2.5 relative">
                         {/* First line: centered breeding pair name */}
                         {l.breedingPairCodeName && (
                             <div className="text-center">
@@ -3203,7 +3203,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         {(l.sireAnimal || l.damAnimal) && (
                             <div className="flex items-center gap-2">
                                 <ParentMiniCard role="Sire" animal={l.sireAnimal} />
-                                <span className="text-gray-300 text-base font-light flex-shrink-0">×</span>
+                                <div className="w-px h-12 bg-gray-200 flex-shrink-0"></div>
                                 <ParentMiniCard role="Dam" animal={l.damAnimal} />
                             </div>
                         )}
@@ -3217,7 +3217,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 <span className="font-semibold text-gray-700">{l.litterSizeBorn} born</span>
                                 {(l.maleCount != null || l.femaleCount != null || l.unknownCount != null) && (
                                     <span>
-                                        <span className="text-gray-400 mx-1">—</span>
+                                        <span className="text-gray-400 mx-1">•</span>
                                         <span className="text-blue-500 font-semibold">{l.maleCount ?? 0}M</span>
                                         <span className="text-gray-400 mx-0.5">/</span>
                                         <span className="text-pink-500 font-semibold">{l.femaleCount ?? 0}F</span>
