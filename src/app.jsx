@@ -2364,6 +2364,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     const [freshProfile, setFreshProfile] = useState(profile);
     const [expandedInfoFields, setExpandedInfoFields] = useState(new Set());
     const [publicLitters, setPublicLitters] = useState([]);
+    const [litterYearFilter, setLitterYearFilter] = useState(''); // filter litters by birth year
     const [ratingData, setRatingData] = useState({ average: 0, count: 0, distribution: {1:0,2:0,3:0,4:0,5:0}, ratings: [] });
     const [myRating, setMyRating] = useState(null);         // own existing rating object or null
     const [ratingForm, setRatingForm] = useState({ score: 0, comment: '' });
@@ -3154,7 +3155,21 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             {activeTab === 'litters' && publicLitters.length > 0 && (() => {
                 const formatLitterDate = (d) => d ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(d)) : null;
                 const planned = publicLitters.filter(l => l.isPlanned);
-                const born    = publicLitters.filter(l => !l.isPlanned);
+                let born = publicLitters.filter(l => !l.isPlanned);
+                
+                // Extract unique years from born litters
+                const bornYears = [...new Set(born
+                    .filter(l => l.birthDate)
+                    .map(l => new Date(l.birthDate).getFullYear())
+                )].sort((a, b) => b - a); // newest first
+                
+                // Filter born litters by selected year
+                if (litterYearFilter) {
+                    born = born.filter(l => {
+                        if (!l.birthDate) return false;
+                        return new Date(l.birthDate).getFullYear().toString() === litterYearFilter;
+                    });
+                }
                 const ParentMiniCard = ({ role, animal }) => {
                     if (!animal) return null;
                     const imgUrl = animal.imageUrl || animal.photoUrl || null;
@@ -3244,9 +3259,23 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         )}
                         {born.length > 0 && (
                             <div>
-                                <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Sparkles size={16} className="text-green-500" /> Past Pairings <span className="text-sm font-normal text-gray-400">({born.length})</span>
-                                </h3>
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-base font-semibold text-gray-700 flex items-center gap-2">
+                                        <Sparkles size={16} className="text-green-500" /> Past Pairings <span className="text-sm font-normal text-gray-400">({born.length})</span>
+                                    </h3>
+                                    {bornYears.length > 1 && (
+                                        <select
+                                            value={litterYearFilter}
+                                            onChange={(e) => setLitterYearFilter(e.target.value)}
+                                            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition"
+                                        >
+                                            <option value="">All Years</option>
+                                            {bornYears.map(year => (
+                                                <option key={year} value={year}>{year}</option>
+                                            ))}
+                                        </select>
+                                    )}
+                                </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {born.map(l => <LitterPublicCard key={l._id} l={l} />)}
                                 </div>
