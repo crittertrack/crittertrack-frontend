@@ -3213,17 +3213,19 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         
                         {/* Born stats - full width */}
                         {!l.isPlanned && l.litterSizeBorn != null && (
-                            <div className="flex items-center justify-center gap-2 text-xs">
+                            <div className="flex items-center justify-center text-xs">
                                 <span className="font-semibold text-gray-700">{l.litterSizeBorn} born</span>
                                 {(l.maleCount != null || l.femaleCount != null || l.unknownCount != null) && (
-                                    <span>
-                                        <span className="text-gray-400 mx-1">•</span>
-                                        <span className="text-blue-500 font-semibold">{l.maleCount ?? 0}M</span>
-                                        <span className="text-gray-400 mx-0.5">/</span>
-                                        <span className="text-pink-500 font-semibold">{l.femaleCount ?? 0}F</span>
-                                        <span className="text-gray-400 mx-0.5">/</span>
-                                        <span className="text-purple-500 font-semibold">{l.unknownCount ?? 0}U</span>
-                                    </span>
+                                    <>
+                                        <span className="text-gray-400 mx-2">•</span>
+                                        <span>
+                                            <span className="text-blue-500 font-semibold">{l.maleCount ?? 0}M</span>
+                                            <span className="text-gray-400 mx-0.5">/</span>
+                                            <span className="text-pink-500 font-semibold">{l.femaleCount ?? 0}F</span>
+                                            <span className="text-gray-400 mx-0.5">/</span>
+                                            <span className="text-purple-500 font-semibold">{l.unknownCount ?? 0}U</span>
+                                        </span>
+                                    </>
                                 )}
                             </div>
                         )}
