@@ -3182,37 +3182,24 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 : <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold ${isSire ? 'bg-blue-300' : 'bg-pink-300'}`}>{isSire ? '♂' : '♀'}</div>
                             }
                             <div className="min-w-0">
-                                <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">{role}</p>
+                                <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-600">{role}</p>
                                 <p className="text-xs font-semibold text-gray-800 truncate">{fullName || animal.id_public}</p>
+                                {animal.variety && <p className="text-[10px] text-gray-500 truncate">{animal.variety}</p>}
                                 <p className="text-[10px] font-mono text-gray-400">{animal.id_public}</p>
                             </div>
                         </div>
                     );
                 };
                 const LitterPublicCard = ({ l }) => (
-                    <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-2.5">
-                        {/* Header row: badges left, counts right */}
-                        <div className="flex items-center gap-2">
-                            <div className="flex flex-wrap items-center gap-2 flex-1">
-                                {l.breedingPairCodeName && <span className="text-sm font-semibold text-gray-800">{l.breedingPairCodeName}</span>}
-                                {l.litter_id_public && <span className="text-xs font-mono bg-purple-100 text-purple-700 px-2 py-0.5 rounded">{l.litter_id_public}</span>}
+                    <div className="bg-white rounded-xl border border-gray-200 p-4 pb-6 space-y-2.5 relative">
+                        {/* First line: centered breeding pair name */}
+                        {l.breedingPairCodeName && (
+                            <div className="text-center">
+                                <span className="text-sm font-semibold text-gray-800">{l.breedingPairCodeName}</span>
                             </div>
-                            {!l.isPlanned && l.litterSizeBorn != null && (
-                                <div className="flex items-center gap-1.5 text-xs ml-auto flex-shrink-0">
-                                    <span className="font-semibold text-gray-700">{l.litterSizeBorn} born</span>
-                                    {(l.maleCount != null || l.femaleCount != null || l.unknownCount != null) && (
-                                        <span>
-                                            <span className="text-blue-500 font-semibold">{l.maleCount ?? 0}M</span>
-                                            <span className="text-gray-400 mx-0.5">/</span>
-                                            <span className="text-pink-500 font-semibold">{l.femaleCount ?? 0}F</span>
-                                            <span className="text-gray-400 mx-0.5">/</span>
-                                            <span className="text-purple-500 font-semibold">{l.unknownCount ?? 0}U</span>
-                                        </span>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                        {/* Sire × Dam mini-cards */}
+                        )}
+                        
+                        {/* Second line: Sire × Dam mini-cards */}
                         {(l.sireAnimal || l.damAnimal) && (
                             <div className="flex items-center gap-2">
                                 <ParentMiniCard role="Sire" animal={l.sireAnimal} />
@@ -3220,28 +3207,39 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 <ParentMiniCard role="Dam" animal={l.damAnimal} />
                             </div>
                         )}
-                        {/* Dates */}
+                        
+                        {/* Visual divider */}
+                        <div className="border-t border-gray-200 my-2"></div>
+                        
+                        {/* Born stats - full width */}
+                        {!l.isPlanned && l.litterSizeBorn != null && (
+                            <div className="flex items-center justify-center gap-2 text-xs">
+                                <span className="font-semibold text-gray-700">{l.litterSizeBorn} born</span>
+                                {(l.maleCount != null || l.femaleCount != null || l.unknownCount != null) && (
+                                    <span>
+                                        <span className="text-gray-400 mx-1">—</span>
+                                        <span className="text-blue-500 font-semibold">{l.maleCount ?? 0}M</span>
+                                        <span className="text-gray-400 mx-0.5">/</span>
+                                        <span className="text-pink-500 font-semibold">{l.femaleCount ?? 0}F</span>
+                                        <span className="text-gray-400 mx-0.5">/</span>
+                                        <span className="text-purple-500 font-semibold">{l.unknownCount ?? 0}U</span>
+                                    </span>
+                                )}
+                            </div>
+                        )}
+                        
+                        {/* Dates - full width centered */}
                         <div className="flex flex-wrap justify-center gap-3 text-xs text-gray-500">
                             {l.matingDate && <span><span className="font-medium">{l.isPlanned ? 'Planned Mating:' : 'Mated:'}</span> {formatLitterDate(l.matingDate)}</span>}
                             {l.expectedDueDate && l.isPlanned && <span><span className="font-medium">Due:</span> {formatLitterDate(l.expectedDueDate)}</span>}
                             {l.birthDate && !l.isPlanned && <span><span className="font-medium">Born:</span> {formatLitterDate(l.birthDate)}</span>}
-
                         </div>
-
-                        {/* Photo strip */}
-                        {l.images?.length > 0 && (
-                            <div className="flex gap-1.5 overflow-x-auto">
-                                {l.images.slice(0, 5).map((img, i) => (
-                                    <img key={i} src={img.url} alt="" className="h-16 w-16 rounded-lg object-cover flex-shrink-0 border border-gray-200" />
-                                ))}
-                                {l.images.length > 5 && (
-                                    <div className="h-16 w-16 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 border border-gray-200 text-xs text-gray-500 font-medium">+{l.images.length - 5}</div>
-                                )}
+                        
+                        {/* CTL ID - bottom right corner */}
+                        {l.litter_id_public && (
+                            <div className="absolute bottom-2 right-3 text-[10px] font-mono text-gray-400">
+                                {l.litter_id_public}
                             </div>
-                        )}
-                        {/* Notes */}
-                        {l.notes?.trim() && (
-                            <p className="text-sm text-gray-600 leading-relaxed border-t border-gray-100 pt-2">{l.notes}</p>
                         )}
                     </div>
                 );
