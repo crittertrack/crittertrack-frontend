@@ -3193,11 +3193,11 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 const LitterPublicCard = ({ l }) => (
                     <div className="bg-white rounded-xl border border-gray-300 p-4 pb-6 space-y-2.5 relative">
                         {/* First line: centered breeding pair name */}
-                        {l.breedingPairCodeName && (
-                            <div className="text-center">
+                        <div className="text-center">
+                            {l.breedingPairCodeName && (
                                 <span className="text-sm font-semibold text-gray-800">{l.breedingPairCodeName}</span>
-                            </div>
-                        )}
+                            )}
+                        </div>
                         
                         {/* Second line: Sire × Dam mini-cards */}
                         {(l.sireAnimal || l.damAnimal) && (
