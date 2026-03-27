@@ -2689,7 +2689,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-4 pb-4 border-b">
                 {/* Left column: name → avatar → ctu → member since → country — centered */}
                 <div className="flex flex-col items-center gap-1.5 text-center">
-                    <div className="flex items-center justify-center gap-1 flex-wrap">
+                    <div className="flex items-center justify-center gap-0.5 flex-wrap">
                         <h2 className="text-xl font-bold text-gray-900 leading-tight">{displayName}</h2>
                         <DonationBadge user={freshProfile || profile} size="sm" />
                     </div>
@@ -22196,7 +22196,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
 
                                         {/* Name and CTU Badge */}
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-1 mb-1">
+                                            <div className="flex items-center gap-0.5 mb-1">
                                                 <h3 className="text-xl font-bold text-gray-800">{displayName}</h3>
                                                 <DonationBadge user={breeder} size="sm" />
                                             </div>
