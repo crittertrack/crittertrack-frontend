@@ -2700,7 +2700,15 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             <User size={40} className="text-gray-400" />
                         </div>
                     )}
-                    <span className="font-mono text-accent font-semibold text-sm">{freshProfile?.id_public || profile.id_public}</span>
+                    <span className="font-mono text-accent font-semibold text-sm">
+                        {['CTU1', 'CTU2'].includes(freshProfile?.id_public || profile.id_public) && (
+                            <span className="mr-1">🔑</span>
+                        )}
+                        {['CTU3', 'CTU4', 'CTU5', 'CTU6', 'CTU7', 'CTU9', 'CTU10', 'CTU11'].includes(freshProfile?.id_public || profile.id_public) && (
+                            <span className="mr-1">🌱</span>
+                        )}
+                        {freshProfile?.id_public || profile.id_public}
+                    </span>
                     {ratingData.count > 0 && (
                         <button onClick={() => setActiveTab('ratings')} className="flex items-center gap-1 text-xs text-amber-500 font-semibold hover:text-amber-600 transition" title="See ratings">
                             <span>★</span>
