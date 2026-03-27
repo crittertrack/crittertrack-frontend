@@ -209,17 +209,15 @@ const DonationBadge = ({ user, badge: badgeProp, size = 'sm' }) => {
     if (!badge) return null;
     
     const sizeClasses = {
-        xs: 'text-xs px-1 py-0.5',
-        sm: 'text-xs px-1.5 py-0.5', 
-        md: 'text-sm px-2 py-1',
-        lg: 'text-base px-2 py-1'
+        xs: 'text-sm',
+        sm: 'text-base',
+        md: 'text-lg',
+        lg: 'text-xl'
     };
     
     return (
-        <span 
-            className={`inline-flex items-center gap-1 rounded-full font-medium shadow-sm ${badge.className} ${sizeClasses[size]}`}
-        >
-            <span>{badge.icon}</span>
+        <span className={`inline-flex items-center ${sizeClasses[size]}`} title={badge.title}>
+            {badge.icon}
         </span>
     );
 };
@@ -2691,7 +2689,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-4 pb-4 border-b">
                 {/* Left column: name → avatar → ctu → member since → country — centered */}
                 <div className="flex flex-col items-center gap-1.5 text-center">
-                    <div className="flex items-center justify-center gap-2 flex-wrap">
+                    <div className="flex items-center justify-center gap-1 flex-wrap">
                         <h2 className="text-xl font-bold text-gray-900 leading-tight">{displayName}</h2>
                         <DonationBadge user={freshProfile || profile} size="sm" />
                     </div>
@@ -22198,7 +22196,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
 
                                         {/* Name and CTU Badge */}
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-3 mb-1">
+                                            <div className="flex items-center gap-1 mb-1">
                                                 <h3 className="text-xl font-bold text-gray-800">{displayName}</h3>
                                                 <DonationBadge user={breeder} size="sm" />
                                             </div>
@@ -31603,12 +31601,6 @@ const App = () => {
                                             className="relative bg-white rounded-lg p-2 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer w-[18%] min-w-[110px] max-w-[140px]"
                                             onClick={() => navigate(`/user/${user.id_public}`)}
                                         >
-                                            {/* Donation badge - top left */}
-                                            {getDonationBadge(user) && (
-                                                <span className="absolute top-1 left-1 z-10">
-                                                    <DonationBadge badge={getDonationBadge(user)} size="xs" />
-                                                </span>
-                                            )}
                                             {/* Active green dot */}
                                             {user.isActive && (
                                                 <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full" title="Recently active" />
@@ -31626,8 +31618,9 @@ const App = () => {
                                                     </div>
                                                 )}
                                             </div>
-                                            <p className="text-xs font-semibold text-gray-800 text-center line-clamp-2 min-h-[2.5rem] flex items-center justify-center">
+                                            <p className="text-xs font-semibold text-gray-800 text-center line-clamp-2 min-h-[2.5rem] flex items-center justify-center gap-0.5">
                                                 {displayName}
+                                                <DonationBadge badge={getDonationBadge(user)} size="xs" />
                                             </p>
                                             <p className="text-xs text-gray-500 text-center truncate">{user.id_public}</p>
                                         </div>
