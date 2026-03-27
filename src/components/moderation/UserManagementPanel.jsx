@@ -508,7 +508,7 @@ const UserManagementPanel = () => {
                                             onClick={() => { setBadgeUser(user); setShowBadgeModal(true); }}
                                             title="Manage donation badge"
                                         >
-                                            {user.monthlyDonationActive ? '💎' : user.lastDonationDate ? '🎁' : '🏅'}
+                                            {user.monthlyDonationActive ? '💎' : user.lastDonationDate ? '🔥' : '🏅'}
                                         </button>
                                     )}
                                 </td>
@@ -551,14 +551,14 @@ const UserManagementPanel = () => {
                                 <span style={{ color: '#6b7280', fontFamily: 'monospace', fontSize: 12 }}>{badgeUser.id_public}</span>
                             </div>
                             <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 16 }}>
-                                Current: {badgeUser.monthlyDonationActive ? '💎 Monthly Supporter' : badgeUser.lastDonationDate ? '🎁 Recent Donor (gift)' : 'No badge'}
+                                Current: {badgeUser.monthlyDonationActive ? '💎 Monthly Supporter' : (badgeUser.lastDonationDate && (Math.floor((new Date() - new Date(badgeUser.lastDonationDate)) / (1000 * 60 * 60 * 24)) <= 31)) ? '🔥 Recent Donor' : 'No badge'}
                             </p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                                 <button style={{ background: '#7c3aed', color: '#fff', padding: '10px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', border: 'none', fontSize: 14, textAlign: 'left' }} onClick={() => handleDonationBadge(badgeUser._id, 'monthly')}>
                                     💎 Grant / Toggle Monthly Supporter
                                 </button>
                                 <button style={{ background: '#16a34a', color: '#fff', padding: '10px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', border: 'none', fontSize: 14, textAlign: 'left' }} onClick={() => handleDonationBadge(badgeUser._id, 'gift')}>
-                                    🎁 Grant Gift Badge (31 days)
+                                    🔥 Grant One-Time Badge (31 days)
                                 </button>
                                 <button style={{ background: '#dc2626', color: '#fff', padding: '10px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', border: 'none', fontSize: 14, textAlign: 'left' }} onClick={() => handleDonationBadge(badgeUser._id, 'clear')}>
                                     🗑 Clear All Badges
