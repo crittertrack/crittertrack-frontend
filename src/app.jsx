@@ -31597,8 +31597,6 @@ const App = () => {
                                         : ((user.showPersonalName ?? false) ? user.personalName : 'Anonymous');
                                     return (
                                         <div
-                                    return (
-                                        <div
                                             key={user.id_public}
                                             className="relative bg-white rounded-lg p-2 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer w-[18%] min-w-[110px] max-w-[140px]"
                                             onClick={() => navigate(`/user/${user.id_public}`)}
