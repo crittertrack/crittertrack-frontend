@@ -2689,9 +2689,9 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-4 pb-4 border-b">
                 {/* Left column: name → avatar → ctu → member since → country — centered */}
                 <div className="flex flex-col items-center gap-1.5 text-center">
-                    <div className="flex items-center justify-center gap-0.5 flex-wrap">
-                        <h2 className="text-xl font-bold text-gray-900 leading-tight">{displayName}</h2>
-                        <DonationBadge user={freshProfile || profile} size="sm" />
+                    <div className="flex items-center justify-center flex-wrap">
+                        <h2 className="text-xl font-bold text-gray-900 leading-tight inline">{displayName}</h2>
+                        <span className="ml-1 inline-block"><DonationBadge user={freshProfile || profile} size="sm" /></span>
                     </div>
                     {profile.profileImage ? (
                         <img src={profile.profileImage} alt={displayName} className="w-24 h-24 rounded-lg object-cover shadow-md" />
@@ -22196,9 +22196,9 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
 
                                         {/* Name and CTU Badge */}
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-0.5 mb-1">
-                                                <h3 className="text-xl font-bold text-gray-800">{displayName}</h3>
-                                                <DonationBadge user={breeder} size="sm" />
+                                            <div className="mb-1">
+                                                <h3 className="text-xl font-bold text-gray-800 inline">{displayName}</h3>
+                                                <span className="ml-1 inline-block"><DonationBadge user={breeder} size="sm" /></span>
                                             </div>
                                             <div className="flex items-center gap-3 flex-wrap">
                                                 <span className="text-xs bg-primary text-black px-2.5 py-1 rounded font-medium">
