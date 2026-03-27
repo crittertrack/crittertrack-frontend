@@ -193,7 +193,7 @@ const getDonationBadge = (user) => {
         if (daysSince <= 31) {
             return {
                 type: 'gift',
-                icon: '🎁',
+                icon: '💗',
                 title: 'Recent Supporter',
                 className: 'bg-gradient-to-r from-green-400 to-blue-500 text-white'
             };
