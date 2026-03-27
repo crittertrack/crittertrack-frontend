@@ -31597,10 +31597,18 @@ const App = () => {
                                         : ((user.showPersonalName ?? false) ? user.personalName : 'Anonymous');
                                     return (
                                         <div
+                                    return (
+                                        <div
                                             key={user.id_public}
                                             className="relative bg-white rounded-lg p-2 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer w-[18%] min-w-[110px] max-w-[140px]"
                                             onClick={() => navigate(`/user/${user.id_public}`)}
                                         >
+                                            {/* Donation badge - top left */}
+                                            {getDonationBadge(user) && (
+                                                <span className="absolute top-1 left-1 z-10">
+                                                    <DonationBadge badge={getDonationBadge(user)} size="xs" />
+                                                </span>
+                                            )}
                                             {/* Active green dot */}
                                             {user.isActive && (
                                                 <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full" title="Recently active" />
@@ -31618,9 +31626,8 @@ const App = () => {
                                                     </div>
                                                 )}
                                             </div>
-                                            <p className="text-xs font-semibold text-gray-800 text-center line-clamp-2 min-h-[2.5rem] flex items-center justify-center gap-0.5">
+                                            <p className="text-xs font-semibold text-gray-800 text-center line-clamp-2 min-h-[2.5rem] px-1">
                                                 {displayName}
-                                                <DonationBadge badge={getDonationBadge(user)} size="xs" />
                                             </p>
                                             <p className="text-xs text-gray-500 text-center truncate">{user.id_public}</p>
                                         </div>
