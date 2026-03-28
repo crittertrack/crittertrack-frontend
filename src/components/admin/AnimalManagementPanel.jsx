@@ -376,10 +376,6 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
         setBreederSearchResults([]);
     };
     
-    const clearOwner = () => {
-        setEditForm(prev => ({ ...prev, ownerId_public: '' }));
-    };
-    
     const clearBreeder = () => {
         setEditForm(prev => ({ ...prev, breederId_public: '', manualBreederName: '' }));
     };
@@ -1887,9 +1883,6 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                                         <button type="button" className="btn-small" onClick={() => setShowOwnerSearch(!showOwnerSearch)}>
                                                             {showOwnerSearch ? 'Cancel' : 'Change'}
                                                         </button>
-                                                        {editForm.ownerId_public && (
-                                                            <button type="button" className="btn-small btn-danger" onClick={clearOwner}>Clear</button>
-                                                        )}
                                                     </div>
                                                 </div>
                                                 {showOwnerSearch && (
