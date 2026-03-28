@@ -1602,7 +1602,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                         <EyeOff size={14} /> Hide from Public
                                     </button>
                                 )}
-                                {userRole === 'admin' && (
+                                {['admin', 'moderator'].includes(userRole) && (
                                     <button 
                                         className="btn-danger"
                                         onClick={() => setShowDeleteConfirm(true)}
