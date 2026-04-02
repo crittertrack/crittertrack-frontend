@@ -22268,6 +22268,413 @@ const DonationView = ({ onBack, authToken, userProfile }) => {
     );
 };
 
+// ==================== COMMUNITY PAGE ====================
+const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
+    const navigate = useNavigate();
+    const [communityUsers, setCommunityUsers] = useState([]);
+    const [favoriteAnimals, setFavoriteAnimals] = useState([]);
+    const [favoriteUsers, setFavoriteUsers] = useState([]);
+    const [recentEdits, setRecentEdits] = useState([]);
+    const [newAvailableAnimals, setNewAvailableAnimals] = useState([]);
+    const [newUsers, setNewUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    // Fetch active community users (last 5 active only)
+    useEffect(() => {
+        const fetchCommunityUsers = async () => {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/public/users/active?minutes=30&limit=5`);
+                let active = response.data || [];
+                
+                const hasVisibleName = (u) => (u.showBreederName && u.breederName) || (u.showPersonalName && u.personalName);
+                const clean = active.filter(u => u.id_public && u.accountStatus !== 'banned' && u.id_public !== 'CTU1' && hasVisibleName(u));
+                
+                setCommunityUsers(clean.slice(0, 5).map(u => ({ ...u, isActive: true })));
+            } catch (error) {
+                console.error('Error fetching community users:', error);
+            }
+        };
+
+        if (authToken) {
+            fetchCommunityUsers();
+            const interval = setInterval(fetchCommunityUsers, 120000); // Refresh every 2 minutes
+            return () => clearInterval(interval);
+        }
+    }, [authToken, API_BASE_URL]);
+
+    // Fetch favorites and activity feeds
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                const [favAnimalsRes, favUsersRes, newAnimalsRes, newUsersRes] = await Promise.all([
+                    // Fetch favorite animals
+                    axios.get(`${API_BASE_URL}/favorites/animals`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    }).catch(() => ({ data: [] })),
+                    // Fetch favorite users
+                    axios.get(`${API_BASE_URL}/favorites/users`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    }).catch(() => ({ data: [] })),
+                    // Fetch new available animals (public only)
+                    axios.get(`${API_BASE_URL}/public/animals/recent-available?limit=10`).catch(() => ({ data: [] })),
+                    // Fetch new users (public only)
+                    axios.get(`${API_BASE_URL}/public/users/newest?limit=5`).catch(() => ({ data: [] }))
+                ]);
+
+                setFavoriteAnimals(favAnimalsRes.data || []);
+                setFavoriteUsers(favUsersRes.data || []);
+                setNewAvailableAnimals(newAnimalsRes.data || []);
+                
+                // Filter new users to only show public ones
+                const hasVisibleName = (u) => (u.showBreederName && u.breederName) || (u.showPersonalName && u.personalName);
+                const publicUsers = (newUsersRes.data || []).filter(u => 
+                    u.id_public && 
+                    u.accountStatus !== 'banned' && 
+                    u.id_public !== 'CTU1' && 
+                    hasVisibleName(u)
+                );
+                setNewUsers(publicUsers.slice(0, 5));
+
+                // Fetch recent edits for favorite animals
+                if (favAnimalsRes.data && favAnimalsRes.data.length > 0) {
+                    const animalIds = favAnimalsRes.data.map(a => a.id_public).join(',');
+                    const editsRes = await axios.get(
+                        `${API_BASE_URL}/public/animals/recent-edits?ids=${animalIds}`,
+                        { headers: { Authorization: `Bearer ${authToken}` } }
+                    ).catch(() => ({ data: [] }));
+                    setRecentEdits(editsRes.data || []);
+                }
+            } catch (error) {
+                console.error('Error fetching community data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (authToken) {
+            fetchData();
+        }
+    }, [authToken, API_BASE_URL]);
+
+    const toggleFavoriteAnimal = async (animalId) => {
+        try {
+            const isFavorited = favoriteAnimals.some(a => a.id_public === animalId);
+            if (isFavorited) {
+                await axios.delete(`${API_BASE_URL}/favorites/animals/${animalId}`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                setFavoriteAnimals(prev => prev.filter(a => a.id_public !== animalId));
+            } else {
+                await axios.post(`${API_BASE_URL}/favorites/animals/${animalId}`, {}, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                // Refetch to get full animal data
+                const res = await axios.get(`${API_BASE_URL}/favorites/animals`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                setFavoriteAnimals(res.data || []);
+            }
+        } catch (error) {
+            console.error('Error toggling favorite animal:', error);
+        }
+    };
+
+    const toggleFavoriteUser = async (userId) => {
+        try {
+            const isFavorited = favoriteUsers.some(u => u.id_public === userId);
+            if (isFavorited) {
+                await axios.delete(`${API_BASE_URL}/favorites/users/${userId}`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                setFavoriteUsers(prev => prev.filter(u => u.id_public !== userId));
+            } else {
+                await axios.post(`${API_BASE_URL}/favorites/users/${userId}`, {}, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                // Refetch to get full user data
+                const res = await axios.get(`${API_BASE_URL}/favorites/users`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                setFavoriteUsers(res.data || []);
+            }
+        } catch (error) {
+            console.error('Error toggling favorite user:', error);
+        }
+    };
+
+    const formatTimeAgo = (dateString) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const seconds = Math.floor((now - date) / 1000);
+        
+        if (seconds < 60) return 'just now';
+        if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+        if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+        if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+        return date.toLocaleDateString();
+    };
+
+    return (
+        <div className="w-full max-w-6xl mx-auto p-4">
+            <h1 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <Users size={32} className="text-primary" />
+                Community
+            </h1>
+
+            {/* Active Community Members */}
+            {communityUsers.length > 0 && (
+                <div className="mb-6 bg-gradient-to-r from-primary/20 to-accent/20 p-4 rounded-lg border border-primary/30">
+                    <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <Users size={20} className="text-primary-dark" />
+                        Recently Active Members
+                    </h2>
+                    <div className="flex flex-wrap gap-3">
+                        {communityUsers.map(user => {
+                            const displayName = (user.showBreederName && user.breederName)
+                                ? user.breederName
+                                : ((user.showPersonalName ?? false) ? user.personalName : 'Anonymous');
+                            return (
+                                <div
+                                    key={user.id_public}
+                                    className="relative bg-white rounded-lg p-3 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer w-[140px]"
+                                    onClick={() => navigate(`/user/${user.id_public}`)}
+                                >
+                                    <span className="absolute top-2 right-2 w-3 h-3 bg-green-400 border-2 border-white rounded-full" title="Active now" />
+                                    <div className="w-12 h-12 bg-gray-100 rounded-full overflow-hidden mx-auto mb-2">
+                                        {user.profileImage ? (
+                                            <img src={user.profileImage} alt={displayName} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                <User size={24} />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <p className="text-sm font-semibold text-gray-800 text-center line-clamp-2 min-h-[2.5rem]">
+                                        {displayName}
+                                    </p>
+                                    <p className="text-xs text-gray-500 text-center truncate">{user.id_public}</p>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {loading ? (
+                <div className="flex justify-center items-center py-12">
+                    <Loader2 className="animate-spin text-primary" size={48} />
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Favorite Animals */}
+                    <div className="bg-white rounded-lg shadow-md p-4">
+                        <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <Heart size={20} className="text-red-500" />
+                            Favorite Animals ({favoriteAnimals.length})
+                        </h2>
+                        {favoriteAnimals.length === 0 ? (
+                            <p className="text-gray-500 text-sm">No favorite animals yet. Visit animal profiles to add favorites!</p>
+                        ) : (
+                            <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                                {favoriteAnimals.map(animal => (
+                                    <div
+                                        key={animal.id_public}
+                                        className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 transition cursor-pointer"
+                                        onClick={() => navigate(`/animal/${animal.id_public}`)}
+                                    >
+                                        <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                            {animal.images?.[0] ? (
+                                                <img src={animal.images[0]} alt={animal.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                    <Cat size={24} />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-semibold text-gray-800 truncate">{animal.name}</p>
+                                            <p className="text-xs text-gray-500 truncate">{animal.id_public} • {animal.species}</p>
+                                        </div>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                toggleFavoriteAnimal(animal.id_public);
+                                            }}
+                                            className="p-2 text-red-500 hover:bg-red-50 rounded transition"
+                                        >
+                                            <Heart size={18} fill="currentColor" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Favorite Users */}
+                    <div className="bg-white rounded-lg shadow-md p-4">
+                        <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <Heart size={20} className="text-purple-500" />
+                            Favorite Breeders ({favoriteUsers.length})
+                        </h2>
+                        {favoriteUsers.length === 0 ? (
+                            <p className="text-gray-500 text-sm">No favorite breeders yet. Visit breeder profiles to add favorites!</p>
+                        ) : (
+                            <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                                {favoriteUsers.map(user => {
+                                    const displayName = (user.showBreederName && user.breederName)
+                                        ? user.breederName
+                                        : ((user.showPersonalName ?? false) ? user.personalName : 'Anonymous');
+                                    return (
+                                        <div
+                                            key={user.id_public}
+                                            className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 transition cursor-pointer"
+                                            onClick={() => navigate(`/user/${user.id_public}`)}
+                                        >
+                                            <div className="w-12 h-12 bg-gray-100 rounded-full overflow-hidden flex-shrink-0">
+                                                {user.profileImage ? (
+                                                    <img src={user.profileImage} alt={displayName} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                        <User size={24} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-semibold text-gray-800 truncate">{displayName}</p>
+                                                <p className="text-xs text-gray-500 truncate">{user.id_public}</p>
+                                            </div>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    toggleFavoriteUser(user.id_public);
+                                                }}
+                                                className="p-2 text-purple-500 hover:bg-purple-50 rounded transition"
+                                            >
+                                                <Heart size={18} fill="currentColor" />
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Recently Edited Favorite Animals */}
+                    <div className="bg-white rounded-lg shadow-md p-4">
+                        <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <Edit size={20} className="text-blue-500" />
+                            Recently Updated Favorites
+                        </h2>
+                        {recentEdits.length === 0 ? (
+                            <p className="text-gray-500 text-sm">No recent updates to your favorite animals.</p>
+                        ) : (
+                            <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                                {recentEdits.slice(0, 10).map(animal => (
+                                    <div
+                                        key={animal.id_public}
+                                        className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 transition cursor-pointer"
+                                        onClick={() => navigate(`/animal/${animal.id_public}`)}
+                                    >
+                                        <div className="w-10 h-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                            {animal.images?.[0] ? (
+                                                <img src={animal.images[0]} alt={animal.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                    <Cat size={20} />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-medium text-gray-800 text-sm truncate">{animal.name}</p>
+                                            <p className="text-xs text-gray-500">Updated {formatTimeAgo(animal.updatedAt)}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* New Available Animals */}
+                    <div className="bg-white rounded-lg shadow-md p-4">
+                        <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <ShoppingBag size={20} className="text-green-500" />
+                            New Available Animals
+                        </h2>
+                        {newAvailableAnimals.length === 0 ? (
+                            <p className="text-gray-500 text-sm">No new available animals recently.</p>
+                        ) : (
+                            <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                                {newAvailableAnimals.slice(0, 10).map(animal => (
+                                    <div
+                                        key={animal.id_public}
+                                        className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 transition cursor-pointer"
+                                        onClick={() => navigate(`/animal/${animal.id_public}`)}
+                                    >
+                                        <div className="w-10 h-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                            {animal.images?.[0] ? (
+                                                <img src={animal.images[0]} alt={animal.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                    <Cat size={20} />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-medium text-gray-800 text-sm truncate">{animal.name}</p>
+                                            <p className="text-xs text-gray-500">{animal.species} • {animal.forSale ? 'For Sale' : 'For Stud'}</p>
+                                        </div>
+                                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">NEW</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* New Users */}
+                    <div className="bg-white rounded-lg shadow-md p-4 lg:col-span-2">
+                        <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <UserPlus size={20} className="text-indigo-500" />
+                            New Community Members
+                        </h2>
+                        {newUsers.length === 0 ? (
+                            <p className="text-gray-500 text-sm">No new members recently.</p>
+                        ) : (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                                {newUsers.map(user => {
+                                    const displayName = (user.showBreederName && user.breederName)
+                                        ? user.breederName
+                                        : ((user.showPersonalName ?? false) ? user.personalName : 'Anonymous');
+                                    return (
+                                        <div
+                                            key={user.id_public}
+                                            className="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition cursor-pointer text-center"
+                                            onClick={() => navigate(`/user/${user.id_public}`)}
+                                        >
+                                            <div className="w-14 h-14 bg-gray-200 rounded-full overflow-hidden mx-auto mb-2">
+                                                {user.profileImage ? (
+                                                    <img src={user.profileImage} alt={displayName} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                        <User size={28} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <p className="font-semibold text-sm text-gray-800 truncate">{displayName}</p>
+                                            <p className="text-xs text-gray-500 truncate">{user.id_public}</p>
+                                            <span className="inline-block mt-1 text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">NEW</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 // ==================== BREEDER DIRECTORY VIEW ====================
 const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
     const navigate = useNavigate();
@@ -29401,10 +29808,6 @@ const App = () => {
     const [transferPrice, setTransferPrice] = useState('');
     const [transferNotes, setTransferNotes] = useState('');
     
-    // Community banner states
-    const [communityUsers, setCommunityUsers] = useState([]);
-    const scrollContainerRef = useRef(null);
-
     // Archive states
     const [showArchiveScreen, setShowArchiveScreen] = useState(false);
     const [archivedAnimals, setArchivedAnimals] = useState([]);
@@ -30315,123 +30718,6 @@ const App = () => {
         };
         fetchSpeciesAndConfigs();
     }, [API_BASE_URL]);
-	
-    // Fetch community users (active-first, topped up with recent new members)
-    useEffect(() => {
-        const fetchCommunityUsers = async () => {
-            try {
-                const [newestResponse, activeResponse] = await Promise.all([
-                    axios.get(`${API_BASE_URL}/public/users/newest?limit=10`),
-                    axios.get(`${API_BASE_URL}/public/users/active?minutes=30`)
-                ]);
-                let newest = newestResponse.data || [];
-                let active = activeResponse.data || [];
-
-                const hasVisibleName = (u) => (u.showBreederName && u.breederName) || (u.showPersonalName && u.personalName);
-                const clean = (arr) => arr.filter(u => u.id_public && u.accountStatus !== 'banned' && u.id_public !== 'CTU1' && hasVisibleName(u));
-                newest = clean(newest);
-                active = clean(active);
-
-                const seenIds = new Set();
-                const combined = [];
-                
-                // Create a set of active user IDs for quick lookup
-                const activeIds = new Set(active.map(u => u.id_public));
-
-                // First, add up to 1 newest member (if any) who is NOT also active
-                const fourteenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-                for (const user of newest) {
-                    if (!seenIds.has(user.id_public) && !activeIds.has(user.id_public) && combined.length < 1) {
-                        seenIds.add(user.id_public);
-                        const isNew = user.createdAt && new Date(user.createdAt) > fourteenDaysAgo;
-                        combined.push({ ...user, isActive: false, isNew: !!isNew });
-                    }
-                }
-
-                // Fill up to 5 total with active users (already sorted most-recently-active first by backend)
-                for (const user of active) {
-                    if (!seenIds.has(user.id_public) && combined.length < 5) {
-                        seenIds.add(user.id_public);
-                        combined.push({ ...user, isActive: true, isNew: false });
-                    }
-                }
-                
-                // If we still have less than 5, fill remaining with new users
-                for (const user of newest) {
-                    if (!seenIds.has(user.id_public) && combined.length < 5) {
-                        seenIds.add(user.id_public);
-                        const isNew = user.createdAt && new Date(user.createdAt) > fourteenDaysAgo;
-                        combined.push({ ...user, isActive: false, isNew: !!isNew });
-                    }
-                }
-
-                setCommunityUsers(combined);
-            } catch (error) {
-                console.error('Error fetching community users:', error);
-            }
-        };
-
-        if (authToken) {
-            fetchCommunityUsers();
-            // Refresh every 2 minutes
-            const interval = setInterval(fetchCommunityUsers, 120000);
-            return () => clearInterval(interval);
-        }
-    }, [authToken, API_BASE_URL]);
-    
-    // Auto-scroll effect for community banner - back and forth on desktop
-    useEffect(() => {
-        const scrollContainer = scrollContainerRef.current;
-        if (!scrollContainer || !communityUsers.length) return;
-        
-        // Disable auto-scroll on mobile to prevent jittery behavior
-        const isMobile = window.innerWidth < 768;
-        if (isMobile) return;
-        
-        let scrollInterval;
-        let isPaused = false;
-        let isScrollingRight = true;
-        const scrollSpeed = 0.5; // pixels per interval
-        
-        const startScroll = () => {
-            scrollInterval = setInterval(() => {
-                if (!isPaused && scrollContainer) {
-                    const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-                    let currentScroll = scrollContainer.scrollLeft;
-
-                    if (isScrollingRight) {
-                        currentScroll += scrollSpeed;
-                        if (currentScroll >= maxScroll) {
-                            currentScroll = maxScroll;
-                            isScrollingRight = false;
-                        }
-                    } else {
-                        currentScroll -= scrollSpeed;
-                        if (currentScroll <= 0) {
-                            currentScroll = 0;
-                            isScrollingRight = true;
-                        }
-                    }
-                    
-                    scrollContainer.scrollLeft = currentScroll;
-                }
-            }, 50);
-        };
-        
-        const handleMouseEnter = () => { isPaused = true; };
-        const handleMouseLeave = () => { isPaused = false; };
-        
-        scrollContainer.addEventListener('mouseenter', handleMouseEnter);
-        scrollContainer.addEventListener('mouseleave', handleMouseLeave);
-        
-        startScroll();
-        
-        return () => {
-            clearInterval(scrollInterval);
-            scrollContainer?.removeEventListener('mouseenter', handleMouseEnter);
-            scrollContainer?.removeEventListener('mouseleave', handleMouseLeave);
-        };
-    }, [communityUsers]);
 	
     const handleBugReportSubmit = async (e) => {
         e.preventDefault();
@@ -31393,6 +31679,10 @@ const App = () => {
                             <MoonStar size={18} className="mb-1" />
                             <span>Breeders</span>
                         </button>
+                        <button onClick={() => navigate('/community')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <Users size={18} className="mb-1" />
+                            <span>Community</span>
+                        </button>
                         <button onClick={() => setShowInfoTab(true)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`}>
                             <BookOpen size={18} className="mb-1" />
                             <span>Help</span>
@@ -31580,8 +31870,8 @@ const App = () => {
                         </button>
                     </nav>
 
-                    {/* Fourth row: Navigation row 2 (3 buttons) */}
-                    <nav className="grid grid-cols-3 gap-1">
+                    {/* Fourth row: Navigation row 2 (4 buttons) */}
+                    <nav className="grid grid-cols-4 gap-1">
                         <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Calculator size={18} className="mb-0.5" />
                             <span>Calculator</span>
@@ -31589,6 +31879,10 @@ const App = () => {
                         <button onClick={() => navigate('/breeder-directory')} data-tutorial-target="breeders-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <MoonStar size={18} className="mb-0.5" />
                             <span>Breeders</span>
+                        </button>
+                        <button onClick={() => navigate('/community')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <Users size={18} className="mb-0.5" />
+                            <span>Community</span>
                         </button>
                         <button onClick={() => setShowInfoTab(true)} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`}>
                             <BookOpen size={18} className="mb-0.5" />
@@ -31917,66 +32211,10 @@ const App = () => {
 
 
 
-            {/* Profile Card and Community Feed - shown only on list view */}
-            {currentView === 'list' && (
-                <div className="w-full max-w-5xl mb-6 flex flex-col sm:flex-row gap-4">
-                    {/* Profile Card - Hidden on mobile */}
-                    {currentView !== 'profile' && userProfile && <div className="hidden sm:block"><UserProfileCard userProfile={userProfile} /></div>}
-                    
-                    {/* Community Feed Banner */}
-                    {communityUsers.length > 0 && (
-                        <div className="flex-1 min-w-0 bg-gradient-to-r from-primary/20 to-accent/20 p-3 rounded-lg border border-primary/30" data-tutorial-target="community-activity">
-                            <h3 className="text-xs font-semibold text-gray-800 mb-2 flex items-center justify-center">
-                                <Users size={14} className="mr-2 text-primary-dark" />
-                                Community Feed
-                            </h3>
-                            <div
-                                ref={scrollContainerRef}
-                                className="flex flex-wrap justify-center gap-3 pb-2"
-                            >
-                                {communityUsers.map(user => {
-                                    const displayName = (user.showBreederName && user.breederName)
-                                        ? user.breederName
-                                        : ((user.showPersonalName ?? false) ? user.personalName : 'Anonymous');
-                                    return (
-                                        <div
-                                            key={user.id_public}
-                                            className="relative bg-white rounded-lg p-2 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer w-[48%] sm:w-[31%] md:w-[23%] lg:w-[18%] min-w-[110px] max-w-[140px]"
-                                            onClick={() => navigate(`/user/${user.id_public}`)}
-                                        >
-                                            {/* Donation badge - top left */}
-                                            {getDonationBadge(user) && (
-                                                <span className="absolute top-1 left-1 z-10">
-                                                    <DonationBadge badge={getDonationBadge(user)} size="xs" />
-                                                </span>
-                                            )}
-                                            {/* Active green dot */}
-                                            {user.isActive && (
-                                                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full" title="Recently active" />
-                                            )}
-                                            {/* New member badge */}
-                                            {!user.isActive && user.isNew && (
-                                                <span className="absolute top-1 right-1 text-[9px] font-bold bg-blue-100 text-blue-600 px-1 rounded">NEW</span>
-                                            )}
-                                            <div className="w-10 h-10 bg-gray-100 rounded-full overflow-hidden mx-auto mb-1">
-                                                {user.profileImage ? (
-                                                    <img src={user.profileImage} alt={displayName} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                        <User size={20} />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <p className="text-xs font-semibold text-gray-800 text-center line-clamp-2 min-h-[2.5rem] px-1">
-                                                {displayName}
-                                            </p>
-                                            <p className="text-xs text-gray-500 text-center truncate">{user.id_public}</p>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
+            {/* Profile Card - shown only on desktop in list view */}
+            {currentView === 'list' && currentView !== 'profile' && userProfile && (
+                <div className="w-full max-w-5xl mb-6 hidden sm:block">
+                    <UserProfileCard userProfile={userProfile} />
                 </div>
             )}
 
@@ -32088,6 +32326,13 @@ const App = () => {
                         />
                     } />
                     <Route path="/profile" element={<ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} saveBreedingLineDefs={saveBreedingLineDefs} toggleAnimalBreedingLine={toggleAnimalBreedingLine} BL_PRESETS_APP={BL_PRESETS_APP} />} />
+                    <Route path="/community" element={
+                        <CommunityPage
+                            authToken={authToken}
+                            API_BASE_URL={API_BASE_URL}
+                            userProfile={userProfile}
+                        />
+                    } />
                     <Route path="/breeder-directory" element={
                         <BreederDirectory
                             authToken={authToken}
