@@ -20858,14 +20858,14 @@ const UserProfileCard = ({ userProfile }) => {
     const isBreederNameVisible = userProfile.showBreederName ?? false;
 
     return (
-        <div className="bg-white p-3 rounded-xl shadow-lg flex flex-col items-center text-center" style={{minWidth: '200px', maxWidth: '220px'}}>
+        <div className="bg-white p-3 rounded-xl shadow-lg flex flex-col items-center text-center justify-between" style={{minWidth: '200px', maxWidth: '220px', height: '260px'}}>
             {/* Names at top */}
             <div className="mb-2 w-full">
                 <div className="flex items-center justify-center gap-2 mb-2">
                     <DonationBadge user={userProfile} size="sm" />
                 </div>
                 {isPersonalNameVisible && (
-                    <h3 className="text-sm font-bold text-gray-900 line-clamp-2">
+                    <h3 className="text-sm font-bold text-gray-900 line-clamp-3">
                         {userProfile.personalName}
                     </h3>
                 )}
