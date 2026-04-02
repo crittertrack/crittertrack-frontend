@@ -22777,17 +22777,17 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                         )}
                     </div>
 
-                    {/* New Available Animals */}
+                    {/* Available from Followed Breeders */}
                     <div className="bg-white rounded-lg shadow-md p-4">
                         <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
                             <ShoppingBag size={20} className="text-green-500" />
-                            New Available Animals
+                            Available from Followed Breeders
                         </h2>
                         {newAvailableAnimals.length === 0 ? (
                             <p className="text-gray-500 text-sm">{favoriteUsers.length === 0 ? 'Favorite some breeders to see their available animals here.' : 'No available animals from your favorite breeders.'}</p>
                         ) : (
                             <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                                {newAvailableAnimals.slice(0, 10).map(animal => {
+                                {newAvailableAnimals.map(animal => {
                                     const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph', 'markings'];
                                     const variety = VARIETY_KEYS.map(k => animal[k]).filter(Boolean).join(' ');
                                     const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
@@ -22812,10 +22812,22 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                                                     {fullName}
                                                     {animal.gender === 'Male' ? <Mars size={13} strokeWidth={2.5} className="text-primary flex-shrink-0" /> : animal.gender === 'Female' ? <Venus size={13} strokeWidth={2.5} className="text-accent flex-shrink-0" /> : animal.gender === 'Intersex' ? <VenusAndMars size={13} strokeWidth={2.5} className="text-purple-500 flex-shrink-0" /> : <Circle size={13} strokeWidth={2.5} className="text-gray-400 flex-shrink-0" />}
                                                 </p>
-                                                <p className="text-xs text-gray-500">{animal.species} • {animal.isForSale ? 'For Sale' : 'For Stud'}</p>
+                                                <p className="text-xs text-gray-500">{animal.species}</p>
                                                 {variety && <p className="text-xs text-gray-400 truncate">{variety}</p>}
                                             </div>
-                                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded flex-shrink-0">NEW</span>
+                                            <div className="flex flex-col gap-1 items-end flex-shrink-0">
+                                                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">{animal.isForSale ? 'For Sale' : 'For Stud'}</span>
+                                                {animal.isForSale && (
+                                                    <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">
+                                                        {animal.salePriceCurrency === 'Negotiable' || !animal.salePriceAmount ? 'Negotiable' : `${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount}`}
+                                                    </span>
+                                                )}
+                                                {!animal.isForSale && animal.availableForBreeding && animal.studFeeAmount && (
+                                                    <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">
+                                                        {animal.studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount}`}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     );
                                 })}
