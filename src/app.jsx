@@ -10577,7 +10577,7 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
                                             <button
                                                 type="button"
                                                 onClick={() => onSelect(s.name)}
-                                                className={`w-full flex flex-col items-start p-3 border-2 rounded-lg text-left transition hover:shadow-md ${
+                                                className={`w-full flex flex-col items-start p-2 border-2 rounded-lg text-left transition hover:shadow-md ${
                                                     isFav
                                                         ? 'border-amber-300 bg-amber-50 hover:bg-amber-100'
                                                         : s.isDefault
@@ -10586,7 +10586,6 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
                                                 }`}
                                             >
                                                 <span className="font-medium text-sm text-gray-800 leading-tight pr-5">
-                                                    {getSpeciesEmoji(s.name) && <span className="mr-1">{getSpeciesEmoji(s.name)}</span>}
                                                     {s.name}
                                                 </span>
                                                 {s.latinName && (
@@ -14672,7 +14671,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
             
             <div className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg">
                 <p className="text-sm text-yellow-800">
-                    <span className="font-semibold"><Wrench size={12} className="inline-block align-middle mr-1" /> Work in Progress:</span> Some default species are intentionally broad ? for example, <span className="italic">Theraphosidae sp.</span> covers the family as a whole. We encourage adding and using your specific species where possible: e.g. <span className="italic">(Theraphosidae) Poecilotheria metallica</span> or <span className="italic">(Theraphosidae) Brachypelma hamorii</span>. Don't see fields you need? You can request them to be added through the species customisomisation!
+                    <span className="font-semibold"><Wrench size={12} className="inline-block align-middle mr-1" /> Work in Progress:</span> Some default species are intentionally broad ? for example, <span className="italic">Theraphosidae sp.</span> covers the family as a whole. We encourage adding and using your specific species where possible: e.g. <span className="italic">(Theraphosidae) Poecilotheria metallica</span> or <span className="italic">(Theraphosidae) Brachypelma hamorii</span>. Don't see fields you need? You can request them to be added through the species customization feature!
                 </p>
             </div>
             
@@ -14720,7 +14719,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                                     <button
                                         onClick={() => onSelectSpecies(species.name)}
                                         data-tutorial-target={species.name === 'Fancy Mouse' ? 'species-fancy-mouse' : undefined}
-                                        className={`w-full p-6 border-2 text-lg font-semibold rounded-lg transition duration-150 shadow-md relative text-center ${
+                                        className={`w-full p-4 border-2 text-lg font-semibold rounded-lg transition duration-150 shadow-md relative text-center ${
                                             isFav
                                                 ? 'border-amber-400 bg-amber-50 text-gray-800 hover:bg-amber-100'
                                                 : species.isDefault 
@@ -14731,9 +14730,6 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                                         {species.name}
                                         {species.latinName && (
                                             <p className={`text-xs italic mt-1 ${isFav || species.isDefault ? 'text-gray-600' : 'text-white/80'}`}>{species.latinName}</p>
-                                        )}
-                                        {species.isDefault && (
-                                            <span className="absolute top-1 right-1 text-base leading-none">{getSpeciesEmoji(species.name)}</span>
                                         )}
                                     </button>
                                     <button
