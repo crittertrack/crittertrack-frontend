@@ -28820,7 +28820,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     const getBroadcastStyles = (broadcastType) => {
         if (broadcastType === 'announcement') return { bg: 'bg-purple-50', border: 'border-purple-300', pill: 'bg-purple-100 text-purple-700', title: 'text-purple-800', sub: 'text-purple-400', dismiss: 'text-purple-400 hover:text-purple-600', icon: 'text-purple-400', label: 'Announcement', button: 'bg-purple-500 hover:bg-purple-600 text-white', optionBg: 'bg-purple-100 hover:bg-purple-200', resultBar: 'bg-purple-400', subtitle: 'text-purple-400', text: 'text-purple-700' };
         if (broadcastType === 'poll') return { bg: 'bg-green-50', border: 'border-green-300', pill: 'bg-green-100 text-green-700', title: 'text-green-800', sub: 'text-green-400', dismiss: 'text-green-400 hover:text-green-600', icon: 'text-green-400', label: 'Poll', button: 'bg-green-500 hover:bg-green-600 text-white', optionBg: 'bg-green-100 hover:bg-green-200', resultBar: 'bg-green-400', subtitle: 'text-green-400', text: 'text-green-700' };
-        return { bg: 'bg-blue-50', border: 'border-blue-300', pill: 'bg-blue-100 text-blue-700', title: 'text-blue-800', sub: 'text-blue-400', dismiss: 'text-blue-400 hover:text-blue-600', icon: 'text-blue-400', label: 'News', button: 'bg-blue-500 hover:bg-blue-600 text-white', optionBg: 'bg-blue-100 hover:bg-blue-200', resultBar: 'bg-blue-400', subtitle: 'text-blue-400', text: 'text-blue-700' };
+        return { bg: 'bg-blue-50', border: 'border-blue-300', pill: 'bg-blue-100 text-blue-700', title: 'text-blue-800', sub: 'text-blue-400', dismiss: 'text-blue-400 hover:text-blue-600', icon: 'text-blue-400', label: 'Info', button: 'bg-blue-500 hover:bg-blue-600 text-white', optionBg: 'bg-blue-100 hover:bg-blue-200', resultBar: 'bg-blue-400', subtitle: 'text-blue-400', text: 'text-blue-700' };
     };
 
     const hasReminders = breedingItems.length > 0 || mgmtItems.length > 0;
@@ -28833,7 +28833,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
             <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100 flex-shrink-0">
                 <div className="flex items-center gap-2">
                     <Bell size={15} className="text-primary" />
-                    <span className="font-semibold text-gray-800 text-sm">Reminders &amp; News</span>
+                    <span className="font-semibold text-gray-800 text-sm">Reminders &amp; Broadcasts</span>
                 </div>
                 {totalCount > 0 && (
                     <span className="text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full font-bold">{totalCount}</span>
