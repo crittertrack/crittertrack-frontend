@@ -28828,7 +28828,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
 
     return (
         <>
-        <div className="bg-white rounded-xl shadow-md flex flex-col" style={!hasNews || totalCount === 0 || isLoading ? { height: '210px' } : undefined}>
+        <div className="bg-white rounded-xl shadow-md flex flex-col" style={!(hasReminders && hasNews) ? { height: '210px' } : undefined}>
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100 flex-shrink-0">
                 <div className="flex items-center gap-2">
@@ -28849,10 +28849,10 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                     <span className="text-xs">No reminders or news.</span>
                 </div>
             ) : (
-                <div className={hasReminders && hasNews ? 'flex flex-col overflow-hidden' : 'flex-1 flex flex-col overflow-hidden'}>
+                <div className="flex-1 flex flex-col overflow-hidden">
                     {/* Reminder rows */}
                     {hasReminders && (
-                        <div className={`overflow-y-auto divide-y divide-gray-200 ${!hasNews ? 'flex-1' : ''}`} style={hasNews ? { maxHeight: '112px' } : {}}>
+                        <div className="overflow-y-auto divide-y divide-gray-200" style={hasNews ? { maxHeight: '106px', flexShrink: 0 } : { flex: 1 }}>
                             {breedingItems.map(item => {
                                 const cfg = breedingTypeConfig[item.type] || breedingTypeConfig.due;
                                 const statusText = item.type === 'mated' && item.diff > 0
@@ -28892,8 +28892,8 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
 
                     {/* News card strip */}
                     {hasNews && (
-                        <div className={`flex-shrink-0 ${hasReminders ? 'border-t border-gray-200' : ''}`}>
-                            <div className="flex gap-2 overflow-x-auto px-3 py-2" style={{ scrollbarWidth: 'thin' }}>
+                        <div className={hasReminders ? 'flex-shrink-0 border-t border-gray-200' : 'flex-1 overflow-hidden'}>
+                            <div className={`gap-2 px-3 py-2 ${hasReminders ? 'flex overflow-x-auto' : 'flex flex-wrap overflow-y-auto h-full'}`} style={{ scrollbarWidth: 'thin' }}>
                                 {broadcasts.map(broadcast => {
                                     const styles = getBroadcastStyles(broadcast.broadcastType);
                                     return (
@@ -28913,10 +28913,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                         </div>
                     )}
 
-                    {/* Only news, no reminders */}
-                    {!hasReminders && hasNews && (
-                        <div className="flex-1" />
-                    )}
+
                 </div>
             )}
         </div>
