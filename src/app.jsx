@@ -20858,7 +20858,7 @@ const UserProfileCard = ({ userProfile }) => {
     const isBreederNameVisible = userProfile.showBreederName ?? false;
 
     return (
-        <div className="bg-white p-3 rounded-xl shadow-lg flex flex-col items-center text-center justify-between" style={{minWidth: '200px', maxWidth: '220px', height: '210px'}}>
+        <div className="bg-white p-3 rounded-xl shadow-lg flex flex-col items-center text-center justify-between" style={{minWidth: '200px', maxWidth: '220px', height: '250px'}}>
             {/* Names at top */}
             <div className="mb-2 w-full">
                 <div className="flex items-center justify-center gap-2 mb-2">
@@ -28828,7 +28828,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
 
     return (
         <>
-        <div className="bg-white rounded-xl shadow-md flex flex-col" style={{ height: '210px' }}>
+        <div className="bg-white rounded-xl shadow-md flex flex-col" style={{ height: '250px' }}>
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100 flex-shrink-0">
                 <div className="flex items-center gap-2">
