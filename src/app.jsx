@@ -28828,7 +28828,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
 
     return (
         <>
-        <div className="bg-white rounded-xl shadow-md flex flex-col" style={hasReminders && hasNews ? undefined : { height: '260px' }}>
+        <div className="bg-white rounded-xl shadow-md flex flex-col" style={totalCount === 0 || isLoading ? { height: '260px' } : undefined}>
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100 flex-shrink-0">
                 <div className="flex items-center gap-2">
