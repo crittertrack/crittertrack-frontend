@@ -28832,7 +28832,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                     <span className="text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full font-bold">{totalCount}</span>
                 )}
             </div>
-            <div className="flex-1 overflow-y-auto divide-y divide-gray-200">
+            <div className="flex-1 overflow-y-auto divide-y divide-gray-200 min-h-0">
                 {isLoading ? (
                     <div className="flex items-center justify-center py-8 text-gray-400 text-sm">Loading...</div>
                 ) : totalCount === 0 ? (
@@ -32677,11 +32677,11 @@ const App = () => {
 
             {/* Profile Card + Banners - shown only on desktop in list view */}
             {currentView === 'list' && currentView !== 'profile' && userProfile && (
-                <div className="w-full max-w-5xl mb-6 hidden sm:flex gap-4 items-stretch">
+                <div className="w-full max-w-5xl mb-6 hidden sm:flex gap-4 items-start">
                     <div className="flex-shrink-0">
                         <UserProfileCard userProfile={userProfile} />
                     </div>
-                    <div className="flex-1 min-w-0 flex flex-col">
+                    <div className="flex-1 min-w-0 self-stretch flex flex-col">
                         <NotificationsHub authToken={authToken} API_BASE_URL={API_BASE_URL} />
                     </div>
                 </div>
