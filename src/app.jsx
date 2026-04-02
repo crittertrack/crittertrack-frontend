@@ -2329,17 +2329,24 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
         try {
             // Search both users and animals in parallel
             const trimmedTerm = term.trim();
-            const idMatch = trimmedTerm.match(/^\s*(?:CT[- ]?)?(\d+)\s*$/i);
             
-            // For ID searches, use the numeric ID; otherwise use the full term
-            const userSearchParam = idMatch 
-                ? `CT${idMatch[1]}`  // Format as CTXXX for user ID search
+            // Check for CTUID pattern (user ID)
+            const userIdMatch = trimmedTerm.match(/^\s*(?:CTU[- ]?)?(\d+)\s*$/i);
+            // Check for CTCID pattern (animal ID) - or just CT without U
+            const animalIdMatch = trimmedTerm.match(/^\s*(?:CTC?[- ]?)?(\d+)\s*$/i);
+            
+            // Determine if this is specifically a user ID search
+            const isUserIdSearch = /CTU/i.test(trimmedTerm);
+            
+            // For user searches: use CTUXXX format if it's a user ID, otherwise use the full term
+            const userSearchParam = (isUserIdSearch && userIdMatch) 
+                ? `CTU${userIdMatch[1]}`
                 : trimmedTerm;
             
             const [usersResponse, animalsResponse] = await Promise.all([
                 axios.get(`${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(userSearchParam)}&limit=10`),
-                axios.get(idMatch 
-                    ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(idMatch[1])}`
+                axios.get((animalIdMatch && !isUserIdSearch)
+                    ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(animalIdMatch[1])}`
                     : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedTerm)}&limit=10`)
             ]);
             
