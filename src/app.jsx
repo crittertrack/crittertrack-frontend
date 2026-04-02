@@ -28586,8 +28586,6 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
     
     return (
         <div className="mt-3">
-            <h4 className={`font-medium ${styles.title} mb-2 text-base`}>{poll.pollQuestion}</h4>
-            
             <div className="grid grid-cols-2 gap-2">
                 {poll.pollOptions?.map((option, index) => {
                     const isSelected = selectedOptions.includes(index);
@@ -29005,12 +29003,17 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                                         >
                                             <button onClick={(e) => { e.stopPropagation(); dismissBroadcast(broadcast._id); }} className={`absolute top-1 right-1 ${styles.dismiss}`}><X size={11} /></button>
                                             <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full self-start ${styles.pill} mb-1`}>{styles.label}</span>
-                                            <p className={`text-xs font-bold ${styles.title} line-clamp-2 pr-3 leading-tight mb-1`}>{broadcast.title || `System ${styles.label}`}</p>
-                                            {broadcast.broadcastType === 'poll' && broadcast.pollQuestion ? (
+                                            <p className={`text-xs font-bold ${styles.title} line-clamp-2 pr-3 leading-tight mb-1`}>{broadcast.broadcastType === 'poll' ? (broadcast.pollQuestion || broadcast.title) : (broadcast.title || `System ${styles.label}`)}</p>
+                                            {broadcast.broadcastType === 'poll' && broadcast.pollOptions ? (
                                                 <>
-                                                    <p className={`text-xs ${styles.text} line-clamp-3 leading-snug mb-0.5`}>{broadcast.pollQuestion}</p>
                                                     {broadcast.pollOptions?.[0] && (
-                                                        <p className={`text-xs ${styles.text} opacity-70 line-clamp-1 leading-snug mb-1`}>• {broadcast.pollOptions[0].text}</p>
+                                                        <p className={`text-xs ${styles.text} opacity-70 line-clamp-1 leading-snug`}>• {broadcast.pollOptions[0].text}</p>
+                                                    )}
+                                                    {broadcast.pollOptions?.[1] && (
+                                                        <p className={`text-xs ${styles.text} opacity-70 line-clamp-1 leading-snug`}>• {broadcast.pollOptions[1].text}</p>
+                                                    )}
+                                                    {broadcast.pollOptions?.[2] && (
+                                                        <p className={`text-xs ${styles.text} opacity-70 line-clamp-1 leading-snug mb-1`}>• {broadcast.pollOptions[2].text}</p>
                                                     )}
                                                 </>
                                             ) : broadcast.message && (
@@ -29041,7 +29044,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                         <div className={`flex items-start justify-between px-5 py-4 border-b border-gray-100`}>
                             <div className="flex items-center gap-2 min-w-0">
                                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${styles.pill}`}>{styles.label}</span>
-                                <h3 className={`text-base font-bold ${styles.title} truncate`}>{selectedBroadcast.title || `System ${styles.label}`}</h3>
+                                <h3 className={`text-base font-bold ${styles.title} truncate`}>{selectedBroadcast.broadcastType === 'poll' ? (selectedBroadcast.pollQuestion || selectedBroadcast.title) : (selectedBroadcast.title || `System ${styles.label}`)}</h3>
                             </div>
                             <button onClick={() => setSelectedBroadcast(null)} className="text-gray-400 hover:text-gray-600 flex-shrink-0 ml-2"><X size={18} /></button>
                         </div>
