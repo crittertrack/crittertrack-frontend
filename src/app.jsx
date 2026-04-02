@@ -28822,7 +28822,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-md flex flex-col h-full min-h-[180px]">
+        <div className="bg-white rounded-xl shadow-md flex flex-col h-full">
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0">
                 <div className="flex items-center gap-2">
                     <Bell size={16} className="text-primary" />
@@ -32677,11 +32677,11 @@ const App = () => {
 
             {/* Profile Card + Banners - shown only on desktop in list view */}
             {currentView === 'list' && currentView !== 'profile' && userProfile && (
-                <div className="w-full max-w-5xl mb-6 hidden sm:flex gap-4 items-start">
+                <div className="w-full max-w-5xl mb-6 hidden sm:flex gap-4 items-stretch">
                     <div className="flex-shrink-0">
                         <UserProfileCard userProfile={userProfile} />
                     </div>
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 flex flex-col">
                         <NotificationsHub authToken={authToken} API_BASE_URL={API_BASE_URL} />
                     </div>
                 </div>
