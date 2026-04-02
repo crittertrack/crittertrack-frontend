@@ -8607,7 +8607,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     disabled={animalFavoritePending}
                                     className={`px-3 py-1.5 font-semibold rounded-lg transition flex items-center gap-2 ${
                                         isAnimalFavorited
-                                            ? 'bg-red-100 hover:bg-red-200 text-red-600'
+                                            ? 'bg-purple-100 hover:bg-purple-200 text-purple-600'
                                             : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                                     } ${animalFavoritePending ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     title={isAnimalFavorited ? 'Remove from favorites' : 'Add to favorites'}
@@ -22619,7 +22619,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                                                 e.stopPropagation();
                                                 toggleFavoriteAnimal(animal.id_public);
                                             }}
-                                            className="p-2 text-red-500 hover:bg-red-50 rounded transition"
+                                            className="p-2 text-purple-500 hover:bg-purple-50 rounded transition"
                                         >
                                             <Heart size={18} fill="currentColor" />
                                         </button>
