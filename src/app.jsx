@@ -32394,14 +32394,14 @@ const App = () => {
                             <DollarSign size={18} className="mb-0.5" />
                             <span>Budget</span>
                         </button>
-                        <button onClick={() => navigate('/marketplace')} data-tutorial-target="marketplace-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <ShoppingBag size={18} className="mb-0.5" />
-                            <span>Available Animals</span>
-                        </button>
                     </nav>
 
                     {/* Fourth row: Navigation row 2 (4 buttons) */}
                     <nav className="grid grid-cols-4 gap-1">
+                        <button onClick={() => navigate('/marketplace')} data-tutorial-target="marketplace-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <ShoppingBag size={18} className="mb-0.5" />
+                            <span>Available</span>
+                        </button>
                         <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Calculator size={18} className="mb-0.5" />
                             <span>Calculator</span>
