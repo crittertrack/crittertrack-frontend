@@ -2666,6 +2666,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     const [reportRatingSuccess, setReportRatingSuccess] = useState(null); // _id of successfully reported rating
     const [removingRatingId, setRemovingRatingId] = useState(null);
     const [ratingError, setRatingError] = useState('');
+    const [isFavorited, setIsFavorited] = useState(false);
+    const [favoritePending, setFavoritePending] = useState(false);
     const toggleInfoField = (key) => setExpandedInfoFields(prev => {
         const next = new Set(prev);
         next.has(key) ? next.delete(key) : next.add(key);
@@ -2673,6 +2675,51 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     });
 
     const isModOrAdmin = ['moderator', 'admin'].includes(currentUserRole);
+
+    // Check if this user is favorited
+    useEffect(() => {
+        const checkFavorited = async () => {
+            if (!authToken || !profile.id_public) return;
+            
+            // Don't allow favoriting yourself
+            if (currentUserIdPublic === profile.id_public) return;
+            
+            try {
+                const res = await axios.get(`${API_BASE_URL}/favorites/users`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                const favorited = (res.data || []).some(u => u.id_public === profile.id_public);
+                setIsFavorited(favorited);
+            } catch (error) {
+                console.error('Error checking favorite status:', error);
+            }
+        };
+        
+        checkFavorited();
+    }, [authToken, profile.id_public, currentUserIdPublic, API_BASE_URL]);
+
+    const toggleFavorite = async () => {
+        if (!authToken || favoritePending) return;
+        
+        setFavoritePending(true);
+        try {
+            if (isFavorited) {
+                await axios.delete(`${API_BASE_URL}/favorites/users/${profile.id_public}`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                setIsFavorited(false);
+            } else {
+                await axios.post(`${API_BASE_URL}/favorites/users/${profile.id_public}`, {}, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                setIsFavorited(true);
+            }
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
+        } finally {
+            setFavoritePending(false);
+        }
+    };
 
     const handleSubmitRating = async () => {
         if (!ratingForm.score || ratingForm.score < 1) return;
@@ -2955,6 +3002,21 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         >
                             <MessageSquare size={16} />
                             Message
+                        </button>
+                    )}
+                    {authToken && currentUserIdPublic !== profile.id_public && (
+                        <button
+                            onClick={toggleFavorite}
+                            disabled={favoritePending}
+                            className={`px-3 py-1.5 font-semibold rounded-lg transition flex items-center gap-2 ${
+                                isFavorited 
+                                    ? 'bg-purple-100 hover:bg-purple-200 text-purple-700'
+                                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                            } ${favoritePending ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                        >
+                            <Heart size={16} fill={isFavorited ? 'currentColor' : 'none'} />
+                            {isFavorited ? 'Favorited' : 'Favorite'}
                         </button>
                     )}
                     <button
@@ -8322,6 +8384,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
     const [expandedPedigreeRecords, setExpandedPedigreeRecords] = useState({});
     const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
     const [parentCardKey, setParentCardKey] = useState(0); // increment to force parent cards to refetch
+    const [isAnimalFavorited, setIsAnimalFavorited] = useState(false);
+    const [animalFavoritePending, setAnimalFavoritePending] = useState(false);
     const { fieldTemplate, getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
 
     // Force parent cards to refetch when Lineage tab opens
@@ -8421,6 +8485,45 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
             setTimeout(() => setCopySuccess(false), 2000);
         });
     };
+
+    // Check if this animal is favorited
+    React.useEffect(() => {
+        const checkFavorited = async () => {
+            if (!authToken || !animal?.id_public) return;
+            try {
+                const res = await axios.get(`${API_BASE_URL}/favorites/animals`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                const favorited = (res.data || []).some(a => a.id_public === animal.id_public);
+                setIsAnimalFavorited(favorited);
+            } catch (error) {
+                // Silently fail
+            }
+        };
+        checkFavorited();
+    }, [authToken, animal?.id_public, API_BASE_URL]);
+
+    const toggleAnimalFavorite = async () => {
+        if (!authToken || animalFavoritePending) return;
+        setAnimalFavoritePending(true);
+        try {
+            if (isAnimalFavorited) {
+                await axios.delete(`${API_BASE_URL}/favorites/animals/${animal.id_public}`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                setIsAnimalFavorited(false);
+            } else {
+                await axios.post(`${API_BASE_URL}/favorites/animals/${animal.id_public}`, {}, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                setIsAnimalFavorited(true);
+            }
+        } catch (error) {
+            console.error('Error toggling animal favorite:', error);
+        } finally {
+            setAnimalFavoritePending(false);
+        }
+    };
     
     // Fetch breeder info when component mounts or animal changes
     React.useEffect(() => {
@@ -8498,6 +8601,21 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             <ArrowLeft size={18} className="mr-1" /> Back
                         </button>
                         <div className="flex items-center gap-2">
+                            {authToken && (
+                                <button
+                                    onClick={toggleAnimalFavorite}
+                                    disabled={animalFavoritePending}
+                                    className={`px-3 py-1.5 font-semibold rounded-lg transition flex items-center gap-2 ${
+                                        isAnimalFavorited
+                                            ? 'bg-red-100 hover:bg-red-200 text-red-600'
+                                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                                    } ${animalFavoritePending ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    title={isAnimalFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                                >
+                                    <Heart size={16} fill={isAnimalFavorited ? 'currentColor' : 'none'} />
+                                    {isAnimalFavorited ? 'Favorited' : 'Favorite'}
+                                </button>
+                            )}
                             <button
                                 onClick={() => setShowQR(true)}
                                 className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
