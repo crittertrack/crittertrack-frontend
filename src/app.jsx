@@ -31384,6 +31384,15 @@ const App = () => {
 
                     <div className="flex items-center space-x-3">
                         <button
+                            onClick={() => setShowInfoTab(true)}
+                            className="flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
+                            title="Help & Tutorials"
+                        >
+                            <BookOpen size={18} className="mb-1" />
+                            <span className="text-xs">Help</span>
+                        </button>
+                        
+                        <button
                             onClick={() => {
                                 setShowNotifications(true);
                                 setNotificationCount(0);
@@ -31437,10 +31446,6 @@ const App = () => {
                                     <button onClick={() => { navigate('/profile'); setShowProfileMenu(false); }}
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
                                         <User size={15} /> Profile
-                                    </button>
-                                    <button onClick={() => { setShowInfoTab(true); setShowProfileMenu(false); }}
-                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
-                                        <BookOpen size={15} /> Help &amp; Tutorials
                                     </button>
                                     {['admin', 'moderator'].includes(userProfile?.role) && (
                                         <button onClick={() => { inModeratorMode ? setShowAdminPanel(!showAdminPanel) : setShowModerationAuthModal(true); setShowProfileMenu(false); }}
@@ -31512,6 +31517,14 @@ const App = () => {
                                 )}
                             </button>
                             
+                            <button
+                                onClick={() => setShowInfoTab(true)}
+                                className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
+                                title="Help & Tutorials"
+                            >
+                                <BookOpen size={18} />
+                            </button>
+                            
                             {/* Avatar / Profile Dropdown (mobile) */}
                             <div className="relative" ref={profileMenuMobileRef}>
                                 <button
@@ -31529,10 +31542,6 @@ const App = () => {
                                         <button onClick={() => { navigate('/profile'); setShowProfileMenu(false); }}
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
                                             <User size={15} /> Profile
-                                        </button>
-                                        <button onClick={() => { setShowInfoTab(true); setShowProfileMenu(false); }}
-                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
-                                            <BookOpen size={15} /> Help &amp; Tutorials
                                         </button>
                                         {['admin', 'moderator'].includes(userProfile?.role) && (
                                             <button onClick={() => { inModeratorMode ? setShowAdminPanel(!showAdminPanel) : setShowModerationAuthModal(true); setShowProfileMenu(false); }}
