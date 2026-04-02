@@ -4410,9 +4410,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             <ArrowLeft size={18} className="mr-1" /> Back
                         </button>
                         <div className="flex items-center gap-2">
-                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded font-medium">
-                                OWNER VIEW - All Data Visible
-                            </span>
                             <button
                                 onClick={() => setShowQR(true)}
                                 className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
@@ -4517,7 +4514,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 title={tab.label}
                             >
                                 {React.createElement(tab.icon, { size: 14, className: `inline-block align-middle flex-shrink-0 mr-1.5 ${tab.color || ''}` })}
-                                <span className="hidden lg:inline">{tab.label}</span>
+                                {tab.label}
                             </button>
                         ))}
                     </div>
@@ -6786,9 +6783,6 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             >
                                 <ArrowLeft size={16} className="mr-1" /> Back
                             </button>
-                            <span className="text-[10px] bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded font-medium flex items-center gap-0.5">
-                                <Lock size={10} /> VIEW-ONLY
-                            </span>
                             <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={24} />
                             </button>
@@ -6805,10 +6799,6 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             <ArrowLeft size={18} className="mr-1" /> Back
                         </button>
                         <div className="flex items-center gap-2">
-                            <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded font-medium">
-                                VIEW-ONLY - Read Only Access
-                            </span>
-
                             <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={28} />
                             </button>
@@ -6847,7 +6837,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 title={tab.label}
                             >
                                 {React.createElement(tab.icon, { size: 14, className: `inline-block align-middle flex-shrink-0 mr-1.5 ${tab.color || ''}` })}
-                                <span className="hidden lg:inline">{tab.label}</span>
+                                {tab.label}
                             </button>
                         ))}
                     </div>
@@ -17786,7 +17776,7 @@ const AnimalForm = ({
                                 title={tab.label}
                             >
                                 {React.createElement(tab.icon, { size: 14, className: `inline-block align-middle flex-shrink-0 mr-1.5 ${tab.color || ''}` })}
-                                <span className="hidden lg:inline">{tab.label}</span>
+                                {tab.label}
                             </button>
                         ))}
                     </div>
