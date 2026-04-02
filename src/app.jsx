@@ -22557,7 +22557,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                         <Users size={20} className="text-primary-dark" />
                         Recently Active Members
                     </h2>
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 overflow-x-auto sm:overflow-x-visible pb-1 sm:pb-0">
                         {communityUsers.map(user => {
                             const displayName = (user.showBreederName && user.breederName)
                                 ? user.breederName
@@ -22565,7 +22565,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                             return (
                                 <div
                                     key={user.id_public}
-                                    className="relative bg-white rounded-lg p-3 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer text-center flex-1 min-w-0"
+                                    className="relative bg-white rounded-lg p-3 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer text-center flex-shrink-0 w-32 sm:flex-1 sm:w-auto sm:min-w-0"
                                     onClick={() => navigate(`/user/${user.id_public}`)}
                                 >
                                     <span className="absolute top-2 right-2 w-3 h-3 bg-green-400 border-2 border-white rounded-full" title="Active now" />
