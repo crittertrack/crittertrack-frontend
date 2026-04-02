@@ -22536,7 +22536,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
         <div className="w-full max-w-6xl mx-auto p-4">
             <h1 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                 <Users size={32} className="text-primary" />
-                Community
+                My Feed
             </h1>
 
             {/* Active Community Members */}
@@ -22816,7 +22816,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                     <div className="bg-white rounded-lg shadow-md p-4 lg:col-span-2">
                         <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
                             <UserPlus size={20} className="text-indigo-500" />
-                            New Community Members
+                            New Members
                         </h2>
                         {newUsers.length === 0 ? (
                             <p className="text-gray-500 text-sm">No new members recently.</p>
@@ -31799,7 +31799,7 @@ const App = () => {
                         </button>
                         <button onClick={() => navigate('/community')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Users size={18} className="mb-1" />
-                            <span>Community</span>
+                            <span>My Feed</span>
                         </button>
                         <button onClick={() => setShowInfoTab(true)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`}>
                             <BookOpen size={18} className="mb-1" />
@@ -32000,7 +32000,7 @@ const App = () => {
                         </button>
                         <button onClick={() => navigate('/community')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Users size={18} className="mb-0.5" />
-                            <span>Community</span>
+                            <span>My Feed</span>
                         </button>
                         <button onClick={() => setShowInfoTab(true)} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`}>
                             <BookOpen size={18} className="mb-0.5" />
