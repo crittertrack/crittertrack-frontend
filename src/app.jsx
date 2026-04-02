@@ -32732,14 +32732,19 @@ const App = () => {
 
             {/* Profile Card + Banners - shown only on desktop in list view */}
             {currentView === 'list' && currentView !== 'profile' && userProfile && (
-                <div className="w-full max-w-5xl mb-6 hidden sm:flex gap-4 items-start">
-                    <div className="flex-shrink-0">
-                        <UserProfileCard userProfile={userProfile} />
+                <>
+                    <div className="w-full max-w-5xl mb-6 hidden sm:flex gap-4 items-start">
+                        <div className="flex-shrink-0">
+                            <UserProfileCard userProfile={userProfile} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <NotificationsHub authToken={authToken} API_BASE_URL={API_BASE_URL} />
+                        </div>
                     </div>
-                    <div className="flex-1 min-w-0">
+                    <div className="w-full max-w-5xl mb-4 sm:hidden">
                         <NotificationsHub authToken={authToken} API_BASE_URL={API_BASE_URL} />
                     </div>
-                </div>
+                </>
             )}
 
             <main className="w-full flex-grow max-w-5xl">
