@@ -28818,7 +28818,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     const getBroadcastStyles = (broadcastType) => {
         if (broadcastType === 'announcement') return { bg: 'bg-purple-50', border: 'border-purple-400', title: 'text-purple-800', text: 'text-purple-700', sub: 'text-purple-400', dismiss: 'text-purple-400 hover:text-purple-600', icon: 'text-purple-400', label: 'Announcement', button: 'bg-purple-500 hover:bg-purple-600 text-white', optionBg: 'bg-purple-100 hover:bg-purple-200', resultBar: 'bg-purple-400', subtitle: 'text-purple-400' };
         if (broadcastType === 'poll') return { bg: 'bg-green-50', border: 'border-green-400', title: 'text-green-800', text: 'text-green-700', sub: 'text-green-400', dismiss: 'text-green-400 hover:text-green-600', icon: 'text-green-400', label: 'Poll', button: 'bg-green-500 hover:bg-green-600 text-white', optionBg: 'bg-green-100 hover:bg-green-200', resultBar: 'bg-green-400', subtitle: 'text-green-400' };
-        return { bg: 'bg-blue-50', border: 'border-blue-400', title: 'text-blue-800', text: 'text-blue-700', sub: 'text-blue-400', dismiss: 'text-blue-400 hover:text-blue-600', icon: 'text-blue-400', label: 'Info', button: 'bg-blue-500 hover:bg-blue-600 text-white', optionBg: 'bg-blue-100 hover:bg-blue-200', resultBar: 'bg-blue-400', subtitle: 'text-blue-400' };
+        return { bg: 'bg-blue-50', border: 'border-blue-400', title: 'text-blue-800', text: 'text-blue-700', sub: 'text-blue-400', dismiss: 'text-blue-400 hover:text-blue-600', icon: 'text-blue-400', label: 'News', button: 'bg-blue-500 hover:bg-blue-600 text-white', optionBg: 'bg-blue-100 hover:bg-blue-200', resultBar: 'bg-blue-400', subtitle: 'text-blue-400' };
     };
 
     return (
@@ -28826,20 +28826,20 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0">
                 <div className="flex items-center gap-2">
                     <Bell size={16} className="text-primary" />
-                    <span className="font-semibold text-gray-800 text-sm">Reminders &amp; Broadcasts</span>
+                    <span className="font-semibold text-gray-800 text-sm">Reminders &amp; News</span>
                 </div>
                 {totalCount > 0 && (
                     <span className="text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full font-bold">{totalCount}</span>
                 )}
             </div>
-            <div className="flex-1 overflow-y-auto divide-y divide-gray-100">
+            <div className="flex-1 overflow-y-auto divide-y divide-gray-200">
                 {isLoading ? (
                     <div className="flex items-center justify-center py-8 text-gray-400 text-sm">Loading...</div>
                 ) : totalCount === 0 ? (
                     <div className="flex flex-col items-center justify-center py-8 gap-2 text-gray-400">
                         <CheckCircle size={28} className="text-green-400" />
                         <span className="text-sm font-medium text-gray-500">All caught up!</span>
-                        <span className="text-xs">No reminders or broadcasts.</span>
+                        <span className="text-xs">No reminders or news.</span>
                     </div>
                 ) : (
                     <>
@@ -28853,7 +28853,12 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                                 <div key={item.key} className="flex items-center gap-2 px-3 py-2.5">
                                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${cfg.bg}`}>{cfg.icon} {cfg.label}</span>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-semibold text-gray-800 truncate">{item.pairName}</p>
+                                        <div className="flex items-center gap-1.5">
+                                            <p className="text-sm font-semibold text-gray-800 truncate">{item.pairName}</p>
+                                            {item.callId && item.callId !== item.pairName && (
+                                                <span className="text-xs text-gray-400 flex-shrink-0">{item.callId}</span>
+                                            )}
+                                        </div>
                                         <p className="text-xs text-gray-500 truncate">{item.sireDam}</p>
                                     </div>
                                     <span className={`text-xs font-bold flex-shrink-0 ${item.diff === 0 ? 'text-purple-600' : 'text-red-600'}`}>{statusText}</span>
