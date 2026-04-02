@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2, Hash, Dna, TreeDeciduous, Tag, Egg, Hospital, Brain, Trophy, Scale, FileCheck, Palette, Sprout, Ruler, FolderOpen, Leaf, Microscope, Pill, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Feather, Medal, Target, Key, Dumbbell, Gem, Flame, Baby, PawPrint, ArrowRight, LockOpen, Camera, BarChart2 } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, TableOfContents, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2, Hash, Dna, TreeDeciduous, Tag, Egg, Hospital, Brain, Trophy, Scale, FileCheck, Palette, Sprout, Ruler, FolderOpen, Leaf, Microscope, Pill, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Feather, Medal, Target, Key, Dumbbell, Gem, Flame, Baby, PawPrint, ArrowRight, LockOpen, Camera, BarChart2 } from 'lucide-react';
 import ArchiveScreen from './components/ArchiveScreen';
 import { QRCodeSVG } from 'qrcode.react';
 import jsPDF from 'jspdf';
@@ -10484,6 +10484,18 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
     const categories = ['All', 'Mammal', 'Reptile', 'Bird', 'Amphibian', 'Fish', 'Invertebrate', 'Other'];
     const [search, setSearch] = useState('');
     const [cat, setCat] = useState('All');
+    const [favorites, setFavorites] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('speciesFavorites') || '[]'); } catch { return []; }
+    });
+
+    const toggleFavorite = (e, name) => {
+        e.stopPropagation();
+        setFavorites(prev => {
+            const next = prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name];
+            localStorage.setItem('speciesFavorites', JSON.stringify(next));
+            return next;
+        });
+    };
 
     const filtered = speciesOptions
         .filter(s => {
@@ -10492,10 +10504,16 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
             return matchesCat && matchesSearch;
         })
         .sort((a, b) => {
+            const aFav = favorites.includes(a.name);
+            const bFav = favorites.includes(b.name);
+            if (aFav && !bFav) return -1;
+            if (!aFav && bFav) return 1;
             if (a.isDefault && !b.isDefault) return -1;
             if (!a.isDefault && b.isDefault) return 1;
             return a.name.localeCompare(b.name);
         });
+
+    const favCount = filtered.filter(s => favorites.includes(s.name)).length;
 
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
@@ -10537,40 +10555,66 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
 
                 {/* Species grid */}
                 <div className="flex-grow overflow-y-auto p-4">
+                    {favCount > 0 && !search && (
+                        <p className="text-xs font-semibold text-amber-600 uppercase tracking-wide mb-2 flex items-center gap-1">
+                            <Star size={11} className="fill-current" /> Favourites
+                        </p>
+                    )}
                     {filtered.length === 0 ? (
                         <p className="text-center text-gray-500 py-8">No species found.</p>
                     ) : (
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                            {filtered.map(s => (
-                                <button
-                                    key={s._id || s.name}
-                                    type="button"
-                                    onClick={() => onSelect(s.name)}
-                                    className={`flex flex-col items-start p-3 border-2 rounded-lg text-left transition hover:shadow-md ${
-                                        s.isDefault
-                                            ? 'border-primary bg-primary/10 hover:bg-primary/20'
-                                            : 'border-gray-200 bg-white hover:border-primary/50 hover:bg-gray-50'
-                                    }`}
-                                >
-                                    <span className="font-medium text-sm text-gray-800 leading-tight">
-                                        {getSpeciesEmoji(s.name) && <span className="mr-1">{getSpeciesEmoji(s.name)}</span>}
-                                        {s.name}
-                                    </span>
-                                    {s.latinName && (
-                                        <span className="text-xs italic text-gray-500 mt-0.5 leading-tight">{s.latinName}</span>
-                                    )}
-                                    {s.category && (
-                                        <span className="mt-1 text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">{s.category}</span>
-                                    )}
-                                </button>
-                            ))}
+                            {filtered.map((s, idx) => {
+                                const isFav = favorites.includes(s.name);
+                                const prevFav = idx > 0 && favorites.includes(filtered[idx - 1].name);
+                                const showDivider = !search && !isFav && prevFav;
+                                return (
+                                    <React.Fragment key={s._id || s.name}>
+                                        {showDivider && (
+                                            <div className="col-span-full border-t border-gray-200 my-1" />
+                                        )}
+                                        <div className="relative group">
+                                            <button
+                                                type="button"
+                                                onClick={() => onSelect(s.name)}
+                                                className={`w-full flex flex-col items-start p-3 border-2 rounded-lg text-left transition hover:shadow-md ${
+                                                    isFav
+                                                        ? 'border-amber-300 bg-amber-50 hover:bg-amber-100'
+                                                        : s.isDefault
+                                                        ? 'border-primary bg-primary/10 hover:bg-primary/20'
+                                                        : 'border-gray-200 bg-white hover:border-primary/50 hover:bg-gray-50'
+                                                }`}
+                                            >
+                                                <span className="font-medium text-sm text-gray-800 leading-tight pr-5">
+                                                    {getSpeciesEmoji(s.name) && <span className="mr-1">{getSpeciesEmoji(s.name)}</span>}
+                                                    {s.name}
+                                                </span>
+                                                {s.latinName && (
+                                                    <span className="text-xs italic text-gray-500 mt-0.5 leading-tight">{s.latinName}</span>
+                                                )}
+                                                {s.category && (
+                                                    <span className="mt-1 text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">{s.category}</span>
+                                                )}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={e => toggleFavorite(e, s.name)}
+                                                title={isFav ? 'Remove from favourites' : 'Add to favourites'}
+                                                className={`absolute top-2 right-2 transition ${isFav ? 'text-amber-400 opacity-100' : 'text-gray-300 opacity-0 group-hover:opacity-100 hover:text-amber-400'}`}
+                                            >
+                                                <Star size={13} className={isFav ? 'fill-current' : ''} />
+                                            </button>
+                                        </div>
+                                    </React.Fragment>
+                                );
+                            })}
                         </div>
                     )}
                 </div>
 
                 {/* Footer */}
                 <div className="border-t p-3 flex-shrink-0 flex justify-between items-center">
-                    <span className="text-xs text-gray-400">{filtered.length} species</span>
+                    <span className="text-xs text-gray-400">{filtered.length} species{favCount > 0 ? ` · ${favCount} favourited` : ''}</span>
                     <button onClick={onClose} className="text-sm text-gray-500 hover:text-gray-800 transition">Cancel</button>
                 </div>
             </div>
@@ -14585,7 +14629,20 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
 
 const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, searchTerm, setSearchTerm, categoryFilter, setCategoryFilter }) => {
     const categories = ['All', 'Mammal', 'Reptile', 'Bird', 'Amphibian', 'Fish', 'Invertebrate', 'Other'];
-    
+
+    const [favorites, setFavorites] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('speciesFavorites') || '[]'); } catch { return []; }
+    });
+
+    const toggleFavorite = (e, name) => {
+        e.stopPropagation();
+        setFavorites(prev => {
+            const next = prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name];
+            localStorage.setItem('speciesFavorites', JSON.stringify(next));
+            return next;
+        });
+    };
+
     // Filter species by category and search
     const filteredSpecies = speciesOptions.filter(s => {
         const matchesCategory = categoryFilter === 'All' || s.category === categoryFilter;
@@ -14593,12 +14650,18 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
         return matchesCategory && matchesSearch;
     });
     
-    // Sort: defaults first, then alphabetical
+    // Sort: favorites first, then defaults, then alphabetical
     const sortedSpecies = [...filteredSpecies].sort((a, b) => {
+        const aFav = favorites.includes(a.name);
+        const bFav = favorites.includes(b.name);
+        if (aFav && !bFav) return -1;
+        if (!aFav && bFav) return 1;
         if (a.isDefault && !b.isDefault) return -1;
         if (!a.isDefault && b.isDefault) return 1;
         return a.name.localeCompare(b.name);
     });
+
+    const favCount = sortedSpecies.filter(s => favorites.includes(s.name)).length;
     
     return (
         <div className="w-full max-w-5xl bg-white p-6 rounded-xl shadow-lg" data-tutorial-target="species-selector">
@@ -14632,37 +14695,65 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                     ))}
                 </select>
             </div>
+
+            {favCount > 0 && !searchTerm && (
+                <p className="text-xs font-semibold text-amber-600 uppercase tracking-wide mb-2 flex items-center gap-1">
+                    <Star size={11} className="fill-current" /> Favourites — click <Star size={11} className="fill-current inline" /> on any card to pin it here
+                </p>
+            )}
+            {favCount === 0 && !searchTerm && (
+                <p className="text-xs text-gray-400 mb-2">Tip: hover a card and click <Star size={11} className="inline-block align-middle" /> to favourite a species.</p>
+            )}
             
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6 max-h-96 overflow-y-auto" data-tutorial-target="default-species-section">
                 {sortedSpecies.length === 0 ? (
                     <p className="col-span-full text-center text-gray-500 p-4">No species found matching your filters.</p>
                 ) : (
-                    sortedSpecies.map(species => (
-                        <button
-                            key={species._id || species.name}
-                            onClick={() => onSelectSpecies(species.name)}
-                            data-tutorial-target={species.name === 'Fancy Mouse' ? 'species-fancy-mouse' : undefined}
-                            className={`p-6 border-2 text-lg font-semibold rounded-lg transition duration-150 shadow-md relative text-center ${
-                                species.isDefault 
-                                    ? 'border-primary-dark bg-primary text-gray-800 hover:bg-primary/80' 
-                                    : 'border-accent bg-accent text-white hover:bg-accent/80'
-                            }`}
-                        >
-                            {species.name}
-                            {species.latinName && (
-                                <p className={`text-xs italic mt-1 ${species.isDefault ? 'text-gray-600' : 'text-white/80'}`}>{species.latinName}</p>
-                            )}
-                            {species.isDefault && (
-                                <span className="absolute top-1 right-1 text-base leading-none">{getSpeciesEmoji(species.name)}</span>
-                            )}
-                        </button>
-                    ))
+                    sortedSpecies.map((species, idx) => {
+                        const isFav = favorites.includes(species.name);
+                        const prevFav = idx > 0 && favorites.includes(sortedSpecies[idx - 1].name);
+                        const showDivider = !searchTerm && !isFav && prevFav;
+                        return (
+                            <React.Fragment key={species._id || species.name}>
+                                {showDivider && <div className="col-span-full border-t border-gray-200 my-1" />}
+                                <div className="relative group">
+                                    <button
+                                        onClick={() => onSelectSpecies(species.name)}
+                                        data-tutorial-target={species.name === 'Fancy Mouse' ? 'species-fancy-mouse' : undefined}
+                                        className={`w-full p-6 border-2 text-lg font-semibold rounded-lg transition duration-150 shadow-md relative text-center ${
+                                            isFav
+                                                ? 'border-amber-400 bg-amber-50 text-gray-800 hover:bg-amber-100'
+                                                : species.isDefault 
+                                                ? 'border-primary-dark bg-primary text-gray-800 hover:bg-primary/80' 
+                                                : 'border-accent bg-accent text-white hover:bg-accent/80'
+                                        }`}
+                                    >
+                                        {species.name}
+                                        {species.latinName && (
+                                            <p className={`text-xs italic mt-1 ${isFav || species.isDefault ? 'text-gray-600' : 'text-white/80'}`}>{species.latinName}</p>
+                                        )}
+                                        {species.isDefault && (
+                                            <span className="absolute top-1 right-1 text-base leading-none">{getSpeciesEmoji(species.name)}</span>
+                                        )}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={e => toggleFavorite(e, species.name)}
+                                        title={isFav ? 'Remove from favourites' : 'Add to favourites'}
+                                        className={`absolute bottom-2 right-2 transition z-10 ${isFav ? 'text-amber-400 opacity-100' : 'text-gray-400 opacity-0 group-hover:opacity-100 hover:text-amber-400'}`}
+                                    >
+                                        <Star size={14} className={isFav ? 'fill-current' : ''} />
+                                    </button>
+                                </div>
+                            </React.Fragment>
+                        );
+                    })
                 )}
             </div>
 
             <div className="mt-8 border-t pt-4 flex justify-between items-center">
                 <p className="text-sm text-gray-500">
-                    <span className="font-semibold">{sortedSpecies.length}</span> species available
+                    <span className="font-semibold">{sortedSpecies.length}</span> species available{favCount > 0 ? <span className="ml-2 text-amber-600 font-medium">· {favCount} favourited</span> : ''}
                 </p>
                 <button
                     data-tutorial-target="add-species-btn"
