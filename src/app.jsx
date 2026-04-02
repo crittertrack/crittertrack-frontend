@@ -29013,7 +29013,10 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                                                         <p className={`text-xs ${styles.text} opacity-70 line-clamp-1 leading-snug`}>• {broadcast.pollOptions[1].text}</p>
                                                     )}
                                                     {broadcast.pollOptions?.[2] && (
-                                                        <p className={`text-xs ${styles.text} opacity-70 line-clamp-1 leading-snug mb-1`}>• {broadcast.pollOptions[2].text}</p>
+                                                        <p className={`text-xs ${styles.text} opacity-70 line-clamp-1 leading-snug`}>• {broadcast.pollOptions[2].text}</p>
+                                                    )}
+                                                    {broadcast.pollOptions?.[3] && (
+                                                        <p className={`text-xs ${styles.text} opacity-70 line-clamp-1 leading-snug mb-1`}>• {broadcast.pollOptions[3].text}</p>
                                                     )}
                                                 </>
                                             ) : broadcast.message && (
