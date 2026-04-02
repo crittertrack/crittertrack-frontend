@@ -83,7 +83,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 5,
         title: 'Category Icons on Species Cards',
-        content: 'Each species card displays a category icon (like a cat for mammals, turtle for reptiles, bird for birds). This helps you quickly identify the type of animal at a glance without reading the category label.',
+        content: 'Each species card displays a small category icon — a cat for mammals, turtle for reptiles, bird for birds, and so on. The icon is the only category indicator on the card, making it easy to scan the list at a glance.',
         tips: [
           'Icons appear in the bottom-left corner on small cards',
           'Icons appear in the top-left corner on full-page view',
