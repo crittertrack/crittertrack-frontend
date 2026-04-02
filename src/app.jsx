@@ -29602,7 +29602,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                                 <div className="ml-2.5 flex-1">
                                     <div className="flex justify-between items-start">
                                         <h3 className={`text-base font-bold ${styles.title}`}>
-                                            {styles.emoji} {broadcast.title || `System ${styles.label}`}
+                                            {styles.emoji} {broadcast.broadcastType === 'poll' ? (broadcast.pollQuestion || broadcast.title) : (broadcast.title || `System ${styles.label}`)}
                                         </h3>
                                         <button 
                                             onClick={() => handleDismiss(broadcast._id)}
