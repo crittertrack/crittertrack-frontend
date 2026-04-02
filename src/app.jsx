@@ -2075,7 +2075,20 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
         try {
             if (searchType === 'users') {
                 // Search for users
-                const url = `${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(searchTerm.trim())}&limit=50`;
+                const trimmedTerm = searchTerm.trim();
+                const numericMatch = trimmedTerm.match(/(\d+)/);
+                const numericId = numericMatch ? numericMatch[1] : null;
+                
+                // Check if it's a user ID pattern (CTU or just numbers)
+                const hasCTU = /CTU/i.test(trimmedTerm);
+                const isNumericOnly = /^\d+$/.test(trimmedTerm);
+                
+                let searchQuery = trimmedTerm;
+                if ((hasCTU || isNumericOnly) && numericId) {
+                    searchQuery = `CTU${numericId}`;
+                }
+                
+                const url = `${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(searchQuery)}&limit=50`;
                 console.log('Fetching users from:', url);
                 const response = await axios.get(url);
                 console.log('User search response:', response.data);
@@ -2083,14 +2096,38 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                     console.log('First user object keys:', Object.keys(response.data[0]));
                     console.log('First user object:', response.data[0]);
                 }
-                setUserResults(response.data || []);
+                
+                // Filter out completely anonymous users (both names hidden/unavailable)
+                const filteredUsers = (response.data || []).filter(user => {
+                    const showPersonalName = user.showPersonalName ?? false;
+                    const showBreederName = user.showBreederName ?? false;
+                    const hasPersonalName = showPersonalName && user.personalName;
+                    const hasBreederName = showBreederName && user.breederName;
+                    
+                    // Only include users who have at least one name visible
+                    return hasPersonalName || hasBreederName;
+                });
+                
+                setUserResults(filteredUsers);
                 setAnimalResults([]);
             } else {
                 // Search for animals globally
-                const idMatch = searchTerm.trim().match(/^\s*(?:CTC?[- ]?)?(\d+)\s*$/i);
-                const url = idMatch
-                    ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent('CTC' + idMatch[1])}`
-                    : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(searchTerm.trim())}`;
+                const trimmedTerm = searchTerm.trim();
+                const numericMatch = trimmedTerm.match(/(\d+)/);
+                const numericId = numericMatch ? numericMatch[1] : null;
+                
+                // Check if it's an animal ID pattern (CTC, CT, or just numbers)
+                const hasCTC = /CTC/i.test(trimmedTerm);
+                const hasCT = /^CT[- ]?\d+$/i.test(trimmedTerm);
+                const isNumericOnly = /^\d+$/.test(trimmedTerm);
+                
+                let url;
+                if ((hasCTC || hasCT || isNumericOnly) && numericId) {
+                    // Format the ID as CTCXXX
+                    url = `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(`CTC${numericId}`)}`;
+                } else {
+                    url = `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedTerm)}&species=${encodeURIComponent(trimmedTerm)}`;
+                }
                 console.log('Fetching animals from:', url);
                 const response = await axios.get(url);
                 console.log('Animal search response:', response.data);
@@ -2289,6 +2326,259 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                     )}
                 </div>
             </div>
+        </div>
+    );
+};
+
+// Global search bar component with dropdown results
+const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className = '' }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [userResults, setUserResults] = useState([]);
+    const [animalResults, setAnimalResults] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [showResults, setShowResults] = useState(false);
+    const searchRef = React.useRef(null);
+    const debounceTimerRef = React.useRef(null);
+
+    // Close dropdown when clicking outside
+    React.useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (searchRef.current && !searchRef.current.contains(event.target)) {
+                setShowResults(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Debounced search function
+    const performSearch = async (term) => {
+        if (!term || term.trim().length < 2) {
+            setUserResults([]);
+            setAnimalResults([]);
+            setShowResults(false);
+            return;
+        }
+
+        setLoading(true);
+        setShowResults(true);
+        
+        try {
+            // Search both users and animals in parallel
+            const trimmedTerm = term.trim();
+            
+            // Check for specific ID patterns
+            const hasCTU = /CTU/i.test(trimmedTerm);
+            const hasCTC = /CTC/i.test(trimmedTerm);
+            const hasCT = /^CT[- ]?\d+$/i.test(trimmedTerm);
+            const isNumericOnly = /^\d+$/.test(trimmedTerm);
+            
+            // Extract the numeric part from any pattern
+            const numericMatch = trimmedTerm.match(/(\d+)/);
+            const numericId = numericMatch ? numericMatch[1] : null;
+            
+            console.log('Search term:', trimmedTerm);
+            console.log('Has CTU:', hasCTU, 'Has CTC:', hasCTC, 'Has CT:', hasCT, 'Numeric only:', isNumericOnly);
+            console.log('Numeric ID:', numericId);
+            
+            let userUrl = null;
+            let animalUrl = null;
+            
+            if (hasCTU && numericId) {
+                // CTU1279 - only search users
+                userUrl = `${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(`CTU${numericId}`)}&limit=10`;
+            } else if (hasCTC && numericId) {
+                // CTC1279 - only search animals
+                animalUrl = `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(`CTC${numericId}`)}`;
+            } else if ((hasCT || isNumericOnly) && numericId) {
+                // CT1279 or 1279 - search both
+                userUrl = `${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(`CTU${numericId}`)}&limit=10`;
+                animalUrl = `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(`CTC${numericId}`)}`;
+            } else {
+                // Regular text search - search both by name/species
+                userUrl = `${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(trimmedTerm)}&limit=10`;
+                animalUrl = `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedTerm)}&species=${encodeURIComponent(trimmedTerm)}&limit=10`;
+            }
+            
+            console.log('User URL:', userUrl);
+            console.log('Animal URL:', animalUrl);
+            
+            // Only make the requests that are needed
+            const promises = [];
+            if (userUrl) promises.push(axios.get(userUrl));
+            else promises.push(Promise.resolve({ data: [] }));
+            
+            if (animalUrl) promises.push(axios.get(animalUrl));
+            else promises.push(Promise.resolve({ data: [] }));
+            
+            const [usersResponse, animalsResponse] = await Promise.all(promises);
+            
+            console.log('Animals response:', animalsResponse.data);
+            console.log('Users response:', usersResponse.data);
+            
+            // Filter out completely anonymous users (both names hidden/unavailable)
+            const filteredUsers = (usersResponse.data || []).filter(user => {
+                const showPersonalName = user.showPersonalName ?? false;
+                const showBreederName = user.showBreederName ?? false;
+                const hasPersonalName = showPersonalName && user.personalName;
+                const hasBreederName = showBreederName && user.breederName;
+                
+                // Only include users who have at least one name visible
+                return hasPersonalName || hasBreederName;
+            });
+            
+            setUserResults(filteredUsers);
+            setAnimalResults(animalsResponse.data || []);
+        } catch (error) {
+            console.error('Search error:', error);
+            setUserResults([]);
+            setAnimalResults([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Debounce search input
+    const handleSearchChange = (value) => {
+        setSearchTerm(value);
+        
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+        }
+        
+        debounceTimerRef.current = setTimeout(() => {
+            performSearch(value);
+        }, 300);
+    };
+
+    const handleUserClick = (user) => {
+        setShowResults(false);
+        setSearchTerm('');
+        onSelectUser(user);
+    };
+
+    const handleAnimalClick = (animal) => {
+        setShowResults(false);
+        setSearchTerm('');
+        onSelectAnimal(animal);
+    };
+
+    const totalResults = userResults.length + animalResults.length;
+
+    return (
+        <div ref={searchRef} className={`relative ${className}`}>
+            <div className="relative">
+                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <input
+                    type="text"
+                    placeholder="Search users, animals, IDs..."
+                    value={searchTerm}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    onFocus={() => searchTerm.trim().length >= 2 && setShowResults(true)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition text-sm"
+                />
+                {loading && (
+                    <Loader2 size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 animate-spin" />
+                )}
+            </div>
+
+            {/* Results dropdown */}
+            {showResults && searchTerm.trim().length >= 2 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 max-h-96 overflow-y-auto z-50">
+                    {loading ? (
+                        <div className="p-4 text-center text-gray-500">
+                            <Loader2 size={24} className="animate-spin mx-auto mb-2" />
+                            <p className="text-sm">Searching...</p>
+                        </div>
+                    ) : totalResults === 0 ? (
+                        <div className="p-4 text-center text-gray-500">
+                            <p className="text-sm">No results found for "{searchTerm}"</p>
+                        </div>
+                    ) : (
+                        <>
+                            {/* User results */}
+                            {userResults.length > 0 && (
+                                <div className="border-b border-gray-100">
+                                    <div className="px-3 py-2 bg-gray-50 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                                        Users ({userResults.length})
+                                    </div>
+                                    {userResults.map(user => {
+                                        const showPersonalName = user.showPersonalName ?? false;
+                                        const showBreederName = user.showBreederName ?? false;
+                                        
+                                        let displayName;
+                                        if (showBreederName && showPersonalName && user.personalName && user.breederName) {
+                                            displayName = `${user.personalName} (${user.breederName})`;
+                                        } else if (showBreederName && user.breederName) {
+                                            displayName = user.breederName;
+                                        } else if (showPersonalName && user.personalName) {
+                                            displayName = user.personalName;
+                                        } else {
+                                            displayName = 'Anonymous Breeder';
+                                        }
+
+                                        return (
+                                            <div
+                                                key={user.id_public}
+                                                className="px-3 py-2 hover:bg-gray-50 cursor-pointer transition flex items-center gap-3"
+                                                onClick={() => handleUserClick(user)}
+                                            >
+                                                {user.profileImage ? (
+                                                    <img src={user.profileImage} alt={displayName} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                                                ) : (
+                                                    <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                        <User size={20} className="text-gray-400" />
+                                                    </div>
+                                                )}
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-semibold text-gray-800 truncate flex items-center gap-2">
+                                                        {displayName}
+                                                        {getDonationBadge(user) && <DonationBadge badge={getDonationBadge(user)} size="xs" />}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 font-mono">{user.id_public}</p>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            {/* Animal results */}
+                            {animalResults.length > 0 && (
+                                <div>
+                                    <div className="px-3 py-2 bg-gray-50 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                                        Animals ({animalResults.length})
+                                    </div>
+                                    {animalResults.map(animal => (
+                                        <div
+                                            key={animal.id_public}
+                                            className="px-3 py-2 hover:bg-gray-50 cursor-pointer transition flex items-center gap-3"
+                                            onClick={() => handleAnimalClick(animal)}
+                                        >
+                                            <div className="w-10 h-10 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                                                <AnimalImage 
+                                                    src={animal.imageUrl || animal.photoUrl} 
+                                                    alt={animal.name} 
+                                                    className="w-full h-full object-cover" 
+                                                    iconSize={20} 
+                                                />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-semibold text-gray-800 truncate">
+                                                    {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                                                </p>
+                                                <p className="text-xs text-gray-500 truncate">
+                                                    {animal.species} • {animal.gender} • {animal.id_public}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+            )}
         </div>
     );
 };
@@ -30600,22 +30890,24 @@ const App = () => {
                         />
                     )}
                     
-                    <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
-                        <CustomAppLogo size="w-10 h-10" />
-                        <div className="flex items-center space-x-3">
-                            <button 
-                                onClick={() => setShowUserSearchModal(true)}
-                                className="px-3 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
-                                data-tutorial-target="global-search-btn"
-                            >
-                                <Search size={18} className="mr-1" /> Search
-                            </button>
-                            <button 
-                                onClick={() => { setViewingPublicProfile(null); navigate('/'); }}
-                                className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition flex items-center"
-                            >
-                                <LogIn size={18} className="mr-1" /> Login
-                            </button>
+                    <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6">
+                        <div className="mb-3">
+                            <GlobalSearchBar 
+                                API_BASE_URL={API_BASE_URL}
+                                onSelectUser={(user) => setViewingPublicProfile(user)}
+                                onSelectAnimal={handleViewPublicAnimal}
+                            />
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <CustomAppLogo size="w-10 h-10" />
+                            <div className="flex items-center space-x-3">
+                                <button 
+                                    onClick={() => { setViewingPublicProfile(null); navigate('/'); }}
+                                    className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition flex items-center"
+                                >
+                                    <LogIn size={18} className="mr-1" /> Login
+                                </button>
+                            </div>
                         </div>
                     </header>
 
@@ -30668,21 +30960,24 @@ const App = () => {
                 <div className="min-h-screen bg-page-bg flex flex-col items-center p-6 font-sans">
                     {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
                     
-                    <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
-                        <CustomAppLogo size="w-10 h-10" />
-                        <div className="flex items-center space-x-3">
-                            <button 
-                                onClick={() => setShowUserSearchModal(true)}
-                                className="px-3 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
-                            >
-                                <Search size={18} className="mr-1" /> Search
-                            </button>
-                            <button 
-                                onClick={() => navigate('/')}
-                                className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition flex items-center"
-                            >
-                                <LogIn size={18} className="mr-1" /> Login
-                            </button>
+                    <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6">
+                        <div className="mb-3">
+                            <GlobalSearchBar 
+                                API_BASE_URL={API_BASE_URL}
+                                onSelectUser={(user) => { navigate(`/user/${user.id_public}`); }}
+                                onSelectAnimal={handleViewPublicAnimal}
+                            />
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <CustomAppLogo size="w-10 h-10" />
+                            <div className="flex items-center space-x-3">
+                                <button 
+                                    onClick={() => navigate('/')}
+                                    className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition flex items-center"
+                                >
+                                    <LogIn size={18} className="mr-1" /> Login
+                                </button>
+                            </div>
                         </div>
                     </header>
                     
@@ -31048,7 +31343,15 @@ const App = () => {
             )}
             
             <header className="w-full bg-white p-3 sm:p-4 rounded-xl shadow-lg mb-6 max-w-5xl overflow-visible">
-                {/* Desktop: Single row layout */}
+                {/* Desktop: Two row layout with search bar on top */}
+                <div className="hidden md:block mb-3">
+                    <GlobalSearchBar 
+                        API_BASE_URL={API_BASE_URL}
+                        onSelectUser={(user) => navigate(`/user/${user.id_public}`)}
+                        onSelectAnimal={handleViewPublicAnimal}
+                    />
+                </div>
+                
                 <div className="hidden md:flex justify-between items-center">
                     <CustomAppLogo size="w-10 h-10" />
                     
@@ -31080,16 +31383,6 @@ const App = () => {
                     </nav>
 
                     <div className="flex items-center space-x-3">
-                        <button 
-                            onClick={() => setShowUserSearchModal(true)} 
-                            className="flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
-                            title="Search Users by Name or ID"
-                            data-tutorial-target="global-search-btn"
-                        >
-                            <Search size={18} className="mb-1" />
-                            <span className="text-xs">Search</span>
-                        </button>
-
                         <button
                             onClick={() => {
                                 setShowNotifications(true);
@@ -31166,22 +31459,22 @@ const App = () => {
                     </div>
                 </div>
 
-                {/* Mobile: Three row layout */}
+                {/* Mobile: Four row layout with search bar */}
                 <div className="md:hidden overflow-x-visible">
-                    {/* First row: Logo and action buttons */}
+                    {/* First row: Search bar */}
+                    <div className="mb-3">
+                        <GlobalSearchBar 
+                            API_BASE_URL={API_BASE_URL}
+                            onSelectUser={(user) => navigate(`/user/${user.id_public}`)}
+                            onSelectAnimal={handleViewPublicAnimal}
+                        />
+                    </div>
+                    
+                    {/* Second row: Logo and action buttons */}
                     <div className="flex justify-between items-center mb-3 gap-2">
                         <CustomAppLogo size="w-8 h-8" className="flex-shrink-0" />
                         
                         <div className="flex items-center space-x-2 flex-shrink-0">
-                            <button 
-                                onClick={() => setShowUserSearchModal(true)} 
-                                className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
-                                title="Search"
-                                data-tutorial-target="global-search-btn"
-                            >
-                                <Search size={18} />
-                            </button>
-
                             <button
                                 onClick={() => {
                                     setShowNotifications(true);
@@ -31258,7 +31551,7 @@ const App = () => {
                         </div>
                     </div>
 
-                    {/* Second row: Navigation row 1 (4 buttons) */}
+                    {/* Third row: Navigation row 1 (4 buttons) */}
                     <nav className="grid grid-cols-4 gap-1 mb-1">
                         <button onClick={() => navigate('/')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Cat size={18} className="mb-0.5" />
@@ -31278,7 +31571,7 @@ const App = () => {
                         </button>
                     </nav>
 
-                    {/* Third row: Navigation row 2 (2 buttons) */}
+                    {/* Fourth row: Navigation row 2 (2 buttons) */}
                     <nav className="grid grid-cols-2 gap-1">
                         <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Calculator size={18} className="mb-0.5" />
