@@ -22403,7 +22403,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
     useEffect(() => {
         const fetchCommunityUsers = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/public/users/active?minutes=30&limit=5`);
+                const response = await axios.get(`${API_BASE_URL}/public/users/active?minutes=60&limit=5`);
                 let active = response.data || [];
                 
                 const hasVisibleName = (u) => (u.showBreederName && u.breederName) || (u.showPersonalName && u.personalName);
