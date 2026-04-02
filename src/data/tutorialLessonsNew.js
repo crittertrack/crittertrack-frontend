@@ -94,7 +94,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 6,
         title: 'Add New Species Button',
-        content: 'In the bottom right corner, you\'ll see the highlighted "Add New Species" button. Click it to create a custom species for your collection. Let\'s explore how to add a custom species.',
+        content: 'In the bottom right corner is the "Add New Species" button. Click it to create a custom species for your collection.',
         highlightElement: '[data-tutorial-target="add-species-btn"]',
         actionType: 'click',
         tips: [
@@ -140,7 +140,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 10,
         title: 'Return to Species Selector',
-        content: 'Now let\'s go back to select a default species for your animal. Click the highlighted "Back" button to return to the species list.',
+        content: 'Use the "Back" button to return to the species list and select a default species.',
         highlightElement: '[data-tutorial-target="back-to-selector-btn"]',
         actionType: 'click',
         tips: [
