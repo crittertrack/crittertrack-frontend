@@ -2331,8 +2331,13 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
             const trimmedTerm = term.trim();
             const idMatch = trimmedTerm.match(/^\s*(?:CT[- ]?)?(\d+)\s*$/i);
             
+            // For ID searches, use the numeric ID; otherwise use the full term
+            const userSearchParam = idMatch 
+                ? `CT${idMatch[1]}`  // Format as CTXXX for user ID search
+                : trimmedTerm;
+            
             const [usersResponse, animalsResponse] = await Promise.all([
-                axios.get(`${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(trimmedTerm)}&limit=10`),
+                axios.get(`${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(userSearchParam)}&limit=10`),
                 axios.get(idMatch 
                     ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(idMatch[1])}`
                     : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedTerm)}&limit=10`)
