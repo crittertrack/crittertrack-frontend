@@ -20950,8 +20950,21 @@ const AnimalForm = ({
     );
 };
 
-const UserProfileCard = ({ userProfile }) => {
+const UserProfileCard = ({ userProfile, API_BASE_URL }) => {
     if (!userProfile) return null;
+
+    const [avgRating, setAvgRating] = useState(0);
+    const [ratingCount, setRatingCount] = useState(0);
+
+    useEffect(() => {
+        if (!API_BASE_URL || !userProfile?.id_public) return;
+        axios.get(`${API_BASE_URL}/public/ratings/${userProfile.id_public}`)
+            .then(r => {
+                setAvgRating(r.data?.average ?? 0);
+                setRatingCount(r.data?.count ?? 0);
+            })
+            .catch(() => {});
+    }, [API_BASE_URL, userProfile?.id_public]);
 
     const formattedCreationDate = userProfile.creationDate
         ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(userProfile.creationDate))
@@ -20959,9 +20972,10 @@ const UserProfileCard = ({ userProfile }) => {
 
     const isPersonalNameVisible = userProfile.showPersonalName ?? true;
     const isBreederNameVisible = userProfile.showBreederName ?? false;
+    const filledStars = Math.round(avgRating);
 
     return (
-        <div className="bg-white p-3 rounded-xl shadow-lg flex flex-col items-center text-center justify-between" style={{minWidth: '200px', maxWidth: '220px', height: '250px'}}>
+        <div className="bg-white p-3 rounded-xl shadow-lg flex flex-col items-center text-center justify-between h-full" style={{minWidth: '200px', maxWidth: '220px'}}>
             {/* Names at top */}
             <div className="mb-2 w-full">
                 <div className="flex items-center justify-center gap-2 mb-2">
@@ -20997,6 +21011,14 @@ const UserProfileCard = ({ userProfile }) => {
 
             {/* Other info below image */}
             <div className="w-full space-y-1">
+                <div className="flex justify-center gap-0.5 mb-0.5">
+                    {[1,2,3,4,5].map(n => (
+                        <Star key={n} size={13} className={n <= filledStars ? 'text-amber-400 fill-current' : 'text-gray-200 fill-current'} />
+                    ))}
+                </div>
+                {ratingCount > 0 && (
+                    <div className="text-xs text-gray-400">{avgRating.toFixed(1)} ({ratingCount})</div>
+                )}
                 <div className="text-sm font-extrabold text-accent">
                     {userProfile.id_public}
                 </div>
@@ -32919,9 +32941,9 @@ const App = () => {
             {/* Profile Card + Banners - shown only on desktop in list view */}
             {currentView === 'list' && currentView !== 'profile' && userProfile && (
                 <>
-                    <div className="w-full max-w-5xl mb-6 hidden sm:flex gap-4 items-start">
-                        <div className="flex-shrink-0">
-                            <UserProfileCard userProfile={userProfile} />
+                    <div className="w-full max-w-5xl mb-6 hidden sm:flex gap-4 items-stretch">
+                        <div className="flex-shrink-0 flex flex-col">
+                            <UserProfileCard userProfile={userProfile} API_BASE_URL={API_BASE_URL} />
                         </div>
                         <div className="flex-1 min-w-0">
                             <NotificationsHub authToken={authToken} API_BASE_URL={API_BASE_URL} />
