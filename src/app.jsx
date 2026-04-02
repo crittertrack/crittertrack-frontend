@@ -28801,111 +28801,170 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     };
 
     // ── Render ──────────────────────────────────────────────────────
+    const [selectedBroadcast, setSelectedBroadcast] = useState(null);
+
     const totalCount = breedingItems.length + mgmtItems.length + broadcasts.length;
     const isLoading = littersLoading || mgmtLoading;
 
     const breedingTypeConfig = {
-        mated:  { label: 'Mating',         bg: 'bg-purple-100 text-purple-700', icon: '\u2665\uFE0F' },
-        due:    { label: 'Expected Birth', bg: 'bg-amber-100 text-amber-700',   icon: '\uD83D\uDC23' },
-        weaned: { label: 'Weaning',        bg: 'bg-sky-100 text-sky-700',       icon: '\uD83C\uDF7C' },
+        mated:  { label: 'Mating',         bg: 'bg-purple-100 text-purple-700', border: 'border-purple-200', icon: '❤️' },
+        due:    { label: 'Expected Birth', bg: 'bg-amber-100 text-amber-700',   border: 'border-amber-200',  icon: '🐣' },
+        weaned: { label: 'Weaning',        bg: 'bg-sky-100 text-sky-700',       border: 'border-sky-200',    icon: '🍼' },
     };
-    const mgmtTypeBg = {
-        feeding:     'bg-orange-100 text-orange-700',
-        care:        'bg-purple-100 text-purple-700',
-        maintenance: 'bg-yellow-100 text-yellow-800',
-        supplies:    'bg-emerald-100 text-emerald-700',
+    const mgmtTypeConfig = {
+        feeding:     { bg: 'bg-orange-100 text-orange-700', border: 'border-orange-200', icon: '🍽️' },
+        care:        { bg: 'bg-purple-100 text-purple-700', border: 'border-purple-200', icon: '🧴' },
+        maintenance: { bg: 'bg-yellow-100 text-yellow-800', border: 'border-yellow-200', icon: '🔧' },
+        supplies:    { bg: 'bg-emerald-100 text-emerald-700', border: 'border-emerald-200', icon: '📦' },
     };
     const getBroadcastStyles = (broadcastType) => {
-        if (broadcastType === 'announcement') return { bg: 'bg-purple-50', border: 'border-purple-400', title: 'text-purple-800', text: 'text-purple-700', sub: 'text-purple-400', dismiss: 'text-purple-400 hover:text-purple-600', icon: 'text-purple-400', label: 'Announcement', button: 'bg-purple-500 hover:bg-purple-600 text-white', optionBg: 'bg-purple-100 hover:bg-purple-200', resultBar: 'bg-purple-400', subtitle: 'text-purple-400' };
-        if (broadcastType === 'poll') return { bg: 'bg-green-50', border: 'border-green-400', title: 'text-green-800', text: 'text-green-700', sub: 'text-green-400', dismiss: 'text-green-400 hover:text-green-600', icon: 'text-green-400', label: 'Poll', button: 'bg-green-500 hover:bg-green-600 text-white', optionBg: 'bg-green-100 hover:bg-green-200', resultBar: 'bg-green-400', subtitle: 'text-green-400' };
-        return { bg: 'bg-blue-50', border: 'border-blue-400', title: 'text-blue-800', text: 'text-blue-700', sub: 'text-blue-400', dismiss: 'text-blue-400 hover:text-blue-600', icon: 'text-blue-400', label: 'News', button: 'bg-blue-500 hover:bg-blue-600 text-white', optionBg: 'bg-blue-100 hover:bg-blue-200', resultBar: 'bg-blue-400', subtitle: 'text-blue-400' };
+        if (broadcastType === 'announcement') return { bg: 'bg-purple-50', border: 'border-purple-300', pill: 'bg-purple-100 text-purple-700', title: 'text-purple-800', sub: 'text-purple-400', dismiss: 'text-purple-400 hover:text-purple-600', icon: 'text-purple-400', label: 'Announcement', button: 'bg-purple-500 hover:bg-purple-600 text-white', optionBg: 'bg-purple-100 hover:bg-purple-200', resultBar: 'bg-purple-400', subtitle: 'text-purple-400', text: 'text-purple-700' };
+        if (broadcastType === 'poll') return { bg: 'bg-green-50', border: 'border-green-300', pill: 'bg-green-100 text-green-700', title: 'text-green-800', sub: 'text-green-400', dismiss: 'text-green-400 hover:text-green-600', icon: 'text-green-400', label: 'Poll', button: 'bg-green-500 hover:bg-green-600 text-white', optionBg: 'bg-green-100 hover:bg-green-200', resultBar: 'bg-green-400', subtitle: 'text-green-400', text: 'text-green-700' };
+        return { bg: 'bg-blue-50', border: 'border-blue-300', pill: 'bg-blue-100 text-blue-700', title: 'text-blue-800', sub: 'text-blue-400', dismiss: 'text-blue-400 hover:text-blue-600', icon: 'text-blue-400', label: 'News', button: 'bg-blue-500 hover:bg-blue-600 text-white', optionBg: 'bg-blue-100 hover:bg-blue-200', resultBar: 'bg-blue-400', subtitle: 'text-blue-400', text: 'text-blue-700' };
     };
 
+    const hasReminders = breedingItems.length > 0 || mgmtItems.length > 0;
+    const hasNews = broadcasts.length > 0;
+
     return (
-        <div className="bg-white rounded-xl shadow-md flex flex-col h-full">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0">
+        <>
+        <div className="bg-white rounded-xl shadow-md flex flex-col" style={{ height: '260px' }}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100 flex-shrink-0">
                 <div className="flex items-center gap-2">
-                    <Bell size={16} className="text-primary" />
+                    <Bell size={15} className="text-primary" />
                     <span className="font-semibold text-gray-800 text-sm">Reminders &amp; News</span>
                 </div>
                 {totalCount > 0 && (
                     <span className="text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full font-bold">{totalCount}</span>
                 )}
             </div>
-            <div className="flex-1 overflow-y-auto divide-y divide-gray-200 min-h-0">
-                {isLoading ? (
-                    <div className="flex items-center justify-center py-8 text-gray-400 text-sm">Loading...</div>
-                ) : totalCount === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-8 gap-2 text-gray-400">
-                        <CheckCircle size={28} className="text-green-400" />
-                        <span className="text-sm font-medium text-gray-500">All caught up!</span>
-                        <span className="text-xs">No reminders or news.</span>
-                    </div>
-                ) : (
-                    <>
-                        {breedingItems.map(item => {
-                            const cfg = breedingTypeConfig[item.type] || breedingTypeConfig.due;
-                            const statusText = item.type === 'mated' && item.diff > 0
-                                ? `In ${item.diff} day${item.diff !== 1 ? 's' : ''}`
-                                : item.diff === 0 ? 'Due today'
-                                : `${Math.abs(item.diff)} day${Math.abs(item.diff) !== 1 ? 's' : ''} overdue`;
-                            return (
-                                <div key={item.key} className="flex items-center gap-2 px-3 py-2.5">
-                                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${cfg.bg}`}>{cfg.icon} {cfg.label}</span>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-1.5">
-                                            <p className="text-sm font-semibold text-gray-800 truncate">{item.pairName}</p>
-                                            {item.callId && item.callId !== item.pairName && (
-                                                <span className="text-xs text-gray-400 flex-shrink-0">{item.callId}</span>
-                                            )}
-                                        </div>
-                                        <p className="text-xs text-gray-500 truncate">{item.sireDam}</p>
-                                    </div>
-                                    <span className={`text-xs font-bold flex-shrink-0 ${item.diff === 0 ? 'text-purple-600' : 'text-red-600'}`}>{statusText}</span>
-                                    <button onClick={() => dismissBreeding(item.key)} className="p-0.5 text-gray-400 hover:text-gray-600 flex-shrink-0"><X size={13} /></button>
-                                </div>
-                            );
-                        })}
-                        {mgmtItems.map(item => (
-                            <div key={item.key} className="flex items-center gap-2 px-3 py-2.5">
-                                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${mgmtTypeBg[item.type] || 'bg-gray-100 text-gray-700'}`}>{item.icon} {item.label}</span>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm text-gray-700 font-medium truncate">{item.description}</p>
-                                </div>
-                                <span className="text-xs font-bold text-red-600 flex-shrink-0">Action needed</span>
-                                <button onClick={() => dismissMgmt(item.key)} className="p-0.5 text-gray-400 hover:text-gray-600 flex-shrink-0"><X size={13} /></button>
-                            </div>
-                        ))}
-                        {broadcasts.map(broadcast => {
-                            const styles = getBroadcastStyles(broadcast.broadcastType);
-                            return (
-                                <div key={broadcast._id} className={`${styles.bg} border-l-4 ${styles.border} px-3 py-2.5`}>
-                                    <div className="flex items-start gap-2">
-                                        <Info size={15} className={`${styles.icon} flex-shrink-0 mt-0.5`} />
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-start justify-between gap-1">
-                                                <p className={`text-sm font-bold ${styles.title} truncate`}>{broadcast.title || `System ${styles.label}`}</p>
-                                                <button onClick={() => dismissBroadcast(broadcast._id)} className={`${styles.dismiss} flex-shrink-0`}><X size={14} /></button>
+
+            {isLoading ? (
+                <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">Loading...</div>
+            ) : totalCount === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center gap-1.5 text-gray-400">
+                    <CheckCircle size={26} className="text-green-400" />
+                    <span className="text-sm font-medium text-gray-500">All caught up!</span>
+                    <span className="text-xs">No reminders or news.</span>
+                </div>
+            ) : (
+                <div className="flex-1 flex flex-col overflow-hidden">
+                    {/* Reminders row */}
+                    {hasReminders && (
+                        <div className="flex-shrink-0">
+                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 pt-2 pb-1">Reminders</p>
+                            <div className="flex gap-2 overflow-x-auto px-4 pb-2 scrollbar-thin" style={{ scrollbarWidth: 'thin' }}>
+                                {breedingItems.map(item => {
+                                    const cfg = breedingTypeConfig[item.type] || breedingTypeConfig.due;
+                                    const statusText = item.type === 'mated' && item.diff > 0
+                                        ? `In ${item.diff}d`
+                                        : item.diff === 0 ? 'Due today'
+                                        : `${Math.abs(item.diff)}d overdue`;
+                                    const isOverdue = item.diff < 0;
+                                    return (
+                                        <div key={item.key} className={`flex-shrink-0 w-44 rounded-lg border ${cfg.border} bg-white p-2.5 flex flex-col gap-1 relative`}>
+                                            <button onClick={() => dismissBreeding(item.key)} className="absolute top-1.5 right-1.5 text-gray-300 hover:text-gray-500"><X size={12} /></button>
+                                            <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full self-start ${cfg.bg}`}>{cfg.icon} {cfg.label}</span>
+                                            <div className="min-w-0">
+                                                <div className="flex items-center gap-1 flex-wrap">
+                                                    <p className="text-sm font-bold text-gray-800 leading-tight">{item.pairName}</p>
+                                                    {item.callId && item.callId !== item.pairName && <span className="text-xs text-gray-400">{item.callId}</span>}
+                                                </div>
+                                                <p className="text-xs text-gray-500 truncate">{item.sireDam}</p>
                                             </div>
-                                            {broadcast.message && <p className={`text-xs ${styles.text} mt-0.5`}>{broadcast.message}</p>}
-                                            {broadcast.broadcastType === 'poll' && broadcast.pollQuestion && (
-                                                <BroadcastPoll
-                                                    poll={broadcast}
-                                                    onVote={(selectedOptions) => handlePollVote(broadcast._id, selectedOptions)}
-                                                    isVoting={votingInProgress[broadcast._id] || false}
-                                                    styles={styles}
-                                                />
-                                            )}
-                                            <p className={`text-xs ${styles.sub} mt-0.5`}>{new Date(broadcast.createdAt).toLocaleString('en-GB')}</p>
+                                            <span className={`text-xs font-bold mt-auto ${isOverdue ? 'text-red-600' : item.diff === 0 ? 'text-purple-600' : 'text-gray-600'}`}>{statusText}</span>
                                         </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </>
-                )}
-            </div>
+                                    );
+                                })}
+                                {mgmtItems.map(item => {
+                                    const cfg = mgmtTypeConfig[item.type] || { bg: 'bg-gray-100 text-gray-700', border: 'border-gray-200', icon: '⚠️' };
+                                    return (
+                                        <div key={item.key} className={`flex-shrink-0 w-44 rounded-lg border ${cfg.border} bg-white p-2.5 flex flex-col gap-1 relative`}>
+                                            <button onClick={() => dismissMgmt(item.key)} className="absolute top-1.5 right-1.5 text-gray-300 hover:text-gray-500"><X size={12} /></button>
+                                            <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full self-start ${cfg.bg}`}>{cfg.icon} {item.label}</span>
+                                            <p className="text-sm font-medium text-gray-700 leading-tight">{item.description}</p>
+                                            <span className="text-xs font-bold text-red-600 mt-auto">Action needed</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Divider between sections */}
+                    {hasReminders && hasNews && <div className="border-t border-gray-100 mx-4 flex-shrink-0" />}
+
+                    {/* News row */}
+                    {hasNews && (
+                        <div className="flex-shrink-0">
+                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 pt-2 pb-1">News</p>
+                            <div className="flex gap-2 overflow-x-auto px-4 pb-2 scrollbar-thin" style={{ scrollbarWidth: 'thin' }}>
+                                {broadcasts.map(broadcast => {
+                                    const styles = getBroadcastStyles(broadcast.broadcastType);
+                                    return (
+                                        <div
+                                            key={broadcast._id}
+                                            className={`flex-shrink-0 w-44 rounded-lg border ${styles.border} ${styles.bg} p-2.5 flex flex-col gap-1 relative cursor-pointer hover:opacity-90 transition`}
+                                            onClick={() => setSelectedBroadcast(broadcast)}
+                                        >
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); dismissBroadcast(broadcast._id); }}
+                                                className={`absolute top-1.5 right-1.5 ${styles.dismiss}`}
+                                            ><X size={12} /></button>
+                                            <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full self-start ${styles.pill}`}>{styles.label}</span>
+                                            <p className={`text-sm font-bold ${styles.title} leading-tight line-clamp-2 pr-4`}>{broadcast.title || `System ${styles.label}`}</p>
+                                            <p className={`text-xs ${styles.sub} mt-auto`}>{new Date(broadcast.createdAt).toLocaleDateString('en-GB')}</p>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
+
+        {/* Broadcast detail modal */}
+        {selectedBroadcast && (() => {
+            const styles = getBroadcastStyles(selectedBroadcast.broadcastType);
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4" onClick={() => setSelectedBroadcast(null)}>
+                    <div className={`bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[80vh] flex flex-col border-t-4 ${styles.border}`} onClick={e => e.stopPropagation()}>
+                        <div className={`flex items-start justify-between px-5 py-4 border-b border-gray-100`}>
+                            <div className="flex items-center gap-2 min-w-0">
+                                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${styles.pill}`}>{styles.label}</span>
+                                <h3 className={`text-base font-bold ${styles.title} truncate`}>{selectedBroadcast.title || `System ${styles.label}`}</h3>
+                            </div>
+                            <button onClick={() => setSelectedBroadcast(null)} className="text-gray-400 hover:text-gray-600 flex-shrink-0 ml-2"><X size={18} /></button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+                            {selectedBroadcast.message && <p className={`text-sm ${styles.text}`}>{selectedBroadcast.message}</p>}
+                            {selectedBroadcast.broadcastType === 'poll' && selectedBroadcast.pollQuestion && (
+                                <BroadcastPoll
+                                    poll={selectedBroadcast}
+                                    onVote={async (selectedOptions) => {
+                                        await handlePollVote(selectedBroadcast._id, selectedOptions);
+                                        setSelectedBroadcast(prev => prev ? { ...prev, userVote: selectedOptions } : null);
+                                    }}
+                                    isVoting={votingInProgress[selectedBroadcast._id] || false}
+                                    styles={styles}
+                                />
+                            )}
+                            <p className={`text-xs ${styles.sub}`}>{new Date(selectedBroadcast.createdAt).toLocaleString('en-GB')}</p>
+                        </div>
+                        <div className="px-5 py-3 border-t border-gray-100 flex justify-end">
+                            <button
+                                onClick={() => { dismissBroadcast(selectedBroadcast._id); setSelectedBroadcast(null); }}
+                                className="text-xs text-gray-400 hover:text-gray-600 underline mr-4"
+                            >Dismiss</button>
+                            <button onClick={() => setSelectedBroadcast(null)} className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg font-medium">Close</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        })()}
+        </>
     );
 };
 
@@ -32681,7 +32740,7 @@ const App = () => {
                     <div className="flex-shrink-0">
                         <UserProfileCard userProfile={userProfile} />
                     </div>
-                    <div className="flex-1 min-w-0 self-stretch flex flex-col">
+                    <div className="flex-1 min-w-0">
                         <NotificationsHub authToken={authToken} API_BASE_URL={API_BASE_URL} />
                     </div>
                 </div>
