@@ -31380,18 +31380,13 @@ const App = () => {
                             <MoonStar size={18} className="mb-1" />
                             <span>Breeders</span>
                         </button>
+                        <button onClick={() => setShowInfoTab(true)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`}>
+                            <BookOpen size={18} className="mb-1" />
+                            <span>Help</span>
+                        </button>
                     </nav>
 
                     <div className="flex items-center space-x-3">
-                        <button
-                            onClick={() => setShowInfoTab(true)}
-                            className="flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
-                            title="Help & Tutorials"
-                        >
-                            <BookOpen size={18} className="mb-1" />
-                            <span className="text-xs">Help</span>
-                        </button>
-                        
                         <button
                             onClick={() => {
                                 setShowNotifications(true);
@@ -31517,14 +31512,6 @@ const App = () => {
                                 )}
                             </button>
                             
-                            <button
-                                onClick={() => setShowInfoTab(true)}
-                                className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
-                                title="Help & Tutorials"
-                            >
-                                <BookOpen size={18} />
-                            </button>
-                            
                             {/* Avatar / Profile Dropdown (mobile) */}
                             <div className="relative" ref={profileMenuMobileRef}>
                                 <button
@@ -31580,8 +31567,8 @@ const App = () => {
                         </button>
                     </nav>
 
-                    {/* Fourth row: Navigation row 2 (2 buttons) */}
-                    <nav className="grid grid-cols-2 gap-1">
+                    {/* Fourth row: Navigation row 2 (3 buttons) */}
+                    <nav className="grid grid-cols-3 gap-1">
                         <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Calculator size={18} className="mb-0.5" />
                             <span>Calculator</span>
@@ -31589,6 +31576,10 @@ const App = () => {
                         <button onClick={() => navigate('/breeder-directory')} data-tutorial-target="breeders-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <MoonStar size={18} className="mb-0.5" />
                             <span>Breeders</span>
+                        </button>
+                        <button onClick={() => setShowInfoTab(true)} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`}>
+                            <BookOpen size={18} className="mb-0.5" />
+                            <span>Help</span>
                         </button>
                     </nav>
                 </div>
