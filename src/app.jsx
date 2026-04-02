@@ -4506,7 +4506,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setDetailViewTab(tab.id)}
-                                className={`flex-shrink-0 px-2.5 sm:px-3 py-2 sm:py-2 text-base sm:text-sm font-medium rounded border transition-colors ${
+                                className={`flex-shrink-0 px-2.5 sm:px-3 py-2 sm:py-2 text-xs sm:text-sm font-medium rounded border transition-colors ${
                                     detailViewTab === tab.id 
                                         ? 'bg-primary text-black border-gray-400' 
                                         : 'bg-gray-50 text-gray-600 hover:text-gray-800 border-gray-300'
@@ -5259,7 +5259,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 const assignedIds = animalBreedingLines[animal.id_public] || [];
                                 return (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3">
-                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-1.5"><Network size={16} className="flex-shrink-0 text-gray-400" /> Breeding Lines</h3>
+                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-1.5"><TableOfContents size={16} className="flex-shrink-0 text-gray-400" /> Breeding Lines</h3>
                                         <div className="flex flex-wrap gap-2">
                                             {namedLines.map(l => {
                                                 const assigned = assignedIds.includes(l.id);
@@ -7283,7 +7283,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 const assignedIds = animalBreedingLines[animal.id_public] || [];
                                 return (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3">
-                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-1.5"><Network size={16} className="flex-shrink-0 text-gray-400" /> Breeding Lines</h3>
+                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-1.5"><TableOfContents size={16} className="flex-shrink-0 text-gray-400" /> Breeding Lines</h3>
                                         <div className="flex flex-wrap gap-2">
                                             {namedLines.map(l => {
                                                 const assigned = assignedIds.includes(l.id);
@@ -21819,7 +21819,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
 
             {settingsTab === 'breeding-lines' && (
                 <div className="p-4 sm:p-6 border rounded-lg bg-gray-50 space-y-5">
-                    <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 flex items-center gap-1.5"><Network size={16} className="flex-shrink-0 text-gray-400" /> Breeding Lines</h3>
+                    <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 flex items-center gap-1.5"><TableOfContents size={16} className="flex-shrink-0 text-gray-400" /> Breeding Lines</h3>
                     <p className="text-sm text-gray-600">Define up to 10 personal breeding lines. These are private and only visible to you. Assign them to animals in the animal&apos;s detail view under the Identification tab.</p>
                     <div className="space-y-3">
                         {localBLDefs.map((line, idx) => (
