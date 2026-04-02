@@ -22557,7 +22557,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                         <Users size={20} className="text-primary-dark" />
                         Recently Active Members
                     </h2>
-                    <div className="flex flex-wrap gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                         {communityUsers.map(user => {
                             const displayName = (user.showBreederName && user.breederName)
                                 ? user.breederName
@@ -22565,7 +22565,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                             return (
                                 <div
                                     key={user.id_public}
-                                    className="relative bg-white rounded-lg p-3 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer w-[180px]"
+                                    className="relative bg-white rounded-lg p-3 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer text-center"
                                     onClick={() => navigate(`/user/${user.id_public}`)}
                                 >
                                     <span className="absolute top-2 right-2 w-3 h-3 bg-green-400 border-2 border-white rounded-full" title="Active now" />
@@ -22578,10 +22578,8 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                                             </div>
                                         )}
                                     </div>
-                                    <p className="text-sm font-semibold text-gray-800 text-center line-clamp-2 min-h-[2.5rem]">
-                                        {displayName}
-                                    </p>
-                                    <p className="text-xs text-gray-500 text-center truncate">{user.id_public}</p>
+                                    <p className="font-semibold text-sm text-gray-800 break-words line-clamp-2 leading-tight">{displayName}</p>
+                                    <p className="text-xs text-gray-500 truncate">{user.id_public}</p>
                                 </div>
                             );
                         })}
