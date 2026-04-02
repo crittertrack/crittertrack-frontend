@@ -28709,7 +28709,9 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     const [breedingDismissed, setBreedingDismissed] = useState(() => {
         try { return JSON.parse(localStorage.getItem('ct_urgency_dismissed') || '{}'); } catch { return {}; }
     });
-    const [litters, setLitters] = useState([]);
+    const [litters, setLitters] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('ct_hub_litters') || '[]'); } catch { return []; }
+    });
     const [littersLoading, setLittersLoading] = useState(true);
 
     // ── Management Alerts ───────────────────────────────────────────
@@ -28719,13 +28721,21 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     const [mgmtDismissed, setMgmtDismissed] = useState(() => {
         try { return JSON.parse(localStorage.getItem('ct_mgmt_urgency_dismissed') || '{}'); } catch { return {}; }
     });
-    const [animals, setAnimals] = useState([]);
-    const [enclosures, setEnclosures] = useState([]);
-    const [supplies, setSupplies] = useState([]);
+    const [animals, setAnimals] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('ct_hub_animals') || '[]'); } catch { return []; }
+    });
+    const [enclosures, setEnclosures] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('ct_hub_enclosures') || '[]'); } catch { return []; }
+    });
+    const [supplies, setSupplies] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('ct_hub_supplies') || '[]'); } catch { return []; }
+    });
     const [mgmtLoading, setMgmtLoading] = useState(true);
 
     // ── Broadcasts ──────────────────────────────────────────────────
-    const [broadcasts, setBroadcasts] = useState([]);
+    const [broadcasts, setBroadcasts] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('ct_hub_broadcasts') || '[]'); } catch { return []; }
+    });
     const [dismissedBroadcastIds, setDismissedBroadcastIds] = useState(() => {
         try { const saved = localStorage.getItem('dismissedBroadcasts'); return saved ? JSON.parse(saved) : []; } catch { return []; }
     });
@@ -28735,7 +28745,11 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     useEffect(() => {
         if (!authToken) return;
         axios.get(`${API_BASE_URL}/litters`, { headers: { Authorization: `Bearer ${authToken}` } })
-            .then(res => setLitters(Array.isArray(res.data) ? res.data : []))
+            .then(res => {
+                const data = Array.isArray(res.data) ? res.data : [];
+                setLitters(data);
+                try { localStorage.setItem('ct_hub_litters', JSON.stringify(data)); } catch {}
+            })
             .catch(() => {})
             .finally(() => setLittersLoading(false));
     }, [authToken, API_BASE_URL]);
@@ -28748,9 +28762,15 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
             axios.get(`${API_BASE_URL}/supplies`, { headers: { Authorization: `Bearer ${authToken}` } }),
         ])
             .then(([ar, er, sr]) => {
-                setAnimals(Array.isArray(ar.data) ? ar.data : []);
-                setEnclosures(Array.isArray(er.data) ? er.data : []);
-                setSupplies(Array.isArray(sr.data) ? sr.data : []);
+                const a = Array.isArray(ar.data) ? ar.data : [];
+                const e = Array.isArray(er.data) ? er.data : [];
+                const s = Array.isArray(sr.data) ? sr.data : [];
+                setAnimals(a); setEnclosures(e); setSupplies(s);
+                try {
+                    localStorage.setItem('ct_hub_animals', JSON.stringify(a));
+                    localStorage.setItem('ct_hub_enclosures', JSON.stringify(e));
+                    localStorage.setItem('ct_hub_supplies', JSON.stringify(s));
+                } catch {}
             })
             .catch(() => {})
             .finally(() => setMgmtLoading(false));
@@ -28770,6 +28790,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                     return isBroadcastType && isNotUrgent && isNotDismissed;
                 });
                 setBroadcasts(broadcastNotifications);
+                try { localStorage.setItem('ct_hub_broadcasts', JSON.stringify(broadcastNotifications)); } catch {}
             } catch {}
         };
         fetchBroadcasts();
@@ -28961,7 +28982,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                 )}
             </div>
 
-            {isLoading ? (
+            {isLoading && litters.length === 0 && animals.length === 0 && broadcasts.length === 0 ? (
                 <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">Loading...</div>
             ) : totalCount === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center gap-1.5 text-gray-400">
