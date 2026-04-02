@@ -2100,9 +2100,14 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
             } else {
                 // Search for animals globally
                 const idMatch = searchTerm.trim().match(/^\s*(?:CTC?[- ]?)?(\d+)\s*$/i);
-                const url = idMatch
-                    ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(idMatch[1])}`
-                    : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(searchTerm.trim())}&species=${encodeURIComponent(searchTerm.trim())}`;
+                let url;
+                if (idMatch) {
+                    // Format the ID as CTCXXX
+                    const formattedId = `CTC${idMatch[1]}`;
+                    url = `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(formattedId)}`;
+                } else {
+                    url = `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(searchTerm.trim())}&species=${encodeURIComponent(searchTerm.trim())}`;
+                }
                 console.log('Fetching animals from:', url);
                 const response = await axios.get(url);
                 console.log('Animal search response:', response.data);
@@ -2344,7 +2349,7 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
             
             // Check for CTUID pattern (user ID)
             const userIdMatch = trimmedTerm.match(/^\s*(?:CTU[- ]?)?(\d+)\s*$/i);
-            // Check for CTCID pattern (animal ID) - or just CT without U
+            // Check for CTCID pattern (animal ID) - matches CTC1279, CT1279, or just 1279
             const animalIdMatch = trimmedTerm.match(/^\s*(?:CTC?[- ]?)?(\d+)\s*$/i);
             
             // Determine if this is specifically a user ID search
@@ -2359,9 +2364,16 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
                 ? `CTU${userIdMatch[1]}`
                 : trimmedTerm;
             
-            const animalUrl = (animalIdMatch && !isUserIdSearch)
-                ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(animalIdMatch[1])}`
-                : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedTerm)}&species=${encodeURIComponent(trimmedTerm)}&limit=10`;
+            // For animal ID searches, format the ID properly
+            let animalUrl;
+            if (animalIdMatch && !isUserIdSearch) {
+                // Extract the numeric part and format as CTCXXX
+                const numericId = animalIdMatch[1];
+                const formattedId = `CTC${numericId}`;
+                animalUrl = `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(formattedId)}`;
+            } else {
+                animalUrl = `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedTerm)}&species=${encodeURIComponent(trimmedTerm)}&limit=10`;
+            }
             
             console.log('Animal search URL:', animalUrl);
             
