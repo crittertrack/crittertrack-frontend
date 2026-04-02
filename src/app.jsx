@@ -28828,7 +28828,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
 
     return (
         <>
-        <div className="bg-white rounded-xl shadow-md flex flex-col" style={{ height: '260px' }}>
+        <div className="bg-white rounded-xl shadow-md flex flex-col" style={hasReminders && hasNews ? undefined : { height: '260px' }}>
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100 flex-shrink-0">
                 <div className="flex items-center gap-2">
@@ -28849,10 +28849,10 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                     <span className="text-xs">No reminders or news.</span>
                 </div>
             ) : (
-                <div className="flex-1 flex flex-col overflow-hidden">
+                <div className={hasReminders && hasNews ? 'flex flex-col overflow-hidden' : 'flex-1 flex flex-col overflow-hidden'}>
                     {/* Reminder rows */}
                     {hasReminders && (
-                        <div className={`overflow-y-auto divide-y divide-gray-200 ${hasNews ? 'flex-1' : 'flex-1'}`}>
+                        <div className={`overflow-y-auto divide-y divide-gray-200 ${!hasNews ? 'flex-1' : ''}`} style={hasNews ? { maxHeight: '112px' } : {}}>
                             {breedingItems.map(item => {
                                 const cfg = breedingTypeConfig[item.type] || breedingTypeConfig.due;
                                 const statusText = item.type === 'mated' && item.diff > 0
