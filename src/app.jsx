@@ -28922,7 +28922,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
 
     return (
         <>
-        <div className="bg-white rounded-xl shadow-md flex flex-col" style={{ height: '250px' }}>
+        <div className="bg-white rounded-xl shadow-md flex flex-col" style={{ height: '280px' }}>
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100 flex-shrink-0">
                 <div className="flex items-center gap-2">
@@ -28945,7 +28945,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
             ) : (
                 <div className="flex-1 flex flex-col overflow-hidden">
                     {/* Reminder rows — always shown unless both empty */}
-                    <div className="overflow-y-auto divide-y divide-gray-200 flex-shrink-0" style={{ height: '106px' }}>
+                    <div className="overflow-y-auto divide-y divide-gray-200 flex-shrink-0" style={{ height: '52px' }}>
                         {hasReminders ? (
                             <>
                                 {breedingItems.map(item => {
