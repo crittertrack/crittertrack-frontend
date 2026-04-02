@@ -280,7 +280,7 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
                     <ShoppingBag className="text-accent" />
-                    Marketplace
+                    Available Animals
                 </h1>
                 <p className="text-gray-600 mt-1">Browse animals available for sale or stud services</p>
             </div>

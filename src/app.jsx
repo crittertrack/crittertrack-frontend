@@ -22599,7 +22599,6 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                                     const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph', 'markings'];
                                     const variety = VARIETY_KEYS.map(k => animal[k]).filter(Boolean).join(' ');
                                     const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
-                                    const genderIcon = animal.gender === 'Male' ? '♂' : animal.gender === 'Female' ? '♀' : animal.gender === 'Intersex' ? '⚥' : null;
                                     const imgSrc = animal.imageUrl || animal.photoUrl || animal.images?.[0];
                                     return (
                                         <div
@@ -22617,9 +22616,9 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                                                 )}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="font-semibold text-gray-800 truncate">
+                                                <p className="font-semibold text-gray-800 truncate flex items-center gap-1">
                                                     {fullName}
-                                                    {genderIcon && <span className={`ml-1 text-sm ${animal.gender === 'Male' ? 'text-blue-500' : animal.gender === 'Female' ? 'text-pink-500' : 'text-purple-500'}`}>{genderIcon}</span>}
+                                                    {animal.gender === 'Male' ? <Mars size={14} strokeWidth={2.5} className="text-primary flex-shrink-0" /> : animal.gender === 'Female' ? <Venus size={14} strokeWidth={2.5} className="text-accent flex-shrink-0" /> : animal.gender === 'Intersex' ? <VenusAndMars size={14} strokeWidth={2.5} className="text-purple-500 flex-shrink-0" /> : <Circle size={14} strokeWidth={2.5} className="text-gray-400 flex-shrink-0" />}
                                                 </p>
                                                 <p className="text-xs text-gray-500 truncate">{animal.id_public} • {animal.species}</p>
                                                 {variety && <p className="text-xs text-gray-400 truncate">{variety}</p>}
@@ -22703,7 +22702,6 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                                     const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph', 'markings'];
                                     const variety = VARIETY_KEYS.map(k => animal[k]).filter(Boolean).join(' ');
                                     const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
-                                    const genderIcon = animal.gender === 'Male' ? '♂' : animal.gender === 'Female' ? '♀' : animal.gender === 'Intersex' ? '⚥' : null;
                                     const imgSrc = animal.imageUrl || animal.photoUrl || animal.images?.[0];
                                     return (
                                         <div
@@ -22721,9 +22719,9 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                                                 )}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="font-medium text-gray-800 text-sm truncate">
+                                                <p className="font-medium text-gray-800 text-sm truncate flex items-center gap-1">
                                                     {fullName}
-                                                    {genderIcon && <span className={`ml-1 text-xs ${animal.gender === 'Male' ? 'text-blue-500' : animal.gender === 'Female' ? 'text-pink-500' : 'text-purple-500'}`}>{genderIcon}</span>}
+                                                    {animal.gender === 'Male' ? <Mars size={13} strokeWidth={2.5} className="text-primary flex-shrink-0" /> : animal.gender === 'Female' ? <Venus size={13} strokeWidth={2.5} className="text-accent flex-shrink-0" /> : animal.gender === 'Intersex' ? <VenusAndMars size={13} strokeWidth={2.5} className="text-purple-500 flex-shrink-0" /> : <Circle size={13} strokeWidth={2.5} className="text-gray-400 flex-shrink-0" />}
                                                 </p>
                                                 {variety && <p className="text-xs text-gray-400 truncate">{variety}</p>}
                                                 <p className="text-xs text-gray-500">Updated {formatTimeAgo(animal.updatedAt)}</p>
@@ -22749,7 +22747,6 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                                     const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph', 'markings'];
                                     const variety = VARIETY_KEYS.map(k => animal[k]).filter(Boolean).join(' ');
                                     const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
-                                    const genderIcon = animal.gender === 'Male' ? '♂' : animal.gender === 'Female' ? '♀' : animal.gender === 'Intersex' ? '⚥' : null;
                                     const imgSrc = animal.imageUrl || animal.photoUrl || animal.images?.[0];
                                     return (
                                         <div
@@ -22767,9 +22764,9 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                                                 )}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="font-medium text-gray-800 text-sm truncate">
+                                                <p className="font-medium text-gray-800 text-sm truncate flex items-center gap-1">
                                                     {fullName}
-                                                    {genderIcon && <span className={`ml-1 text-xs ${animal.gender === 'Male' ? 'text-blue-500' : animal.gender === 'Female' ? 'text-pink-500' : 'text-purple-500'}`}>{genderIcon}</span>}
+                                                    {animal.gender === 'Male' ? <Mars size={13} strokeWidth={2.5} className="text-primary flex-shrink-0" /> : animal.gender === 'Female' ? <Venus size={13} strokeWidth={2.5} className="text-accent flex-shrink-0" /> : animal.gender === 'Intersex' ? <VenusAndMars size={13} strokeWidth={2.5} className="text-purple-500 flex-shrink-0" /> : <Circle size={13} strokeWidth={2.5} className="text-gray-400 flex-shrink-0" />}
                                                 </p>
                                                 <p className="text-xs text-gray-500">{animal.species} • {animal.isForSale ? 'For Sale' : 'For Stud'}</p>
                                                 {variety && <p className="text-xs text-gray-400 truncate">{variety}</p>}
@@ -22811,7 +22808,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                                                     </div>
                                                 )}
                                             </div>
-                                            <p className="font-semibold text-sm text-gray-800 truncate">{displayName}</p>
+                                            <p className="font-semibold text-sm text-gray-800 break-words line-clamp-2 leading-tight">{displayName}</p>
                                             <p className="text-xs text-gray-500 truncate">{user.id_public}</p>
                                             <span className="inline-block mt-1 text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">NEW</span>
                                         </div>
@@ -32003,10 +32000,7 @@ const App = () => {
             {/* Management Urgency Banner — due-today/overdue care, maintenance & supplies */}
             {authToken && <MgmtUrgencyBanner authToken={authToken} API_BASE_URL={API_BASE_URL} />}
             
-            {/* System Broadcast Banner (info/announcements) - only on dashboard */}
-            {(currentView === 'list' || currentView === '') && (
-                <BroadcastBanner authToken={authToken} API_BASE_URL={API_BASE_URL} />
-            )}
+
             
             {/* Urgent Broadcast Popup (warning/alert) */}
             <UrgentBroadcastPopup authToken={authToken} API_BASE_URL={API_BASE_URL} />
@@ -32299,10 +32293,15 @@ const App = () => {
 
 
 
-            {/* Profile Card - shown only on desktop in list view */}
+            {/* Profile Card + Banners - shown only on desktop in list view */}
             {currentView === 'list' && currentView !== 'profile' && userProfile && (
-                <div className="w-full max-w-5xl mb-6 hidden sm:block">
-                    <UserProfileCard userProfile={userProfile} />
+                <div className="w-full max-w-5xl mb-6 hidden sm:flex gap-4 items-start">
+                    <div className="flex-shrink-0">
+                        <UserProfileCard userProfile={userProfile} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <BroadcastBanner authToken={authToken} API_BASE_URL={API_BASE_URL} />
+                    </div>
                 </div>
             )}
 
