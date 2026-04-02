@@ -22442,9 +22442,14 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                     axios.get(`${API_BASE_URL}/public/users/newest?limit=5`).catch(() => ({ data: [] }))
                 ]);
 
-                setFavoriteAnimals(favAnimalsRes.data || []);
+                const favAnimals = favAnimalsRes.data || [];
+                setFavoriteAnimals(favAnimals);
                 setFavoriteUsers(favUsersRes.data || []);
                 setNewAvailableAnimals(newAnimalsRes.data || []);
+
+                // Derive recently updated from already-fetched favorite animals — sort by updatedAt desc
+                const sorted = [...favAnimals].sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
+                setRecentEdits(sorted);
                 
                 // Filter new users to only show public ones
                 const hasVisibleName = (u) => (u.showBreederName && u.breederName) || (u.showPersonalName && u.personalName);
@@ -22455,16 +22460,6 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                     hasVisibleName(u)
                 );
                 setNewUsers(publicUsers.slice(0, 5));
-
-                // Fetch recent edits for favorite animals
-                if (favAnimalsRes.data && favAnimalsRes.data.length > 0) {
-                    const animalIds = favAnimalsRes.data.map(a => a.id_public).join(',');
-                    const editsRes = await axios.get(
-                        `${API_BASE_URL}/public/animals/recent-edits?ids=${animalIds}`,
-                        { headers: { Authorization: `Bearer ${authToken}` } }
-                    ).catch(() => ({ data: [] }));
-                    setRecentEdits(editsRes.data || []);
-                }
             } catch (error) {
                 console.error('Error fetching community data:', error);
             } finally {
