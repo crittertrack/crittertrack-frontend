@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2 } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2, Hash, Dna, TreeDeciduous, Tag, Egg, Hospital, Brain, Trophy, Scale, FileCheck, Palette, Sprout, Ruler, FolderOpen, Leaf, Microscope, Pill, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Feather, Medal, Target, Key, Dumbbell } from 'lucide-react';
 import ArchiveScreen from './components/ArchiveScreen';
 import { QRCodeSVG } from 'qrcode.react';
 import jsPDF from 'jspdf';
@@ -1414,7 +1414,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         <h2 className="text-lg sm:text-2xl font-bold text-gray-800 flex items-center">
                             <FileText className="mr-1 sm:mr-2" size={18} />
                             <span className="hidden sm:inline">Pedigree Chart</span>
-                            <span className="sm:hidden">🌳 Pedigree</span>
+                            <span className="sm:hidden"><TreeDeciduous size={14} className="inline-block align-middle mr-1 flex-shrink-0" /> Pedigree</span>
                         </h2>
                         <div className="flex items-center gap-1 sm:gap-2">
                             <button
@@ -4489,21 +4489,21 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                 <div className="bg-white border-b border-gray-300 px-2 sm:px-6 pt-2 sm:pt-4">
                     <div className="flex flex-wrap gap-1 sm:gap-1 pb-2 sm:pb-4">
                         {[
-                            { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
-                            { id: 3, label: 'Physical', icon: '🎨' },
-                            { id: 4, label: 'Identification', icon: '🏷️' },
-                            { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🥚' },
-                            { id: 7, label: 'Health', icon: '🏥' },
-                            { id: 8, label: 'Animal Care', icon: '🏠' },
-                            { id: 9, label: 'Behavior', icon: '🧠' },
-                            { id: 10, label: 'Records', icon: '📝' },
-                            { id: 11, label: 'End of Life', icon: '⚖️' },
-                            { id: 12, label: 'Show', icon: '🏆' },
-                            { id: 13, label: 'Legal', icon: '📄' },
-                            { id: 14, label: 'Gallery', icon: '🖼️' },
-                            { id: 15, label: 'Logs', icon: '📜' }
+                            { id: 1, label: 'Overview', icon: ClipboardList },
+                            { id: 2, label: 'Status & Privacy', icon: Lock },
+                            { id: 3, label: 'Physical', icon: Palette },
+                            { id: 4, label: 'Identification', icon: Tag },
+                            { id: 5, label: 'Lineage', icon: TreeDeciduous },
+                            { id: 6, label: 'Breeding', icon: Egg },
+                            { id: 7, label: 'Health', icon: Hospital },
+                            { id: 8, label: 'Animal Care', icon: Home },
+                            { id: 9, label: 'Behavior', icon: Brain },
+                            { id: 10, label: 'Records', icon: FileText },
+                            { id: 11, label: 'End of Life', icon: Scale },
+                            { id: 12, label: 'Show', icon: Trophy },
+                            { id: 13, label: 'Legal', icon: FileCheck },
+                            { id: 14, label: 'Gallery', icon: Images },
+                            { id: 15, label: 'Logs', icon: ScrollText }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -4516,7 +4516,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 }`}
                                 title={tab.label}
                             >
-                                <span className="sm:mr-1">{tab.icon}</span>
+                                {React.createElement(tab.icon, { size: 14, className: 'inline-block align-middle flex-shrink-0' })}
                                 <span className="hidden lg:inline">{tab.label}</span>
                             </button>
                         ))}
@@ -4758,7 +4758,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 
                             {/* Identification Numbers Section */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">🔢 Identification Numbers</h3>
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
                                 <div className="space-y-2 text-sm">
                                     <p><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></p>
                                     {animal.breederAssignedId && <p><span className="text-gray-600">Identification:</span> <strong>{animal.breederAssignedId}</strong></p>}
@@ -4769,14 +4769,14 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 
                             {/* Genetic Code Display Section */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">🧬 Genetic Code</h3>
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3"><Dna size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Genetic Code</h3>
                                 <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || ''}</p>
                             </div>
 
                             {/* Parents Section */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <div className="flex items-center justify-between border-b pb-2 mb-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🌳 Parents</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><TreeDeciduous size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Parents</h3>
                                     {animalCOI != null && (
                                         <div className="text-sm text-gray-800">
                                             <span className="font-medium">COI:</span> {animalCOI.toFixed(2)}%
@@ -4811,7 +4811,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         <div className="space-y-6">
                             {/* 1st Section: Ownership */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">👥 Ownership</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Users size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Ownership</h3>
                                 <div className="space-y-3 text-sm">
                                     <div className="flex items-center gap-2">
                                         <span className="text-gray-600">Currently Owned:</span>
@@ -4828,7 +4828,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 
                             {/* 2nd Section: Current Owner */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🏠 Keeper</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper</h3>
                                 <div className="text-sm space-y-2">
                                     {(animal.keeperName || animal.isOwned) && (
                                     <div className="flex items-center gap-2">
@@ -4847,7 +4847,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 
                             {/* 3rd Section: Keeper History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🏠 Keeper History</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper History</h3>
                                 {(animal.keeperHistory || []).length === 0 ? (
                                     <p className="text-sm text-gray-400 italic">No entries yet</p>
                                 ) : (
@@ -4872,7 +4872,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 
                             {/* 4th Section: Availability for Sale or Stud */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🏷️🥚 Availability for Sale or Stud</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Tag size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Availability for Sale or Stud</h3>
                                 <div className="space-y-3 text-sm">
                                     <div className="flex items-center gap-2">
                                         <span className="text-gray-600">For Sale:</span>
@@ -4907,7 +4907,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700">✨ Appearance</h3>
+                                        <h3 className="text-lg font-semibold text-gray-700"><Sparkles size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Appearance</h3>
                                         {fields.length > 0 ? (
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                                 {fields.map(f => (
@@ -4924,7 +4924,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {/* Genetic Code - Always show */}
                             {fieldTemplate?.fields?.geneticCode?.enabled !== false && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🧬 {getLabel('geneticCode', 'Genetic Code')}</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Dna size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> {getLabel('geneticCode', 'Genetic Code')}</h3>
                                     <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || 'Not specified'}</p>
                                 </div>
                             )}
@@ -4932,14 +4932,14 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {/* Life Stage - Always show */}
                             {fieldTemplate?.fields?.lifeStage?.enabled !== false && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🌱 {getLabel('lifeStage', 'Life Stage')}</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Sprout size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> {getLabel('lifeStage', 'Life Stage')}</h3>
                                     <p className="text-gray-700 text-sm">{animal.lifeStage || 'Not specified'}</p>
                                 </div>
                             )}
 
                             {/* Current Measurements & Growth Tracking - Always show */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">📏 Measurements & Growth Tracking</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Ruler size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Measurements & Growth Tracking</h3>
                                 {(() => {
                                     let growthRecords = animal.growthRecords;
                                     if (typeof growthRecords === 'string') {
@@ -5212,7 +5212,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700">🔢 Identification Numbers</h3>
+                                        <h3 className="text-lg font-semibold text-gray-700"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                             <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></div>
                                             {idFields.map(f => (
@@ -5225,7 +5225,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 
                             {/* Classification */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🗂️ Classification</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><FolderOpen size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Classification</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Species:</span> <strong>{animal.species || ''}</strong></div>
                                     {fieldTemplate?.fields?.breed?.enabled !== false && animal.breed && (
@@ -5240,14 +5240,14 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {/* Origin */}
                             {animal.origin && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🌍 Origin</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Globe size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Origin</h3>
                                 <p className="text-sm text-gray-700">{animal.origin}</p>
                             </div>
                             )}
                             {/* Tags */}
                             {animal.tags && animal.tags.length > 0 && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🏷️ Tags</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Tag size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Tags</h3>
                                     <div className="flex flex-wrap gap-2">
                                         {animal.tags.map((tag, idx) => (
                                             <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">{tag}</span>
@@ -5963,7 +5963,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         <div className="space-y-6">
                             {/* 1st Section: Reproductive Status */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🌿 Reproductive Status</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Leaf size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Reproductive Status</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animal.isNeutered ? 'Yes' : 'No'}</strong></div>
                                     <div><span className="text-gray-600">Infertile:</span> <strong>{animal.isInfertile ? 'Yes' : 'No'}</strong></div>
@@ -5988,7 +5988,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {/* 2nd Section: Estrus/Cycle (Female/Intersex/Unknown only) */}
                             {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🔄 Estrus/Cycle</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><RefreshCw size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Estrus/Cycle</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">Heat Status:</span> <strong>{animal.heatStatus || ''}</strong></div>
                                         <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animal.lastHeatDate ? formatDate(animal.lastHeatDate) : ''}</strong></div>
@@ -6003,7 +6003,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {/* 4th Section: Stud Information */}
                             {!animal.isNeutered && !animal.isInfertile && (animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">♂️ Sire Information</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Mars size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Sire Information</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">Fertility Status:</span> <strong>{animal.fertilityStatus || ''}</strong></div>
                                     </div>
@@ -6022,7 +6022,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {/* 5th Section: Dam Information */}
                             {!animal.isNeutered && !animal.isInfertile && (animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">♀️ Dam Information</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Venus size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Dam Information</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">{getLabel('damFertilityStatus', 'Dam Fertility Status')}:</span> <strong>{animal.damFertilityStatus || animal.fertilityStatus || ''}</strong></div>
                                         {animal.gestationLength && (
@@ -6060,7 +6060,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {(animal.vaccinations || animal.dewormingRecords || animal.parasiteControl || animal.parasitePreventionSchedule) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, preventiveCare: !p.preventiveCare}))} className="w-full flex items-center justify-between text-left group">
-                                    <h3 className="text-lg font-semibold text-gray-700">🛡️ Preventive Care</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Shield size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Preventive Care</h3>
                                     <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.preventiveCare ? '▶' : '▼'}</span>
                                 </button>
                                 {!collapsedHealthSections.preventiveCare && (<div className="space-y-4 mt-4">
@@ -6099,7 +6099,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {(animal.medicalProcedures || animal.labResults || animal.laboratoryResults) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, proceduresDiagnostics: !p.proceduresDiagnostics}))} className="w-full flex items-center justify-between text-left group">
-                                    <h3 className="text-lg font-semibold text-gray-700">🔬 Procedures & Diagnostics</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Microscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Procedures & Diagnostics</h3>
                                     <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.proceduresDiagnostics ? '▶' : '▼'}</span>
                                 </button>
                                 {!collapsedHealthSections.proceduresDiagnostics && (<div className="space-y-4 mt-4">
@@ -6125,7 +6125,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {(animal.medicalConditions || animal.allergies || animal.medications) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, activeMedical: !p.activeMedical}))} className="w-full flex items-center justify-between text-left group">
-                                    <h3 className="text-lg font-semibold text-gray-700">🩹💊 Active Medical Records</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Pill size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Active Medical Records</h3>
                                     <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? '▶' : '▼'}</span>
                                 </button>
                                 {!collapsedHealthSections.activeMedical && (<div className="space-y-3 mt-4">
@@ -6199,7 +6199,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 return (clearanceFields.length > 0 || spayDate) && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                         <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, healthClearances: !p.healthClearances}))} className="w-full flex items-center justify-between text-left group">
-                                            <h3 className="text-lg font-semibold text-gray-700">🏥 Health Clearances & Screening</h3>
+                                            <h3 className="text-lg font-semibold text-gray-700"><Hospital size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Health Clearances & Screening</h3>
                                             <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? '▶' : '▼'}</span>
                                         </button>
                                         {!collapsedHealthSections.healthClearances && (<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
@@ -6216,7 +6216,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {(animal.primaryVet || animal.vetVisits) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, vetCare: !p.vetCare}))} className="w-full flex items-center justify-between text-left group">
-                                    <h3 className="text-lg font-semibold text-gray-700">🩺 Veterinary Care</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Stethoscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Veterinary Care</h3>
                                     <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.vetCare ? '▶' : '▼'}</span>
                                 </button>
                                 {!collapsedHealthSections.vetCare && (<div className="space-y-4 text-sm mt-4">
@@ -6240,7 +6240,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {/* 1st Section: Nutrition */}
                             {(animal.dietType || animal.feedingSchedule || animal.supplements) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🍽️ Nutrition</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><UtensilsCrossed size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Nutrition</h3>
                                 <div className="space-y-3 text-sm">
                                     {animal.dietType && <div><span className="text-gray-600">Diet Type:</span> <strong>{animal.dietType}</strong></div>}
                                     {animal.feedingSchedule && <div><span className="text-gray-600">Feeding Schedule:</span> <strong>{animal.feedingSchedule}</strong></div>}
@@ -6252,7 +6252,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {/* 2nd Section: Housing & Enclosure */}
                             {(animal.enclosureId || animal.housingType || animal.bedding || animal.enrichment || animal.careTasks?.length > 0) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🏡 Housing & Enclosure</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Housing & Enclosure</h3>
                                 <div className="space-y-3 text-sm">
                                     {enclosureInfo && (<div><span className="text-gray-600">Enclosure:</span> <strong>{enclosureInfo.name}</strong></div>)}
                                     {fieldTemplate?.fields?.housingType?.enabled !== false && animal.housingType && <div><span className="text-gray-600">{getLabel('housingType', 'Housing Type')}:</span> <strong>{animal.housingType}</strong></div>}
@@ -6281,7 +6281,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {/* 3rd Section: Animal Care */}
                             {(animal.animalCareTasks?.length > 0 || animal.handlingNotes || animal.socializationNotes || animal.specialCareRequirements) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🧴 Animal Care</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Droplets size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Animal Care</h3>
                                 <div className="space-y-3 text-sm">
                                     {animal.animalCareTasks && animal.animalCareTasks.length > 0 && (
                                         <div>
@@ -6309,7 +6309,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {/* 3rd Section: Environment */}
                             {(animal.temperatureRange || animal.humidity || animal.lighting || animal.noise) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🌡️ Environment</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Thermometer size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Environment</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     {animal.temperatureRange && <div><span className="text-gray-600">Temperature Range:</span> <strong>{animal.temperatureRange}</strong></div>}
                                     {fieldTemplate?.fields?.humidity?.enabled !== false && animal.humidity && <div><span className="text-gray-600">{getLabel('humidity', 'Humidity')}:</span> <strong>{animal.humidity}</strong></div>}
@@ -6335,7 +6335,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return (egFields.length > 0 || trainFlags.length > 0) && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700">✂️ Grooming</h3>
+                                        <h3 className="text-lg font-semibold text-gray-700"><Scissors size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Grooming</h3>
                                         {egFields.length > 0 && (
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                                 {egFields.map(f => (
@@ -6362,7 +6362,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {/* 1st Section: Behavior */}
                             {(animal.temperament || animal.handlingTolerance || animal.socialStructure) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">💭 Behavior</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><MessageSquare size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Behavior</h3>
                                 <div className="space-y-3 text-sm">
                                     {animal.temperament && <div><span className="text-gray-600">Temperament:</span> <strong>{animal.temperament}</strong></div>}
                                     {fieldTemplate?.fields?.handlingTolerance?.enabled !== false && animal.handlingTolerance && <div><span className="text-gray-600">{getLabel('handlingTolerance', 'Handling Tolerance')}:</span> <strong>{animal.handlingTolerance}</strong></div>}
@@ -6374,7 +6374,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {/* 2nd Section: Activity */}
                             {(animal.activityCycle || animal.exerciseRequirements || animal.dailyExerciseMinutes || animal.trainingLevel || animal.trainingDisciplines || animal.workingRole || animal.certifications || animal.crateTrained || animal.litterTrained || animal.leashTrained || animal.freeFlightTrained) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🌓🏃 Activity</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Activity size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Activity</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     {animal.activityCycle && <div><span className="text-gray-600">Activity Cycle:</span> <strong>{animal.activityCycle}</strong></div>}
                                     {fieldTemplate?.fields?.exerciseRequirements?.enabled !== false && animal.exerciseRequirements && <div><span className="text-gray-600">{getLabel('exerciseRequirements', 'Exercise Requirements')}:</span> <strong>{animal.exerciseRequirements}</strong></div>}
@@ -6398,7 +6398,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {/* 3rd Section: Known Issues */}
                             {(animal.behavioralIssues || animal.biteHistory || animal.reactivityNotes) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">⚠️ Known Issues</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><AlertTriangle size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Known Issues</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     {fieldTemplate?.fields?.behavioralIssues?.enabled !== false && animal.behavioralIssues && <div className="flex items-baseline gap-1"><span className="text-gray-600 shrink-0">{getLabel('behavioralIssues', 'Behavioral Issues')}:</span><strong className="whitespace-pre-wrap">{animal.behavioralIssues}</strong></div>}
                                     {fieldTemplate?.fields?.biteHistory?.enabled !== false && animal.biteHistory && <div className="flex items-baseline gap-1"><span className="text-gray-600 shrink-0">{getLabel('biteHistory', 'Bite History')}:</span><strong className="whitespace-pre-wrap">{animal.biteHistory}</strong></div>}
@@ -6414,7 +6414,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         <div className="space-y-6">
                             {/* 1st Section: Remarks & Notes */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">📝 Remarks & Notes</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><FileText size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Remarks & Notes</h3>
                                 <strong className="block text-sm text-gray-700 whitespace-pre-wrap">{animal.remarks || ''}</strong>
                             </div>
                         </div>
@@ -6423,7 +6423,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         <div className="space-y-6">
                             {/* End of Life */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🕊️ Information</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Feather size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Information</h3>
                                 <div className="space-y-3 text-sm">
                                     <div><span className="text-gray-600">Deceased Date:</span> <strong>{animal.deceasedDate ? formatDate(animal.deceasedDate) : ''}</strong></div>
                                     <div><span className="text-gray-600">Cause of Death:</span> <strong>{animal.causeOfDeath || ''}</strong></div>
@@ -6441,7 +6441,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         <div className="space-y-6">
                             {/* Show Titles & Ratings */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🥇 Show Titles & Ratings</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Medal size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Show Titles & Ratings</h3>
                                 <div className="space-y-3 text-sm">
                                     <div><span className="text-gray-600">Titles:</span> <strong>{animal.showTitles || ''}</strong></div>
                                     <div><span className="text-gray-600">Ratings:</span> <strong>{animal.showRatings || ''}</strong></div>
@@ -6452,7 +6452,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {/* Working Titles & Performance */}
                             {(animal.workingTitles || animal.performanceScores) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🎯 Working & Performance</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Target size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Working & Performance</h3>
                                     <div className="space-y-3 text-sm">
                                         <div><span className="text-gray-600">Working Titles:</span> <strong>{animal.workingTitles || ''}</strong></div>
                                         <div><span className="text-gray-600">Performance Scores:</span> <strong>{animal.performanceScores || ''}</strong></div>
@@ -6468,7 +6468,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {/* Licensing & Permits */}
                             {(animal.licenseNumber || animal.licenseJurisdiction) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🔑 Licensing & Permits</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Key size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Licensing & Permits</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     {fieldTemplate?.fields?.licenseNumber?.enabled !== false && animal.licenseNumber && (
                                         <div><span className="text-gray-600">{getLabel('licenseNumber', 'License Number')}:</span> <strong>{animal.licenseNumber}</strong></div>
@@ -6483,7 +6483,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {/* Legal / Administrative */}
                             {(animal.insurance || animal.legalStatus) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">📋 Legal / Administrative</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><ClipboardList size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Legal / Administrative</h3>
                                 <div className="space-y-3 text-sm">
                                     {fieldTemplate?.fields?.insurance?.enabled !== false && animal.insurance && (
                                         <div><span className="text-gray-600">{getLabel('insurance', 'Insurance')}:</span> <strong className="whitespace-pre-wrap">{animal.insurance}</strong></div>
@@ -6498,7 +6498,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {/* Restrictions */}
                             {(animal.breedingRestrictions || animal.exportRestrictions) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🚫 Restrictions</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Ban size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Restrictions</h3>
                                 <div className="space-y-3 text-sm">
                                     {animal.breedingRestrictions && (
                                         <div><span className="text-gray-600">{getLabel('breedingRestrictions', 'Breeding Restrictions')}:</span> <strong className="whitespace-pre-wrap">{animal.breedingRestrictions}</strong></div>
@@ -6524,7 +6524,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h3 className="text-lg font-semibold text-gray-700">🖼️ Photo Gallery</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Images size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Photo Gallery</h3>
                                 <p className="text-xs text-gray-400 mt-0.5">{(animal.extraImages || []).length} / 20 photos — manage in <strong>Edit</strong></p>
                             </div>
                         </div>
@@ -6820,20 +6820,20 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                 <div className="bg-white border-b border-gray-300 px-6 pt-4">
                     <div className="flex flex-wrap gap-1 pb-4">
                         {[
-                            { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
-                            { id: 3, label: 'Physical', icon: '🎨' },
-                            { id: 4, label: 'Identification', icon: '🏷️' },
-                            { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🥚' },
-                            { id: 7, label: 'Health', icon: '🏥' },
-                            { id: 8, label: 'Animal Care', icon: '🏠' },
-                            { id: 9, label: 'Behavior', icon: '🧠' },
-                            { id: 10, label: 'Records', icon: '📝' },
-                            { id: 11, label: 'End of Life', icon: '⚖️' },
-                            { id: 12, label: 'Show', icon: '🏆' },
-                            { id: 13, label: 'Legal', icon: '📄' },
-                            { id: 14, label: 'Logs', icon: '📜' }
+                            { id: 1, label: 'Overview', icon: ClipboardList },
+                            { id: 2, label: 'Status & Privacy', icon: Lock },
+                            { id: 3, label: 'Physical', icon: Palette },
+                            { id: 4, label: 'Identification', icon: Tag },
+                            { id: 5, label: 'Lineage', icon: TreeDeciduous },
+                            { id: 6, label: 'Breeding', icon: Egg },
+                            { id: 7, label: 'Health', icon: Hospital },
+                            { id: 8, label: 'Animal Care', icon: Home },
+                            { id: 9, label: 'Behavior', icon: Brain },
+                            { id: 10, label: 'Records', icon: FileText },
+                            { id: 11, label: 'End of Life', icon: Scale },
+                            { id: 12, label: 'Show', icon: Trophy },
+                            { id: 13, label: 'Legal', icon: FileCheck },
+                            { id: 14, label: 'Logs', icon: ScrollText }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -6846,7 +6846,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 }`}
                                 title={tab.label}
                             >
-                                <span className="mr-1">{tab.icon}</span>
+                                {React.createElement(tab.icon, { size: 14, className: 'inline-block align-middle flex-shrink-0 mr-1' })}
                                 <span className="hidden lg:inline">{tab.label}</span>
                             </button>
                         ))}
@@ -7041,7 +7041,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
 
                             {/* Identification Numbers Section */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">🔢 Identification Numbers</h3>
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
                                 <div className="space-y-2 text-sm">
                                     <p><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></p>
                                     {animal.breederAssignedId && <p><span className="text-gray-600">Identification:</span> <strong>{animal.breederAssignedId}</strong></p>}
@@ -7052,13 +7052,13 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
 
                             {/* Genetic Code Display Section */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">🧬 Genetic Code</h3>
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3"><Dna size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Genetic Code</h3>
                                 <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || ''}</p>
                             </div>
 
                             {/* Parents Section */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">🌳 Parents</h3>
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4"><TreeDeciduous size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Parents</h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <ViewOnlyParentCard 
                                         parentId={animal.fatherId_public || animal.sireId_public} 
@@ -7084,7 +7084,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                         <div className="space-y-6">
                             {/* 1st Section: Ownership */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">👥 Ownership</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Users size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Ownership</h3>
                                 <div className="space-y-3 text-sm">
                                     <div className="flex items-center gap-2">
                                         <span className="text-gray-600">Currently Owned:</span>
@@ -7101,7 +7101,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
 
                             {/* 2nd Section: Current Owner */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🏠 Keeper</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper</h3>
                                 <div className="text-sm space-y-2">
                                     {(animal.keeperName || animal.isOwned) && (
                                     <div className="flex items-center gap-2">
@@ -7120,7 +7120,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
 
                             {/* 3rd Section: Keeper History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🏠 Keeper History</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper History</h3>
                                 {(animal.keeperHistory || []).length === 0 ? (
                                     <p className="text-sm text-gray-400 italic">No entries yet</p>
                                 ) : (
@@ -7145,7 +7145,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
 
                             {/* 4th Section: Availability for Sale or Stud */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🏷️🥚 Availability for Sale or Stud</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Tag size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Availability for Sale or Stud</h3>
                                 <div className="space-y-3 text-sm">
                                     <div className="flex items-center gap-2">
                                         <span className="text-gray-600">For Sale:</span>
@@ -7180,7 +7180,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return fields.length > 0 && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700">✨ Appearance</h3>
+                                        <h3 className="text-lg font-semibold text-gray-700"><Sparkles size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Appearance</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                             {fields.map(f => (
                                                 <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
@@ -7193,7 +7193,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {/* Genetic Code */}
                             {fieldTemplate?.fields?.geneticCode?.enabled !== false && animal.geneticCode && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🧬 {getLabel('geneticCode', 'Genetic Code')}</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Dna size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> {getLabel('geneticCode', 'Genetic Code')}</h3>
                                     <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode}</p>
                                 </div>
                             )}
@@ -7201,7 +7201,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {/* Life Stage */}
                             {fieldTemplate?.fields?.lifeStage?.enabled !== false && animal.lifeStage && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🌱 {getLabel('lifeStage', 'Life Stage')}</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Sprout size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> {getLabel('lifeStage', 'Life Stage')}</h3>
                                     <p className="text-gray-700 text-sm">{animal.lifeStage}</p>
                                 </div>
                             )}
@@ -7219,7 +7219,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return mFields.length > 0 && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700">📏 Measurements</h3>
+                                        <h3 className="text-lg font-semibold text-gray-700"><Ruler size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Measurements</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                             {mFields.map(f => (
                                                 <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
@@ -7250,7 +7250,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700">🔢 Identification Numbers</h3>
+                                        <h3 className="text-lg font-semibold text-gray-700"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                             <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></div>
                                             {idFields.map(f => (
@@ -7263,7 +7263,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
 
                             {/* Classification */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🗂️ Classification</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><FolderOpen size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Classification</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Species:</span> <strong>{animal.species || ''}</strong></div>
                                     {fieldTemplate?.fields?.breed?.enabled !== false && animal.breed && (
@@ -7278,7 +7278,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {/* Tags */}
                             {animal.tags && animal.tags.length > 0 && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🏷️ Tags</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Tag size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Tags</h3>
                                     <div className="flex flex-wrap gap-2">
                                         {animal.tags.map((tag, idx) => (
                                             <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">{tag}</span>
@@ -7312,7 +7312,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
 
                             {/* Origin */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🌍 Origin</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Globe size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Origin</h3>
                                 <p className="text-sm text-gray-700">{animal.origin || ''}</p>
                             </div>
                         </div>
@@ -7324,7 +7324,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {/* 1st Section: Pedigree */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <div className="flex justify-between items-center">
-                                    <h3 className="text-lg font-semibold text-gray-700">🌳 Pedigree: Sire and Dam</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><TreeDeciduous size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Pedigree: Sire and Dam</h3>
                                     <button
                                         onClick={() => setShowPedigree(true)}
                                         data-tutorial-target="pedigree-btn"
@@ -7353,7 +7353,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
 
                             {/* 2nd Section: Keeper History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🏠 Keeper History</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper History</h3>
                                 {(animal.keeperHistory || []).length === 0 ? (
                                     <p className="text-sm text-gray-400 italic">No entries yet</p>
                                 ) : (
@@ -7824,7 +7824,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                         <div className="space-y-6">
                             {/* 1st Section: Reproductive Status */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🌿 Reproductive Status</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Leaf size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Reproductive Status</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animal.isNeutered ? 'Yes' : 'No'}</strong></div>
                                     <div><span className="text-gray-600">Infertile:</span> <strong>{animal.isInfertile ? 'Yes' : 'No'}</strong></div>
@@ -7849,7 +7849,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {/* 2nd Section: Estrus/Cycle (Female/Intersex/Unknown only) */}
                             {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🔄 Estrus/Cycle</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><RefreshCw size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Estrus/Cycle</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">Heat Status:</span> <strong>{animal.heatStatus || ''}</strong></div>
                                         <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animal.lastHeatDate ? formatDate(animal.lastHeatDate) : ''}</strong></div>
@@ -7864,7 +7864,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {/* 4th Section: Stud Information */}
                             {!animal.isNeutered && !animal.isInfertile && (animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">♂️ Sire Information</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Mars size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Sire Information</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">Fertility Status:</span> <strong>{animal.fertilityStatus || ''}</strong></div>
                                     </div>
@@ -7883,7 +7883,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {/* 5th Section: Dam Information */}
                             {!animal.isNeutered && !animal.isInfertile && (animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">♀️ Dam Information</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Venus size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Dam Information</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">{getLabel('damFertilityStatus', 'Dam Fertility Status')}:</span> <strong>{animal.damFertilityStatus || animal.fertilityStatus || ''}</strong></div>
                                         {animal.gestationLength && (
@@ -7939,7 +7939,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {(animal.vaccinations || animal.dewormingRecords || animal.parasiteControl || animal.parasitePreventionSchedule) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, preventiveCare: !p.preventiveCare}))} className="w-full flex items-center justify-between text-left group">
-                                    <h3 className="text-lg font-semibold text-gray-700">🛡️ Preventive Care</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Shield size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Preventive Care</h3>
                                     <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.preventiveCare ? '▶' : '▼'}</span>
                                 </button>
                                 {!collapsedHealthSections.preventiveCare && (<div className="space-y-4 mt-4">
@@ -7978,7 +7978,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {(animal.medicalProcedures || animal.labResults || animal.laboratoryResults) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, proceduresDiagnostics: !p.proceduresDiagnostics}))} className="w-full flex items-center justify-between text-left group">
-                                    <h3 className="text-lg font-semibold text-gray-700">🔬 Procedures & Diagnostics</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Microscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Procedures & Diagnostics</h3>
                                     <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.proceduresDiagnostics ? '▶' : '▼'}</span>
                                 </button>
                                 {!collapsedHealthSections.proceduresDiagnostics && (<div className="space-y-4 mt-4">
@@ -8004,7 +8004,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {(animal.medicalConditions || animal.allergies || animal.medications) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, activeMedical: !p.activeMedical}))} className="w-full flex items-center justify-between text-left group">
-                                    <h3 className="text-lg font-semibold text-gray-700">🩹💊 Active Medical Records</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Pill size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Active Medical Records</h3>
                                     <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? '▶' : '▼'}</span>
                                 </button>
                                 {!collapsedHealthSections.activeMedical && (<div className="space-y-3 mt-4">
@@ -8078,7 +8078,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 return (clearanceFields.length > 0 || spayDate) && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                         <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, healthClearances: !p.healthClearances}))} className="w-full flex items-center justify-between text-left group">
-                                            <h3 className="text-lg font-semibold text-gray-700">🏥 Health Clearances & Screening</h3>
+                                            <h3 className="text-lg font-semibold text-gray-700"><Hospital size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Health Clearances & Screening</h3>
                                             <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? '▶' : '▼'}</span>
                                         </button>
                                         {!collapsedHealthSections.healthClearances && (<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
@@ -8095,7 +8095,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {(animal.primaryVet || animal.vetVisits) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, vetCare: !p.vetCare}))} className="w-full flex items-center justify-between text-left group">
-                                    <h3 className="text-lg font-semibold text-gray-700">🩺 Veterinary Care</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Stethoscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Veterinary Care</h3>
                                     <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.vetCare ? '▶' : '▼'}</span>
                                 </button>
                                 {!collapsedHealthSections.vetCare && (<div className="space-y-4 text-sm mt-4">
@@ -8119,7 +8119,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {/* 1st Section: Nutrition */}
                             {(animal.dietType || animal.feedingSchedule || animal.supplements) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🍽️ Nutrition</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><UtensilsCrossed size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Nutrition</h3>
                                 <div className="space-y-3 text-sm">
                                     {animal.dietType && <div><span className="text-gray-600">Diet Type:</span> <strong>{animal.dietType}</strong></div>}
                                     {animal.feedingSchedule && <div><span className="text-gray-600">Feeding Schedule:</span> <strong>{animal.feedingSchedule}</strong></div>}
@@ -8131,7 +8131,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {/* 2nd Section: Husbandry */}
                             {(animal.enclosureId || animal.housingType || animal.bedding || animal.enrichment) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🧴 Animal Care</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Droplets size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Animal Care</h3>
                                 <div className="space-y-3 text-sm">
                                     {enclosureInfo && (<div><span className="text-gray-600">Enclosure:</span> <strong>{enclosureInfo.name}</strong></div>)}
                                     {fieldTemplate?.fields?.housingType?.enabled !== false && animal.housingType && <div><span className="text-gray-600">{getLabel('housingType', 'Housing Type')}:</span> <strong>{animal.housingType}</strong></div>}
@@ -8144,7 +8144,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {/* 3rd Section: Environment */}
                             {(animal.temperatureRange || animal.humidity || animal.lighting || animal.noise) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🌡️ Environment</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Thermometer size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Environment</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     {animal.temperatureRange && <div><span className="text-gray-600">Temperature Range:</span> <strong>{animal.temperatureRange}</strong></div>}
                                     {fieldTemplate?.fields?.humidity?.enabled !== false && animal.humidity && <div><span className="text-gray-600">{getLabel('humidity', 'Humidity')}:</span> <strong>{animal.humidity}</strong></div>}
@@ -8170,7 +8170,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return (egFields.length > 0 || trainFlags.length > 0) && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700">✂️ Grooming</h3>
+                                        <h3 className="text-lg font-semibold text-gray-700"><Scissors size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Grooming</h3>
                                         {egFields.length > 0 && (
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                                 {egFields.map(f => (
@@ -8197,7 +8197,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {/* 1st Section: Behavior */}
                             {(animal.temperament || animal.handlingTolerance || animal.socialStructure) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">💭 Behavior</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><MessageSquare size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Behavior</h3>
                                 <div className="space-y-3 text-sm">
                                     {animal.temperament && <div><span className="text-gray-600">Temperament:</span> <strong>{animal.temperament}</strong></div>}
                                     {fieldTemplate?.fields?.handlingTolerance?.enabled !== false && animal.handlingTolerance && <div><span className="text-gray-600">{getLabel('handlingTolerance', 'Handling Tolerance')}:</span> <strong>{animal.handlingTolerance}</strong></div>}
@@ -8209,7 +8209,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {/* 2nd Section: Activity */}
                             {animal.activityCycle && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🌓🏃 Activity</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Activity size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Activity</h3>
                                 <div className="space-y-3 text-sm">
                                     <div><span className="text-gray-600">Activity Cycle:</span> <strong>{animal.activityCycle}</strong></div>
                                 </div>
@@ -8229,7 +8229,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return trainFields.length > 0 && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700">🌓🏃 Training & Working</h3>
+                                        <h3 className="text-lg font-semibold text-gray-700"><Dumbbell size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Training & Working</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                             {trainFields.map(f => (
                                                 <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
@@ -8246,7 +8246,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                         <div className="space-y-6">
                             {/* 1st Section: Remarks & Notes */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">📝 Remarks & Notes</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><FileText size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Remarks & Notes</h3>
                                 <strong className="block text-sm text-gray-700 whitespace-pre-wrap">{animal.remarks || ''}</strong>
                             </div>
                         </div>
@@ -8255,7 +8255,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                         <div className="space-y-6">
                             {/* End of Life */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🕊️ Information</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Feather size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Information</h3>
                                 <div className="space-y-3 text-sm">
                                     <div><span className="text-gray-600">Deceased Date:</span> <strong>{animal.deceasedDate ? formatDate(animal.deceasedDate) : ''}</strong></div>
                                     <div><span className="text-gray-600">Cause of Death:</span> <strong>{animal.causeOfDeath || ''}</strong></div>
@@ -8273,7 +8273,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                         <div className="space-y-6">
                             {/* Show Titles & Ratings */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🥇 Show Titles & Ratings</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Medal size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Show Titles & Ratings</h3>
                                 <div className="space-y-3 text-sm">
                                     <div><span className="text-gray-600">Titles:</span> <strong>{animal.showTitles || ''}</strong></div>
                                     <div><span className="text-gray-600">Ratings:</span> <strong>{animal.showRatings || ''}</strong></div>
@@ -8284,7 +8284,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {/* Working Titles & Performance */}
                             {(animal.workingTitles || animal.performanceScores) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🎯 Working & Performance</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Target size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Working & Performance</h3>
                                     <div className="space-y-3 text-sm">
                                         <div><span className="text-gray-600">Working Titles:</span> <strong>{animal.workingTitles || ''}</strong></div>
                                         <div><span className="text-gray-600">Performance Scores:</span> <strong>{animal.performanceScores || ''}</strong></div>
@@ -8300,7 +8300,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {/* Licensing & Permits */}
                             {(animal.licenseNumber || animal.licenseJurisdiction) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🔑 Licensing & Permits</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Key size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Licensing & Permits</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     {fieldTemplate?.fields?.licenseNumber?.enabled !== false && animal.licenseNumber && (
                                         <div><span className="text-gray-600">{getLabel('licenseNumber', 'License Number')}:</span> <strong>{animal.licenseNumber}</strong></div>
@@ -8315,7 +8315,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {/* Legal / Administrative */}
                             {(animal.insurance || animal.legalStatus) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">📋 Legal / Administrative</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><ClipboardList size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Legal / Administrative</h3>
                                 <div className="space-y-3 text-sm">
                                     {fieldTemplate?.fields?.insurance?.enabled !== false && animal.insurance && (
                                         <div><span className="text-gray-600">{getLabel('insurance', 'Insurance')}:</span> <strong className="whitespace-pre-wrap">{animal.insurance}</strong></div>
@@ -8330,7 +8330,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {/* Restrictions */}
                             {(animal.breedingRestrictions || animal.exportRestrictions) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🚫 Restrictions</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Ban size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Restrictions</h3>
                                 <div className="space-y-3 text-sm">
                                     {animal.breedingRestrictions && (
                                         <div><span className="text-gray-600">{getLabel('breedingRestrictions', 'Breeding Restrictions')}:</span> <strong className="whitespace-pre-wrap">{animal.breedingRestrictions}</strong></div>
@@ -8642,19 +8642,19 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                 <div className="bg-white border-b border-gray-300">
                     <div className="flex flex-wrap">
                         {[
-                            { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 2, label: 'Status', icon: '🔒' },
-                            { id: 3, label: 'Physical', icon: '🎨' },
-                            { id: 4, label: 'Identification', icon: '🏷️' },
-                            { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🥚' },
-                            { id: 7, label: 'Health', icon: '🏥' },
-                            { id: 8, label: 'Animal Care', icon: '🏠' },
-                            { id: 9, label: 'Behavior', icon: '🧠' },
-                            { id: 10, label: 'Records', icon: '📝' },
-                            { id: 11, label: 'End of Life', icon: '⚖️' },
-                            { id: 12, label: 'Show', icon: '🏆' },
-                            { id: 13, label: 'Legal', icon: '📄' }
+                            { id: 1, label: 'Overview', icon: ClipboardList },
+                            { id: 2, label: 'Status', icon: Lock },
+                            { id: 3, label: 'Physical', icon: Palette },
+                            { id: 4, label: 'Identification', icon: Tag },
+                            { id: 5, label: 'Lineage', icon: TreeDeciduous },
+                            { id: 6, label: 'Breeding', icon: Egg },
+                            { id: 7, label: 'Health', icon: Hospital },
+                            { id: 8, label: 'Animal Care', icon: Home },
+                            { id: 9, label: 'Behavior', icon: Brain },
+                            { id: 10, label: 'Records', icon: FileText },
+                            { id: 11, label: 'End of Life', icon: Scale },
+                            { id: 12, label: 'Show', icon: Trophy },
+                            { id: 13, label: 'Legal', icon: FileCheck }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -8665,7 +8665,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                         : 'text-gray-600 hover:text-gray-800'
                                 }`}
                             >
-                                <span className="mr-1">{tab.icon}</span>{tab.label}
+                                {React.createElement(tab.icon, { size: 14, className: 'inline-block align-middle flex-shrink-0 mr-1' })}{tab.label}
                             </button>
                         ))}
                     </div>
@@ -8863,7 +8863,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
 
                             {/* Identification Numbers Section */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">🔢 Identification Numbers</h3>
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
                                 <div className="space-y-2 text-sm">
                                     <p><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></p>
                                     {animal.breederAssignedId && <p><span className="text-gray-600">Identification:</span> <strong>{animal.breederAssignedId}</strong></p>}
@@ -8873,7 +8873,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             </div>
                             {/* Genetic Code Display Section */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">🧬 Genetic Code</h3>
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3"><Dna size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Genetic Code</h3>
                                 <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || ''}</p>
                             </div>
 
@@ -8881,7 +8881,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {(animal.fatherId_public || animal.sireId_public || animal.motherId_public || animal.damId_public) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <div className="flex items-center justify-between border-b pb-2 mb-4">
-                                        <h3 className="text-lg font-semibold text-gray-700">🌳 Parents</h3>
+                                        <h3 className="text-lg font-semibold text-gray-700"><TreeDeciduous size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Parents</h3>
                                         <div className="flex items-center gap-3">
                                             {animalCOI != null && (
                                                 <div className="text-sm text-gray-800">
@@ -8919,7 +8919,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                         <div className="space-y-6">
                             {/* 1st Section: Ownership */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">👥 Ownership</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Users size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Ownership</h3>
                                 <div className="space-y-3 text-sm">
                                     <div className="flex items-center gap-2">
                                         <span className="text-gray-600">Currently Owned:</span>
@@ -8955,7 +8955,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
 
                             {/* 2nd Section: Current Owner */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🏠 Keeper</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper</h3>
                                 <div className="text-sm space-y-2">
                                     {(animal.keeperName || animal.isOwned) && (
                                     <div className="flex items-center gap-2">
@@ -8974,7 +8974,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
 
                             {/* 3rd Section: Keeper History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🏠 Keeper History</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper History</h3>
                                 {(animal.keeperHistory || []).length === 0 ? (
                                     <p className="text-sm text-gray-400 italic">No entries yet</p>
                                 ) : (
@@ -8999,7 +8999,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
 
                             {/* 4th Section: Availability for Sale or Stud */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🏷️🥚 Availability for Sale or Stud</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Tag size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Availability for Sale or Stud</h3>
                                 <div className="space-y-3 text-sm">
                                     <div className="flex items-center gap-2">
                                         <span className="text-gray-600">For Sale:</span>
@@ -9034,7 +9034,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return fields.length > 0 && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700">✨ Appearance</h3>
+                                        <h3 className="text-lg font-semibold text-gray-700"><Sparkles size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Appearance</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                             {fields.map(f => (
                                                 <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
@@ -9047,7 +9047,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* Genetic Code */}
                             {fieldTemplate?.fields?.geneticCode?.enabled !== false && animal.geneticCode && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🧬 {getLabel('geneticCode', 'Genetic Code')}</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Dna size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> {getLabel('geneticCode', 'Genetic Code')}</h3>
                                     <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode}</p>
                                 </div>
                             )}
@@ -9055,7 +9055,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* Life Stage */}
                             {fieldTemplate?.fields?.lifeStage?.enabled !== false && animal.lifeStage && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🌱 {getLabel('lifeStage', 'Life Stage')}</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Sprout size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> {getLabel('lifeStage', 'Life Stage')}</h3>
                                     <p className="text-gray-700 text-sm">{animal.lifeStage}</p>
                                 </div>
                             )}
@@ -9073,7 +9073,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return mFields.length > 0 && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700">📏 Measurements</h3>
+                                        <h3 className="text-lg font-semibold text-gray-700"><Ruler size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Measurements</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                             {mFields.map(f => (
                                                 <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
@@ -9104,7 +9104,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700">🔢 Identification Numbers</h3>
+                                        <h3 className="text-lg font-semibold text-gray-700"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                             <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></div>
                                             {idFields.map(f => (
@@ -9117,7 +9117,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
 
                             {/* Classification */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🗂️ Classification</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><FolderOpen size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Classification</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Species:</span> <strong>{animal.species || ''}</strong></div>
                                     {fieldTemplate?.fields?.breed?.enabled !== false && animal.breed && (
@@ -9132,7 +9132,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* Tags */}
                             {animal.tags && animal.tags.length > 0 && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🏷️ Tags</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Tag size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Tags</h3>
                                     <div className="flex flex-wrap gap-2">
                                         {animal.tags.map((tag, idx) => (
                                             <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">{tag}</span>
@@ -9143,7 +9143,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
 
                             {/* Origin */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🌍 Origin</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Globe size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Origin</h3>
                                 <p className="text-sm text-gray-700">{animal.origin || ''}</p>
                             </div>
                         </div>
@@ -9155,7 +9155,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* 1st Section: Pedigree */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <div className="flex justify-between items-center">
-                                    <h3 className="text-lg font-semibold text-gray-700">🌳 Pedigree: Sire and Dam</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><TreeDeciduous size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Pedigree: Sire and Dam</h3>
                                     <button
                                         onClick={() => setShowPedigree(true)}
                                         data-tutorial-target="pedigree-btn"
@@ -9511,7 +9511,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                         <div className="space-y-6">
                             {/* 1st Section: Reproductive Status */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🌿 Reproductive Status</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Leaf size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Reproductive Status</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animal.isNeutered ? 'Yes' : 'No'}</strong></div>
                                     <div><span className="text-gray-600">Infertile:</span> <strong>{animal.isInfertile ? 'Yes' : 'No'}</strong></div>
@@ -9536,7 +9536,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* 2nd Section: Estrus/Cycle (Female/Intersex/Unknown only) */}
                             {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🔄 Estrus/Cycle</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><RefreshCw size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Estrus/Cycle</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">Heat Status:</span> <strong>{animal.heatStatus || ''}</strong></div>
                                         <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animal.lastHeatDate ? formatDate(animal.lastHeatDate) : ''}</strong></div>
@@ -9551,7 +9551,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* 4th Section: Stud Information */}
                             {!animal.isNeutered && !animal.isInfertile && (animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">♂️ Sire Information</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Mars size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Sire Information</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">Fertility Status:</span> <strong>{animal.fertilityStatus || ''}</strong></div>
                                     </div>
@@ -9570,7 +9570,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* 5th Section: Dam Information */}
                             {!animal.isNeutered && !animal.isInfertile && (animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">♀️ Dam Information</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Venus size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Dam Information</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">{getLabel('damFertilityStatus', 'Dam Fertility Status')}:</span> <strong>{animal.damFertilityStatus || animal.fertilityStatus || ''}</strong></div>
                                         {animal.gestationLength && (
@@ -9608,7 +9608,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {(animal.vaccinations || animal.dewormingRecords || animal.parasiteControl || animal.parasitePreventionSchedule) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, preventiveCare: !p.preventiveCare}))} className="w-full flex items-center justify-between text-left group">
-                                    <h3 className="text-lg font-semibold text-gray-700">🛡️ Preventive Care</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Shield size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Preventive Care</h3>
                                     <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.preventiveCare ? '▶' : '▼'}</span>
                                 </button>
                                 {!collapsedHealthSections.preventiveCare && (<div className="space-y-4 mt-4">
@@ -9647,7 +9647,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {(animal.medicalProcedures || animal.labResults || animal.laboratoryResults) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, proceduresDiagnostics: !p.proceduresDiagnostics}))} className="w-full flex items-center justify-between text-left group">
-                                    <h3 className="text-lg font-semibold text-gray-700">🔬 Procedures & Diagnostics</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Microscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Procedures & Diagnostics</h3>
                                     <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.proceduresDiagnostics ? '▶' : '▼'}</span>
                                 </button>
                                 {!collapsedHealthSections.proceduresDiagnostics && (<div className="space-y-4 mt-4">
@@ -9673,7 +9673,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {(animal.medicalConditions || animal.allergies || animal.medications) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, activeMedical: !p.activeMedical}))} className="w-full flex items-center justify-between text-left group">
-                                    <h3 className="text-lg font-semibold text-gray-700">🩹💊 Active Medical Records</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Pill size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Active Medical Records</h3>
                                     <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? '▶' : '▼'}</span>
                                 </button>
                                 {!collapsedHealthSections.activeMedical && (<div className="space-y-3 mt-4">
@@ -9747,7 +9747,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                 return (clearanceFields.length > 0 || spayDate) && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                         <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, healthClearances: !p.healthClearances}))} className="w-full flex items-center justify-between text-left group">
-                                            <h3 className="text-lg font-semibold text-gray-700">🏥 Health Clearances & Screening</h3>
+                                            <h3 className="text-lg font-semibold text-gray-700"><Hospital size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Health Clearances & Screening</h3>
                                             <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? '▶' : '▼'}</span>
                                         </button>
                                         {!collapsedHealthSections.healthClearances && (<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
@@ -9764,7 +9764,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {(animal.primaryVet || animal.vetVisits) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, vetCare: !p.vetCare}))} className="w-full flex items-center justify-between text-left group">
-                                    <h3 className="text-lg font-semibold text-gray-700">🩺 Veterinary Care</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Stethoscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Veterinary Care</h3>
                                     <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.vetCare ? '▶' : '▼'}</span>
                                 </button>
                                 {!collapsedHealthSections.vetCare && (<div className="space-y-4 text-sm mt-4">
@@ -9788,7 +9788,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* 1st Section: Nutrition */}
                             {(animal.dietType || animal.feedingSchedule || animal.supplements) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🍽️ Nutrition</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><UtensilsCrossed size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Nutrition</h3>
                                 {animal.dietType && <div><strong className="text-sm">Diet Type:</strong> <p className="text-sm mt-1">{animal.dietType}</p></div>}
                                 {animal.feedingSchedule && <div><strong className="text-sm">Feeding Schedule:</strong> <p className="text-sm mt-1">{animal.feedingSchedule}</p></div>}
                                 {animal.supplements && <div><strong className="text-sm">Supplements:</strong> <p className="text-sm mt-1">{animal.supplements}</p></div>}
@@ -9799,7 +9799,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* 2nd Section: Housing & Enclosure */}
                             {(animal.housingType || animal.bedding || animal.enrichment || (animal.careTasks && animal.careTasks.length > 0)) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🏡 Housing & Enclosure</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Housing & Enclosure</h3>
                                 {animal.housingType && <div><strong className="text-sm">{getLabel('housingType', 'Housing Type')}:</strong> <p className="text-sm mt-1">{animal.housingType}</p></div>}
                                 {animal.bedding && <div><strong className="text-sm">{getLabel('bedding', 'Bedding')}:</strong> <p className="text-sm mt-1">{animal.bedding}</p></div>}
                                 {animal.enrichment && <div><strong className="text-sm">Enrichment:</strong> <p className="text-sm mt-1">{animal.enrichment}</p></div>}
@@ -9826,7 +9826,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* 3rd Section: Animal Care */}
                             {(animal.animalCareTasks && animal.animalCareTasks.length > 0) || animal.handlingNotes || animal.socializationNotes || animal.specialCareRequirements ? (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🧴 Animal Care</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Droplets size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Animal Care</h3>
                                 {animal.animalCareTasks && animal.animalCareTasks.length > 0 && (
                                     <div>
                                         <h4 className="text-sm font-semibold text-gray-700 mb-2">Animal Care Tasks</h4>
@@ -9854,7 +9854,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* 4th Section: Environment */}
                             {(animal.temperatureRange || animal.humidity || animal.lighting || animal.noise) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🌡️ Environment</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Thermometer size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Environment</h3>
                                 {animal.temperatureRange && <div><strong className="text-sm">Temperature Range:</strong> <p className="text-sm mt-1">{animal.temperatureRange}</p></div>}
                                 {animal.humidity && <div><strong className="text-sm">{getLabel('humidity', 'Humidity')}:</strong> <p className="text-sm mt-1">{animal.humidity}</p></div>}
                                 {animal.lighting && <div><strong className="text-sm">Lighting:</strong> <p className="text-sm mt-1">{animal.lighting}</p></div>}
@@ -9879,7 +9879,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return (egFields.length > 0 || trainFlags.length > 0) && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700">✂️ Grooming</h3>
+                                        <h3 className="text-lg font-semibold text-gray-700"><Scissors size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Grooming</h3>
                                         {egFields.length > 0 && (
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                                 {egFields.map(f => (
@@ -9906,7 +9906,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* 1st Section: Behavior */}
                             {(animal.temperament || animal.handlingTolerance || animal.socialStructure) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">💭 Behavior</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><MessageSquare size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Behavior</h3>
                                 {animal.temperament && <div><strong className="text-sm">Temperament:</strong> <p className="text-sm mt-1">{animal.temperament}</p></div>}
                                 {animal.handlingTolerance && <div><strong className="text-sm">{getLabel('handlingTolerance', 'Handling Tolerance')}:</strong> <p className="text-sm mt-1">{animal.handlingTolerance}</p></div>}
                                 {animal.socialStructure && <div><strong className="text-sm">Social Structure:</strong> <p className="text-sm mt-1">{animal.socialStructure}</p></div>}
@@ -9917,7 +9917,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* 2nd Section: Activity */}
                             {animal.activityCycle && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🌓🏃 Activity</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Activity size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Activity</h3>
                                 {animal.activityCycle && <div><strong className="text-sm">Activity Cycle:</strong> <p className="text-sm mt-1">{animal.activityCycle}</p></div>}
                                 {!animal.activityCycle && <p className="text-sm text-gray-600"></p>}
                             </div>
@@ -9936,7 +9936,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return trainFields.length > 0 && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700">🌓🏃 Training & Working</h3>
+                                        <h3 className="text-lg font-semibold text-gray-700"><Dumbbell size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Training & Working</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                             {trainFields.map(f => (
                                                 <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
@@ -9953,7 +9953,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                         <div className="space-y-6">
                             {/* Remarks & Notes */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">📝 Remarks & Notes</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><FileText size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Remarks & Notes</h3>
                                 <strong className="block text-sm text-gray-700 whitespace-pre-wrap">{animal.remarks || ''}</strong>
                             </div>
                         </div>
@@ -9964,7 +9964,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                         <div className="space-y-6">
                             {/* End of Life */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🕊️ Information</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Feather size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Information</h3>
                                 <div className="space-y-3 text-sm">
                                     <div><span className="text-gray-600">Deceased Date:</span> <strong>{animal.deceasedDate ? formatDate(animal.deceasedDate) : ''}</strong></div>
                                     <div><span className="text-gray-600">Cause of Death:</span> <strong>{animal.causeOfDeath || ''}</strong></div>
@@ -9982,7 +9982,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                         <div className="space-y-6">
                             {/* Show Titles & Ratings */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🥇 Show Titles & Ratings</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Medal size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Show Titles & Ratings</h3>
                                 <div className="space-y-3 text-sm">
                                     {animal.showTitles && <div><span className="text-gray-600">Titles:</span> <strong>{animal.showTitles}</strong></div>}
                                     {animal.showRatings && <div><span className="text-gray-600">Ratings:</span> <strong>{animal.showRatings}</strong></div>}
@@ -9993,7 +9993,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* Working Titles & Performance */}
                             {(animal.workingTitles || animal.performanceScores) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🎯 Working & Performance</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Target size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Working & Performance</h3>
                                     <div className="space-y-3 text-sm">
                                         {animal.workingTitles && <div><span className="text-gray-600">Working Titles:</span> <strong>{animal.workingTitles}</strong></div>}
                                         {animal.performanceScores && <div><span className="text-gray-600">Performance Scores:</span> <strong>{animal.performanceScores}</strong></div>}
@@ -10016,7 +10016,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* Licensing & Permits */}
                             {(animal.licenseNumber || animal.licenseJurisdiction) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🔑 Licensing & Permits</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Key size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Licensing & Permits</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     {fieldTemplate?.fields?.licenseNumber?.enabled !== false && animal.licenseNumber && (
                                         <div><span className="text-gray-600">{getLabel('licenseNumber', 'License Number')}:</span> <strong>{animal.licenseNumber}</strong></div>
@@ -10031,7 +10031,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* Legal / Administrative */}
                             {(animal.insurance || animal.legalStatus) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">📋 Legal / Administrative</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><ClipboardList size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Legal / Administrative</h3>
                                 <div className="space-y-3 text-sm">
                                     {fieldTemplate?.fields?.insurance?.enabled !== false && animal.insurance && (
                                         <div><span className="text-gray-600">{getLabel('insurance', 'Insurance')}:</span> <strong className="whitespace-pre-wrap">{animal.insurance}</strong></div>
@@ -10046,7 +10046,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* Restrictions */}
                             {(animal.breedingRestrictions || animal.exportRestrictions) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🚫 Restrictions</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Ban size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Restrictions</h3>
                                 <div className="space-y-3 text-sm">
                                     {animal.breedingRestrictions && (
                                         <div><span className="text-gray-600">{getLabel('breedingRestrictions', 'Breeding Restrictions')}:</span> <strong className="whitespace-pre-wrap">{animal.breedingRestrictions}</strong></div>
@@ -17758,20 +17758,20 @@ const AnimalForm = ({
                 <div className="border border-gray-300 -mx-6 px-6 pt-4">
                     <div className="flex flex-wrap gap-1 pb-px">
                         {[
-                            { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
-                            { id: 3, label: 'Physical', icon: '🎨' },
-                            { id: 4, label: 'Identification', icon: '🏷️' },
-                            { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🥚' },
-                            { id: 7, label: 'Health', icon: '🏥' },
-                            { id: 8, label: 'Animal Care', icon: '🏠' },
-                            { id: 9, label: 'Behavior', icon: '🧠' },
-                            { id: 10, label: 'Records', icon: '📝' },
-                            { id: 11, label: 'End of Life', icon: '⚖️' },
-                            { id: 12, label: 'Show', icon: '🏆' },
-                            { id: 13, label: 'Legal', icon: '📄' },
-                            { id: 14, label: 'Gallery', icon: '🖼️' }
+                            { id: 1, label: 'Overview', icon: ClipboardList },
+                            { id: 2, label: 'Status & Privacy', icon: Lock },
+                            { id: 3, label: 'Physical', icon: Palette },
+                            { id: 4, label: 'Identification', icon: Tag },
+                            { id: 5, label: 'Lineage', icon: TreeDeciduous },
+                            { id: 6, label: 'Breeding', icon: Egg },
+                            { id: 7, label: 'Health', icon: Hospital },
+                            { id: 8, label: 'Animal Care', icon: Home },
+                            { id: 9, label: 'Behavior', icon: Brain },
+                            { id: 10, label: 'Records', icon: FileText },
+                            { id: 11, label: 'End of Life', icon: Scale },
+                            { id: 12, label: 'Show', icon: Trophy },
+                            { id: 13, label: 'Legal', icon: FileCheck },
+                            { id: 14, label: 'Gallery', icon: Images }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -17785,7 +17785,7 @@ const AnimalForm = ({
                                 }`}
                                 title={tab.label}
                             >
-                                <span className="mr-1">{tab.icon}</span>
+                                {React.createElement(tab.icon, { size: 14, className: 'inline-block align-middle flex-shrink-0 mr-1' })}
                                 <span className="hidden lg:inline">{tab.label}</span>
                             </button>
                         ))}
@@ -18022,7 +18022,7 @@ const AnimalForm = ({
                         
                         {/* Current Owner */}
                         <div data-tutorial-target="current-owner-field" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">🏠 Keeper</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper</h3>
                             {!isFieldHidden('isOwned') && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
@@ -18062,7 +18062,7 @@ const AnimalForm = ({
 
                         {/* Keeper History */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">🏠 Keeper History</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper History</h3>
 
                             {/* Existing entries */}
                             {(formData.keeperHistory || []).length > 0 && (
@@ -18166,7 +18166,7 @@ const AnimalForm = ({
                         
                         {/* Availability for Sale/Stud */}
                         <div data-tutorial-target="availability-for-sale-stud" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">🏷️🥚 Availability for Sale or Stud</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2"><Tag size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Availability for Sale or Stud</h3>
                             <p className="text-xs text-gray-500">Enable "For Sale" or "For Stud" to make this animal visible in the public showcase (requires Public Profile enabled)</p>
                             
                             {/* For Sale Section */}
@@ -18233,7 +18233,7 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Appearance */}
                         <div data-tutorial-target="appearance-section" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">✨ Appearance</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2"><Sparkles size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Appearance</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {!isFieldHidden('color') && (
                                 <div>
@@ -18340,7 +18340,7 @@ const AnimalForm = ({
                         {/* Genetic Code */}
                         {!isFieldHidden('geneticCode') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 mb-4">🧬 {getFieldLabel('geneticCode', 'Genetic Code')}</h3>
+                                <h3 className="text-lg font-semibold text-gray-700 mb-4"><Dna size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> {getFieldLabel('geneticCode', 'Genetic Code')}</h3>
                                 <GeneticCodeBuilder
                                     species={formData.species}
                                     gender={formData.gender}
@@ -18375,7 +18375,7 @@ const AnimalForm = ({
                         {/* Measurements & Growth Tracking */}
                         <div data-tutorial-target="measurements-growth-section" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <div className="mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700">📏 Measurements & Growth Tracking</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Ruler size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Measurements & Growth Tracking</h3>
                                 <p className="text-xs text-gray-600 mt-1">Current measurements & growth history</p>
                             </div>
                             
@@ -18859,7 +18859,7 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Identification Numbers */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">🔢 Identification Numbers</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {!isFieldHidden('breederAssignedId') && (
                                 <div data-tutorial-target="identification-breeder-id">
@@ -18956,7 +18956,7 @@ const AnimalForm = ({
                         
                         {/* Classification */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="classification-section">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">🗂️ Classification</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2"><FolderOpen size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Classification</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Species</label>
@@ -18989,7 +18989,7 @@ const AnimalForm = ({
                         {/* Origin */}
                         {!isFieldHidden('origin') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">🌍 Origin</h3>
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3"><Globe size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Origin</h3>
                                 <label className="block text-sm font-medium text-gray-700">{getFieldLabel('origin', 'Origin')}</label>
                                 <select name="origin" value={formData.origin || ''} onChange={handleChange}
                                     className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
@@ -19003,7 +19003,7 @@ const AnimalForm = ({
 
                         {/* Tags */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="tags-section">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">🏷️ Tags</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3"><Tag size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Tags</h3>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Tags (Lines, Enclosures, etc)</label>
                             <input 
                                 type="text" 
@@ -19064,7 +19064,7 @@ const AnimalForm = ({
                             data-tutorial-target="pedigree-section"
                             className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4"
                         >
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">🌳 Pedigree: Sire and Dam</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2"><TreeDeciduous size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Pedigree: Sire and Dam</h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                 <div className='flex flex-col'>
                                     <label className='text-sm font-medium text-gray-600 mb-1'>Sire (Father)</label>
@@ -19152,7 +19152,7 @@ const AnimalForm = ({
                         {/* Reproductive Status - Key Status Indicators */}
                         {(!isFieldHidden('isNeutered') || !isFieldHidden('isInfertile') || !isFieldHidden('isPregnant') || !isFieldHidden('isNursing') || !isFieldHidden('isInMating')) && (
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="reproductive-status-section">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">🌿 Reproductive Status</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2"><Leaf size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Reproductive Status</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {!isFieldHidden('isNeutered') && (
                                 <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
@@ -19228,7 +19228,7 @@ const AnimalForm = ({
                         {/* Estrus/Cycle - Only for females when not neutered */}
                         {!isFieldHidden('heatStatus') && (formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="estrus-cycle-section">
-                                <h3 className="text-lg font-semibold text-gray-700 mb-4">🔄 Estrus/Cycle</h3>
+                                <h3 className="text-lg font-semibold text-gray-700 mb-4"><RefreshCw size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Estrus/Cycle</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('heatStatus', 'Heat Status')}</label>
@@ -19273,7 +19273,7 @@ const AnimalForm = ({
                         {!formData.isNeutered && !formData.isInfertile && (formData.gender === 'Male' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="stud-info-section">
                                 <div className="mb-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">♂️ Sire Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Mars size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Sire Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
                                     {formData.gender === 'Unknown' && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded mt-1 inline-block">Fertility</span>}
                                     {formData.gender === 'Intersex' && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded mt-1 inline-block">Sire Role</span>}
                                 </div>
@@ -19330,7 +19330,7 @@ const AnimalForm = ({
                         {!formData.isNeutered && !formData.isInfertile && (formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="dam-info-section">
                                 <div className="mb-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">♀️ Dam Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Venus size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Dam Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
                                     {formData.gender === 'Unknown' && <span className="text-xs bg-pink-100 text-pink-700 px-2 py-1 rounded mt-1 inline-block">Egg Fertility</span>}
                                     {formData.gender === 'Intersex' && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded mt-1 inline-block">Dam Role</span>}
                                 </div>
@@ -19426,7 +19426,7 @@ const AnimalForm = ({
                         {/* Preventive Care */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="preventive-care-section">
                             <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, preventiveCare: !p.preventiveCare}))} className="w-full flex items-center justify-between text-left group">
-                                <h3 className="text-lg font-semibold text-gray-700">🛡️ Preventive Care</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Shield size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Preventive Care</h3>
                                 <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.preventiveCare ? '▶' : '▼'}</span>
                             </button>
                             {!collapsedHealthSections.preventiveCare && (<div className="space-y-6 mt-4">
@@ -19558,7 +19558,7 @@ const AnimalForm = ({
                         {/* Procedures & Diagnostics */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="procedures-section">
                             <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, proceduresDiagnostics: !p.proceduresDiagnostics}))} className="w-full flex items-center justify-between text-left group">
-                                <h3 className="text-lg font-semibold text-gray-700">🔬 Procedures & Diagnostics</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Microscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Procedures & Diagnostics</h3>
                                 <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.proceduresDiagnostics ? '▶' : '▼'}</span>
                             </button>
                             {!collapsedHealthSections.proceduresDiagnostics && (<div className="space-y-6 mt-4">
@@ -19654,7 +19654,7 @@ const AnimalForm = ({
                         {/* Active Medical Records */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="medical-history-section">
                             <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, activeMedical: !p.activeMedical}))} className="w-full flex items-center justify-between text-left group">
-                                <h3 className="text-lg font-semibold text-gray-700">🩹💊 Active Medical Records</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Pill size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Active Medical Records</h3>
                                 <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? '▶' : '▼'}</span>
                             </button>
                             {!collapsedHealthSections.activeMedical && (<div className="space-y-4 mt-4">
@@ -19786,7 +19786,7 @@ const AnimalForm = ({
                         {(!isFieldHidden('spayNeuterDate') || !isFieldHidden('heartwormStatus') || !isFieldHidden('hipElbowScores') || !isFieldHidden('eyeClearance') || !isFieldHidden('cardiacClearance') || !isFieldHidden('dentalRecords') || !isFieldHidden('geneticTestResults') || !isFieldHidden('chronicConditions')) && (
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, healthClearances: !p.healthClearances}))} className="w-full flex items-center justify-between text-left group">
-                                <h3 className="text-lg font-semibold text-gray-700">🏥 Health Clearances & Screening</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Hospital size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Health Clearances & Screening</h3>
                                 <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? '▶' : '▼'}</span>
                             </button>
                             {!collapsedHealthSections.healthClearances && (<div className="space-y-4 mt-4">
@@ -19871,7 +19871,7 @@ const AnimalForm = ({
                         {/* Veterinary Care */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="vet-care-section">
                             <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, vetCare: !p.vetCare}))} className="w-full flex items-center justify-between text-left group">
-                                <h3 className="text-lg font-semibold text-gray-700">🩺 Veterinary Care</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Stethoscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Veterinary Care</h3>
                                 <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.vetCare ? '▶' : '▼'}</span>
                             </button>
                             {!collapsedHealthSections.vetCare && (<div className="space-y-4 mt-4">
@@ -19947,7 +19947,7 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* 1st Section: Nutrition */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="nutrition-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">🍽️ Nutrition</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><UtensilsCrossed size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Nutrition</h3>
                             <div className="space-y-4">
                                 {!isFieldHidden('dietType') && (
                                 <div>
@@ -19995,7 +19995,7 @@ const AnimalForm = ({
 
                         {/* 2nd Section: Housing & Enclosure */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="housing-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">🏡 Housing & Enclosure</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Housing & Enclosure</h3>
                             <div className="space-y-4">
                                 {/* Enclosure assignment */}
                                 <div>
@@ -20097,7 +20097,7 @@ const AnimalForm = ({
 
                         {/* 3rd Section: Animal Care */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="animal-care-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">🧴 Animal Care</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><Droplets size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Animal Care</h3>
                             <div className="space-y-4">
                                 <p className="text-sm text-gray-600">Track recurring care tasks specific to this animal, such as health checks, grooming, weighing, and handling routines.</p>
 
@@ -20164,7 +20164,7 @@ const AnimalForm = ({
 
                         {/* 4th Section: Environment */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="environment-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">🌡️ Environment</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><Thermometer size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Environment</h3>
                             <div className="space-y-4">
                                 {!isFieldHidden('temperatureRange') && (
                                 <div>
@@ -20207,7 +20207,7 @@ const AnimalForm = ({
                         {/* 5th Section: Exercise & Grooming */}
                         {(!isFieldHidden('groomingNeeds') || !isFieldHidden('sheddingLevel')) && (
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="exercise-grooming-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">✂️ Grooming</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><Scissors size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Grooming</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {!isFieldHidden('groomingNeeds') && (
                                 <div>
@@ -20254,7 +20254,7 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Behavior */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">💭 Behavior</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><MessageSquare size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Behavior</h3>
                             <div className="space-y-4" data-tutorial-target="behavior-items-section">
                                 {!isFieldHidden('temperament') && (
                                 <div>
@@ -20287,7 +20287,7 @@ const AnimalForm = ({
 
                         {/* Activity */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">🌓🏃 Activity</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><Activity size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Activity</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {!isFieldHidden('activityCycle') && (
                             <div>
@@ -20406,7 +20406,7 @@ const AnimalForm = ({
                         {/* Known Issues */}
                         {(!isFieldHidden('behavioralIssues') || !isFieldHidden('biteHistory') || !isFieldHidden('reactivityNotes')) && (
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">⚠️ Known Issues</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><AlertTriangle size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Known Issues</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {!isFieldHidden('behavioralIssues') && (
                                 <div>
@@ -20444,7 +20444,7 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {!isFieldHidden('remarks') && (
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="remarks-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">📝 Remarks & Notes</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><FileText size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Remarks & Notes</h3>
                             <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="5"
                                 className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                 placeholder="General notes, observations, and records..." />
@@ -20459,7 +20459,7 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* End of Life */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">🕊️ Information</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><Feather size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Information</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Date of Death</label>
@@ -20505,7 +20505,7 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Show Titles & Ratings */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="show-titles-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">🥇 Show Titles & Ratings</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><Medal size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Show Titles & Ratings</h3>
                             <div className="space-y-4">
                                 {!isFieldHidden('showTitles') && (
                                 <div>
@@ -20541,7 +20541,7 @@ const AnimalForm = ({
                         {/* Working & Performance - Template controlled */}
                         {!isFieldHidden('workingTitles') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">🎯 Working & Performance</h3>
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2"><Target size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Working & Performance</h3>
                                 <div className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('workingTitles', 'Working Titles')}</label>
@@ -20571,7 +20571,7 @@ const AnimalForm = ({
                         {/* Licensing */}
                         {(!isFieldHidden('licenseNumber') || !isFieldHidden('licenseJurisdiction')) && (
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">🔑 Licensing & Permits</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><Key size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Licensing & Permits</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {!isFieldHidden('licenseNumber') && (
                                 <div>
@@ -20595,7 +20595,7 @@ const AnimalForm = ({
 
                         {/* Insurance & Legal Status */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="legal-admin-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">📋 Legal / Administrative</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><ClipboardList size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Legal / Administrative</h3>
                             <div className="space-y-4">
                                 {!isFieldHidden('insurance') && (
                                 <div>
@@ -20619,7 +20619,7 @@ const AnimalForm = ({
                         {/* Restrictions */}
                         {(!isFieldHidden('breedingRestrictions') || !isFieldHidden('exportRestrictions')) && (
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">🚫 Restrictions</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><Ban size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Restrictions</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {!isFieldHidden('breedingRestrictions') && (
                                 <div>
@@ -20652,7 +20652,7 @@ const AnimalForm = ({
                             <>
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <h3 className="text-lg font-semibold text-gray-700">🖼️ Photo Gallery</h3>
+                                        <h3 className="text-lg font-semibold text-gray-700"><Images size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Photo Gallery</h3>
                                         <p className="text-xs text-gray-400 mt-0.5">{editGalleryImages.length} / 20 photos</p>
                                     </div>
                                     {editGalleryImages.length < 20 && (
@@ -28425,7 +28425,7 @@ const WarningBanner = ({ authToken, API_BASE_URL, userProfile }) => {
                             <AlertCircle className="h-6 w-6 text-yellow-400" />
                         </div>
                         <div className="ml-3 flex-1">
-                            <h3 className="text-lg font-bold text-yellow-800">⚠️ Official Warning{warnings.length !== 1 ? 's' : ''} from Moderation Team</h3>
+                            <h3 className="text-lg font-bold text-yellow-800"><AlertTriangle size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Official Warning{warnings.length !== 1 ? 's' : ''} from Moderation Team</h3>
                             <div className="mt-3 text-yellow-700">
                                 <p className="text-sm font-semibold mb-2">
                                     You have {warnings.length} active warning{warnings.length !== 1 ? 's' : ''}:
@@ -28805,15 +28805,15 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     const isLoading = littersLoading || mgmtLoading;
 
     const breedingTypeConfig = {
-        mated:  { label: 'Mating',         bg: 'bg-purple-100 text-purple-700', border: 'border-purple-200', icon: '❤️' },
-        due:    { label: 'Expected Birth', bg: 'bg-amber-100 text-amber-700',   border: 'border-amber-200',  icon: '🐣' },
-        weaned: { label: 'Weaning',        bg: 'bg-sky-100 text-sky-700',       border: 'border-sky-200',    icon: '🍼' },
+        mated:  { label: 'Mating',         bg: 'bg-purple-100 text-purple-700', border: 'border-purple-200', icon: Heart },
+        due:    { label: 'Expected Birth', bg: 'bg-amber-100 text-amber-700',   border: 'border-amber-200',  icon: Egg },
+        weaned: { label: 'Weaning',        bg: 'bg-sky-100 text-sky-700',       border: 'border-sky-200',    icon: Milk },
     };
     const mgmtTypeConfig = {
-        feeding:     { bg: 'bg-orange-100 text-orange-700', border: 'border-orange-200', icon: '🍽️' },
-        care:        { bg: 'bg-purple-100 text-purple-700', border: 'border-purple-200', icon: '🧴' },
-        maintenance: { bg: 'bg-yellow-100 text-yellow-800', border: 'border-yellow-200', icon: '🔧' },
-        supplies:    { bg: 'bg-emerald-100 text-emerald-700', border: 'border-emerald-200', icon: '📦' },
+        feeding:     { bg: 'bg-orange-100 text-orange-700', border: 'border-orange-200', icon: UtensilsCrossed },
+        care:        { bg: 'bg-purple-100 text-purple-700', border: 'border-purple-200', icon: Droplets },
+        maintenance: { bg: 'bg-yellow-100 text-yellow-800', border: 'border-yellow-200', icon: Wrench },
+        supplies:    { bg: 'bg-emerald-100 text-emerald-700', border: 'border-emerald-200', icon: Package },
     };
     const getBroadcastStyles = (broadcastType) => {
         if (broadcastType === 'announcement') return { bg: 'bg-purple-50', border: 'border-purple-300', pill: 'bg-purple-100 text-purple-700', title: 'text-purple-800', sub: 'text-purple-400', dismiss: 'text-purple-400 hover:text-purple-600', icon: 'text-purple-400', label: 'Announcement', button: 'bg-purple-500 hover:bg-purple-600 text-white', optionBg: 'bg-purple-100 hover:bg-purple-200', resultBar: 'bg-purple-400', subtitle: 'text-purple-400', text: 'text-purple-700' };
@@ -28860,7 +28860,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                                         : `${Math.abs(item.diff)}d overdue`;
                                     return (
                                         <div key={item.key} className="flex items-center gap-2 px-3 py-2.5">
-                                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${cfg.bg}`}>{cfg.icon} {cfg.label}</span>
+                                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${cfg.bg}`}>{React.createElement(cfg.icon, { size: 10, className: 'inline-block align-middle mr-0.5' })} {cfg.label}</span>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-1.5">
                                                     <p className="text-sm font-semibold text-gray-800 truncate">{item.pairName}</p>
@@ -28874,10 +28874,10 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                                     );
                                 })}
                                 {mgmtItems.map(item => {
-                                    const cfg = mgmtTypeConfig[item.type] || { bg: 'bg-gray-100 text-gray-700', border: 'border-gray-200', icon: '⚠️' };
+                                    const cfg = mgmtTypeConfig[item.type] || { bg: 'bg-gray-100 text-gray-700', border: 'border-gray-200', icon: AlertTriangle };
                                     return (
                                         <div key={item.key} className="flex items-center gap-2 px-3 py-2.5">
-                                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${cfg.bg}`}>{cfg.icon} {item.label}</span>
+                                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${cfg.bg}`}>{React.createElement(cfg.icon, { size: 10, className: 'inline-block align-middle mr-0.5' })} {item.label}</span>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm text-gray-700 font-medium truncate">{item.description}</p>
                                             </div>
@@ -29123,7 +29123,7 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
                         return (
                             <div key={item.key} className="flex items-center gap-2 sm:gap-3 px-3 py-2.5">
                                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${cfg.bg}`}>
-                                    {cfg.icon} {cfg.label}
+                                    {React.createElement(cfg.icon, { size: 10, className: 'inline-block align-middle mr-0.5' })} {cfg.label}
                                 </span>
                                 <div className="flex-1 min-w-0">
                                     <span className="font-semibold text-gray-800 text-sm">{item.pairName}</span>
@@ -33142,15 +33142,15 @@ const App = () => {
                                             {showTabs && (
                                                 <div className="px-4 py-3 flex flex-wrap gap-2">
                                                     {[
-                            { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
-                            { id: 3, label: 'Physical', icon: '🎨' },
-                            { id: 4, label: 'Identification', icon: '🏷️' },
-                            { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🥚' },
-                            { id: 7, label: 'Health', icon: '🏥' },
-                            { id: 8, label: 'Animal Care', icon: '🏠' },
-                            { id: 11, label: 'Show', icon: '🏆' }
+                            { id: 1, label: 'Overview', icon: ClipboardList },
+                            { id: 2, label: 'Status & Privacy', icon: Lock },
+                            { id: 3, label: 'Physical', icon: Palette },
+                            { id: 4, label: 'Identification', icon: Tag },
+                            { id: 5, label: 'Lineage', icon: TreeDeciduous },
+                            { id: 6, label: 'Breeding', icon: Egg },
+                            { id: 7, label: 'Health', icon: Hospital },
+                            { id: 8, label: 'Animal Care', icon: Home },
+                            { id: 11, label: 'Show', icon: Trophy }
                                                     ].map(tab => (
                                                         <button
                                                             key={tab.id}
@@ -33163,7 +33163,7 @@ const App = () => {
                                                             }`}
                                                             title={tab.label}
                                                         >
-                                                            <span className="mr-1">{tab.icon}</span>
+                                                            {React.createElement(tab.icon, { size: 14, className: 'inline-block align-middle flex-shrink-0 mr-1' })}
                                                             {tab.label}
                                                         </button>
                                                     ))}
@@ -33634,7 +33634,7 @@ const App = () => {
                                                 </div>
                                                 {animalToView.keeperHistory && animalToView.keeperHistory.length > 0 && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                                        <h3 className="text-lg font-semibold text-gray-700">🏠 Keeper History</h3>
+                                                        <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper History</h3>
                                                         <div className="space-y-2">
                                                             {animalToView.keeperHistory.map((entry, idx) => (
                                                                 <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded border border-gray-200">
@@ -33693,7 +33693,7 @@ const App = () => {
                                             <div className="space-y-6">
                                                 {/* Appearance - Always show */}
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                                    <h3 className="text-lg font-semibold text-gray-700">✨ Appearance</h3>
+                                                    <h3 className="text-lg font-semibold text-gray-700"><Sparkles size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Appearance</h3>
                                                     {(() => {
                                                         const fields = [
                                                             { key: 'color', label: 'Color' },
@@ -33722,7 +33722,7 @@ const App = () => {
                                                 
                                                 {/* Genetic Code - Always show */}
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                                    <h3 className="text-lg font-semibold text-gray-700 mb-2">🧬 Genetic Code</h3>
+                                                    <h3 className="text-lg font-semibold text-gray-700 mb-2"><Dna size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Genetic Code</h3>
                                                     <p className="text-sm font-mono">{animalToView.geneticCode || 'Not specified'}</p>
                                                 </div>
                                                 
@@ -34056,7 +34056,7 @@ const App = () => {
                                         {detailViewTab === 4 && (
                                             <div className="space-y-6">
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                                    <h3 className="text-lg font-semibold text-gray-700">🔢 Identification Numbers</h3>
+                                                    <h3 className="text-lg font-semibold text-gray-700"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                                         <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animalToView.id_public || ''}</strong></div>
                                                         <div><span className="text-gray-600">Identification:</span> <strong>{animalToView.breederAssignedId || ''}</strong></div>
@@ -34065,7 +34065,7 @@ const App = () => {
                                                     </div>
                                                 </div>
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                                    <h3 className="text-lg font-semibold text-gray-700">🗂️ Classification</h3>
+                                                    <h3 className="text-lg font-semibold text-gray-700"><FolderOpen size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Classification</h3>
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                                         <div><span className="text-gray-600">Species:</span> <strong>{animalToView.species}</strong></div>
                                                         <div><span className="text-gray-600">Breed:</span> <strong>{animalToView.breed || ''}</strong></div>
@@ -34080,7 +34080,7 @@ const App = () => {
                                             <div className="space-y-6">
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                                     <div className="flex justify-between items-center mb-4">
-                                                        <h3 className="text-lg font-semibold text-gray-700">🌳 Parents</h3>
+                                                        <h3 className="text-lg font-semibold text-gray-700"><TreeDeciduous size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Parents</h3>
                                                         <button
                                                             onClick={() => setShowPedigreeChart(true)}
                                                             data-tutorial-target="pedigree-btn"
@@ -34204,7 +34204,7 @@ const App = () => {
                         <div className="space-y-6">
                             {/* 1st Section: Reproductive Status */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🌿 Reproductive Status</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Leaf size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Reproductive Status</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animalToView.isNeutered ? 'Yes' : 'No'}</strong></div>
                                     <div><span className="text-gray-600">Infertile:</span> <strong>{animalToView.isInfertile ? 'Yes' : 'No'}</strong></div>
@@ -34229,7 +34229,7 @@ const App = () => {
                             {/* 2nd Section: Estrus/Cycle (Female/Intersex/Unknown only) */}
                             {(animalToView.gender === 'Female' || animalToView.gender === 'Intersex' || animalToView.gender === 'Unknown') && !animalToView.isNeutered && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🔄 Estrus/Cycle</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><RefreshCw size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Estrus/Cycle</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">Heat Status:</span> <strong>{animalToView.heatStatus || ''}</strong></div>
                                         <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animalToView.lastHeatDate ? formatDate(animalToView.lastHeatDate) : ''}</strong></div>
@@ -34245,7 +34245,7 @@ const App = () => {
                             {/* 4th Section: Stud Information */}
                             {!animalToView.isNeutered && !animalToView.isInfertile && (animalToView.gender === 'Male' || animalToView.gender === 'Intersex' || animalToView.gender === 'Unknown') && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">♂️ Sire Information</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Mars size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Sire Information</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">Fertility Status:</span> <strong>{animalToView.fertilityStatus || ''}</strong></div>
                                     </div>
@@ -34268,7 +34268,7 @@ const App = () => {
                             {/* 5th Section: Dam Information */}
                             {!animalToView.isNeutered && !animalToView.isInfertile && (animalToView.gender === 'Female' || animalToView.gender === 'Intersex' || animalToView.gender === 'Unknown') && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">♀️ Dam Information</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Venus size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Dam Information</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">Dam Fertility Status:</span> <strong>{animalToView.damFertilityStatus || animalToView.fertilityStatus || ''}</strong></div>
                                         {(animalToView.species === 'Dog' || animalToView.species === 'Cat') && (
@@ -34442,7 +34442,7 @@ const App = () => {
                                             <div className="space-y-6">
                                                 {(animalToView.dietType || animalToView.feedingSchedule || animalToView.supplements) && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                                        <h3 className="text-lg font-semibold text-gray-700">🍽️ Nutrition</h3>
+                                                        <h3 className="text-lg font-semibold text-gray-700"><UtensilsCrossed size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Nutrition</h3>
                                                         {animalToView.dietType && <div><strong>Diet Type:</strong> <p className="text-sm mt-1">{animalToView.dietType}</p></div>}
                                                         {animalToView.feedingSchedule && <div><strong>Feeding Schedule:</strong> <p className="text-sm mt-1">{animalToView.feedingSchedule}</p></div>}
                                                         {animalToView.supplements && <div><strong>Supplements:</strong> <p className="text-sm mt-1">{animalToView.supplements}</p></div>}
@@ -34450,7 +34450,7 @@ const App = () => {
                                                 )}
                                                 {(animalToView.housingType || animalToView.bedding || animalToView.enrichment) && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                                        <h3 className="text-lg font-semibold text-gray-700">🧴 Animal Care</h3>
+                                                        <h3 className="text-lg font-semibold text-gray-700"><Droplets size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Animal Care</h3>
                                                         {animalToView.housingType && <div><strong>Housing Type:</strong> <p className="text-sm mt-1">{animalToView.housingType}</p></div>}
                                                         {animalToView.bedding && <div><strong>Bedding:</strong> <p className="text-sm mt-1">{animalToView.bedding}</p></div>}
                                                         {animalToView.enrichment && <div><strong>Enrichment:</strong> <p className="text-sm mt-1">{animalToView.enrichment}</p></div>}
@@ -34458,7 +34458,7 @@ const App = () => {
                                                 )}
                                                 {(animalToView.temperatureRange || animalToView.humidity || animalToView.lighting || animalToView.noise) && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                                        <h3 className="text-lg font-semibold text-gray-700">🌡️ Environment</h3>
+                                                        <h3 className="text-lg font-semibold text-gray-700"><Thermometer size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Environment</h3>
                                                         {animalToView.temperatureRange && <div><strong>Temperature Range:</strong> <p className="text-sm mt-1">{animalToView.temperatureRange}</p></div>}
                                                         {animalToView.humidity && <div><strong>Humidity:</strong> <p className="text-sm mt-1">{animalToView.humidity}</p></div>}
                                                         {animalToView.lighting && <div><strong>Lighting:</strong> <p className="text-sm mt-1">{animalToView.lighting}</p></div>}
@@ -34498,7 +34498,7 @@ const App = () => {
                         <div className="space-y-6">
                             {/* 1st Section: End of Life */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🕊️ Information</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Feather size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Information</h3>
                                 <div className="space-y-3 text-sm">
                                     <div><span className="text-gray-600">Deceased Date:</span> <strong>{animalToView.deceasedDate ? formatDate(animalToView.deceasedDate) : ''}</strong></div>
                                     <div><span className="text-gray-600">Cause of Death:</span> <strong>{animalToView.causeOfDeath || ''}</strong></div>
@@ -34521,7 +34521,7 @@ const App = () => {
                             {/* 3rd Section: Restrictions (Dog/Cat only) */}
                             {(animalToView.species === 'Dog' || animalToView.species === 'Cat') && (animalToView.breedingRestrictions || animalToView.exportRestrictions) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🚫 Restrictions</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Ban size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Restrictions</h3>
                                     <div className="space-y-3 text-sm">
                                         {animalToView.breedingRestrictions && (
                                             <div><span className="text-gray-600">Breeding Restrictions:</span> <strong className="whitespace-pre-wrap">{animalToView.breedingRestrictions}</strong></div>
@@ -34540,7 +34540,7 @@ const App = () => {
                         <div className="space-y-6">
                             {/* Show Titles & Ratings */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">🥇 Show Titles & Ratings</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><Medal size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Show Titles & Ratings</h3>
                                 <div className="space-y-3 text-sm">
                                     <div><span className="text-gray-600">Titles:</span> <strong>{animalToView.showTitles || ''}</strong></div>
                                     <div><span className="text-gray-600">Ratings:</span> <strong>{animalToView.showRatings || ''}</strong></div>
@@ -34551,7 +34551,7 @@ const App = () => {
                             {/* Working Titles & Performance - Dog only */}
                             {animalToView.species === 'Dog' && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">🎯 Working & Performance</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700"><Target size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Working & Performance</h3>
                                     <div className="space-y-3 text-sm">
                                         <div><span className="text-gray-600">Working Titles:</span> <strong>{animalToView.workingTitles || ''}</strong></div>
                                         <div><span className="text-gray-600">Performance Scores:</span> <strong>{animalToView.performanceScores || ''}</strong></div>
