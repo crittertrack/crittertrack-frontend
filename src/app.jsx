@@ -27221,69 +27221,6 @@ const AnimalList = ({
                     )}
                 </div>
 
-                {/* -- 7. SOLD / TRANSFERRED -------------------------------- */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <SectionHeader sectionKey="soldTransferred"
-                        icon={<ArrowLeftRight size={18} className="text-orange-600" />}
-                        title="Sold / Transferred" count={soldList.length} bgClass="bg-orange-50" />
-                    {!collapsedMgmtSections['soldTransferred'] && (() => {
-                        // Build unique owner list for dropdown
-                        const soldOwners = [...new Map(
-                            soldList
-                                .filter(a => a.ownerName)
-                                .map(a => [a.ownerId_public || a.ownerName, { key: a.ownerId_public || a.ownerName, label: a.ownerName }])
-                        ).values()].sort((a, b) => a.label.localeCompare(b.label));
-                        const filteredSoldList = soldOwnerFilter
-                            ? soldList.filter(a => (a.ownerId_public || a.ownerName) === soldOwnerFilter)
-                            : soldList;
-                        return (
-                            <div className="p-3 space-y-2">
-                                {soldList.length === 0
-                                    ? <div className="text-sm text-gray-400 text-center py-4">No sold or transferred animals.</div>
-                                    : <>
-                                        {soldOwners.length > 1 && (
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs font-medium text-gray-500 whitespace-nowrap">Filter by recipient:</span>
-                                                <select
-                                                    value={soldOwnerFilter}
-                                                    onChange={e => setSoldOwnerFilter(e.target.value)}
-                                                    className="flex-1 text-xs border border-gray-300 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-orange-300 focus:border-orange-400 bg-white"
-                                                >
-                                                    <option value="">All recipients ({soldList.length})</option>
-                                                    {soldOwners.map(o => (
-                                                        <option key={o.key} value={o.key}>
-                                                            {o.label} ({soldList.filter(a => (a.ownerId_public || a.ownerName) === o.key).length})
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                        )}
-                                        <div className="space-y-1.5">
-                                            {filteredSoldList.map(a => (
-                                                <MgmtAnimalCard key={a._id || a.id_public} animal={a} extras={
-                                                    a.ownerName ? (
-                                                        <button
-                                                            className="flex items-center gap-1.5 shrink-0 min-w-0 hover:opacity-80 transition-opacity"
-                                                            title={`View profile: ${a.ownerName}`}
-                                                            onClick={e => { e.stopPropagation(); if (a.ownerIdPublic) navigate(`/user/${a.ownerIdPublic}`); }}
-                                                        >
-                                                            {a.ownerAvatar
-                                                                ? <img src={a.ownerAvatar} alt={a.ownerName} className="w-5 h-5 rounded-full object-cover shrink-0 border border-orange-200" />
-                                                                : <span className="w-5 h-5 rounded-full bg-orange-200 text-orange-700 text-[10px] font-bold flex items-center justify-center shrink-0">{a.ownerName.charAt(0).toUpperCase()}</span>
-                                                            }
-                                                            <span className="text-xs text-orange-700 font-medium max-w-[110px] truncate whitespace-nowrap">{a.ownerName}</span>
-                                                        </button>
-                                                    ) : null
-                                                } />
-                                            ))}
-                                        </div>
-                                    </>
-                                }
-                            </div>
-                        );
-                    })()}
-                </div>
-
                 {/* -- 8. ACTIVITY LOG ? now a separate screen, accessed via button in header -- */}
 
                 {/* -- Feeding Modal ------------------------------------------------------- */}
