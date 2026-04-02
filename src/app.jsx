@@ -28849,7 +28849,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
             ) : (
                 <div className="flex-1 flex flex-col overflow-hidden">
                     {/* Reminder rows — always shown unless both empty */}
-                    <div className="overflow-y-auto divide-y divide-gray-200" style={{ maxHeight: '106px', flexShrink: 0 }}>
+                    <div className="overflow-y-auto divide-y divide-gray-200 flex-shrink-0" style={{ height: '106px' }}>
                         {hasReminders ? (
                             <>
                                 {breedingItems.map(item => {
