@@ -2350,17 +2350,28 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
             // Determine if this is specifically a user ID search
             const isUserIdSearch = /CTU/i.test(trimmedTerm);
             
+            console.log('Search term:', trimmedTerm);
+            console.log('Animal ID match:', animalIdMatch);
+            console.log('Is user ID search:', isUserIdSearch);
+            
             // For user searches: use CTUXXX format if it's a user ID, otherwise use the full term
             const userSearchParam = (isUserIdSearch && userIdMatch) 
                 ? `CTU${userIdMatch[1]}`
                 : trimmedTerm;
             
+            const animalUrl = (animalIdMatch && !isUserIdSearch)
+                ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(animalIdMatch[1])}`
+                : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedTerm)}&species=${encodeURIComponent(trimmedTerm)}&limit=10`;
+            
+            console.log('Animal search URL:', animalUrl);
+            
             const [usersResponse, animalsResponse] = await Promise.all([
                 axios.get(`${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(userSearchParam)}&limit=10`),
-                axios.get((animalIdMatch && !isUserIdSearch)
-                    ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(animalIdMatch[1])}`
-                    : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedTerm)}&species=${encodeURIComponent(trimmedTerm)}&limit=10`)
+                axios.get(animalUrl)
             ]);
+            
+            console.log('Animals response:', animalsResponse.data);
+            console.log('Users response:', usersResponse.data);
             
             // Filter out completely anonymous users (both names hidden/unavailable)
             const filteredUsers = (usersResponse.data || []).filter(user => {
@@ -2417,7 +2428,7 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
                 <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                 <input
                     type="text"
-                    placeholder="Search users, animals, species, IDs..."
+                    placeholder="Search users, animals, IDs..."
                     value={searchTerm}
                     onChange={(e) => handleSearchChange(e.target.value)}
                     onFocus={() => searchTerm.trim().length >= 2 && setShowResults(true)}
