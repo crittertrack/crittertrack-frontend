@@ -70,6 +70,29 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 4,
+        title: 'Favorite Species (Star Icons)',
+        content: 'Notice the star icons on each species card. Click a star to mark a species as a favorite. Favorited species appear at the top of the list with an amber/yellow highlight, making them easier to find.',
+        tips: [
+          'Favorites are saved to your account',
+          'They persist across devices when you log in',
+          'Favorites survive clearing browser data - just log back in',
+          'A divider separates favorites from other species',
+          'The count shows how many favorites are currently displayed'
+        ]
+      },
+      {
+        stepNumber: 5,
+        title: 'Category Icons on Species Cards',
+        content: 'Each species card displays a category icon (like a cat for mammals, turtle for reptiles, bird for birds). This helps you quickly identify the type of animal at a glance without reading the category label.',
+        tips: [
+          'Icons appear in the bottom-left corner on small cards',
+          'Icons appear in the top-left corner on full-page view',
+          'Each category has its own distinctive icon',
+          'Icons make visual scanning faster'
+        ]
+      },
+      {
+        stepNumber: 6,
         title: 'Add New Species Button',
         content: 'In the bottom right corner, you\'ll see the highlighted "Add New Species" button. Click it to create a custom species for your collection. Let\'s explore how to add a custom species.',
         highlightElement: '[data-tutorial-target="add-species-btn"]',
@@ -81,7 +104,7 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 5,
+        stepNumber: 7,
         title: 'Species Name',
         content: 'Enter the name of your custom species here. This is the display name that will appear throughout your collection.',
         highlightElement: '[data-tutorial-target="species-name-input"]',
@@ -92,7 +115,7 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 6,
+        stepNumber: 8,
         title: 'Category Selection',
         content: 'Select a category that best fits your species. This helps organize your species list and makes searching easier. Categories include Mammal, Reptile, Bird, Amphibian, Fish, Invertebrate, and Other.',
         highlightElement: '[data-tutorial-target="species-category-dropdown"]',
@@ -104,7 +127,7 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 7,
+        stepNumber: 9,
         title: 'Latin/Scientific Name',
         content: 'Enter the scientific name of your species here. This is optional but highly recommended for clarity and accuracy. For example, a Fancy Mouse\'s scientific name is "Mus musculus".',
         highlightElement: '[data-tutorial-target="species-latin-input"]',
@@ -115,7 +138,7 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 8,
+        stepNumber: 10,
         title: 'Return to Species Selector',
         content: 'Now let\'s go back to select a default species for your animal. Click the highlighted "Back" button to return to the species list.',
         highlightElement: '[data-tutorial-target="back-to-selector-btn"]',
@@ -127,7 +150,7 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 9,
+        stepNumber: 11,
         title: 'Select Fancy Mouse',
         content: 'For this tutorial, select "Fancy Mouse" from the species list. This will give us access to all the advanced features like the genetic code builder.',
         highlightElement: '[data-tutorial-target="species-fancy-mouse"]',
