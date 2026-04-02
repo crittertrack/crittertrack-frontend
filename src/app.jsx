@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, TableOfContents, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2, Hash, Dna, TreeDeciduous, Tag, Egg, Hospital, Brain, Trophy, Scale, FileCheck, Palette, Sprout, Ruler, FolderOpen, Leaf, Microscope, Pill, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Feather, Medal, Target, Key, Dumbbell, Gem, Flame, Baby, PawPrint, ArrowRight, LockOpen, Camera, BarChart2 } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, TableOfContents, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2, Hash, Dna, TreeDeciduous, Tag, Egg, Hospital, Brain, Trophy, Scale, FileCheck, Palette, Sprout, Ruler, FolderOpen, Leaf, Microscope, Pill, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Feather, Medal, Target, Key, Dumbbell, Gem, Flame, Baby, PawPrint, ArrowRight, LockOpen, Camera, BarChart2, Bird, Fish, Bug, Worm, Turtle } from 'lucide-react';
 import ArchiveScreen from './components/ArchiveScreen';
 import { QRCodeSVG } from 'qrcode.react';
 import jsPDF from 'jspdf';
@@ -10577,7 +10577,7 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
                                             <button
                                                 type="button"
                                                 onClick={() => onSelect(s.name)}
-                                                className={`w-full h-20 flex flex-col items-start justify-center p-2 border-2 rounded-lg text-left transition hover:shadow-md ${
+                                                className={`w-full h-20 flex flex-col items-start justify-center p-2 border-2 rounded-lg text-left transition hover:shadow-md relative ${
                                                     isFav
                                                         ? 'border-amber-300 bg-amber-50 hover:bg-amber-100'
                                                         : s.isDefault
@@ -10592,7 +10592,15 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
                                                     <span className="text-xs italic text-gray-500 mt-0.5 leading-tight line-clamp-1">{s.latinName}</span>
                                                 )}
                                                 {s.category && (
-                                                    <span className="mt-1 text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">{s.category}</span>
+                                                    <span className="absolute bottom-1 left-2 text-gray-400">
+                                                        {s.category === 'Mammal' && <Cat size={12} />}
+                                                        {s.category === 'Reptile' && <Turtle size={12} />}
+                                                        {s.category === 'Bird' && <Bird size={12} />}
+                                                        {s.category === 'Amphibian' && <Worm size={12} />}
+                                                        {s.category === 'Fish' && <Fish size={12} />}
+                                                        {s.category === 'Invertebrate' && <Bug size={12} />}
+                                                        {s.category === 'Other' && <PawPrint size={12} />}
+                                                    </span>
                                                 )}
                                             </button>
                                             <button
@@ -14730,6 +14738,17 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                                         <span className="line-clamp-2">{species.name}</span>
                                         {species.latinName && (
                                             <p className={`text-xs italic mt-1 line-clamp-1 ${isFav || species.isDefault ? 'text-gray-600' : 'text-white/80'}`}>{species.latinName}</p>
+                                        )}
+                                        {species.category && (
+                                            <span className={`absolute top-2 left-2 ${isFav || species.isDefault ? 'text-gray-400' : 'text-white/60'}`}>
+                                                {species.category === 'Mammal' && <Cat size={14} />}
+                                                {species.category === 'Reptile' && <Turtle size={14} />}
+                                                {species.category === 'Bird' && <Bird size={14} />}
+                                                {species.category === 'Amphibian' && <Worm size={14} />}
+                                                {species.category === 'Fish' && <Fish size={14} />}
+                                                {species.category === 'Invertebrate' && <Bug size={14} />}
+                                                {species.category === 'Other' && <PawPrint size={14} />}
+                                            </span>
                                         )}
                                     </button>
                                     <button
