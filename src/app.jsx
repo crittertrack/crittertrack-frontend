@@ -28669,8 +28669,8 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
         };
         litters.forEach(l => {
             const pairName = l.breedingPairCodeName || l.litter_id_public || 'Unnamed Litter';
-            const sn = l.sire?.name || l.sireId_public || '?';
-            const dn = l.dam?.name || l.damId_public || '?';
+            const sn = [l.sire?.prefix, l.sire?.name || l.sireId_public || '?', l.sire?.suffix].filter(Boolean).join(' ');
+            const dn = [l.dam?.prefix, l.dam?.name || l.damId_public || '?', l.dam?.suffix].filter(Boolean).join(' ');
             const sireDam = `${sn} \u00d7 ${dn}`;
             const callId = l.litter_id_public;
             if (l.matingDate && !l.birthDate) {
