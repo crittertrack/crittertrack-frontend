@@ -28073,6 +28073,8 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
     const messagesEndRef = useRef(null);
+    const prevMessageCountRef = useRef(0);
+    const prevConversationRef = useRef(null);
 
     useEffect(() => {
         fetchConversations();
@@ -28103,9 +28105,15 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
     }, [selectedConversation]);
 
     useEffect(() => {
-        // Scroll to bottom when messages change
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+        // Scroll to bottom only when switching conversation or when new messages arrive
+        const conversationChanged = prevConversationRef.current !== selectedConversation?.otherUserId;
+        const newMessagesArrived = messages.length > prevMessageCountRef.current;
+        if (conversationChanged || newMessagesArrived) {
+            messagesEndRef.current?.scrollIntoView({ behavior: conversationChanged ? 'auto' : 'smooth' });
+        }
+        prevMessageCountRef.current = messages.length;
+        prevConversationRef.current = selectedConversation?.otherUserId;
+    }, [messages, selectedConversation]);
 
     const fetchConversations = async () => {
         try {
