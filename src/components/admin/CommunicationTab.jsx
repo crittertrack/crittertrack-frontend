@@ -642,28 +642,33 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                             </select>
                         </div>
 
-                        <div className="form-group">
-                            <label>Subject / Title *</label>
-                            <input
-                                type="text"
-                                value={subject}
-                                onChange={(e) => setSubject(e.target.value)}
-                                placeholder="Brief subject line..."
-                                disabled={loading}
-                                maxLength="100"
-                            />
-                            <span className="char-count">{subject.length}/100</span>
-                        </div>
+                        {broadcastType !== 'poll' && (
+                            <div className="form-group">
+                                <label>Subject / Title *</label>
+                                <input
+                                    type="text"
+                                    value={subject}
+                                    onChange={(e) => setSubject(e.target.value)}
+                                    placeholder="Brief subject line..."
+                                    disabled={loading}
+                                    maxLength="100"
+                                />
+                                <span className="char-count">{subject.length}/100</span>
+                            </div>
+                        )}
 
                         {/* Poll Fields */}
                         {broadcastType === 'poll' ? (
                             <div className="poll-fields">
                                 <div className="form-group">
-                                    <label>Poll Question *</label>
+                                    <label>Poll Question (will be used as title) *</label>
                                     <input
                                         type="text"
                                         value={pollQuestion}
-                                        onChange={(e) => setPollQuestion(e.target.value)}
+                                        onChange={(e) => {
+                                            setPollQuestion(e.target.value);
+                                            setSubject(e.target.value);
+                                        }}
                                         placeholder="What question do you want to ask?"
                                         disabled={loading}
                                         maxLength="200"
