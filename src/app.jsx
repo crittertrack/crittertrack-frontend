@@ -14707,19 +14707,19 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                 </select>
             </div>
 
-            {favCount > 0 && !searchTerm && (
-                <p className="text-xs font-semibold text-amber-600 uppercase tracking-wide mb-2 flex flex-wrap items-center gap-x-1 gap-y-0.5">
-                    <Star size={11} className="fill-current shrink-0" />
-                    <span>Favourites — click</span>
-                    <Star size={11} className="fill-current shrink-0" />
-                    <span>on any card to pin it here</span>
-                </p>
-            )}
             {favCount === 0 && !searchTerm && (
                 <p className="text-xs text-gray-400 mb-2">Tip: click the <Star size={11} className="inline-block align-middle" /> on any card to favourite a species.</p>
             )}
             
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6 max-h-96 overflow-y-auto" data-tutorial-target="default-species-section">
+                {favCount > 0 && !searchTerm && (
+                    <p className="col-span-full text-xs font-semibold text-amber-600 uppercase tracking-wide flex flex-wrap items-center gap-x-1 gap-y-0.5">
+                        <Star size={11} className="fill-current shrink-0" />
+                        <span>Favourites — click</span>
+                        <Star size={11} className="fill-current shrink-0" />
+                        <span>on any card to pin it here</span>
+                    </p>
+                )}
                 {sortedSpecies.length === 0 ? (
                     <p className="col-span-full text-center text-gray-500 p-4">No species found matching your filters.</p>
                 ) : (
