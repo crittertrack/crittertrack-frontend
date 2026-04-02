@@ -14215,7 +14215,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                 </p>
             </div>
             
-            <div className="mb-4 flex space-x-3" data-tutorial-target="species-search-section">
+            <div className="mb-4 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3" data-tutorial-target="species-search-section">
                 <input
                     type="text"
                     placeholder="Search species..."
@@ -14227,7 +14227,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                 <select
                     value={categoryFilter}
                     onChange={(e) => setCategoryFilter(e.target.value)}
-                    className="p-2 border border-gray-300 rounded-lg w-40 flex-shrink-0"
+                    className="p-2 border border-gray-300 rounded-lg w-full sm:w-40 flex-shrink-0"
                 >
                     {categories.map(cat => (
                         <option key={cat} value={cat}>{cat}</option>
@@ -31635,7 +31635,7 @@ const App = () => {
                                     return (
                                         <div
                                             key={user.id_public}
-                                            className="relative bg-white rounded-lg p-2 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer w-[18%] min-w-[110px] max-w-[140px]"
+                                            className="relative bg-white rounded-lg p-2 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer w-full sm:w-[48%] md:w-[30%] lg:w-[18%] sm:min-w-[110px] sm:max-w-[140px]"
                                             onClick={() => navigate(`/user/${user.id_public}`)}
                                         >
                                             {/* Donation badge - top left */}
