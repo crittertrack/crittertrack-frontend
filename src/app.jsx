@@ -28828,7 +28828,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
 
     return (
         <>
-        <div className="bg-white rounded-xl shadow-md flex flex-col" style={!(hasReminders && hasNews) ? { height: '210px' } : undefined}>
+        <div className="bg-white rounded-xl shadow-md flex flex-col" style={{ height: '210px' }}>
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100 flex-shrink-0">
                 <div className="flex items-center gap-2">
@@ -28892,7 +28892,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
 
                     {/* News card strip */}
                     {hasNews && (
-                        <div className={hasReminders ? 'flex-shrink-0 border-t border-gray-200' : 'flex-1 overflow-hidden flex flex-col'}>
+                        <div className={hasReminders ? 'flex-shrink-0 border-t border-gray-200' : 'flex-1 overflow-hidden flex flex-col'} style={hasReminders ? { flex: 1, overflow: 'hidden' } : {}}>
                             <div className={`gap-2 px-3 py-2 ${hasReminders ? 'flex overflow-x-auto' : 'flex flex-wrap overflow-y-auto flex-1'}`} style={{ scrollbarWidth: 'thin' }}>
                                 {broadcasts.map(broadcast => {
                                     const styles = getBroadcastStyles(broadcast.broadcastType);
