@@ -1661,18 +1661,31 @@ const KEY_FEATURES_LESSONS = [
     steps: [
       {
         stepNumber: 1,
-        title: 'Global Search in Header',
-        content: 'The Search button in the header is your global search tool. It allows you to search across all users and animals on CritterTrack by name or ID. This finds animals from the entire community, not just your collection.',
+        title: 'Global Search Bar in Header',
+        content: 'At the top of every screen there is an inline search bar — no button to click, just type! It searches the entire CritterTrack community simultaneously: type a name, species, or ID and results for both users and animals drop down instantly. Users show on the left and animals on the right.',
         highlightElement: '[data-tutorial-target="global-search-btn"]',
         tips: [
-          'Search the entire CritterTrack community',
-          'Find users and their animals',
-          'Search by name or ID only',
-          'Opens a dedicated search modal'
+          'Start typing after 2 characters — results appear automatically',
+          'Use CTU followed by numbers to search users (e.g. CTU1234)',
+          'Use CTC followed by numbers to search animals (e.g. CTC5678)',
+          'Plain text searches both users and animals at once',
+          'Click any result to jump straight to that profile or animal'
         ]
       },
       {
         stepNumber: 2,
+        title: 'My Feed',
+        content: 'The "My Feed" tab (first in the navigation bar) is your personal community hub. It shows: recently active members with a green dot, your favorited animals, your favorited breeders, and recently updated animals from breeders you follow. It is a quick overview of everything you care about in the community.',
+        tips: [
+          'Access My Feed from the first nav tab (Users icon)',
+          'Recently active members show with a green dot',
+          'Favorite animals by clicking the heart icon on any animal profile',
+          'Favorite breeders by clicking the heart icon on their profile',
+          'Recently updated favorites: see when your saved animals change'
+        ]
+      },
+      {
+        stepNumber: 3,
         title: 'My Animals Search Bar',
         content: 'In your "My Animals" section, you\'ll find a separate search bar that lets you search within your own collection by animal name. This is local to your animals only.',
         highlightElement: '[data-tutorial-target="my-animals-search"]',
@@ -1684,7 +1697,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 3,
+        stepNumber: 4,
         title: 'Species Filter',
         content: 'In your "My Animals" section, use the Species dropdown to filter your collection by animal type. Combine this with the search bar for quick access to specific animals.',
         highlightElement: '[data-tutorial-target="species-filter"]',
@@ -1696,7 +1709,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 4,
+        stepNumber: 5,
         title: 'Gender Filter',
         content: 'Use the Gender filter to find males, females, or other genders in your collection. This is helpful when planning breeding pairs.',
         highlightElement: '[data-tutorial-target="gender-filter"]',
@@ -1708,7 +1721,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 5,
+        stepNumber: 6,
         title: 'Status Filter',
         content: 'Filter by status (Pet, Breeder, Available, Sold, etc.) to quickly find animals in specific situations within your collection.',
         highlightElement: '[data-tutorial-target="status-filter"]',
@@ -1720,7 +1733,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 6,
+        stepNumber: 7,
         title: 'Combined Filtering',
         content: 'Use multiple filters together: search by name, filter by species and gender, then by status. This gives you powerful tools to find exactly what you\'re looking for in your collection.',
         highlightElement: '[data-tutorial-target="my-animals-section"]',
@@ -1850,7 +1863,7 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 5,
         title: 'Next: Advanced Features Tour',
-        content: 'Congratulations on completing the Key Features tour! You now understand how to view and edit animals, manage litters, configure your profile, handle breeding finances, search and filter, receive notifications, and communicate with other breeders. Would you like to start the "Advanced Features" tour? This will teach you about tags, genetics, COI calculations, and more advanced community features.',
+        content: 'Congratulations on completing the Key Features tour! You now understand how to view and edit animals, manage litters, configure your profile, handle breeding finances, search and filter, receive notifications, and communicate with other breeders. The "My Feed" tab is your personalized community hub — check it regularly to stay up to date with your favorited animals and breeders. Would you like to start the "Advanced Features" tour? This will teach you about tags, genetics, COI calculations, and more advanced community features.',
         actionType: 'startNextTour',
         actionData: { nextTour: 'advanced' },
         tips: [
