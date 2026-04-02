@@ -18,6 +18,10 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
     const [scheduledDate, setScheduledDate] = useState('');
     const [scheduledTime, setScheduledTime] = useState('');
 
+    // Test mode state
+    const [testMode, setTestMode] = useState(false);
+    const [testUserIds, setTestUserIds] = useState('');
+
     // Poll state
     const [pollQuestion, setPollQuestion] = useState('');
     const [pollOptions, setPollOptions] = useState(['', '']);
@@ -230,6 +234,13 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
             }
         }
 
+        // Validate test mode
+        if (testMode && !testUserIds.trim()) {
+            setError('Enter at least one CTU ID for test mode');
+            setLoading(false);
+            return;
+        }
+
         // Validate scheduled time if enabled
         let scheduledFor = null;
         if (scheduleEnabled) {
@@ -259,10 +270,15 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
 
         try {
             // Prepare payload based on broadcast type
+            const targetUserIds = testMode
+                ? testUserIds.split(',').map(s => s.trim()).filter(Boolean)
+                : null;
+
             const payload = {
                 title: subject,
                 type: broadcastType,
-                ...(scheduledFor && { scheduledFor: scheduledFor.toISOString() })
+                ...(scheduledFor && { scheduledFor: scheduledFor.toISOString() }),
+                ...(targetUserIds && targetUserIds.length > 0 && { targetUserIds })
             };
 
             if (broadcastType === 'poll') {
@@ -299,10 +315,11 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                 throw new Error(data.error || 'Failed to send broadcast');
             }
 
+            const testSuffix = testMode ? ` (test — ${data.recipientCount} user${data.recipientCount !== 1 ? 's' : ''})` : ` to ${data.recipientCount} users`;
             if (scheduledFor) {
-                setSuccess(`${broadcastType === 'poll' ? 'Poll' : 'Broadcast'} scheduled for ${scheduledFor.toLocaleString('en-GB')} - will be sent to ${data.recipientCount} users`);
+                setSuccess(`${broadcastType === 'poll' ? 'Poll' : 'Broadcast'} scheduled for ${scheduledFor.toLocaleString('en-GB')}${testSuffix}`);
             } else {
-                setSuccess(`${broadcastType === 'poll' ? 'Poll' : 'Broadcast'} sent successfully to ${data.recipientCount} users!`);
+                setSuccess(`${broadcastType === 'poll' ? 'Poll' : 'Broadcast'} sent successfully${testSuffix}!`);
             }
             
             // Reset form
@@ -312,6 +329,8 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
             setScheduleEnabled(false);
             setScheduledDate('');
             setScheduledTime('');
+            setTestMode(false);
+            setTestUserIds('');
             clearPollForm();
 
             // Refresh history
@@ -783,8 +802,34 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                             </div>
                         )}
 
+                        <div className="form-group schedule-toggle">
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={testMode}
+                                    onChange={(e) => setTestMode(e.target.checked)}
+                                    disabled={loading}
+                                />
+                                <span>🧪 Test mode — send to specific users only</span>
+                            </label>
+                        </div>
+
+                        {testMode && (
+                            <div className="form-group">
+                                <label>Target CTU IDs (comma-separated) *</label>
+                                <input
+                                    type="text"
+                                    value={testUserIds}
+                                    onChange={(e) => setTestUserIds(e.target.value)}
+                                    placeholder="e.g. CTU1, CTU2, CTU3"
+                                    disabled={loading}
+                                />
+                                <small>Only these users will receive the broadcast. Great for testing before sending to all.</small>
+                            </div>
+                        )}
+
                         <button type="submit" className="btn-send" disabled={loading}>
-                            {loading ? 'Sending...' : scheduleEnabled ? '📅 Schedule Broadcast' : '📢 Send Now'}
+                            {loading ? 'Sending...' : testMode ? '🧪 Send Test Broadcast' : scheduleEnabled ? '📅 Schedule Broadcast' : '📢 Send Now'}
                         </button>
                     </form>
                 </div>
