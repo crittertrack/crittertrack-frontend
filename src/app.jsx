@@ -31635,7 +31635,7 @@ const App = () => {
                                     return (
                                         <div
                                             key={user.id_public}
-                                            className="relative bg-white rounded-lg p-2 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer w-full sm:w-[48%] md:w-[30%] lg:w-[18%] sm:min-w-[110px] sm:max-w-[140px]"
+                                            className="relative bg-white rounded-lg p-2 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer w-[48%] sm:w-[31%] md:w-[23%] lg:w-[18%] min-w-[110px] max-w-[140px]"
                                             onClick={() => navigate(`/user/${user.id_public}`)}
                                         >
                                             {/* Donation badge - top left */}
