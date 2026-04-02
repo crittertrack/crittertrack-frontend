@@ -28850,41 +28850,62 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                 </div>
             ) : (
                 <div className="flex-1 flex flex-col overflow-hidden">
-                    {/* Reminders row */}
+                    {/* Reminder rows */}
                     {hasReminders && (
-                        <div className="flex-shrink-0">
-                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 pt-2 pb-1">Reminders</p>
-                            <div className="flex gap-2 overflow-x-auto px-4 pb-2 scrollbar-thin" style={{ scrollbarWidth: 'thin' }}>
-                                {breedingItems.map(item => {
-                                    const cfg = breedingTypeConfig[item.type] || breedingTypeConfig.due;
-                                    const statusText = item.type === 'mated' && item.diff > 0
-                                        ? `In ${item.diff}d`
-                                        : item.diff === 0 ? 'Due today'
-                                        : `${Math.abs(item.diff)}d overdue`;
-                                    const isOverdue = item.diff < 0;
-                                    return (
-                                        <div key={item.key} className={`flex-shrink-0 w-44 rounded-lg border ${cfg.border} bg-white p-2.5 flex flex-col gap-1 relative`}>
-                                            <button onClick={() => dismissBreeding(item.key)} className="absolute top-1.5 right-1.5 text-gray-300 hover:text-gray-500"><X size={12} /></button>
-                                            <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full self-start ${cfg.bg}`}>{cfg.icon} {cfg.label}</span>
-                                            <div className="min-w-0">
-                                                <div className="flex items-center gap-1 flex-wrap">
-                                                    <p className="text-sm font-bold text-gray-800 leading-tight">{item.pairName}</p>
-                                                    {item.callId && item.callId !== item.pairName && <span className="text-xs text-gray-400">{item.callId}</span>}
-                                                </div>
-                                                <p className="text-xs text-gray-500 truncate">{item.sireDam}</p>
+                        <div className={`overflow-y-auto divide-y divide-gray-200 ${hasNews ? 'flex-1' : 'flex-1'}`}>
+                            {breedingItems.map(item => {
+                                const cfg = breedingTypeConfig[item.type] || breedingTypeConfig.due;
+                                const statusText = item.type === 'mated' && item.diff > 0
+                                    ? `In ${item.diff}d`
+                                    : item.diff === 0 ? 'Due today'
+                                    : `${Math.abs(item.diff)}d overdue`;
+                                return (
+                                    <div key={item.key} className="flex items-center gap-2 px-3 py-2.5">
+                                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${cfg.bg}`}>{cfg.icon} {cfg.label}</span>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-1.5">
+                                                <p className="text-sm font-semibold text-gray-800 truncate">{item.pairName}</p>
+                                                {item.callId && item.callId !== item.pairName && <span className="text-xs text-gray-400 flex-shrink-0">{item.callId}</span>}
                                             </div>
-                                            <span className={`text-xs font-bold mt-auto ${isOverdue ? 'text-red-600' : item.diff === 0 ? 'text-purple-600' : 'text-gray-600'}`}>{statusText}</span>
+                                            <p className="text-xs text-gray-500 truncate">{item.sireDam}</p>
                                         </div>
-                                    );
-                                })}
-                                {mgmtItems.map(item => {
-                                    const cfg = mgmtTypeConfig[item.type] || { bg: 'bg-gray-100 text-gray-700', border: 'border-gray-200', icon: '⚠️' };
+                                        <span className={`text-xs font-bold flex-shrink-0 ${item.diff < 0 ? 'text-red-600' : item.diff === 0 ? 'text-purple-600' : 'text-gray-600'}`}>{statusText}</span>
+                                        <button onClick={() => dismissBreeding(item.key)} className="p-0.5 text-gray-400 hover:text-gray-600 flex-shrink-0"><X size={13} /></button>
+                                    </div>
+                                );
+                            })}
+                            {mgmtItems.map(item => {
+                                const cfg = mgmtTypeConfig[item.type] || { bg: 'bg-gray-100 text-gray-700', border: 'border-gray-200', icon: '⚠️' };
+                                return (
+                                    <div key={item.key} className="flex items-center gap-2 px-3 py-2.5">
+                                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${cfg.bg}`}>{cfg.icon} {item.label}</span>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm text-gray-700 font-medium truncate">{item.description}</p>
+                                        </div>
+                                        <span className="text-xs font-bold text-red-600 flex-shrink-0">Action needed</span>
+                                        <button onClick={() => dismissMgmt(item.key)} className="p-0.5 text-gray-400 hover:text-gray-600 flex-shrink-0"><X size={13} /></button>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {/* News card strip */}
+                    {hasNews && (
+                        <div className={`flex-shrink-0 ${hasReminders ? 'border-t border-gray-200' : ''}`}>
+                            <div className="flex gap-2 overflow-x-auto px-3 py-2" style={{ scrollbarWidth: 'thin' }}>
+                                {broadcasts.map(broadcast => {
+                                    const styles = getBroadcastStyles(broadcast.broadcastType);
                                     return (
-                                        <div key={item.key} className={`flex-shrink-0 w-44 rounded-lg border ${cfg.border} bg-white p-2.5 flex flex-col gap-1 relative`}>
-                                            <button onClick={() => dismissMgmt(item.key)} className="absolute top-1.5 right-1.5 text-gray-300 hover:text-gray-500"><X size={12} /></button>
-                                            <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full self-start ${cfg.bg}`}>{cfg.icon} {item.label}</span>
-                                            <p className="text-sm font-medium text-gray-700 leading-tight">{item.description}</p>
-                                            <span className="text-xs font-bold text-red-600 mt-auto">Action needed</span>
+                                        <div
+                                            key={broadcast._id}
+                                            className={`flex-shrink-0 w-40 rounded-lg border ${styles.border} ${styles.bg} px-2.5 py-2 flex flex-col gap-0.5 relative cursor-pointer hover:opacity-90 transition`}
+                                            onClick={() => setSelectedBroadcast(broadcast)}
+                                        >
+                                            <button onClick={(e) => { e.stopPropagation(); dismissBroadcast(broadcast._id); }} className={`absolute top-1 right-1 ${styles.dismiss}`}><X size={11} /></button>
+                                            <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full self-start ${styles.pill}`}>{styles.label}</span>
+                                            <p className={`text-xs font-bold ${styles.title} line-clamp-2 pr-3 leading-tight`}>{broadcast.title || `System ${styles.label}`}</p>
+                                            <p className={`text-xs ${styles.sub} mt-auto`}>{new Date(broadcast.createdAt).toLocaleDateString('en-GB')}</p>
                                         </div>
                                     );
                                 })}
@@ -28892,34 +28913,9 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                         </div>
                     )}
 
-                    {/* Divider between sections */}
-                    {hasReminders && hasNews && <div className="border-t border-gray-100 mx-4 flex-shrink-0" />}
-
-                    {/* News row */}
-                    {hasNews && (
-                        <div className="flex-shrink-0">
-                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 pt-2 pb-1">News</p>
-                            <div className="flex gap-2 overflow-x-auto px-4 pb-2 scrollbar-thin" style={{ scrollbarWidth: 'thin' }}>
-                                {broadcasts.map(broadcast => {
-                                    const styles = getBroadcastStyles(broadcast.broadcastType);
-                                    return (
-                                        <div
-                                            key={broadcast._id}
-                                            className={`flex-shrink-0 w-44 rounded-lg border ${styles.border} ${styles.bg} p-2.5 flex flex-col gap-1 relative cursor-pointer hover:opacity-90 transition`}
-                                            onClick={() => setSelectedBroadcast(broadcast)}
-                                        >
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); dismissBroadcast(broadcast._id); }}
-                                                className={`absolute top-1.5 right-1.5 ${styles.dismiss}`}
-                                            ><X size={12} /></button>
-                                            <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full self-start ${styles.pill}`}>{styles.label}</span>
-                                            <p className={`text-sm font-bold ${styles.title} leading-tight line-clamp-2 pr-4`}>{broadcast.title || `System ${styles.label}`}</p>
-                                            <p className={`text-xs ${styles.sub} mt-auto`}>{new Date(broadcast.createdAt).toLocaleDateString('en-GB')}</p>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
+                    {/* Only news, no reminders */}
+                    {!hasReminders && hasNews && (
+                        <div className="flex-1" />
                     )}
                 </div>
             )}
