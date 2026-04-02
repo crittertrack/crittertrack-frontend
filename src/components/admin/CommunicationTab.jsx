@@ -922,17 +922,13 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                 return (
                                     <div key={idx} className="poll-result-card">
                                         <div className="poll-header">
-                                            <strong>{poll.title}</strong>
+                                            <strong>{poll.pollQuestion || poll.title}</strong>
                                             <span className="poll-date">
                                                 {new Date(poll.createdAt).toLocaleString('en-GB')}
                                             </span>
                                         </div>
                                         
-                                        <div className="poll-question">
-                                            <h4>{poll.pollQuestion}</h4>
-                                        </div>
-                                        
-                                        <div className="poll-meta">
+                                        <div className="poll-options-results">
                                             <span>Total Votes: {totalVotes}</span>
                                             <span>Type: {poll.allowMultipleChoices ? 'Multiple Choice' : 'Single Choice'}</span>
                                             {poll.pollEndsAt && (
