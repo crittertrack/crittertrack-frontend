@@ -22396,6 +22396,8 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
     const [newAvailableAnimals, setNewAvailableAnimals] = useState([]);
     const [newUsers, setNewUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [animalSearch, setAnimalSearch] = useState('');
+    const [breederSearch, setBreederSearch] = useState('');
 
     // Fetch active community users (last 5 active only)
     useEffect(() => {
@@ -22594,8 +22596,24 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                         {favoriteAnimals.length === 0 ? (
                             <p className="text-gray-500 text-sm">No favorite animals yet. Visit animal profiles to add favorites!</p>
                         ) : (
-                            <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                                {favoriteAnimals.map(animal => {
+                            <>
+                                <div className="relative mb-2">
+                                    <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search favorites..."
+                                        value={animalSearch}
+                                        onChange={e => setAnimalSearch(e.target.value)}
+                                        className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
+                                    />
+                                </div>
+                                <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                                {favoriteAnimals.filter(animal => {
+                                    if (!animalSearch.trim()) return true;
+                                    const q = animalSearch.toLowerCase();
+                                    const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ').toLowerCase();
+                                    return fullName.includes(q) || (animal.id_public || '').toLowerCase().includes(q) || (animal.species || '').toLowerCase().includes(q);
+                                }).map(animal => {
                                     const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph', 'markings'];
                                     const variety = VARIETY_KEYS.map(k => animal[k]).filter(Boolean).join(' ');
                                     const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
@@ -22635,7 +22653,8 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                                         </div>
                                     );
                                 })}
-                            </div>
+                                </div>
+                            </>
                         )}
                     </div>
 
@@ -22648,8 +22667,24 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                         {favoriteUsers.length === 0 ? (
                             <p className="text-gray-500 text-sm">No favorite breeders yet. Visit breeder profiles to add favorites!</p>
                         ) : (
-                            <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                                {favoriteUsers.map(user => {
+                            <>
+                                <div className="relative mb-2">
+                                    <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search favorites..."
+                                        value={breederSearch}
+                                        onChange={e => setBreederSearch(e.target.value)}
+                                        className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
+                                    />
+                                </div>
+                                <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                                {favoriteUsers.filter(user => {
+                                    if (!breederSearch.trim()) return true;
+                                    const q = breederSearch.toLowerCase();
+                                    const displayName = ((user.showBreederName && user.breederName) ? user.breederName : ((user.showPersonalName ?? false) ? user.personalName : '')).toLowerCase();
+                                    return displayName.includes(q) || (user.id_public || '').toLowerCase().includes(q);
+                                }).map(user => {
                                     const displayName = (user.showBreederName && user.breederName)
                                         ? user.breederName
                                         : ((user.showPersonalName ?? false) ? user.personalName : 'Anonymous');
@@ -22684,7 +22719,8 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                                         </div>
                                     );
                                 })}
-                            </div>
+                                </div>
+                            </>
                         )}
                     </div>
 
