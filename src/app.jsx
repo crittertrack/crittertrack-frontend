@@ -10577,7 +10577,7 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
                                             <button
                                                 type="button"
                                                 onClick={() => onSelect(s.name)}
-                                                className={`w-full flex flex-col items-start p-2 border-2 rounded-lg text-left transition hover:shadow-md ${
+                                                className={`w-full h-20 flex flex-col items-start justify-center p-2 border-2 rounded-lg text-left transition hover:shadow-md ${
                                                     isFav
                                                         ? 'border-amber-300 bg-amber-50 hover:bg-amber-100'
                                                         : s.isDefault
@@ -10585,11 +10585,11 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
                                                         : 'border-gray-200 bg-white hover:border-primary/50 hover:bg-gray-50'
                                                 }`}
                                             >
-                                                <span className="font-medium text-sm text-gray-800 leading-tight pr-5">
+                                                <span className="font-medium text-sm text-gray-800 leading-tight pr-5 line-clamp-1">
                                                     {s.name}
                                                 </span>
                                                 {s.latinName && (
-                                                    <span className="text-xs italic text-gray-500 mt-0.5 leading-tight">{s.latinName}</span>
+                                                    <span className="text-xs italic text-gray-500 mt-0.5 leading-tight line-clamp-1">{s.latinName}</span>
                                                 )}
                                                 {s.category && (
                                                     <span className="mt-1 text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">{s.category}</span>
@@ -14719,7 +14719,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                                     <button
                                         onClick={() => onSelectSpecies(species.name)}
                                         data-tutorial-target={species.name === 'Fancy Mouse' ? 'species-fancy-mouse' : undefined}
-                                        className={`w-full p-4 border-2 text-lg font-semibold rounded-lg transition duration-150 shadow-md relative text-center ${
+                                        className={`w-full h-24 p-3 border-2 text-sm font-semibold rounded-lg transition duration-150 shadow-md relative text-center flex flex-col items-center justify-center ${
                                             isFav
                                                 ? 'border-amber-400 bg-amber-50 text-gray-800 hover:bg-amber-100'
                                                 : species.isDefault 
@@ -14727,9 +14727,9 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                                                 : 'border-accent bg-accent text-white hover:bg-accent/80'
                                         }`}
                                     >
-                                        {species.name}
+                                        <span className="line-clamp-2">{species.name}</span>
                                         {species.latinName && (
-                                            <p className={`text-xs italic mt-1 ${isFav || species.isDefault ? 'text-gray-600' : 'text-white/80'}`}>{species.latinName}</p>
+                                            <p className={`text-xs italic mt-1 line-clamp-1 ${isFav || species.isDefault ? 'text-gray-600' : 'text-white/80'}`}>{species.latinName}</p>
                                         )}
                                     </button>
                                     <button
