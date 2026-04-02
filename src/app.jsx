@@ -28833,7 +28833,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
             <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100 flex-shrink-0">
                 <div className="flex items-center gap-2">
                     <Bell size={15} className="text-primary" />
-                    <span className="font-semibold text-gray-800 text-sm">Reminders &amp; Broadcasts</span>
+                    <span className="font-semibold text-gray-800 text-sm">Reminders &amp; News</span>
                 </div>
                 {totalCount > 0 && (
                     <span className="text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full font-bold">{totalCount}</span>
