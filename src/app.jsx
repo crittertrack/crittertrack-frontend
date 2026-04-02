@@ -10493,6 +10493,8 @@ const SpeciesPickerModal = ({ speciesOptions, onSelect, onClose, X, Search }) =>
         setFavorites(prev => {
             const next = prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name];
             localStorage.setItem('speciesFavorites', JSON.stringify(next));
+            // Dispatch custom event for backend sync
+            window.dispatchEvent(new CustomEvent('speciesFavoritesChanged', { detail: next }));
             return next;
         });
     };
@@ -14646,6 +14648,8 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
         setFavorites(prev => {
             const next = prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name];
             localStorage.setItem('speciesFavorites', JSON.stringify(next));
+            // Dispatch custom event for backend sync
+            window.dispatchEvent(new CustomEvent('speciesFavoritesChanged', { detail: next }));
             return next;
         });
     };
@@ -30185,6 +30189,68 @@ const App = () => {
             console.log('[Cache Clear] Cache cleared successfully');
         }
     }, []);
+    
+    // Sync species favorites between localStorage and backend
+    useEffect(() => {
+        const syncSpeciesFavorites = async () => {
+            if (!authToken) return;
+            
+            try {
+                // Get current localStorage favorites
+                const localFavorites = JSON.parse(localStorage.getItem('speciesFavorites') || '[]');
+                
+                // Fetch from backend
+                const response = await axios.get(`${API_BASE_URL}/users/species-favorites`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                
+                const backendFavorites = response.data?.speciesFavorites || [];
+                
+                // Merge: union of both lists (take all unique favorites from both sources)
+                const mergedFavorites = [...new Set([...localFavorites, ...backendFavorites])];
+                
+                // Only update if there's a difference
+                if (JSON.stringify(mergedFavorites) !== JSON.stringify(backendFavorites)) {
+                    // Save merged favorites to backend
+                    await axios.post(`${API_BASE_URL}/users/species-favorites`, 
+                        { speciesFavorites: mergedFavorites },
+                        { headers: { Authorization: `Bearer ${authToken}` } }
+                    );
+                }
+                
+                // Update localStorage with merged favorites
+                localStorage.setItem('speciesFavorites', JSON.stringify(mergedFavorites));
+                
+                console.log('[SPECIES FAVORITES] Synced:', mergedFavorites.length, 'favorites');
+            } catch (error) {
+                console.error('[SPECIES FAVORITES] Sync error:', error);
+                // Silently fail - user can still use localStorage
+            }
+        };
+        
+        syncSpeciesFavorites();
+    }, [authToken, API_BASE_URL]);
+
+    // Listen for favorites changes to sync to backend
+    useEffect(() => {
+        if (!authToken) return;
+        
+        const syncToBackend = async (e) => {
+            try {
+                const favorites = e.detail; // from custom event
+                await axios.post(`${API_BASE_URL}/users/species-favorites`, 
+                    { speciesFavorites: favorites },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+                console.log('[SPECIES FAVORITES] Synced to backend after change');
+            } catch (error) {
+                console.error('[SPECIES FAVORITES] Failed to sync to backend:', error);
+            }
+        };
+        
+        window.addEventListener('speciesFavoritesChanged', syncToBackend);
+        return () => window.removeEventListener('speciesFavoritesChanged', syncToBackend);
+    }, [authToken, API_BASE_URL]);
     
     // Fetch and display user count on login/register screen
     useEffect(() => {
