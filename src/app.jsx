@@ -22446,13 +22446,12 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                 setFavoriteUsers(favUsers);
 
                 // Available animals from favorited users only
-                const favUserIds = new Set(favUsers.map(u => u.id_public));
-                if (favUserIds.size > 0) {
+                const favUserIds = favUsers.map(u => u.id_public).filter(Boolean);
+                if (favUserIds.length > 0) {
                     const availRes = await axios.get(
-                        `${API_BASE_URL}/public/animals/recent-available?limit=50`
+                        `${API_BASE_URL}/public/animals/recent-available?ownerIds=${favUserIds.join(',')}&limit=50`
                     ).catch(() => ({ data: [] }));
-                    const fromFavUsers = (availRes.data || []).filter(a => favUserIds.has(a.ownerId_public));
-                    setNewAvailableAnimals(fromFavUsers.slice(0, 10));
+                    setNewAvailableAnimals(availRes.data || []);
                 } else {
                     setNewAvailableAnimals([]);
                 }
