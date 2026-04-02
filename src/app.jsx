@@ -29000,13 +29000,20 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                                     return (
                                         <div
                                             key={broadcast._id}
-                                            className={`flex-shrink-0 w-48 rounded-lg border ${styles.border} ${styles.bg} px-2.5 py-2 flex flex-col gap-1 relative cursor-pointer hover:opacity-90 transition h-full`}
+                                            className={`flex-shrink-0 w-48 rounded-lg border ${styles.border} ${styles.bg} px-2.5 py-2 flex flex-col gap-1 relative cursor-pointer hover:opacity-90 transition h-full overflow-hidden`}
                                             onClick={() => setSelectedBroadcast(broadcast)}
                                         >
                                             <button onClick={(e) => { e.stopPropagation(); dismissBroadcast(broadcast._id); }} className={`absolute top-1 right-1 ${styles.dismiss}`}><X size={11} /></button>
                                             <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full self-start ${styles.pill}`}>{styles.label}</span>
                                             <p className={`text-xs font-bold ${styles.title} line-clamp-2 pr-3 leading-tight`}>{broadcast.title || `System ${styles.label}`}</p>
-                                            {broadcast.message && (
+                                            {broadcast.broadcastType === 'poll' && broadcast.pollQuestion ? (
+                                                <>
+                                                    <p className={`text-xs ${styles.text} line-clamp-3 leading-snug flex-1`}>{broadcast.pollQuestion}</p>
+                                                    {broadcast.pollOptions?.[0] && (
+                                                        <p className={`text-xs ${styles.text} opacity-70 line-clamp-1 leading-snug`}>• {broadcast.pollOptions[0].text}</p>
+                                                    )}
+                                                </>
+                                            ) : broadcast.message && (
                                                 <p className={`text-xs ${styles.text} line-clamp-4 leading-snug flex-1`}>{broadcast.message}</p>
                                             )}
                                             <p className={`text-xs ${styles.sub} mt-auto`}>{new Date(broadcast.createdAt).toLocaleDateString('en-GB')}</p>
