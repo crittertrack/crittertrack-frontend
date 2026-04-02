@@ -1,5 +1,5 @@
-// Force deployment trigger - donation badges fix (gift icon + PublicProfile sync)
-// Date: 2026-03-27
-// Purpose: Fix donation badge display on community feed, public profiles, and breeders registry
-// Build: v12 - Fixed service worker caching
-export const DEPLOYMENT_TIMESTAMP = '2026-03-27T02:00:00Z';
+// Force deployment trigger - Community page with favorites system
+// Date: 2026-04-02
+// Purpose: Deploy new Community page with favorites (animals & users) and activity feeds
+// Build: v13 - Favorites system integration
+export const DEPLOYMENT_TIMESTAMP = '2026-04-02T21:30:00Z';
