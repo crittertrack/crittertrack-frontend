@@ -1,6 +1,6 @@
 ﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
 import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2 } from 'lucide-react';
 import ArchiveScreen from './components/ArchiveScreen';
@@ -22271,15 +22271,28 @@ const DonationView = ({ onBack, authToken, userProfile }) => {
 // ==================== BREEDER DIRECTORY VIEW ====================
 const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [breeders, setBreeders] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedSpecies, setSelectedSpecies] = useState('');
-    const [selectedCountry, setSelectedCountry] = useState('');
-    const [selectedState, setSelectedState] = useState('');
+    
+    // Initialize filters from URL params
+    const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+    const [selectedSpecies, setSelectedSpecies] = useState(searchParams.get('species') || '');
+    const [selectedCountry, setSelectedCountry] = useState(searchParams.get('country') || '');
+    const [selectedState, setSelectedState] = useState(searchParams.get('state') || '');
     const [availableSpecies, setAvailableSpecies] = useState([]);
     const [availableCountries, setAvailableCountries] = useState([]);
     const [availableStates, setAvailableStates] = useState([]);
+
+    // Update URL params when filters change
+    useEffect(() => {
+        const params = {};
+        if (searchQuery) params.search = searchQuery;
+        if (selectedSpecies) params.species = selectedSpecies;
+        if (selectedCountry) params.country = selectedCountry;
+        if (selectedState) params.state = selectedState;
+        setSearchParams(params, { replace: true });
+    }, [searchQuery, selectedSpecies, selectedCountry, selectedState]);
 
     // Fetch breeders on mount
     useEffect(() => {
