@@ -320,7 +320,9 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             transferHistory: animal.transferHistory || '',
             breedingRestrictions: animal.breedingRestrictions || '',
             exportRestrictions: animal.exportRestrictions || '',
-            ownershipHistory: animal.ownershipHistory || []
+            ownershipHistory: animal.ownershipHistory || [],
+            // Gallery
+            extraImages: animal.extraImages || []
         };
         setEditForm(formData);
         setOriginalEditForm(formData); // Store original values for comparison
@@ -372,10 +374,6 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
         setShowBreederSearch(false);
         setBreederSearchQuery('');
         setBreederSearchResults([]);
-    };
-    
-    const clearOwner = () => {
-        setEditForm(prev => ({ ...prev, ownerId_public: '' }));
     };
     
     const clearBreeder = () => {
@@ -903,83 +901,36 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                             </button>
                         </div>
 
-                        {/* Tab Navigation */}
+                        {/* Tab Navigation - ALL 16 TABS (15 standard + Reports) */}
                         <div className="modal-tabs">
-                            <div className="modal-tabs-row">
-                                <button 
-                                    className={`tab ${viewActiveTab === 'overview' ? 'active' : ''}`}
-                                    onClick={() => setViewActiveTab('overview')}
-                                >
-                                    📋 Overview
-                                </button>
-                                <button 
-                                    className={`tab ${viewActiveTab === 'status' ? 'active' : ''}`}
-                                    onClick={() => setViewActiveTab('status')}
-                                >
-                                    🔒 Status
-                                </button>
-                                <button 
-                                    className={`tab ${viewActiveTab === 'physical' ? 'active' : ''}`}
-                                    onClick={() => setViewActiveTab('physical')}
-                                >
-                                    🎨 Physical
-                                </button>
-                                <button 
-                                    className={`tab ${viewActiveTab === 'identification' ? 'active' : ''}`}
-                                    onClick={() => setViewActiveTab('identification')}
-                                >
-                                    🏷️ Identification
-                                </button>
-                                <button 
-                                    className={`tab ${viewActiveTab === 'lineage' ? 'active' : ''}`}
-                                    onClick={() => setViewActiveTab('lineage')}
-                                >
-                                    🌳 Lineage
-                                </button>
-                                <button 
-                                    className={`tab ${viewActiveTab === 'breeding' ? 'active' : ''}`}
-                                    onClick={() => setViewActiveTab('breeding')}
-                                >
-                                    🫘 Breeding
-                                </button>
-                            </div>
-                            <div className="modal-tabs-row">
-                                <button 
-                                    className={`tab ${viewActiveTab === 'health' ? 'active' : ''}`}
-                                    onClick={() => setViewActiveTab('health')}
-                                >
-                                    🏥 Health
-                                </button>
-                                <button 
-                                    className={`tab ${viewActiveTab === 'husbandry' ? 'active' : ''}`}
-                                    onClick={() => setViewActiveTab('husbandry')}
-                                >
-                                    🏠 Husbandry
-                                </button>
-                                <button 
-                                    className={`tab ${viewActiveTab === 'behavior' ? 'active' : ''}`}
-                                    onClick={() => setViewActiveTab('behavior')}
-                                >
-                                    🧠 Behavior
-                                </button>
-                                <button 
-                                    className={`tab ${viewActiveTab === 'records' ? 'active' : ''}`}
-                                    onClick={() => setViewActiveTab('records')}
-                                >
-                                    📝 Records
-                                </button>
-                                <button 
-                                    className={`tab ${viewActiveTab === 'endoflife' ? 'active' : ''}`}
-                                    onClick={() => setViewActiveTab('endoflife')}
-                                >
-                                    ⚖️ End of Life
-                                </button>
-                                <button 
-                                    className={`tab ${viewActiveTab === 'reports' ? 'active' : ''}`}
-                                    onClick={() => setViewActiveTab('reports')}
-                                >
-                                    ⚠️ Reports
-                                </button>
+                            <div className="modal-tabs-row" style={{display: 'flex', flexWrap: 'wrap', gap: '0.25rem'}}>
+                                {[
+                                    { id: 'overview', label: 'Overview', icon: '📋' },
+                                    { id: 'status', label: 'Status & Privacy', icon: '🔒' },
+                                    { id: 'physical', label: 'Physical', icon: '🎨' },
+                                    { id: 'identification', label: 'Identification', icon: '🏷️' },
+                                    { id: 'lineage', label: 'Lineage', icon: '🌳' },
+                                    { id: 'breeding', label: 'Breeding', icon: '🥚' },
+                                    { id: 'health', label: 'Health', icon: '🏥' },
+                                    { id: 'husbandry', label: 'Animal Care', icon: '🏠' },
+                                    { id: 'behavior', label: 'Behavior', icon: '🧠' },
+                                    { id: 'records', label: 'Records', icon: '📝' },
+                                    { id: 'endoflife', label: 'End of Life', icon: '⚖️' },
+                                    { id: 'show', label: 'Show', icon: '🏆' },
+                                    { id: 'legal', label: 'Legal', icon: '📄' },
+                                    { id: 'gallery', label: 'Gallery', icon: '🖼️' },
+                                    { id: 'logs', label: 'Logs', icon: '📜' },
+                                    { id: 'reports', label: 'Reports', icon: '⚠️' }
+                                ].map(tab => (
+                                    <button 
+                                        key={tab.id}
+                                        className={`tab ${viewActiveTab === tab.id ? 'active' : ''}`}
+                                        onClick={() => setViewActiveTab(tab.id)}
+                                        style={{flexShrink: 0}}
+                                    >
+                                        {tab.icon} {tab.label}
+                                    </button>
+                                ))}
                             </div>
                         </div>
 
@@ -1546,6 +1497,100 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                     </div>
                                 )}
 
+                                {/* Show Tab */}
+                                {viewActiveTab === 'show' && (
+                                    <div className="tab-panel">
+                                        <div className="animal-detail-section">
+                                            <h4>Show Titles & Ratings</h4>
+                                            <div className="detail-grid">
+                                                <div><strong>Show Titles:</strong> {selectedAnimal.showTitles || '-'}</div>
+                                                <div><strong>Show Ratings:</strong> {selectedAnimal.showRatings || '-'}</div>
+                                                <div><strong>Judge Comments:</strong> <span style={{whiteSpace: 'pre-wrap'}}>{selectedAnimal.judgeComments || '-'}</span></div>
+                                            </div>
+                                        </div>
+
+                                        {selectedAnimal.species?.toLowerCase() === 'dog' && (
+                                            <div className="animal-detail-section">
+                                                <h4>Working & Performance</h4>
+                                                <div className="detail-grid">
+                                                    <div><strong>Working Titles:</strong> {selectedAnimal.workingTitles || '-'}</div>
+                                                    <div><strong>Performance Scores:</strong> {selectedAnimal.performanceScores || '-'}</div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Legal Tab */}
+                                {viewActiveTab === 'legal' && (
+                                    <div className="tab-panel">
+                                        <div className="animal-detail-section">
+                                            <h4>Licensing & Permits</h4>
+                                            <div className="detail-grid">
+                                                <div><strong>License Number:</strong> {selectedAnimal.licenseNumber || '-'}</div>
+                                                <div><strong>License Jurisdiction:</strong> {selectedAnimal.licenseJurisdiction || '-'}</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="animal-detail-section">
+                                            <h4>Legal & Administrative</h4>
+                                            <div className="detail-grid">
+                                                <div><strong>Insurance:</strong> <span style={{whiteSpace: 'pre-wrap'}}>{selectedAnimal.insurance || '-'}</span></div>
+                                                <div><strong>Legal Status:</strong> <span style={{whiteSpace: 'pre-wrap'}}>{selectedAnimal.legalStatus || '-'}</span></div>
+                                            </div>
+                                        </div>
+
+                                        <div className="animal-detail-section">
+                                            <h4>Restrictions</h4>
+                                            <div className="detail-grid">
+                                                <div><strong>Breeding Restrictions:</strong> <span style={{whiteSpace: 'pre-wrap'}}>{selectedAnimal.breedingRestrictions || '-'}</span></div>
+                                                <div><strong>Export Restrictions:</strong> <span style={{whiteSpace: 'pre-wrap'}}>{selectedAnimal.exportRestrictions || '-'}</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Gallery Tab */}
+                                {viewActiveTab === 'gallery' && (
+                                    <div className="tab-panel">
+                                        <div className="animal-detail-section">
+                                            <h4>Photo Gallery ({(selectedAnimal.extraImages || []).length} / 20 photos)</h4>
+                                            {(selectedAnimal.extraImages || []).length === 0 ? (
+                                                <div style={{textAlign: 'center', padding: '40px', color: '#999'}}>
+                                                    <div style={{fontSize: '48px', marginBottom: '10px'}}>📷</div>
+                                                    <p>No extra photos yet. Add photos in Edit mode.</p>
+                                                </div>
+                                            ) : (
+                                                <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px'}}>
+                                                    {(selectedAnimal.extraImages || []).map((url, idx) => (
+                                                        <div key={idx} style={{position: 'relative', aspectRatio: '1', borderRadius: '8px', overflow: 'hidden', border: '1px solid #ddd'}}>
+                                                            <img src={url} alt={`Gallery ${idx + 1}`} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                                                            <span style={{position: 'absolute', bottom: '4px', left: '4px', background: 'rgba(0,0,0,0.6)', color: 'white', fontSize: '10px', padding: '2px 6px', borderRadius: '3px'}}>#{idx + 1}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Logs Tab */}
+                                {viewActiveTab === 'logs' && (
+                                    <div className="tab-panel">
+                                        <div className="animal-detail-section">
+                                            <h4>Activity Logs</h4>
+                                            <p style={{color: '#666', fontSize: '14px', marginBottom: '10px'}}>
+                                                Logs show feeding, care updates, and field edits for this animal.
+                                            </p>
+                                            <div style={{textAlign: 'center', padding: '40px', color: '#999'}}>
+                                                <div style={{fontSize: '48px', marginBottom: '10px'}}>📜</div>
+                                                <p>Activity logs are available in the user's private animal detail view.</p>
+                                                <p style={{fontSize: '12px', marginTop: '10px'}}>Moderators see animal data but not owner-specific activity logs.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Reports Tab */}
                                 {viewActiveTab === 'reports' && (
                                     <div className="tab-panel">
@@ -1602,7 +1647,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                         <EyeOff size={14} /> Hide from Public
                                     </button>
                                 )}
-                                {userRole === 'admin' && (
+                                {['admin', 'moderator'].includes(userRole) && (
                                     <button 
                                         className="btn-danger"
                                         onClick={() => setShowDeleteConfirm(true)}
@@ -1630,83 +1675,91 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                         </div>
 
                         {/* Tab Navigation */}
-                        <div className="modal-tabs">
-                            <div className="modal-tabs-row">
-                                <button 
-                                    className={`tab ${editActiveTab === 'overview' ? 'active' : ''}`}
-                                    onClick={() => setEditActiveTab('overview')}
-                                >
-                                    📋 Overview
-                                </button>
-                                <button 
-                                    className={`tab ${editActiveTab === 'status' ? 'active' : ''}`}
-                                    onClick={() => setEditActiveTab('status')}
-                                >
-                                    🔒 Status
-                                </button>
-                                <button 
-                                    className={`tab ${editActiveTab === 'physical' ? 'active' : ''}`}
-                                    onClick={() => setEditActiveTab('physical')}
-                                >
-                                    🎨 Physical
-                                </button>
-                                <button 
-                                    className={`tab ${editActiveTab === 'identification' ? 'active' : ''}`}
-                                    onClick={() => setEditActiveTab('identification')}
-                                >
-                                    🏷️ Identification
-                                </button>
-                                <button 
-                                    className={`tab ${editActiveTab === 'lineage' ? 'active' : ''}`}
-                                    onClick={() => setEditActiveTab('lineage')}
-                                >
-                                    🌳 Lineage
-                                </button>
-                                <button 
-                                    className={`tab ${editActiveTab === 'breeding' ? 'active' : ''}`}
-                                    onClick={() => setEditActiveTab('breeding')}
-                                >
-                                    🫘 Breeding
-                                </button>
-                            </div>
-                            <div className="modal-tabs-row">
-                                <button 
-                                    className={`tab ${editActiveTab === 'health' ? 'active' : ''}`}
-                                    onClick={() => setEditActiveTab('health')}
-                                >
-                                    🏥 Health
-                                </button>
-                                <button 
-                                    className={`tab ${editActiveTab === 'husbandry' ? 'active' : ''}`}
-                                    onClick={() => setEditActiveTab('husbandry')}
-                                >
-                                    🏠 Husbandry
-                                </button>
-                                <button 
-                                    className={`tab ${editActiveTab === 'behavior' ? 'active' : ''}`}
-                                    onClick={() => setEditActiveTab('behavior')}
-                                >
-                                    🧠 Behavior
-                                </button>
-                                <button 
-                                    className={`tab ${editActiveTab === 'records' ? 'active' : ''}`}
-                                    onClick={() => setEditActiveTab('records')}
-                                >
-                                    📝 Records
-                                </button>
-                                <button 
-                                    className={`tab ${editActiveTab === 'endoflife' ? 'active' : ''}`}
-                                    onClick={() => setEditActiveTab('endoflife')}
-                                >
-                                    ⚖️ End of Life
-                                </button>
-                                <button 
-                                    className={`tab ${editActiveTab === 'show' ? 'active' : ''}`}
-                                    onClick={() => setEditActiveTab('show')}
-                                >
-                                    🏆 Show
-                                </button>
-                            </div>
+                        <div className="modal-tabs" style={{display: 'flex', flexWrap: 'wrap', gap: '5px'}}>
+                            <button 
+                                className={`tab ${editActiveTab === 'overview' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('overview')}
+                            >
+                                📋 Overview
+                            </button>
+                            <button 
+                                className={`tab ${editActiveTab === 'status' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('status')}
+                            >
+                                🔒 Status
+                            </button>
+                            <button 
+                                className={`tab ${editActiveTab === 'physical' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('physical')}
+                            >
+                                🎨 Physical
+                            </button>
+                            <button 
+                                className={`tab ${editActiveTab === 'identification' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('identification')}
+                            >
+                                🏷️ Identification
+                            </button>
+                            <button 
+                                className={`tab ${editActiveTab === 'lineage' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('lineage')}
+                            >
+                                🌳 Lineage
+                            </button>
+                            <button 
+                                className={`tab ${editActiveTab === 'breeding' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('breeding')}
+                            >
+                                🫘 Breeding
+                            </button>
+                            <button 
+                                className={`tab ${editActiveTab === 'health' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('health')}
+                            >
+                                🏥 Health
+                            </button>
+                            <button 
+                                className={`tab ${editActiveTab === 'husbandry' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('husbandry')}
+                            >
+                                🏠 Husbandry
+                            </button>
+                            <button 
+                                className={`tab ${editActiveTab === 'behavior' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('behavior')}
+                            >
+                                🧠 Behavior
+                            </button>
+                            <button 
+                                className={`tab ${editActiveTab === 'records' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('records')}
+                            >
+                                📝 Records
+                            </button>
+                            <button 
+                                className={`tab ${editActiveTab === 'endoflife' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('endoflife')}
+                            >
+                                ⚖️ End of Life
+                            </button>
+                            <button 
+                                className={`tab ${editActiveTab === 'show' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('show')}
+                            >
+                                🏆 Show
+                            </button>
+                            <button 
+                                className={`tab ${editActiveTab === 'legal' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('legal')}
+                            >
+                                ⚖️ Legal
+                            </button>
+                            <button 
+                                className={`tab ${editActiveTab === 'gallery' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('gallery')}
+                            >
+                                📷 Gallery
+                            </button>
                         </div>
 
                         <div className="animal-modal-body">
@@ -1830,9 +1883,6 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                                         <button type="button" className="btn-small" onClick={() => setShowOwnerSearch(!showOwnerSearch)}>
                                                             {showOwnerSearch ? 'Cancel' : 'Change'}
                                                         </button>
-                                                        {editForm.ownerId_public && (
-                                                            <button type="button" className="btn-small btn-danger" onClick={clearOwner}>Clear</button>
-                                                        )}
                                                     </div>
                                                 </div>
                                                 {showOwnerSearch && (
@@ -2870,6 +2920,71 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                                 </div>
                                             </div>
                                         )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Tab 13: Legal */}
+                            {editActiveTab === 'legal' && (
+                                <div className="tab-panel">
+                                    <div className="edit-form">
+                                        <div className="form-section">
+                                            <h4 className="section-title">Licensing & Permits</h4>
+                                            <div className="form-row">
+                                                <label>License Number</label>
+                                                <input type="text" value={editForm.licenseNumber || ''} onChange={(e) => setEditForm({...editForm, licenseNumber: e.target.value})} />
+                                            </div>
+                                            <div className="form-row">
+                                                <label>License Jurisdiction</label>
+                                                <input type="text" value={editForm.licenseJurisdiction || ''} onChange={(e) => setEditForm({...editForm, licenseJurisdiction: e.target.value})} />
+                                            </div>
+                                        </div>
+
+                                        <div className="form-section">
+                                            <h4 className="section-title">Legal & Administrative</h4>
+                                            <div className="form-row full-width">
+                                                <label>Insurance</label>
+                                                <textarea rows={3} value={editForm.insurance || ''} onChange={(e) => setEditForm({...editForm, insurance: e.target.value})} />
+                                            </div>
+                                            <div className="form-row full-width">
+                                                <label>Legal Status</label>
+                                                <textarea rows={3} value={editForm.legalStatus || ''} onChange={(e) => setEditForm({...editForm, legalStatus: e.target.value})} />
+                                            </div>
+                                        </div>
+
+                                        <div className="form-section">
+                                            <h4 className="section-title">Restrictions</h4>
+                                            <div className="form-row full-width">
+                                                <label>Breeding Restrictions</label>
+                                                <textarea rows={3} value={editForm.breedingRestrictions || ''} onChange={(e) => setEditForm({...editForm, breedingRestrictions: e.target.value})} />
+                                            </div>
+                                            <div className="form-row full-width">
+                                                <label>Export Restrictions</label>
+                                                <textarea rows={3} value={editForm.exportRestrictions || ''} onChange={(e) => setEditForm({...editForm, exportRestrictions: e.target.value})} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Tab 14: Gallery */}
+                            {editActiveTab === 'gallery' && (
+                                <div className="tab-panel">
+                                    <div className="edit-form">
+                                        <div className="form-section">
+                                            <h4 className="section-title">Photo Gallery</h4>
+                                            <p style={{fontSize: '14px', color: '#666', marginBottom: '15px'}}>
+                                                Extra images for this animal. Currently {(editForm.extraImages || []).length} / 20 photos.
+                                            </p>
+                                            <div style={{background: '#f9f9f9', border: '1px solid #ddd', borderRadius: '8px', padding: '20px', textAlign: 'center'}}>
+                                                <p style={{color: '#999', fontSize: '14px'}}>
+                                                    📷 Gallery management (add/remove photos) is handled through the standard animal edit interface.
+                                                </p>
+                                                <p style={{color: '#999', fontSize: '12px', marginTop: '10px'}}>
+                                                    Moderators can view gallery photos in the View tab but cannot modify them here.
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             )}

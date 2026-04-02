@@ -1,0 +1,81 @@
+ID,Full Name,Name,Prefix,Sex,Sire ID,Dam ID,Owner CTU ID,Owned
+CTC682,F2,F2,,Female,CTC679,CTC630,,Yes
+CTC683,M2,M2,,Male,CTC679,CTC630,,Yes
+CTC684,M3,M3,,Male,CTC679,CTC630,,Yes
+CTC685,F4,F4,,Female,CTC679,CTC630,,Yes
+CTC686,F3,F3,,Female,CTC679,CTC630,,Yes
+CTC735,TnS Qoro,Qoro,TnS,Male,CTC739,CTC740,,Yes
+CTC738,TnS Liyuu,Liyuu,TnS,Female,CTC745,CTC746,,Yes
+CTC742,TnS Okiru,Okiru,TnS,Female,CTC753,CTC754,,Yes
+CTC758,TnS Zettai,Zettai,TnS,Male,CTC760,CTC761,,Yes
+CTC762,TnS Hachiman,Hachiman,TnS,Male,CTC778,CTC779,,Yes
+CTC764,TnS Poteto,Poteto,TnS,Male,CTC766,CTC767,,Yes
+CTC766,TnS Suiteki,Suiteki,TnS,Male,CTC781,CTC782,,Yes
+CTC771,TnS Bakebi,Bakebi,TnS,Female,CTC772,CTC773,,Yes
+CTC791,TnS Umai,Umai,TnS,Female,CTC792,CTC793,,Yes
+CTC793,TnS Onu,Onu,TnS,Female,CTC753,CTC740,,Yes
+CTC951,TnS Nanami,Nanami,TnS,Female,CTC781,CTC780,,Yes
+CTC956,TnS Likka,Likka,TnS,Female,CTC950,CTC970,,Yes
+CTC957,MLP Brie,Brie,MLP,Male,CTC959,CTC960,,No
+CTC981,TnS Bimyo,Bimyo,TnS,Female,CTC781,CTC985,,Yes
+CTC982,TnS Shoji,Shoji,TnS,Female,CTC983,CTC984,,Yes
+CTC1055,DA Whimsy,Whimsy,DA,Male,CTC63,CTC64,,Yes
+CTC1860,SLM's Oddy,Oddy,SLM's,Male,CTC679,CTC630,,Yes
+CTC1861,SLM's Pasta,Pasta,SLM's,Male,CTC679,CTC630,,Yes
+CTC1968,SLM's Yūzu,Yūzu,SLM's,Male,CTC679,CTC630,,Yes
+CTC2244,SLM's Uzu,Uzu,SLM's,Male,CTC679,CTC630,,Yes
+CTC2245,SLM's Ted,Ted,SLM's,Male,CTC631,CTC658,,Yes
+CTC2246,SLM's Toes,Toes,SLM's,Male,CTC597,CTC628,,Yes
+CTC154,JW Ravi,Ravi,JW,Male,,,,Yes
+CTC155,MOW Maya,Maya,MOW,Female,,,,Yes
+CTC156,MLP Anna,Anna,MLP,Female,CTC157,CTC168,,Yes
+CTC172,TnS Jiro,Jiro,TnS,Male,CTC776,CTC777,,Yes
+CTC174,TnS Sasori,Sasori,TnS,Male,CTC913,CTC914,,Yes
+CTC180,JW Rose,Rose,JW,Female,,,,Yes
+CTC182,JW Sara,Sara,JW,Female,,,,Yes
+CTC197,BE Brindles,Brindles,BE,Female,,,,No
+CTC207,HV Emerald,Emerald,HV,Male,CTC211,CTC212,,No
+CTC254,PvK Gimli,Gimli,PvK,Male,,,,No
+CTC279,PvK Java,Java,PvK,Female,,,,No
+CTC286,LB Blcky,Blcky,LB,Female,,,,No
+CTC290,CMM Black Eye White,Black Eye White,CMM,Female,,,,No
+CTC295,M&M Praline,Praline,M&M,Female,,,,No
+CTC298,TnS Shina,Shina,TnS,Female,CTC878,CTC879,,Yes
+CTC30,RM Lola,Lola,RM,Female,,,,No
+CTC371,TOM Astrid,Astrid,TOM,Female,,,,No
+CTC385,MJ Lila,Lila,MJ,Female,,,,No
+CTC44,YR Pride,Pride,YR,Male,,,,No
+CTC45,AM Betty,Betty,AM,Female,,,,No
+CTC49,FF Red Sable,Red Sable,FF,Male,,,,No
+CTC50,FF Jazz,Jazz,FF,Female,,,,No
+CTC51,PvK Argente Brindle,Argente Brindle,PvK,Male,,,,No
+CTC52,PvK Tricolor,Tricolor,PvK,Female,,,,No
+CTC529,TnS Panikku,Panikku,TnS,Male,,,,Yes
+CTC530,MMM Daenerys,Daenerys,MMM,Female,,,,No
+CTC601,SLM'S Dobby von Zaandam,Dobby von Zaandam,SLM'S,Male,,,,Yes
+CTC657,SLM's Cocoa,Cocoa,SLM's,Female,,,,Yes
+CTC733,TnS Liichi,Liichi,TnS,Male,CTC735,CTC736,,Yes
+CTC734,TnS Fuyumi,Fuyumi,TnS,Female,CTC737,CTC738,,Yes
+CTC736,TnS Nozomu,Nozomu,TnS,Female,CTC741,CTC742,,Yes
+CTC741,LB Irie,Irie,LB,Male,,,,No
+CTC748,TnS Inoko,Inoko,TnS,Female,CTC749,CTC750,,Yes
+CTC755,TnS Misuzu,Misuzu,TnS,Female,CTC756,CTC757,,Yes
+CTC759,TnS Harumi,Harumi,TnS,Female,CTC762,CTC763,,Yes
+CTC765,TnS Peji,Peji,TnS,Female,CTC739,CTC768,,Yes
+CTC774,TnS Naoko,Naoko,TnS,Female,CTC174,CTC911,,Yes
+CTC780,TnS Natsuki,Natsuki,TnS,Female,CTC912,CTC935,,Yes
+CTC789,MMM Abracadabra,Abracadabra,MMM,Male,,,,No
+CTC790,MMM A+,A+,MMM,Female,,,,No
+CTC794,TnS Noboru,Noboru,TnS,Female,CTC741,CTC742,,Yes
+CTC814,PM Bambi,Bambi,PM,Female,,,,Yes
+CTC815,PM Splash,Splash,PM,Female,,,,Yes
+CTC886,TnS Teruko,Teruko,TnS,Female,CTC887,CTC888,,Yes
+CTC899,TnS Mitsurin,Mitsurin,TnS,Female,CTC749,CTC900,,Yes
+CTC952,TnS Mizuki,Mizuki,TnS,Female,CTC756,CTC757,,Yes
+CTC953,TnS Jigoku,Jigoku,TnS,Male,CTC955,CTC956,,Yes
+CTC954,TnS Yuushou,Yuushou,TnS,Female,CTC980,CTC981,,Yes
+CTC961,HV Dash,Dash,HV,Male,CTC211,CTC45,,No
+CTC971,TnS Kami,Kami,TnS,Female,CTC912,CTC972,,Yes
+CTC972,TnS Ibuki,Ibuki,TnS,Female,CTC973,CTC974,,Yes
+CTC986,Iwa,Iwa,,Female,,,,No
+CTC169,MW Bertus,Bertus,MW,Male,CTC170,CTC171,,No

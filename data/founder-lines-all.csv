@@ -1,0 +1,941 @@
+ID,Full Name,Owner CTU ID,Owned,Founder Lines
+CTC100,MLP Vivian,CTU2,No,Pawfriends Line
+CTC101,MM Delcia,CTU1,No,New Merle Line
+CTC102,MM Daevy,CTU2,No,New Merle Line
+CTC1027,DM Kaia,CTU2,Yes,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2; Quattro Line
+CTC103,RM Doria,CTU2,No,
+CTC104,MLP Wayla,CTU2,No,Pawfriends Line
+CTC105,MLP Wyna,CTU2,No,Pawfriends Line
+CTC1055,DA Whimsy,,Yes,
+CTC1058,DM Raya,,Yes,
+CTC1059,DM Shanti,,Yes,
+CTC106,MLP Wende,CTU2,No,
+CTC1062,DM Helga,,Yes,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2; Quattro Line
+CTC1064,DM Fuzzby,,Yes,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2; Quattro Line
+CTC1065,DM Kitty,,Yes,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2; Quattro Line
+CTC107,MM Gabriella,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC108,MM Haidera,CTU1,No,Legacy Red Line; Polish Line
+CTC109,MM Habiba Marion,CTU2,No,Legacy Red Line; Polish Line
+CTC1096,DM Eva,,Yes,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC11,MM Rizzo,CTU2,Yes,Legacy Red Line; Polish Line
+CTC110,MM Ivey,CTU2,No,Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC1102,DM Perdita 2.0,,No,
+CTC1103,SLM's Dumbo,,No,
+CTC1106,H15-M4 Kassy,CTU2,No,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC1107,H15-M5 Marion,CTU2,No,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC1108,MM Holly,CTU2,Yes,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC1109,MM Hera,CTU2,Yes,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC111,MM Jimena,CTU2,Yes,Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC1110,MM Hikari,CTU9,Yes,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC1111,H15-M3 Kassy,CTU2,No,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC1112,H15-M2,CTU2,No,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC1115,I15-M4,CTU2,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC1116,I15-F4,CTU2,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC1117,I15-F1,CTU2,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC1118,I15-F3,CTU2,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC1119,I15-M3,CTU2,Yes,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC112,MM Journey,CTU1,No,Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC1120,I15-M2,CTU2,Yes,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC1121,I15-M1,CTU2,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC1122,I15-F2,CTU2,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC1123,RM Fergie,CTU2,No,Legacy Red Line; Polish Line
+CTC1124,RM Marten Sable,CTU2,No,Legacy Red Line; Polish Line
+CTC1125,RM BEW,CTU2,No,
+CTC113,MM Kenzie,CTU2,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC114,MM Lexi,CTU2,Yes,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC115,MM Lottie,CTU2,Yes,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC116,M3 Mavi,CTU2,No,
+CTC117,M3 Navy,CTU1,No,
+CTC118,MM Myrrh,CTU2,Yes,Legacy Red Line
+CTC1189,SLM's Ice Queen,,Yes,Legacy Red Line; Polish Line
+CTC119,MM Manisha,CTU2,No,Legacy Red Line
+CTC120,MM Meadow,CTU2,No,Legacy Red Line
+CTC121,MM Melina,CTU2,No,Legacy Red Line
+CTC122,MM Primrose,CTU2,No,Legacy Red Line; Polish Line
+CTC123,MM Marla,CTU2,No,Legacy Brindle Line
+CTC1236,MD Joep,,Yes,
+CTC124,MM Ursula,CTU2,No,Legacy Red Line; Polish Line
+CTC1247,MM J15-M2,CTU2,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC1248,MM J15-F2,CTU2,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC1249,MM J15-F1,CTU2,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC125,MM Ultima,CTU2,No,Legacy Red Line; Polish Line
+CTC1250,MM J15-M3,CTU2,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC1251,MM J15-M1,CTU2,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC1252,MM J15-M4,CTU2,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC1253,MM J15-F3,CTU2,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC1254,MM J15-F4,CTU2,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC1255,MM K15-M1,CTU2,No,Legacy Red Line
+CTC1256,MM K15-F2,CTU2,No,Legacy Red Line
+CTC1257,MM K15-M3,CTU2,No,Legacy Red Line
+CTC1258,MM K15-M5,CTU2,No,Legacy Red Line
+CTC1259,MM K15-F1,CTU2,No,Legacy Red Line
+CTC126,MM Atari,CTU2,Yes,
+CTC1260,MM K15-M4,CTU2,No,Legacy Red Line
+CTC1261,MM K15-M2,CTU2,No,Legacy Red Line
+CTC1262,MM L15-M5,CTU2,No,Legacy Red Line; Polish Line
+CTC1263,MM Lyra,CTU9,Yes,Legacy Red Line; Polish Line
+CTC1264,MM L15-M4,CTU2,No,Legacy Red Line; Polish Line
+CTC1265,MM L15-F1,CTU2,No,Legacy Red Line; Polish Line
+CTC1266,MM L15-M6,CTU2,No,Legacy Red Line; Polish Line
+CTC1267,MM L15-M1,CTU2,No,Legacy Red Line; Polish Line
+CTC1268,MM L15-M3,CTU2,No,Legacy Red Line; Polish Line
+CTC1269,MM L15-F3,CTU2,No,Legacy Red Line; Polish Line
+CTC127,MM Yeva,CTU2,Yes,
+CTC1270,MM L15-M2,CTU2,No,Legacy Red Line; Polish Line
+CTC1271,MM M15-F2,CTU2,No,Legacy Brindle Line; Quattro Line; Pawfriends Line; Daikon Line
+CTC1272,MM M15-M2,CTU2,Yes,Legacy Brindle Line; Quattro Line; Pawfriends Line; Daikon Line
+CTC1273,MM M15-M1 Elise,CTU2,No,Legacy Brindle Line; Quattro Line; Pawfriends Line; Daikon Line
+CTC1274,MM M15-M3,CTU2,No,Legacy Brindle Line; Quattro Line; Pawfriends Line; Daikon Line
+CTC1275,MM N15-F2,CTU2,No,Legacy Red Line; Polish Line
+CTC1276,MM N15-M1,CTU2,No,Legacy Red Line; Polish Line
+CTC1277,MM N15-F1,CTU2,No,Legacy Red Line; Polish Line
+CTC1278,MM O15-M1,CTU2,No,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC1279,MM O15-F1,CTU2,No,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC128,MM Zorica Marion,CTU2,No,Legacy Red Line; Quattro Line
+CTC1280,MM Polaria,CTU9,Yes,
+CTC1281,MM P15-M1,CTU2,No,
+CTC1282,MM Pippa,CTU2,No,
+CTC1283,MM Poppy,CTU2,No,
+CTC1284,MM P15-F3,CTU2,No,
+CTC1285,MM P15-M2,CTU2,No,
+CTC1286,MM Q15-M1,CTU2,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; New Merle Line; Gianni Line
+CTC1287,MM Q15-M2,CTU2,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; New Merle Line; Gianni Line
+CTC129,MF Bagel,CTU2,No,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC130,MM Cally,CTU9,Yes,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC131,MM Emory,CTU2,No,Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC132,MM Emmy,CTU2,No,Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC133,MM Dakota Marion,CTU2,No,Legacy Red Line; Polish Line; Quattro Line
+CTC134,MM Dica,CTU2,Yes,Legacy Red Line; Polish Line; Quattro Line
+CTC135,MM Deedee,CTU2,Yes,Legacy Red Line; Polish Line; Quattro Line
+CTC139,MM Femme,CTU2,Yes,Quattro Line
+CTC14,BF Sami,CTU2,Yes,
+CTC140,MM Fedora,CTU2,No,Quattro Line
+CTC141,MM Ginny,CTU2,Yes,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC142,MM Jazlin,CTU2,Yes,Legacy Red Line; Polish Line
+CTC143,MM Jaylee,CTU2,No,Legacy Red Line; Polish Line
+CTC144,MF Daifuku,CTU2,Yes,Quattro Line; Pawfriends Line; Daikon Line
+CTC145,MM Keira,CTU2,Yes,
+CTC146,MM Kadee,CTU2,Yes,
+CTC147,MM Lainey,CTU2,Yes,
+CTC148,MM London,CTU2,No,
+CTC149,MM Leah,CTU2,No,
+CTC15,BE Charlie,CTU2,No,
+CTC150,MM Maddox,CTU2,Yes,Quattro Line
+CTC151,MM Nayeli,CTU2,Yes,
+CTC152,MLP Hiro,,Yes,
+CTC153,MLP Cara,,Yes,
+CTC154,JW Ravi,,Yes,
+CTC155,MOW Maya,,Yes,
+CTC156,MLP Anna,,Yes,
+CTC157,PLX Coco,,No,
+CTC158,PLX Cepheus,,No,
+CTC159,PLX Dawa,,No,
+CTC16,MM Voltari,CTU2,No,
+CTC160,PLX Altair,,No,
+CTC161,PLX Aysu,,No,
+CTC162,MM Vitello Tonato,CTU1,No,
+CTC163,LB Chibi,,No,
+CTC164,LB Quicksilver,,No,
+CTC165,MM Calamari,CTU1,No,
+CTC166,MM Halibut,CTU1,No,
+CTC167,MM Burrata,CTU1,No,
+CTC168,LK Lily Iglehart,,No,
+CTC169,MW Bertus,,No,
+CTC17,MM Fynn,CTU1,No,Quattro Line
+CTC170,TnS Kobus,,Yes,
+CTC171,MP Sniper,,No,
+CTC172,TnS Jiro,,Yes,
+CTC173,TnS Anzu,,Yes,
+CTC174,TnS Sasori,,Yes,
+CTC175,MM Amako,CTU1,No,
+CTC176,MM Jerome,CTU1,No,
+CTC177,PvK Lovegood,,No,
+CTC178,Betty,,No,
+CTC179,MLP Ella,,Yes,
+CTC18,MM Fenno,CTU1,No,Quattro Line
+CTC180,JW Rose,,Yes,
+CTC181,MLP Eric,,Yes,
+CTC182,JW Sara,,Yes,
+CTC183,MLP Nina,,Yes,
+CTC184,MLP Tutu,CTU1,No,Pawfriends Line
+CTC185,MM Zodiac,CTU1,No,Legacy Brindle Line; Legacy Merle Line 2
+CTC1858,SLM's Iolite,,Yes,Legacy Red Line; Polish Line
+CTC186,MM Vision Forward,CTU1,No,Legacy Red Line
+CTC1860,SLM's Oddy,,Yes,Legacy Red Line; Polish Line
+CTC1861,SLM's Pasta,,Yes,Legacy Red Line; Polish Line
+CTC187,MM Umbreon,CTU1,No,Legacy Red Line
+CTC188,MM Up2Date,CTU1,No,Legacy Red Line
+CTC189,MM Jackpot,CTU1,No,Legacy Brindle Line; Legacy Merle Line 2
+CTC19,DA Wonder,CTU5,Yes,
+CTC190,MM Topnotch,CTU1,No,Legacy Brindle Line
+CTC191,MM Ventura,CTU1,No,Legacy Brindle Line
+CTC192,MV Ember,,No,Legacy Merle Line 2
+CTC193,MM Skeletor,CTU1,No,Legacy Merle Line 2
+CTC194,M3 Mex,,No,
+CTC195,MM Inola,CTU1,No,Legacy Merle Line 2
+CTC1958,MM R12-M1,CTU2,No,Legacy Red Line
+CTC1959,MM R12-M2,CTU2,No,Legacy Red Line
+CTC196,CoCM Gifted Spirit,,No,Legacy Merle Line 2
+CTC1960,MM R12-M3,CTU2,No,Legacy Red Line
+CTC1961,MM R12-F1,CTU2,No,Legacy Red Line
+CTC1963,MM R12-F2,CTU2,No,Legacy Red Line
+CTC1964,MM R12-F3,CTU2,No,Legacy Red Line
+CTC1965,MM R12-F4,CTU2,No,Legacy Red Line
+CTC1966,MM R12-F5,CTU2,No,Legacy Red Line
+CTC1968,SLM's Yūzu,,Yes,Legacy Red Line; Polish Line
+CTC197,BE Brindles,,No,
+CTC198,MV Rory,,No,Legacy Merle Line 2
+CTC1988,RM Rowan,CTU2,No,
+CTC199,PvK Mr. Midnight,,No,
+CTC1990,Oh My God,CTU2,No,
+CTC1991,TnS Ikuya,CTU2,No,
+CTC1992,PvK Snoetje,CTU2,No,
+CTC1993,Ocean Breeze,CTU2,No,
+CTC20,MF Daikon Marion,CTU2,No,Quattro Line; Pawfriends Line; Daikon Line
+CTC200,MM Victoria's Secret,CTU1,No,Legacy Brindle Line
+CTC201,MM Yeshua,CTU1,No,
+CTC202,CMM Magpie,,No,
+CTC203,MM Chocolate Chip Cookie,CTU1,No,
+CTC204,MM Starlight Sterre,CTU1,No,
+CTC205,HV Hakuna,,No,
+CTC206,MM Salt Junior,CTU1,No,
+CTC2060,Michel,,Yes,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC207,HV Emerald,,No,
+CTC208,MM Zhaleya,CTU1,No,
+CTC209,JW Casanova,,No,
+CTC21,MM Knox,CTU24,Yes,
+CTC210,TOM Cherise,,No,
+CTC211,HV Annakin,,No,
+CTC212,HV Catalia,,No,
+CTC213,TU Tygo,,No,
+CTC214,TU Maeve,,No,
+CTC215,MS Black Elah,,No,
+CTC2153,MM Nana,CTU1,Yes,
+CTC2154,MM Kenny,CTU1,Yes,
+CTC2155,MM Mystique,CTU1,Yes,
+CTC2156,SB Tutti,CTU2,Yes,
+CTC2157,MM Madee,CTU1,Yes,
+CTC2158,MM E4-F3,CTU1,Yes,
+CTC2159,MM Djennah,CTU1,Yes,
+CTC216,AM Leana,,No,
+CTC2160,MM N2-M4,CTU1,Yes,
+CTC2161,MM Sadie,CTU1,Yes,
+CTC2162,MM N2-F2,CTU1,Yes,
+CTC2163,MM Gavin,CTU1,Yes,
+CTC2164,MM W2-F3,CTU1,Yes,
+CTC2165,PvK Hardy,CTU2,Yes,
+CTC2166,MM Indigo,CTU1,Yes,
+CTC2167,MGF Hairo,CTU2,Yes,
+CTC2168,MM I4-F1,CTU1,Yes,
+CTC2169,MM I4-F2,CTU1,Yes,
+CTC217,MM Caramel Swirl,CTU1,No,
+CTC2170,MM I4-F3,CTU1,Yes,
+CTC2171,FR Xatu,CTU2,Yes,
+CTC2172,MM Bindi,CTU1,Yes,
+CTC2173,MM Naya,CTU1,Yes,
+CTC2174,MM Moffel,CTU1,Yes,
+CTC2175,MM Gaga,CTU1,Yes,
+CTC2176,MM Pip,CTU1,Yes,
+CTC2177,AR Rebel,CTU2,Yes,
+CTC2178,MM Q2-M1,CTU1,Yes,
+CTC2179,FR Remy,CTU2,Yes,
+CTC218,CM Bellatrix,,No,
+CTC2180,MM Senne,CTU1,Yes,
+CTC2181,MM Sjors,CTU1,Yes,
+CTC2182,PvK Boo,CTU2,Yes,
+CTC2183,MM Teddie,CTU1,Yes,
+CTC2184,CM Silke,CTU2,Yes,
+CTC2185,MM Tomoe,CTU1,Yes,
+CTC2186,MM Sango,CTU1,Yes,
+CTC2187,MM J5-M4,CTU1,Yes,
+CTC2188,MM J5-F4,CTU1,Yes,
+CTC2189,MM Ichiyo,CTU1,Yes,
+CTC219,DM Domino,,No,
+CTC2190,MM Komijn,CTU1,Yes,
+CTC2191,MM Chiharu,CTU1,Yes,
+CTC2192,MM Himeka,CTU1,Yes,
+CTC2193,MM Eiko,CTU1,Yes,
+CTC2194,FF Baron,CTU2,Yes,
+CTC2195,PvK Mascha,CTU2,Yes,
+CTC2196,PvK Gemma,CTU2,Yes,
+CTC2197,PvK Finn,CTU2,Yes,
+CTC2198,BE Dena,CTU2,Yes,
+CTC2199,MM Belle,CTU1,Yes,
+CTC22,MM Laszlo,CTU2,No,
+CTC220,MM Pador,CTU1,No,
+CTC2200,PvK Ravi,CTU2,Yes,
+CTC2201,MS Levi,CTU2,Yes,
+CTC2202,MM Vince,CTU1,Yes,
+CTC2203,MM Jezebel,CTU1,Yes,
+CTC2206,BSR Skye,CTU2,Yes,
+CTC2207,MM Golden Brown,CTU1,Yes,
+CTC2208,JW Devon,CTU2,Yes,
+CTC2209,SA Destiny,CTU2,Yes,
+CTC221,MM Laluna,CTU1,No,
+CTC2210,MM Dante's Inferno,CTU1,Yes,
+CTC2211,MM Fudge,CTU1,Yes,
+CTC2212,AM Ruby,CTU2,Yes,
+CTC2213,MM Flynn Rider,CTU1,Yes,
+CTC2214,AM Senna,CTU2,Yes,
+CTC2215,MM Pepper,CTU1,Yes,
+CTC2217,MOW Flip,CTU2,Yes,
+CTC2218,MOW Jasmin,CTU2,Yes,
+CTC2219,MM Blue Tan,CTU1,Yes,
+CTC222,MM Universe,CTU1,No,
+CTC2220,MM Sweetpea,CTU1,Yes,
+CTC2221,FF King,CTU2,Yes,
+CTC2222,Cami,CTU2,Yes,
+CTC2223,MM Sheera,CTU1,Yes,
+CTC2224,TOM Kalani,CTU2,Yes,
+CTC2225,PvK Rosemary,CTU2,Yes,
+CTC2226,MM Elle,CTU2,Yes,
+CTC2229,FR Sierra,CTU2,Yes,
+CTC223,LvD Felix,,No,
+CTC2230,MM Maisy,CTU2,Yes,
+CTC224,PvK Gracie,,No,
+CTC2240,SB Emmett,CTU2,Yes,
+CTC2241,FR Azula,CTU2,Yes,
+CTC2242,MM Sinne,CTU2,Yes,
+CTC2244,SLM's Uzu,,Yes,Legacy Red Line; Polish Line
+CTC2245,SLM's Ted,,Yes,Legacy Red Line; Polish Line
+CTC2246,SLM's Toes,,Yes,Legacy Red Line; Polish Line
+CTC225,MM Hayley,CTU1,No,
+CTC226,MM Percy Plumeau,CTU1,No,
+CTC227,FR Ryoka,,No,
+CTC228,MM Imperial Stout,CTU1,No,
+CTC229,MM Yours Truly,CTU1,No,
+CTC23,MM Legend,CTU2,No,
+CTC230,MM Abundance,CTU1,No,
+CTC231,CMM Cinnamon Toast,,No,
+CTC232,MM Chico,CTU1,No,
+CTC233,PvK Carlisle,,No,
+CTC234,MM Sjors,CTU1,No,
+CTC235,KW Nyota,,No,
+CTC236,KW Yoshi,,No,
+CTC237,KW Kimi,,No,
+CTC238,MM Taiyo,CTU1,No,
+CTC239,MM Eevee,CTU1,No,
+CTC24,MM Mickah,CTU1,No,Quattro Line
+CTC240,MM Fallon,CTU1,No,
+CTC241,MM Luciana,CTU1,No,
+CTC242,LvD Alec,,No,
+CTC243,CM Bluberry,,No,
+CTC244,LvD Mateo,,No,
+CTC245,MM Bluet,CTU1,No,
+CTC246,HM Juniper,,No,
+CTC247,MM Abeltje,CTU1,No,
+CTC248,Captain Fluff,,No,
+CTC249,MM Hope,CTU1,No,
+CTC25,MM Nolan,CTU2,Yes,
+CTC250,MM Saydie,CTU1,No,
+CTC251,AK Glowe,,No,
+CTC252,MM Peter,CTU1,No,
+CTC253,AR Fata Morgana,,No,
+CTC254,PvK Gimli,,No,
+CTC255,AR Gaia,,No,
+CTC256,MM Odin,CTU1,No,
+CTC257,MM Arwen,CTU1,No,
+CTC258,RVE Baco,,No,
+CTC259,RVE Mimi,,No,
+CTC26,RM Toby,,Yes,Legacy Red Line; Polish Line
+CTC260,RVE Scar,,No,
+CTC261,PvK Emma,,No,
+CTC262,MM Jumpstart,CTU1,No,Legacy Brindle Line; Legacy Merle Line 2
+CTC263,MM Taragon,CTU1,No,Legacy Brindle Line
+CTC264,Chicken Wing,,No,
+CTC265,MM Ambrosia,CTU1,No,New Merle Line
+CTC266,LGM Twilight,,No,
+CTC267,TnS Emiko,,Yes,
+CTC268,MM Kingfish,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2
+CTC269,RM Banda,,No,Banded Line
+CTC270,MM Awesome Curls,CTU1,No,Legacy Red Line; Polish Line
+CTC271,NOX Rocco,,No,
+CTC272,TRM Diesel,,No,Broken Line
+CTC273,MM Toretto,CTU1,No,Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC274,MM Oddball,CTU1,No,Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC275,MM Whats'up Dog,CTU1,No,Legacy Merle Line 2
+CTC276,TnS Likona,,Yes,
+CTC277,MM Queen of Hearts,CTU1,No,Legacy Merle Line 2
+CTC278,MM Poco Loco,CTU1,No,Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC279,PvK Java,,No,
+CTC28,MM Nautica,CTU1,No,
+CTC280,RM Mia,,No,Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC281,TnS Pikachu,,Yes,
+CTC282,MM Royal Sunshine,CTU1,No,Legacy Brindle Line
+CTC283,MM Quincy,CTU1,No,Legacy Brindle Line; Legacy Merle Line 2
+CTC284,RM Jordana,,No,Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC285,MM Flame,CTU1,No,
+CTC286,LB Blcky,,No,
+CTC287,LB Rhedija,,No,
+CTC288,LB Ghost,,No,
+CTC289,MM Red Hot Firecracker,CTU1,No,
+CTC29,MM Hodor,CTU1,No,Legacy Red Line; Polish Line
+CTC290,CMM Black Eye White,,No,
+CTC291,CMM Masked Flame,,No,
+CTC292,MK Zigzagoon,,No,
+CTC293,MM Zipper,CTU1,No,
+CTC294,MM Kadeem,CTU1,No,Legacy Red Line
+CTC295,M&M Praline,,No,
+CTC296,M&M Samara,,No,Legacy Red Line
+CTC297,M&M Farah,,No,Legacy Red Line
+CTC298,TnS Shina,,Yes,
+CTC299,TnS Kozue,,Yes,
+CTC30,RM Lola,,No,
+CTC300,M&M Leila,,No,Legacy Red Line
+CTC301,TnS Unichi,,Yes,
+CTC302,TnS Grandity,,Yes,
+CTC303,MM Nero,CTU1,No,
+CTC304,TnS Erina,,Yes,
+CTC305,MM Gameboy,CTU1,No,
+CTC306,RM Darcy,,No,Legacy Red Line; Polish Line
+CTC307,NOX Floyd,,No,
+CTC308,MM Itsy Bitsy,CTU1,No,Legacy Brindle Line
+CTC309,MM Ultra Vox,CTU1,No,Legacy Red Line
+CTC31,Mysigonek Qasimir,,No,Polish Line
+CTC310,MM White Magic,CTU1,No,Legacy Red Line; Polish Line
+CTC311,TnS Yoshi,,Yes,
+CTC312,BE Avalanche,,No,
+CTC313,MM Dazzle Dream,CTU1,No,
+CTC314,MM Uros,CTU1,No,Legacy Red Line; Polish Line
+CTC315,RR Ciaran,,No,
+CTC316,NOX Valor,,No,
+CTC317,M3 Thalia,,No,
+CTC318,PvK Rocky Road,,No,
+CTC319,MM Keepsake,CTU1,No,Legacy Red Line
+CTC32,MM Uptown Girl,CTU1,No,Legacy Red Line
+CTC320,MM Just a Flirt,CTU1,No,Legacy Red Line
+CTC321,MM Texmex,CTU1,No,Legacy Red Line; Polish Line
+CTC322,MM What the Fluff,CTU1,No,Legacy Red Line; Polish Line
+CTC323,MM Taco,CTU1,No,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC324,RM Letty,,No,Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC325,RM Pardoes,,No,Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC326,RM Poppy,,No,Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC327,MM Unica,CTU1,No,Legacy Red Line; Polish Line
+CTC328,MM Winnie the Blue,CTU1,No,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC329,MM Parker,CTU1,No,Legacy Red Line; Polish Line
+CTC330,MMM Bucket,,No,Quattro Line
+CTC331,Sofia,CTU1,No,
+CTC336,MM Burrito,CTU1,No,Legacy Red Line; Polish Line
+CTC337,MF Almond,CTU5,Yes,Legacy Red Line; Polish Line; Quattro Line
+CTC338,MM Triple X,CTU1,No,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC339,MM Caviar Cracker,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC34,SR Scooby,,No,
+CTC340,MF Curry,,No,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC341,MM Neela,CTU2,Yes,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Quattro Line; Gianni Line
+CTC342,MM Nameless Kassy,CTU2,No,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Quattro Line; Gianni Line
+CTC343,MM Sassy Marion,CTU2,No,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Quattro Line; Gianni Line
+CTC344,MM Calico,CTU2,Yes,New Merle Line
+CTC345,MM Primadonna,CTU2,Yes,New Merle Line
+CTC346,MM Cruella,CTU5,Yes,New Merle Line
+CTC347,MM Qutie,CTU2,Yes,Legacy Red Line; Polish Line
+CTC348,MM Quana,CTU2,Yes,Legacy Red Line; Polish Line
+CTC349,MM Royce,CTU2,Yes,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC35,MM Nugget,CTU1,No,Legacy Red Line
+CTC350,MM Ryder,CTU2,Yes,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC351,MM Rogue,CTU2,Yes,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC352,MM Ramona,CTU2,Yes,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC353,MM Special,CTU2,Yes,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; New Merle Line; Gianni Line
+CTC354,MM Sunny,CTU2,Yes,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; New Merle Line; Gianni Line
+CTC355,MM Tapioka,CTU2,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC358,SB Vidar,,No,
+CTC359,PvK Marble,,No,
+CTC36,MM Quantum,CTU1,No,
+CTC360,M3 Leviathan,,No,
+CTC361,MJ Kappa,,No,
+CTC362,MM Chica,CTU1,No,
+CTC363,LvD Chiro,,No,
+CTC364,MM Yuri,CTU1,No,
+CTC365,FR Calypso,,No,
+CTC366,AK Lexie,,No,
+CTC367,MM Miuna,CTU1,No,
+CTC368,MM Pip,CTU1,No,
+CTC369,MM Fuyuki,CTU1,No,
+CTC37,CMM Wildfire,,No,Legacy Red Line
+CTC370,MM Ghimly,CTU1,No,
+CTC371,TOM Astrid,,No,
+CTC372,TOM Zola,,No,
+CTC373,MM Glennfiddich,CTU1,No,
+CTC374,CM Briley,,No,
+CTC375,MM Hayao,CTU1,No,
+CTC376,CM Penny,,No,
+CTC377,MM Ryu,CTU1,No,
+CTC378,AK Felicity,,No,
+CTC379,MM Hogara,CTU1,No,
+CTC38,Mohanah Chedomir,,No,
+CTC380,MM Atlas,CTU1,No,
+CTC381,MM Peyton,CTU1,No,
+CTC382,MM Naomi,CTU1,No,
+CTC383,FS Rogan,,No,
+CTC384,MM Brindle Pied,CTU1,No,
+CTC385,MJ Lila,,No,
+CTC386,CMM Hot Spot,,No,
+CTC387,MM Flogging Molly,CTU1,No,
+CTC39,TnS Black Belle,,Yes,
+CTC394,MM Tater Tot,CTU1,No,Legacy Brindle Line
+CTC395,MM Touchdown,CTU1,No,Legacy Brindle Line
+CTC396,MM Unicat,CTU1,No,Legacy Red Line
+CTC397,MM Whoop Whoop,CTU1,No,Legacy Merle Line 2
+CTC398,MM Legend of Zelda,CTU1,No,Legacy Brindle Line; Legacy Merle Line 2
+CTC399,MM Lucky Chance,CTU1,No,Legacy Brindle Line; Legacy Merle Line 2
+CTC40,MM Kinnori,CTU1,No,
+CTC400,TnS Kaito,,Yes,
+CTC401,MM Maddie's Maiden,CTU1,No,
+CTC402,MM Mango Vista,CTU1,No,
+CTC403,MM Marshmallow,CTU1,No,
+CTC404,MM Nanook,CTU1,No,
+CTC405,MM Odyssee,CTU1,No,Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC406,MM Oppy,CTU1,No,Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC408,MM Quava,CTU1,No,Legacy Merle Line 2
+CTC409,MM Reggie Pride,CTU1,No,Legacy Brindle Line
+CTC41,CM Noelle,,No,
+CTC410,MM Ravin' Renegade,CTU1,No,Legacy Brindle Line
+CTC411,MM Raichu,CTU1,No,Legacy Brindle Line
+CTC412,MM Raggedy Anne,CTU1,No,Legacy Brindle Line
+CTC413,MM Teddy Boy,CTU1,No,Legacy Brindle Line
+CTC414,MM T11-F1,CTU1,No,Legacy Brindle Line
+CTC415,MM Treasure Hunt,CTU1,No,Legacy Brindle Line
+CTC416,MM Tuxedo Teaser,CTU1,No,Legacy Brindle Line
+CTC417,MM Two to Tango,CTU1,No,Legacy Brindle Line
+CTC418,M&M Kitsy,,No,
+CTC419,MM Ulterior Motive,CTU1,No,Legacy Red Line
+CTC42,MM Wicked,CTU1,No,
+CTC420,MM Uniquely Different,CTU1,No,Legacy Red Line
+CTC421,MM Unicorn Glitter,CTU1,No,Legacy Red Line
+CTC422,MM Uno Reverse,CTU1,No,Legacy Red Line
+CTC423,MM U11-F5,CTU1,No,Legacy Red Line
+CTC424,MM Under the Radar,CTU1,No,Legacy Red Line
+CTC425,MM Splash,CTU1,No,Legacy Red Line
+CTC426,MM U11-F8,CTU1,No,Legacy Red Line
+CTC427,MM Pinky,CTU1,No,Legacy Red Line
+CTC428,MM Uncharted Territory,CTU1,No,Legacy Red Line
+CTC429,MM V for Vendetta,CTU1,No,Legacy Red Line
+CTC43,HV Mirabel,,No,
+CTC430,MM Valentino,CTU1,No,Legacy Red Line
+CTC431,MM Vanilla Ice,CTU1,No,Legacy Red Line
+CTC432,MM Vibrant Memory,CTU1,No,Legacy Red Line
+CTC433,MM Pippin,CTU1,No,Legacy Red Line; Polish Line
+CTC434,MM Wannabe Wistar,CTU1,No,Legacy Red Line; Polish Line
+CTC435,MM Wildcard,CTU1,No,Legacy Red Line; Polish Line
+CTC436,MM Work of Art,CTU1,No,Legacy Red Line; Polish Line
+CTC437,MM Rickon,CTU1,No,Legacy Red Line; Polish Line
+CTC438,MM Aqua,CTU1,No,Legacy Red Line
+CTC439,MM Black Betty,CTU1,No,Legacy Red Line
+CTC44,YR Pride,,No,
+CTC440,MM Bronze Beauty,CTU1,No,Legacy Red Line
+CTC441,MM Butt Fluff,CTU1,No,Legacy Red Line
+CTC442,MM Zorino,CTU1,No,Legacy Brindle Line; Legacy Merle Line 2
+CTC443,MM Zylan,CTU1,No,Legacy Brindle Line; Legacy Merle Line 2
+CTC444,MM Z11-F2,CTU1,No,Legacy Brindle Line; Legacy Merle Line 2
+CTC445,MM Z11-F1,CTU1,No,Legacy Brindle Line; Legacy Merle Line 2
+CTC446,MM Diva,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC447,MM Okki,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC448,MM Sterrin,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC449,MM Storm,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC45,AM Betty,,No,
+CTC450,MM Tippy,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC454,MM Mickey,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC455,MM Chalked Up,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC457,MM Campina,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC46,MM Sundae Caramel,CTU1,No,
+CTC460,MM Choco,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC461,MM Cafe Noir,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC463,MM Cameo,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC464,MM Clueless,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC465,MM Devon Rex,CTU1,No,
+CTC466,MM Dairy Queen,CTU1,No,
+CTC47,PvK Loki,,No,
+CTC473,MM Ivy League,CTU1,No,Legacy Brindle Line
+CTC474,MM Lyra,CTU1,No,Legacy Merle Line 2
+CTC475,MM Livvy,CTU1,No,Legacy Merle Line 2
+CTC476,MM Liviana,CTU1,No,Legacy Merle Line 2
+CTC477,MM Liora,CTU1,No,Legacy Merle Line 2
+CTC478,MM Nabrina,CTU1,No,Legacy Brindle Line; Legacy Merle Line 2
+CTC479,MM Quaker,CTU1,No,Legacy Brindle Line; Legacy Merle Line 2
+CTC48,FF Amelie,,No,
+CTC480,MM Tabita,CTU4,Yes,Legacy Brindle Line
+CTC481,MM Tigerlily,CTU1,No,Legacy Brindle Line
+CTC482,MM Utara,CTU1,No,Legacy Brindle Line
+CTC483,Unknown,,No,
+CTC484,Shelby,,No,
+CTC485,MM Teemo,CTU1,No,
+CTC486,MM Tatufa Tofu,CTU1,No,
+CTC487,MM Usukuchi Shoyu,CTU1,No,Legacy Red Line; Polish Line
+CTC488,MM Ursula,CTU1,No,Legacy Red Line; Polish Line
+CTC489,MM Uriel,CTU4,Yes,Legacy Red Line; Polish Line
+CTC49,FF Red Sable,,No,
+CTC490,MM Umai Udon,CTU1,No,Legacy Red Line; Polish Line
+CTC491,MM Willow,CTU1,No,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC492,MM Wakai Wakame,CTU1,No,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC493,MM Zyan,CTU1,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC494,MM Zongzi,CTU1,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC495,MM Zizi,CTU1,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC496,MM Zazu,CTU1,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC497,Macy,,No,
+CTC498,MM Xiaolongbao,CTU1,No,
+CTC499,MM Yaki Onigiri,CTU1,No,Legacy Red Line; Polish Line
+CTC50,FF Jazz,,No,
+CTC500,MM YakiSoba,CTU1,No,Legacy Red Line; Polish Line
+CTC501,Liana,CTU1,No,
+CTC502,MM Asante,CTU4,Yes,
+CTC503,MM Assamese Fish Curry,CTU1,No,
+CTC504,MM Gryffin,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC506,MM Koda,CTU5,Yes,Legacy Red Line
+CTC507,MM Maribel,CTU5,Yes,Legacy Red Line; Polish Line
+CTC508,MM Duchess,CTU5,Yes,Legacy Red Line; Polish Line; Quattro Line
+CTC509,MM Alice,CTU1,No,Legacy Red Line; Polish Line; Quattro Line
+CTC51,PvK Argente Brindle,,No,
+CTC510,MM Neytiri,CTU2,No,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC511,MM Harriet,CTU5,Yes,Legacy Red Line; Polish Line; Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC512,MM Indie,CTU5,Yes,
+CTC513,Arianna,CTU7,Yes,
+CTC514,MF Destiny,CTU5,No,Quattro Line; Pawfriends Line; Daikon Line
+CTC515,MF Donut,CTU1,No,Quattro Line; Pawfriends Line; Daikon Line
+CTC516,MM Kiara,CTU5,Yes,
+CTC517,MM Remy,CTU5,No,Quattro Line
+CTC518,MM Nani,CTU1,No,
+CTC519,FS Tinkerbell,CTU2,Yes,
+CTC52,PvK Tricolor,,No,
+CTC520,MF Pocahontas,CTU1,No,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC521,MF Simba,CTU5,No,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC522,MM Violet,CTU5,No,
+CTC523,Allegra,CTU1,No,
+CTC525,MM Mirage,CTU5,Yes,
+CTC526,MM Oscar,CTU7,Yes,Legacy Brindle Line
+CTC527,MM Speedy Gonzales.,CTU7,Yes,Legacy Brindle Line
+CTC529,TnS Panikku,,Yes,
+CTC53,MM Gianni,CTU5,Yes,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC530,MMM Daenerys,,No,
+CTC531,Pino,,No,
+CTC532,Mother,,No,
+CTC54,MM Bianco,CTU2,Yes,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC542,MM Prism,CTU2,Yes,New Merle Line
+CTC543,MM P14-F6,CTU1,No,New Merle Line
+CTC544,MM Pixel,CTU9,Yes,New Merle Line
+CTC545,MM P14-F8,CTU1,No,New Merle Line
+CTC546,MM Quix,CTU2,No,Legacy Red Line; Polish Line
+CTC547,MM Q14-F1,CTU1,No,Legacy Red Line; Polish Line
+CTC551,MM Rio,CTU7,Yes,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC553,MM R14-F4,CTU1,No,
+CTC554,MM Skol,CTU9,Yes,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; New Merle Line; Gianni Line
+CTC555,MM S14-M1,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; New Merle Line; Gianni Line
+CTC556,MM Hans,CTU5,Yes,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; New Merle Line; Gianni Line
+CTC557,MM Sally,CTU2,Yes,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; New Merle Line; Gianni Line
+CTC558,MM Tetsu,CTU9,Yes,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC559,MF Jake,CTU5,Yes,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC56,NOX Spencer,,No,
+CTC560,MF Edna,CTU5,Yes,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Quattro Line; Gianni Line
+CTC561,MF Baloo,CTU5,Yes,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Quattro Line; Gianni Line
+CTC562,MM Lilo,CTU1,No,
+CTC563,MF Amaranth,,No,Legacy Red Line; Polish Line; Quattro Line
+CTC564,MM O14-F6,CTU1,No,
+CTC565,MM O14-F5,CTU1,No,
+CTC566,MM U14-M1 Elise,CTU2,No,Quattro Line; Pawfriends Line; Daikon Line
+CTC567,MM U14-M2 Kassy,CTU2,No,Quattro Line; Pawfriends Line; Daikon Line
+CTC568,MM Unix,CTU2,Yes,Quattro Line; Pawfriends Line; Daikon Line
+CTC569,MM U14-M4,CTU1,No,Quattro Line; Pawfriends Line; Daikon Line
+CTC57,MM Chantilly,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC570,MM Unita,CTU2,Yes,Quattro Line; Pawfriends Line; Daikon Line
+CTC571,MM Uvala,CTU2,Yes,Quattro Line; Pawfriends Line; Daikon Line
+CTC572,MM Upsy,CTU2,Yes,Quattro Line; Pawfriends Line; Daikon Line
+CTC573,MM Umbra,CTU2,Yes,Quattro Line; Pawfriends Line; Daikon Line
+CTC574,MM Voodoo Kassy,CTU2,No,Quattro Line; Pawfriends Line; Daikon Line
+CTC575,MM Pearl,CTU7,Yes,Quattro Line; Pawfriends Line; Daikon Line
+CTC576,MM Opal,CTU7,Yes,Quattro Line; Pawfriends Line; Daikon Line
+CTC577,MM W14-M1,CTU1,No,Quattro Line; Pawfriends Line; Daikon Line
+CTC578,MM W14-M2,CTU1,No,Quattro Line; Pawfriends Line; Daikon Line
+CTC579,MM Wicky,CTU2,Yes,Quattro Line; Pawfriends Line; Daikon Line
+CTC58,M3 Cooper,,No,
+CTC580,MM Whoopy,CTU2,Yes,Quattro Line; Pawfriends Line; Daikon Line
+CTC581,MM Gin,CTU7,Yes,Quattro Line; Pawfriends Line; Daikon Line
+CTC582,MM Brownie,CTU7,Yes,Pawfriends Line
+CTC583,MM Xavi,CTU2,Yes,Pawfriends Line
+CTC584,MM Xayah,CTU9,Yes,Pawfriends Line
+CTC585,MM Overbaked,CTU7,Yes,Pawfriends Line
+CTC586,MM Y14-M1,CTU2,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC587,MM Yeera,CTU2,Yes,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC588,MM Z14-M3,CTU1,No,Pawfriends Line
+CTC589,MM Z14-M1,CTU1,No,Pawfriends Line
+CTC59,RM Safiya,,No,
+CTC590,MM Blitz,CTU24,Yes,Pawfriends Line
+CTC591,MM Fiddich,CTU1,No,Pawfriends Line
+CTC592,MM Zumi,CTU9,Yes,Pawfriends Line
+CTC593,MM Zira,CTU9,Yes,Pawfriends Line
+CTC594,MM Z14-M4,CTU1,No,Pawfriends Line
+CTC595,MM Z14-M2,CTU1,No,Pawfriends Line
+CTC597,SLM'S Lilo,,Yes,Legacy Red Line; Polish Line
+CTC60,LH Lucia,,No,
+CTC601,SLM'S Dobby von Zaandam,,Yes,
+CTC61,MMM Quattro,,No,Quattro Line
+CTC618,MM Armani,CTU2,Yes,Quattro Line; Pawfriends Line; Daikon Line
+CTC619,MM A15-M2,CTU1,No,Quattro Line; Pawfriends Line; Daikon Line
+CTC62,LH Yara,,No,
+CTC620,MM A15-M3,CTU1,No,Quattro Line; Pawfriends Line; Daikon Line
+CTC621,MM A15-F1,CTU1,No,Quattro Line; Pawfriends Line; Daikon Line
+CTC622,MM Chardonay,CTU7,Yes,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC623,MM Chikaka,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC624,M1,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC625,MM B15-M2,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC626,MM B15-M3,CTU1,No,Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC628,SLM'S Steelix,,Yes,
+CTC629,SLM'S BlueBelle,,Yes,Legacy Red Line; Polish Line
+CTC63,DA MP2-M2,,No,
+CTC630,SLM'S Swablu,,Yes,Legacy Red Line; Polish Line
+CTC631,SLM'S Ocean,,Yes,Legacy Red Line; Polish Line
+CTC638,MM Calimero,CTU2,Yes,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 2; Broken Line
+CTC639,MM D15-M1,CTU2,No,Legacy Red Line; Polish Line; Quattro Line
+CTC64,NOX Misu,,No,
+CTC640,MM D15-F1 Kassy,CTU2,No,Legacy Red Line; Polish Line; Quattro Line
+CTC641,MM D15-F2 Kassy,CTU2,No,Legacy Red Line; Polish Line; Quattro Line
+CTC642,MM Dahlia,CTU9,Yes,Legacy Red Line; Polish Line; Quattro Line
+CTC643,MM E15-M1,CTU1,No,Legacy Red Line
+CTC644,MM E15-M2,CTU1,No,Legacy Red Line
+CTC645,MM E15-F1,CTU2,Yes,Legacy Red Line
+CTC646,MM Furby,CTU2,Yes,Legacy Red Line; Polish Line; Quattro Line; Pawfriends Line; Daikon Line
+CTC648,MM Fabiosa,CTU2,Yes,Legacy Red Line; Polish Line; Quattro Line; Pawfriends Line; Daikon Line
+CTC649,MM G15-M1,CTU1,No,
+CTC65,M3 Mottley,,No,
+CTC650,MM G15-F1 Elise,CTU2,No,
+CTC651,MM Gaia,CTU9,Yes,
+CTC656,MM's Nelson,CTU10,Yes,Legacy Brindle Line; Legacy Merle Line 2
+CTC657,SLM's Cocoa,,Yes,
+CTC658,SLM's Pluck,,Yes,Legacy Red Line; Polish Line
+CTC66,MM Omega,CTU1,No,
+CTC661,SLM's Sir Fluffington,,Yes,
+CTC662,SLM's HachiMitsu,,Yes,
+CTC663,SLM's Blacka,,Yes,
+CTC664,SLM's Midnight,,Yes,
+CTC67,Giulia,CTU2,No,
+CTC672,MM Binx,CTU24,Yes,Quattro Line
+CTC679,SLM's No Name,,Yes,
+CTC68,Chiara,CTU2,No,
+CTC680,M1,,Yes,Legacy Red Line; Polish Line
+CTC681,F1,,Yes,Legacy Red Line; Polish Line
+CTC682,F2,,Yes,Legacy Red Line; Polish Line
+CTC683,M2,,Yes,Legacy Red Line; Polish Line
+CTC684,M3,,Yes,Legacy Red Line; Polish Line
+CTC685,F4,,Yes,Legacy Red Line; Polish Line
+CTC686,F3,,Yes,Legacy Red Line; Polish Line
+CTC687,M2,,Yes,Legacy Brindle Line; Legacy Merle Line 2
+CTC688,M1,,Yes,Legacy Brindle Line; Legacy Merle Line 2
+CTC689,M4,,Yes,Legacy Brindle Line; Legacy Merle Line 2
+CTC69,RM Breezer,,No,
+CTC690,M5,,Yes,Legacy Brindle Line; Legacy Merle Line 2
+CTC691,M6,,Yes,Legacy Brindle Line; Legacy Merle Line 2
+CTC692,F5,,Yes,Legacy Brindle Line; Legacy Merle Line 2
+CTC693,F3,,Yes,Legacy Brindle Line; Legacy Merle Line 2
+CTC694,F4,,Yes,Legacy Brindle Line; Legacy Merle Line 2
+CTC695,M3,,Yes,Legacy Brindle Line; Legacy Merle Line 2
+CTC696,F2,,Yes,Legacy Brindle Line; Legacy Merle Line 2
+CTC697,F1,,Yes,Legacy Brindle Line; Legacy Merle Line 2
+CTC698,MM's Lazuli (Lazeltje),CTU10,Yes,Legacy Red Line; Polish Line
+CTC699,MM's (Silver) Spoon,CTU10,Yes,
+CTC70,Bianca,CTU2,No,
+CTC700,SLM's Big Boy,,Yes,
+CTC701,SLM's Snow White,,Yes,
+CTC702,SLM's CupCake,,Yes,
+CTC703,SLM's Onyx,,Yes,
+CTC704,SLM's Oozara,,Yes,
+CTC705,SLM's Si,,Yes,
+CTC706,SLM's Tijger,,Yes,
+CTC707,MM's Bubbles,CTU10,Yes,Legacy Red Line; Polish Line
+CTC710,SLM's Swoop,,No,
+CTC711,SLM's Spook,,No,
+CTC712,SLM's Goosebumps,,Yes,Legacy Red Line; Polish Line
+CTC723,SLM's Doblo,,Yes,Legacy Red Line; Polish Line
+CTC725,SLM's Rintin,,Yes,Legacy Red Line; Polish Line
+CTC730,SLM's Prosecco,,Yes,Legacy Red Line; Polish Line
+CTC731,SLM's Veneto,,Yes,Legacy Red Line; Polish Line
+CTC733,TnS Liichi,,Yes,
+CTC734,TnS Fuyumi,,Yes,
+CTC735,TnS Qoro,,Yes,
+CTC736,TnS Nozomu,,Yes,
+CTC737,TnS Merlin,,Yes,
+CTC738,TnS Liyuu,,Yes,
+CTC739,Ray's Ramen,,No,
+CTC740,TnS Ran,,Yes,
+CTC741,LB Irie,,No,
+CTC742,TnS Okiru,,Yes,
+CTC743,Ray's Dekret,,No,
+CTC744,TnS Nobu,,Yes,
+CTC745,LB Oishii,,No,
+CTC746,TnS Risu,,Yes,
+CTC747,TnS Riku,,Yes,
+CTC748,TnS Inoko,,Yes,
+CTC749,TnS Kiseki,,Yes,
+CTC750,TnS Hiyori,,Yes,
+CTC751,TnS Hiroo,,Yes,
+CTC752,FF Yuko,,No,
+CTC753,From MouseHouse Amai,,No,
+CTC754,TnS Kakei,,Yes,
+CTC755,TnS Misuzu,,Yes,
+CTC756,ECLS Kiba,,No,
+CTC757,TnS Terumi,,Yes,
+CTC758,TnS Zettai,,Yes,
+CTC759,TnS Harumi,,Yes,
+CTC76,MLP Raylin,CTU2,No,Pawfriends Line
+CTC760,TnS Chikara,,Yes,
+CTC761,TnS Benihime,,Yes,
+CTC762,TnS Hachiman,,Yes,
+CTC763,FM Sumire,,No,
+CTC764,TnS Poteto,,Yes,
+CTC765,TnS Peji,,Yes,
+CTC766,TnS Suiteki,,Yes,
+CTC767,TnS Ryoko,,Yes,
+CTC768,TnS Iroha,,Yes,
+CTC769,MM Zense,CTU2,No,
+CTC77,Azzura,CTU2,No,
+CTC770,TnS Moka,,Yes,
+CTC771,TnS Bakebi,,Yes,
+CTC772,TnS Junzen,,Yes,
+CTC773,TnS Ninko,,Yes,
+CTC774,TnS Naoko,,Yes,
+CTC776,ECLS Hoshi,,No,
+CTC777,TnS Hanako,,Yes,
+CTC778,TnS Kujaku,,Yes,
+CTC779,Ray's Qiqi,,No,
+CTC78,MM Zelesta,CTU1,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC780,TnS Natsuki,,Yes,
+CTC781,KW Satoshi,,No,
+CTC782,TnS Akimi,,Yes,
+CTC783,MM Diego,CTU1,No,
+CTC784,FR Tikka,,No,
+CTC785,TnS Takiyo,,Yes,
+CTC786,TnS Hakuko,,Yes,
+CTC787,MMM Iyabo,,No,
+CTC788,MM Peen,CTU1,Yes,
+CTC789,MMM Abracadabra,,No,
+CTC79,MM Zoltara,CTU2,No,Legacy Red Line; Legacy Brindle Line; Legacy Merle Line 2
+CTC790,MMM A+,,No,
+CTC791,TnS Umai,,Yes,
+CTC792,TnS Nesshin,,Yes,
+CTC793,TnS Onu,,Yes,
+CTC794,TnS Noboru,,Yes,
+CTC804,DM Vitan,CTU2,Yes,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC805,DM Asha,CTU2,Yes,Legacy Red Line; Polish Line; Legacy Brindle Line; Legacy Merle Line 1; Legacy Merle Line 2; Banded Line; Gianni Line
+CTC806,MF Tamala,CTU2,Yes,Legacy Red Line; Polish Line; Legacy Brindle Line
+CTC807,MF Cotija,CTU2,Yes,Legacy Red Line; Polish Line; Legacy Brindle Line
+CTC808,MM Aslan,CTU1,Yes,Legacy Red Line; Polish Line
+CTC809,RM Ripton,CTU2,Yes,Legacy Red Line; Polish Line
+CTC810,MD Camille,,Yes,Quattro Line
+CTC811,MD Sylvie,,Yes,Quattro Line
+CTC812,MD Emily,,Yes,Quattro Line
+CTC813,MD Mindy,,Yes,Quattro Line
+CTC814,PM Bambi,,Yes,
+CTC815,PM Splash,,Yes,
+CTC816,PM Mika,,Yes,
+CTC878,Kuro,,No,
+CTC879,ECLS Hiroaki,,No,
+CTC880,Akito,,No,
+CTC881,Toriko,,No,
+CTC882,Aki,,No,
+CTC883,ECLS Biscotte,,No,
+CTC884,Biscuit,,No,
+CTC885,ECLS Rosie,,No,
+CTC886,TnS Teruko,,Yes,
+CTC887,TnS Fawny,,Yes,
+CTC888,TnS Hibiki,,Yes,
+CTC889,TnS Shuga,,Yes,
+CTC890,ECLS Kyoko,,No,
+CTC891,ECLS Hikari,,No,
+CTC892,Jin,,No,
+CTC893,TnS Mikan,,Yes,
+CTC894,Rei,,No,
+CTC895,TnS Mayumi,,Yes,
+CTC896,Mohanah Auguste,,No,
+CTC897,MS Prune,,No,
+CTC898,MafiaSpade Marvel,,Yes,
+CTC899,TnS Mitsurin,,Yes,
+CTC900,TnS Mizore,,Yes,
+CTC901,TnS Mamoru,,Yes,
+CTC902,FF Kotoe,,No,
+CTC903,TnS Hikari,,Yes,
+CTC904,AM Sayuki,,No,
+CTC905,TnS Bourbillon,,Yes,
+CTC906,Fripouillette,,No,
+CTC907,Nozomi,,No,
+CTC908,Miyuna,,No,
+CTC909,Kinder,,No,
+CTC910,ECLS Ruby,,No,
+CTC911,TnS Ayame,,Yes,
+CTC912,C&C Kenshin,,No,
+CTC913,TnS Guimauve,,Yes,
+CTC914,C&C Suki,,No,
+CTC915,TnS Hinata,,Yes,
+CTC916,Rina,,No,
+CTC917,TOM Haiko,,No,
+CTC918,Kaguya,,No,
+CTC919,TOM Coeur De Chauffe,,No,
+CTC920,Ghost,,No,
+CTC921,TOM Tilikum,,No,
+CTC922,FKM Plume d'argent,,No,
+CTC923,MS Sourcil,,No,
+CTC924,SIL Mithril,,No,
+CTC925,FKM Marlin,,No,
+CTC926,FKM Api,,No,
+CTC927,OHH SplashGordon,,No,
+CTC928,MS Skweetheart,,No,
+CTC929,FKM Jiraiya,,No,
+CTC930,FKM Ruchka,,No,
+CTC931,FKM Hypnose,,No,
+CTC932,Aurea's Chinchidou,,No,
+CTC933,FKM Olovka,,No,
+CTC934,BB Nemo,,No,
+CTC935,TnS Zeroyo,,Yes,
+CTC936,TnS Towa,,Yes,
+CTC937,TnS Seiko,,Yes,
+CTC938,TnS Aoki,,Yes,
+CTC939,Zenko,,No,
+CTC940,TnS Takara,,Yes,
+CTC941,Rinku,,No,
+CTC942,TnS Kanade,,Yes,
+CTC943,TnS Asaki,,Yes,
+CTC944,TnS Haruna,,Yes,
+CTC945,FF Suzaku,,No,
+CTC946,Hymaya,,No,
+CTC947,Satoru,,No,
+CTC948,Iseko,,No,
+CTC949,Melie,,No,
+CTC950,TnS Misao,,Yes,
+CTC951,TnS Nanami,,Yes,
+CTC952,TnS Mizuki,,Yes,
+CTC953,TnS Jigoku,,Yes,
+CTC954,TnS Yuushou,,Yes,
+CTC955,TnS Dankei,,Yes,
+CTC956,TnS Likka,,Yes,
+CTC957,MLP Brie,,No,
+CTC958,TnS Yasu,,Yes,
+CTC959,KW Kieran,,No,
+CTC960,TnS Dolly,,Yes,
+CTC961,HV Dash,,No,
+CTC962,TnS Azami,,Yes,
+CTC963,TnS Shigure,,Yes,
+CTC964,TnS Kumi,,Yes,
+CTC965,Etsu,,No,
+CTC966,Yaki,,No,
+CTC967,TnS Himeko,,Yes,
+CTC968,TnS Wakana,,Yes,
+CTC969,MoW Yutsuki,,No,
+CTC97,M3 Mika,,No,
+CTC970,TnS Koi,,Yes,
+CTC971,TnS Kami,,Yes,
+CTC972,TnS Ibuki,,Yes,
+CTC973,TnS Wataru,,Yes,
+CTC974,TnS Yoko,,Yes,
+CTC975,TnS Kanon,,Yes,
+CTC976,TnS Itoe,,Yes,
+CTC977,TnS Iwako,,Yes,
+CTC978,Kumon,,No,
+CTC979,Akiho,,No,
+CTC98,MLP Violet,CTU2,No,Pawfriends Line
+CTC980,TnS Ningyo,,Yes,
+CTC981,TnS Bimyo,,Yes,
+CTC982,TnS Shoji,,Yes,
+CTC983,TnS Motoo,,Yes,
+CTC984,TnS Sunao,,Yes,
+CTC985,TnS Itako,,Yes,
+CTC986,Iwa,,No,
+CTC99,MLP Vajen,CTU2,No,Pawfriends Line
+CTC990,M3 Rumi,CTU2,Yes,Legacy Red Line; Polish Line
+CTC991,M3 Zaya,CTU2,Yes,
+CTC992,M3 Tova,CTU2,Yes,
+CTC993,M3 Tarin,CTU2,Yes,

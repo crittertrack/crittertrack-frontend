@@ -1,5 +1,5 @@
 // Service Worker for CritterTrack PWA
-const CACHE_NAME = 'crittertrack-v9'; // Increment version to force cache update
+const CACHE_NAME = 'crittertrack-v13'; // Increment version to force cache update
 const urlsToCache = [
   '/',
   '/index.html',
@@ -58,27 +58,22 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // Network-first strategy for HTML files (ensures updates are fetched)
+  // Network-first strategy for HTML files (ensures updates are fetched, NEVER cache HTML)
   if (request.headers.get('accept')?.includes('text/html') || url.pathname === '/' || url.pathname.endsWith('.html')) {
     event.respondWith(
       fetch(request)
         .then((response) => {
           console.log('[SW] HTML network fetch:', url.pathname);
-          if (!response || response.status !== 200) {
-            return response;
-          }
-          // Clone and cache the response
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseToCache);
-          });
+          // DO NOT CACHE HTML - always fetch fresh to prevent stale bundle references
           return response;
         })
         .catch((err) => {
-          console.log('[SW] HTML fetch failed, trying cache:', url.pathname, err);
-          // If network fails, try cache
-          return caches.match(request)
-            .then(response => response || new Response('Offline - page not cached', { status: 503 }));
+          console.log('[SW] HTML fetch failed:', url.pathname, err);
+          // Fallback to basic offline message - don't serve stale HTML
+          return new Response('Offline - Please check your connection', { 
+            status: 503,
+            headers: { 'Content-Type': 'text/html' }
+          });
         })
     );
     return;

@@ -1,6 +1,6 @@
 ﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
 import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2 } from 'lucide-react';
 import ArchiveScreen from './components/ArchiveScreen';
@@ -181,7 +181,7 @@ const getDonationBadge = (user) => {
             type: 'diamond',
             icon: '💎',
             title: 'Monthly Supporter',
-            className: 'bg-gradient-to-r from-blue-400 to-purple-500 text-white'
+            className: 'bg-gradient-to-r from-blue-400 to-pink-500 text-white'
         };
     }
     
@@ -193,7 +193,7 @@ const getDonationBadge = (user) => {
         if (daysSince <= 31) {
             return {
                 type: 'gift',
-                icon: '💎',
+                icon: '🔥',
                 title: 'Recent Supporter',
                 className: 'bg-gradient-to-r from-green-400 to-blue-500 text-white'
             };
@@ -209,17 +209,15 @@ const DonationBadge = ({ user, badge: badgeProp, size = 'sm' }) => {
     if (!badge) return null;
     
     const sizeClasses = {
-        xs: 'text-xs px-1 py-0.5',
-        sm: 'text-xs px-1.5 py-0.5', 
-        md: 'text-sm px-2 py-1',
-        lg: 'text-base px-2 py-1'
+        xs: 'text-sm',
+        sm: 'text-base',
+        md: 'text-lg',
+        lg: 'text-xl'
     };
     
     return (
-        <span 
-            className={`inline-flex items-center gap-1 rounded-full font-medium shadow-sm ${badge.className} ${sizeClasses[size]}`}
-        >
-            <span>{badge.icon}</span>
+        <span className={`inline-flex items-center ${sizeClasses[size]}`} title={badge.title}>
+            {badge.icon}
         </span>
     );
 };
@@ -629,7 +627,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                                     headers: { Authorization: `Bearer ${authToken}` }
                                 });
                                 animalInfo = response.data;
-                                foundViaOwned = true; // User has legitimate access (sold/transferred animal)
+                                // Do NOT set foundViaOwned = true here — animal is accessible but not owned.
+                                // This ensures the showOnPublicProfile check below still applies,
+                                // consistent with how ViewOnlyParentCard handles the same case.
                             } catch (error2) {
                                 console.log(`Animal ${id} not accessible via owned or related endpoints:`, error2.message);
                             }
@@ -2654,6 +2654,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     const [freshProfile, setFreshProfile] = useState(profile);
     const [expandedInfoFields, setExpandedInfoFields] = useState(new Set());
     const [publicLitters, setPublicLitters] = useState([]);
+    const [litterYearFilter, setLitterYearFilter] = useState(''); // filter litters by birth year
     const [ratingData, setRatingData] = useState({ average: 0, count: 0, distribution: {1:0,2:0,3:0,4:0,5:0}, ratings: [] });
     const [myRating, setMyRating] = useState(null);         // own existing rating object or null
     const [ratingForm, setRatingForm] = useState({ score: 0, comment: '' });
@@ -2979,9 +2980,9 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-4 pb-4 border-b">
                 {/* Left column: name → avatar → ctu → member since → country — centered */}
                 <div className="flex flex-col items-center gap-1.5 text-center">
-                    <div className="flex items-center justify-center gap-2 flex-wrap">
-                        <h2 className="text-xl font-bold text-gray-900 leading-tight">{displayName}</h2>
-                        <DonationBadge user={freshProfile || profile} size="sm" />
+                    <div className="flex items-center justify-center flex-wrap">
+                        <h2 className="text-xl font-bold text-gray-900 leading-tight inline">{displayName}</h2>
+                        <span className="ml-1 inline-block"><DonationBadge user={freshProfile || profile} size="sm" /></span>
                     </div>
                     {profile.profileImage ? (
                         <img src={profile.profileImage} alt={displayName} className="w-24 h-24 rounded-lg object-cover shadow-md" />
@@ -2990,7 +2991,15 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             <User size={40} className="text-gray-400" />
                         </div>
                     )}
-                    <span className="font-mono text-accent font-semibold text-sm">{freshProfile?.id_public || profile.id_public}</span>
+                    <span className="font-mono text-accent font-semibold text-sm">
+                        {['CTU1', 'CTU2'].includes(freshProfile?.id_public || profile.id_public) && (
+                            <span className="mr-1">🔑</span>
+                        )}
+                        {['CTU3', 'CTU4', 'CTU5', 'CTU6', 'CTU7', 'CTU9', 'CTU10', 'CTU11'].includes(freshProfile?.id_public || profile.id_public) && (
+                            <span className="mr-1">🌱</span>
+                        )}
+                        {freshProfile?.id_public || profile.id_public}
+                    </span>
                     {ratingData.count > 0 && (
                         <button onClick={() => setActiveTab('ratings')} className="flex items-center gap-1 text-xs text-amber-500 font-semibold hover:text-amber-600 transition" title="See ratings">
                             <span>★</span>
@@ -3436,7 +3445,21 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             {activeTab === 'litters' && publicLitters.length > 0 && (() => {
                 const formatLitterDate = (d) => d ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(d)) : null;
                 const planned = publicLitters.filter(l => l.isPlanned);
-                const born    = publicLitters.filter(l => !l.isPlanned);
+                let born = publicLitters.filter(l => !l.isPlanned);
+                
+                // Extract unique years from born litters
+                const bornYears = [...new Set(born
+                    .filter(l => l.birthDate)
+                    .map(l => new Date(l.birthDate).getFullYear())
+                )].sort((a, b) => b - a); // newest first
+                
+                // Filter born litters by selected year
+                if (litterYearFilter) {
+                    born = born.filter(l => {
+                        if (!l.birthDate) return false;
+                        return new Date(l.birthDate).getFullYear().toString() === litterYearFilter;
+                    });
+                }
                 const ParentMiniCard = ({ role, animal }) => {
                     if (!animal) return null;
                     const imgUrl = animal.imageUrl || animal.photoUrl || null;
@@ -3449,25 +3472,42 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 : <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold ${isSire ? 'bg-blue-300' : 'bg-pink-300'}`}>{isSire ? '♂' : '♀'}</div>
                             }
                             <div className="min-w-0">
-                                <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">{role}</p>
+                                <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-600">{role}</p>
                                 <p className="text-xs font-semibold text-gray-800 truncate">{fullName || animal.id_public}</p>
+                                {animal.variety && <p className="text-[10px] text-gray-500 truncate">{animal.variety}</p>}
                                 <p className="text-[10px] font-mono text-gray-400">{animal.id_public}</p>
                             </div>
                         </div>
                     );
                 };
                 const LitterPublicCard = ({ l }) => (
-                    <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-2.5">
-                        {/* Header row: badges left, counts right */}
-                        <div className="flex items-center gap-2">
-                            <div className="flex flex-wrap items-center gap-2 flex-1">
-                                {l.breedingPairCodeName && <span className="text-sm font-semibold text-gray-800">{l.breedingPairCodeName}</span>}
-                                {l.litter_id_public && <span className="text-xs font-mono bg-purple-100 text-purple-700 px-2 py-0.5 rounded">{l.litter_id_public}</span>}
+                    <div className="bg-white rounded-xl border border-gray-300 p-4 pb-6 space-y-2.5 relative">
+                        {/* First line: centered breeding pair name */}
+                        <div className="text-center min-h-[1.25rem] flex items-center justify-center">
+                            {l.breedingPairCodeName && (
+                                <span className="text-sm font-semibold text-gray-800">{l.breedingPairCodeName}</span>
+                            )}
+                        </div>
+                        
+                        {/* Second line: Sire × Dam mini-cards */}
+                        {(l.sireAnimal || l.damAnimal) && (
+                            <div className="flex items-center gap-2">
+                                <ParentMiniCard role="Sire" animal={l.sireAnimal} />
+                                <div className="w-px h-12 bg-gray-200 flex-shrink-0"></div>
+                                <ParentMiniCard role="Dam" animal={l.damAnimal} />
                             </div>
-                            {!l.isPlanned && l.litterSizeBorn != null && (
-                                <div className="flex items-center gap-1.5 text-xs ml-auto flex-shrink-0">
-                                    <span className="font-semibold text-gray-700">{l.litterSizeBorn} born</span>
-                                    {(l.maleCount != null || l.femaleCount != null || l.unknownCount != null) && (
+                        )}
+                        
+                        {/* Visual divider */}
+                        <div className="border-t border-gray-200 my-2"></div>
+                        
+                        {/* Born stats - full width */}
+                        {!l.isPlanned && l.litterSizeBorn != null && (
+                            <div className="flex items-center justify-center text-xs">
+                                <span className="font-semibold text-gray-700">{l.litterSizeBorn} born</span>
+                                {(l.maleCount != null || l.femaleCount != null || l.unknownCount != null) && (
+                                    <>
+                                        <span className="text-gray-400 mx-2">•</span>
                                         <span>
                                             <span className="text-blue-500 font-semibold">{l.maleCount ?? 0}M</span>
                                             <span className="text-gray-400 mx-0.5">/</span>
@@ -3475,40 +3515,23 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                             <span className="text-gray-400 mx-0.5">/</span>
                                             <span className="text-purple-500 font-semibold">{l.unknownCount ?? 0}U</span>
                                         </span>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                        {/* Sire × Dam mini-cards */}
-                        {(l.sireAnimal || l.damAnimal) && (
-                            <div className="flex items-center gap-2">
-                                <ParentMiniCard role="Sire" animal={l.sireAnimal} />
-                                <span className="text-gray-300 text-base font-light flex-shrink-0">×</span>
-                                <ParentMiniCard role="Dam" animal={l.damAnimal} />
+                                    </>
+                                )}
                             </div>
                         )}
-                        {/* Dates */}
+                        
+                        {/* Dates - full width centered */}
                         <div className="flex flex-wrap justify-center gap-3 text-xs text-gray-500">
                             {l.matingDate && <span><span className="font-medium">{l.isPlanned ? 'Planned Mating:' : 'Mated:'}</span> {formatLitterDate(l.matingDate)}</span>}
                             {l.expectedDueDate && l.isPlanned && <span><span className="font-medium">Due:</span> {formatLitterDate(l.expectedDueDate)}</span>}
                             {l.birthDate && !l.isPlanned && <span><span className="font-medium">Born:</span> {formatLitterDate(l.birthDate)}</span>}
-
                         </div>
-
-                        {/* Photo strip */}
-                        {l.images?.length > 0 && (
-                            <div className="flex gap-1.5 overflow-x-auto">
-                                {l.images.slice(0, 5).map((img, i) => (
-                                    <img key={i} src={img.url} alt="" className="h-16 w-16 rounded-lg object-cover flex-shrink-0 border border-gray-200" />
-                                ))}
-                                {l.images.length > 5 && (
-                                    <div className="h-16 w-16 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 border border-gray-200 text-xs text-gray-500 font-medium">+{l.images.length - 5}</div>
-                                )}
+                        
+                        {/* CTL ID - bottom right corner */}
+                        {l.litter_id_public && (
+                            <div className="absolute bottom-2 right-3 text-[10px] font-mono text-gray-400">
+                                {l.litter_id_public}
                             </div>
-                        )}
-                        {/* Notes */}
-                        {l.notes?.trim() && (
-                            <p className="text-sm text-gray-600 leading-relaxed border-t border-gray-100 pt-2">{l.notes}</p>
                         )}
                     </div>
                 );
@@ -3526,9 +3549,23 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         )}
                         {born.length > 0 && (
                             <div>
-                                <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Sparkles size={16} className="text-green-500" /> Past Pairings <span className="text-sm font-normal text-gray-400">({born.length})</span>
-                                </h3>
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-base font-semibold text-gray-700 flex items-center gap-2">
+                                        <Sparkles size={16} className="text-green-500" /> Past Pairings <span className="text-sm font-normal text-gray-400">({born.length})</span>
+                                    </h3>
+                                    {bornYears.length > 1 && (
+                                        <select
+                                            value={litterYearFilter}
+                                            onChange={(e) => setLitterYearFilter(e.target.value)}
+                                            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition"
+                                        >
+                                            <option value="">All Years</option>
+                                            {bornYears.map(year => (
+                                                <option key={year} value={year}>{year}</option>
+                                            ))}
+                                        </select>
+                                    )}
+                                </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {born.map(l => <LitterPublicCard key={l._id} l={l} />)}
                                 </div>
@@ -10694,7 +10731,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const response = await axios.get(`${API_BASE_URL}/litters`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            const littersData = response.data || [];
+            const littersData = Array.isArray(response.data) ? response.data : [];
             
             // Set litters immediately so UI can render
             setLitters(littersData);
@@ -10744,7 +10781,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 axios.get(`${API_BASE_URL}/litters/${litter.litter_id_public}/offspring`, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 }).then(res => {
-                    const offspring = res.data || [];
+                    const offspring = Array.isArray(res.data) ? res.data : [];
                     setLitterOffspringMap(prev => ({ ...prev, [litter._id]: offspring }));
 
                     // Silently reconcile counts if linked offspring exceed stored values
@@ -10757,17 +10794,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     const storedFemales = litter.femaleCount  ?? 0;
                     const storedUnknown = litter.unknownCount ?? 0;
                     const storedBorn    = litter.litterSizeBorn ?? litter.numberBorn ?? 0;
-                    // Gender counts: use linked offspring as ground truth so a gender
-                    // change on a linked animal correctly decrements the old gender
-                    // and increments the new one (mirrors calcLitterCounts logic).
-                    const newMales   = linkedMales;
-                    const newFemales = linkedFemales;
-                    const newUnknown = linkedUnknown;
-                    // Total born: keep the higher value — stored may include
-                    // unlinked / stillborn animals that aren't in the offspring list.
-                    const newBorn    = Math.max(storedBorn, linkedTotal);
-                    if (newMales !== storedMales || newFemales !== storedFemales || newUnknown !== storedUnknown || newBorn !== storedBorn) {
-                        const patch = { maleCount: newMales || null, femaleCount: newFemales || null, unknownCount: newUnknown || null, litterSizeBorn: newBorn || null, numberBorn: newBorn || null };
+                    // Only auto-update total born if linked offspring exceed stored value.
+                    // Never overwrite manually-entered gender counts.
+                    const newBorn = Math.max(storedBorn, linkedTotal);
+                    if (newBorn !== storedBorn) {
+                        const patch = { litterSizeBorn: newBorn || null, numberBorn: newBorn || null };
                         setLitters(prev => prev.map(l => l._id === litter._id ? { ...l, ...patch } : l));
                         axios.put(`${API_BASE_URL}/litters/${litter._id}`, patch, { headers: { Authorization: `Bearer ${authToken}` } }).catch(() => {});
                     }
@@ -10973,15 +11004,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     // Rule 1: gender sum > total ? bump total (silent)
     // Rule 2: stillborn or weaned > total ? warn, do NOT auto-correct
     const reconcileLitterFormCounts = (fd, linkedAnimals = []) => {
-        const maleCount    = linkedAnimals.length > 0
-            ? linkedAnimals.filter(a => a.gender === 'Male').length
-            : (parseInt(fd.maleCount) || 0);
-        const femaleCount  = linkedAnimals.length > 0
-            ? linkedAnimals.filter(a => a.gender === 'Female').length
-            : (parseInt(fd.femaleCount) || 0);
-        const unknownCount = linkedAnimals.length > 0
-            ? linkedAnimals.filter(a => a.gender !== 'Male' && a.gender !== 'Female').length
-            : (parseInt(fd.unknownCount) || 0);
+        const linkedMales   = linkedAnimals.filter(a => a.gender === 'Male').length;
+        const linkedFemales = linkedAnimals.filter(a => a.gender === 'Female').length;
+        const linkedUnknown = linkedAnimals.filter(a => a.gender !== 'Male' && a.gender !== 'Female').length;
+        // Always keep manual entries — only enforce minimum equal to linked count
+        const maleCount    = Math.max(parseInt(fd.maleCount)    || 0, linkedMales);
+        const femaleCount  = Math.max(parseInt(fd.femaleCount)  || 0, linkedFemales);
+        const unknownCount = Math.max(parseInt(fd.unknownCount) || 0, linkedUnknown);
         const genderSum    = maleCount + femaleCount + unknownCount;
         const linkedCount  = linkedAnimals.length;
         const manualTotal  = parseInt(fd.litterSizeBorn) || 0;
@@ -11275,11 +11304,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const addedAnimal = availableToLink.animals.find(a => a.id_public === animalId);
             const existingOffspring = myAnimals.filter(a => (litter.offspringIds_public || []).includes(a.id_public));
             const allLinked = [...existingOffspring, ...(addedAnimal ? [addedAnimal] : [])];
-            const counts = calcLitterCounts(litter, allLinked);
+            // Only bump total born if linked count exceeds stored value — never touch gender counts
+            const newBorn = Math.max(litter.litterSizeBorn || 0, allLinked.length);
 
             await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
                 offspringIds_public: updatedOffspringIds,
-                ...counts
+                litterSizeBorn: newBorn || null,
+                numberBorn: newBorn || null,
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
@@ -11316,11 +11347,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const updatedOffspringIds = [...(litter.offspringIds_public || []), ...animalIdsToAdd];
             const existingOffspring = myAnimals.filter(a => (litter.offspringIds_public || []).includes(a.id_public));
             const allLinked = [...existingOffspring, ...availableToLink.animals];
-            const counts = calcLitterCounts(litter, allLinked);
+            // Only bump total born if linked count exceeds stored value — never touch gender counts
+            const newBorn = Math.max(litter.litterSizeBorn || 0, allLinked.length);
 
             await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
                 offspringIds_public: updatedOffspringIds,
-                ...counts
+                litterSizeBorn: newBorn || null,
+                numberBorn: newBorn || null,
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
@@ -11352,10 +11385,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         try {
             const updatedOffspringIds = (litter.offspringIds_public || []).filter(id => id !== animalId_public);
             const remainingOffspring = (litterOffspringMap[litter._id] || []).filter(a => a.id_public !== animalId_public);
-            const counts = calcLitterCounts(litter, remainingOffspring);
+            // Only update the link list — never modify gender counts or total born on unlink
             await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
                 offspringIds_public: updatedOffspringIds,
-                ...counts
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
@@ -11835,9 +11867,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         return bDate - aDate;
     });
 
+    const litterStats = filteredLitters.reduce((acc, l) => {
+        acc.litters++;
+        acc.males   += l.maleCount   ?? 0;
+        acc.females += l.femaleCount ?? 0;
+        acc.unknown += l.unknownCount ?? 0;
+        return acc;
+    }, { litters: 0, males: 0, females: 0, unknown: 0 });
+
     return (
         <div className="w-full max-w-6xl bg-white p-3 sm:p-6 rounded-xl shadow-lg">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
                 <h2 className="text-xl sm:text-3xl font-bold text-gray-800 flex items-center">
                     <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
                     Litter Management
@@ -11930,6 +11970,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         </button>
                     </div>
                 </div>
+            </div>
+
+            {/* Stats bar */}
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 mb-4 sm:mb-6 pl-0.5">
+                <span><span className="font-semibold text-gray-700">{litterStats.litters}</span> Litters</span>
+                <span className="text-gray-300">|</span>
+                <span><span className="font-semibold text-blue-600">{litterStats.males}</span> Males</span>
+                <span className="text-gray-300">|</span>
+                <span><span className="font-semibold text-pink-500">{litterStats.females}</span> Females</span>
+                <span className="text-gray-300">|</span>
+                <span><span className="font-semibold text-gray-500">{litterStats.unknown}</span> Unknown</span>
             </div>
 
             {loading && litters.length === 0 && (
@@ -14454,7 +14505,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                 </p>
             </div>
             
-            <div className="mb-4 flex space-x-3" data-tutorial-target="species-search-section">
+            <div className="mb-4 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3" data-tutorial-target="species-search-section">
                 <input
                     type="text"
                     placeholder="Search species..."
@@ -14466,7 +14517,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                 <select
                     value={categoryFilter}
                     onChange={(e) => setCategoryFilter(e.target.value)}
-                    className="p-2 border border-gray-300 rounded-lg w-40 flex-shrink-0"
+                    className="p-2 border border-gray-300 rounded-lg w-full sm:w-40 flex-shrink-0"
                 >
                     {categories.map(cat => (
                         <option key={cat} value={cat}>{cat}</option>
@@ -16543,7 +16594,7 @@ const AnimalForm = ({
                 { headers: { Authorization: `Bearer ${authToken}` } }
             );
             
-            let filtered = response.data || [];
+            let filtered = Array.isArray(response.data) ? response.data : [];
             
             // Filter: current animal as sire/dam/other parent
             // Only show litters that match current animal's gender role
@@ -20862,6 +20913,12 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [myReceivedRatings, setMyReceivedRatings] = useState(null);
     const [myReceivedRatingsLoading, setMyReceivedRatingsLoading] = useState(false);
 
+    // Breeding lines — local draft state (not saved until user clicks Save)
+    const [localBLDefs, setLocalBLDefs] = useState(breedingLineDefs);
+    const [blSaving, setBlSaving] = useState(false);
+    const [blSaved, setBlSaved] = useState(false);
+    useEffect(() => { setLocalBLDefs(breedingLineDefs); }, [breedingLineDefs]);
+
     useEffect(() => {
         if (settingsTab !== 'ratings' || !userProfile?.id_public) return;
         setMyReceivedRatingsLoading(true);
@@ -21657,7 +21714,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">&#x1F4A0; Breeding Lines</h3>
                     <p className="text-sm text-gray-600">Define up to 10 personal breeding lines. These are private and only visible to you. Assign them to animals in the animal&apos;s detail view under the Identification tab.</p>
                     <div className="space-y-3">
-                        {breedingLineDefs.map((line, idx) => (
+                        {localBLDefs.map((line, idx) => (
                             <div key={line.id} className="flex items-center gap-3 flex-wrap">
                                 <span className="text-sm text-gray-400 w-4 text-right">{idx + 1}</span>
                                 <div className="flex gap-1">
@@ -21665,7 +21722,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                         <button
                                             key={color}
                                             type="button"
-                                            onClick={() => saveBreedingLineDefs(breedingLineDefs.map((l, i) => i === idx ? { ...l, color } : l), animalBreedingLines)}
+                                            onClick={() => setLocalBLDefs(localBLDefs.map((l, i) => i === idx ? { ...l, color } : l))}
                                             style={{ backgroundColor: color, outline: line.color === color ? '3px solid #374151' : 'none', outlineOffset: '2px' }}
                                             className="w-5 h-5 rounded-full transition hover:scale-110 flex-shrink-0"
                                             title={color}
@@ -21677,14 +21734,32 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     placeholder={`Line ${idx + 1} name`}
                                     value={line.name}
                                     maxLength={30}
-                                    onChange={(e) => saveBreedingLineDefs(breedingLineDefs.map((l, i) => i === idx ? { ...l, name: e.target.value } : l), animalBreedingLines)}
+                                    onChange={(e) => setLocalBLDefs(localBLDefs.map((l, i) => i === idx ? { ...l, name: e.target.value } : l))}
                                     className="flex-1 min-w-[120px] p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary"
                                 />
                                 <span style={{ color: line.color }} className="text-xl leading-none" title={line.name || `Line ${idx + 1}`}>&#x25C6;</span>
                             </div>
                         ))}
                     </div>
-                    <p className="text-xs text-gray-400">Changes are saved to your account automatically.</p>
+                    <div className="flex items-center gap-3 pt-1">
+                        <button
+                            type="button"
+                            disabled={blSaving}
+                            onClick={async () => {
+                                setBlSaving(true);
+                                setBlSaved(false);
+                                await saveBreedingLineDefs(localBLDefs, animalBreedingLines);
+                                setBlSaving(false);
+                                setBlSaved(true);
+                                setTimeout(() => setBlSaved(false), 3000);
+                            }}
+                            className="bg-primary hover:bg-primary-dark text-black font-bold py-2 px-5 rounded-lg shadow-md transition duration-150 flex items-center gap-2 disabled:opacity-50"
+                        >
+                            {blSaving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
+                            {blSaving ? 'Saving…' : 'Save Breeding Lines'}
+                        </button>
+                        {blSaved && <span className="text-sm text-green-600 font-medium">&#x2713; Saved to your account!</span>}
+                    </div>
                 </div>
             )}
 
@@ -22196,15 +22271,28 @@ const DonationView = ({ onBack, authToken, userProfile }) => {
 // ==================== BREEDER DIRECTORY VIEW ====================
 const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [breeders, setBreeders] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedSpecies, setSelectedSpecies] = useState('');
-    const [selectedCountry, setSelectedCountry] = useState('');
-    const [selectedState, setSelectedState] = useState('');
+    
+    // Initialize filters from URL params
+    const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+    const [selectedSpecies, setSelectedSpecies] = useState(searchParams.get('species') || '');
+    const [selectedCountry, setSelectedCountry] = useState(searchParams.get('country') || '');
+    const [selectedState, setSelectedState] = useState(searchParams.get('state') || '');
     const [availableSpecies, setAvailableSpecies] = useState([]);
     const [availableCountries, setAvailableCountries] = useState([]);
     const [availableStates, setAvailableStates] = useState([]);
+
+    // Update URL params when filters change
+    useEffect(() => {
+        const params = {};
+        if (searchQuery) params.search = searchQuery;
+        if (selectedSpecies) params.species = selectedSpecies;
+        if (selectedCountry) params.country = selectedCountry;
+        if (selectedState) params.state = selectedState;
+        setSearchParams(params, { replace: true });
+    }, [searchQuery, selectedSpecies, selectedCountry, selectedState]);
 
     // Fetch breeders on mount
     useEffect(() => {
@@ -22448,9 +22536,9 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
 
                                         {/* Name and CTU Badge */}
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-3 mb-1">
-                                                <h3 className="text-xl font-bold text-gray-800">{displayName}</h3>
-                                                <DonationBadge user={breeder} size="sm" />
+                                            <div className="mb-1">
+                                                <h3 className="text-xl font-bold text-gray-800 inline">{displayName}</h3>
+                                                <span className="ml-1 inline-block"><DonationBadge user={breeder} size="sm" /></span>
                                             </div>
                                             <div className="flex items-center gap-3 flex-wrap">
                                                 <span className="text-xs bg-primary text-black px-2.5 py-1 rounded font-medium">
@@ -23699,6 +23787,7 @@ const AnimalList = ({
             return localStorage.getItem('animalList_statusFilterMating') === 'true';
         } catch { return false; }
     });
+    const [blFilter, setBlFilter] = useState([]); // array of line IDs to filter by (empty = no filter)
     const [ownedFilterActive, setOwnedFilterActive] = useState(() => {
         try {
             const saved = localStorage.getItem('animalList_ownedFilterActive');
@@ -24167,7 +24256,15 @@ const AnimalList = ({
     }, [authToken, API_BASE_URL]);
 
     const groupedAnimals = useMemo(() => {
-        return animals.reduce((groups, animal) => {
+        let source = animals;
+        // Apply breeding line filter client-side so it reacts instantly without re-fetching
+        if (blFilter.length > 0) {
+            source = source.filter(a => {
+                const assigned = animalBreedingLines[a.id_public] || [];
+                return blFilter.some(lineId => assigned.includes(lineId));
+            });
+        }
+        return source.reduce((groups, animal) => {
             const species = animal.species || 'Unspecified Species';
             if (!groups[species]) {
                 groups[species] = [];
@@ -24175,7 +24272,7 @@ const AnimalList = ({
             groups[species].push(animal);
             return groups;
         }, {});
-    }, [animals]);
+    }, [animals, blFilter, animalBreedingLines]);
     
     const speciesNames = useMemo(() => {
         return [...allUserSpecies].sort((a, b) => {
@@ -24254,7 +24351,8 @@ const AnimalList = ({
         statusFilterNursing ||
         statusFilterMating ||
         !ownedFilterActive ||
-        publicFilter !== ''
+        publicFilter !== '' ||
+        blFilter.length > 0
     );
     
     const handleClearFilters = () => {
@@ -24268,6 +24366,7 @@ const AnimalList = ({
         setStatusFilterMating(false);
         setOwnedFilterActive(true);
         setPublicFilter('');
+        setBlFilter([]);
     };
     
     const handleRefresh = async () => {
@@ -27071,6 +27170,30 @@ const AnimalList = ({
                         <span className="hidden sm:inline">Nursing</span>
                     </button>
                 </div>
+
+                {/* Line 4: Breeding Line filters (only shown when user has named lines) */}
+                {breedingLineDefs.some(l => l.name) && (
+                    <div className="flex flex-wrap justify-center items-center gap-2">
+                        <span className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">Breeding Line:</span>
+                        {breedingLineDefs.filter(l => l.name).map(line => {
+                            const isActive = blFilter.includes(line.id);
+                            return (
+                                <button
+                                    key={line.id}
+                                    onClick={() => setBlFilter(prev => isActive ? prev.filter(id => id !== line.id) : [...prev, line.id])}
+                                    title={line.name}
+                                    className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm border ${
+                                        isActive ? 'text-white border-transparent' : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300'
+                                    }`}
+                                    style={isActive ? { backgroundColor: line.color, borderColor: line.color } : {}}
+                                >
+                                    <span style={{ color: isActive ? 'white' : line.color }} className="text-base leading-none">&#x25C6;</span>
+                                    {line.name}
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
             )}
 
@@ -29080,6 +29203,9 @@ const App = () => {
         try { const s = localStorage.getItem('ct_blassign'); if (s) return JSON.parse(s); } catch {}
         return {};
     });
+    // Ref so toggleAnimalBreedingLine always reads the latest defs without stale closure issues
+    const breedingLineDefsRef = React.useRef(breedingLineDefs);
+    React.useEffect(() => { breedingLineDefsRef.current = breedingLineDefs; }, [breedingLineDefs]);
     // Load from backend on login (overrides localStorage with server truth)
     React.useEffect(() => {
         if (!authToken) return;
@@ -29100,26 +29226,25 @@ const App = () => {
         setBreedingLineDefs(defs);
         try { localStorage.setItem('ct_bldefs', JSON.stringify(defs)); } catch {}
         if (authToken) {
-            axios.put(`${API_BASE_URL}/users/breeding-lines`,
+            return axios.put(`${API_BASE_URL}/users/breeding-lines`,
                 { breedingLineDefs: defs, animalBreedingLines: currentAssignments },
                 { headers: { Authorization: `Bearer ${authToken}` } }
             ).catch(() => {});
         }
+        return Promise.resolve();
     };
     const toggleAnimalBreedingLine = (animalId, lineId) => {
-        setAnimalBreedingLines(prev => {
-            const current = prev[animalId] || [];
-            const updated = current.includes(lineId) ? current.filter(id => id !== lineId) : [...current, lineId];
-            const next = { ...prev, [animalId]: updated };
-            try { localStorage.setItem('ct_blassign', JSON.stringify(next)); } catch {}
-            if (authToken) {
-                axios.put(`${API_BASE_URL}/users/breeding-lines`,
-                    { breedingLineDefs, animalBreedingLines: next },
-                    { headers: { Authorization: `Bearer ${authToken}` } }
-                ).catch(() => {});
-            }
-            return next;
-        });
+        const current = animalBreedingLines[animalId] || [];
+        const updated = current.includes(lineId) ? current.filter(id => id !== lineId) : [...current, lineId];
+        const next = { ...animalBreedingLines, [animalId]: updated };
+        setAnimalBreedingLines(next);
+        try { localStorage.setItem('ct_blassign', JSON.stringify(next)); } catch {}
+        if (authToken) {
+            axios.put(`${API_BASE_URL}/users/breeding-lines`,
+                { breedingLineDefs: breedingLineDefsRef.current, animalBreedingLines: next },
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            ).catch(err => console.error('Failed to save breeding line assignment:', err));
+        }
     };
     // ─────────────────────────────────────────────────────────────────────────────
     const [parentCardKey, setParentCardKey] = useState(0); // Force parent cards to refetch when tab opens
@@ -31258,7 +31383,7 @@ const App = () => {
                         </button>
                         <button onClick={() => navigate('/marketplace')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <ShoppingBag size={18} className="mb-1" />
-                            <span>Marketplace</span>
+                            <span>Available Animals</span>
                         </button>
                         <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Calculator size={18} className="mb-1" />
@@ -31267,6 +31392,10 @@ const App = () => {
                         <button onClick={() => navigate('/breeder-directory')} data-tutorial-target="breeders-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <MoonStar size={18} className="mb-1" />
                             <span>Breeders</span>
+                        </button>
+                        <button onClick={() => setShowInfoTab(true)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`}>
+                            <BookOpen size={18} className="mb-1" />
+                            <span>Help</span>
                         </button>
                     </nav>
 
@@ -31325,10 +31454,6 @@ const App = () => {
                                     <button onClick={() => { navigate('/profile'); setShowProfileMenu(false); }}
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
                                         <User size={15} /> Profile
-                                    </button>
-                                    <button onClick={() => { setShowInfoTab(true); setShowProfileMenu(false); }}
-                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
-                                        <BookOpen size={15} /> Help &amp; Tutorials
                                     </button>
                                     {['admin', 'moderator'].includes(userProfile?.role) && (
                                         <button onClick={() => { inModeratorMode ? setShowAdminPanel(!showAdminPanel) : setShowModerationAuthModal(true); setShowProfileMenu(false); }}
@@ -31418,10 +31543,6 @@ const App = () => {
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
                                             <User size={15} /> Profile
                                         </button>
-                                        <button onClick={() => { setShowInfoTab(true); setShowProfileMenu(false); }}
-                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
-                                            <BookOpen size={15} /> Help &amp; Tutorials
-                                        </button>
                                         {['admin', 'moderator'].includes(userProfile?.role) && (
                                             <button onClick={() => { inModeratorMode ? setShowAdminPanel(!showAdminPanel) : setShowModerationAuthModal(true); setShowProfileMenu(false); }}
                                                 className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
@@ -31455,12 +31576,12 @@ const App = () => {
                         </button>
                         <button onClick={() => navigate('/marketplace')} data-tutorial-target="marketplace-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <ShoppingBag size={18} className="mb-0.5" />
-                            <span>Marketplace</span>
+                            <span>Available Animals</span>
                         </button>
                     </nav>
 
-                    {/* Fourth row: Navigation row 2 (2 buttons) */}
-                    <nav className="grid grid-cols-2 gap-1">
+                    {/* Fourth row: Navigation row 2 (3 buttons) */}
+                    <nav className="grid grid-cols-3 gap-1">
                         <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Calculator size={18} className="mb-0.5" />
                             <span>Calculator</span>
@@ -31468,6 +31589,10 @@ const App = () => {
                         <button onClick={() => navigate('/breeder-directory')} data-tutorial-target="breeders-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <MoonStar size={18} className="mb-0.5" />
                             <span>Breeders</span>
+                        </button>
+                        <button onClick={() => setShowInfoTab(true)} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`}>
+                            <BookOpen size={18} className="mb-0.5" />
+                            <span>Help</span>
                         </button>
                     </nav>
                 </div>
@@ -31816,9 +31941,15 @@ const App = () => {
                                     return (
                                         <div
                                             key={user.id_public}
-                                            className="relative bg-white rounded-lg p-2 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer w-[18%] min-w-[110px] max-w-[140px]"
+                                            className="relative bg-white rounded-lg p-2 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer w-[48%] sm:w-[31%] md:w-[23%] lg:w-[18%] min-w-[110px] max-w-[140px]"
                                             onClick={() => navigate(`/user/${user.id_public}`)}
                                         >
+                                            {/* Donation badge - top left */}
+                                            {getDonationBadge(user) && (
+                                                <span className="absolute top-1 left-1 z-10">
+                                                    <DonationBadge badge={getDonationBadge(user)} size="xs" />
+                                                </span>
+                                            )}
                                             {/* Active green dot */}
                                             {user.isActive && (
                                                 <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full" title="Recently active" />
@@ -31836,9 +31967,8 @@ const App = () => {
                                                     </div>
                                                 )}
                                             </div>
-                                            <p className="text-xs font-semibold text-gray-800 text-center line-clamp-2 min-h-[2.5rem] flex items-center justify-center gap-1">
+                                            <p className="text-xs font-semibold text-gray-800 text-center line-clamp-2 min-h-[2.5rem] px-1">
                                                 {displayName}
-                                                <DonationBadge badge={getDonationBadge(user)} size="xs" />
                                             </p>
                                             <p className="text-xs text-gray-500 text-center truncate">{user.id_public}</p>
                                         </div>

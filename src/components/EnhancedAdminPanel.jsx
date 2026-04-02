@@ -701,7 +701,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                 <AnimalManagementPanel 
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
-                                    userRole={localStorage.getItem('userRole')}
+                                    userRole={userRole}
                                 />
                             </div>
                         )}

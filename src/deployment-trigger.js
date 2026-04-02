@@ -1,4 +1,5 @@
-// Force deployment trigger - planned mating isPlanned flag + card visual clarity
-// Date: 2026-03-13
-// Purpose: Deploy isPlanned schema field + planned mating card UI changes
-export const DEPLOYMENT_TIMESTAMP = '2026-03-13T00:00:00Z';
+// Force deployment trigger - donation badges fix (gift icon + PublicProfile sync)
+// Date: 2026-03-27
+// Purpose: Fix donation badge display on community feed, public profiles, and breeders registry
+// Build: v12 - Fixed service worker caching
+export const DEPLOYMENT_TIMESTAMP = '2026-03-27T02:00:00Z';

@@ -259,7 +259,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             'Species', 'Sex', 'Birth Date',
             'Sire ID', 'Dam ID',
             'Genetic Code', 'Color', 'Eye Color',
-            'Owned'
+            'Owner CTU ID', 'Owned'
         ];
 
         const escape = (val) => {
@@ -283,6 +283,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             escape(a.geneticCode),
             escape(a.color),
             escape(a.eyeColor),
+            escape(a.ownerId_public),
             escape(a.isOwned ? 'Yes' : 'No')
         ].join(','));
 

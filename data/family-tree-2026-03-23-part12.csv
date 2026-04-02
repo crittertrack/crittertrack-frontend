@@ -1,0 +1,61 @@
+ID,Full Name,Name,Prefix,Sex,Sire ID,Dam ID,Owner CTU ID,Owned
+CTC946,Hymaya,Hymaya,,Female,,,,No
+CTC947,Satoru,Satoru,,Male,,,,No
+CTC948,Iseko,Iseko,,Female,CTC901,CTC949,,No
+CTC958,TnS Yasu,Yasu,TnS,Female,CTC966,CTC967,,Yes
+CTC962,TnS Azami,Azami,TnS,Female,CTC945,CTC963,,Yes
+CTC969,MoW Yutsuki,Yutsuki,MoW,Male,,,,No
+CTC975,TnS Kanon,Kanon,TnS,Female,CTC939,CTC976,,Yes
+CTC661,SLM's Sir Fluffington,Sir Fluffington,SLM's,Male,CTC662,CTC664,,Yes
+CTC706,SLM's Tijger,Tijger,SLM's,Female,CTC703,CTC704,,Yes
+CTC710,SLM's Swoop,Swoop,SLM's,Female,CTC662,CTC664,,No
+CTC711,SLM's Spook,Spook,SLM's,Female,CTC662,CTC664,,No
+CTC893,TnS Mikan,Mikan,TnS,Female,CTC894,CTC895,,Yes
+CTC903,TnS Hikari,Hikari,TnS,Male,CTC905,CTC906,,Yes
+CTC940,TnS Takara,Takara,TnS,Female,CTC751,CTC941,,Yes
+CTC963,TnS Shigure,Shigure,TnS,Female,CTC894,CTC964,,Yes
+CTC968,TnS Wakana,Wakana,TnS,Female,CTC969,CTC946,,Yes
+CTC1103,SLM's Dumbo,Dumbo,SLM's,Male,CTC703,CTC704,,No
+CTC702,SLM's CupCake,CupCake,SLM's,Female,,,,Yes
+CTC884,Biscuit,Biscuit,,Male,,,,No
+CTC885,ECLS Rosie,Rosie,ECLS,Female,,,,No
+CTC898,MafiaSpade Marvel,Marvel,MafiaSpade,Female,,,,Yes
+CTC904,AM Sayuki,Sayuki,AM,Female,,,,No
+CTC907,Nozomi,Nozomi,,Male,,,,No
+CTC908,Miyuna,Miyuna,,Female,,,,No
+CTC916,Rina,Rina,,Female,,,,No
+CTC917,TOM Haiko,Haiko,TOM,Male,CTC919,CTC920,,No
+CTC918,Kaguya,Kaguya,,Female,,,,No
+CTC938,TnS Aoki,Aoki,TnS,Female,CTC939,CTC940,,Yes
+CTC939,Zenko,Zenko,,Male,,,,No
+CTC949,Melie,Melie,,Female,,,,No
+CTC966,Yaki,Yaki,,Male,,,,No
+CTC976,TnS Itoe,Itoe,TnS,Female,CTC907,CTC977,,Yes
+CTC964,TnS Kumi,Kumi,TnS,Female,CTC917,CTC965,,Yes
+CTC1058,DM Raya,Raya,DM,Female,CTC1103,CTC1102,,Yes
+CTC1059,DM Shanti,Shanti,DM,Female,CTC1103,CTC1102,,Yes
+CTC704,SLM's Oozara,Oozara,SLM's,Female,,,,Yes
+CTC895,TnS Mayumi,Mayumi,TnS,Female,,,,Yes
+CTC906,Fripouillette,Fripouillette,,Female,,,,No
+CTC919,TOM Coeur De Chauffe,Coeur De Chauffe,TOM,Male,CTC921,CTC922,,No
+CTC920,Ghost,Ghost,,Female,,,,No
+CTC941,Rinku,Rinku,,Female,,,,No
+CTC977,TnS Iwako,Iwako,TnS,Female,CTC978,CTC979,,Yes
+CTC1102,DM Perdita 2.0,Perdita 2.0,DM,Female,,,,No
+CTC921,TOM Tilikum,Tilikum,TOM,Male,CTC923,CTC924,,No
+CTC922,FKM Plume d'argent,Plume d'argent,FKM,Female,CTC925,CTC926,,No
+CTC965,Etsu,Etsu,,Female,,,,No
+CTC978,Kumon,Kumon,,Male,,,,No
+CTC979,Akiho,Akiho,,Female,,,,No
+CTC923,MS Sourcil,Sourcil,MS,Male,,,,No
+CTC924,SIL Mithril,Mithril,SIL,Female,,,,No
+CTC925,FKM Marlin,Marlin,FKM,Male,CTC929,CTC930,,No
+CTC926,FKM Api,Api,FKM,Female,CTC927,CTC928,,No
+CTC927,OHH SplashGordon,SplashGordon,OHH,Male,,,,No
+CTC928,MS Skweetheart,Skweetheart,MS,Female,,,,No
+CTC929,FKM Jiraiya,Jiraiya,FKM,Male,CTC932,CTC933,,No
+CTC930,FKM Ruchka,Ruchka,FKM,Female,CTC927,CTC931,,No
+CTC931,FKM Hypnose,Hypnose,FKM,Female,,,,No
+CTC932,Aurea's Chinchidou,Chinchidou,Aurea's,Male,,,,No
+CTC933,FKM Olovka,Olovka,FKM,Female,CTC934,CTC931,,No
+CTC934,BB Nemo,Nemo,BB,Male,,,,No
