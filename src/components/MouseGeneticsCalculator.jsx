@@ -1090,6 +1090,10 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     else if (color === 'Cinnamon Tan') color = 'Cinnamon Argente Tan';
     else if (color === 'Black Tan') color = 'Blue Tan';
     else if (color === 'Chocolate Tan') color = 'Lilac Tan';
+    else if (color === 'Dove') color = 'Silver';
+    else if (color === 'Dove Tan') color = 'Silver Tan';
+    else if (color === 'Champagne') color = 'Lavender';
+    else if (color === 'Champagne Tan') color = 'Lavender Tan';
   }
 
   // Lavender (b/b + d/d + p/p combination)
