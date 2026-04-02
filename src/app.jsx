@@ -22777,11 +22777,11 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                         )}
                     </div>
 
-                    {/* Available from Followed Breeders */}
+                    {/* Available from Favorited Breeders */}
                     <div className="bg-white rounded-lg shadow-md p-4">
                         <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
                             <ShoppingBag size={20} className="text-green-500" />
-                            Available from Followed Breeders
+                            Available from Favorited Breeders
                         </h2>
                         {newAvailableAnimals.length === 0 ? (
                             <p className="text-gray-500 text-sm">{favoriteUsers.length === 0 ? 'Favorite some breeders to see their available animals here.' : 'No available animals from your favorite breeders.'}</p>
