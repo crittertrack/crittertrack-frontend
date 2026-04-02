@@ -4489,21 +4489,21 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                 <div className="bg-white border-b border-gray-300 px-2 sm:px-6 pt-2 sm:pt-4">
                     <div className="flex flex-wrap gap-1 sm:gap-1 pb-2 sm:pb-4">
                         {[
-                            { id: 1, label: 'Overview', icon: ClipboardList },
-                            { id: 2, label: 'Status & Privacy', icon: Lock },
-                            { id: 3, label: 'Physical', icon: Palette },
-                            { id: 4, label: 'Identification', icon: Tag },
-                            { id: 5, label: 'Lineage', icon: TreeDeciduous },
-                            { id: 6, label: 'Breeding', icon: Egg },
-                            { id: 7, label: 'Health', icon: Hospital },
-                            { id: 8, label: 'Animal Care', icon: Home },
-                            { id: 9, label: 'Behavior', icon: Brain },
-                            { id: 10, label: 'Records', icon: FileText },
-                            { id: 11, label: 'End of Life', icon: Scale },
-                            { id: 12, label: 'Show', icon: Trophy },
-                            { id: 13, label: 'Legal', icon: FileCheck },
-                            { id: 14, label: 'Gallery', icon: Images },
-                            { id: 15, label: 'Logs', icon: ScrollText }
+                            { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
+                            { id: 2, label: 'Status & Privacy', icon: Lock, color: 'text-slate-500' },
+                            { id: 3, label: 'Physical', icon: Palette, color: 'text-pink-500' },
+                            { id: 4, label: 'Identification', icon: Tag, color: 'text-amber-500' },
+                            { id: 5, label: 'Lineage', icon: TreeDeciduous, color: 'text-green-600' },
+                            { id: 6, label: 'Breeding', icon: Egg, color: 'text-yellow-500' },
+                            { id: 7, label: 'Health', icon: Hospital, color: 'text-red-500' },
+                            { id: 8, label: 'Animal Care', icon: Home, color: 'text-teal-500' },
+                            { id: 9, label: 'Behavior', icon: Brain, color: 'text-purple-500' },
+                            { id: 10, label: 'Records', icon: FileText, color: 'text-indigo-500' },
+                            { id: 11, label: 'End of Life', icon: Scale, color: 'text-gray-500' },
+                            { id: 12, label: 'Show', icon: Trophy, color: 'text-yellow-600' },
+                            { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' },
+                            { id: 14, label: 'Gallery', icon: Images, color: 'text-rose-500' },
+                            { id: 15, label: 'Logs', icon: ScrollText, color: 'text-gray-600' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -4516,7 +4516,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 }`}
                                 title={tab.label}
                             >
-                                {React.createElement(tab.icon, { size: 14, className: 'inline-block align-middle flex-shrink-0' })}
+                                {React.createElement(tab.icon, { size: 14, className: `inline-block align-middle flex-shrink-0 mr-1.5 ${tab.color || ''}` })}
                                 <span className="hidden lg:inline">{tab.label}</span>
                             </button>
                         ))}
@@ -6820,20 +6820,20 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                 <div className="bg-white border-b border-gray-300 px-6 pt-4">
                     <div className="flex flex-wrap gap-1 pb-4">
                         {[
-                            { id: 1, label: 'Overview', icon: ClipboardList },
-                            { id: 2, label: 'Status & Privacy', icon: Lock },
-                            { id: 3, label: 'Physical', icon: Palette },
-                            { id: 4, label: 'Identification', icon: Tag },
-                            { id: 5, label: 'Lineage', icon: TreeDeciduous },
-                            { id: 6, label: 'Breeding', icon: Egg },
-                            { id: 7, label: 'Health', icon: Hospital },
-                            { id: 8, label: 'Animal Care', icon: Home },
-                            { id: 9, label: 'Behavior', icon: Brain },
-                            { id: 10, label: 'Records', icon: FileText },
-                            { id: 11, label: 'End of Life', icon: Scale },
-                            { id: 12, label: 'Show', icon: Trophy },
-                            { id: 13, label: 'Legal', icon: FileCheck },
-                            { id: 14, label: 'Logs', icon: ScrollText }
+                            { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
+                            { id: 2, label: 'Status & Privacy', icon: Lock, color: 'text-slate-500' },
+                            { id: 3, label: 'Physical', icon: Palette, color: 'text-pink-500' },
+                            { id: 4, label: 'Identification', icon: Tag, color: 'text-amber-500' },
+                            { id: 5, label: 'Lineage', icon: TreeDeciduous, color: 'text-green-600' },
+                            { id: 6, label: 'Breeding', icon: Egg, color: 'text-yellow-500' },
+                            { id: 7, label: 'Health', icon: Hospital, color: 'text-red-500' },
+                            { id: 8, label: 'Animal Care', icon: Home, color: 'text-teal-500' },
+                            { id: 9, label: 'Behavior', icon: Brain, color: 'text-purple-500' },
+                            { id: 10, label: 'Records', icon: FileText, color: 'text-indigo-500' },
+                            { id: 11, label: 'End of Life', icon: Scale, color: 'text-gray-500' },
+                            { id: 12, label: 'Show', icon: Trophy, color: 'text-yellow-600' },
+                            { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' },
+                            { id: 14, label: 'Logs', icon: ScrollText, color: 'text-gray-600' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -6846,7 +6846,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 }`}
                                 title={tab.label}
                             >
-                                {React.createElement(tab.icon, { size: 14, className: 'inline-block align-middle flex-shrink-0 mr-1' })}
+                                {React.createElement(tab.icon, { size: 14, className: `inline-block align-middle flex-shrink-0 mr-1.5 ${tab.color || ''}` })}
                                 <span className="hidden lg:inline">{tab.label}</span>
                             </button>
                         ))}
@@ -8642,19 +8642,19 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                 <div className="bg-white border-b border-gray-300">
                     <div className="flex flex-wrap">
                         {[
-                            { id: 1, label: 'Overview', icon: ClipboardList },
-                            { id: 2, label: 'Status', icon: Lock },
-                            { id: 3, label: 'Physical', icon: Palette },
-                            { id: 4, label: 'Identification', icon: Tag },
-                            { id: 5, label: 'Lineage', icon: TreeDeciduous },
-                            { id: 6, label: 'Breeding', icon: Egg },
-                            { id: 7, label: 'Health', icon: Hospital },
-                            { id: 8, label: 'Animal Care', icon: Home },
-                            { id: 9, label: 'Behavior', icon: Brain },
-                            { id: 10, label: 'Records', icon: FileText },
-                            { id: 11, label: 'End of Life', icon: Scale },
-                            { id: 12, label: 'Show', icon: Trophy },
-                            { id: 13, label: 'Legal', icon: FileCheck }
+                            { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
+                            { id: 2, label: 'Status', icon: Lock, color: 'text-slate-500' },
+                            { id: 3, label: 'Physical', icon: Palette, color: 'text-pink-500' },
+                            { id: 4, label: 'Identification', icon: Tag, color: 'text-amber-500' },
+                            { id: 5, label: 'Lineage', icon: TreeDeciduous, color: 'text-green-600' },
+                            { id: 6, label: 'Breeding', icon: Egg, color: 'text-yellow-500' },
+                            { id: 7, label: 'Health', icon: Hospital, color: 'text-red-500' },
+                            { id: 8, label: 'Animal Care', icon: Home, color: 'text-teal-500' },
+                            { id: 9, label: 'Behavior', icon: Brain, color: 'text-purple-500' },
+                            { id: 10, label: 'Records', icon: FileText, color: 'text-indigo-500' },
+                            { id: 11, label: 'End of Life', icon: Scale, color: 'text-gray-500' },
+                            { id: 12, label: 'Show', icon: Trophy, color: 'text-yellow-600' },
+                            { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -8665,7 +8665,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                         : 'text-gray-600 hover:text-gray-800'
                                 }`}
                             >
-                                {React.createElement(tab.icon, { size: 14, className: 'inline-block align-middle flex-shrink-0 mr-1' })}{tab.label}
+                                {React.createElement(tab.icon, { size: 14, className: `inline-block align-middle flex-shrink-0 mr-1.5 ${tab.color || ''}` })}{tab.label}
                             </button>
                         ))}
                     </div>
@@ -17758,20 +17758,20 @@ const AnimalForm = ({
                 <div className="border border-gray-300 -mx-6 px-6 pt-4">
                     <div className="flex flex-wrap gap-1 pb-px">
                         {[
-                            { id: 1, label: 'Overview', icon: ClipboardList },
-                            { id: 2, label: 'Status & Privacy', icon: Lock },
-                            { id: 3, label: 'Physical', icon: Palette },
-                            { id: 4, label: 'Identification', icon: Tag },
-                            { id: 5, label: 'Lineage', icon: TreeDeciduous },
-                            { id: 6, label: 'Breeding', icon: Egg },
-                            { id: 7, label: 'Health', icon: Hospital },
-                            { id: 8, label: 'Animal Care', icon: Home },
-                            { id: 9, label: 'Behavior', icon: Brain },
-                            { id: 10, label: 'Records', icon: FileText },
-                            { id: 11, label: 'End of Life', icon: Scale },
-                            { id: 12, label: 'Show', icon: Trophy },
-                            { id: 13, label: 'Legal', icon: FileCheck },
-                            { id: 14, label: 'Gallery', icon: Images }
+                            { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
+                            { id: 2, label: 'Status & Privacy', icon: Lock, color: 'text-slate-500' },
+                            { id: 3, label: 'Physical', icon: Palette, color: 'text-pink-500' },
+                            { id: 4, label: 'Identification', icon: Tag, color: 'text-amber-500' },
+                            { id: 5, label: 'Lineage', icon: TreeDeciduous, color: 'text-green-600' },
+                            { id: 6, label: 'Breeding', icon: Egg, color: 'text-yellow-500' },
+                            { id: 7, label: 'Health', icon: Hospital, color: 'text-red-500' },
+                            { id: 8, label: 'Animal Care', icon: Home, color: 'text-teal-500' },
+                            { id: 9, label: 'Behavior', icon: Brain, color: 'text-purple-500' },
+                            { id: 10, label: 'Records', icon: FileText, color: 'text-indigo-500' },
+                            { id: 11, label: 'End of Life', icon: Scale, color: 'text-gray-500' },
+                            { id: 12, label: 'Show', icon: Trophy, color: 'text-yellow-600' },
+                            { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' },
+                            { id: 14, label: 'Gallery', icon: Images, color: 'text-rose-500' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -17785,7 +17785,7 @@ const AnimalForm = ({
                                 }`}
                                 title={tab.label}
                             >
-                                {React.createElement(tab.icon, { size: 14, className: 'inline-block align-middle flex-shrink-0 mr-1' })}
+                                {React.createElement(tab.icon, { size: 14, className: `inline-block align-middle flex-shrink-0 mr-1.5 ${tab.color || ''}` })}
                                 <span className="hidden lg:inline">{tab.label}</span>
                             </button>
                         ))}
@@ -33142,15 +33142,15 @@ const App = () => {
                                             {showTabs && (
                                                 <div className="px-4 py-3 flex flex-wrap gap-2">
                                                     {[
-                            { id: 1, label: 'Overview', icon: ClipboardList },
-                            { id: 2, label: 'Status & Privacy', icon: Lock },
-                            { id: 3, label: 'Physical', icon: Palette },
-                            { id: 4, label: 'Identification', icon: Tag },
-                            { id: 5, label: 'Lineage', icon: TreeDeciduous },
-                            { id: 6, label: 'Breeding', icon: Egg },
-                            { id: 7, label: 'Health', icon: Hospital },
-                            { id: 8, label: 'Animal Care', icon: Home },
-                            { id: 11, label: 'Show', icon: Trophy }
+                            { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
+                            { id: 2, label: 'Status & Privacy', icon: Lock, color: 'text-slate-500' },
+                            { id: 3, label: 'Physical', icon: Palette, color: 'text-pink-500' },
+                            { id: 4, label: 'Identification', icon: Tag, color: 'text-amber-500' },
+                            { id: 5, label: 'Lineage', icon: TreeDeciduous, color: 'text-green-600' },
+                            { id: 6, label: 'Breeding', icon: Egg, color: 'text-yellow-500' },
+                            { id: 7, label: 'Health', icon: Hospital, color: 'text-red-500' },
+                            { id: 8, label: 'Animal Care', icon: Home, color: 'text-teal-500' },
+                            { id: 11, label: 'Show', icon: Trophy, color: 'text-yellow-600' }
                                                     ].map(tab => (
                                                         <button
                                                             key={tab.id}
@@ -33163,7 +33163,7 @@ const App = () => {
                                                             }`}
                                                             title={tab.label}
                                                         >
-                                                            {React.createElement(tab.icon, { size: 14, className: 'inline-block align-middle flex-shrink-0 mr-1' })}
+                                                            {React.createElement(tab.icon, { size: 14, className: `inline-block align-middle flex-shrink-0 mr-1.5 ${tab.color || ''}` })}
                                                             {tab.label}
                                                         </button>
                                                     ))}
