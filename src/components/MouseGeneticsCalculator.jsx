@@ -1105,7 +1105,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   }
 
   if (genotype.P === 'p/p') {
-    if (!color.includes('Fawn') && !color.includes('Red') && !color.includes('Dove') && !color.includes('Argente') && !color.includes('Champagne')) {
+    if (!color.includes('Fawn') && !color.includes('Red') && !color.includes('Dove') && !color.includes('Argente') && !color.includes('Champagne') && !color.includes('Silver') && !color.includes('Lavender')) {
       color = `Pink-Eyed ${color}`;
     }
   }
