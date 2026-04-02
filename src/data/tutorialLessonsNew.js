@@ -1662,7 +1662,7 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 1,
         title: 'Global Search Bar in Header',
-        content: 'At the top of every screen there is an inline search bar — no button to click, just type! It searches the entire CritterTrack community simultaneously: type a name, species, or ID and results for both users and animals drop down instantly. Users show on the left and animals on the right.',
+        content: 'At the top of every screen there is an inline search bar — no button to click, just type! It searches the entire CritterTrack community simultaneously: type a name, species, or ID and results for both users and animals drop down instantly. Animals appear at the top of the results, users appear below.',
         highlightElement: '[data-tutorial-target="global-search-btn"]',
         tips: [
           'Start typing after 2 characters — results appear automatically',
