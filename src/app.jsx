@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2, Hash, Dna, TreeDeciduous, Tag, Egg, Hospital, Brain, Trophy, Scale, FileCheck, Palette, Sprout, Ruler, FolderOpen, Leaf, Microscope, Pill, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Feather, Medal, Target, Key, Dumbbell } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2, Hash, Dna, TreeDeciduous, Tag, Egg, Hospital, Brain, Trophy, Scale, FileCheck, Palette, Sprout, Ruler, FolderOpen, Leaf, Microscope, Pill, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Feather, Medal, Target, Key, Dumbbell, Gem, Flame, Baby, PawPrint, ArrowRight, LockOpen, Camera, BarChart2 } from 'lucide-react';
 import ArchiveScreen from './components/ArchiveScreen';
 import { QRCodeSVG } from 'qrcode.react';
 import jsPDF from 'jspdf';
@@ -179,7 +179,7 @@ const getDonationBadge = (user) => {
     if (user.monthlyDonationActive) {
         return {
             type: 'diamond',
-            icon: '💎',
+            icon: <Gem size={16} />,
             title: 'Monthly Supporter',
             className: 'bg-gradient-to-r from-blue-400 to-pink-500 text-white'
         };
@@ -193,7 +193,7 @@ const getDonationBadge = (user) => {
         if (daysSince <= 31) {
             return {
                 type: 'gift',
-                icon: '🔥',
+                icon: <Flame size={16} />,
                 title: 'Recent Supporter',
                 className: 'bg-gradient-to-r from-green-400 to-blue-500 text-white'
             };
@@ -1650,9 +1650,9 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
                                 className="px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary text-sm"
                                 disabled={loading}
                             >
-                                <option value="owner">🏠 Owner</option>
+                                <option value="owner">Owner</option>
                                 <option value="breeder">⭐ Active Breeder</option>
-                                <option value="retired">🌙 Retired Breeder</option>
+                                <option value="retired">Retired Breeder</option>
                             </select>
                         </div>
                     );
@@ -2242,7 +2242,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
                 <div className="flex justify-between items-center border-b pb-3 mb-4">
-                    <h3 className="text-xl font-bold text-gray-800">Global Search 🔎</h3>
+                    <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">Global Search <Search size={18} className="flex-shrink-0" /></h3>
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
                 </div>
 
@@ -2634,7 +2634,7 @@ const RatingStarRow = ({ score, interactive, onSelect }) => (
                 className={`text-2xl leading-none transition ${interactive ? 'hover:scale-110 cursor-pointer' : 'cursor-default'} ${n <= score ? 'text-amber-400' : 'text-gray-200'}`}
                 aria-label={`${n} star`}
                 disabled={!interactive}
-            >★</button>
+            ><Star size={20} className="inline-block align-middle fill-current" /></button>
         ))}
     </div>
 );
@@ -3055,16 +3055,16 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     )}
                     <span className="font-mono text-accent font-semibold text-sm">
                         {['CTU1', 'CTU2'].includes(freshProfile?.id_public || profile.id_public) && (
-                            <span className="mr-1">🔑</span>
+                            <Key size={14} className="inline-block align-middle mr-1 text-amber-500" />
                         )}
                         {['CTU3', 'CTU4', 'CTU5', 'CTU6', 'CTU7', 'CTU9', 'CTU10', 'CTU11'].includes(freshProfile?.id_public || profile.id_public) && (
-                            <span className="mr-1">🌱</span>
+                            <Sprout size={14} className="inline-block align-middle mr-1 text-green-500" />
                         )}
                         {freshProfile?.id_public || profile.id_public}
                     </span>
                     {ratingData.count > 0 && (
                         <button onClick={() => setActiveTab('ratings')} className="flex items-center gap-1 text-xs text-amber-500 font-semibold hover:text-amber-600 transition" title="See ratings">
-                            <span>★</span>
+                            <Star size={12} className="inline-block align-middle fill-current" />
                             <span>{ratingData.average.toFixed(1)}</span>
                             <span className="text-gray-400 font-normal">({ratingData.count})</span>
                         </button>
@@ -3531,7 +3531,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         <div className="flex-1 flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-100 min-w-0">
                             {imgUrl
                                 ? <img src={imgUrl} alt={fullName} className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-gray-200" />
-                                : <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold ${isSire ? 'bg-blue-300' : 'bg-pink-300'}`}>{isSire ? '♂' : '♀'}</div>
+                                : <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold ${isSire ? 'bg-blue-300' : 'bg-pink-300'}`}>{isSire ? <Mars size={16} /> : <Venus size={16} />}</div>
                             }
                             <div className="min-w-0">
                                 <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-600">{role}</p>
@@ -3759,7 +3759,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                     <span className="text-5xl font-bold text-gray-900">{ratingData.average.toFixed(1)}</span>
                                     <div className="flex gap-0.5">
                                         {[1,2,3,4,5].map(n => (
-                                            <span key={n} className={`text-xl ${n <= Math.round(ratingData.average) ? 'text-amber-400' : 'text-gray-200'}`}>★</span>
+                                            <Star key={n} size={20} className={`inline-block align-middle ${n <= Math.round(ratingData.average) ? 'fill-current text-amber-400' : 'text-gray-200'}`} />
                                         ))}
                                     </div>
                                     <span className="text-xs text-gray-400">{ratingData.count} {ratingData.count === 1 ? 'rating' : 'ratings'}</span>
@@ -3769,7 +3769,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                     {[5,4,3,2,1].map(n => (
                                         <div key={n} className="flex items-center gap-2">
                                             <span className="text-xs text-gray-500 w-3 shrink-0">{n}</span>
-                                            <span className="text-amber-400 text-xs shrink-0">★</span>
+                                            <Star size={12} className="inline-block align-middle fill-current text-amber-400 flex-shrink-0" />
                                             <div className="flex-1 bg-gray-100 rounded-full h-2">
                                                 <div
                                                     className="bg-amber-400 h-2 rounded-full transition-all"
@@ -3783,7 +3783,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             </div>
                         ) : (
                             <div className="text-center py-8 text-gray-400">
-                                <p className="text-3xl mb-2">☆</p>
+                                <p className="mb-2 flex justify-center"><Star size={32} className="text-gray-200" /></p>
                                 <p className="text-sm">No ratings yet.</p>
                             </div>
                         )}
@@ -3845,7 +3845,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                             <div className="flex items-center gap-2">
                                                 <div className="flex gap-0.5">
                                                     {[1,2,3,4,5].map(n => (
-                                                        <span key={n} className={`text-sm ${n <= r.score ? 'text-amber-400' : 'text-gray-200'}`}>★</span>
+                                                        <Star key={n} size={14} className={`inline-block align-middle ${n <= r.score ? 'fill-current text-amber-400' : 'text-gray-200'}`} />
                                                     ))}
                                                 </div>
                                                 <span className="text-xs font-semibold text-gray-700">{r.raterName || r.raterId_public}</span>
@@ -3870,7 +3870,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                         className="text-xs px-2 py-0.5 rounded bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100 transition"
                                                         title="Report this rating"
                                                     >
-                                                        ⚠ Report
+                                                        Report
                                                     </button>
                                                 )}
                                             </div>
@@ -4411,7 +4411,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         </button>
                         <div className="flex items-center gap-2">
                             <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded font-medium">
-                                👁️ OWNER VIEW - All Data Visible
+                                OWNER VIEW - All Data Visible
                             </span>
                             <button
                                 onClick={() => setShowQR(true)}
@@ -4623,7 +4623,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                         {/* For Sale Badge */}
                                         {animal.isForSale && (
                                             <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
-                                                <span className="text-lg">🏷️</span>
+                                                <Tag size={18} className="inline-block align-middle" />
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">For Sale</p>
                                                     <p className="text-sm text-gray-600">
@@ -4636,7 +4636,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                         {/* For Stud Badge */}
                                         {animal.availableForBreeding && (
                                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-2">
-                                                <span className="text-lg">🏷️</span>
+                                                <Tag size={18} className="inline-block align-middle" />
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">Available for Stud</p>
                                                     <p className="text-sm text-gray-600">
@@ -5288,7 +5288,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <div className="flex justify-between items-center">
                                     <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
-                                        🌳 Pedigree: Sire and Dam
+                                        <TreeDeciduous size={14} className="inline-block align-middle mr-1" /> Pedigree: Sire and Dam
                                         {ownedAnimals.length > 0 && (
                                             pedigreeIssues.some(i => i.severity === 'error')
                                                 ? <AlertCircle size={16} className="text-red-500" />
@@ -5556,7 +5556,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                                         <p className="font-bold text-gray-800 text-sm">{displayName || <span className="text-gray-400 font-normal">Unnamed Litter</span>}</p>
                                                                         <div className="flex items-center gap-1 ml-2 flex-shrink-0">
                                                                             {lid && <span className="text-xs font-mono bg-purple-100 px-1.5 py-0.5 rounded text-purple-700">{lid}</span>}
-                                                                            {litter.isPlanned && <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5">⏳ Planned</span>}
+                                                                            {litter.isPlanned && <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Planned</span>}
                                                                         </div>
                                                                     </div>
                                                                     <div className="text-xs text-gray-600 flex gap-2 flex-wrap items-center">
@@ -5585,7 +5585,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                                 <div className="hidden sm:grid flex-1 grid-cols-6 gap-3 items-center min-w-0">
                                                                     <div className="min-w-0">
                                                                         <p className="font-bold text-gray-800 text-sm truncate">{displayName || <span className="text-gray-400 font-normal text-xs">Unnamed</span>}</p>
-                                                                        {litter.isPlanned && <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5 inline-block mt-0.5">⏳ Planned</span>}
+                                                                        {litter.isPlanned && <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5 inline-block mt-0.5"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Planned</span>}
                                                                     </div>
                                                                     <div className="min-w-0">
                                                                         {lid ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block w-fit">{lid}</span> : <span className="text-xs text-gray-400">—</span>}
@@ -6386,10 +6386,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 </div>
                                 {(animal.crateTrained || animal.litterTrained || animal.leashTrained || animal.freeFlightTrained) && (
                                     <div className="flex flex-wrap gap-3 text-sm pt-2">
-                                        {fieldTemplate?.fields?.crateTrained?.enabled !== false && animal.crateTrained && <span className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">✓ {getLabel('crateTrained', 'Crate Trained')}</span>}
-                                        {fieldTemplate?.fields?.litterTrained?.enabled !== false && animal.litterTrained && <span className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">✓ {getLabel('litterTrained', 'Litter Trained')}</span>}
-                                        {fieldTemplate?.fields?.leashTrained?.enabled !== false && animal.leashTrained && <span className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">✓ {getLabel('leashTrained', 'Leash Trained')}</span>}
-                                        {fieldTemplate?.fields?.freeFlightTrained?.enabled !== false && animal.freeFlightTrained && <span className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">✓ {getLabel('freeFlightTrained', 'Free Flight Trained')}</span>}
+                                        {fieldTemplate?.fields?.crateTrained?.enabled !== false && animal.crateTrained && <span className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold"><Check size={12} className="inline-block align-middle mr-0.5" /> {getLabel('crateTrained', 'Crate Trained')}</span>}
+                                        {fieldTemplate?.fields?.litterTrained?.enabled !== false && animal.litterTrained && <span className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold"><Check size={12} className="inline-block align-middle mr-0.5" /> {getLabel('litterTrained', 'Litter Trained')}</span>}
+                                        {fieldTemplate?.fields?.leashTrained?.enabled !== false && animal.leashTrained && <span className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold"><Check size={12} className="inline-block align-middle mr-0.5" /> {getLabel('leashTrained', 'Leash Trained')}</span>}
+                                        {fieldTemplate?.fields?.freeFlightTrained?.enabled !== false && animal.freeFlightTrained && <span className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold"><Check size={12} className="inline-block align-middle mr-0.5" /> {getLabel('freeFlightTrained', 'Free Flight Trained')}</span>}
                                     </div>
                                 )}
                             </div>
@@ -6531,7 +6531,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 
                         {(animal.extraImages || []).length === 0 ? (
                             <div className="text-center py-16 text-gray-400">
-                                <div className="text-5xl mb-3">📷</div>
+                                <Camera size={48} className="text-gray-300 mx-auto mb-3" />
                                 <p className="text-sm font-medium">No extra photos yet</p>
                                 <p className="text-xs mt-1">Add photos from the Edit screen.</p>
                             </div>
@@ -6574,7 +6574,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                     {feedingLogs.length > 0 && (
                                         <div className="space-y-3">
                                             <div className="flex items-center gap-2 pb-1 border-b border-green-200">
-                                                <span className="text-base">✏️</span>
+                                                <Edit size={16} className="inline-block align-middle" />
                                                 <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">Feeding History</h3>
                                                 <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{feedingLogs.length}</span>
                                             </div>
@@ -6588,7 +6588,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                     <div key={log._id} className="bg-green-50 border border-green-100 rounded-lg p-3">
                                                         <div className="flex items-center justify-between gap-2 flex-wrap">
                                                             <div className="flex items-center gap-2 flex-wrap">
-                                                                <span className="text-green-600 font-medium text-sm">✅ Fed</span>
+                                                                <span className="text-green-600 font-medium text-sm flex items-center gap-0.5"><Check size={12} className="flex-shrink-0" /> Fed</span>
                                                                 {foodLabel && <span className="text-gray-700 text-sm font-medium">{foodLabel}</span>}
                                                                 {qtyLabel && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">?{qtyLabel}</span>}
                                                             </div>
@@ -6606,7 +6606,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                     {careLogs.length > 0 && (
                                         <div className="space-y-3">
                                             <div className="flex items-center gap-2 pb-1 border-b border-blue-200">
-                                                <span className="text-base">✏️</span>
+                                                <Edit size={16} className="inline-block align-middle" />
                                                 <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">Care Schedule Updates</h3>
                                                 <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{careLogs.length}</span>
                                             </div>
@@ -6619,11 +6619,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                             {c.field === 'careTasks' ? (
                                                                 <span className="text-gray-500">Task list updated</span>
                                                             ) : c.field === 'careTaskDone' ? (
-                                                                <span className="text-green-600">✅ Completed: {c.newValue}</span>
+                                                                <span className="text-green-600 flex items-center gap-0.5"><Check size={12} className="flex-shrink-0" /> Completed: {c.newValue}</span>
                                                             ) : (
                                                                 <span className="text-gray-500">
                                                                     {c.oldValue != null ? <span className="line-through text-red-400 mr-1">{fmtVal(c.oldValue)}</span> : <span className="text-gray-400 mr-1">none</span>}
-                                                                    ➡️ <span className="text-green-600">{fmtVal(c.newValue)}</span>
+                                                                    <ArrowRight size={14} className="inline-block align-middle mr-0.5" /> <span className="text-green-600">{fmtVal(c.newValue)}</span>
                                                                 </span>
                                                             )}
                                                         </div>
@@ -6637,7 +6637,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                     {fieldLogs.length > 0 && (
                                         <div className="space-y-3">
                                             <div className="flex items-center gap-2 pb-1 border-b border-gray-200">
-                                                <span className="text-base">✏️</span>
+                                                <Edit size={16} className="inline-block align-middle" />
                                                 <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">Field Edits</h3>
                                                 <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{fieldLogs.length}</span>
                                             </div>
@@ -6649,7 +6649,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                             <span className="font-medium text-gray-700 shrink-0">{c.label}:</span>
                                                             <span className="text-gray-500">
                                                                 {c.oldValue != null ? <span className="line-through text-red-400 mr-1">{fmtVal(c.oldValue)}</span> : <span className="text-gray-400 mr-1">→</span>}
-                                                                ➡️ <span className="text-green-600">{fmtVal(c.newValue)}</span>
+                                                                <ArrowRight size={14} className="inline-block align-middle mr-0.5" /> <span className="text-green-600">{fmtVal(c.newValue)}</span>
                                                             </span>
                                                         </div>
                                                     ))}
@@ -6786,8 +6786,8 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             >
                                 <ArrowLeft size={16} className="mr-1" /> Back
                             </button>
-                            <span className="text-[10px] bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded font-medium">
-                                🔒 VIEW-ONLY
+                            <span className="text-[10px] bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded font-medium flex items-center gap-0.5">
+                                <Lock size={10} /> VIEW-ONLY
                             </span>
                             <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={24} />
@@ -6806,7 +6806,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                         </button>
                         <div className="flex items-center gap-2">
                             <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded font-medium">
-                                🔒 VIEW-ONLY - Read Only Access
+                                VIEW-ONLY - Read Only Access
                             </span>
 
                             <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
@@ -6917,7 +6917,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                         {/* For Sale Badge */}
                                         {animal.isForSale && (
                                             <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
-                                                <span className="text-lg">🏷️</span>
+                                                <Tag size={18} className="inline-block align-middle" />
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">For Sale</p>
                                                     <p className="text-sm text-gray-600">
@@ -6930,7 +6930,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                         {/* For Stud Badge */}
                                         {animal.availableForBreeding && (
                                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-2">
-                                                <span className="text-lg">🏷️</span>
+                                                <Tag size={18} className="inline-block align-middle" />
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">Available for Stud</p>
                                                     <p className="text-sm text-gray-600">
@@ -7417,7 +7417,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                                         <p className="font-bold text-gray-800 text-sm">{displayName || <span className="text-gray-400 font-normal">Unnamed Litter</span>}</p>
                                                                         <div className="flex items-center gap-1 ml-2 flex-shrink-0">
                                                                             {lid && <span className="text-xs font-mono bg-purple-100 px-1.5 py-0.5 rounded text-purple-700">{lid}</span>}
-                                                                            {litter.isPlanned && <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5">⏳ Planned</span>}
+                                                                            {litter.isPlanned && <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Planned</span>}
                                                                         </div>
                                                                     </div>
                                                                     <div className="text-xs text-gray-600 flex gap-2 flex-wrap items-center">
@@ -7446,7 +7446,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                                 <div className="hidden sm:grid flex-1 grid-cols-6 gap-3 items-center min-w-0">
                                                                     <div className="min-w-0">
                                                                         <p className="font-bold text-gray-800 text-sm truncate">{displayName || <span className="text-gray-400 font-normal text-xs">Unnamed</span>}</p>
-                                                                        {litter.isPlanned && <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5 inline-block mt-0.5">⏳ Planned</span>}
+                                                                        {litter.isPlanned && <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5 inline-block mt-0.5"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Planned</span>}
                                                                     </div>
                                                                     <div className="min-w-0">
                                                                         {lid ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block w-fit">{lid}</span> : <span className="text-xs text-gray-400">—</span>}
@@ -8740,7 +8740,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                         {/* For Sale Badge */}
                                         {animal.isForSale && (animal.salePriceCurrency || animal.salePriceAmount) && (
                                             <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
-                                                <span className="text-lg">🏷️</span>
+                                                <Tag size={18} className="inline-block align-middle" />
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">For Sale</p>
                                                     <p className="text-sm text-gray-600">
@@ -8753,7 +8753,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                         {/* For Stud Badge */}
                                         {animal.availableForBreeding && (animal.studFeeCurrency || animal.studFeeAmount) && (
                                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-2">
-                                                <span className="text-lg">🏷️</span>
+                                                <Tag size={18} className="inline-block align-middle" />
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">Available for Stud</p>
                                                     <p className="text-sm text-gray-600">
@@ -12146,7 +12146,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 {(editingLitter ? (() => { const tl = litters.find(l => l._id === editingLitter || l.litterId_backend === editingLitter); return tl && !tl.isPlanned; })() : true) && (
                                     <div className="mb-2 p-4 border border-amber-200 rounded-lg bg-amber-50">
                                         <h4 className="text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                            <span>📷</span> Litter Photos
+                                            <Camera size={16} className="inline-block align-middle mr-1" /> Litter Photos
                                             <span className="text-xs font-normal text-gray-400">({editingLitter ? litterImages.filter(i => i.r2Key !== '__uploading__').length : pendingLitterImages.length}/5)</span>
                                         </h4>
 
@@ -12159,7 +12159,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                             <img src={img.url} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
                                                             {img.r2Key === '__uploading__' ? (
                                                                 <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                                                                    <span className="text-white text-xs">⏳</span>
+                                                                    <Hourglass size={12} className="inline-block align-middle text-white" />
                                                                 </div>
                                                             ) : (
                                                                 <button
@@ -12167,7 +12167,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                     onClick={() => handleLitterImageDelete(img.r2Key)}
                                                                 className="absolute top-0.5 right-0.5 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                                                                 title="Remove photo"
-                                                            >✕</button>
+                                                            ><X size={14} /></button>
                                                             )}
                                                         </div>
                                                     ))}
@@ -12187,7 +12187,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                 }}
                                                                 className="absolute top-0.5 right-0.5 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                                                                 title="Remove photo"
-                                            >✕</button>
+                                            ><X size={14} /></button>
                                                         </div>
                                                     ))}
                                                 </div>
@@ -12214,7 +12214,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                         e.target.value = '';
                                                     }}
                                                 />
-                                                {litterImageUploading ? '⏳ Uploading…' : '+ Add Photo'}
+                                                {litterImageUploading ? <><Loader2 size={14} className="inline-block align-middle animate-spin mr-1" />Uploading…</> : '+ Add Photo'}
                                             </label>
                                         )}
                                         <p className="text-xs text-gray-400 mt-2">{editingLitter ? 'PNG or JPEG, max 500 KB each. Up to 5 photos.' : 'Photos will be uploaded when you save the litter.'}</p>
@@ -12347,7 +12347,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 {/* Breeding Information */}
                                 <div className="mb-6 p-4 border border-purple-200 rounded-lg bg-purple-50">
                                     <h4 className="text-md font-semibold text-gray-700 mb-4 flex items-center">
-                                        <span className="text-purple-600 mr-2">🧬</span>Breeding Information
+                                        <Dna size={18} className="inline-block align-middle text-purple-600 mr-2 flex-shrink-0" />Breeding Information
                                     </h4>
                                     
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -12454,7 +12454,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 {/* Birth Date & Offspring Counts */}
                                 <div className="mb-6 p-4 border border-green-200 rounded-lg bg-green-50">
                                     <h4 className="text-md font-semibold text-gray-700 mb-4 flex items-center">
-                                        <span className="text-green-600 mr-2">👶</span>Birth & Offspring Details
+                                        <Baby size={18} className="inline-block align-middle text-green-600 mr-2 flex-shrink-0" />Birth & Offspring Details
                                     </h4>
                                     
                                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4" data-tutorial-target="litter-dates-counts">
@@ -12593,7 +12593,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     {/* Total Born (auto-computed) */}
                                     {formData.litterSizeBorn > 0 && (
                                         <div className="mt-2 p-2 rounded-md bg-green-50 border border-green-200">
-                                            <p className="text-xs text-green-800">🔢 <strong>Total Born auto-set to {formData.litterSizeBorn}</strong> ({formData.maleCount || 0}M + {formData.femaleCount || 0}F + {formData.unknownCount || 0}U)</p>
+                                            <p className="text-xs text-green-800"><Hash size={12} className="inline-block align-middle mr-0.5" /> <strong>Total Born auto-set to {formData.litterSizeBorn}</strong> ({formData.maleCount || 0}M + {formData.femaleCount || 0}F + {formData.unknownCount || 0}U)</p>
                                         </div>
                                     )}
                                 </div>
@@ -13183,7 +13183,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block mb-0.5 w-fit">{litter.litter_id_public}</span>
                                                 : <span className="text-xs text-gray-400">—</span>}
                                             {litter.isPlanned
-                                                ? <span className="text-xs font-semibold text-indigo-600">⏳ Planned mating</span>
+                                                ? <span className="text-xs font-semibold text-indigo-600"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Planned mating</span>
                                                 : <span className="text-xs text-gray-500">{formatDate(litter.birthDate) || '—'}</span>}
                                         </div>
                                         {/* Col 3: Sire */}
@@ -14467,7 +14467,7 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                         {loading ? 'Adding...' : 'Add'}
                     </button>
                 </div>
-                <p className="text-xs text-gray-500">🌍 Species you add will be available to all users globally! Include the scientific name if known. </p>
+                <p className="text-xs text-gray-500"><Globe size={12} className="inline-block align-middle mr-1" /> Species you add will be available to all users globally! Include the scientific name if known. </p>
             </form>
 
             <div className="mb-4 flex flex-col sm:flex-row gap-2 sm:space-x-3 overflow-x-hidden">
@@ -14507,7 +14507,7 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                                 {species.isDefault && <span className="ml-2 text-xs bg-primary text-black px-2 py-1 rounded">Default</span>}
                             </div>
                             {species.isDefault ? (
-                                <span className="text-sm text-gray-400">🔒 Locked</span>
+                                <span className="text-sm text-gray-400 flex items-center gap-1"><Lock size={14} /> Locked</span>
                             ) : (
                                 <span className="text-xs text-gray-500">Added by community</span>
                             )}
@@ -14619,7 +14619,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
             
             <div className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg">
                 <p className="text-sm text-yellow-800">
-                    <span className="font-semibold">🚧 Work in Progress:</span> Some default species are intentionally broad ? for example, <span className="italic">Theraphosidae sp.</span> covers the family as a whole. We encourage adding and using your specific species where possible: e.g. <span className="italic">(Theraphosidae) Poecilotheria metallica</span> or <span className="italic">(Theraphosidae) Brachypelma hamorii</span>. Don't see fields you need? You can request them to be added through the species customisomisation!
+                    <span className="font-semibold"><Wrench size={12} className="inline-block align-middle mr-1" /> Work in Progress:</span> Some default species are intentionally broad ? for example, <span className="italic">Theraphosidae sp.</span> covers the family as a whole. We encourage adding and using your specific species where possible: e.g. <span className="italic">(Theraphosidae) Poecilotheria metallica</span> or <span className="italic">(Theraphosidae) Brachypelma hamorii</span>. Don't see fields you need? You can request them to be added through the species customisomisation!
                 </p>
             </div>
             
@@ -18175,7 +18175,7 @@ const AnimalForm = ({
                                 <div className="flex items-center space-x-2">
                                     <input type="checkbox" name="isForSale" checked={formData.isForSale} onChange={handleChange} 
                                         className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                    <span className="text-sm font-medium text-gray-700">🏷️ Available for Sale</span>
+                                    <span className="text-sm font-medium text-gray-700"><Tag size={14} className="inline-block align-middle mr-1" /> Available for Sale</span>
                                 </div>
                                 {formData.isForSale && (
                                     <div className="ml-7 flex gap-2">
@@ -18203,7 +18203,7 @@ const AnimalForm = ({
                                 <div className="flex items-center space-x-2">
                                     <input type="checkbox" name="availableForBreeding" checked={formData.availableForBreeding} onChange={handleChange} 
                                         className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                    <span className="text-sm font-medium text-gray-700">🥚 Available for Stud</span>
+                                    <span className="text-sm font-medium text-gray-700"><Egg size={14} className="inline-block align-middle mr-1" /> Available for Stud</span>
                                 </div>
                                 {formData.availableForBreeding && (
                                     <div className="ml-7 flex gap-2">
@@ -18354,7 +18354,7 @@ const AnimalForm = ({
                         {/* Life Stage */}
                         {!isFieldHidden('lifeStage') && (
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">🌱 Life Stage</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><Sprout size={18} className="inline-block align-middle mr-2" /> Life Stage</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <select name="lifeStage" value={formData.lifeStage} onChange={handleChange} 
@@ -19464,7 +19464,7 @@ const AnimalForm = ({
                                                     {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
                                                 </div>
                                                 <button type="button" onClick={() => setVaccinationRecords(vaccinationRecords.filter(r => r.id !== record.id))}
-                                                    className="text-red-500 hover:text-red-700 p-1" title="Delete record">🗑️</button>
+                                                    className="text-red-500 hover:text-red-700 p-1" title="Delete record"><Trash2 size={14} /></button>
                                             </div>
                                         ))}
                                     </div>
@@ -19505,7 +19505,7 @@ const AnimalForm = ({
                                                     {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
                                                 </div>
                                                 <button type="button" onClick={() => setDewormingRecordsArray(dewormingRecordsArray.filter(r => r.id !== record.id))}
-                                                    className="text-red-500 hover:text-red-700 p-1" title="Delete record">🗑️</button>
+                                                    className="text-red-500 hover:text-red-700 p-1" title="Delete record"><Trash2 size={14} /></button>
                                             </div>
                                         ))}
                                     </div>
@@ -19546,7 +19546,7 @@ const AnimalForm = ({
                                                     {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
                                                 </div>
                                                 <button type="button" onClick={() => setParasiteControlRecords(parasiteControlRecords.filter(r => r.id !== record.id))}
-                                                    className="text-red-500 hover:text-red-700 p-1" title="Delete record">🗑️</button>
+                                                    className="text-red-500 hover:text-red-700 p-1" title="Delete record"><Trash2 size={14} /></button>
                                             </div>
                                         ))}
                                     </div>
@@ -19596,7 +19596,7 @@ const AnimalForm = ({
                                                     {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
                                                 </div>
                                                 <button type="button" onClick={() => setMedicalProcedureRecords(medicalProcedureRecords.filter(r => r.id !== record.id))}
-                                                    className="text-red-500 hover:text-red-700 p-1" title="Delete record">🗑️</button>
+                                                    className="text-red-500 hover:text-red-700 p-1" title="Delete record"><Trash2 size={14} /></button>
                                             </div>
                                         ))}
                                     </div>
@@ -19642,7 +19642,7 @@ const AnimalForm = ({
                                                     {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
                                                 </div>
                                                 <button type="button" onClick={() => setLabResultRecords(labResultRecords.filter(r => r.id !== record.id))}
-                                                    className="text-red-500 hover:text-red-700 p-1" title="Delete record">🗑️</button>
+                                                    className="text-red-500 hover:text-red-700 p-1" title="Delete record"><Trash2 size={14} /></button>
                                             </div>
                                         ))}
                                     </div>
@@ -19699,7 +19699,7 @@ const AnimalForm = ({
                                                         {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
                                                     </div>
                                                     <button type="button" onClick={() => setMedicalConditionsArray(medicalConditionsArray.filter(r => r.id !== record.id))}
-                                                        className="text-red-500 hover:text-red-700 p-1" title="Delete record">🗑️</button>
+                                                        className="text-red-500 hover:text-red-700 p-1" title="Delete record"><Trash2 size={14} /></button>
                                                 </div>
                                             ))}
                                         </div>
@@ -19735,7 +19735,7 @@ const AnimalForm = ({
                                                         {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
                                                     </div>
                                                     <button type="button" onClick={() => setAllergiesArray(allergiesArray.filter(r => r.id !== record.id))}
-                                                        className="text-red-500 hover:text-red-700 p-1" title="Delete record">🗑️</button>
+                                                        className="text-red-500 hover:text-red-700 p-1" title="Delete record"><Trash2 size={14} /></button>
                                                 </div>
                                             ))}
                                         </div>
@@ -19771,7 +19771,7 @@ const AnimalForm = ({
                                                         {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
                                                     </div>
                                                     <button type="button" onClick={() => setMedicationsArray(medicationsArray.filter(r => r.id !== record.id))}
-                                                        className="text-red-500 hover:text-red-700 p-1" title="Delete record">🗑️</button>
+                                                        className="text-red-500 hover:text-red-700 p-1" title="Delete record"><Trash2 size={14} /></button>
                                                 </div>
                                             ))}
                                         </div>
@@ -19910,7 +19910,7 @@ const AnimalForm = ({
                                                         {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
                                                     </div>
                                                     <button type="button" onClick={() => setVetVisitsArray(vetVisitsArray.filter(r => r.id !== record.id))}
-                                                        className="text-red-500 hover:text-red-700 p-1" title="Delete record">🗑️</button>
+                                                        className="text-red-500 hover:text-red-700 p-1" title="Delete record"><Trash2 size={14} /></button>
                                                 </div>
                                             ))}
                                         </div>
@@ -20071,7 +20071,7 @@ const AnimalForm = ({
                                                     <span className="flex-1 font-medium text-gray-700">{task.taskName}</span>
                                                     {task.frequencyDays && <span className="text-xs text-gray-400">Every {task.frequencyDays}d</span>}
                                                     {task.lastDoneDate && <span className="text-xs text-gray-400">Last: {new Date(task.lastDoneDate).toLocaleDateString()}</span>}
-                                                    <button type="button" onClick={() => setFormData(prev => ({ ...prev, careTasks: (prev.careTasks || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 font-bold leading-none">🗑️</button>
+                                                    <button type="button" onClick={() => setFormData(prev => ({ ...prev, careTasks: (prev.careTasks || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 p-0.5" title="Remove"><Trash2 size={14} /></button>
                                                 </div>
                                             ))}
                                         </div>
@@ -20723,7 +20723,7 @@ const AnimalForm = ({
 
                                 {editGalleryImages.length === 0 ? (
                                     <div className="text-center py-16 text-gray-400">
-                                        <div className="text-5xl mb-3">📷</div>
+                                        <Camera size={48} className="text-gray-300 mx-auto mb-3" />
                                         <p className="text-sm font-medium">No extra photos yet</p>
                                         <p className="text-xs mt-1">Add up to 20 extra photos for this animal.</p>
                                     </div>
@@ -21791,7 +21791,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             <div className="text-center">
                                 <div className="text-3xl font-bold text-gray-800">{myReceivedRatings.average.toFixed(1)}</div>
                                 <div className="text-yellow-400 text-xl">
-                                    {[1,2,3,4,5].map(n => <span key={n}>{n <= Math.round(myReceivedRatings.average) ? '★' : '☆'}</span>)}
+                                    {[1,2,3,4,5].map(n => <span key={n}>{n <= Math.round(myReceivedRatings.average) ? <Star size={16} className="inline-block align-middle fill-current text-amber-400" /> : <Star size={16} className="inline-block align-middle text-gray-200" />}</span>)}
                                 </div>
                                 <div className="text-xs text-gray-500">{myReceivedRatings.count} rating{myReceivedRatings.count !== 1 ? 's' : ''}</div>
                             </div>
@@ -21799,7 +21799,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 {[5,4,3,2,1].map(star => (
                                     <div key={star} className="flex items-center gap-2 text-xs">
                                         <span className="w-4 text-right text-gray-500">{star}</span>
-                                        <span className="text-yellow-400">★</span>
+                                        <Star size={14} className="inline-block align-middle fill-current text-yellow-400" />
                                         <div className="flex-1 bg-gray-200 rounded-full h-2">
                                             <div className="bg-yellow-400 h-2 rounded-full" style={{ width: `${myReceivedRatings.count > 0 ? ((myReceivedRatings.distribution?.[star] || 0) / myReceivedRatings.count) * 100 : 0}%` }} />
                                         </div>
@@ -21814,7 +21814,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     <div className="flex items-center justify-between mb-1">
                                         <span className="font-semibold text-gray-800 text-sm">{r.raterName || r.raterId_public}</span>
                                         <span className="text-yellow-400 text-sm">
-                                            {[1,2,3,4,5].map(n => <span key={n}>{n <= r.score ? '★' : '☆'}</span>)}
+                                            {[1,2,3,4,5].map(n => <span key={n}>{n <= r.score ? <Star size={14} className="inline-block align-middle fill-current text-amber-400" /> : <Star size={14} className="inline-block align-middle text-gray-200" />}</span>)}
                                         </span>
                                     </div>
                                     {r.comment && <p className="text-gray-600 text-sm mt-1">{r.comment}</p>}
@@ -23917,7 +23917,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     
                     {forgotPasswordStep === 2 && (
                         <div>
-                            <p className="text-sm text-gray-600 mb-4">📧 Check your email for a password reset button. Click it to proceed with resetting your password.</p>
+                            <p className="text-sm text-gray-600 mb-4"><Mail size={14} className="inline-block align-middle mr-1" /> Check your email for a password reset button. Click it to proceed with resetting your password.</p>
                             <p className="text-xs text-gray-500 bg-blue-50 p-3 rounded border border-blue-200">The reset link will expire in 1 hour.</p>
                         </div>
                     )}
@@ -26024,7 +26024,7 @@ const AnimalList = ({
                                     <div className={`flex items-center gap-1.5 text-xs rounded-lg px-2 py-1.5 mt-0.5 ${isOverdue(item) ? 'bg-red-50 text-red-600' : isDueSoon(item) ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-500'}`}>
                                         <Calendar size={11} className="shrink-0" />
                                         <span>Next order: {new Date(item.nextOrderDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                                        {item.orderFrequency && <span className="opacity-60"> 🔄 every {item.orderFrequency} {item.orderFrequencyUnit}</span>}
+                                        {item.orderFrequency && <span className="opacity-60"> <RefreshCw size={12} className="inline-block align-middle mr-0.5" /> every {item.orderFrequency} {item.orderFrequencyUnit}</span>}
                                     </div>
                                 )}
 
@@ -26229,7 +26229,7 @@ const AnimalList = ({
                     </div>
                 ) : duplicateGroups.length === 0 ? (
                     <div className="text-center py-16 text-gray-400">
-                        <div className="text-5xl mb-3">✨</div>
+                        <Sparkles size={48} className="text-gray-300 mx-auto mb-3" />
                         <p className="text-sm font-medium">No duplicate animals found</p>
                         <p className="text-xs mt-1">Your collection looks clean!</p>
                     </div>
@@ -26786,7 +26786,7 @@ const AnimalList = ({
                                                 <div key={idx} className="flex items-center gap-2 text-xs bg-white rounded border border-gray-200 px-2 py-1.5">
                                                     <span className="flex-1 font-medium text-gray-700">{task.taskName}</span>
                                                     {task.frequencyDays && <span className="text-gray-400">Every {task.frequencyDays}d</span>}
-                                                    <button type="button" onClick={() => setEnclosureFormData(p => ({ ...p, cleaningTasks: (p.cleaningTasks || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 font-bold text-sm leading-none">🗑️</button>
+                                                    <button type="button" onClick={() => setEnclosureFormData(p => ({ ...p, cleaningTasks: (p.cleaningTasks || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 p-0.5" title="Remove"><Trash2 size={14} /></button>
                                                 </div>
                                             ))}
                                         </div>
@@ -26952,7 +26952,7 @@ const AnimalList = ({
                                                 <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
                                                     {a.matingDate && <div className="text-xs text-gray-400 hidden sm:block">Since {formatDateShort(a.matingDate)}</div>}
                                                     {a.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: true })}
-                                                        className="text-xs px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 whitespace-nowrap">🥜 Set as Pregnant</button>}
+                                                        className="text-xs px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 whitespace-nowrap flex items-center gap-0.5"><Bean size={10} className="flex-shrink-0" /> Set as Pregnant</button>}
                                                     <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false })}
                                                         className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200">Clear</button>
                                                 </div>
@@ -26965,7 +26965,7 @@ const AnimalList = ({
                                                 <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
                                                     {a.expectedDueDate && <div className="text-xs text-gray-400 hidden sm:block">Due {formatDateShort(a.expectedDueDate)}</div>}
                                                     {a.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false, isNursing: true })}
-                                                        className="text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 whitespace-nowrap">🍼 Set as Nursing</button>}
+                                                        className="text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 whitespace-nowrap flex items-center gap-0.5"><Milk size={10} className="flex-shrink-0" /> Set as Nursing</button>}
                                                     <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false })}
                                                         className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200">Clear</button>
                                                 </div>
@@ -26977,7 +26977,7 @@ const AnimalList = ({
                                             renderExtras={(a) => (
                                                 <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
                                                     <button onClick={(e) => handleReproStatusUpdate(e, a, { isNursing: false })}
-                                                        className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200">✅ Done</button>
+                                                        className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 flex items-center gap-0.5"><Check size={10} className="flex-shrink-0" /> Done</button>
                                                 </div>
                                             )} />
                                     )}
@@ -27027,7 +27027,7 @@ const AnimalList = ({
                                             renderExtras={(a) => (
                                                 <div className="text-xs text-gray-400 text-right whitespace-nowrap shrink-0">
                                                     {a.lastFedDate && <div>Last: {formatDateShort(a.lastFedDate)}</div>}
-                                                    {a.feedingFrequencyDays && <div> 🔄 Every {a.feedingFrequencyDays}d</div>}
+                                                    {a.feedingFrequencyDays && <div> <RefreshCw size={12} className="inline-block align-middle mr-0.5" /> Every {a.feedingFrequencyDays}d</div>}
                                                 </div>
                                             )} />
                                     )}
@@ -27086,8 +27086,8 @@ const AnimalList = ({
                                                                     {taskType === 'animal' && <span className="text-xs bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded">Animal</span>}
                                                                 </div>
                                                                 <div className="flex items-center gap-1.5 shrink-0 text-xs text-gray-400">
-                                                                    {task.frequencyDays && <span>🔄 Every {task.frequencyDays}d</span>}
-                                                                    {task.lastDoneDate ? <span>✅ Last: {formatDateShort(task.lastDoneDate)}</span> : <span className="text-orange-500">❌ Never done</span>}
+                                                                    {task.frequencyDays && <span><RefreshCw size={12} className="inline-block align-middle mr-0.5" /> Every {task.frequencyDays}d</span>}
+                                                                    {task.lastDoneDate ? <span className="flex items-center gap-0.5 text-green-600"><Check size={10} className="flex-shrink-0" /> Last: {formatDateShort(task.lastDoneDate)}</span> : <span className="text-orange-500 flex items-center gap-0.5"><X size={10} className="flex-shrink-0" /> Never done</span>}
                                                                     <button onClick={(e) => handleMarkAnimalCareTaskDone(e, a, realIdx, taskType)}
                                                                         className={`ml-1 text-xs px-2 py-0.5 rounded font-medium border ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
                                                                         ? Done
@@ -27150,8 +27150,8 @@ const AnimalList = ({
                                                                     <span className="text-gray-700 truncate">{task.taskName}</span>
                                                                 </div>
                                                                 <div className="flex items-center gap-1.5 shrink-0 text-xs text-gray-400">
-                                                                    {task.frequencyDays && <span>🔄 Every {task.frequencyDays}d</span>}
-                                                                    {task.lastDoneDate ? <span>✅ Last: {formatDateShort(task.lastDoneDate)}</span> : <span className="text-orange-500">❌ Never done</span>}
+                                                                    {task.frequencyDays && <span><RefreshCw size={12} className="inline-block align-middle mr-0.5" /> Every {task.frequencyDays}d</span>}
+                                                                    {task.lastDoneDate ? <span className="flex items-center gap-0.5 text-green-600"><Check size={10} className="flex-shrink-0" /> Last: {formatDateShort(task.lastDoneDate)}</span> : <span className="text-orange-500 flex items-center gap-0.5"><X size={10} className="flex-shrink-0" /> Never done</span>}
                                                                     <button onClick={(e) => handleMarkEnclosureTaskDone(e, enc, idx)}
                                                                         className={`ml-1 text-xs px-2 py-0.5 rounded font-medium border ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
                                                                         ? Done
@@ -27179,7 +27179,7 @@ const AnimalList = ({
                                         ? <Loader2 size={11} className="animate-spin text-gray-400" />
                                         : <span className="text-gray-400 font-normal normal-case">
                                             {supplies.length} item{supplies.length !== 1 ? 's' : ''}
-                                            {supplyReorderDue.length > 0 && <span className="ml-1 text-amber-600 font-semibold">❗ {supplyReorderDue.length} to reorder</span>}
+                                            {supplyReorderDue.length > 0 && <span className="ml-1 text-amber-600 font-semibold"><AlertCircle size={12} className="inline-block align-middle mr-0.5" /> {supplyReorderDue.length} to reorder</span>}
                                           </span>
                                     }
                                 </div>
@@ -27247,7 +27247,7 @@ const AnimalList = ({
                                                             className="text-xs px-2 py-0.5 rounded font-medium border bg-green-500 text-white hover:bg-green-600 border-green-500 whitespace-nowrap"
                                                             title="Release from quarantine"
                                                         >
-                                                            🔓 Release
+                                                            <LockOpen size={14} className="inline-block align-middle mr-1" /> Release
                                                         </button>
                                                     </div>
                                                 );
@@ -27295,7 +27295,7 @@ const AnimalList = ({
                                                 className="text-xs px-2 py-0.5 rounded font-medium border bg-indigo-500 text-white hover:bg-indigo-600 border-indigo-500 whitespace-nowrap"
                                                 title="Mark as Rehomed / Sold"
                                             >
-                                                ✓ Rehomed
+                                                <Check size={14} className="inline-block align-middle mr-0.5" /> Rehomed
                                             </button>
                                         </div>
                                     } />
@@ -27327,14 +27327,14 @@ const AnimalList = ({
                                     onChange={e => setFeedingForm(f => ({ ...f, supplyId: e.target.value, qty: '1' }))}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary"
                                 >
-                                    <option value="">🍽️ No food selected 🍽️</option>
+                                    <option value="">No food selected</option>
                                     {supplies.filter(s => s.category === 'Food').map(s => (
                                         <option key={s._id} value={s._id}>
                                             {s.name}{s.feederType ? ` (${s.feederType}${s.feederSize ? ` • ${s.feederSize}` : ''})` : ''}{s.currentStock != null ? ` • ${s.currentStock} ${s.unit || 'in stock'}` : ''}
                                         </option>
                                     ))}
                                     {supplies.filter(s => s.category === 'Food').length === 0 && (
-                                        <option disabled>No food items in supply 🍽️ add some in Supplies & Inventory</option>
+                                        <option disabled>No food items in supply — add some in Supplies & Inventory</option>
                                     )}
                                 </select>
                             </div>
@@ -28442,7 +28442,7 @@ const WarningBanner = ({ authToken, API_BASE_URL, userProfile }) => {
                                 </div>
                                 {warnings.length >= 3 && (
                                     <p className="text-xs mt-3 text-red-600 font-semibold">
-                                        ⚠️ You have reached 3 warnings - your account is suspended. Contact moderators for appeal.
+                                        <AlertTriangle size={14} className="inline-block align-middle mr-1" /> You have reached 3 warnings - your account is suspended. Contact moderators for appeal.
                                     </p>
                                 )}
                             </div>
@@ -29445,7 +29445,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                 text: 'text-purple-700',
                 subtitle: 'text-purple-500',
                 dismissBtn: 'text-purple-400 hover:text-purple-600',
-                emoji: 'ℹ️',
+                emoji: '',
                 label: 'Announcement'
             };
         }
@@ -29459,7 +29459,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                 text: 'text-green-700',
                 subtitle: 'text-green-500',
                 dismissBtn: 'text-green-400 hover:text-green-600',
-                emoji: 'ℹ️',
+                emoji: '',
                 label: 'Poll',
                 button: 'bg-green-500 hover:bg-green-600 text-white',
                 optionBg: 'bg-green-100 hover:bg-green-200',
@@ -29475,7 +29475,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
             text: 'text-blue-700',
             subtitle: 'text-blue-500',
             dismissBtn: 'text-blue-400 hover:text-blue-600',
-            emoji: 'ℹ️',
+            emoji: '',
             label: 'Info'
         };
     };
@@ -29592,7 +29592,7 @@ const UrgentBroadcastPopup = ({ authToken, API_BASE_URL }) => {
                     </div>
                     <div className="ml-4 flex-1">
                         <h3 className={`text-xl font-bold ${textColor}`}>
-                            {isAlert ? '🚨 URGENT ALERT' : '⚠️ Important Notice'}
+                            {isAlert ? <><AlertCircle size={18} className="inline-block align-middle mr-1" /> URGENT ALERT</> : <><AlertTriangle size={18} className="inline-block align-middle mr-1" /> Important Notice</>}
                         </h3>
                         <h4 className={`text-lg font-semibold ${textColor} mt-2`}>
                             {urgentBroadcast.title || 'System Message'}
@@ -29811,21 +29811,21 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                             {/* Moderation Notice Header */}
                                             {notification.type === 'content_edited' && (
                                                 <div className="flex items-center text-orange-700 font-semibold mb-2">
-                                                    <span className="mr-2">⚠️</span>
+                                                    <AlertTriangle size={16} className="mr-2 flex-shrink-0" />
                                                     <span>Moderation Notice</span>
                                                 </div>
                                             )}
                                             {/* Litter Assignment Header */}
                                             {notification.type === 'litter_assignment' && (
                                                 <div className="flex items-center text-green-700 font-semibold mb-2 text-sm">
-                                                    <span className="mr-2">🐣</span>
+                                                    <Baby size={16} className="mr-2 flex-shrink-0" />
                                                     <span>Litter Assignment — {notification.parentType === 'sire' ? 'Sire' : 'Dam'}</span>
                                                 </div>
                                             )}
                                             {/* Mating Reminder Header */}
                                             {notification.type === 'mating_reminder' && (
                                                 <div className="flex items-center text-indigo-700 font-semibold mb-2 text-sm">
-                                                    <span className="mr-2">🐾</span>
+                                                    <PawPrint size={16} className="mr-2 flex-shrink-0" />
                                                     <span>Planned Mating — Today!</span>
                                                 </div>
                                             )}
@@ -29855,7 +29855,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                         />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-500">
-                                                            {notification.type === 'litter_assignment' ? <span className="text-3xl">🐣</span> : notification.type === 'mating_reminder' ? <span className="text-3xl">🐾</span> : <AlertCircle size={28} />}
+                                                            {notification.type === 'litter_assignment' ? <Baby size={28} className="text-green-500" /> : notification.type === 'mating_reminder' ? <PawPrint size={28} className="text-indigo-500" /> : <AlertCircle size={28} />}
                                                         </div>
                                                     )}
                                                 </div>
@@ -32048,7 +32048,7 @@ const App = () => {
                 {!hasSeenDonationHighlight && (
                     <div className="absolute top-full mt-2 left-0 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg shadow-xl whitespace-nowrap animate-bounce">
                         <div className="absolute bottom-full left-4 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-b-4 border-b-gray-900"></div>
-                        ❤️ Support CritterTrack
+                        <Heart size={14} className="inline-block align-middle mr-1 text-red-400 fill-current" /> Support CritterTrack
                     </div>
                 )}
             </div>
@@ -32067,10 +32067,10 @@ const App = () => {
                         <div className="bg-gradient-to-r from-primary to-accent p-2 relative">
                             <div className="text-xs font-semibold text-black text-center flex items-center justify-center gap-2 flex-wrap">
                                 {availableAnimals[currentAvailableIndex].isForSale && (
-                                    <><span>🏷️</span> For Sale</>
+                                    <><Tag size={14} className="inline-block align-middle mr-1" /> For Sale</>
                                 )}
                                 {availableAnimals[currentAvailableIndex].availableForBreeding && (
-                                    <><span>🥚</span> For Stud</>
+                                    <><Egg size={14} className="inline-block align-middle mr-1" /> For Stud</>
                                 )}
                                 {availableAnimals[currentAvailableIndex].isForSale && availableAnimals[currentAvailableIndex].availableForBreeding && (
                                     <span className="text-xs">/</span>
@@ -33480,7 +33480,7 @@ const App = () => {
                                                 {/* Reproductive Status Card */}
                                                 {!animalToView.isNeutered && (animalToView.heatStatus || animalToView.lastHeatDate || animalToView.matingDate) && (
                                                     <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                        <h4 className="font-semibold text-gray-700 mb-2">🌿 Reproductive Status</h4>
+                                                        <h4 className="font-semibold text-gray-700 mb-2"><Leaf size={16} className="inline-block align-middle mr-2 text-green-600" /> Reproductive Status</h4>
                                                         <div className="text-sm space-y-1">
                                                             {animalToView.heatStatus && <div><strong>Heat Status:</strong> {animalToView.heatStatus}</div>}
                                                             {animalToView.lastHeatDate && <div><strong>Last Heat:</strong> {formatDate(animalToView.lastHeatDate)}</div>}
@@ -33619,7 +33619,7 @@ const App = () => {
                                                             <p className="font-medium">{animalToView.status || 'Unknown'}</p>
                                                         </div>
                                                         <div>
-                                                            <span className="text-sm text-gray-600">🏠 Keeper</span>
+                                                            <span className="text-sm text-gray-600 flex items-center gap-1"><Home size={14} /> Keeper</span>
                                                             <p className="font-medium">{animalToView.keeperName || ''}</p>
                                                         </div>
                                                         <div>
@@ -33810,7 +33810,7 @@ const App = () => {
                                                                         return (
                                                                             <g key={`grid-${i}`}>
                                                                                 <line x1={70} y1={y} x2={470} y2={y} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4" />
-                                                                                <text x={58} y={y} textAnchor="end" dy="0.3em" fontSize="11" fill="#999">📏</text>
+                                                                                <text x={58} y={y} textAnchor="end" dy="0.3em" fontSize="11" fill="#999">·</text>
                                                                             </g>
                                                                         );
                                                                     })}
@@ -33821,7 +33821,7 @@ const App = () => {
                                                                     
                                                                     {/* Empty state message */}
                                                                     <text x={270} y={150} textAnchor="middle" fontSize="14" fill="#999">
-                                                                        📈 No growth data recorded yet
+                                                                        No growth data recorded yet
                                                                     </text>
                                                                 </svg>
                                                                 <p className="text-xs text-gray-500 mt-2">Growth curves will appear once measurement entries are added.</p>
@@ -34118,7 +34118,7 @@ const App = () => {
                                                 {/* Breeding Records - Accordion View (Nested) */}
                                                 {animalToView.breedingRecords && animalToView.breedingRecords.length > 0 && (
                                                     <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 space-y-3">
-                                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center"><span className="text-purple-600 mr-2">📊</span>Breeding Records</h3>
+                                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center"><BarChart2 size={18} className="inline-block align-middle text-purple-600 mr-2 flex-shrink-0" />Breeding Records</h3>
                                                         <div className="space-y-2">
                                                             {animalToView.breedingRecords.map((record, idx) => {
                                                                 const isExpanded = expandedBreedingRecords[idx];
@@ -34134,7 +34134,7 @@ const App = () => {
                                                                             className="p-3 flex items-center justify-between cursor-pointer hover:bg-purple-50 transition rounded"
                                                                         >
                                                                             <div className="flex items-center gap-3 flex-1">
-                                                                                <span className={`text-lg transition-transform ${isExpanded ? 'rotate-90' : ''}`}>▶️</span>
+                                                                                <ChevronRight size={18} className={`inline-block align-middle transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
                                                                                 {record.litterName ? (
                                                                                     <>
                                                                                         <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-700 text-white flex-shrink-0">{record.litterName}</span>
@@ -34511,7 +34511,7 @@ const App = () => {
 
                             {/* 2nd Section: Legal/Administrative */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">📋 Legal/Administrative</h3>
+                                <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2"><ClipboardList size={18} className="flex-shrink-0" /> Legal/Administrative</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Insurance:</span> <strong>{animalToView.insurance || ''}</strong></div>
                                     <div><span className="text-gray-600">Legal Status:</span> <strong>{animalToView.legalStatus || ''}</strong></div>
@@ -34769,7 +34769,7 @@ const App = () => {
                                 <div className="flex items-start gap-2">
                                     <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
                                     <div className="text-xs text-blue-800">
-                                        <p className="font-semibold mb-1">ℹ️ How Transfer Works</p>
+                                        <p className="font-semibold mb-1 flex items-center gap-1"><Info size={14} className="flex-shrink-0" /> How Transfer Works</p>
                                         <p>The buyer will receive a notification to accept the transfer. Once accepted, the animal will be transferred to their account and you'll keep view-only access to track lineage.</p>
                                     </div>
                                 </div>
