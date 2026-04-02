@@ -22439,7 +22439,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                     // Fetch new available animals (public only)
                     axios.get(`${API_BASE_URL}/public/animals/recent-available?limit=10`).catch(() => ({ data: [] })),
                     // Fetch new users (public only)
-                    axios.get(`${API_BASE_URL}/public/users/newest?limit=5`).catch(() => ({ data: [] }))
+                    axios.get(`${API_BASE_URL}/public/users/newest?limit=25`).catch(() => ({ data: [] }))
                 ]);
 
                 const favAnimals = favAnimalsRes.data || [];
