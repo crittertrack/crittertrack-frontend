@@ -2083,14 +2083,26 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                     console.log('First user object keys:', Object.keys(response.data[0]));
                     console.log('First user object:', response.data[0]);
                 }
-                setUserResults(response.data || []);
+                
+                // Filter out completely anonymous users (both names hidden/unavailable)
+                const filteredUsers = (response.data || []).filter(user => {
+                    const showPersonalName = user.showPersonalName ?? false;
+                    const showBreederName = user.showBreederName ?? false;
+                    const hasPersonalName = showPersonalName && user.personalName;
+                    const hasBreederName = showBreederName && user.breederName;
+                    
+                    // Only include users who have at least one name visible
+                    return hasPersonalName || hasBreederName;
+                });
+                
+                setUserResults(filteredUsers);
                 setAnimalResults([]);
             } else {
                 // Search for animals globally
-                const idMatch = searchTerm.trim().match(/^\s*(?:CT[- ]?)?(\d+)\s*$/i);
+                const idMatch = searchTerm.trim().match(/^\s*(?:CTC?[- ]?)?(\d+)\s*$/i);
                 const url = idMatch
                     ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(idMatch[1])}`
-                    : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(searchTerm.trim())}`;
+                    : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(searchTerm.trim())}&species=${encodeURIComponent(searchTerm.trim())}`;
                 console.log('Fetching animals from:', url);
                 const response = await axios.get(url);
                 console.log('Animal search response:', response.data);
@@ -2347,10 +2359,21 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
                 axios.get(`${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(userSearchParam)}&limit=10`),
                 axios.get((animalIdMatch && !isUserIdSearch)
                     ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(animalIdMatch[1])}`
-                    : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedTerm)}&limit=10`)
+                    : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedTerm)}&species=${encodeURIComponent(trimmedTerm)}&limit=10`)
             ]);
             
-            setUserResults(usersResponse.data || []);
+            // Filter out completely anonymous users (both names hidden/unavailable)
+            const filteredUsers = (usersResponse.data || []).filter(user => {
+                const showPersonalName = user.showPersonalName ?? false;
+                const showBreederName = user.showBreederName ?? false;
+                const hasPersonalName = showPersonalName && user.personalName;
+                const hasBreederName = showBreederName && user.breederName;
+                
+                // Only include users who have at least one name visible
+                return hasPersonalName || hasBreederName;
+            });
+            
+            setUserResults(filteredUsers);
             setAnimalResults(animalsResponse.data || []);
         } catch (error) {
             console.error('Search error:', error);
