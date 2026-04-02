@@ -22445,13 +22445,15 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                 setFavoriteAnimals(favAnimals);
                 setFavoriteUsers(favUsers);
 
-                // Available animals from favorited users only
-                const favUserIds = favUsers.map(u => u.id_public).filter(Boolean);
-                if (favUserIds.length > 0) {
+                // Available animals from favorited users — use marketplace endpoint (known working)
+                const favUserIds = new Set(favUsers.map(u => u.id_public).filter(Boolean));
+                if (favUserIds.size > 0) {
                     const availRes = await axios.get(
-                        `${API_BASE_URL}/public/animals/recent-available?ownerIds=${favUserIds.join(',')}&limit=50`
-                    ).catch(() => ({ data: [] }));
-                    setNewAvailableAnimals(availRes.data || []);
+                        `${API_BASE_URL}/public/marketplace?limit=100&type=all`
+                    ).catch(() => ({ data: { animals: [] } }));
+                    const allAvailable = availRes.data?.animals || availRes.data || [];
+                    const fromFavUsers = allAvailable.filter(a => favUserIds.has(a.ownerId_public));
+                    setNewAvailableAnimals(fromFavUsers);
                 } else {
                     setNewAvailableAnimals([]);
                 }
