@@ -27,6 +27,10 @@
       "destination": "https://crittertrack-pedigree-production.up.railway.app/api/$1"
     },
     {
+      "source": "/.well-known/assetlinks.json",
+      "destination": "/.well-known/assetlinks.json"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
