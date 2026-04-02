@@ -28892,7 +28892,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
 
                     {/* News card strip */}
                     {hasNews && (
-                        <div className={hasReminders ? 'flex-shrink-0 border-t border-gray-200' : 'flex-1 overflow-hidden flex flex-col'} style={hasReminders ? { flex: 1, overflow: 'hidden' } : {}}>
+                        <div className={hasReminders ? 'mt-auto flex-shrink-0 border-t border-gray-200' : 'flex-1 overflow-hidden flex flex-col'} style={hasReminders ? {} : {}}>
                             <div className={`gap-2 px-3 py-2 ${hasReminders ? 'flex overflow-x-auto' : 'flex flex-wrap overflow-y-auto flex-1'}`} style={{ scrollbarWidth: 'thin' }}>
                                 {broadcasts.map(broadcast => {
                                     const styles = getBroadcastStyles(broadcast.broadcastType);
