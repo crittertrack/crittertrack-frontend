@@ -22588,43 +22588,54 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                     {/* Favorite Animals */}
                     <div className="bg-white rounded-lg shadow-md p-4">
                         <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                            <Heart size={20} className="text-red-500" />
+                            <Heart size={20} className="text-purple-500" />
                             Favorite Animals ({favoriteAnimals.length})
                         </h2>
                         {favoriteAnimals.length === 0 ? (
                             <p className="text-gray-500 text-sm">No favorite animals yet. Visit animal profiles to add favorites!</p>
                         ) : (
                             <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                                {favoriteAnimals.map(animal => (
-                                    <div
-                                        key={animal.id_public}
-                                        className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 transition cursor-pointer"
-                                        onClick={() => navigate(`/animal/${animal.id_public}`)}
-                                    >
-                                        <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                                            {animal.images?.[0] ? (
-                                                <img src={animal.images[0]} alt={animal.name} className="w-full h-full object-cover" />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                    <Cat size={24} />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-semibold text-gray-800 truncate">{animal.name}</p>
-                                            <p className="text-xs text-gray-500 truncate">{animal.id_public} • {animal.species}</p>
-                                        </div>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                toggleFavoriteAnimal(animal.id_public);
-                                            }}
-                                            className="p-2 text-purple-500 hover:bg-purple-50 rounded transition"
+                                {favoriteAnimals.map(animal => {
+                                    const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph', 'markings'];
+                                    const variety = VARIETY_KEYS.map(k => animal[k]).filter(Boolean).join(' ');
+                                    const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+                                    const genderIcon = animal.gender === 'Male' ? '♂' : animal.gender === 'Female' ? '♀' : animal.gender === 'Intersex' ? '⚥' : null;
+                                    const imgSrc = animal.imageUrl || animal.photoUrl || animal.images?.[0];
+                                    return (
+                                        <div
+                                            key={animal.id_public}
+                                            className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 transition cursor-pointer"
+                                            onClick={() => navigate(`/animal/${animal.id_public}`)}
                                         >
-                                            <Heart size={18} fill="currentColor" />
-                                        </button>
-                                    </div>
-                                ))}
+                                            <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                                {imgSrc ? (
+                                                    <img src={imgSrc} alt={fullName} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                        <Cat size={24} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-semibold text-gray-800 truncate">
+                                                    {fullName}
+                                                    {genderIcon && <span className={`ml-1 text-sm ${animal.gender === 'Male' ? 'text-blue-500' : animal.gender === 'Female' ? 'text-pink-500' : 'text-purple-500'}`}>{genderIcon}</span>}
+                                                </p>
+                                                <p className="text-xs text-gray-500 truncate">{animal.id_public} • {animal.species}</p>
+                                                {variety && <p className="text-xs text-gray-400 truncate">{variety}</p>}
+                                            </div>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    toggleFavoriteAnimal(animal.id_public);
+                                                }}
+                                                className="p-2 text-purple-500 hover:bg-purple-50 rounded transition flex-shrink-0"
+                                            >
+                                                <Heart size={18} fill="currentColor" />
+                                            </button>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
@@ -22688,27 +22699,38 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                             <p className="text-gray-500 text-sm">No recent updates to your favorite animals.</p>
                         ) : (
                             <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                                {recentEdits.slice(0, 10).map(animal => (
-                                    <div
-                                        key={animal.id_public}
-                                        className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 transition cursor-pointer"
-                                        onClick={() => navigate(`/animal/${animal.id_public}`)}
-                                    >
-                                        <div className="w-10 h-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                                            {animal.images?.[0] ? (
-                                                <img src={animal.images[0]} alt={animal.name} className="w-full h-full object-cover" />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                    <Cat size={20} />
-                                                </div>
-                                            )}
+                                {recentEdits.slice(0, 10).map(animal => {
+                                    const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph', 'markings'];
+                                    const variety = VARIETY_KEYS.map(k => animal[k]).filter(Boolean).join(' ');
+                                    const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+                                    const genderIcon = animal.gender === 'Male' ? '♂' : animal.gender === 'Female' ? '♀' : animal.gender === 'Intersex' ? '⚥' : null;
+                                    const imgSrc = animal.imageUrl || animal.photoUrl || animal.images?.[0];
+                                    return (
+                                        <div
+                                            key={animal.id_public}
+                                            className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 transition cursor-pointer"
+                                            onClick={() => navigate(`/animal/${animal.id_public}`)}
+                                        >
+                                            <div className="w-10 h-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                                {imgSrc ? (
+                                                    <img src={imgSrc} alt={fullName} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                        <Cat size={20} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-medium text-gray-800 text-sm truncate">
+                                                    {fullName}
+                                                    {genderIcon && <span className={`ml-1 text-xs ${animal.gender === 'Male' ? 'text-blue-500' : animal.gender === 'Female' ? 'text-pink-500' : 'text-purple-500'}`}>{genderIcon}</span>}
+                                                </p>
+                                                {variety && <p className="text-xs text-gray-400 truncate">{variety}</p>}
+                                                <p className="text-xs text-gray-500">Updated {formatTimeAgo(animal.updatedAt)}</p>
+                                            </div>
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-medium text-gray-800 text-sm truncate">{animal.name}</p>
-                                            <p className="text-xs text-gray-500">Updated {formatTimeAgo(animal.updatedAt)}</p>
-                                        </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
@@ -22723,28 +22745,39 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                             <p className="text-gray-500 text-sm">No new available animals recently.</p>
                         ) : (
                             <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                                {newAvailableAnimals.slice(0, 10).map(animal => (
-                                    <div
-                                        key={animal.id_public}
-                                        className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 transition cursor-pointer"
-                                        onClick={() => navigate(`/animal/${animal.id_public}`)}
-                                    >
-                                        <div className="w-10 h-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                                            {animal.images?.[0] ? (
-                                                <img src={animal.images[0]} alt={animal.name} className="w-full h-full object-cover" />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                    <Cat size={20} />
-                                                </div>
-                                            )}
+                                {newAvailableAnimals.slice(0, 10).map(animal => {
+                                    const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph', 'markings'];
+                                    const variety = VARIETY_KEYS.map(k => animal[k]).filter(Boolean).join(' ');
+                                    const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+                                    const genderIcon = animal.gender === 'Male' ? '♂' : animal.gender === 'Female' ? '♀' : animal.gender === 'Intersex' ? '⚥' : null;
+                                    const imgSrc = animal.imageUrl || animal.photoUrl || animal.images?.[0];
+                                    return (
+                                        <div
+                                            key={animal.id_public}
+                                            className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 transition cursor-pointer"
+                                            onClick={() => navigate(`/animal/${animal.id_public}`)}
+                                        >
+                                            <div className="w-10 h-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                                {imgSrc ? (
+                                                    <img src={imgSrc} alt={fullName} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                        <Cat size={20} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-medium text-gray-800 text-sm truncate">
+                                                    {fullName}
+                                                    {genderIcon && <span className={`ml-1 text-xs ${animal.gender === 'Male' ? 'text-blue-500' : animal.gender === 'Female' ? 'text-pink-500' : 'text-purple-500'}`}>{genderIcon}</span>}
+                                                </p>
+                                                <p className="text-xs text-gray-500">{animal.species} • {animal.isForSale ? 'For Sale' : 'For Stud'}</p>
+                                                {variety && <p className="text-xs text-gray-400 truncate">{variety}</p>}
+                                            </div>
+                                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded flex-shrink-0">NEW</span>
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-medium text-gray-800 text-sm truncate">{animal.name}</p>
-                                            <p className="text-xs text-gray-500">{animal.species} • {animal.forSale ? 'For Sale' : 'For Stud'}</p>
-                                        </div>
-                                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">NEW</span>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
