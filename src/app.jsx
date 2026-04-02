@@ -20865,7 +20865,7 @@ const UserProfileCard = ({ userProfile }) => {
                     <DonationBadge user={userProfile} size="sm" />
                 </div>
                 {isPersonalNameVisible && (
-                    <h3 className="text-sm font-bold text-gray-900 line-clamp-3">
+                    <h3 className="text-sm font-bold text-gray-900 line-clamp-2">
                         {userProfile.personalName}
                     </h3>
                 )}
