@@ -22447,8 +22447,10 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                 setFavoriteUsers(favUsersRes.data || []);
                 setNewAvailableAnimals(newAnimalsRes.data || []);
 
-                // Derive recently updated from already-fetched favorite animals — sort by updatedAt desc
-                const sorted = [...favAnimals].sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
+                // Derive recently updated from already-fetched favorite animals — only animals with a valid updatedAt
+                const sorted = [...favAnimals]
+                    .filter(a => a.updatedAt && !isNaN(new Date(a.updatedAt)))
+                    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
                 setRecentEdits(sorted);
                 
                 // Filter new users to only show public ones
