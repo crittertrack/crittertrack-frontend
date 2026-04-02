@@ -22427,7 +22427,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const [favAnimalsRes, favUsersRes, newAnimalsRes, newUsersRes] = await Promise.all([
+                const [favAnimalsRes, favUsersRes, newUsersRes] = await Promise.all([
                     // Fetch favorite animals
                     axios.get(`${API_BASE_URL}/favorites/animals`, {
                         headers: { Authorization: `Bearer ${authToken}` }
@@ -22436,16 +22436,26 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                     axios.get(`${API_BASE_URL}/favorites/users`, {
                         headers: { Authorization: `Bearer ${authToken}` }
                     }).catch(() => ({ data: [] })),
-                    // Fetch new available animals (public only)
-                    axios.get(`${API_BASE_URL}/public/animals/recent-available?limit=10`).catch(() => ({ data: [] })),
                     // Fetch new users (public only)
                     axios.get(`${API_BASE_URL}/public/users/newest?limit=25`).catch(() => ({ data: [] }))
                 ]);
 
                 const favAnimals = favAnimalsRes.data || [];
+                const favUsers = favUsersRes.data || [];
                 setFavoriteAnimals(favAnimals);
-                setFavoriteUsers(favUsersRes.data || []);
-                setNewAvailableAnimals(newAnimalsRes.data || []);
+                setFavoriteUsers(favUsers);
+
+                // Available animals from favorited users only
+                const favUserIds = new Set(favUsers.map(u => u.id_public));
+                if (favUserIds.size > 0) {
+                    const availRes = await axios.get(
+                        `${API_BASE_URL}/public/animals/recent-available?limit=50`
+                    ).catch(() => ({ data: [] }));
+                    const fromFavUsers = (availRes.data || []).filter(a => favUserIds.has(a.ownerId_public));
+                    setNewAvailableAnimals(fromFavUsers.slice(0, 10));
+                } else {
+                    setNewAvailableAnimals([]);
+                }
 
                 // Derive recently updated from already-fetched favorite animals — only animals with a valid updatedAt
                 const sorted = [...favAnimals]
@@ -22773,7 +22783,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                             New Available Animals
                         </h2>
                         {newAvailableAnimals.length === 0 ? (
-                            <p className="text-gray-500 text-sm">No new available animals recently.</p>
+                            <p className="text-gray-500 text-sm">{favoriteUsers.length === 0 ? 'Favorite some breeders to see their available animals here.' : 'No available animals from your favorite breeders.'}</p>
                         ) : (
                             <div className="space-y-2 max-h-[400px] overflow-y-auto">
                                 {newAvailableAnimals.slice(0, 10).map(animal => {
