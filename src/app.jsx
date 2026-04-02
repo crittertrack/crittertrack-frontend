@@ -34467,7 +34467,7 @@ const PublicProfilePage = () => {
             </header>
             <PublicProfileView
                 profile={profile}
-                onBack={() => navigate('/')}
+                onBack={() => navigate(-1)}
                 onViewAnimal={(animal) => navigate(`/animal/${animal.id_public}`, { state: { from: `/user/${userId}` } })}
                 API_BASE_URL={API_BASE_URL}
                 authToken={authToken}
