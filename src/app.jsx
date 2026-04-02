@@ -31773,6 +31773,10 @@ const App = () => {
                     <CustomAppLogo size="w-10 h-10" />
                     
                     <nav className="flex space-x-3">
+                        <button onClick={() => navigate('/community')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <Users size={18} className="mb-1" />
+                            <span>My Feed</span>
+                        </button>
                         <button onClick={() => navigate('/')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Cat size={18} className="mb-1" />
                             <span>Animals</span>
@@ -31796,10 +31800,6 @@ const App = () => {
                         <button onClick={() => navigate('/breeder-directory')} data-tutorial-target="breeders-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <MoonStar size={18} className="mb-1" />
                             <span>Breeders</span>
-                        </button>
-                        <button onClick={() => navigate('/community')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <Users size={18} className="mb-1" />
-                            <span>My Feed</span>
                         </button>
                         <button onClick={() => setShowInfoTab(true)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`}>
                             <BookOpen size={18} className="mb-1" />
@@ -31970,6 +31970,10 @@ const App = () => {
 
                     {/* Third row: Navigation row 1 (4 buttons) */}
                     <nav className="grid grid-cols-4 gap-1 mb-1">
+                        <button onClick={() => navigate('/community')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <Users size={18} className="mb-0.5" />
+                            <span>My Feed</span>
+                        </button>
                         <button onClick={() => navigate('/')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Cat size={18} className="mb-0.5" />
                             <span>Animals</span>
@@ -31997,10 +32001,6 @@ const App = () => {
                         <button onClick={() => navigate('/breeder-directory')} data-tutorial-target="breeders-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <MoonStar size={18} className="mb-0.5" />
                             <span>Breeders</span>
-                        </button>
-                        <button onClick={() => navigate('/community')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <Users size={18} className="mb-0.5" />
-                            <span>My Feed</span>
                         </button>
                         <button onClick={() => setShowInfoTab(true)} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`}>
                             <BookOpen size={18} className="mb-0.5" />
