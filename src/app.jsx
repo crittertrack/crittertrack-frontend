@@ -2075,7 +2075,20 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
         try {
             if (searchType === 'users') {
                 // Search for users
-                const url = `${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(searchTerm.trim())}&limit=50`;
+                const trimmedTerm = searchTerm.trim();
+                const numericMatch = trimmedTerm.match(/(\d+)/);
+                const numericId = numericMatch ? numericMatch[1] : null;
+                
+                // Check if it's a user ID pattern (CTU or just numbers)
+                const hasCTU = /CTU/i.test(trimmedTerm);
+                const isNumericOnly = /^\d+$/.test(trimmedTerm);
+                
+                let searchQuery = trimmedTerm;
+                if ((hasCTU || isNumericOnly) && numericId) {
+                    searchQuery = `CTU${numericId}`;
+                }
+                
+                const url = `${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(searchQuery)}&limit=50`;
                 console.log('Fetching users from:', url);
                 const response = await axios.get(url);
                 console.log('User search response:', response.data);
@@ -2099,14 +2112,21 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                 setAnimalResults([]);
             } else {
                 // Search for animals globally
-                const idMatch = searchTerm.trim().match(/^\s*(?:CTC?[- ]?)?(\d+)\s*$/i);
+                const trimmedTerm = searchTerm.trim();
+                const numericMatch = trimmedTerm.match(/(\d+)/);
+                const numericId = numericMatch ? numericMatch[1] : null;
+                
+                // Check if it's an animal ID pattern (CTC, CT, or just numbers)
+                const hasCTC = /CTC/i.test(trimmedTerm);
+                const hasCT = /^CT[- ]?\d+$/i.test(trimmedTerm);
+                const isNumericOnly = /^\d+$/.test(trimmedTerm);
+                
                 let url;
-                if (idMatch) {
+                if ((hasCTC || hasCT || isNumericOnly) && numericId) {
                     // Format the ID as CTCXXX
-                    const formattedId = `CTC${idMatch[1]}`;
-                    url = `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(formattedId)}`;
+                    url = `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(`CTC${numericId}`)}`;
                 } else {
-                    url = `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(searchTerm.trim())}&species=${encodeURIComponent(searchTerm.trim())}`;
+                    url = `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedTerm)}&species=${encodeURIComponent(trimmedTerm)}`;
                 }
                 console.log('Fetching animals from:', url);
                 const response = await axios.get(url);
@@ -2347,40 +2367,51 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
             // Search both users and animals in parallel
             const trimmedTerm = term.trim();
             
-            // Check for CTUID pattern (user ID)
-            const userIdMatch = trimmedTerm.match(/^\s*(?:CTU[- ]?)?(\d+)\s*$/i);
-            // Check for CTCID pattern (animal ID) - matches CTC1279, CT1279, or just 1279
-            const animalIdMatch = trimmedTerm.match(/^\s*(?:CTC?[- ]?)?(\d+)\s*$/i);
+            // Check for specific ID patterns
+            const hasCTU = /CTU/i.test(trimmedTerm);
+            const hasCTC = /CTC/i.test(trimmedTerm);
+            const hasCT = /^CT[- ]?\d+$/i.test(trimmedTerm);
+            const isNumericOnly = /^\d+$/.test(trimmedTerm);
             
-            // Determine if this is specifically a user ID search
-            const isUserIdSearch = /CTU/i.test(trimmedTerm);
+            // Extract the numeric part from any pattern
+            const numericMatch = trimmedTerm.match(/(\d+)/);
+            const numericId = numericMatch ? numericMatch[1] : null;
             
             console.log('Search term:', trimmedTerm);
-            console.log('Animal ID match:', animalIdMatch);
-            console.log('Is user ID search:', isUserIdSearch);
+            console.log('Has CTU:', hasCTU, 'Has CTC:', hasCTC, 'Has CT:', hasCT, 'Numeric only:', isNumericOnly);
+            console.log('Numeric ID:', numericId);
             
-            // For user searches: use CTUXXX format if it's a user ID, otherwise use the full term
-            const userSearchParam = (isUserIdSearch && userIdMatch) 
-                ? `CTU${userIdMatch[1]}`
-                : trimmedTerm;
+            let userUrl = null;
+            let animalUrl = null;
             
-            // For animal ID searches, format the ID properly
-            let animalUrl;
-            if (animalIdMatch && !isUserIdSearch) {
-                // Extract the numeric part and format as CTCXXX
-                const numericId = animalIdMatch[1];
-                const formattedId = `CTC${numericId}`;
-                animalUrl = `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(formattedId)}`;
+            if (hasCTU && numericId) {
+                // CTU1279 - only search users
+                userUrl = `${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(`CTU${numericId}`)}&limit=10`;
+            } else if (hasCTC && numericId) {
+                // CTC1279 - only search animals
+                animalUrl = `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(`CTC${numericId}`)}`;
+            } else if ((hasCT || isNumericOnly) && numericId) {
+                // CT1279 or 1279 - search both
+                userUrl = `${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(`CTU${numericId}`)}&limit=10`;
+                animalUrl = `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(`CTC${numericId}`)}`;
             } else {
+                // Regular text search - search both by name/species
+                userUrl = `${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(trimmedTerm)}&limit=10`;
                 animalUrl = `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedTerm)}&species=${encodeURIComponent(trimmedTerm)}&limit=10`;
             }
             
-            console.log('Animal search URL:', animalUrl);
+            console.log('User URL:', userUrl);
+            console.log('Animal URL:', animalUrl);
             
-            const [usersResponse, animalsResponse] = await Promise.all([
-                axios.get(`${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(userSearchParam)}&limit=10`),
-                axios.get(animalUrl)
-            ]);
+            // Only make the requests that are needed
+            const promises = [];
+            if (userUrl) promises.push(axios.get(userUrl));
+            else promises.push(Promise.resolve({ data: [] }));
+            
+            if (animalUrl) promises.push(axios.get(animalUrl));
+            else promises.push(Promise.resolve({ data: [] }));
+            
+            const [usersResponse, animalsResponse] = await Promise.all(promises);
             
             console.log('Animals response:', animalsResponse.data);
             console.log('Users response:', usersResponse.data);
