@@ -34,13 +34,19 @@ const InstallPWA = () => {
     setInstallPrompt(null);
   };
 
-  // Don't show if already installed or no install prompt available
-  if (isInstalled || !installPrompt) return null;
+  // Don't show if already running as installed PWA
+  if (isInstalled) return null;
 
   return (
     <button
       onClick={handleInstallClick}
-      className="w-full bg-purple-100 hover:bg-purple-200 text-purple-800 font-semibold py-3 px-4 rounded-lg transition duration-150 flex items-center justify-center gap-2 border-2 border-purple-300"
+      disabled={!installPrompt}
+      className={`w-full font-semibold py-3 px-4 rounded-lg transition duration-150 flex items-center justify-center gap-2 border-2 ${
+        installPrompt
+          ? 'bg-purple-100 hover:bg-purple-200 text-purple-800 border-purple-300 cursor-pointer'
+          : 'bg-gray-100 text-gray-500 border-gray-200 cursor-default'
+      }`}
+      title={!installPrompt ? 'Open this page in a browser (not already installed) to install the app' : undefined}
     >
       <Download size={20} />
       Install Desktop/Mobile App
