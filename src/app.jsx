@@ -15196,6 +15196,10 @@ const AnimalForm = ({
     const [fieldTemplate, setFieldTemplate] = useState(null);
     const [loadingTemplate, setLoadingTemplate] = useState(false);
     const [enclosureOptions, setEnclosureOptions] = useState([]);
+    const [showQuickEnclosureForm, setShowQuickEnclosureForm] = useState(false);
+    const [quickEnclosureName, setQuickEnclosureName] = useState('');
+    const [quickEnclosureType, setQuickEnclosureType] = useState('');
+    const [quickEnclosureSize, setQuickEnclosureSize] = useState('');
     const [newCareTaskName, setNewCareTaskName] = useState('');
     const [newCareTaskFreq, setNewCareTaskFreq] = useState('');
     const [newAnimalCareTaskName, setNewAnimalCareTaskName] = useState('');
@@ -20104,7 +20108,14 @@ const AnimalForm = ({
                             <div className="space-y-4">
                                 {/* Enclosure assignment */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Assigned Enclosure</label>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <label className="block text-sm font-medium text-gray-700">Assigned Enclosure</label>
+                                        <button type="button"
+                                            onClick={() => setShowQuickEnclosureForm(prev => !prev)}
+                                            className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-medium">
+                                            <Plus size={13} /> New Enclosure
+                                        </button>
+                                    </div>
                                     <select name="enclosureId" value={formData.enclosureId || ''} onChange={handleChange}
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                         <option value="">* None / Unassigned *</option>
@@ -20114,8 +20125,42 @@ const AnimalForm = ({
                                             </option>
                                         ))}
                                     </select>
-                                    {enclosureOptions.length === 0 && (
-                                        <p className="text-xs text-gray-400 mt-1">No enclosures created yet. Create them in the Management view.</p>
+                                    {showQuickEnclosureForm && (
+                                        <div className="mt-2 p-3 border border-primary/30 rounded-lg bg-primary/5 space-y-2">
+                                            <p className="text-xs font-semibold text-gray-600">Quick-create enclosure</p>
+                                            <input type="text" value={quickEnclosureName} onChange={e => setQuickEnclosureName(e.target.value)}
+                                                placeholder="Enclosure name *"
+                                                className="block w-full p-1.5 text-sm border border-gray-300 rounded-md focus:ring-primary focus:border-primary" />
+                                            <div className="flex gap-2">
+                                                <input type="text" value={quickEnclosureType} onChange={e => setQuickEnclosureType(e.target.value)}
+                                                    placeholder="Type (e.g. Cage, Tank)"
+                                                    className="flex-1 p-1.5 text-sm border border-gray-300 rounded-md focus:ring-primary focus:border-primary" />
+                                                <input type="text" value={quickEnclosureSize} onChange={e => setQuickEnclosureSize(e.target.value)}
+                                                    placeholder="Size"
+                                                    className="flex-1 p-1.5 text-sm border border-gray-300 rounded-md focus:ring-primary focus:border-primary" />
+                                            </div>
+                                            <div className="flex gap-2 justify-end">
+                                                <button type="button" onClick={() => { setShowQuickEnclosureForm(false); setQuickEnclosureName(''); setQuickEnclosureType(''); setQuickEnclosureSize(''); }}
+                                                    className="text-xs px-3 py-1.5 rounded border border-gray-300 text-gray-600 hover:bg-gray-100">Cancel</button>
+                                                <button type="button" disabled={!quickEnclosureName.trim()} onClick={async () => {
+                                                    if (!quickEnclosureName.trim()) return;
+                                                    try {
+                                                        const res = await axios.post(`${API_BASE_URL}/enclosures`,
+                                                            { name: quickEnclosureName.trim(), enclosureType: quickEnclosureType.trim(), size: quickEnclosureSize.trim(), notes: '', cleaningTasks: [] },
+                                                            { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+                                                        const newEnc = res.data;
+                                                        setEnclosureOptions(prev => [...prev, newEnc]);
+                                                        setFormData(prev => ({ ...prev, enclosureId: newEnc._id }));
+                                                        setShowQuickEnclosureForm(false);
+                                                        setQuickEnclosureName(''); setQuickEnclosureType(''); setQuickEnclosureSize('');
+                                                    } catch (err) {
+                                                        alert(err.response?.data?.message || 'Failed to create enclosure');
+                                                    }
+                                                }} className="text-xs px-3 py-1.5 rounded bg-primary text-black font-semibold hover:bg-primary/80 disabled:opacity-50">
+                                                    Create &amp; Assign
+                                                </button>
+                                            </div>
+                                        </div>
                                     )}
                                 </div>
 
