@@ -27205,23 +27205,27 @@ const AnimalList = ({
                                                         const taskType = task.type;
                                                         const realIdx = taskType === 'animal' ? idx - enclosureTasks.length : idx;
                                                         return (
-                                                            <div key={idx} className="flex items-center justify-between gap-2 text-sm" onClick={e => e.stopPropagation()}>
+                                                            <div key={idx} className="flex flex-col gap-1 text-sm py-1 border-b border-gray-50 last:border-0" onClick={e => e.stopPropagation()}>
+                                                                {/* Row 1: status dot + name + type badge */}
                                                                 <div className="flex items-center gap-2 min-w-0">
                                                                     <span className={`w-2 h-2 rounded-full flex-shrink-0 ${due ? 'bg-red-500' : soon ? 'bg-orange-400' : task.frequencyDays ? 'bg-green-500' : 'bg-gray-300'}`} />
-                                                                    <span className="text-gray-700 truncate">{task.taskName}</span>
-                                                                    {taskType === 'enclosure' && <span className="text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">Housing</span>}
-                                                                    {taskType === 'animal' && <span className="text-xs bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded">Animal</span>}
+                                                                    <span className="text-gray-700 font-medium truncate">{task.taskName}</span>
+                                                                    {taskType === 'enclosure' && <span className="text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded flex-shrink-0">Housing</span>}
+                                                                    {taskType === 'animal' && <span className="text-xs bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded flex-shrink-0">Animal</span>}
                                                                 </div>
-                                                                <div className="flex items-center gap-1.5 shrink-0 text-xs text-gray-400">
-                                                                    {task.frequencyDays && <span><RefreshCw size={12} className="inline-block align-middle mr-0.5" /> Every {task.frequencyDays}d</span>}
-                                                                    {task.lastDoneDate ? <span className="flex items-center gap-0.5 text-green-600"><Check size={10} className="flex-shrink-0" /> Last: {formatDateShort(task.lastDoneDate)}</span> : <span className="text-orange-500 flex items-center gap-0.5"><X size={10} className="flex-shrink-0" /> Never done</span>}
+                                                                {/* Row 2: meta info + action buttons */}
+                                                                <div className="flex items-center flex-wrap gap-x-2 gap-y-1 pl-4 text-xs text-gray-400">
+                                                                    {task.frequencyDays && <span className="flex items-center gap-0.5"><RefreshCw size={11} /> Every {task.frequencyDays}d</span>}
+                                                                    {task.lastDoneDate
+                                                                        ? <span className="flex items-center gap-0.5 text-green-600"><Check size={10} /> Last: {formatDateShort(task.lastDoneDate)}</span>
+                                                                        : <span className="flex items-center gap-0.5 text-orange-500"><X size={10} /> Never done</span>}
                                                                     <button onClick={(e) => handleMarkAnimalCareTaskDone(e, a, realIdx, taskType)}
-                                                                        className={`ml-1 text-xs px-2 py-0.5 rounded font-medium border ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
-                                                                        ? Done
+                                                                        className={`text-xs px-2 py-0.5 rounded font-medium border flex items-center gap-0.5 ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
+                                                                        <Check size={10} /> Done
                                                                     </button>
                                                                     <button onClick={(e) => handleSkipAnimalCareTask(e, a, realIdx, taskType)}
-                                                                        className="ml-1 text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200">
-                                                                        ?? Skip
+                                                                        className="text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200 flex items-center gap-0.5">
+                                                                        <ChevronRight size={10} /> Skip
                                                                     </button>
                                                                 </div>
                                                             </div>
