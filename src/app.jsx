@@ -15307,6 +15307,7 @@ const AnimalForm = ({
             lastMaintenanceDate: animalToEdit.lastMaintenanceDate ? new Date(animalToEdit.lastMaintenanceDate).toISOString().split('T')[0] : '',
             maintenanceFrequencyDays: animalToEdit.maintenanceFrequencyDays || '',
             careTasks: animalToEdit.careTasks || [],
+            animalCareTasks: animalToEdit.animalCareTasks || [],
             isOwned: animalToEdit.isOwned ?? true,
             isDisplay: animalToEdit.isDisplay ?? false,
             // New fields for comprehensive mammal profile
@@ -15479,6 +15480,7 @@ const AnimalForm = ({
             lastMaintenanceDate: '',
             maintenanceFrequencyDays: '',
             careTasks: [],
+            animalCareTasks: [],
             breedingRole: 'both',
             isOwned: true,
             isDisplay: true,
@@ -20219,7 +20221,7 @@ const AnimalForm = ({
                                                     <span className="flex-1 font-medium text-gray-700">{task.taskName}</span>
                                                     {task.frequencyDays && <span className="text-xs text-gray-400">Every {task.frequencyDays}d</span>}
                                                     {task.lastDoneDate && <span className="text-xs text-gray-400">Last: {new Date(task.lastDoneDate).toLocaleDateString()}</span>}
-                                                    <button type="button" onClick={() => setFormData(prev => ({ ...prev, animalCareTasks: (prev.animalCareTasks || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 font-bold leading-none">?</button>
+                                                    <button type="button" onClick={() => setFormData(prev => ({ ...prev, animalCareTasks: (prev.animalCareTasks || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 p-0.5" title="Remove"><Trash2 size={14} /></button>
                                                 </div>
                                             ))}
                                         </div>
