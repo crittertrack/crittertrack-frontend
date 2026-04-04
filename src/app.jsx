@@ -26714,20 +26714,19 @@ const AnimalList = ({
         const feedOk = allAnimals.filter(a => a.feedingFrequencyDays && !isDue(a.lastFedDate, a.feedingFrequencyDays));
         const feedNone = allAnimals.filter(a => !a.feedingFrequencyDays);
 
-        // 4. Maintenance ? enclosure cleaning tasks + supply reorders
+        // 4. Maintenance — enclosure cleaning tasks + supply reorders + housing care tasks per animal
         const enclosuresWithCleaningTasks = enclosures.filter(enc => enc.cleaningTasks?.length > 0);
-        const animalsWithCareTasks = allAnimals.filter(a => (a.careTasks?.length > 0) || (a.animalCareTasks?.length > 0));
+        const animalsWithAnimalTasks = allAnimals.filter(a => a.animalCareTasks?.length > 0);
+        const animalsWithEnclosureCareTasks = allAnimals.filter(a => (a.careTasks?.length > 0) || (a.maintenanceFrequencyDays));
         const todayMaint = new Date(); todayMaint.setHours(0, 0, 0, 0);
         const supplyReorderDue = supplies.filter(s =>
             (s.reorderThreshold != null && s.currentStock <= s.reorderThreshold) ||
             (s.nextOrderDate && new Date(s.nextOrderDate) < todayMaint)
         );
-        const maintTotalDue = enclosuresWithCleaningTasks.reduce((sum, enc) => sum + enc.cleaningTasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0) + supplyReorderDue.length;
-        const animalCareDue = feedDue.length + animalsWithCareTasks.reduce((sum, a) => {
-            const enclosureTasks = (a.careTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length;
-            const animalTasks = (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length;
-            return sum + enclosureTasks + animalTasks;
-        }, 0);
+        const enclosureCarTasksDue = animalsWithEnclosureCareTasks.reduce((sum, a) => sum + (a.careTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
+        const maintMaintenanceDue = allAnimals.filter(a => a.maintenanceFrequencyDays && isDue(a.lastMaintenanceDate, a.maintenanceFrequencyDays)).length;
+        const maintTotalDue = enclosuresWithCleaningTasks.reduce((sum, enc) => sum + enc.cleaningTasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0) + supplyReorderDue.length + enclosureCarTasksDue + maintMaintenanceDue;
+        const animalCareDue = feedDue.length + animalsWithAnimalTasks.reduce((sum, a) => sum + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
 
         // 5. Medical ? quarantine and treatment
         const quarantineList = allAnimals.filter(a => a.isQuarantine);
@@ -27170,17 +27169,15 @@ const AnimalList = ({
                                     )}
                                 </div>
                             </div>
-                            {/* -- Scheduled Care -- */}
+                            {/* -- Scheduled Care (Animal Care Tasks only) -- */}
                             <div>
                                 <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide">Scheduled Care</div>
-                                {animalsWithCareTasks.length === 0 ? (
-                                    <div className="px-3 py-4 text-xs text-gray-400 text-center">No scheduled care tasks. Edit an animal and add tasks in the Animal Care tab.</div>
-                                ) : animalsWithCareTasks.map(a => {
-                                    const grpKey = `maint_animal_${a.id_public}`;
+                                {animalsWithAnimalTasks.length === 0 ? (
+                                    <div className="px-3 py-4 text-xs text-gray-400 text-center">No animal care tasks. Edit an animal and add tasks in the Animal Care tab.</div>
+                                ) : animalsWithAnimalTasks.map(a => {
+                                    const grpKey = `animalcare_${a.id_public}`;
                                     const isGrpCollapsed = collapsedMgmtGroups[grpKey] || false;
-                                    const enclosureTasks = (a.careTasks || []).map(t => ({ ...t, type: 'enclosure' }));
-                                    const animalTasks = (a.animalCareTasks || []).map(t => ({ ...t, type: 'animal' }));
-                                    const tasks = [...enclosureTasks, ...animalTasks];
+                                    const tasks = (a.animalCareTasks || []);
                                     const dueTasks = tasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays));
                                     return (
                                         <div key={a.id_public} className="border-b border-gray-100 last:border-0">
@@ -27196,34 +27193,28 @@ const AnimalList = ({
                                                 {dueTasks.length > 0 && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium shrink-0">{dueTasks.length} due</span>}
                                             </div>
                                             {!isGrpCollapsed && (
-                                                <div className="px-4 py-2 space-y-2">
+                                                <div className="px-4 py-2 space-y-1">
                                                     {tasks.map((task, idx) => {
                                                         const due = isDue(task.lastDoneDate, task.frequencyDays);
                                                         const daysAgo = task.lastDoneDate ? daysSince(task.lastDoneDate) : null;
                                                         const daysLeft = task.frequencyDays && daysAgo !== null ? task.frequencyDays - daysAgo : null;
                                                         const soon = !due && daysLeft !== null && daysLeft <= 2;
-                                                        const taskType = task.type;
-                                                        const realIdx = taskType === 'animal' ? idx - enclosureTasks.length : idx;
                                                         return (
                                                             <div key={idx} className="flex flex-col gap-1 text-sm py-1 border-b border-gray-50 last:border-0" onClick={e => e.stopPropagation()}>
-                                                                {/* Row 1: status dot + name + type badge */}
                                                                 <div className="flex items-center gap-2 min-w-0">
                                                                     <span className={`w-2 h-2 rounded-full flex-shrink-0 ${due ? 'bg-red-500' : soon ? 'bg-orange-400' : task.frequencyDays ? 'bg-green-500' : 'bg-gray-300'}`} />
                                                                     <span className="text-gray-700 font-medium truncate">{task.taskName}</span>
-                                                                    {taskType === 'enclosure' && <span className="text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded flex-shrink-0">Housing</span>}
-                                                                    {taskType === 'animal' && <span className="text-xs bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded flex-shrink-0">Animal</span>}
                                                                 </div>
-                                                                {/* Row 2: meta info + action buttons */}
                                                                 <div className="flex items-center flex-wrap gap-x-2 gap-y-1 pl-4 text-xs text-gray-400">
                                                                     {task.frequencyDays && <span className="flex items-center gap-0.5"><RefreshCw size={11} /> Every {task.frequencyDays}d</span>}
                                                                     {task.lastDoneDate
                                                                         ? <span className="flex items-center gap-0.5 text-green-600"><Check size={10} /> Last: {formatDateShort(task.lastDoneDate)}</span>
                                                                         : <span className="flex items-center gap-0.5 text-orange-500"><X size={10} /> Never done</span>}
-                                                                    <button onClick={(e) => handleMarkAnimalCareTaskDone(e, a, realIdx, taskType)}
+                                                                    <button onClick={(e) => handleMarkAnimalCareTaskDone(e, a, idx, 'animal')}
                                                                         className={`text-xs px-2 py-0.5 rounded font-medium border flex items-center gap-0.5 ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
                                                                         <Check size={10} /> Done
                                                                     </button>
-                                                                    <button onClick={(e) => handleSkipAnimalCareTask(e, a, realIdx, taskType)}
+                                                                    <button onClick={(e) => handleSkipAnimalCareTask(e, a, idx, 'animal')}
                                                                         className="text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200 flex items-center gap-0.5">
                                                                         <ChevronRight size={10} /> Skip
                                                                     </button>
@@ -27248,6 +27239,88 @@ const AnimalList = ({
                         title="Maintenance" count={`${maintTotalDue} due`} bgClass="bg-amber-50" />
                     {!collapsedMgmtSections['maintenance'] && (
                         <div className="divide-y divide-gray-100">
+                            {/* -- Housing Maintenance (animal enclosure care tasks + maintenance schedule) -- */}
+                            <div>
+                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide">Housing Maintenance</div>
+                                {animalsWithEnclosureCareTasks.length === 0 ? (
+                                    <div className="px-3 py-4 text-xs text-gray-400 text-center">No housing maintenance tasks. Edit an animal and add tasks in the Housing tab.</div>
+                                ) : animalsWithEnclosureCareTasks.map(a => {
+                                    const grpKey = `housingmaint_${a.id_public}`;
+                                    const isGrpCollapsed = collapsedMgmtGroups[grpKey] || false;
+                                    const tasks = (a.careTasks || []);
+                                    const maintDue = a.maintenanceFrequencyDays && isDue(a.lastMaintenanceDate, a.maintenanceFrequencyDays);
+                                    const tasksDue = tasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length + (maintDue ? 1 : 0);
+                                    return (
+                                        <div key={a.id_public} className="border-b border-gray-100 last:border-0">
+                                            <div className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50" onClick={() => toggleGroup(grpKey)}>
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    {isGrpCollapsed ? <ChevronDown size={14} className="text-gray-400" /> : <ChevronUp size={14} className="text-gray-400" />}
+                                                    {a.imageUrl
+                                                        ? <img src={a.imageUrl} alt={a.name} className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
+                                                        : <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0"><Cat size={11} className="text-gray-400" /></div>}
+                                                    <span className="text-sm font-medium text-gray-800 truncate">{[a.prefix, a.name || 'Unnamed', a.suffix].filter(Boolean).join(' ')}</span>
+                                                    <span className="text-xs text-gray-400 hidden sm:block">{getSpeciesDisplayName(a.species)}</span>
+                                                </div>
+                                                {tasksDue > 0 && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium shrink-0">{tasksDue} due</span>}
+                                            </div>
+                                            {!isGrpCollapsed && (
+                                                <div className="px-4 py-2 space-y-1">
+                                                    {/* General maintenance schedule row */}
+                                                    {a.maintenanceFrequencyDays && (
+                                                        <div className="flex flex-col gap-1 text-sm py-1 border-b border-gray-50" onClick={e => e.stopPropagation()}>
+                                                            <div className="flex items-center gap-2 min-w-0">
+                                                                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${maintDue ? 'bg-red-500' : 'bg-green-500'}`} />
+                                                                <span className="text-gray-700 font-medium">General Maintenance</span>
+                                                                <span className="text-xs bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded flex-shrink-0">Schedule</span>
+                                                            </div>
+                                                            <div className="flex items-center flex-wrap gap-x-2 gap-y-1 pl-4 text-xs text-gray-400">
+                                                                <span className="flex items-center gap-0.5"><RefreshCw size={11} /> Every {a.maintenanceFrequencyDays}d</span>
+                                                                {a.lastMaintenanceDate
+                                                                    ? <span className="flex items-center gap-0.5 text-green-600"><Check size={10} /> Last: {formatDateShort(a.lastMaintenanceDate)}</span>
+                                                                    : <span className="flex items-center gap-0.5 text-orange-500"><X size={10} /> Never done</span>}
+                                                                <button onClick={(e) => { e.stopPropagation(); const today = new Date().toISOString().split('T')[0]; setAllAnimalsRaw(prev => prev.map(x => x.id_public === a.id_public ? { ...x, lastMaintenanceDate: today } : x)); axios.put(`${API_BASE_URL}/animals/${a.id_public}`, { lastMaintenanceDate: today }, { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } }).catch(err => { console.error('Mark maintenance done failed:', err); fetchAllAnimals(); }); }}
+                                                                    className={`text-xs px-2 py-0.5 rounded font-medium border flex items-center gap-0.5 ${maintDue ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
+                                                                    <Check size={10} /> Done
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {/* Per-task enclosure care tasks */}
+                                                    {tasks.map((task, idx) => {
+                                                        const due = isDue(task.lastDoneDate, task.frequencyDays);
+                                                        const daysAgo = task.lastDoneDate ? daysSince(task.lastDoneDate) : null;
+                                                        const daysLeft = task.frequencyDays && daysAgo !== null ? task.frequencyDays - daysAgo : null;
+                                                        const soon = !due && daysLeft !== null && daysLeft <= 2;
+                                                        return (
+                                                            <div key={idx} className="flex flex-col gap-1 text-sm py-1 border-b border-gray-50 last:border-0" onClick={e => e.stopPropagation()}>
+                                                                <div className="flex items-center gap-2 min-w-0">
+                                                                    <span className={`w-2 h-2 rounded-full flex-shrink-0 ${due ? 'bg-red-500' : soon ? 'bg-orange-400' : task.frequencyDays ? 'bg-green-500' : 'bg-gray-300'}`} />
+                                                                    <span className="text-gray-700 font-medium truncate">{task.taskName}</span>
+                                                                </div>
+                                                                <div className="flex items-center flex-wrap gap-x-2 gap-y-1 pl-4 text-xs text-gray-400">
+                                                                    {task.frequencyDays && <span className="flex items-center gap-0.5"><RefreshCw size={11} /> Every {task.frequencyDays}d</span>}
+                                                                    {task.lastDoneDate
+                                                                        ? <span className="flex items-center gap-0.5 text-green-600"><Check size={10} /> Last: {formatDateShort(task.lastDoneDate)}</span>
+                                                                        : <span className="flex items-center gap-0.5 text-orange-500"><X size={10} /> Never done</span>}
+                                                                    <button onClick={(e) => handleMarkAnimalCareTaskDone(e, a, idx, 'enclosure')}
+                                                                        className={`text-xs px-2 py-0.5 rounded font-medium border flex items-center gap-0.5 ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
+                                                                        <Check size={10} /> Done
+                                                                    </button>
+                                                                    <button onClick={(e) => handleSkipAnimalCareTask(e, a, idx, 'enclosure')}
+                                                                        className="text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200 flex items-center gap-0.5">
+                                                                        <ChevronRight size={10} /> Skip
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
                             {/* -- Enclosure Cleaning -- */}
                             <div>
                                 <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide">Enclosure Cleaning</div>
@@ -27284,12 +27357,12 @@ const AnimalList = ({
                                                                     {task.frequencyDays && <span><RefreshCw size={12} className="inline-block align-middle mr-0.5" /> Every {task.frequencyDays}d</span>}
                                                                     {task.lastDoneDate ? <span className="flex items-center gap-0.5 text-green-600"><Check size={10} className="flex-shrink-0" /> Last: {formatDateShort(task.lastDoneDate)}</span> : <span className="text-orange-500 flex items-center gap-0.5"><X size={10} className="flex-shrink-0" /> Never done</span>}
                                                                     <button onClick={(e) => handleMarkEnclosureTaskDone(e, enc, idx)}
-                                                                        className={`ml-1 text-xs px-2 py-0.5 rounded font-medium border ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
-                                                                        ? Done
+                                                                        className={`ml-1 text-xs px-2 py-0.5 rounded font-medium border flex items-center gap-0.5 ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
+                                                                        <Check size={10} /> Done
                                                                     </button>
                                                                     <button onClick={(e) => handleSkipEnclosureTask(e, enc, idx)}
-                                                                        className="ml-1 text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200">
-                                                                        ?? Skip
+                                                                        className="ml-1 text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200 flex items-center gap-0.5">
+                                                                        <ChevronRight size={10} /> Skip
                                                                     </button>
                                                                 </div>
                                                             </div>
