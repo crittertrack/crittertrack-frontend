@@ -28948,7 +28948,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                 const mated = parseLocalDate(l.matingDate);
                 if (mated) {
                     const diff = Math.round((mated - today) / 86400000);
-                    if (diff >= 0 && diff <= 7) {
+                    if (diff === 0) {
                         const key = `${l._id}-mated-${todayStr}`;
                         if (!breedingDismissed[key]) breedingItems.push({ key, type: 'mated', pairName, sireDam, callId, diff });
                     }
