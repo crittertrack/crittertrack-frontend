@@ -9376,7 +9376,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                                                         <div key={offspring.id_public} onClick={() => onViewAnimal && onViewAnimal(offspring)} className="relative bg-white rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-200 pt-2">
                                                                                             {offspring.gender && (
                                                                                                 <div className="absolute top-1.5 right-1.5">
-                                                                                                    {offspring.gender === 'Male' ? <Mars size={14} strokeWidth={2.5} className="text-primary" /> : <Venus size={14} strokeWidth={2.5} className="text-accent" />}
+                                                                                                    {offspring.gender === 'Male' ? <Mars size={14} strokeWidth={2.5} className="text-primary" /> : offspring.gender === 'Female' ? <Venus size={14} strokeWidth={2.5} className="text-accent" /> : offspring.gender === 'Intersex' ? <VenusAndMars size={14} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={14} strokeWidth={2.5} className="text-gray-400" />}
                                                                                                 </div>
                                                                                             )}
                                                                                             <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
@@ -9471,7 +9471,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                                                 {offspringList.map(offspring => (
                                                                                     <div key={offspring.id_public || offspring._id} onClick={() => onViewAnimal && onViewAnimal(offspring)} className="relative bg-white rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-200 pt-2">
                                                                                         {offspring.gender && (
-                                                                                            <div className="absolute top-1.5 right-1.5">{offspring.gender === 'Male' ? <Mars size={14} strokeWidth={2.5} className="text-primary" /> : <Venus size={14} strokeWidth={2.5} className="text-accent" />}</div>
+                                                                                            <div className="absolute top-1.5 right-1.5">{offspring.gender === 'Male' ? <Mars size={14} strokeWidth={2.5} className="text-primary" /> : offspring.gender === 'Female' ? <Venus size={14} strokeWidth={2.5} className="text-accent" /> : offspring.gender === 'Intersex' ? <VenusAndMars size={14} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={14} strokeWidth={2.5} className="text-gray-400" />}</div>
                                                                                         )}
                                                                                         <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
                                                                                             {offspring.imageUrl || offspring.photoUrl ? <img src={offspring.imageUrl || offspring.photoUrl} alt={offspring.name} className="w-20 h-20 object-cover rounded-md" /> : <div className="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center text-gray-400"><Cat size={32} /></div>}
@@ -13594,12 +13594,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                 </div>
                                                             )}
                                                             {/* Gender badge top-right */}
-                                                            {animal.gender && (
+                                                            {(animal.gender === 'Male' || animal.gender === 'Female') && (
                                                                 <div className="absolute top-1.5 right-1.5">
-                                                                    {animal.gender === 'Male' 
-                                                                        ? <Mars size={14} strokeWidth={2.5} className="text-primary" /> 
-                                                                        : <Venus size={14} strokeWidth={2.5} className="text-accent" />
-                                                                    }
+                                                                    {animal.gender === 'Male' ? <Mars size={14} strokeWidth={2.5} className="text-primary" /> : animal.gender === 'Female' ? <Venus size={14} strokeWidth={2.5} className="text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars size={14} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={14} strokeWidth={2.5} className="text-gray-400" />}
                                                                 </div>
                                                             )}
 
