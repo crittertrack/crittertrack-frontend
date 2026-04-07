@@ -33,3 +33,12 @@ font-family: 'Inter', sans-serif;
 .animate-fadeInScale {
   animation: fadeInScale 0.5s ease-in-out;
 }
+
+/* Hide scrollbar while keeping scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

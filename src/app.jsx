@@ -3142,17 +3142,17 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             ) : null}
 
             {/* Tab Bar */}
-            <div className="flex border-b border-gray-200 mb-6">
+            <div className="flex border-b border-gray-200 mb-6 overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
                 <button
                     onClick={() => setActiveTab('animals')}
-                    className={`flex-1 text-center px-2 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'animals' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    className={`flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'animals' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                 >
                     Animals ({animals.filter(a => a.isOwned !== false).length})
                 </button>
                 {hasBreederInfo && (
                     <button
                         onClick={() => setActiveTab('info-adoption')}
-                        className={`flex-1 text-center px-2 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'info-adoption' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                        className={`flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'info-adoption' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                         Info &amp; Adoption
                     </button>
@@ -3160,7 +3160,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 {publicLitters.length > 0 && (
                     <button
                         onClick={() => setActiveTab('litters')}
-                        className={`flex-1 text-center px-2 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'litters' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                        className={`flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'litters' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                         Pairings ({publicLitters.length})
                     </button>
@@ -3168,7 +3168,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 {animals.some(a => a.isForSale || a.availableForBreeding) && (
                     <button
                         onClick={() => setActiveTab('for-sale-stud')}
-                        className={`flex-1 text-center px-2 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'for-sale-stud' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                        className={`flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'for-sale-stud' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                         For Sale / Stud ({animals.filter(a => a.isForSale || a.availableForBreeding).length})
                     </button>
@@ -3176,14 +3176,14 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 {(freshProfile?.showStatsTab ?? true) && (
                     <button
                         onClick={() => setActiveTab('stats')}
-                        className={`flex-1 text-center px-2 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'stats' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                        className={`flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'stats' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                         Stats
                     </button>
                 )}
                 <button
                     onClick={() => setActiveTab('ratings')}
-                    className={`flex-1 text-center px-2 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'ratings' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    className={`flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'ratings' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                 >
                     Ratings{ratingData.count > 0 && ` (${ratingData.count})`}
                 </button>
@@ -29331,12 +29331,12 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
             return isNaN(d.getTime()) ? null : d;
         };
 
-        // Mating due — matingDate within 7 days (upcoming or today) and litter not yet born
+        // Mating due — matingDate is today and litter not yet born
         if (l.matingDate && !l.birthDate) {
             const mated = parseLocalDate(l.matingDate);
             if (mated) {
                 const diff = Math.round((mated - today) / 86400000);
-                if (diff >= 0 && diff <= 7) {
+                if (diff === 0) {
                     const key = `${l._id}-mated-${todayStr}`;
                     if (!dismissed[key]) urgentItems.push({ key, type: 'mated', pairName, sireDam, callId, diff });
                 }
@@ -30486,6 +30486,8 @@ const App = () => {
     const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
     const [animalToView, setAnimalToView] = useState(null);
     const [animalViewHistory, setAnimalViewHistory] = useState([]); // Navigation history stack for animals
+    const viewReturnPathRef = React.useRef('/'); // Path to return to when closing /view-animal
+    const editReturnPathRef = React.useRef('/view-animal'); // Path to return to when closing /edit-animal
     const [detailViewTab, setDetailViewTab] = useState(1); // Tab for detail view
     // ── Breeding Lines ────────────────────────────────────────────────────────────
     const BL_PRESETS_APP = ['#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#3b82f6','#6366f1','#a855f7','#ec4899','#64748b'];
@@ -31704,6 +31706,7 @@ const App = () => {
     };
 
     const handleEditAnimal = (animal) => {
+        editReturnPathRef.current = location.pathname;
         setAnimalToEdit(animal);
         setSpeciesToAdd(animal.species); 
         navigate('/edit-animal');
@@ -31748,6 +31751,7 @@ const App = () => {
         // Use existing COI if available, will be updated in background
         
         console.log('[handleViewAnimal] Father ID:', normalizedAnimal.fatherId_public, 'Mother ID:', normalizedAnimal.motherId_public);
+        viewReturnPathRef.current = location.pathname;
         setAnimalToView(normalizedAnimal);
         navigate('/view-animal');
         
@@ -31779,11 +31783,13 @@ const App = () => {
             setAnimalToView(previousAnimal);
             console.log('[handleBackFromAnimal] Navigating back to previous animal, remaining history:', animalViewHistory.length - 1);
         } else {
-            // No history, close the detail view entirely
+            // No history, return to wherever view-animal was opened from
             setAnimalToView(null);
             setAnimalViewHistory([]);
-            navigate('/');
-            console.log('[handleBackFromAnimal] No history, closing detail view');
+            const returnPath = viewReturnPathRef.current || '/';
+            viewReturnPathRef.current = '/';
+            navigate(returnPath);
+            console.log('[handleBackFromAnimal] No history, returning to', returnPath);
         }
     };
     
@@ -31791,8 +31797,10 @@ const App = () => {
     const handleCloseAllAnimals = () => {
         setAnimalToView(null);
         setAnimalViewHistory([]);
-        navigate('/');
-        console.log('[handleCloseAllAnimals] Closed entire animal modal stack');
+        const returnPath = viewReturnPathRef.current || '/';
+        viewReturnPathRef.current = '/';
+        navigate(returnPath);
+        console.log('[handleCloseAllAnimals] Closed entire animal modal stack, returning to', returnPath);
     };
     
     // Handle viewing public animals with history support
@@ -33331,7 +33339,7 @@ const App = () => {
                                 animalToEdit={animalToEdit} 
                                 species={animalToEdit.species} 
                                 onSave={handleSaveAnimal} 
-                                onCancel={() => navigate('/')} 
+                                onCancel={() => navigate(editReturnPathRef.current || '/')} 
                                 onDelete={handleDeleteAnimal}
                                 authToken={authToken} 
                                 showModalMessage={showModalMessage}
@@ -33457,7 +33465,7 @@ const App = () => {
                                                         <>
                                                             <button 
                                                                 data-tutorial-target="edit-animal-btn"
-                                                                onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); navigate('/edit-animal'); }} 
+                                                                onClick={() => handleEditAnimal(animalToView)} 
                                                                 className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg"
                                                             >
                                                                 Edit
