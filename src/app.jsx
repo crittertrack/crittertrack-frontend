@@ -30504,14 +30504,18 @@ const App = () => {
         if (!authToken) return;
         axios.get(`${API_BASE_URL}/users/breeding-lines`, { headers: { Authorization: `Bearer ${authToken}` } })
             .then(r => {
-                if (Array.isArray(r.data.breedingLineDefs) && r.data.breedingLineDefs.length > 0) {
-                    setBreedingLineDefs(r.data.breedingLineDefs);
-                    try { localStorage.setItem('ct_bldefs', JSON.stringify(r.data.breedingLineDefs)); } catch {}
-                }
-                if (r.data.animalBreedingLines && Object.keys(r.data.animalBreedingLines).length > 0) {
-                    setAnimalBreedingLines(r.data.animalBreedingLines);
-                    try { localStorage.setItem('ct_blassign', JSON.stringify(r.data.animalBreedingLines)); } catch {}
-                }
+                // Always overwrite from backend — even empty arrays clear stale data from a previous user
+                const defs = Array.isArray(r.data.breedingLineDefs) && r.data.breedingLineDefs.length > 0
+                    ? r.data.breedingLineDefs
+                    : Array.from({ length: 10 }, (_, i) => ({ id: i, name: '', color: BL_PRESETS_APP[i] }));
+                setBreedingLineDefs(defs);
+                try { localStorage.setItem('ct_bldefs', JSON.stringify(defs)); } catch {}
+
+                const assign = (r.data.animalBreedingLines && typeof r.data.animalBreedingLines === 'object')
+                    ? r.data.animalBreedingLines
+                    : {};
+                setAnimalBreedingLines(assign);
+                try { localStorage.setItem('ct_blassign', JSON.stringify(assign)); } catch {}
             })
             .catch(() => {}); // Silent fail — use localStorage fallback
     }, [authToken]);
@@ -30737,6 +30741,10 @@ const App = () => {
         setShowModReportQueue(false);
         localStorage.removeItem('authToken');
         localStorage.removeItem('moderationAuthenticated');
+        localStorage.removeItem('ct_bldefs');
+        localStorage.removeItem('ct_blassign');
+        setBreedingLineDefs(Array.from({ length: 10 }, (_, i) => ({ id: i, name: '', color: BL_PRESETS_APP[i] })));
+        setAnimalBreedingLines({});
         navigate('/');
         if (expired) {
             showModalMessage('Session Expired', 'You were logged out due to 30 minutes of inactivity.');
