@@ -4088,10 +4088,10 @@ const computeRelationships = (animal, userAnimals) => {
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
-const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onViewPublicAnimal, onToggleOwned, userProfile, userAnimals = [], breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onViewPublicAnimal, onToggleOwned, userProfile, userAnimals = [], breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, initialTab = 1 }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
-    const [detailViewTab, setDetailViewTab] = useState(1);
+    const [detailViewTab, setDetailViewTab] = useState(initialTab);
     const [copySuccess, setCopySuccess] = useState(false);
     const [showQR, setShowQR] = useState(false);
     const [enclosureInfo, setEnclosureInfo] = useState(null);
@@ -4137,6 +4137,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
         return () => { cancelled = true; };
     }, [detailViewTab, animal?.id_public]);
     useEffect(() => { setMpEnrichedData(null); }, [animal?.id_public]);
+    useEffect(() => { setDetailViewTab(initialTab); }, [animal?.id_public, initialTab]);
 
     // Fetch ALL animals on the account + global relationships lazily when Lineage tab opens
     useEffect(() => {
@@ -6775,7 +6776,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         const handleSlotClick = d.ctcId && onViewAnimal ? async () => {
                             try {
                                 const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(d.ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } });
-                                if (res.data) onViewAnimal(res.data);
+                                if (res.data) onViewAnimal(res.data, 16);
                             } catch { /* not accessible */ }
                         } : undefined;
                         return (
@@ -6950,10 +6951,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 // ==================== VIEW-ONLY PRIVATE ANIMAL DETAIL (SOLD/TRANSFERRED) ====================
 // Identical to PrivateAnimalDetail but without edit/delete and privacy controls
 // Used for animals you have view-only access to (sold, transferred, purchased)
-const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, showModalMessage, onViewAnimal, breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine }) => {
+const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, showModalMessage, onViewAnimal, breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, initialTab = 1 }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
-    const [detailViewTab, setDetailViewTab] = useState(1);
+    const [detailViewTab, setDetailViewTab] = useState(initialTab);
     const [enclosureInfo, setEnclosureInfo] = useState(null);
     const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
     const [breedingRecordOffspring, setBreedingRecordOffspring] = useState({});
@@ -6987,6 +6988,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
         return () => { cancelled = true; };
     }, [detailViewTab, animal?.id_public]);
     useEffect(() => { setMpEnrichedData(null); }, [animal?.id_public]);
+    useEffect(() => { setDetailViewTab(initialTab); }, [animal?.id_public, initialTab]);
 
     // Fetch all litters where this animal is sire or dam
     React.useEffect(() => {
@@ -8697,7 +8699,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                         const handleSlotClick = d.ctcId && onViewAnimal ? async () => {
                             try {
                                 const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(d.ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } });
-                                if (res.data) onViewAnimal(res.data);
+                                if (res.data) onViewAnimal(res.data, 16);
                             } catch { /* not accessible */ }
                         } : undefined;
                         return (
@@ -31474,6 +31476,7 @@ const App = () => {
     const [viewingPublicAnimal, setViewingPublicAnimal] = useState(null);
     const [publicAnimalViewHistory, setPublicAnimalViewHistory] = useState([]); // Navigation history for public animals
     const [publicAnimalInitialTab, setPublicAnimalInitialTab] = useState(1);
+    const [privateAnimalInitialTab, setPrivateAnimalInitialTab] = useState(1);
     const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
     const [animalToView, setAnimalToView] = useState(null);
     const [animalViewHistory, setAnimalViewHistory] = useState([]); // Navigation history stack for animals
@@ -32711,7 +32714,7 @@ const App = () => {
         navigate('/edit-animal');
     };
 
-    const handleViewAnimal = async (animal) => {
+    const handleViewAnimal = async (animal, initialTab = 1) => {
         console.log('[handleViewAnimal] Viewing animal:', animal);
         
         // If we're already viewing an animal, push it to history before navigating to new one
@@ -32751,6 +32754,7 @@ const App = () => {
         
         console.log('[handleViewAnimal] Father ID:', normalizedAnimal.fatherId_public, 'Mother ID:', normalizedAnimal.motherId_public);
         viewReturnPathRef.current = location.pathname;
+        setPrivateAnimalInitialTab(initialTab);
         setAnimalToView(normalizedAnimal);
         navigate('/view-animal');
         
@@ -34379,6 +34383,7 @@ const App = () => {
                                 return (
                                     <PrivateAnimalDetail
                                         animal={animalToView}
+                                        initialTab={privateAnimalInitialTab}
                                         onClose={handleBackFromAnimal}
                                         onCloseAll={handleCloseAllAnimals}
                                         onEdit={handleEditAnimal}
@@ -34407,6 +34412,7 @@ const App = () => {
                                 return (
                                     <ViewOnlyPrivateAnimalDetail
                                         animal={animalToView}
+                                        initialTab={privateAnimalInitialTab}
                                         onClose={handleBackFromAnimal}
                                         onCloseAll={handleCloseAllAnimals}
                                         API_BASE_URL={API_BASE_URL}
