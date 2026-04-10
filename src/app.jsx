@@ -4113,6 +4113,30 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
     // Manual Pedigree (Beta) — Tab 16
     const [mpDownloading, setMpDownloading] = useState(false);
     const mpTreeRef = useRef(null);
+    const [mpEnrichedData, setMpEnrichedData] = useState(null);
+    useEffect(() => {
+        if (detailViewTab !== 16) return;
+        const base = animal?.manualPedigree || {};
+        const ctcSlots = Object.entries(base).filter(([, v]) => v?.ctcId);
+        if (!ctcSlots.length) { setMpEnrichedData(base); return; }
+        let cancelled = false;
+        Promise.all(ctcSlots.map(([key, slot]) =>
+            axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(slot.ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } })
+                .then(r => [key, r.data])
+                .catch(() => [key, null])
+        )).then(results => {
+            if (cancelled) return;
+            const merged = { ...base };
+            results.forEach(([key, data]) => {
+                if (data && (data.breederName || data.manualBreederName)) {
+                    merged[key] = { ...merged[key], breederName: data.breederName || data.manualBreederName };
+                }
+            });
+            setMpEnrichedData(merged);
+        });
+        return () => { cancelled = true; };
+    }, [detailViewTab, animal?.id_public]);
+    useEffect(() => { setMpEnrichedData(null); }, [animal?.id_public]);
 
     // Fetch ALL animals on the account + global relationships lazily when Lineage tab opens
     useEffect(() => {
@@ -6716,7 +6740,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 
                 {/* ── TAB 16: Manual Pedigree (Beta) ── */}
                 {detailViewTab === 16 && (() => {
-                    const mpData = animal?.manualPedigree || {};
+                    const mpData = mpEnrichedData || animal?.manualPedigree || {};
                     const emptySlot = () => ({ mode: 'manual', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
                     const getSlot = (key) => mpData[key] || emptySlot();
                     const hasAnyData = ['sire','dam','sireSire','sireDam','damSire','damDam',
@@ -8633,8 +8657,31 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
     const [detailViewTab, setDetailViewTab] = useState(initialTab);
     const [mpDownloading, setMpDownloading] = useState(false);
     const mpTreeRef = useRef(null);
+    const [mpEnrichedData, setMpEnrichedData] = useState(null);
+    useEffect(() => {
+        if (detailViewTab !== 14) return;
+        const base = animal?.manualPedigree || {};
+        const ctcSlots = Object.entries(base).filter(([, v]) => v?.ctcId);
+        if (!ctcSlots.length) { setMpEnrichedData(base); return; }
+        let cancelled = false;
+        Promise.all(ctcSlots.map(([key, slot]) =>
+            axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(slot.ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } })
+                .then(r => [key, r.data])
+                .catch(() => [key, null])
+        )).then(results => {
+            if (cancelled) return;
+            const merged = { ...base };
+            results.forEach(([key, data]) => {
+                if (data && (data.breederName || data.manualBreederName)) {
+                    merged[key] = { ...merged[key], breederName: data.breederName || data.manualBreederName };
+                }
+            });
+            setMpEnrichedData(merged);
+        });
+        return () => { cancelled = true; };
+    }, [detailViewTab, animal?.id_public]);
     // Reset tab when navigating to a different animal
-    React.useEffect(() => { setDetailViewTab(initialTab); }, [animal?.id_public, initialTab]);
+    React.useEffect(() => { setDetailViewTab(initialTab); setMpEnrichedData(null); }, [animal?.id_public, initialTab]);
     const [animalCOI, setAnimalCOI] = useState(null);
     const [loadingCOI, setLoadingCOI] = useState(false);
     const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});
@@ -10364,7 +10411,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
 
                 {/* Tab 14: Beta Pedigree */}
                 {detailViewTab === 14 && (() => {
-                    const mpData = animal?.manualPedigree || {};
+                    const mpData = mpEnrichedData || animal?.manualPedigree || {};
                     const emptySlot = () => ({ mode: 'manual', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
                     const getSlot = (key) => mpData[key] || emptySlot();
                     const hasAnyData = ['sire','dam','sireSire','sireDam','damSire','damDam',
