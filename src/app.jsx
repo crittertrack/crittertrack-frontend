@@ -3611,7 +3611,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         <div className="flex flex-wrap justify-center gap-3 text-xs text-gray-500">
                             {l.matingDate && <span><span className="font-medium">{isMated ? 'Mated:' : l.isPlanned ? 'Planned Mating:' : 'Mated:'}</span> {formatLitterDate(l.matingDate)}</span>}
                             {l.expectedDueDate && l.isPlanned && <span><span className="font-medium">Due:</span> {formatLitterDate(l.expectedDueDate)}</span>}
-                            {l.birthDate && !l.isPlanned && <span><span className="font-medium">Born:</span> {formatLitterDate(l.birthDate)}</span>}
+                            {l.birthDate && !l.isPlanned && <span><span className="font-medium">Born:</span> {formatLitterDate(l.birthDate)}{litterAge(l.birthDate) && <span className="ml-1 font-semibold text-green-600">· {litterAge(l.birthDate)}</span>}</span>}
                         </div>
                         
                         {/* CTL ID - bottom right corner */}
@@ -11265,6 +11265,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             await axios.put(`${API_BASE_URL}/litters/${litter._id}`, { matingDate: today }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
+            // Auto-dismiss the "mating due today" urgency notification for this litter
+            try {
+                const key = `${litter._id}-mated-${today}`;
+                const prev = JSON.parse(localStorage.getItem('ct_urgency_dismissed') || '{}');
+                prev[key] = true;
+                localStorage.setItem('ct_urgency_dismissed', JSON.stringify(prev));
+                window.dispatchEvent(new StorageEvent('storage', { key: 'ct_urgency_dismissed' }));
+            } catch {}
             fetchLitters();
         } catch (err) {
             showModalMessage('Error', 'Failed to mark as mated');
@@ -29431,8 +29439,11 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
 
     // Sync enabled state if toggled from another part of the app (e.g. ProfileView)
     useEffect(() => {
-        const onStorage = () => {
+        const onStorage = (e) => {
             try { setEnabled(localStorage.getItem('ct_urgency_enabled') !== 'false'); } catch {}
+            if (!e.key || e.key === 'ct_urgency_dismissed') {
+                try { setDismissed(JSON.parse(localStorage.getItem('ct_urgency_dismissed') || '{}')); } catch {}
+            }
         };
         window.addEventListener('storage', onStorage);
         return () => window.removeEventListener('storage', onStorage);
