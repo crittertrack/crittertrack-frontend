@@ -235,6 +235,29 @@ const formatDateDisplay = (dateString) => {
     }
 };
 
+// Returns a human-friendly age string from a birth date, matching the animal age format (e.g. "9d", "3m 5d", "1y 2m 10d")
+const litterAge = (birthDate) => {
+    if (!birthDate) return null;
+    const born = new Date(birthDate);
+    const now = new Date();
+    if (isNaN(born.getTime()) || born > now) return null;
+    let years = now.getFullYear() - born.getFullYear();
+    let months = now.getMonth() - born.getMonth();
+    let days = now.getDate() - born.getDate();
+    if (days < 0) {
+        months--;
+        const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+        days += prevMonth.getDate();
+    }
+    if (months < 0) {
+        years--;
+        months += 12;
+    }
+    if (years > 0) return `${years}y ${months}m ${days}d`;
+    if (months > 0) return `${months}m ${days}d`;
+    return `${days}d`;
+};
+
 // Formats a date/ISO string as a relative time phrase (e.g. "2 hours ago")
 const formatTimeAgo = (dateStr) => {
     if (!dateStr) return '';
@@ -11160,6 +11183,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
     };
 
+    const handleMarkAsMated = async (litter) => {
+        const today = new Date().toISOString().split('T')[0];
+        try {
+            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, { matingDate: today }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            fetchLitters();
+        } catch (err) {
+            showModalMessage('Error', 'Failed to mark as mated');
+        }
+    };
+
     // -- Litter form save-time reconciliation ---------------------------------
     // Returns { correctedCounts, warnings[] } based on form values + linked animals.
     // Rule 1: gender sum > total ? bump total (silent)
@@ -13167,9 +13202,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         // Use endpoint-fetched offspring (includes transferred animals) with fallback to myAnimals
                         const offspringList = litterOffspringMap[litter._id] ?? [];
                         const offspringLoading = isExpanded && litterOffspringMap[litter._id] === undefined;
+                        // Mating state helpers
+                        const isMated = litter.isPlanned && litter.matingDate && new Date(litter.matingDate) <= new Date();
+                        const isPlannedOnly = litter.isPlanned && !isMated;
                         
                         return (
-                            <div key={litter._id} className={`border-2 ${litter.isPlanned ? 'border-dashed border-indigo-300 bg-indigo-50/20' : 'border-gray-200 bg-white'} rounded-lg hover:shadow-md transition`} data-tutorial-target="litter-card">
+                            <div key={litter._id} className={`border-2 ${isPlannedOnly ? 'border-dashed border-indigo-300 bg-indigo-50/20' : isMated ? 'border-dashed border-purple-300 bg-purple-50/20' : 'border-gray-200 bg-white'} rounded-lg hover:shadow-md transition`} data-tutorial-target="litter-card">
                                 {/* Compact Header - Always Visible */}
                                 <div 
                                     className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50/80"
@@ -13189,13 +13227,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         <div className="flex justify-between items-start mb-1">
                                             <div className="flex-1">
                                                 <p className="font-bold text-gray-800 text-sm">
-                                                    {litter.isPlanned && <span className="text-[10px] font-semibold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded mr-2">Planned</span>}
+                                                    {isPlannedOnly && <span className="text-[10px] font-semibold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded mr-2">Planned</span>}
+                                                    {isMated && <span className="text-[10px] font-semibold bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded mr-2">Mated</span>}
                                                     {litter.litter_id_public && <span className="text-xs font-mono bg-gray-100 px-1.5 py-0.5 rounded mr-2">{litter.litter_id_public}</span>}
                                                     {litter.breedingPairCodeName && <span className="truncate">{litter.breedingPairCodeName}</span>}
                                                     {!litter.breedingPairCodeName && !litter.litter_id_public && <span>Unnamed Litter</span>}
                                                 </p>
                                             </div>
-                                            <span className="text-xs font-semibold text-gray-700 ml-2">{litter.isPlanned ? 'Planned' : `${litter.litterSizeBorn ?? litter.numberBorn ?? 0} pups`}</span>
+                                            <span className="text-xs font-semibold text-gray-700 ml-2">{isPlannedOnly ? 'Planned' : isMated ? 'Mated' : `${litter.litterSizeBorn ?? litter.numberBorn ?? 0} pups`}</span>
                                         </div>
                                         <div className="flex gap-3 text-xs text-gray-600">
                                             <span><span className="font-medium">S:</span> {sire ? `${sire.prefix ? `${sire.prefix} ` : ''}${sire.name}${sire.suffix ? ` ${sire.suffix}` : ''}` : litter.sireId_public}</span>
@@ -13203,6 +13242,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </div>
                                         <p className="text-[10px] text-gray-500 mt-0.5">
                                             {formatDate(litter.birthDate)}
+                                            {!litter.isPlanned && litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-green-600">· {litterAge(litter.birthDate)}</span>}
                                         </p>
                                         {(litter.inbreedingCoefficient != null || coiCalculating.has(litter._id)) && (
                                             <p className="text-[10px] text-gray-500 mt-0.5">
@@ -13225,9 +13265,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             {litter.litter_id_public
                                                 ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block mb-0.5 w-fit">{litter.litter_id_public}</span>
                                                 : <span className="text-xs text-gray-400">—</span>}
-                                            {litter.isPlanned
-                                                ? <span className="text-xs font-semibold text-indigo-600"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Planned mating</span>
-                                                : <span className="text-xs text-gray-500">{formatDate(litter.birthDate) || '—'}</span>}
+                                            {isPlannedOnly
+                                                ? <span className="text-xs font-semibold text-indigo-600"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Planned</span>
+                                                : isMated
+                                                ? <span className="text-xs font-semibold text-purple-600"><Heart size={12} className="inline-block align-middle mr-0.5" /> Mated {formatDate(litter.matingDate)}</span>
+                                                : <span className="text-xs text-gray-500">{formatDate(litter.birthDate) || '—'}{litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-green-600">· {litterAge(litter.birthDate)}</span>}</span>}
                                         </div>
                                         {/* Col 3: Sire */}
                                         <div className="min-w-0">
@@ -13251,8 +13293,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         {/* Col 6: Born with M/F/U */}
                                         <div>
                                             <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">{litter.isPlanned ? 'Status' : 'Born'}</span>
-                                            {litter.isPlanned
-                                                ? <span className="text-xs font-semibold text-indigo-500">Awaiting birth</span>
+                                            {isPlannedOnly
+                                                ? <span className="text-xs font-semibold text-indigo-500">Awaiting mating</span>
+                                                : isMated
+                                                ? <span className="text-xs font-semibold text-purple-500">Awaiting birth</span>
                                                 : <div className="flex items-center gap-1.5">
                                                     <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
                                                     {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
@@ -13268,6 +13312,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             }
                                         </div>
                                     </div>
+                                    {isPlannedOnly && (
+                                        <button
+                                            type="button"
+                                            onClick={(e) => { e.stopPropagation(); handleMarkAsMated(litter); }}
+                                            title="Mark as mated today"
+                                            className="flex-shrink-0 flex items-center gap-1 mr-1 px-2 py-1 text-[11px] font-semibold text-purple-700 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition"
+                                        >
+                                            <Heart size={11} /> Mated today
+                                        </button>
+                                    )}
                                     {(litter.images?.length > 0) && (
                                         <span className="flex items-center gap-0.5 text-[11px] text-gray-400 mr-1 flex-shrink-0">
                                             <Images size={12} />
@@ -13284,6 +13338,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 {isExpanded && (
                                     <div className="border-t-2 border-gray-200 p-2 sm:p-4 bg-gray-50">
                                         <div className="flex flex-wrap justify-end gap-1 sm:gap-2 mb-3 sm:mb-4">
+                                            {isPlannedOnly && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleMarkAsMated(litter); }}
+                                                    className="flex items-center gap-1 bg-purple-500 hover:bg-purple-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
+                                                >
+                                                    <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                                    <span>Mated Today</span>
+                                                </button>
+                                            )}
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
@@ -13420,7 +13483,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     {litter.birthDate && (
                                                         <div>
                                                             <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Birth Date</div>
-                                                            <div className="font-semibold text-gray-800">{formatDate(litter.birthDate)}</div>
+                                                            <div className="font-semibold text-gray-800">{formatDate(litter.birthDate)}{litterAge(litter.birthDate) && <span className="ml-2 text-xs font-semibold text-green-600">{litterAge(litter.birthDate)}</span>}</div>
                                                         </div>
                                                     )}
                                                     {litter.weaningDate && (
