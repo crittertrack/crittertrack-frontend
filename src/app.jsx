@@ -4564,7 +4564,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' },
                             { id: 14, label: 'Gallery', icon: Images, color: 'text-rose-500' },
                             { id: 15, label: 'Logs', icon: ScrollText, color: 'text-gray-600' },
-                            { id: 16, label: 'Beta Pedigree', icon: Dna, color: 'text-orange-500', badge: Sparkles }
+                            { id: 16, label: 'Beta Pedigree', icon: Dna, color: 'text-orange-500' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -4579,7 +4579,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             >
                                 {React.createElement(tab.icon, { size: 14, className: `inline-block align-middle flex-shrink-0 mr-1.5 ${tab.color || ''}` })}
                                 {tab.label}
-                                {tab.badge && React.createElement(tab.badge, { size: 10, className: `inline-block align-middle ml-0.5 flex-shrink-0 ${tab.color || ''}` })}
                             </button>
                         ))}
                     </div>
@@ -7121,7 +7120,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             { id: 12, label: 'Show', icon: Trophy, color: 'text-yellow-600' },
                             { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' },
                             { id: 14, label: 'Logs', icon: ScrollText, color: 'text-gray-600' },
-                            { id: 16, label: 'Beta Pedigree', icon: Dna, color: 'text-orange-500', badge: Sparkles }
+                            { id: 16, label: 'Beta Pedigree', icon: Dna, color: 'text-orange-500' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -7136,7 +7135,6 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             >
                                 {React.createElement(tab.icon, { size: 14, className: `inline-block align-middle flex-shrink-0 mr-1.5 ${tab.color || ''}` })}
                                 {tab.label}
-                                {tab.badge && React.createElement(tab.badge, { size: 10, className: `inline-block align-middle ml-0.5 flex-shrink-0 ${tab.color || ''}` })}
                             </button>
                         ))}
                     </div>
@@ -9155,7 +9153,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             { id: 11, label: 'End of Life', icon: Scale, color: 'text-gray-500' },
                             { id: 12, label: 'Show', icon: Trophy, color: 'text-yellow-600' },
                             { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' },
-                            { id: 14, label: 'Beta Pedigree', icon: Dna, color: 'text-orange-500', badge: Sparkles }
+                            { id: 14, label: 'Beta Pedigree', icon: Dna, color: 'text-orange-500' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -9166,7 +9164,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                         : 'text-gray-600 hover:text-gray-800'
                                 }`}
                             >
-                                {React.createElement(tab.icon, { size: 14, className: `inline-block align-middle flex-shrink-0 mr-1.5 ${tab.color || ''}` })}{tab.label}{tab.badge && React.createElement(tab.badge, { size: 10, className: `inline-block align-middle ml-0.5 flex-shrink-0 ${tab.color || ''}` })}
+                                {React.createElement(tab.icon, { size: 14, className: `inline-block align-middle flex-shrink-0 mr-1.5 ${tab.color || ''}` })}{tab.label}
                             </button>
                         ))}
                     </div>
@@ -18659,7 +18657,7 @@ const AnimalForm = ({
                             { id: 12, label: 'Show', icon: Trophy, color: 'text-yellow-600' },
                             { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' },
                             { id: 14, label: 'Gallery', icon: Images, color: 'text-rose-500' },
-                            { id: 15, label: 'Beta Pedigree', icon: Dna, color: 'text-orange-500', badge: Sparkles }
+                            { id: 15, label: 'Beta Pedigree', icon: Dna, color: 'text-orange-500' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -18675,7 +18673,6 @@ const AnimalForm = ({
                             >
                                 {React.createElement(tab.icon, { size: 14, className: `inline-block align-middle flex-shrink-0 mr-1.5 ${tab.color || ''}` })}
                                 {tab.label}
-                                {tab.badge && React.createElement(tab.badge, { size: 10, className: `inline-block align-middle ml-0.5 flex-shrink-0 ${tab.color || ''}` })}
                             </button>
                         ))}
                     </div>
