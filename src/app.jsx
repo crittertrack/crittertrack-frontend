@@ -6857,6 +6857,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                             {subjectVariety && <p className="text-xs text-gray-500 -mt-1">{subjectVariety}</p>}
                                             {animal.geneticCode && <p className="text-xs font-mono text-indigo-600">{animal.geneticCode}</p>}
                                             {animal.birthDate && <p className="text-xs text-gray-400">b. {formatDate(animal.birthDate)}</p>}
+                                            {(animal.manualBreederName || (breederInfo && (breederInfo.breederName || breederInfo.personalName))) && <p className="text-xs text-gray-500 italic">Bred by: {animal.manualBreederName || breederInfo.breederName || breederInfo.personalName}</p>}
                                             {animal.remarks && <p className="text-xs text-gray-400 border-t border-primary/20 pt-1 mt-1 max-w-xs">{animal.remarks}</p>}
                                             {animal.id_public && <p className="text-xs font-mono text-gray-400">{animal.id_public}</p>}
                                         </div>
@@ -8765,6 +8766,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                             {subjectVariety && <p className="text-xs text-gray-500 -mt-1">{subjectVariety}</p>}
                                             {animal.geneticCode && <p className="text-xs font-mono text-indigo-600">{animal.geneticCode}</p>}
                                             {animal.birthDate && <p className="text-xs text-gray-400">b. {formatDate(animal.birthDate)}</p>}
+                                            {(animal.manualBreederName || (breederInfo && (breederInfo.breederName || breederInfo.personalName))) && <p className="text-xs text-gray-500 italic">Bred by: {animal.manualBreederName || breederInfo.breederName || breederInfo.personalName}</p>}
                                             {animal.id_public && <p className="text-xs font-mono text-gray-400">{animal.id_public}</p>}
                                         </div>
                                         <div className="flex flex-col items-center justify-center gap-2 p-3 border-l border-primary/20 bg-primary/5 text-center" style={{width:'25%'}}>
@@ -10702,6 +10704,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                 {subjectVariety && <p className="text-xs text-gray-500 -mt-1">{subjectVariety}</p>}
                                                 {animal.geneticCode && <p className="text-xs font-mono text-indigo-600">{animal.geneticCode}</p>}
                                                 {animal.birthDate && <p className="text-xs text-gray-400">b. {formatDate(animal.birthDate)}</p>}
+                                                {(animal.manualBreederName || (breederInfo && (breederInfo.breederName || breederInfo.personalName))) && <p className="text-xs text-gray-500 italic">Bred by: {animal.manualBreederName || breederInfo.breederName || breederInfo.personalName}</p>}
                                                 {animal.id_public && <p className="text-xs font-mono text-gray-400">{animal.id_public}</p>}
                                             </div>
                                             {/* 25% — owner/breeder info */}
