@@ -12054,12 +12054,22 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         
         return false;
     }).sort((a, b) => {
-        // No-birthdate litters float to the top; otherwise sort newest birthDate first
-        const aDate = a.birthDate ? new Date(a.birthDate).getTime() : null;
-        const bDate = b.birthDate ? new Date(b.birthDate).getTime() : null;
+        // Sort order: Mated (isPlanned + past matingDate) → Planned-only → Born (newest first)
+        const today = new Date();
+        const aIsMated = a.isPlanned && a.matingDate && new Date(a.matingDate) <= today;
+        const bIsMated = b.isPlanned && b.matingDate && new Date(b.matingDate) <= today;
+        const aIsPlannedOnly = a.isPlanned && !aIsMated;
+        const bIsPlannedOnly = b.isPlanned && !bIsMated;
+        const rank = (l, isMated, isPlannedOnly) => isMated ? 0 : isPlannedOnly ? 1 : 2;
+        const aRank = rank(a, aIsMated, aIsPlannedOnly);
+        const bRank = rank(b, bIsMated, bIsPlannedOnly);
+        if (aRank !== bRank) return aRank - bRank;
+        // Within same group: newest date first
+        const aDate = (a.birthDate || a.matingDate) ? new Date(a.birthDate || a.matingDate).getTime() : null;
+        const bDate = (b.birthDate || b.matingDate) ? new Date(b.birthDate || b.matingDate).getTime() : null;
         if (aDate === null && bDate === null) return 0;
-        if (aDate === null) return -1;
-        if (bDate === null) return 1;
+        if (aDate === null) return 1;
+        if (bDate === null) return -1;
         return bDate - aDate;
     });
 
