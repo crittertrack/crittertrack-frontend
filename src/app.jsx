@@ -4535,7 +4535,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             { id: 12, label: 'Show', icon: Trophy, color: 'text-yellow-600' },
                             { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' },
                             { id: 14, label: 'Gallery', icon: Images, color: 'text-rose-500' },
-                            { id: 15, label: 'Logs', icon: ScrollText, color: 'text-gray-600' }
+                            { id: 15, label: 'Logs', icon: ScrollText, color: 'text-gray-600' },
+                            { id: 16, label: 'Manual Pedigree ✦', icon: Dna, color: 'text-orange-500' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -6709,6 +6710,178 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         })()}
                     </div>
                 )}
+
+                {/* ── TAB 16: Manual Pedigree (Beta) ── */}
+                {detailViewTab === 16 && (() => {
+                    const MP_SLOTS = [
+                        { key: 'sire',       label: 'Sire',                    side: 'sire', gen: 1 },
+                        { key: 'dam',        label: 'Dam',                     side: 'dam',  gen: 1 },
+                        { key: 'sireSire',   label: "Sire's Sire",             side: 'sire', gen: 2 },
+                        { key: 'sireDam',    label: "Sire's Dam",              side: 'sire', gen: 2 },
+                        { key: 'damSire',    label: "Dam's Sire",              side: 'dam',  gen: 2 },
+                        { key: 'damDam',     label: "Dam's Dam",               side: 'dam',  gen: 2 },
+                        { key: 'sireSireSire', label: "Sire's Sire's Sire",   side: 'sire', gen: 3 },
+                        { key: 'sireSireDam',  label: "Sire's Sire's Dam",    side: 'sire', gen: 3 },
+                        { key: 'sireDamSire',  label: "Sire's Dam's Sire",    side: 'sire', gen: 3 },
+                        { key: 'sireDamDam',   label: "Sire's Dam's Dam",     side: 'sire', gen: 3 },
+                        { key: 'damSireSire',  label: "Dam's Sire's Sire",    side: 'dam',  gen: 3 },
+                        { key: 'damSireDam',   label: "Dam's Sire's Dam",     side: 'dam',  gen: 3 },
+                        { key: 'damDamSire',   label: "Dam's Dam's Sire",     side: 'dam',  gen: 3 },
+                        { key: 'damDamDam',    label: "Dam's Dam's Dam",      side: 'dam',  gen: 3 },
+                    ];
+                    const emptySlot = () => ({ name: '', variety: '', genCode: '', birthDate: '', breederName: '', notes: '' });
+                    const getSlot = (key) => mpForm[key] || emptySlot();
+                    const setSlotField = (key, field, val) => setMpForm(f => ({ ...f, [key]: { ...getSlot(key), [field]: val } }));
+                    const hasAnyData = MP_SLOTS.some(s => {
+                        const d = mpForm[s.key];
+                        return d && Object.values(d).some(v => v && String(v).trim());
+                    });
+
+                    const handleSaveMP = async () => {
+                        setMpSaving(true);
+                        try {
+                            await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { manualPedigree: mpForm }, {
+                                headers: { Authorization: `Bearer ${authToken}` }
+                            });
+                            if (onUpdateAnimal) onUpdateAnimal({ ...animal, manualPedigree: mpForm });
+                            setMpEditMode(false);
+                        } catch {
+                            showModalMessage('Error', 'Failed to save manual pedigree');
+                        } finally {
+                            setMpSaving(false);
+                        }
+                    };
+
+                    const AncestorCard = ({ slotKey, label, sideColor }) => {
+                        const d = getSlot(slotKey);
+                        const hasData = d && Object.values(d).some(v => v && String(v).trim());
+                        if (mpEditMode) {
+                            return (
+                                <div className={`rounded-lg border p-3 space-y-2 text-xs ${sideColor === 'sire' ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40'}`}>
+                                    <p className={`text-[10px] font-bold uppercase tracking-widest ${sideColor === 'sire' ? 'text-blue-500' : 'text-pink-500'}`}>{label}</p>
+                                    <input placeholder="Name" value={d.name || ''} onChange={e => setSlotField(slotKey, 'name', e.target.value)}
+                                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                    <input placeholder="Variety / Morph" value={d.variety || ''} onChange={e => setSlotField(slotKey, 'variety', e.target.value)}
+                                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                    <input placeholder="Genetic Code" value={d.genCode || ''} onChange={e => setSlotField(slotKey, 'genCode', e.target.value)}
+                                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs font-mono focus:ring-1 focus:ring-primary focus:border-primary" />
+                                    <input type="date" placeholder="Birth Date" value={d.birthDate || ''} onChange={e => setSlotField(slotKey, 'birthDate', e.target.value)}
+                                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                    <input placeholder="Breeder Name" value={d.breederName || ''} onChange={e => setSlotField(slotKey, 'breederName', e.target.value)}
+                                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                    <textarea placeholder="Notes" value={d.notes || ''} onChange={e => setSlotField(slotKey, 'notes', e.target.value)} rows={2}
+                                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs resize-none focus:ring-1 focus:ring-primary focus:border-primary" />
+                                </div>
+                            );
+                        }
+                        // View mode
+                        return (
+                            <div className={`rounded-lg border p-3 min-h-[70px] ${hasData ? (sideColor === 'sire' ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                                <p className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${sideColor === 'sire' ? 'text-blue-400' : 'text-pink-400'}`}>{label}</p>
+                                {hasData ? (
+                                    <div className="space-y-0.5">
+                                        {d.name && <p className="text-xs font-semibold text-gray-800">{d.name}</p>}
+                                        {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
+                                        {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
+                                        {d.birthDate && <p className="text-[11px] text-gray-400">b. {new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(d.birthDate + 'T00:00:00'))}</p>}
+                                        {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
+                                        {d.notes && <p className="text-[11px] text-gray-400 border-t border-gray-200 mt-1 pt-1">{d.notes}</p>}
+                                    </div>
+                                ) : (
+                                    <p className="text-[11px] text-gray-300 italic">—</p>
+                                )}
+                            </div>
+                        );
+                    };
+
+                    return (
+                        <div className="space-y-6">
+                            {/* Header */}
+                            <div className="flex items-center justify-between flex-wrap gap-2">
+                                <div className="flex items-center gap-2">
+                                    <Dna size={18} className="text-orange-500" />
+                                    <h3 className="text-base font-semibold text-gray-700">Manual Pedigree</h3>
+                                    <span className="text-[10px] font-bold uppercase tracking-widest bg-orange-100 text-orange-600 border border-orange-200 rounded-full px-2 py-0.5">Beta</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    {mpEditMode ? (
+                                        <>
+                                            <button onClick={() => { setMpForm(animal?.manualPedigree || {}); setMpEditMode(false); }}
+                                                className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg border border-gray-300 transition">
+                                                Cancel
+                                            </button>
+                                            <button onClick={handleSaveMP} disabled={mpSaving}
+                                                className="px-3 py-1.5 text-sm bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1.5 disabled:opacity-60">
+                                                {mpSaving ? <><Loader2 size={14} className="animate-spin" /> Saving…</> : <><Save size={14} /> Save</>}
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <button onClick={() => setMpEditMode(true)}
+                                            className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5">
+                                            <Edit size={14} /> {hasAnyData ? 'Edit' : 'Add Ancestors'}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            <p className="text-xs text-gray-400 -mt-3">Enter ancestors manually — these are not linked to registered CritterTrack animals and do not affect COI calculations or the pedigree chart.</p>
+
+                            {/* Generation 1: Subject animal */}
+                            <div className="rounded-xl border-2 border-primary bg-primary/10 p-4 text-center">
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Subject</p>
+                                <p className="text-base font-bold text-gray-800">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</p>
+                                {animal.id_public && <p className="text-xs font-mono text-gray-400 mt-0.5">CTC{animal.id_public}</p>}
+                            </div>
+
+                            {/* Generation 1: Sire & Dam */}
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 1 — Parents</p>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <AncestorCard slotKey="sire" label="Sire" sideColor="sire" />
+                                    <AncestorCard slotKey="dam"  label="Dam"  sideColor="dam" />
+                                </div>
+                            </div>
+
+                            {/* Generation 2: Grandparents */}
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 2 — Grandparents</p>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Sire's Side</p>
+                                        <AncestorCard slotKey="sireSire" label="Sire's Sire" sideColor="sire" />
+                                        <AncestorCard slotKey="sireDam"  label="Sire's Dam"  sideColor="sire" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Dam's Side</p>
+                                        <AncestorCard slotKey="damSire" label="Dam's Sire" sideColor="dam" />
+                                        <AncestorCard slotKey="damDam"  label="Dam's Dam"  sideColor="dam" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Generation 3: Great-Grandparents */}
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 3 — Great-Grandparents</p>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Sire's Side</p>
+                                        <AncestorCard slotKey="sireSireSire" label="Sire's Sire's Sire" sideColor="sire" />
+                                        <AncestorCard slotKey="sireSireDam"  label="Sire's Sire's Dam"  sideColor="sire" />
+                                        <AncestorCard slotKey="sireDamSire"  label="Sire's Dam's Sire"  sideColor="sire" />
+                                        <AncestorCard slotKey="sireDamDam"   label="Sire's Dam's Dam"   sideColor="sire" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Dam's Side</p>
+                                        <AncestorCard slotKey="damSireSire" label="Dam's Sire's Sire" sideColor="dam" />
+                                        <AncestorCard slotKey="damSireDam"  label="Dam's Sire's Dam"  sideColor="dam" />
+                                        <AncestorCard slotKey="damDamSire"  label="Dam's Dam's Sire"  sideColor="dam" />
+                                        <AncestorCard slotKey="damDamDam"   label="Dam's Dam's Dam"   sideColor="dam" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })()}
 
                 {/* QR Share Modal */}
                 {showQR && <QRModal url={`${window.location.origin}/animal/${animal.id_public}`} title={animal.name} onClose={() => setShowQR(false)} />}
