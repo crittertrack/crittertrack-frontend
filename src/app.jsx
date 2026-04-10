@@ -6837,11 +6837,33 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
 
-                            <div className="rounded-xl border-2 border-primary bg-primary/10 p-4 text-center">
-                                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Subject</p>
-                                <p className="text-base font-bold text-gray-800">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</p>
-                                {animal.id_public && <p className="text-xs font-mono text-gray-400 mt-0.5">{animal.id_public}</p>}
-                            </div>
+                            {(() => {
+                                const subjectVariety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => animal[k]).filter(Boolean).join(' ');
+                                const subjectImgUrl = animal.imageUrl || animal.photoUrl || null;
+                                const subjectName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+                                return (
+                                    <div className="rounded-xl border-2 border-primary bg-primary/10 p-4 flex flex-col items-center gap-2 text-center">
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Current Animal</p>
+                                        {subjectImgUrl ? (
+                                            <img src={subjectImgUrl} alt={subjectName} className="w-20 h-20 rounded-full object-cover border-2 border-primary/30" />
+                                        ) : (
+                                            <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-gray-300"><Cat size={32} /></div>
+                                        )}
+                                        <p className="text-base font-bold text-gray-800 leading-tight">{subjectName}</p>
+                                        {subjectVariety && <p className="text-xs text-gray-500">{subjectVariety}</p>}
+                                        {animal.geneticCode && <p className="text-xs font-mono text-indigo-600">{animal.geneticCode}</p>}
+                                        {animal.birthDate && <p className="text-xs text-gray-400">b. {new Intl.DateTimeFormat(undefined,{year:'numeric',month:'short',day:'numeric'}).format(new Date(animal.birthDate))}</p>}
+                                        {(() => {
+                                            const breederDisplay = animal.manualBreederName
+                                                || (breederInfo && (breederInfo.breederName || breederInfo.personalName))
+                                                || null;
+                                            return breederDisplay ? <p className="text-xs text-gray-500 italic">Breeder: {breederDisplay}</p> : null;
+                                        })()}
+                                        {animal.remarks && <p className="text-xs text-gray-400 border-t border-primary/20 pt-1 mt-1 max-w-xs">{animal.remarks}</p>}
+                                        {animal.id_public && <p className="text-xs font-mono text-gray-400">{animal.id_public}</p>}
+                                    </div>
+                                );
+                            })()}
 
                             <div>
                                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 1 — Parents</p>
