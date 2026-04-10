@@ -6717,6 +6717,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 
                 {/* ── TAB 16: Manual Pedigree (Beta) ── */}
                 {detailViewTab === 16 && (() => {
+                    const mpTreeRef = React.useRef(null);
+                    const [mpDownloading, setMpDownloading] = React.useState(false);
                     const emptySlot = () => ({ name: '', variety: '', genCode: '', birthDate: '', breederName: '', notes: '' });
                     const getSlot = (key) => mpForm[key] || emptySlot();
                     const setSlotField = (key, field, val) => setMpForm(f => ({ ...f, [key]: { ...(f[key] || emptySlot()), [field]: val } }));
@@ -6726,6 +6728,19 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         const d = mpForm[k];
                         return d && Object.values(d).some(v => v && String(v).trim());
                     });
+                    const handleDownloadMP = async () => {
+                        if (!mpTreeRef.current) return;
+                        setMpDownloading(true);
+                        try {
+                            const el = mpTreeRef.current;
+                            const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            const link = document.createElement('a');
+                            link.download = `manual-pedigree-${animal.name || animal.id_public}.png`;
+                            link.href = canvas.toDataURL('image/png');
+                            link.click();
+                        } catch(e) { console.error('Manual pedigree download failed', e); }
+                        finally { setMpDownloading(false); }
+                    };
 
                     const handleSaveMP = async () => {
                         setMpSaving(true);
@@ -6793,6 +6808,12 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                     <span className="text-[10px] font-bold uppercase tracking-widest bg-orange-100 text-orange-600 border border-orange-200 rounded-full px-2 py-0.5">Beta</span>
                                 </div>
                                 <div className="flex items-center gap-2">
+                                    {!mpEditMode && hasAnyData && (
+                                        <button onClick={handleDownloadMP} disabled={mpDownloading}
+                                            className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
+                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save as Image</>}
+                                        </button>
+                                    )}
                                     {mpEditMode ? (
                                         <>
                                             <button onClick={() => { setMpForm(animal?.manualPedigree || {}); setMpEditMode(false); }}
@@ -6814,10 +6835,12 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             </div>
                             <p className="text-xs text-gray-400 -mt-3">Ancestors entered here are not linked to registered CritterTrack animals and do not affect COI calculations or the pedigree chart.</p>
 
+                            <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
+
                             <div className="rounded-xl border-2 border-primary bg-primary/10 p-4 text-center">
                                 <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Subject</p>
                                 <p className="text-base font-bold text-gray-800">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</p>
-                                {animal.id_public && <p className="text-xs font-mono text-gray-400 mt-0.5">CTC{animal.id_public}</p>}
+                                {animal.id_public && <p className="text-xs font-mono text-gray-400 mt-0.5">{animal.id_public}</p>}
                             </div>
 
                             <div>
@@ -6863,6 +6886,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                     </div>
                                 </div>
                             </div>
+                            </div>{/* end mpTreeRef */}
                         </div>
                     );
                 })()}
