@@ -6750,7 +6750,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         const handleSlotClick = d.ctcId && onViewAnimal ? async () => {
                             try {
                                 const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(d.ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } });
-                                if (res.data) onViewAnimal(res.data);
+                                if (res.data) onViewAnimal(res.data, 14);
                             } catch { /* not accessible */ }
                         } : undefined;
                         return (
@@ -8595,12 +8595,16 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
 // ==================== PUBLIC ANIMAL DETAIL (VIEW-ONLY FOR OTHERS) ====================
 // Respects privacy toggles - only shows public sections
 // Accessed from: Global search, user profiles, offspring links
-const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onViewProfile, onViewAnimal, authToken, setModCurrentContext, setShowImageModal, setEnlargedImageUrl }) => {
+const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onViewProfile, onViewAnimal, authToken, setModCurrentContext, setShowImageModal, setEnlargedImageUrl, initialTab = 1 }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
     const [showQR, setShowQR] = useState(false);
-    const [detailViewTab, setDetailViewTab] = useState(1);
+    const [detailViewTab, setDetailViewTab] = useState(initialTab);
+    const [mpDownloading, setMpDownloading] = useState(false);
+    const mpTreeRef = useRef(null);
+    // Reset tab when navigating to a different animal
+    React.useEffect(() => { setDetailViewTab(initialTab); }, [animal?.id_public, initialTab]);
     const [animalCOI, setAnimalCOI] = useState(null);
     const [loadingCOI, setLoadingCOI] = useState(false);
     const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});
@@ -8880,7 +8884,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             { id: 10, label: 'Records', icon: FileText, color: 'text-indigo-500' },
                             { id: 11, label: 'End of Life', icon: Scale, color: 'text-gray-500' },
                             { id: 12, label: 'Show', icon: Trophy, color: 'text-yellow-600' },
-                            { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' }
+                            { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' },
+                            { id: 14, label: 'Beta Pedigree ✦', icon: Dna, color: 'text-orange-500' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -10326,6 +10331,151 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             )}
                         </div>
                     )}
+
+                {/* Tab 14: Beta Pedigree */}
+                {detailViewTab === 14 && (() => {
+                    const mpData = animal?.manualPedigree || {};
+                    const emptySlot = () => ({ mode: 'manual', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
+                    const getSlot = (key) => mpData[key] || emptySlot();
+                    const hasAnyData = ['sire','dam','sireSire','sireDam','damSire','damDam',
+                        'sireSireSire','sireSireDam','sireDamSire','sireDamDam',
+                        'damSireSire','damSireDam','damDamSire','damDamDam'].some(k => {
+                        const d = mpData[k];
+                        return d && (d.ctcId || Object.entries(d).some(([fk,v]) => fk !== 'mode' && v && String(v).trim()));
+                    });
+                    const handleDownloadMP = async () => {
+                        if (!mpTreeRef.current) return;
+                        setMpDownloading(true);
+                        try {
+                            const el = mpTreeRef.current;
+                            const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            const link = document.createElement('a');
+                            link.download = `beta-pedigree-${animal.name || animal.id_public}.png`;
+                            link.href = canvas.toDataURL('image/png');
+                            link.click();
+                        } catch(e) { console.error('Beta pedigree download failed', e); }
+                        finally { setMpDownloading(false); }
+                    };
+                    const renderSlot = (slotKey, label) => {
+                        const d = getSlot(slotKey);
+                        const hasData = d && (d.ctcId || Object.entries(d).some(([fk,v]) => fk !== 'mode' && v && String(v).trim()));
+                        const fullName = [d.prefix, d.name, d.suffix].filter(Boolean).join(' ');
+                        const isSire = slotKey === 'sire' || slotKey.endsWith('Sire');
+                        const GIcon = isSire ? Mars : Venus;
+                        const gColor = isSire ? 'text-blue-400' : 'text-pink-400';
+                        const handleSlotClick = d.ctcId && onViewAnimal ? async () => {
+                            try {
+                                const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(d.ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                                if (res.data) onViewAnimal(res.data, 14);
+                            } catch { /* not accessible */ }
+                        } : undefined;
+                        return (
+                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border p-3 min-h-[80px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                                <div className={`flex items-center gap-1 mb-1.5 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>
+                                    <GIcon size={11} className={`flex-shrink-0 ${gColor}`} />
+                                    <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
+                                </div>
+                                {hasData ? (
+                                    <div className="flex gap-2.5">
+                                        {d.imageUrl && <img src={d.imageUrl} alt={fullName} className="w-16 h-16 rounded-lg object-cover flex-shrink-0 border border-gray-200 self-start" />}
+                                        <div className="flex-1 min-w-0 space-y-0.5 pb-4">
+                                            {fullName && <p className="text-xs font-semibold text-gray-800 leading-tight">{fullName}</p>}
+                                            {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
+                                            {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
+                                            {d.birthDate && <p className="text-[11px] text-gray-400">b. {new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(d.birthDate + 'T00:00:00'))}</p>}
+                                            {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
+                                            {d.notes && <p className="text-[11px] text-gray-400 border-t border-gray-200 mt-1 pt-1">{d.notes}</p>}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <p className="text-[11px] text-gray-300 italic">—</p>
+                                )}
+                                {d.ctcId && <p className="absolute bottom-1.5 right-2 text-[10px] font-mono text-primary">{d.ctcId}</p>}
+                            </div>
+                        );
+                    };
+                    return (
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-between flex-wrap gap-2">
+                                <div className="flex items-center gap-2">
+                                    <Dna size={18} className="text-orange-500" />
+                                    <h3 className="text-base font-semibold text-gray-700">Beta Pedigree</h3>
+                                </div>
+                                {hasAnyData && (
+                                    <button onClick={handleDownloadMP} disabled={mpDownloading}
+                                        className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
+                                        {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save as Image</>}
+                                    </button>
+                                )}
+                            </div>
+                            <p className="text-xs text-gray-400 -mt-3">Ancestors entered by the breeder. Not linked to registered CritterTrack animals and do not affect COI calculations.</p>
+                            <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
+                                {(() => {
+                                    const subjectVariety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => animal[k]).filter(Boolean).join(' ');
+                                    const subjectImgUrl = animal.imageUrl || animal.photoUrl || null;
+                                    const subjectName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+                                    return (
+                                        <div className="rounded-xl border-2 border-primary bg-primary/10 p-4 flex flex-col items-center gap-2 text-center">
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Current Animal</p>
+                                            {subjectImgUrl ? <img src={subjectImgUrl} alt={subjectName} className="w-20 h-20 rounded-full object-cover border-2 border-primary/30" /> : <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-gray-300"><Cat size={32} /></div>}
+                                            <p className="text-base font-bold text-gray-800 leading-tight">{subjectName}</p>
+                                            {subjectVariety && <p className="text-xs text-gray-500">{subjectVariety}</p>}
+                                            {animal.geneticCode && <p className="text-xs font-mono text-indigo-600">{animal.geneticCode}</p>}
+                                            {animal.birthDate && <p className="text-xs text-gray-400">b. {new Intl.DateTimeFormat(undefined,{year:'numeric',month:'short',day:'numeric'}).format(new Date(animal.birthDate))}</p>}
+                                            {(() => { const bd = animal.manualBreederName || (breederInfo && (breederInfo.breederName || breederInfo.personalName)) || null; return bd ? <p className="text-xs text-gray-500 italic">Breeder: {bd}</p> : null; })()}
+                                            {animal.id_public && <p className="text-xs font-mono text-gray-400">{animal.id_public}</p>}
+                                        </div>
+                                    );
+                                })()}
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 1 — Parents</p>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {renderSlot('sire', 'Sire')}
+                                        {renderSlot('dam', 'Dam')}
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 2 — Grandparents</p>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                            {renderSlot('sireSire', 'Grandsire')}
+                                            {renderSlot('sireDam', 'Granddam')}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                            {renderSlot('damSire', 'Grandsire')}
+                                            {renderSlot('damDam', 'Granddam')}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 3 — Great-Grandparents</p>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                            <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
+                                            {renderSlot('sireSireSire', 'Great-Grandsire')}
+                                            {renderSlot('sireSireDam', 'Great-Granddam')}
+                                            <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                            {renderSlot('sireDamSire', 'Great-Grandsire')}
+                                            {renderSlot('sireDamDam', 'Great-Granddam')}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                            <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
+                                            {renderSlot('damSireSire', 'Great-Grandsire')}
+                                            {renderSlot('damSireDam', 'Great-Granddam')}
+                                            <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                            {renderSlot('damDamSire', 'Great-Grandsire')}
+                                            {renderSlot('damDamDam', 'Great-Granddam')}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })()}
 
                 {/* Pedigree Chart Modal */}
                 {showPedigree && (
@@ -31026,6 +31176,7 @@ const App = () => {
     const [viewingPublicProfile, setViewingPublicProfile] = useState(null);
     const [viewingPublicAnimal, setViewingPublicAnimal] = useState(null);
     const [publicAnimalViewHistory, setPublicAnimalViewHistory] = useState([]); // Navigation history for public animals
+    const [publicAnimalInitialTab, setPublicAnimalInitialTab] = useState(1);
     const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
     const [animalToView, setAnimalToView] = useState(null);
     const [animalViewHistory, setAnimalViewHistory] = useState([]); // Navigation history stack for animals
@@ -32355,7 +32506,7 @@ const App = () => {
     };
     
     // Handle viewing public animals with history support
-    const handleViewPublicAnimal = (animal) => {
+    const handleViewPublicAnimal = (animal, initialTab = 1) => {
         console.log('[handleViewPublicAnimal] Viewing public animal:', animal);
         
         // If we're already viewing a public animal, push it to history before navigating to new one
@@ -32364,6 +32515,7 @@ const App = () => {
             console.log('[handleViewPublicAnimal] Pushed current animal to history, stack size:', publicAnimalViewHistory.length + 1);
         }
         
+        setPublicAnimalInitialTab(initialTab);
         setViewingPublicAnimal(animal);
     };
     
@@ -32373,12 +32525,14 @@ const App = () => {
             // Pop the last animal from history and view it
             const previousAnimal = publicAnimalViewHistory[publicAnimalViewHistory.length - 1];
             setPublicAnimalViewHistory(prev => prev.slice(0, -1));
+            setPublicAnimalInitialTab(1);
             setViewingPublicAnimal(previousAnimal);
             console.log('[handleBackFromPublicAnimal] Navigating back to previous animal, remaining history:', publicAnimalViewHistory.length - 1);
         } else {
             // No history, close the detail view entirely
             setViewingPublicAnimal(null);
             setPublicAnimalViewHistory([]);
+            setPublicAnimalInitialTab(1);
             console.log('[handleBackFromPublicAnimal] No history, closing detail view');
         }
     };
@@ -32387,6 +32541,7 @@ const App = () => {
     const handleCloseAllPublicAnimals = () => {
         setViewingPublicAnimal(null);
         setPublicAnimalViewHistory([]);
+        setPublicAnimalInitialTab(1);
         console.log('[handleCloseAllPublicAnimals] Closed entire public animal modal stack');
     };
 
@@ -32610,6 +32765,7 @@ const App = () => {
                             onViewProfile={(user) => setViewingPublicProfile(user)}
                             onViewAnimal={handleViewPublicAnimal}
                             setModCurrentContext={setModCurrentContext}
+                            initialTab={publicAnimalInitialTab}
                         />
                     )}
 
@@ -32750,6 +32906,7 @@ const App = () => {
                             setModCurrentContext={setModCurrentContext}
                             setShowImageModal={setShowImageModal}
                             setEnlargedImageUrl={setEnlargedImageUrl}
+                            initialTab={publicAnimalInitialTab}
                         />
                     )}
                     
