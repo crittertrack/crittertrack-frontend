@@ -21124,6 +21124,26 @@ const AnimalForm = ({
                     const getSlot = (key) => mpEditForm[key] || emptySlot();
                     const setSlotField = (key, field, val) => setMpEditForm(f => ({ ...f, [key]: { ...(f[key] || emptySlot()), [field]: val } }));
 
+                    // Maps each slot to its paternal/maternal child slot keys
+                    const SLOT_CHILDREN = {
+                        sire:    { father: 'sireSire',    mother: 'sireDam'    },
+                        dam:     { father: 'damSire',     mother: 'damDam'     },
+                        sireSire:{ father: 'sireSireSire',mother: 'sireSireDam'},
+                        sireDam: { father: 'sireDamSire', mother: 'sireDamDam' },
+                        damSire: { father: 'damSireSire', mother: 'damSireDam' },
+                        damDam:  { father: 'damDamSire',  mother: 'damDamDam'  },
+                    };
+                    const toSlot = (a) => {
+                        const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
+                        return { mode: 'ctc', ctcId: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? a.birthDate.slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
+                    };
+                    const fetchByCtc = async (id) => {
+                        try {
+                            const res = await axios.get(`${API_BASE_URL}/animals?id_public=${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                            return (res.data || [])[0] || null;
+                        } catch { return null; }
+                    };
+
                     const renderEditSlot = (slotKey, label, sideColor) => {
                         const d = getSlot(slotKey);
                         const isSire = sideColor === 'sire';
@@ -21144,16 +21164,26 @@ const AnimalForm = ({
                             setMpCTCSearching(p => ({ ...p, [slotKey]: false }));
                         };
 
-                        const linkAnimal = (a) => {
-                            const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
-                            setMpEditForm(f => ({ ...f, [slotKey]: {
-                                mode: 'ctc', ctcId: a.id_public,
-                                prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '',
-                                variety, genCode: a.geneticCode || '',
-                                birthDate: a.birthDate ? a.birthDate.slice(0,10) : '',
-                                breederName: a.breederName || a.manualBreederName || '',
-                                gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: ''
-                            }}));
+                        const linkAnimal = async (a) => {
+                            // BFS: cascade-fill child slots from this animal's registered ancestry
+                            const updates = { [slotKey]: toSlot(a) };
+                            const queue = [{ animal: a, slot: slotKey }];
+                            while (queue.length) {
+                                const { animal: cur, slot } = queue.shift();
+                                const children = SLOT_CHILDREN[slot];
+                                if (!children) continue;
+                                const fatherId = cur.fatherId_public || cur.sireId_public;
+                                const motherId = cur.motherId_public || cur.damId_public;
+                                if (fatherId) {
+                                    const father = await fetchByCtc(fatherId);
+                                    if (father) { updates[children.father] = toSlot(father); queue.push({ animal: father, slot: children.father }); }
+                                }
+                                if (motherId) {
+                                    const mother = await fetchByCtc(motherId);
+                                    if (mother) { updates[children.mother] = toSlot(mother); queue.push({ animal: mother, slot: children.mother }); }
+                                }
+                            }
+                            setMpEditForm(f => ({ ...f, ...updates }));
                             setMpCTCResults(p => ({ ...p, [slotKey]: [] }));
                             setMpCTCQuery(p => ({ ...p, [slotKey]: '' }));
                         };
