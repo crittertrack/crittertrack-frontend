@@ -21255,16 +21255,8 @@ const AnimalForm = ({
                                     )
                                 ) : (
                                     <>
-                                        <div className="flex gap-1.5">
-                                            <select value={d.gender || ''} onChange={e => setSlotField(slotKey, 'gender', e.target.value)}
-                                                className="w-24 px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary bg-white">
-                                                <option value="">Gender</option>
-                                                <option value="Male">Male</option>
-                                                <option value="Female">Female</option>
-                                            </select>
-                                            <input placeholder="Name" value={d.name || ''} onChange={e => setSlotField(slotKey, 'name', e.target.value)}
-                                                className="flex-1 px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
-                                        </div>
+                                        <input placeholder="Name" value={d.name || ''} onChange={e => setSlotField(slotKey, 'name', e.target.value)}
+                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
                                         <input placeholder="Variety / Morph" value={d.variety || ''} onChange={e => setSlotField(slotKey, 'variety', e.target.value)}
                                             className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
                                         <input placeholder="Genetic Code" value={d.genCode || ''} onChange={e => setSlotField(slotKey, 'genCode', e.target.value)}
