@@ -16308,9 +16308,7 @@ const AnimalForm = ({
     const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
     // Manual Pedigree (Beta) — Tab 15
     const [mpEditForm, setMpEditForm] = useState(() => animalToEdit?.manualPedigree || {});
-    const [mpCTCQuery, setMpCTCQuery] = useState({});
-    const [mpCTCResults, setMpCTCResults] = useState({});
-    const [mpCTCSearching, setMpCTCSearching] = useState({});
+    const [mpCTCOpenSlot, setMpCTCOpenSlot] = useState(null);
     // Gallery state (edit-only; changes are applied immediately via API)
     const [editGalleryImages, setEditGalleryImages] = useState(animalToEdit?.extraImages || []);
     const [galleryUploading, setGalleryUploading] = useState(false);
@@ -21143,50 +21141,31 @@ const AnimalForm = ({
                             return (res.data || [])[0] || null;
                         } catch { return null; }
                     };
+                    const linkAnimal = async (slotKey, a) => {
+                        const updates = { [slotKey]: toSlot(a) };
+                        const queue = [{ animal: a, slot: slotKey }];
+                        while (queue.length) {
+                            const { animal: cur, slot } = queue.shift();
+                            const children = SLOT_CHILDREN[slot];
+                            if (!children) continue;
+                            const fatherId = cur.fatherId_public || cur.sireId_public;
+                            const motherId = cur.motherId_public || cur.damId_public;
+                            if (fatherId) {
+                                const father = await fetchByCtc(fatherId);
+                                if (father) { updates[children.father] = toSlot(father); queue.push({ animal: father, slot: children.father }); }
+                            }
+                            if (motherId) {
+                                const mother = await fetchByCtc(motherId);
+                                if (mother) { updates[children.mother] = toSlot(mother); queue.push({ animal: mother, slot: children.mother }); }
+                            }
+                        }
+                        setMpEditForm(f => ({ ...f, ...updates }));
+                    };
 
                     const renderEditSlot = (slotKey, label, sideColor) => {
                         const d = getSlot(slotKey);
                         const isSire = sideColor === 'sire';
                         const isCTC = d.mode === 'ctc';
-                        const searchQ = mpCTCQuery[slotKey] || '';
-                        const results = mpCTCResults[slotKey] || [];
-                        const searching = mpCTCSearching[slotKey] || false;
-
-                        const doSearch = async () => {
-                            if (searchQ.trim().length < 3) return;
-                            setMpCTCSearching(p => ({ ...p, [slotKey]: true }));
-                            try {
-                                const res = await axios.get(`${API_BASE_URL}/animals?name=${encodeURIComponent(searchQ.trim())}`, {
-                                    headers: { Authorization: `Bearer ${authToken}` }
-                                });
-                                setMpCTCResults(p => ({ ...p, [slotKey]: (res.data || []).slice(0, 6) }));
-                            } catch(e) { /* silent */ }
-                            setMpCTCSearching(p => ({ ...p, [slotKey]: false }));
-                        };
-
-                        const linkAnimal = async (a) => {
-                            // BFS: cascade-fill child slots from this animal's registered ancestry
-                            const updates = { [slotKey]: toSlot(a) };
-                            const queue = [{ animal: a, slot: slotKey }];
-                            while (queue.length) {
-                                const { animal: cur, slot } = queue.shift();
-                                const children = SLOT_CHILDREN[slot];
-                                if (!children) continue;
-                                const fatherId = cur.fatherId_public || cur.sireId_public;
-                                const motherId = cur.motherId_public || cur.damId_public;
-                                if (fatherId) {
-                                    const father = await fetchByCtc(fatherId);
-                                    if (father) { updates[children.father] = toSlot(father); queue.push({ animal: father, slot: children.father }); }
-                                }
-                                if (motherId) {
-                                    const mother = await fetchByCtc(motherId);
-                                    if (mother) { updates[children.mother] = toSlot(mother); queue.push({ animal: mother, slot: children.mother }); }
-                                }
-                            }
-                            setMpEditForm(f => ({ ...f, ...updates }));
-                            setMpCTCResults(p => ({ ...p, [slotKey]: [] }));
-                            setMpCTCQuery(p => ({ ...p, [slotKey]: '' }));
-                        };
 
                         const bdr = isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40';
                         const lbl = isSire ? 'text-blue-500' : 'text-pink-500';
@@ -21222,35 +21201,11 @@ const AnimalForm = ({
                                                 className="text-[10px] text-red-400 hover:text-red-600 transition-colors">Unlink</button>
                                         </div>
                                     ) : (
-                                        <div className="space-y-1">
-                                            <div className="flex gap-1">
-                                                <input value={searchQ}
-                                                    onChange={e => setMpCTCQuery(p => ({ ...p, [slotKey]: e.target.value }))}
-                                                    onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), doSearch())}
-                                                    placeholder="Search by name (min 3 chars)"
-                                                    className="flex-1 px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary" />
-                                                <button type="button" onClick={doSearch} disabled={searching || searchQ.trim().length < 3}
-                                                    className="px-2 py-1 bg-primary text-black text-xs rounded disabled:opacity-50 flex items-center gap-1">
-                                                    {searching ? <Loader2 size={12} className="animate-spin" /> : <Search size={12} />}
-                                                </button>
-                                            </div>
-                                            {results.length > 0 && (
-                                                <div className="border border-gray-200 rounded bg-white shadow-sm max-h-36 overflow-y-auto">
-                                                    {results.map(a => (
-                                                        <button key={a.id_public} type="button" onClick={() => linkAnimal(a)}
-                                                            className="w-full text-left px-2 py-1.5 hover:bg-gray-50 border-b border-gray-100 last:border-0 flex items-center gap-2">
-                                                            {(a.imageUrl || a.photoUrl) && <img src={a.imageUrl || a.photoUrl} className="w-6 h-6 rounded-full object-cover flex-shrink-0" alt="" />}
-                                                            <span className="flex-1 min-w-0">
-                                                                <span className="font-medium text-gray-800">{a.name}</span>
-                                                                <span className="text-gray-400 ml-1 text-[10px]">{a.id_public}</span>
-                                                            </span>
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            )}
-                                            {results.length === 0 && !searching && mpCTCResults[slotKey] !== undefined && searchQ.trim().length >= 3 && (
-                                                <p className="text-[11px] text-gray-400 italic">No animals found.</p>
-                                            )}
+                                        <div className="space-y-1.5">
+                                            <button type="button" onClick={() => setMpCTCOpenSlot(slotKey)}
+                                                className="w-full px-2 py-1.5 border border-dashed border-primary/40 rounded text-xs text-primary hover:bg-primary/5 transition flex items-center gap-1.5 justify-center">
+                                                <Search size={12} /> Search CTC Animal…
+                                            </button>
                                         </div>
                                     )
                                 ) : (
@@ -21334,6 +21289,28 @@ const AnimalForm = ({
                         </div>
                     );
                 })()}
+
+                {/* Manual Pedigree CTC selector modal */}
+                {mpCTCOpenSlot && (
+                    <ParentSearchModal
+                        title={mpCTCOpenSlot.endsWith('Sire') || mpCTCOpenSlot === 'sire' ? 'Sire' : 'Dam'}
+                        currentId={animalToEdit?.id_public}
+                        onSelect={async (a) => {
+                            setMpCTCOpenSlot(null);
+                            if (a) await linkAnimal(mpCTCOpenSlot, a);
+                        }}
+                        onClose={() => setMpCTCOpenSlot(null)}
+                        authToken={authToken}
+                        showModalMessage={showModalMessage}
+                        API_BASE_URL={API_BASE_URL}
+                        X={X}
+                        Search={Search}
+                        Loader2={Loader2}
+                        LoadingSpinner={LoadingSpinner}
+                        requiredGender={mpCTCOpenSlot.endsWith('Sire') || mpCTCOpenSlot === 'sire' ? 'Male' : 'Female'}
+                        species={formData.species}
+                    />
+                )}
 
                 {/* Tab 14: Gallery */}
                 {activeTab === 14 && (
