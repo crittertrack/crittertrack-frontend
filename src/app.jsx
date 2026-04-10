@@ -4088,7 +4088,7 @@ const computeRelationships = (animal, userAnimals) => {
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
-const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onToggleOwned, userProfile, userAnimals = [], breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onViewPublicAnimal, onToggleOwned, userProfile, userAnimals = [], breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -6747,10 +6747,18 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         const isSire = slotGender === 'Male';
                         const GIcon = isSire ? Mars : Venus;
                         const gColor = isSire ? 'text-blue-400' : 'text-pink-400';
-                        const handleSlotClick = d.ctcId && onViewAnimal ? async () => {
+                        const handleSlotClick = d.ctcId && (onViewAnimal || onViewPublicAnimal) ? async () => {
                             try {
                                 const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(d.ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } });
-                                if (res.data) onViewAnimal(res.data, 14);
+                                if (res.data) {
+                                    if (res.data.ownerId_public === userProfile?.id_public && onViewAnimal) {
+                                        onViewAnimal(res.data);
+                                    } else if (onViewPublicAnimal) {
+                                        onViewPublicAnimal(res.data, 14);
+                                    } else if (onViewAnimal) {
+                                        onViewAnimal(res.data);
+                                    }
+                                }
                             } catch { /* not accessible */ }
                         } : undefined;
                         return (
@@ -34146,6 +34154,7 @@ const App = () => {
                                             setShowTransferModal(true);
                                         }}
                                         onViewAnimal={handleViewAnimal}
+                                        onViewPublicAnimal={handleViewPublicAnimal}
                                         onToggleOwned={toggleAnimalOwned}
                                         userProfile={userProfile}
                                         breedingLineDefs={breedingLineDefs}
