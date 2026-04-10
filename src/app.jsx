@@ -4111,10 +4111,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
     const [globalRelsLoading, setGlobalRelsLoading] = useState(false);
     const [parentCardKey, setParentCardKey] = useState(0); // increment to force parent cards to refetch
     // Manual Pedigree (Beta) — Tab 16
-    const [mpEditMode, setMpEditMode] = useState(false);
-    const [mpSaving, setMpSaving] = useState(false);
     const [mpDownloading, setMpDownloading] = useState(false);
-    const [mpForm, setMpForm] = useState(() => animal?.manualPedigree || {});
     const mpTreeRef = useRef(null);
 
     // Fetch ALL animals on the account + global relationships lazily when Lineage tab opens
@@ -6719,13 +6716,13 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 
                 {/* ── TAB 16: Manual Pedigree (Beta) ── */}
                 {detailViewTab === 16 && (() => {
+                    const mpData = animal?.manualPedigree || {};
                     const emptySlot = () => ({ name: '', variety: '', genCode: '', birthDate: '', breederName: '', notes: '' });
-                    const getSlot = (key) => mpForm[key] || emptySlot();
-                    const setSlotField = (key, field, val) => setMpForm(f => ({ ...f, [key]: { ...(f[key] || emptySlot()), [field]: val } }));
+                    const getSlot = (key) => mpData[key] || emptySlot();
                     const hasAnyData = ['sire','dam','sireSire','sireDam','damSire','damDam',
                         'sireSireSire','sireSireDam','sireDamSire','sireDamDam',
                         'damSireSire','damSireDam','damDamSire','damDamDam'].some(k => {
-                        const d = mpForm[k];
+                        const d = mpData[k];
                         return d && Object.values(d).some(v => v && String(v).trim());
                     });
                     const handleDownloadMP = async () => {
@@ -6742,44 +6739,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         finally { setMpDownloading(false); }
                     };
 
-                    const handleSaveMP = async () => {
-                        setMpSaving(true);
-                        try {
-                            await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { manualPedigree: mpForm }, {
-                                headers: { Authorization: `Bearer ${authToken}` }
-                            });
-                            if (onUpdateAnimal) onUpdateAnimal({ ...animal, manualPedigree: mpForm });
-                            setMpEditMode(false);
-                        } catch(err) {
-                            showModalMessage('Error', 'Failed to save manual pedigree');
-                        } finally {
-                            setMpSaving(false);
-                        }
-                    };
-
                     const renderSlot = (slotKey, label, sideColor) => {
                         const d = getSlot(slotKey);
                         const hasData = d && Object.values(d).some(v => v && String(v).trim());
                         const isSire = sideColor === 'sire';
-                        if (mpEditMode) {
-                            return (
-                                <div key={slotKey} className={`rounded-lg border p-3 space-y-2 text-xs ${isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40'}`}>
-                                    <p className={`text-[10px] font-bold uppercase tracking-widest ${isSire ? 'text-blue-500' : 'text-pink-500'}`}>{label}</p>
-                                    <input placeholder="Name" value={d.name || ''} onChange={e => setSlotField(slotKey, 'name', e.target.value)}
-                                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
-                                    <input placeholder="Variety / Morph" value={d.variety || ''} onChange={e => setSlotField(slotKey, 'variety', e.target.value)}
-                                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
-                                    <input placeholder="Genetic Code" value={d.genCode || ''} onChange={e => setSlotField(slotKey, 'genCode', e.target.value)}
-                                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs font-mono focus:ring-1 focus:ring-primary focus:border-primary" />
-                                    <input type="date" value={d.birthDate || ''} onChange={e => setSlotField(slotKey, 'birthDate', e.target.value)}
-                                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
-                                    <input placeholder="Breeder Name" value={d.breederName || ''} onChange={e => setSlotField(slotKey, 'breederName', e.target.value)}
-                                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
-                                    <textarea placeholder="Notes" value={d.notes || ''} onChange={e => setSlotField(slotKey, 'notes', e.target.value)} rows={2}
-                                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs resize-none focus:ring-1 focus:ring-primary focus:border-primary"></textarea>
-                                </div>
-                            );
-                        }
                         return (
                             <div key={slotKey} className={`rounded-lg border p-3 min-h-[70px] ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
                                 <p className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>{label}</p>
@@ -6808,27 +6771,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                     <span className="text-[10px] font-bold uppercase tracking-widest bg-orange-100 text-orange-600 border border-orange-200 rounded-full px-2 py-0.5">Beta</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    {!mpEditMode && hasAnyData && (
+                                    {hasAnyData && (
                                         <button onClick={handleDownloadMP} disabled={mpDownloading}
                                             className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
                                             {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save as Image</>}
-                                        </button>
-                                    )}
-                                    {mpEditMode ? (
-                                        <>
-                                            <button onClick={() => { setMpForm(animal?.manualPedigree || {}); setMpEditMode(false); }}
-                                                className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg border border-gray-300 transition">
-                                                Cancel
-                                            </button>
-                                            <button onClick={handleSaveMP} disabled={mpSaving}
-                                                className="px-3 py-1.5 text-sm bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1.5 disabled:opacity-60">
-                                                {mpSaving ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Save size={14} /> Save</>}
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <button onClick={() => setMpEditMode(true)}
-                                            className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5">
-                                            <Edit size={14} /> {hasAnyData ? 'Edit' : 'Add Ancestors'}
                                         </button>
                                     )}
                                 </div>
@@ -16349,6 +16295,8 @@ const AnimalForm = ({
     const [showCommunityGeneticsModal, setShowCommunityGeneticsModal] = useState(false);
     const [activeTab, setActiveTab] = useState(1); // Tab navigation state
     const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
+    // Manual Pedigree (Beta) — Tab 15
+    const [mpEditForm, setMpEditForm] = useState(() => animalToEdit?.manualPedigree || {});
     // Gallery state (edit-only; changes are applied immediately via API)
     const [editGalleryImages, setEditGalleryImages] = useState(animalToEdit?.extraImages || []);
     const [galleryUploading, setGalleryUploading] = useState(false);
@@ -17584,6 +17532,7 @@ const AnimalForm = ({
             // Prepare explicit payload to send to the API and log it for debugging
             // Merge in any immediate pedigree selections stored in `pedigreeRef` to avoid race conditions
             const payloadToSave = { ...formData };
+            payloadToSave.manualPedigree = mpEditForm;
             
             // Include growth records
             payloadToSave.growthRecords = growthRecords;
@@ -18241,7 +18190,8 @@ const AnimalForm = ({
                             { id: 11, label: 'End of Life', icon: Scale, color: 'text-gray-500' },
                             { id: 12, label: 'Show', icon: Trophy, color: 'text-yellow-600' },
                             { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' },
-                            { id: 14, label: 'Gallery', icon: Images, color: 'text-rose-500' }
+                            { id: 14, label: 'Gallery', icon: Images, color: 'text-rose-500' },
+                            { id: 15, label: 'Manual Pedigree ✶', icon: Dna, color: 'text-orange-500' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -21153,6 +21103,94 @@ const AnimalForm = ({
                         )}
                     </div>
                 )}
+
+                {/* Tab 15: Manual Pedigree */}
+                {activeTab === 15 && (() => {
+                    const emptySlot = () => ({ name: '', variety: '', genCode: '', birthDate: '', breederName: '', notes: '' });
+                    const getSlot = (key) => mpEditForm[key] || emptySlot();
+                    const setSlotField = (key, field, val) => setMpEditForm(f => ({ ...f, [key]: { ...(f[key] || emptySlot()), [field]: val } }));
+
+                    const renderEditSlot = (slotKey, label, sideColor) => {
+                        const d = getSlot(slotKey);
+                        const isSire = sideColor === 'sire';
+                        return (
+                            <div key={slotKey} className={`rounded-lg border p-3 space-y-2 text-xs ${isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40'}`}>
+                                <p className={`text-[10px] font-bold uppercase tracking-widest ${isSire ? 'text-blue-500' : 'text-pink-500'}`}>{label}</p>
+                                <input placeholder="Name" value={d.name || ''} onChange={e => setSlotField(slotKey, 'name', e.target.value)}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                <input placeholder="Variety / Morph" value={d.variety || ''} onChange={e => setSlotField(slotKey, 'variety', e.target.value)}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                <input placeholder="Genetic Code" value={d.genCode || ''} onChange={e => setSlotField(slotKey, 'genCode', e.target.value)}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs font-mono focus:ring-1 focus:ring-primary focus:border-primary" />
+                                <input type="date" value={d.birthDate || ''} onChange={e => setSlotField(slotKey, 'birthDate', e.target.value)}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                <input placeholder="Breeder Name" value={d.breederName || ''} onChange={e => setSlotField(slotKey, 'breederName', e.target.value)}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                <textarea placeholder="Notes" value={d.notes || ''} onChange={e => setSlotField(slotKey, 'notes', e.target.value)} rows={2}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs resize-none focus:ring-1 focus:ring-primary focus:border-primary"></textarea>
+                            </div>
+                        );
+                    };
+
+                    return (
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-2">
+                                <Dna size={18} className="text-orange-500" />
+                                <h3 className="text-base font-semibold text-gray-700">Manual Pedigree</h3>
+                                <span className="text-[10px] font-bold uppercase tracking-widest bg-orange-100 text-orange-600 border border-orange-200 rounded-full px-2 py-0.5">Beta</span>
+                            </div>
+                            <p className="text-xs text-gray-400 -mt-3">Ancestors entered here are not linked to registered CritterTrack animals and do not affect COI calculations or the pedigree chart. Changes are saved when you click Save Animal.</p>
+
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 1 — Parents</p>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {renderEditSlot('sire', 'Sire', 'sire')}
+                                    {renderEditSlot('dam', 'Dam', 'dam')}
+                                </div>
+                            </div>
+
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 2 — Grandparents</p>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                        {renderEditSlot('sireSire', 'Grandsire', 'sire')}
+                                        {renderEditSlot('sireDam', 'Granddam', 'sire')}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                        {renderEditSlot('damSire', 'Grandsire', 'dam')}
+                                        {renderEditSlot('damDam', 'Granddam', 'dam')}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 3 — Great-Grandparents</p>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                        <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
+                                        {renderEditSlot('sireSireSire', 'Great-Grandsire', 'sire')}
+                                        {renderEditSlot('sireSireDam', 'Great-Granddam', 'sire')}
+                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                        {renderEditSlot('sireDamSire', 'Great-Grandsire', 'sire')}
+                                        {renderEditSlot('sireDamDam', 'Great-Granddam', 'sire')}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                        <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
+                                        {renderEditSlot('damSireSire', 'Great-Grandsire', 'dam')}
+                                        {renderEditSlot('damSireDam', 'Great-Granddam', 'dam')}
+                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                        {renderEditSlot('damDamSire', 'Great-Grandsire', 'dam')}
+                                        {renderEditSlot('damDamDam', 'Great-Granddam', 'dam')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })()}
 
                 {/* Tab 14: Gallery */}
                 {activeTab === 14 && (
