@@ -6768,7 +6768,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                             {fullName && <p className="text-xs font-semibold text-gray-800 leading-tight">{fullName}</p>}
                                             {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
                                             {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
-                                            {d.birthDate && <p className="text-[11px] text-gray-400">b. {new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(d.birthDate + 'T00:00:00'))}</p>}
+                                            {d.birthDate && <p className="text-[11px] text-gray-400">b. {formatDate(d.birthDate)}</p>}
                                             {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
                                             {d.notes && <p className="text-[11px] text-gray-400 border-t border-gray-200 mt-1 pt-1">{d.notes}</p>}
                                         </div>
@@ -6819,7 +6819,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 return (
                                     <div className="rounded-xl border-2 border-primary bg-primary/10 flex overflow-hidden">
                                         {/* 75% — animal info */}
-                                        <div className="flex flex-col items-center gap-2 text-center p-4" style={{width:'75%'}}>
+                                        <div className="flex flex-col items-center gap-2 text-center p-4 relative" style={{width:'75%'}}>
+                                            {animal.species && <div className="absolute top-2 left-2 text-left"><p className="text-[10px] font-semibold text-gray-600 leading-tight">{animal.species}</p>{getSpeciesLatinName(animal.species) && <p className="text-[9px] italic text-gray-400 leading-tight">{getSpeciesLatinName(animal.species)}</p>}</div>}
                                             {subjectImgUrl ? (
                                                 <img src={subjectImgUrl} alt={subjectName} className="w-20 h-20 rounded-full object-cover border-2 border-primary/30" />
                                             ) : (
@@ -10403,7 +10404,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                             {fullName && <p className="text-xs font-semibold text-gray-800 leading-tight">{fullName}</p>}
                                             {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
                                             {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
-                                            {d.birthDate && <p className="text-[11px] text-gray-400">b. {new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(d.birthDate + 'T00:00:00'))}</p>}
+                                            {d.birthDate && <p className="text-[11px] text-gray-400">b. {formatDate(d.birthDate)}</p>}
                                             {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
                                             {d.notes && <p className="text-[11px] text-gray-400 border-t border-gray-200 mt-1 pt-1">{d.notes}</p>}
                                         </div>
@@ -10449,7 +10450,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     return (
                                         <div className="rounded-xl border-2 border-primary bg-primary/10 flex overflow-hidden">
                                             {/* 75% — animal info */}
-                                            <div className="flex flex-col items-center gap-2 text-center p-4" style={{width:'75%'}}>
+                                            <div className="flex flex-col items-center gap-2 text-center p-4 relative" style={{width:'75%'}}>
+                                                {animal.species && <div className="absolute top-2 left-2 text-left"><p className="text-[10px] font-semibold text-gray-600 leading-tight">{animal.species}</p>{getSpeciesLatinName(animal.species) && <p className="text-[9px] italic text-gray-400 leading-tight">{getSpeciesLatinName(animal.species)}</p>}</div>}
                                                 {subjectImgUrl ? <img src={subjectImgUrl} alt={subjectName} className="w-20 h-20 rounded-full object-cover border-2 border-primary/30" /> : <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-gray-300"><Cat size={32} /></div>}
                                                 <div className="flex items-center gap-1 justify-center">
                                                     <SubjectGenderIcon size={14} className={`flex-shrink-0 ${subjectGColor}`} />
