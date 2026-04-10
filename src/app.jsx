@@ -6771,18 +6771,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         const isSire = slotGender === 'Male';
                         const GIcon = isSire ? Mars : Venus;
                         const gColor = isSire ? 'text-blue-400' : 'text-pink-400';
-                        const handleSlotClick = d.ctcId && (onViewAnimal || onViewPublicAnimal) ? async () => {
+                        const handleSlotClick = d.ctcId && onViewAnimal ? async () => {
                             try {
                                 const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(d.ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } });
-                                if (res.data) {
-                                    if (res.data.ownerId_public === userProfile?.id_public && onViewAnimal) {
-                                        onViewAnimal(res.data);
-                                    } else if (onViewPublicAnimal) {
-                                        onViewPublicAnimal(res.data, 14);
-                                    } else if (onViewAnimal) {
-                                        onViewAnimal(res.data);
-                                    }
-                                }
+                                if (res.data) onViewAnimal(res.data);
                             } catch { /* not accessible */ }
                         } : undefined;
                         return (
