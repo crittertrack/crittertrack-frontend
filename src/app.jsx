@@ -3529,7 +3529,9 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             {/* Litters Tab */}
             {activeTab === 'litters' && publicLitters.length > 0 && (() => {
                 const formatLitterDate = (d) => d ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(d)) : null;
-                const planned = publicLitters.filter(l => l.isPlanned);
+                const today = new Date();
+                const mated = publicLitters.filter(l => l.isPlanned && l.matingDate && new Date(l.matingDate) <= today);
+                const plannedOnly = publicLitters.filter(l => l.isPlanned && !(l.matingDate && new Date(l.matingDate) <= today));
                 let born = publicLitters.filter(l => !l.isPlanned);
                 
                 // Extract unique years from born litters
@@ -3565,8 +3567,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         </div>
                     );
                 };
-                const LitterPublicCard = ({ l }) => (
-                    <div className="bg-white rounded-xl border border-gray-300 p-4 pb-6 space-y-2.5 relative">
+                const LitterPublicCard = ({ l, isMated }) => (
+                    <div className={`bg-white rounded-xl border p-4 pb-6 space-y-2.5 relative ${isMated ? 'border-purple-300' : l.isPlanned ? 'border-indigo-300' : 'border-gray-300'}`}>
                         {/* First line: centered breeding pair name */}
                         <div className="text-center min-h-[1.25rem] flex items-center justify-center">
                             {l.breedingPairCodeName && (
@@ -3607,7 +3609,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         
                         {/* Dates - full width centered */}
                         <div className="flex flex-wrap justify-center gap-3 text-xs text-gray-500">
-                            {l.matingDate && <span><span className="font-medium">{l.isPlanned ? 'Planned Mating:' : 'Mated:'}</span> {formatLitterDate(l.matingDate)}</span>}
+                            {l.matingDate && <span><span className="font-medium">{isMated ? 'Mated:' : l.isPlanned ? 'Planned Mating:' : 'Mated:'}</span> {formatLitterDate(l.matingDate)}</span>}
                             {l.expectedDueDate && l.isPlanned && <span><span className="font-medium">Due:</span> {formatLitterDate(l.expectedDueDate)}</span>}
                             {l.birthDate && !l.isPlanned && <span><span className="font-medium">Born:</span> {formatLitterDate(l.birthDate)}</span>}
                         </div>
@@ -3622,13 +3624,23 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 );
                 return (
                     <div className="space-y-8">
-                        {planned.length > 0 && (
+                        {mated.length > 0 && (
                             <div>
                                 <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Calendar size={16} className="text-indigo-500" /> Planned Pairings <span className="text-sm font-normal text-gray-400">({planned.length})</span>
+                                    <Heart size={16} className="text-purple-500" /> Mated Pairings <span className="text-sm font-normal text-gray-400">({mated.length})</span>
                                 </h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {planned.map(l => <LitterPublicCard key={l._id} l={l} />)}
+                                    {mated.map(l => <LitterPublicCard key={l._id} l={l} isMated={true} />)}
+                                </div>
+                            </div>
+                        )}
+                        {plannedOnly.length > 0 && (
+                            <div>
+                                <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                    <Calendar size={16} className="text-indigo-500" /> Planned Pairings <span className="text-sm font-normal text-gray-400">({plannedOnly.length})</span>
+                                </h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {plannedOnly.map(l => <LitterPublicCard key={l._id} l={l} />)}
                                 </div>
                             </div>
                         )}
