@@ -6717,13 +6717,13 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                 {/* ── TAB 16: Manual Pedigree (Beta) ── */}
                 {detailViewTab === 16 && (() => {
                     const mpData = animal?.manualPedigree || {};
-                    const emptySlot = () => ({ name: '', variety: '', genCode: '', birthDate: '', breederName: '', notes: '' });
+                    const emptySlot = () => ({ mode: 'manual', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
                     const getSlot = (key) => mpData[key] || emptySlot();
                     const hasAnyData = ['sire','dam','sireSire','sireDam','damSire','damDam',
                         'sireSireSire','sireSireDam','sireDamSire','sireDamDam',
                         'damSireSire','damSireDam','damDamSire','damDamDam'].some(k => {
                         const d = mpData[k];
-                        return d && Object.values(d).some(v => v && String(v).trim());
+                        return d && (d.ctcId || Object.entries(d).some(([fk,v]) => fk !== 'mode' && v && String(v).trim()));
                     });
                     const handleDownloadMP = async () => {
                         if (!mpTreeRef.current) return;
@@ -6741,19 +6741,30 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 
                     const renderSlot = (slotKey, label, sideColor) => {
                         const d = getSlot(slotKey);
-                        const hasData = d && Object.values(d).some(v => v && String(v).trim());
+                        const hasData = d && (d.ctcId || Object.entries(d).some(([fk,v]) => fk !== 'mode' && v && String(v).trim()));
                         const isSire = sideColor === 'sire';
+                        const fullName = [d.prefix, d.name, d.suffix].filter(Boolean).join(' ');
                         return (
                             <div key={slotKey} className={`rounded-lg border p-3 min-h-[70px] ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
                                 <p className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>{label}</p>
                                 {hasData ? (
                                     <div className="space-y-0.5">
-                                        {d.name && <p className="text-xs font-semibold text-gray-800">{d.name}</p>}
+                                        {d.imageUrl && (
+                                            <img src={d.imageUrl} alt={fullName} className="w-10 h-10 rounded-full object-cover float-right ml-2 mb-1 border border-gray-200" />
+                                        )}
+                                        {(fullName || d.gender) && (
+                                            <div className="flex items-center gap-1">
+                                                {d.gender === 'Male' && <Mars size={11} className="text-blue-400 flex-shrink-0" />}
+                                                {d.gender === 'Female' && <Venus size={11} className="text-pink-400 flex-shrink-0" />}
+                                                {fullName && <p className="text-xs font-semibold text-gray-800">{fullName}</p>}
+                                            </div>
+                                        )}
+                                        {d.ctcId && <p className="text-[10px] font-mono text-primary bg-primary/10 inline-block px-1 rounded">{d.ctcId}</p>}
                                         {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
                                         {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
                                         {d.birthDate && <p className="text-[11px] text-gray-400">b. {new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(d.birthDate + 'T00:00:00'))}</p>}
                                         {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
-                                        {d.notes && <p className="text-[11px] text-gray-400 border-t border-gray-200 mt-1 pt-1">{d.notes}</p>}
+                                        {d.notes && <p className="text-[11px] text-gray-400 border-t border-gray-200 mt-1 pt-1 clear-both">{d.notes}</p>}
                                     </div>
                                 ) : (
                                     <p className="text-[11px] text-gray-300 italic">—</p>
@@ -16297,6 +16308,9 @@ const AnimalForm = ({
     const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
     // Manual Pedigree (Beta) — Tab 15
     const [mpEditForm, setMpEditForm] = useState(() => animalToEdit?.manualPedigree || {});
+    const [mpCTCQuery, setMpCTCQuery] = useState({});
+    const [mpCTCResults, setMpCTCResults] = useState({});
+    const [mpCTCSearching, setMpCTCSearching] = useState({});
     // Gallery state (edit-only; changes are applied immediately via API)
     const [editGalleryImages, setEditGalleryImages] = useState(animalToEdit?.extraImages || []);
     const [galleryUploading, setGalleryUploading] = useState(false);
@@ -21106,28 +21120,135 @@ const AnimalForm = ({
 
                 {/* Tab 15: Manual Pedigree */}
                 {activeTab === 15 && (() => {
-                    const emptySlot = () => ({ name: '', variety: '', genCode: '', birthDate: '', breederName: '', notes: '' });
+                    const emptySlot = () => ({ mode: 'manual', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
                     const getSlot = (key) => mpEditForm[key] || emptySlot();
                     const setSlotField = (key, field, val) => setMpEditForm(f => ({ ...f, [key]: { ...(f[key] || emptySlot()), [field]: val } }));
 
                     const renderEditSlot = (slotKey, label, sideColor) => {
                         const d = getSlot(slotKey);
                         const isSire = sideColor === 'sire';
+                        const isCTC = d.mode === 'ctc';
+                        const searchQ = mpCTCQuery[slotKey] || '';
+                        const results = mpCTCResults[slotKey] || [];
+                        const searching = mpCTCSearching[slotKey] || false;
+
+                        const doSearch = async () => {
+                            if (searchQ.trim().length < 3) return;
+                            setMpCTCSearching(p => ({ ...p, [slotKey]: true }));
+                            try {
+                                const res = await axios.get(`${API_BASE_URL}/animals?name=${encodeURIComponent(searchQ.trim())}`, {
+                                    headers: { Authorization: `Bearer ${authToken}` }
+                                });
+                                setMpCTCResults(p => ({ ...p, [slotKey]: (res.data || []).slice(0, 6) }));
+                            } catch(e) { /* silent */ }
+                            setMpCTCSearching(p => ({ ...p, [slotKey]: false }));
+                        };
+
+                        const linkAnimal = (a) => {
+                            const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
+                            setMpEditForm(f => ({ ...f, [slotKey]: {
+                                mode: 'ctc', ctcId: a.id_public,
+                                prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '',
+                                variety, genCode: a.geneticCode || '',
+                                birthDate: a.birthDate ? a.birthDate.slice(0,10) : '',
+                                breederName: a.breederName || a.manualBreederName || '',
+                                gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: ''
+                            }}));
+                            setMpCTCResults(p => ({ ...p, [slotKey]: [] }));
+                            setMpCTCQuery(p => ({ ...p, [slotKey]: '' }));
+                        };
+
+                        const bdr = isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40';
+                        const lbl = isSire ? 'text-blue-500' : 'text-pink-500';
+
                         return (
-                            <div key={slotKey} className={`rounded-lg border p-3 space-y-2 text-xs ${isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40'}`}>
-                                <p className={`text-[10px] font-bold uppercase tracking-widest ${isSire ? 'text-blue-500' : 'text-pink-500'}`}>{label}</p>
-                                <input placeholder="Name" value={d.name || ''} onChange={e => setSlotField(slotKey, 'name', e.target.value)}
-                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
-                                <input placeholder="Variety / Morph" value={d.variety || ''} onChange={e => setSlotField(slotKey, 'variety', e.target.value)}
-                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
-                                <input placeholder="Genetic Code" value={d.genCode || ''} onChange={e => setSlotField(slotKey, 'genCode', e.target.value)}
-                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs font-mono focus:ring-1 focus:ring-primary focus:border-primary" />
-                                <input type="date" value={d.birthDate || ''} onChange={e => setSlotField(slotKey, 'birthDate', e.target.value)}
-                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
-                                <input placeholder="Breeder Name" value={d.breederName || ''} onChange={e => setSlotField(slotKey, 'breederName', e.target.value)}
-                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
-                                <textarea placeholder="Notes" value={d.notes || ''} onChange={e => setSlotField(slotKey, 'notes', e.target.value)} rows={2}
-                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs resize-none focus:ring-1 focus:ring-primary focus:border-primary"></textarea>
+                            <div key={slotKey} className={`rounded-lg border p-3 space-y-2 text-xs ${bdr}`}>
+                                <div className="flex items-center justify-between">
+                                    <p className={`text-[10px] font-bold uppercase tracking-widest ${lbl}`}>{label}</p>
+                                    <div className="flex rounded border border-gray-300 overflow-hidden text-[10px]">
+                                        <button type="button" onClick={() => setSlotField(slotKey, 'mode', 'manual')}
+                                            className={`px-2 py-0.5 transition-colors ${!isCTC ? 'bg-gray-200 font-semibold text-gray-800' : 'text-gray-400 hover:bg-gray-100'}`}>Manual</button>
+                                        <button type="button" onClick={() => setSlotField(slotKey, 'mode', 'ctc')}
+                                            className={`px-2 py-0.5 transition-colors ${isCTC ? 'bg-primary font-semibold text-black' : 'text-gray-400 hover:bg-gray-100'}`}>Link CTC</button>
+                                    </div>
+                                </div>
+
+                                {isCTC ? (
+                                    d.ctcId ? (
+                                        <div className="space-y-1.5">
+                                            <div className="flex items-center gap-2 p-2 bg-white rounded border border-primary/30">
+                                                {d.imageUrl
+                                                    ? <img src={d.imageUrl} className="w-10 h-10 rounded-full object-cover flex-shrink-0" alt="" />
+                                                    : <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0"><Cat size={16} className="text-gray-300" /></div>
+                                                }
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-xs font-semibold text-gray-800 truncate">{[d.prefix,d.name,d.suffix].filter(Boolean).join(' ')}</p>
+                                                    {d.variety && <p className="text-[11px] text-gray-500 truncate">{d.variety}</p>}
+                                                    <p className="text-[10px] font-mono text-primary">{d.ctcId}</p>
+                                                </div>
+                                            </div>
+                                            <button type="button"
+                                                onClick={() => setMpEditForm(f => ({ ...f, [slotKey]: { ...f[slotKey], mode: 'manual', ctcId: '' } }))}
+                                                className="text-[10px] text-red-400 hover:text-red-600 transition-colors">Unlink</button>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-1">
+                                            <div className="flex gap-1">
+                                                <input value={searchQ}
+                                                    onChange={e => setMpCTCQuery(p => ({ ...p, [slotKey]: e.target.value }))}
+                                                    onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), doSearch())}
+                                                    placeholder="Search by name (min 3 chars)"
+                                                    className="flex-1 px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary" />
+                                                <button type="button" onClick={doSearch} disabled={searching || searchQ.trim().length < 3}
+                                                    className="px-2 py-1 bg-primary text-black text-xs rounded disabled:opacity-50 flex items-center gap-1">
+                                                    {searching ? <Loader2 size={12} className="animate-spin" /> : <Search size={12} />}
+                                                </button>
+                                            </div>
+                                            {results.length > 0 && (
+                                                <div className="border border-gray-200 rounded bg-white shadow-sm max-h-36 overflow-y-auto">
+                                                    {results.map(a => (
+                                                        <button key={a.id_public} type="button" onClick={() => linkAnimal(a)}
+                                                            className="w-full text-left px-2 py-1.5 hover:bg-gray-50 border-b border-gray-100 last:border-0 flex items-center gap-2">
+                                                            {(a.imageUrl || a.photoUrl) && <img src={a.imageUrl || a.photoUrl} className="w-6 h-6 rounded-full object-cover flex-shrink-0" alt="" />}
+                                                            <span className="flex-1 min-w-0">
+                                                                <span className="font-medium text-gray-800">{a.name}</span>
+                                                                <span className="text-gray-400 ml-1 text-[10px]">{a.id_public}</span>
+                                                            </span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            {results.length === 0 && !searching && mpCTCResults[slotKey] !== undefined && searchQ.trim().length >= 3 && (
+                                                <p className="text-[11px] text-gray-400 italic">No animals found.</p>
+                                            )}
+                                        </div>
+                                    )
+                                ) : (
+                                    <>
+                                        <div className="flex gap-1.5">
+                                            <select value={d.gender || ''} onChange={e => setSlotField(slotKey, 'gender', e.target.value)}
+                                                className="w-24 px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary bg-white">
+                                                <option value="">Gender</option>
+                                                <option value="Male">Male</option>
+                                                <option value="Female">Female</option>
+                                            </select>
+                                            <input placeholder="Name" value={d.name || ''} onChange={e => setSlotField(slotKey, 'name', e.target.value)}
+                                                className="flex-1 px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                        </div>
+                                        <input placeholder="Variety / Morph" value={d.variety || ''} onChange={e => setSlotField(slotKey, 'variety', e.target.value)}
+                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                        <input placeholder="Genetic Code" value={d.genCode || ''} onChange={e => setSlotField(slotKey, 'genCode', e.target.value)}
+                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs font-mono focus:ring-1 focus:ring-primary focus:border-primary" />
+                                        <input type="date" value={d.birthDate || ''} onChange={e => setSlotField(slotKey, 'birthDate', e.target.value)}
+                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                        <input placeholder="Breeder Name" value={d.breederName || ''} onChange={e => setSlotField(slotKey, 'breederName', e.target.value)}
+                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                        <input placeholder="Image URL (optional)" value={d.imageUrl || ''} onChange={e => setSlotField(slotKey, 'imageUrl', e.target.value)}
+                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                        <textarea placeholder="Notes" value={d.notes || ''} onChange={e => setSlotField(slotKey, 'notes', e.target.value)} rows={2}
+                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs resize-none focus:ring-1 focus:ring-primary focus:border-primary"></textarea>
+                                    </>
+                                )}
                             </div>
                         );
                     };
