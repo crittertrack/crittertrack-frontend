@@ -6744,6 +6744,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         const hasData = d && (d.ctcId || Object.entries(d).some(([fk,v]) => fk !== 'mode' && v && String(v).trim()));
                         const isSire = sideColor === 'sire';
                         const fullName = [d.prefix, d.name, d.suffix].filter(Boolean).join(' ');
+                        const slotGender = (slotKey === 'sire' || slotKey.endsWith('Sire')) ? 'Male' : 'Female';
                         return (
                             <div key={slotKey} className={`rounded-lg border p-3 min-h-[70px] ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
                                 <p className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>{label}</p>
@@ -6752,11 +6753,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                         {d.imageUrl && (
                                             <img src={d.imageUrl} alt={fullName} className="w-10 h-10 rounded-full object-cover float-right ml-2 mb-1 border border-gray-200" />
                                         )}
-                                        {(fullName || d.gender) && (
+                                        {fullName && (
                                             <div className="flex items-center gap-1">
-                                                {d.gender === 'Male' && <Mars size={11} className="text-blue-400 flex-shrink-0" />}
-                                                {d.gender === 'Female' && <Venus size={11} className="text-pink-400 flex-shrink-0" />}
-                                                {fullName && <p className="text-xs font-semibold text-gray-800">{fullName}</p>}
+                                                {slotGender === 'Male' ? <Mars size={11} className="text-blue-400 flex-shrink-0" /> : <Venus size={11} className="text-pink-400 flex-shrink-0" />}
+                                                <p className="text-xs font-semibold text-gray-800">{fullName}</p>
                                             </div>
                                         )}
                                         {d.ctcId && <p className="text-[10px] font-mono text-primary bg-primary/10 inline-block px-1 rounded">{d.ctcId}</p>}
