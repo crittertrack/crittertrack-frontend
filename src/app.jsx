@@ -6805,26 +6805,47 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 const subjectVariety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => animal[k]).filter(Boolean).join(' ');
                                 const subjectImgUrl = animal.imageUrl || animal.photoUrl || null;
                                 const subjectName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+                                const isMale = animal.gender === 'Male';
+                                const SubjectGenderIcon = isMale ? Mars : Venus;
+                                const subjectGColor = isMale ? 'text-blue-500' : 'text-pink-500';
+                                const ownerImgUrl = userProfile?.profileImage || userProfile?.profileImageUrl || null;
+                                const ownerShowPersonal = userProfile?.showPersonalName ?? true;
+                                const ownerShowBreeder = userProfile?.showBreederName ?? true;
+                                const ownerLines = [];
+                                if (ownerShowPersonal && userProfile?.personalName) ownerLines.push(userProfile.personalName);
+                                if (ownerShowBreeder && userProfile?.breederName) ownerLines.push(userProfile.breederName);
+                                const ownerUserId = userProfile?.id_public || null;
+                                const ownerQrUrl = ownerUserId ? `${window.location.origin}/user/${ownerUserId}` : null;
                                 return (
-                                    <div className="rounded-xl border-2 border-primary bg-primary/10 p-4 flex flex-col items-center gap-2 text-center">
-                                        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Current Animal</p>
-                                        {subjectImgUrl ? (
-                                            <img src={subjectImgUrl} alt={subjectName} className="w-20 h-20 rounded-full object-cover border-2 border-primary/30" />
-                                        ) : (
-                                            <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-gray-300"><Cat size={32} /></div>
-                                        )}
-                                        <p className="text-base font-bold text-gray-800 leading-tight">{subjectName}</p>
-                                        {subjectVariety && <p className="text-xs text-gray-500">{subjectVariety}</p>}
-                                        {animal.geneticCode && <p className="text-xs font-mono text-indigo-600">{animal.geneticCode}</p>}
-                                        {animal.birthDate && <p className="text-xs text-gray-400">b. {new Intl.DateTimeFormat(undefined,{year:'numeric',month:'short',day:'numeric'}).format(new Date(animal.birthDate))}</p>}
-                                        {(() => {
-                                            const breederDisplay = animal.manualBreederName
-                                                || (breederInfo && (breederInfo.breederName || breederInfo.personalName))
-                                                || null;
-                                            return breederDisplay ? <p className="text-xs text-gray-500 italic">Breeder: {breederDisplay}</p> : null;
-                                        })()}
-                                        {animal.remarks && <p className="text-xs text-gray-400 border-t border-primary/20 pt-1 mt-1 max-w-xs">{animal.remarks}</p>}
-                                        {animal.id_public && <p className="text-xs font-mono text-gray-400">{animal.id_public}</p>}
+                                    <div className="rounded-xl border-2 border-primary bg-primary/10 flex overflow-hidden">
+                                        {/* 75% — animal info */}
+                                        <div className="flex flex-col items-center gap-2 text-center p-4" style={{width:'75%'}}>
+                                            {subjectImgUrl ? (
+                                                <img src={subjectImgUrl} alt={subjectName} className="w-20 h-20 rounded-full object-cover border-2 border-primary/30" />
+                                            ) : (
+                                                <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-gray-300"><Cat size={32} /></div>
+                                            )}
+                                            <div className="flex items-center gap-1 justify-center">
+                                                <SubjectGenderIcon size={14} className={`flex-shrink-0 ${subjectGColor}`} />
+                                                <p className="text-base font-bold text-gray-800 leading-tight">{subjectName}</p>
+                                            </div>
+                                            {subjectVariety && <p className="text-xs text-gray-500 -mt-1">{subjectVariety}</p>}
+                                            {animal.geneticCode && <p className="text-xs font-mono text-indigo-600">{animal.geneticCode}</p>}
+                                            {animal.birthDate && <p className="text-xs text-gray-400">b. {formatDate(animal.birthDate)}</p>}
+                                            {animal.remarks && <p className="text-xs text-gray-400 border-t border-primary/20 pt-1 mt-1 max-w-xs">{animal.remarks}</p>}
+                                            {animal.id_public && <p className="text-xs font-mono text-gray-400">{animal.id_public}</p>}
+                                        </div>
+                                        {/* 25% — owner/breeder info */}
+                                        <div className="flex flex-col items-center justify-center gap-2 p-3 border-l border-primary/20 bg-primary/5 text-center" style={{width:'25%'}}>
+                                            <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border-2 border-primary/20 flex items-center justify-center flex-shrink-0">
+                                                {ownerImgUrl ? <img src={ownerImgUrl} alt="Breeder" className="w-full h-full object-cover" /> : <User size={20} className="text-gray-400" />}
+                                            </div>
+                                            <div className="space-y-0.5">
+                                                {ownerLines.length > 0 ? ownerLines.map((l,i) => <p key={i} className="text-xs font-semibold text-gray-700 leading-tight">{l}</p>) : null}
+                                                {ownerUserId && <p className="text-[10px] font-mono text-gray-400">{ownerUserId}</p>}
+                                            </div>
+                                            {ownerQrUrl && <QRCodeSVG value={ownerQrUrl} size={56} bgColor="transparent" fgColor="#374151" level="M" className="mt-1" />}
+                                        </div>
                                     </div>
                                 );
                             })()}
@@ -10414,16 +10435,42 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     const subjectVariety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => animal[k]).filter(Boolean).join(' ');
                                     const subjectImgUrl = animal.imageUrl || animal.photoUrl || null;
                                     const subjectName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+                                    const isMale = animal.gender === 'Male';
+                                    const SubjectGenderIcon = isMale ? Mars : Venus;
+                                    const subjectGColor = isMale ? 'text-blue-500' : 'text-pink-500';
+                                    const ownerImgUrl = breederInfo?.profileImage || breederInfo?.profileImageUrl || null;
+                                    const ownerShowPersonal = breederInfo?.showPersonalName ?? true;
+                                    const ownerShowBreeder = breederInfo?.showBreederName ?? true;
+                                    const ownerLines = [];
+                                    if (ownerShowPersonal && breederInfo?.personalName) ownerLines.push(breederInfo.personalName);
+                                    if (ownerShowBreeder && breederInfo?.breederName) ownerLines.push(breederInfo.breederName);
+                                    const ownerUserId = breederInfo?.id_public || animal.ownerId_public || null;
+                                    const ownerQrUrl = ownerUserId ? `${window.location.origin}/user/${ownerUserId}` : null;
                                     return (
-                                        <div className="rounded-xl border-2 border-primary bg-primary/10 p-4 flex flex-col items-center gap-2 text-center">
-                                            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Current Animal</p>
-                                            {subjectImgUrl ? <img src={subjectImgUrl} alt={subjectName} className="w-20 h-20 rounded-full object-cover border-2 border-primary/30" /> : <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-gray-300"><Cat size={32} /></div>}
-                                            <p className="text-base font-bold text-gray-800 leading-tight">{subjectName}</p>
-                                            {subjectVariety && <p className="text-xs text-gray-500">{subjectVariety}</p>}
-                                            {animal.geneticCode && <p className="text-xs font-mono text-indigo-600">{animal.geneticCode}</p>}
-                                            {animal.birthDate && <p className="text-xs text-gray-400">b. {new Intl.DateTimeFormat(undefined,{year:'numeric',month:'short',day:'numeric'}).format(new Date(animal.birthDate))}</p>}
-                                            {(() => { const bd = animal.manualBreederName || (breederInfo && (breederInfo.breederName || breederInfo.personalName)) || null; return bd ? <p className="text-xs text-gray-500 italic">Breeder: {bd}</p> : null; })()}
-                                            {animal.id_public && <p className="text-xs font-mono text-gray-400">{animal.id_public}</p>}
+                                        <div className="rounded-xl border-2 border-primary bg-primary/10 flex overflow-hidden">
+                                            {/* 75% — animal info */}
+                                            <div className="flex flex-col items-center gap-2 text-center p-4" style={{width:'75%'}}>
+                                                {subjectImgUrl ? <img src={subjectImgUrl} alt={subjectName} className="w-20 h-20 rounded-full object-cover border-2 border-primary/30" /> : <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-gray-300"><Cat size={32} /></div>}
+                                                <div className="flex items-center gap-1 justify-center">
+                                                    <SubjectGenderIcon size={14} className={`flex-shrink-0 ${subjectGColor}`} />
+                                                    <p className="text-base font-bold text-gray-800 leading-tight">{subjectName}</p>
+                                                </div>
+                                                {subjectVariety && <p className="text-xs text-gray-500 -mt-1">{subjectVariety}</p>}
+                                                {animal.geneticCode && <p className="text-xs font-mono text-indigo-600">{animal.geneticCode}</p>}
+                                                {animal.birthDate && <p className="text-xs text-gray-400">b. {formatDate(animal.birthDate)}</p>}
+                                                {animal.id_public && <p className="text-xs font-mono text-gray-400">{animal.id_public}</p>}
+                                            </div>
+                                            {/* 25% — owner/breeder info */}
+                                            <div className="flex flex-col items-center justify-center gap-2 p-3 border-l border-primary/20 bg-primary/5 text-center" style={{width:'25%'}}>
+                                                <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border-2 border-primary/20 flex items-center justify-center flex-shrink-0">
+                                                    {ownerImgUrl ? <img src={ownerImgUrl} alt="Breeder" className="w-full h-full object-cover" /> : <User size={20} className="text-gray-400" />}
+                                                </div>
+                                                <div className="space-y-0.5">
+                                                    {ownerLines.length > 0 ? ownerLines.map((l,i) => <p key={i} className="text-xs font-semibold text-gray-700 leading-tight">{l}</p>) : null}
+                                                    {ownerUserId && <p className="text-[10px] font-mono text-gray-400">{ownerUserId}</p>}
+                                                </div>
+                                                {ownerQrUrl && <QRCodeSVG value={ownerQrUrl} size={56} bgColor="transparent" fgColor="#374151" level="M" className="mt-1" />}
+                                            </div>
                                         </div>
                                     );
                                 })()}
