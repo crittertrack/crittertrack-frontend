@@ -6877,14 +6877,14 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 2 — Grandparents</p>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Sire's Side</p>
-                                        {renderSlot('sireSire', 'Paternal Grandsire', 'sire')}
-                                        {renderSlot('sireDam', 'Paternal Granddam', 'sire')}
+                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                        {renderSlot('sireSire', 'Grandsire', 'sire')}
+                                        {renderSlot('sireDam', 'Granddam', 'sire')}
                                     </div>
                                     <div className="space-y-2">
-                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Dam's Side</p>
-                                        {renderSlot('damSire', 'Maternal Grandsire', 'dam')}
-                                        {renderSlot('damDam', 'Maternal Granddam', 'dam')}
+                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                        {renderSlot('damSire', 'Grandsire', 'dam')}
+                                        {renderSlot('damDam', 'Granddam', 'dam')}
                                     </div>
                                 </div>
                             </div>
@@ -6893,18 +6893,22 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 3 — Great-Grandparents</p>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Sire's Side</p>
-                                        {renderSlot('sireSireSire', "Paternal Grandsire's Sire", 'sire')}
-                                        {renderSlot('sireSireDam', "Paternal Grandsire's Dam", 'sire')}
-                                        {renderSlot('sireDamSire', "Paternal Granddam's Sire", 'sire')}
-                                        {renderSlot('sireDamDam', "Paternal Granddam's Dam", 'sire')}
+                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                        <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
+                                        {renderSlot('sireSireSire', 'Great-Grandsire', 'sire')}
+                                        {renderSlot('sireSireDam', 'Great-Granddam', 'sire')}
+                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                        {renderSlot('sireDamSire', 'Great-Grandsire', 'sire')}
+                                        {renderSlot('sireDamDam', 'Great-Granddam', 'sire')}
                                     </div>
                                     <div className="space-y-2">
-                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Dam's Side</p>
-                                        {renderSlot('damSireSire', "Maternal Grandsire's Sire", 'dam')}
-                                        {renderSlot('damSireDam', "Maternal Grandsire's Dam", 'dam')}
-                                        {renderSlot('damDamSire', "Maternal Granddam's Sire", 'dam')}
-                                        {renderSlot('damDamDam', "Maternal Granddam's Dam", 'dam')}
+                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                        <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
+                                        {renderSlot('damSireSire', 'Great-Grandsire', 'dam')}
+                                        {renderSlot('damSireDam', 'Great-Granddam', 'dam')}
+                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                        {renderSlot('damDamSire', 'Great-Grandsire', 'dam')}
+                                        {renderSlot('damDamDam', 'Great-Granddam', 'dam')}
                                     </div>
                                 </div>
                             </div>
