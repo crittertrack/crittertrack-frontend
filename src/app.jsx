@@ -21128,8 +21128,8 @@ const AnimalForm = ({
                     };
                     const mpFetchByCtc = async (id) => {
                         try {
-                            const res = await axios.get(`${API_BASE_URL}/animals?id_public=${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${authToken}` } });
-                            return (res.data || [])[0] || null;
+                            const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                            return res.data || null;
                         } catch { return null; }
                     };
                     const MP_SLOT_CHILDREN = {
