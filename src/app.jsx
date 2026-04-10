@@ -6747,8 +6747,14 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         const isSire = slotGender === 'Male';
                         const GIcon = isSire ? Mars : Venus;
                         const gColor = isSire ? 'text-blue-400' : 'text-pink-400';
+                        const handleSlotClick = d.ctcId && onViewAnimal ? async () => {
+                            try {
+                                const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(d.ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                                if (res.data) onViewAnimal(res.data);
+                            } catch { /* not accessible */ }
+                        } : undefined;
                         return (
-                            <div key={slotKey} className={`rounded-lg border p-3 min-h-[80px] relative ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border p-3 min-h-[80px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
                                 <div className={`flex items-center gap-1 mb-1.5 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>
                                     <GIcon size={11} className={`flex-shrink-0 ${gColor}`} />
                                     <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
