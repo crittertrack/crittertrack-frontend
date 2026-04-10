@@ -6778,7 +6778,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             } catch { /* not accessible */ }
                         } : undefined;
                         return (
-                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border p-3 min-h-[80px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 min-h-[80px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
                                 <div className={`flex items-center gap-1 mb-1.5 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>
                                     <GIcon size={11} className={`flex-shrink-0 ${gColor}`} />
                                     <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
@@ -6792,7 +6792,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                             {fullName && <p className="text-xs font-semibold text-gray-800 leading-tight">{fullName}</p>}
                                             {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
                                             {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
-                                            {d.birthDate && <p className="text-[11px] text-gray-400">b. {formatDate(d.birthDate)}</p>}
+                                            {d.birthDate && <p className="text-[11px] text-gray-400">{formatDate(d.birthDate)}</p>}
                                             {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
                                             {d.notes && <p className="text-[11px] text-gray-400 border-t border-gray-200 mt-1 pt-1">{d.notes}</p>}
                                         </div>
@@ -6800,7 +6800,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 ) : (
                                     <p className="text-[11px] text-gray-300 italic">—</p>
                                 )}
-                                {d.ctcId && <p className="absolute bottom-1.5 right-2 text-[10px] font-mono text-primary">{d.ctcId}</p>}
+                                {d.ctcId && <p className="absolute bottom-1.5 right-2 text-[10px] font-mono text-gray-800">{d.ctcId}</p>}
                             </div>
                         );
                     };
@@ -8699,7 +8699,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             } catch { /* not accessible */ }
                         } : undefined;
                         return (
-                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border p-3 min-h-[80px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 min-h-[80px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
                                 <div className={`flex items-center gap-1 mb-1.5 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>
                                     <GIcon size={11} className={`flex-shrink-0 ${gColor}`} />
                                     <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
@@ -8711,7 +8711,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                             {fullName && <p className="text-xs font-semibold text-gray-800 leading-tight">{fullName}</p>}
                                             {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
                                             {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
-                                            {d.birthDate && <p className="text-[11px] text-gray-400">b. {formatDate(d.birthDate)}</p>}
+                                            {d.birthDate && <p className="text-[11px] text-gray-400">{formatDate(d.birthDate)}</p>}
                                             {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
                                             {d.notes && <p className="text-[11px] text-gray-400 border-t border-gray-200 mt-1 pt-1">{d.notes}</p>}
                                         </div>
@@ -8719,7 +8719,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 ) : (
                                     <p className="text-[11px] text-gray-300 italic">—</p>
                                 )}
-                                {d.ctcId && <p className="absolute bottom-1.5 right-2 text-[10px] font-mono text-primary">{d.ctcId}</p>}
+                                {d.ctcId && <p className="absolute bottom-1.5 right-2 text-[10px] font-mono text-gray-800">{d.ctcId}</p>}
                             </div>
                         );
                     };
@@ -10636,7 +10636,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             } catch { /* not accessible */ }
                         } : undefined;
                         return (
-                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border p-3 min-h-[80px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 min-h-[80px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
                                 <div className={`flex items-center gap-1 mb-1.5 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>
                                     <GIcon size={11} className={`flex-shrink-0 ${gColor}`} />
                                     <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
@@ -10648,7 +10648,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                             {fullName && <p className="text-xs font-semibold text-gray-800 leading-tight">{fullName}</p>}
                                             {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
                                             {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
-                                            {d.birthDate && <p className="text-[11px] text-gray-400">b. {formatDate(d.birthDate)}</p>}
+                                            {d.birthDate && <p className="text-[11px] text-gray-400">{formatDate(d.birthDate)}</p>}
                                             {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
                                             {d.notes && <p className="text-[11px] text-gray-400 border-t border-gray-200 mt-1 pt-1">{d.notes}</p>}
                                         </div>
@@ -10656,7 +10656,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                 ) : (
                                     <p className="text-[11px] text-gray-300 italic">—</p>
                                 )}
-                                {d.ctcId && <p className="absolute bottom-1.5 right-2 text-[10px] font-mono text-primary">{d.ctcId}</p>}
+                                {d.ctcId && <p className="absolute bottom-1.5 right-2 text-[10px] font-mono text-gray-800">{d.ctcId}</p>}
                             </div>
                         );
                     };
@@ -21659,7 +21659,7 @@ const AnimalForm = ({
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-xs font-semibold text-gray-800 truncate">{[d.prefix,d.name,d.suffix].filter(Boolean).join(' ')}</p>
                                                     {d.variety && <p className="text-[11px] text-gray-500 truncate">{d.variety}</p>}
-                                                    <p className="text-[10px] font-mono text-primary">{d.ctcId}</p>
+                                                    <p className="text-[10px] font-mono text-gray-800">{d.ctcId}</p>
                                                 </div>
                                             </div>
                                             <button type="button"
