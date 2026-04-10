@@ -16309,6 +16309,7 @@ const AnimalForm = ({
     // Manual Pedigree (Beta) — Tab 15
     const [mpEditForm, setMpEditForm] = useState(() => animalToEdit?.manualPedigree || {});
     const [mpCTCOpenSlot, setMpCTCOpenSlot] = useState(null);
+    const [mpSlotUploading, setMpSlotUploading] = useState({});
     // Gallery state (edit-only; changes are applied immediately via API)
     const [editGalleryImages, setEditGalleryImages] = useState(animalToEdit?.extraImages || []);
     const [galleryUploading, setGalleryUploading] = useState(false);
@@ -21220,8 +21221,29 @@ const AnimalForm = ({
                                             className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
                                         <input placeholder="Breeder Name" value={d.breederName || ''} onChange={e => setSlotField(slotKey, 'breederName', e.target.value)}
                                             className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
-                                        <input placeholder="Image URL (optional)" value={d.imageUrl || ''} onChange={e => setSlotField(slotKey, 'imageUrl', e.target.value)}
-                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                        <div className="flex items-center gap-2">
+                                            {d.imageUrl && <img src={d.imageUrl} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-gray-200" />}
+                                            <label className={`flex-1 flex items-center gap-1.5 px-2 py-1 border border-gray-300 rounded text-xs cursor-pointer bg-white hover:bg-gray-50 transition ${mpSlotUploading[slotKey] ? 'opacity-50 pointer-events-none' : ''}`}>
+                                                {mpSlotUploading[slotKey] ? <><Loader2 size={11} className="animate-spin" /> Uploading…</> : <><Camera size={11} /> {d.imageUrl ? 'Change Photo' : 'Add Photo'}</>}
+                                                <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                                                    const file = e.target.files?.[0];
+                                                    e.target.value = '';
+                                                    if (!file) return;
+                                                    setMpSlotUploading(p => ({ ...p, [slotKey]: true }));
+                                                    try {
+                                                        let blob;
+                                                        try { blob = await compressImageWithWorker(file, 480 * 1024, { maxWidth: 1200, maxHeight: 1200, startQuality: 0.85 }); } catch { blob = null; }
+                                                        if (!blob) { try { blob = await compressImageToMaxSize(file, 480 * 1024, { maxWidth: 1200, maxHeight: 1200 }); } catch { blob = await compressImageFile(file, { maxWidth: 1200, maxHeight: 1200, quality: 0.82 }); } }
+                                                        const fd = new FormData();
+                                                        fd.append('file', new File([blob], 'ancestor.jpg', { type: 'image/jpeg' }));
+                                                        const up = await axios.post(`${API_BASE_URL}/upload`, fd, { headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'multipart/form-data' } });
+                                                        setSlotField(slotKey, 'imageUrl', up.data.url);
+                                                    } catch { showModalMessage('Upload failed', 'Could not upload ancestor image. Please try again.'); }
+                                                    setMpSlotUploading(p => ({ ...p, [slotKey]: false }));
+                                                }} />
+                                            </label>
+                                            {d.imageUrl && <button type="button" onClick={() => setSlotField(slotKey, 'imageUrl', '')} className="text-[10px] text-red-400 hover:text-red-600 transition-colors flex-shrink-0">Remove</button>}
+                                        </div>
                                         <textarea placeholder="Notes" value={d.notes || ''} onChange={e => setSlotField(slotKey, 'notes', e.target.value)} rows={2}
                                             className="w-full px-2 py-1 border border-gray-300 rounded text-xs resize-none focus:ring-1 focus:ring-primary focus:border-primary"></textarea>
                                     </>
