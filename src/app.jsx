@@ -4113,7 +4113,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
     // Manual Pedigree (Beta) — Tab 16
     const [mpEditMode, setMpEditMode] = useState(false);
     const [mpSaving, setMpSaving] = useState(false);
+    const [mpDownloading, setMpDownloading] = useState(false);
     const [mpForm, setMpForm] = useState(() => animal?.manualPedigree || {});
+    const mpTreeRef = useRef(null);
 
     // Fetch ALL animals on the account + global relationships lazily when Lineage tab opens
     useEffect(() => {
@@ -6717,8 +6719,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 
                 {/* ── TAB 16: Manual Pedigree (Beta) ── */}
                 {detailViewTab === 16 && (() => {
-                    const mpTreeRef = React.useRef(null);
-                    const [mpDownloading, setMpDownloading] = React.useState(false);
                     const emptySlot = () => ({ name: '', variety: '', genCode: '', birthDate: '', breederName: '', notes: '' });
                     const getSlot = (key) => mpForm[key] || emptySlot();
                     const setSlotField = (key, field, val) => setMpForm(f => ({ ...f, [key]: { ...(f[key] || emptySlot()), [field]: val } }));
