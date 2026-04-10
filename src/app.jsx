@@ -6745,30 +6745,32 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         const isSire = sideColor === 'sire';
                         const fullName = [d.prefix, d.name, d.suffix].filter(Boolean).join(' ');
                         const slotGender = (slotKey === 'sire' || slotKey.endsWith('Sire')) ? 'Male' : 'Female';
+                        const GIcon = slotGender === 'Male' ? Mars : Venus;
+                        const gColor = slotGender === 'Male' ? 'text-blue-400' : 'text-pink-400';
                         return (
-                            <div key={slotKey} className={`rounded-lg border p-3 min-h-[70px] ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
-                                <p className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>{label}</p>
+                            <div key={slotKey} className={`rounded-lg border p-3 min-h-[80px] relative ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                                <div className={`flex items-center gap-1 mb-1.5 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>
+                                    <GIcon size={11} className={`flex-shrink-0 ${gColor}`} />
+                                    <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
+                                </div>
                                 {hasData ? (
-                                    <div className="space-y-0.5">
+                                    <div className="flex gap-2.5">
                                         {d.imageUrl && (
-                                            <img src={d.imageUrl} alt={fullName} className="w-10 h-10 rounded-full object-cover float-right ml-2 mb-1 border border-gray-200" />
+                                            <img src={d.imageUrl} alt={fullName} className="w-16 h-16 rounded-lg object-cover flex-shrink-0 border border-gray-200 self-start" />
                                         )}
-                                        {fullName && (
-                                            <div className="flex items-center gap-1">
-                                                {slotGender === 'Male' ? <Mars size={11} className="text-blue-400 flex-shrink-0" /> : <Venus size={11} className="text-pink-400 flex-shrink-0" />}
-                                                <p className="text-xs font-semibold text-gray-800">{fullName}</p>
-                                            </div>
-                                        )}
-                                        {d.ctcId && <p className="text-[10px] font-mono text-primary bg-primary/10 inline-block px-1 rounded">{d.ctcId}</p>}
-                                        {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
-                                        {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
-                                        {d.birthDate && <p className="text-[11px] text-gray-400">b. {new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(d.birthDate + 'T00:00:00'))}</p>}
-                                        {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
-                                        {d.notes && <p className="text-[11px] text-gray-400 border-t border-gray-200 mt-1 pt-1 clear-both">{d.notes}</p>}
+                                        <div className="flex-1 min-w-0 space-y-0.5 pb-4">
+                                            {fullName && <p className="text-xs font-semibold text-gray-800 leading-tight">{fullName}</p>}
+                                            {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
+                                            {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
+                                            {d.birthDate && <p className="text-[11px] text-gray-400">b. {new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(d.birthDate + 'T00:00:00'))}</p>}
+                                            {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
+                                            {d.notes && <p className="text-[11px] text-gray-400 border-t border-gray-200 mt-1 pt-1">{d.notes}</p>}
+                                        </div>
                                     </div>
                                 ) : (
                                     <p className="text-[11px] text-gray-300 italic">—</p>
                                 )}
+                                {d.ctcId && <p className="absolute bottom-1.5 right-2 text-[10px] font-mono text-primary">{d.ctcId}</p>}
                             </div>
                         );
                     };
