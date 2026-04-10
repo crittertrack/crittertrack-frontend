@@ -6878,13 +6878,13 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Sire's Side</p>
-                                        {renderSlot('sireSire', "Sire's Sire", 'sire')}
-                                        {renderSlot('sireDam', "Sire's Dam", 'sire')}
+                                        {renderSlot('sireSire', 'Paternal Grandsire', 'sire')}
+                                        {renderSlot('sireDam', 'Paternal Granddam', 'sire')}
                                     </div>
                                     <div className="space-y-2">
                                         <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Dam's Side</p>
-                                        {renderSlot('damSire', "Dam's Sire", 'dam')}
-                                        {renderSlot('damDam', "Dam's Dam", 'dam')}
+                                        {renderSlot('damSire', 'Maternal Grandsire', 'dam')}
+                                        {renderSlot('damDam', 'Maternal Granddam', 'dam')}
                                     </div>
                                 </div>
                             </div>
@@ -6894,17 +6894,17 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Sire's Side</p>
-                                        {renderSlot('sireSireSire', "Sire's Sire's Sire", 'sire')}
-                                        {renderSlot('sireSireDam', "Sire's Sire's Dam", 'sire')}
-                                        {renderSlot('sireDamSire', "Sire's Dam's Sire", 'sire')}
-                                        {renderSlot('sireDamDam', "Sire's Dam's Dam", 'sire')}
+                                        {renderSlot('sireSireSire', "Paternal Grandsire's Sire", 'sire')}
+                                        {renderSlot('sireSireDam', "Paternal Grandsire's Dam", 'sire')}
+                                        {renderSlot('sireDamSire', "Paternal Granddam's Sire", 'sire')}
+                                        {renderSlot('sireDamDam', "Paternal Granddam's Dam", 'sire')}
                                     </div>
                                     <div className="space-y-2">
                                         <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Dam's Side</p>
-                                        {renderSlot('damSireSire', "Dam's Sire's Sire", 'dam')}
-                                        {renderSlot('damSireDam', "Dam's Sire's Dam", 'dam')}
-                                        {renderSlot('damDamSire', "Dam's Dam's Sire", 'dam')}
-                                        {renderSlot('damDamDam', "Dam's Dam's Dam", 'dam')}
+                                        {renderSlot('damSireSire', "Maternal Grandsire's Sire", 'dam')}
+                                        {renderSlot('damSireDam', "Maternal Grandsire's Dam", 'dam')}
+                                        {renderSlot('damDamSire', "Maternal Granddam's Sire", 'dam')}
+                                        {renderSlot('damDamDam', "Maternal Granddam's Dam", 'dam')}
                                     </div>
                                 </div>
                             </div>
