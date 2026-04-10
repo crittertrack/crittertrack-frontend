@@ -21116,14 +21116,21 @@ const AnimalForm = ({
                     </div>
                 )}
 
-                {/* Tab 15: Manual Pedigree */}
-                {activeTab === 15 && (() => {
-                    const emptySlot = () => ({ mode: 'manual', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
-                    const getSlot = (key) => mpEditForm[key] || emptySlot();
-                    const setSlotField = (key, field, val) => setMpEditForm(f => ({ ...f, [key]: { ...(f[key] || emptySlot()), [field]: val } }));
-
-                    // Maps each slot to its paternal/maternal child slot keys
-                    const SLOT_CHILDREN = {
+                {/* Tab 15: Beta Pedigree */}
+                {(() => {
+                    // Hoisted so the CTC modal (rendered outside the tab guard) can always call linkAnimal
+                    const mpEmptySlot = () => ({ mode: 'manual', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
+                    const mpToSlot = (a) => {
+                        const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
+                        return { mode: 'ctc', ctcId: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? a.birthDate.slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
+                    };
+                    const mpFetchByCtc = async (id) => {
+                        try {
+                            const res = await axios.get(`${API_BASE_URL}/animals?id_public=${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                            return (res.data || [])[0] || null;
+                        } catch { return null; }
+                    };
+                    const MP_SLOT_CHILDREN = {
                         sire:    { father: 'sireSire',    mother: 'sireDam'    },
                         dam:     { father: 'damSire',     mother: 'damDam'     },
                         sireSire:{ father: 'sireSireSire',mother: 'sireSireDam'},
@@ -21131,42 +21138,49 @@ const AnimalForm = ({
                         damSire: { father: 'damSireSire', mother: 'damSireDam' },
                         damDam:  { father: 'damDamSire',  mother: 'damDamDam'  },
                     };
-                    const toSlot = (a) => {
-                        const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
-                        return { mode: 'ctc', ctcId: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? a.birthDate.slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
-                    };
-                    const fetchByCtc = async (id) => {
-                        try {
-                            const res = await axios.get(`${API_BASE_URL}/animals?id_public=${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${authToken}` } });
-                            return (res.data || [])[0] || null;
-                        } catch { return null; }
-                    };
-                    const linkAnimal = async (slotKey, a) => {
-                        const updates = { [slotKey]: toSlot(a) };
+                    const mpLinkAnimal = async (slotKey, a) => {
+                        const updates = { [slotKey]: mpToSlot(a) };
                         const queue = [{ animal: a, slot: slotKey }];
                         while (queue.length) {
                             const { animal: cur, slot } = queue.shift();
-                            const children = SLOT_CHILDREN[slot];
+                            const children = MP_SLOT_CHILDREN[slot];
                             if (!children) continue;
                             const fatherId = cur.fatherId_public || cur.sireId_public;
                             const motherId = cur.motherId_public || cur.damId_public;
-                            if (fatherId) {
-                                const father = await fetchByCtc(fatherId);
-                                if (father) { updates[children.father] = toSlot(father); queue.push({ animal: father, slot: children.father }); }
-                            }
-                            if (motherId) {
-                                const mother = await fetchByCtc(motherId);
-                                if (mother) { updates[children.mother] = toSlot(mother); queue.push({ animal: mother, slot: children.mother }); }
-                            }
+                            if (fatherId) { const f = await mpFetchByCtc(fatherId); if (f) { updates[children.father] = mpToSlot(f); queue.push({ animal: f, slot: children.father }); } }
+                            if (motherId) { const m = await mpFetchByCtc(motherId); if (m) { updates[children.mother] = mpToSlot(m); queue.push({ animal: m, slot: children.mother }); } }
                         }
                         setMpEditForm(f => ({ ...f, ...updates }));
                     };
+
+                    // CTC selector modal — always rendered so it works regardless of activeTab
+                    const ctcModal = mpCTCOpenSlot ? (
+                        <ParentSearchModal
+                            title={mpCTCOpenSlot.endsWith('Sire') || mpCTCOpenSlot === 'sire' ? 'Sire' : 'Dam'}
+                            currentId={animalToEdit?.id_public}
+                            onSelect={async (a) => { setMpCTCOpenSlot(null); if (a) await mpLinkAnimal(mpCTCOpenSlot, a); }}
+                            onClose={() => setMpCTCOpenSlot(null)}
+                            authToken={authToken}
+                            showModalMessage={showModalMessage}
+                            API_BASE_URL={API_BASE_URL}
+                            X={X}
+                            Search={Search}
+                            Loader2={Loader2}
+                            LoadingSpinner={LoadingSpinner}
+                            requiredGender={mpCTCOpenSlot.endsWith('Sire') || mpCTCOpenSlot === 'sire' ? 'Male' : 'Female'}
+                            species={formData.species}
+                        />
+                    ) : null;
+
+                    if (activeTab !== 15) return ctcModal;
+
+                    const getSlot = (key) => mpEditForm[key] || mpEmptySlot();
+                    const setSlotField = (key, field, val) => setMpEditForm(f => ({ ...f, [key]: { ...(f[key] || mpEmptySlot()), [field]: val } }));
 
                     const renderEditSlot = (slotKey, label, sideColor) => {
                         const d = getSlot(slotKey);
                         const isSire = sideColor === 'sire';
                         const isCTC = d.mode === 'ctc';
-
                         const bdr = isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40';
                         const lbl = isSire ? 'text-blue-500' : 'text-pink-500';
 
@@ -21251,7 +21265,8 @@ const AnimalForm = ({
                         );
                     };
 
-                    return (
+                    return (<>
+                        {ctcModal}
                         <div className="space-y-6">
                             <div className="flex items-center gap-2">
                                 <Dna size={18} className="text-orange-500" />
@@ -21307,30 +21322,8 @@ const AnimalForm = ({
                                 </div>
                             </div>
                         </div>
-                    );
+                    </>);
                 })()}
-
-                {/* Manual Pedigree CTC selector modal */}
-                {mpCTCOpenSlot && (
-                    <ParentSearchModal
-                        title={mpCTCOpenSlot.endsWith('Sire') || mpCTCOpenSlot === 'sire' ? 'Sire' : 'Dam'}
-                        currentId={animalToEdit?.id_public}
-                        onSelect={async (a) => {
-                            setMpCTCOpenSlot(null);
-                            if (a) await linkAnimal(mpCTCOpenSlot, a);
-                        }}
-                        onClose={() => setMpCTCOpenSlot(null)}
-                        authToken={authToken}
-                        showModalMessage={showModalMessage}
-                        API_BASE_URL={API_BASE_URL}
-                        X={X}
-                        Search={Search}
-                        Loader2={Loader2}
-                        LoadingSpinner={LoadingSpinner}
-                        requiredGender={mpCTCOpenSlot.endsWith('Sire') || mpCTCOpenSlot === 'sire' ? 'Male' : 'Female'}
-                        species={formData.species}
-                    />
-                )}
 
                 {/* Tab 14: Gallery */}
                 {activeTab === 14 && (
