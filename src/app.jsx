@@ -6742,11 +6742,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                     const renderSlot = (slotKey, label, sideColor) => {
                         const d = getSlot(slotKey);
                         const hasData = d && (d.ctcId || Object.entries(d).some(([fk,v]) => fk !== 'mode' && v && String(v).trim()));
-                        const isSire = sideColor === 'sire';
                         const fullName = [d.prefix, d.name, d.suffix].filter(Boolean).join(' ');
                         const slotGender = (slotKey === 'sire' || slotKey.endsWith('Sire')) ? 'Male' : 'Female';
-                        const GIcon = slotGender === 'Male' ? Mars : Venus;
-                        const gColor = slotGender === 'Male' ? 'text-blue-400' : 'text-pink-400';
+                        const isSire = slotGender === 'Male';
+                        const GIcon = isSire ? Mars : Venus;
+                        const gColor = isSire ? 'text-blue-400' : 'text-pink-400';
                         return (
                             <div key={slotKey} className={`rounded-lg border p-3 min-h-[80px] relative ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
                                 <div className={`flex items-center gap-1 mb-1.5 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>
@@ -21181,7 +21181,7 @@ const AnimalForm = ({
 
                     const renderEditSlot = (slotKey, label, sideColor) => {
                         const d = getSlot(slotKey);
-                        const isSire = sideColor === 'sire';
+                        const isSire = slotKey === 'sire' || slotKey.endsWith('Sire');
                         const isCTC = d.mode === 'ctc';
                         const bdr = isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40';
                         const lbl = isSire ? 'text-blue-500' : 'text-pink-500';
