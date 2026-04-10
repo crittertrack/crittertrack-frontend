@@ -4110,6 +4110,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
     const [globalRels, setGlobalRels] = useState(null); // null = not yet fetched
     const [globalRelsLoading, setGlobalRelsLoading] = useState(false);
     const [parentCardKey, setParentCardKey] = useState(0); // increment to force parent cards to refetch
+    // Manual Pedigree (Beta) — Tab 16
+    const [mpEditMode, setMpEditMode] = useState(false);
+    const [mpSaving, setMpSaving] = useState(false);
+    const [mpForm, setMpForm] = useState(() => animal?.manualPedigree || {});
 
     // Fetch ALL animals on the account + global relationships lazily when Lineage tab opens
     useEffect(() => {
