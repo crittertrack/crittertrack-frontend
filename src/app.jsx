@@ -4539,7 +4539,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' },
                             { id: 14, label: 'Gallery', icon: Images, color: 'text-rose-500' },
                             { id: 15, label: 'Logs', icon: ScrollText, color: 'text-gray-600' },
-                            { id: 16, label: 'Manual Pedigree ✦', icon: Dna, color: 'text-orange-500' }
+                            { id: 16, label: 'Beta Pedigree ✦', icon: Dna, color: 'text-orange-500' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -6778,8 +6778,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             <div className="flex items-center justify-between flex-wrap gap-2">
                                 <div className="flex items-center gap-2">
                                     <Dna size={18} className="text-orange-500" />
-                                    <h3 className="text-base font-semibold text-gray-700">Manual Pedigree</h3>
-                                    <span className="text-[10px] font-bold uppercase tracking-widest bg-orange-100 text-orange-600 border border-orange-200 rounded-full px-2 py-0.5">Beta</span>
+                                    <h3 className="text-base font-semibold text-gray-700">Beta Pedigree</h3>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     {hasAnyData && (
@@ -18204,7 +18203,7 @@ const AnimalForm = ({
                             { id: 12, label: 'Show', icon: Trophy, color: 'text-yellow-600' },
                             { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' },
                             { id: 14, label: 'Gallery', icon: Images, color: 'text-rose-500' },
-                            { id: 15, label: 'Manual Pedigree ✶', icon: Dna, color: 'text-orange-500' }
+                            { id: 15, label: 'Beta Pedigree ✶', icon: Dna, color: 'text-orange-500' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -21256,8 +21255,7 @@ const AnimalForm = ({
                         <div className="space-y-6">
                             <div className="flex items-center gap-2">
                                 <Dna size={18} className="text-orange-500" />
-                                <h3 className="text-base font-semibold text-gray-700">Manual Pedigree</h3>
-                                <span className="text-[10px] font-bold uppercase tracking-widest bg-orange-100 text-orange-600 border border-orange-200 rounded-full px-2 py-0.5">Beta</span>
+                                <h3 className="text-base font-semibold text-gray-700">Beta Pedigree</h3>
                             </div>
                             <p className="text-xs text-gray-400 -mt-3">Ancestors entered here are not linked to registered CritterTrack animals and do not affect COI calculations or the pedigree chart. Changes are saved when you click Save Animal.</p>
 
