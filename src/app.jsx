@@ -23865,10 +23865,18 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                     {zePreview.litters.items.map((l, i) => (
                                                         <tr key={i}>
                                                             <td className="px-2 py-1.5 font-medium text-gray-700">{l.nestLetter || '—'}</td>
-                                                            <td className="px-2 py-1.5 text-gray-600">{l.matingDate || '—'}</td>
-                                                            <td className="px-2 py-1.5 text-gray-600">{l.birthDate || '—'}</td>
-                                                            <td className="px-2 py-1.5 text-gray-700" title={l.maleRegNum || ''}>{l.maleName || l.maleRegNum || '—'}</td>
-                                                            <td className="px-2 py-1.5 text-gray-700" title={l.femaleRegNum || ''}>{l.femaleName || l.femaleRegNum || '—'}</td>
+                                                            <td className="px-2 py-1.5 text-gray-600">{l.matingDate ? String(l.matingDate).slice(0,10) : '—'}</td>
+                                                            <td className="px-2 py-1.5 text-gray-600">{l.birthDate ? String(l.birthDate).slice(0,10) : '—'}</td>
+                                                            <td className="px-2 py-1.5 text-gray-700" title={l.maleRegNum || ''}>
+                                                                {l.maleName || l.maleRegNum || '—'}
+                                                                {l.maleCtId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{l.maleCtId}</span>}
+                                                                {!l.maleCtId && l.maleRegNum && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
+                                                            </td>
+                                                            <td className="px-2 py-1.5 text-gray-700" title={l.femaleRegNum || ''}>
+                                                                {l.femaleName || l.femaleRegNum || '—'}
+                                                                {l.femaleCtId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{l.femaleCtId}</span>}
+                                                                {!l.femaleCtId && l.femaleRegNum && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
+                                                            </td>
                                                             <td className="px-2 py-1.5 text-gray-600">{l.litterSizeBorn != null ? l.litterSizeBorn : '—'}</td>
                                                         </tr>
                                                     ))}
