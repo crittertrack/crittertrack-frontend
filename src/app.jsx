@@ -22394,6 +22394,16 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
 
     // Data Portability — Import
     const [importFile, setImportFile] = useState(null);
+
+    // ZooEasy Import
+    const [zeAnimalsFile, setZeAnimalsFile] = useState(null);
+    const [zePairsFile, setZePairsFile] = useState(null);
+    const [zeSpecies, setZeSpecies] = useState('');
+    const [zePreview, setZePreview] = useState(null);
+    const [zeConflictResolutions, setZeConflictResolutions] = useState({});
+    const [zeLoading, setZeLoading] = useState(false);
+    const [zeConfirmLoading, setZeConfirmLoading] = useState(false);
+    const [zeResult, setZeResult] = useState(null);
     const [importPreview, setImportPreview] = useState(null);
     const [importConflictResolutions, setImportConflictResolutions] = useState({});
     const [importLoading, setImportLoading] = useState(false);
@@ -23469,6 +23479,218 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 </div>
                             )}
                             <button onClick={() => setImportResult(null)} className="mt-3 text-xs text-gray-500 hover:text-gray-700 underline">Dismiss</button>
+                        </div>
+                    )}
+                </div>
+
+                {/* ── ZooEasy Import ─────────────────────────────────────────── */}
+                <div className="border-t pt-5">
+                    <h4 className="font-semibold text-gray-700 mb-1 flex items-center gap-2"><Upload size={16} /> Import from ZooEasy</h4>
+                    <p className="text-xs text-gray-500 mb-4">Export your animals and/or breeding pairs from ZooEasy as CSV, then upload them here. Duplicates are detected across all CritterTrack users by registration number and name + birth date.</p>
+
+                    {/* Species */}
+                    <div className="mb-4">
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Species <span className="text-red-500">*</span> (required when importing animals)</label>
+                        <input
+                            type="text"
+                            placeholder="e.g. Mouse, Rat, Guinea Pig"
+                            value={zeSpecies}
+                            onChange={e => setZeSpecies(e.target.value)}
+                            className="w-full max-w-xs p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary"
+                        />
+                    </div>
+
+                    {/* File pickers */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                        {[['animals', zeAnimalsFile, setZeAnimalsFile, 'Animals CSV (animals.csv)'],
+                          ['breedingpairs', zePairsFile, setZePairsFile, 'Breeding Pairs CSV (breedingpairs.csv)']].map(
+                            ([key, file, setter, label]) => (
+                                <label key={key} className="flex flex-col items-center justify-center h-20 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition relative">
+                                    <input type="file" accept=".csv" className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                                        onChange={e => { setter(e.target.files?.[0] || null); setZePreview(null); setZeResult(null); }} />
+                                    {file
+                                        ? <p className="text-xs font-medium text-gray-700 flex items-center gap-1"><FileText size={13} />{file.name}</p>
+                                        : <>
+                                            <Upload size={16} className="text-gray-400 mb-1" />
+                                            <p className="text-xs text-gray-500 text-center px-2">{label}</p>
+                                          </>
+                                    }
+                                </label>
+                            )
+                        )}
+                    </div>
+
+                    {(zeAnimalsFile || zePairsFile) && !zePreview && !zeResult && (
+                        <button
+                            onClick={async () => {
+                                if (zeAnimalsFile && !zeSpecies.trim()) {
+                                    showModalMessage('Species Required', 'Please enter a species name before previewing.');
+                                    return;
+                                }
+                                setZeLoading(true);
+                                setZePreview(null);
+                                setZeResult(null);
+                                setZeConflictResolutions({});
+                                try {
+                                    const fd = new FormData();
+                                    if (zeAnimalsFile) fd.append('animals', zeAnimalsFile);
+                                    if (zePairsFile) fd.append('breedingpairs', zePairsFile);
+                                    fd.append('species', zeSpecies.trim());
+                                    const resp = await axios.post(`${API_BASE_URL}/import/zooeasy`, fd, {
+                                        headers: { Authorization: `Bearer ${authToken}` },
+                                    });
+                                    setZePreview(resp.data.preview || {});
+                                    // Default all conflicts to 'skip'
+                                    const defaults = {};
+                                    for (const c of (resp.data.preview?.animals?.conflicts || [])) {
+                                        defaults[c.zeRegNum] = 'skip';
+                                    }
+                                    setZeConflictResolutions(defaults);
+                                } catch (err) {
+                                    showModalMessage('ZooEasy Preview Failed', err.response?.data?.message || err.message);
+                                } finally {
+                                    setZeLoading(false);
+                                }
+                            }}
+                            disabled={zeLoading}
+                            className="bg-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+                        >
+                            {zeLoading ? <Loader2 className="animate-spin" size={16} /> : <FileText size={16} />}
+                            Preview Import
+                        </button>
+                    )}
+
+                    {/* Preview */}
+                    {zePreview && (
+                        <div className="space-y-4 mt-3">
+                            <h5 className="font-semibold text-gray-700">Preview</h5>
+
+                            {/* Summary row */}
+                            <div className="flex flex-wrap gap-4 text-sm">
+                                {zePreview.animals && (
+                                    <div className="bg-white border rounded-lg px-4 py-2">
+                                        <p className="font-medium text-gray-700">Animals</p>
+                                        <p className="text-green-700">{zePreview.animals.new} new</p>
+                                        {zePreview.animals.conflicts?.length > 0 && (
+                                            <p className="text-amber-600">{zePreview.animals.conflicts.length} duplicate{zePreview.animals.conflicts.length !== 1 ? 's' : ''}</p>
+                                        )}
+                                    </div>
+                                )}
+                                {zePreview.litters && (
+                                    <div className="bg-white border rounded-lg px-4 py-2">
+                                        <p className="font-medium text-gray-700">Litters</p>
+                                        <p className="text-green-700">{zePreview.litters.total} to import</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Conflict resolution */}
+                            {zePreview.animals?.conflicts?.length > 0 && (
+                                <div className="rounded border bg-amber-50 overflow-hidden">
+                                    <div className="px-3 py-2.5 flex items-center gap-2">
+                                        <AlertTriangle size={14} className="text-amber-600 shrink-0" />
+                                        <p className="text-sm font-semibold text-amber-700 flex-1">Duplicate animals detected in CritterTrack</p>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs text-gray-500">Set all:</span>
+                                            {['skip', 'import_anyway'].map(action => (
+                                                <button key={action} type="button"
+                                                    onClick={() => {
+                                                        const all = {};
+                                                        for (const c of zePreview.animals.conflicts) all[c.zeRegNum] = action;
+                                                        setZeConflictResolutions(all);
+                                                    }}
+                                                    className="text-xs px-2 py-1 border rounded bg-white hover:bg-gray-100"
+                                                >
+                                                    {action === 'skip' ? 'Skip all' : 'Import all anyway'}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="border-t bg-white divide-y max-h-64 overflow-y-auto">
+                                        {zePreview.animals.conflicts.map(c => (
+                                            <div key={c.zeRegNum} className="px-3 py-2 flex flex-wrap items-start gap-x-3 gap-y-1 text-xs">
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-medium text-gray-800 truncate">{c.name}</p>
+                                                    <p className="text-gray-500">
+                                                        ZooEasy #{c.zeRegNum} &rarr; already exists as <span className="font-mono">{c.existingId}</span>
+                                                        {' '}({c.isOwnedByImporter ? 'your animal' : `owned by ${c.existingOwner}`})
+                                                    </p>
+                                                    <p className="text-gray-400 italic">Matched by: {c.matchType === 'id' ? 'registration number' : 'name + birth date'}</p>
+                                                </div>
+                                                <select
+                                                    value={zeConflictResolutions[c.zeRegNum] || 'skip'}
+                                                    onChange={e => setZeConflictResolutions(prev => ({ ...prev, [c.zeRegNum]: e.target.value }))}
+                                                    className="text-xs border rounded px-2 py-1 bg-white shrink-0"
+                                                >
+                                                    <option value="skip">Skip</option>
+                                                    <option value="import_anyway">Import anyway</option>
+                                                </select>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex gap-3 pt-1">
+                                <button
+                                    onClick={async () => {
+                                        setZeConfirmLoading(true);
+                                        try {
+                                            const fd = new FormData();
+                                            if (zeAnimalsFile) fd.append('animals', zeAnimalsFile);
+                                            if (zePairsFile) fd.append('breedingpairs', zePairsFile);
+                                            fd.append('species', zeSpecies.trim());
+                                            fd.append('confirm', 'true');
+                                            fd.append('conflictResolutions', JSON.stringify(zeConflictResolutions));
+                                            const resp = await axios.post(`${API_BASE_URL}/import/zooeasy`, fd, {
+                                                headers: { Authorization: `Bearer ${authToken}` },
+                                            });
+                                            setZeResult(resp.data);
+                                            setZePreview(null);
+                                            setZeAnimalsFile(null);
+                                            setZePairsFile(null);
+                                        } catch (err) {
+                                            showModalMessage('ZooEasy Import Failed', err.response?.data?.message || err.message);
+                                        } finally {
+                                            setZeConfirmLoading(false);
+                                        }
+                                    }}
+                                    disabled={zeConfirmLoading}
+                                    className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+                                >
+                                    {zeConfirmLoading ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle size={16} />}
+                                    Confirm Import
+                                </button>
+                                <button
+                                    onClick={() => { setZePreview(null); setZeAnimalsFile(null); setZePairsFile(null); }}
+                                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Result */}
+                    {zeResult && (
+                        <div className="mt-3 p-4 rounded-lg border bg-green-50 border-green-200">
+                            <p className="font-semibold text-green-800 flex items-center gap-1.5 mb-2"><CheckCircle size={16} /> ZooEasy import complete</p>
+                            <div className="text-sm text-gray-700 space-y-0.5 mb-2">
+                                {zeResult.written && Object.entries(zeResult.written).map(([s, n]) => (
+                                    <p key={s}><span className="capitalize font-medium">{s}</span>: {n} imported{zeResult.skipped?.[s] ? `, ${zeResult.skipped[s]} skipped (duplicates)` : ''}</p>
+                                ))}
+                            </div>
+                            {zeResult.errors?.length > 0 && (
+                                <div className="mt-2">
+                                    <p className="text-sm font-semibold text-red-700 flex items-center gap-1"><AlertTriangle size={13} /> {zeResult.errors.length} error(s):</p>
+                                    <ul className="text-xs text-red-600 list-disc list-inside mt-1 space-y-0.5 max-h-32 overflow-y-auto">
+                                        {zeResult.errors.map((e, i) => (
+                                            <li key={i}>[{e.section}] {e.id}: {e.error}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                            <button onClick={() => setZeResult(null)} className="mt-3 text-xs text-gray-500 hover:text-gray-700 underline">Dismiss</button>
                         </div>
                     )}
                 </div>
