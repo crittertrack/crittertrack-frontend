@@ -4170,11 +4170,12 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
             if (dsd)  seeded.damSireDam   = toSlot(dsd);
             if (dds)  seeded.damDamSire   = toSlot(dds);
             if (ddd)  seeded.damDamDam    = toSlot(ddd);
-            // Overlay non-empty manualPedigree entries on top of seeded values
-            const merged = { ...seeded };
+            // Overlay seeded (real CTC links) on top of manual entries — seed wins
+            const merged = {};
             Object.entries(manual).forEach(([k, v]) => {
                 if (v && (v.ctcId || v.name || v.prefix || v.suffix)) merged[k] = v;
             });
+            Object.assign(merged, seeded);
             setMpEnrichedData(merged);
         })();
         return () => { cancelled = true; };
@@ -7063,11 +7064,12 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
             if (dsd)  seeded.damSireDam   = toSlot(dsd);
             if (dds)  seeded.damDamSire   = toSlot(dds);
             if (ddd)  seeded.damDamDam    = toSlot(ddd);
-            // Overlay non-empty manualPedigree entries on top of seeded values
-            const merged = { ...seeded };
+            // Overlay seeded (real CTC links) on top of manual entries — seed wins
+            const merged = {};
             Object.entries(manual).forEach(([k, v]) => {
                 if (v && (v.ctcId || v.name || v.prefix || v.suffix)) merged[k] = v;
             });
+            Object.assign(merged, seeded);
             setMpEnrichedData(merged);
         })();
         return () => { cancelled = true; };
@@ -8991,11 +8993,12 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
             if (dsd)  seeded.damSireDam   = toSlot(dsd);
             if (dds)  seeded.damDamSire   = toSlot(dds);
             if (ddd)  seeded.damDamDam    = toSlot(ddd);
-            // Overlay non-empty manualPedigree entries on top of seeded values
-            const merged = { ...seeded };
+            // Overlay seeded (real CTC links) on top of manual entries — seed wins
+            const merged = {};
             Object.entries(manual).forEach(([k, v]) => {
                 if (v && (v.ctcId || v.name || v.prefix || v.suffix)) merged[k] = v;
             });
+            Object.assign(merged, seeded);
             setMpEnrichedData(merged);
         })();
         return () => { cancelled = true; };
