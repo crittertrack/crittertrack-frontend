@@ -1,5 +1,5 @@
-// Force deployment trigger - Community page with favorites system
-// Date: 2026-04-02
-// Purpose: Deploy new Community page with favorites (animals & users) and activity feeds
-// Build: v13 - Favorites system integration
-export const DEPLOYMENT_TIMESTAMP = '2026-04-02T21:30:00Z';
+// Force deployment trigger - Kintraks import dupe detection fix
+// Date: 2026-04-11
+// Purpose: Fix Kintraks dupe logic, litter manual mapping, batch query optimisation
+// Build: v14 - Kintraks import improvements
+export const DEPLOYMENT_TIMESTAMP = '2026-04-11T18:00:00Z';
