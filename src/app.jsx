@@ -24118,13 +24118,13 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     });
                                     const preview = resp.data.preview || {};
                                     setKtkPreview(preview);
-                                    setKtkSelectedAnimals(new Set((preview.animals?.items || []).map(a => a.registration).filter(Boolean)));
-                                    setKtkSelectedLitters(new Set((preview.litters?.items || []).filter(l => !l.isDuplicate).map(l => l.litterIndex)));
+                                    setKtkSelectedAnimals(new Set((preview.animals?.items || []).map(a => a.registration || a.kintrakId).filter(Boolean)));
+                                    setKtkSelectedLitters(new Set((preview.litters?.items || []).map(l => l.litterIndex)));
                                     setKtkManualMappings({});
                                     setKtkMappingSearch({ registration: null, query: '', results: [], loading: false });
                                     const defaults = {};
                                     for (const c of (preview.animals?.conflicts || [])) {
-                                        defaults[c.registration] = 'use_existing';
+                                        defaults[c.registration || c.kintrakId] = 'use_existing';
                                     }
                                     setKtkConflictResolutions(defaults);
                                 } catch (err) {
@@ -24165,7 +24165,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                         </h5>
                                         <div className="flex gap-2 text-xs">
                                             <button type="button"
-                                                onClick={() => setKtkSelectedAnimals(new Set((ktkPreview.animals.items || []).map(a => a.registration).filter(Boolean)))}
+                                                onClick={() => setKtkSelectedAnimals(new Set((ktkPreview.animals.items || []).map(a => a.registration || a.kintrakId).filter(Boolean)))}
                                                 className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Select all</button>
                                             <button type="button"
                                                 onClick={() => setKtkSelectedAnimals(new Set())}
@@ -24189,17 +24189,18 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                 </thead>
                                                 <tbody className="divide-y bg-white">
                                                     {(ktkPreview.animals.items || []).map(a => {
-                                                        const isSelected = ktkSelectedAnimals.has(a.registration);
-                                                        const conflict   = ktkPreview.animals.conflicts?.find(c => c.registration === a.registration);
-                                                        const resolution = ktkConflictResolutions[a.registration] || 'use_existing';
+                                                        const aKey = a.registration || a.kintrakId;
+                                                        const isSelected = ktkSelectedAnimals.has(aKey);
+                                                        const conflict   = ktkPreview.animals.conflicts?.find(c => c.kintrakId === a.kintrakId);
+                                                        const resolution = ktkConflictResolutions[aKey] || 'use_existing';
                                                         return (
-                                                            <React.Fragment key={a.registration || a.name}>
-                                                                <tr className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : conflict ? 'bg-amber-50' : ''}`}>
+                                                            <React.Fragment key={aKey}>
+                                                                <tr className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : conflict ? (conflict.confidence === 'possible' ? 'bg-orange-50' : 'bg-amber-50') : ''}`}>
                                                                     <td className="px-2 py-1.5 text-center">
                                                                         <input type="checkbox" checked={isSelected}
                                                                             onChange={e => setKtkSelectedAnimals(prev => {
                                                                                 const next = new Set(prev);
-                                                                                if (e.target.checked) next.add(a.registration); else next.delete(a.registration);
+                                                                                if (e.target.checked) next.add(aKey); else next.delete(aKey);
                                                                                 return next;
                                                                             })}
                                                                             className="rounded" />
@@ -24215,25 +24216,25 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                             ? conflict.confidence === 'possible'
                                                                                 ? <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded text-xs font-medium">Possible match</span>
                                                                                 : <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium">Duplicate</span>
-                                                                            : ktkManualMappings[a.registration]
+                                                                            : ktkManualMappings[aKey]
                                                                                 ? <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">Mapped</span>
                                                                                 : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
                                                                     </td>
                                                                 </tr>
                                                                 {/* Manual mapping sub-row for New/Mapped rows */}
                                                                 {!conflict && isSelected && (
-                                                                    <tr className={ktkManualMappings[a.registration] ? 'bg-blue-50' : 'bg-gray-50'}>
+                                                                    <tr className={ktkManualMappings[aKey] ? 'bg-blue-50' : 'bg-gray-50'}>
                                                                         <td></td>
                                                                         <td colSpan="7" className="px-3 pb-2 pt-0">
-                                                                            {ktkManualMappings[a.registration] ? (
+                                                                            {ktkManualMappings[aKey] ? (
                                                                                 <div className="flex items-center gap-2 text-xs pt-1">
-                                                                                    <span className="text-blue-700">&#x21AA; Mapped to CT <span className="font-mono font-semibold">{ktkManualMappings[a.registration].id_public}</span> &mdash; {ktkManualMappings[a.registration].name}</span>
-                                                                                    <button type="button" onClick={() => setKtkManualMappings(prev => { const n = { ...prev }; delete n[a.registration]; return n; })}
+                                                                                    <span className="text-blue-700">&#x21AA; Mapped to CT <span className="font-mono font-semibold">{ktkManualMappings[aKey].id_public}</span> &mdash; {ktkManualMappings[aKey].name}</span>
+                                                                                    <button type="button" onClick={() => setKtkManualMappings(prev => { const n = { ...prev }; delete n[aKey]; return n; })}
                                                                                         className="text-gray-400 hover:text-red-500 transition ml-1" title="Remove mapping"><X size={11} /></button>
                                                                                 </div>
                                                                             ) : (
                                                                                 <div className="pt-1">
-                                                                                    {ktkMappingSearch.registration === a.registration ? (
+                                                                                    {ktkMappingSearch.registration === aKey ? (
                                                                                         <div className="flex flex-col gap-1.5">
                                                                                             <div className="flex items-center gap-1.5">
                                                                                                 <input autoFocus type="text" placeholder="Search CT animal by name…"
@@ -24265,7 +24266,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                                     {ktkMappingSearch.results.map(r => (
                                                                                                         <button key={r.id_public} type="button"
                                                                                                             onClick={() => {
-                                                                                                                setKtkManualMappings(prev => ({ ...prev, [a.registration]: { id_public: r.id_public, name: [r.prefix, r.name, r.suffix].filter(Boolean).join(' ') } }));
+                                                                                                                setKtkManualMappings(prev => ({ ...prev, [aKey]: { id_public: r.id_public, name: [r.prefix, r.name, r.suffix].filter(Boolean).join(' ') } }));
                                                                                                                 setKtkMappingSearch({ registration: null, query: '', results: [], loading: false });
                                                                                                             }}
                                                                                                             className="w-full text-left px-2 py-1.5 hover:bg-blue-50 transition text-xs"
@@ -24282,7 +24283,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                         </div>
                                                                                     ) : (
                                                                                         <button type="button"
-                                                                                            onClick={() => setKtkMappingSearch({ registration: a.registration, query: '', results: [], loading: false })}
+                                                                                            onClick={() => setKtkMappingSearch({ registration: aKey, query: '', results: [], loading: false })}
                                                                                             className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
                                                                                         >
                                                                                             + Map to existing CT animal (for parent links)
@@ -24309,7 +24310,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                 </span>
                                                                                 <select
                                                                                     value={resolution}
-                                                                                    onChange={e => setKtkConflictResolutions(prev => ({ ...prev, [a.registration]: e.target.value }))}
+                                                                                    onChange={e => setKtkConflictResolutions(prev => ({ ...prev, [aKey]: e.target.value }))}
                                                                                     className="border rounded px-2 py-0.5 bg-white text-gray-700 font-medium text-xs"
                                                                                 >
                                                                                     <option value="use_existing">Use existing CT animal for parent links (skip import)</option>
@@ -24330,7 +24331,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                         {ktkSelectedAnimals.size} of {ktkPreview.animals.total} selected
                                         {(() => {
                                             const dupeLinks = [...ktkSelectedAnimals].filter(r => {
-                                                const c = ktkPreview.animals.conflicts?.find(x => x.registration === r);
+                                                const c = ktkPreview.animals.conflicts?.find(x => (x.registration || x.kintrakId) === r);
                                                 return c && (ktkConflictResolutions[r] || 'use_existing') === 'use_existing';
                                             }).length;
                                             return dupeLinks > 0 ? ` · ${dupeLinks} duplicate${dupeLinks !== 1 ? 's' : ''} will link to existing CT animals` : '';
