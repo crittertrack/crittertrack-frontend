@@ -4112,11 +4112,13 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
     const [parentCardKey, setParentCardKey] = useState(0); // increment to force parent cards to refetch
     // Manual Pedigree (Beta) — Tab 16
     const [mpDownloading, setMpDownloading] = useState(false);
+    const [mpLoading, setMpLoading] = useState(false);
     const mpTreeRef = useRef(null);
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
     useEffect(() => {
         if (detailViewTab !== 16) return;
         let cancelled = false;
+        setMpLoading(true);
         (async () => {
             const manual = animal?.manualPedigree || {};
             const toSlot = (a) => {
@@ -4176,11 +4178,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                 if (v && (v.ctcId || v.name || v.prefix || v.suffix)) merged[k] = v;
             });
             Object.assign(merged, seeded);
-            setMpEnrichedData(merged);
+            if (!cancelled) { setMpEnrichedData(merged); setMpLoading(false); }
         })();
         return () => { cancelled = true; };
     }, [detailViewTab, animal?.id_public]);
-    useEffect(() => { setMpEnrichedData(null); }, [animal?.id_public]);
+    useEffect(() => { setMpEnrichedData(null); setMpLoading(false); }, [animal?.id_public]);
     useEffect(() => { setDetailViewTab(initialTab); }, [animal?.id_public, initialTab]);
 
     // Fetch ALL animals on the account + global relationships lazily when Lineage tab opens
@@ -6785,6 +6787,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 
                 {/* ── TAB 16: Manual Pedigree (Beta) ── */}
                 {detailViewTab === 16 && (() => {
+                    if (mpLoading) return <div className="flex items-center justify-center py-16 gap-2 text-gray-400"><Loader2 size={18} className="animate-spin" /><span className="text-sm">Loading ancestry…</span></div>;
                     const mpData = mpEnrichedData || animal?.manualPedigree || {};
                     const emptySlot = () => ({ mode: 'manual', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
                     const getSlot = (key) => mpData[key] || emptySlot();
@@ -7006,11 +7009,13 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
     const [pedigreeOffspring, setPedigreeOffspring] = useState(null);
     const [expandedPedigreeRecords, setExpandedPedigreeRecords] = useState({});
     const [mpDownloading, setMpDownloading] = useState(false);
+    const [mpLoading, setMpLoading] = useState(false);
     const mpTreeRef = useRef(null);
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
     useEffect(() => {
         if (detailViewTab !== 16) return;
         let cancelled = false;
+        setMpLoading(true);
         (async () => {
             const manual = animal?.manualPedigree || {};
             const toSlot = (a) => {
@@ -7070,11 +7075,11 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                 if (v && (v.ctcId || v.name || v.prefix || v.suffix)) merged[k] = v;
             });
             Object.assign(merged, seeded);
-            setMpEnrichedData(merged);
+            if (!cancelled) { setMpEnrichedData(merged); setMpLoading(false); }
         })();
         return () => { cancelled = true; };
     }, [detailViewTab, animal?.id_public]);
-    useEffect(() => { setMpEnrichedData(null); }, [animal?.id_public]);
+    useEffect(() => { setMpEnrichedData(null); setMpLoading(false); }, [animal?.id_public]);
     useEffect(() => { setDetailViewTab(initialTab); }, [animal?.id_public, initialTab]);
 
     // Fetch all litters where this animal is sire or dam
@@ -8753,6 +8758,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
 
                 {/* Tab 16: Beta Pedigree */}
                 {detailViewTab === 16 && (() => {
+                    if (mpLoading) return <div className="flex items-center justify-center py-16 gap-2 text-gray-400"><Loader2 size={18} className="animate-spin" /><span className="text-sm">Loading ancestry…</span></div>;
                     const mpData = mpEnrichedData || animal?.manualPedigree || {};
                     const emptySlot = () => ({ mode: 'manual', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
                     const getSlot = (key) => mpData[key] || emptySlot();
@@ -8935,11 +8941,13 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
     const [showQR, setShowQR] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(initialTab);
     const [mpDownloading, setMpDownloading] = useState(false);
+    const [mpLoading, setMpLoading] = useState(false);
     const mpTreeRef = useRef(null);
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
     useEffect(() => {
         if (detailViewTab !== 14) return;
         let cancelled = false;
+        setMpLoading(true);
         (async () => {
             const manual = animal?.manualPedigree || {};
             const toSlot = (a) => {
@@ -8999,12 +9007,12 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                 if (v && (v.ctcId || v.name || v.prefix || v.suffix)) merged[k] = v;
             });
             Object.assign(merged, seeded);
-            setMpEnrichedData(merged);
+            if (!cancelled) { setMpEnrichedData(merged); setMpLoading(false); }
         })();
         return () => { cancelled = true; };
     }, [detailViewTab, animal?.id_public]);
     // Reset tab when navigating to a different animal
-    React.useEffect(() => { setDetailViewTab(initialTab); setMpEnrichedData(null); }, [animal?.id_public, initialTab]);
+    React.useEffect(() => { setDetailViewTab(initialTab); setMpEnrichedData(null); setMpLoading(false); }, [animal?.id_public, initialTab]);
     const [animalCOI, setAnimalCOI] = useState(null);
     const [loadingCOI, setLoadingCOI] = useState(false);
     const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});
@@ -10734,6 +10742,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
 
                 {/* Tab 14: Beta Pedigree */}
                 {detailViewTab === 14 && (() => {
+                    if (mpLoading) return <div className="flex items-center justify-center py-16 gap-2 text-gray-400"><Loader2 size={18} className="animate-spin" /><span className="text-sm">Loading ancestry…</span></div>;
                     const mpData = mpEnrichedData || animal?.manualPedigree || {};
                     const emptySlot = () => ({ mode: 'manual', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
                     const getSlot = (key) => mpData[key] || emptySlot();
