@@ -23686,13 +23686,23 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                 );
                                             })()}
                                         </h5>
-                                        <div className="flex gap-2 text-xs">
+                                        <div className="flex gap-2 text-xs flex-wrap">
                                             <button type="button"
                                                 onClick={() => setZeSelectedAnimals(new Set((zePreview.animals.items || []).map(a => a.zeRegNum).filter(Boolean)))}
                                                 className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Select all</button>
                                             <button type="button"
                                                 onClick={() => setZeSelectedAnimals(new Set())}
                                                 className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Deselect all</button>
+                                            <span className="border-l mx-1"></span>
+                                            <button type="button"
+                                                onClick={() => { const conflictRegs = new Set((zePreview.animals.conflicts || []).map(c => c.zeRegNum)); setZeSelectedAnimals(new Set((zePreview.animals.items || []).filter(a => !conflictRegs.has(a.zeRegNum)).map(a => a.zeRegNum).filter(Boolean))); }}
+                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-green-700">New only</button>
+                                            <button type="button"
+                                                onClick={() => { const dupRegs = new Set((zePreview.animals.conflicts || []).filter(c => c.confidence !== 'possible').map(c => c.zeRegNum)); setZeSelectedAnimals(new Set((zePreview.animals.items || []).filter(a => dupRegs.has(a.zeRegNum)).map(a => a.zeRegNum).filter(Boolean))); }}
+                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-amber-700">Duplicates only</button>
+                                            <button type="button"
+                                                onClick={() => { const possRegs = new Set((zePreview.animals.conflicts || []).filter(c => c.confidence === 'possible').map(c => c.zeRegNum)); setZeSelectedAnimals(new Set((zePreview.animals.items || []).filter(a => possRegs.has(a.zeRegNum)).map(a => a.zeRegNum).filter(Boolean))); }}
+                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-orange-700">Possible only</button>
                                         </div>
                                     </div>
                                     <div className="border rounded-lg overflow-hidden">
@@ -24163,13 +24173,23 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                 );
                                             })()}
                                         </h5>
-                                        <div className="flex gap-2 text-xs">
+                                        <div className="flex gap-2 text-xs flex-wrap">
                                             <button type="button"
                                                 onClick={() => setKtkSelectedAnimals(new Set((ktkPreview.animals.items || []).map(a => a.registration || a.kintrakId).filter(Boolean)))}
                                                 className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Select all</button>
                                             <button type="button"
                                                 onClick={() => setKtkSelectedAnimals(new Set())}
                                                 className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Deselect all</button>
+                                            <span className="border-l mx-1"></span>
+                                            <button type="button"
+                                                onClick={() => { const conflictKtIds = new Set((ktkPreview.animals.conflicts || []).map(c => c.kintrakId)); setKtkSelectedAnimals(new Set((ktkPreview.animals.items || []).filter(a => !conflictKtIds.has(a.kintrakId)).map(a => a.registration || a.kintrakId).filter(Boolean))); }}
+                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-green-700">New only</button>
+                                            <button type="button"
+                                                onClick={() => { const dupKtIds = new Set((ktkPreview.animals.conflicts || []).filter(c => c.confidence !== 'possible').map(c => c.kintrakId)); setKtkSelectedAnimals(new Set((ktkPreview.animals.items || []).filter(a => dupKtIds.has(a.kintrakId)).map(a => a.registration || a.kintrakId).filter(Boolean))); }}
+                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-amber-700">Duplicates only</button>
+                                            <button type="button"
+                                                onClick={() => { const possKtIds = new Set((ktkPreview.animals.conflicts || []).filter(c => c.confidence === 'possible').map(c => c.kintrakId)); setKtkSelectedAnimals(new Set((ktkPreview.animals.items || []).filter(a => possKtIds.has(a.kintrakId)).map(a => a.registration || a.kintrakId).filter(Boolean))); }}
+                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-orange-700">Possible only</button>
                                         </div>
                                     </div>
                                     <div className="border rounded-lg overflow-hidden">
