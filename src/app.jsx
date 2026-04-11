@@ -23806,7 +23806,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                 <AlertTriangle size={11} className="shrink-0 text-amber-500" />
                                                                                 <span>
                                                                                     {conflict.confidence === 'possible' ? 'Possible match: ' : 'Matches '}
-                                                                                    CT <span className="font-mono">{conflict.existingId}</span>
+                                                                                    <span className="font-mono">{conflict.existingId}</span>
                                                                                     {conflict.existingName && conflict.existingName !== conflict.name && <span> &ldquo;{conflict.existingName}&rdquo;</span>}
                                                                                     {conflict.existingBirthDate && <span> &middot; {conflict.existingBirthDate}</span>}
                                                                                     {' '}({conflict.isOwnedByImporter ? 'your animal' : `owned by ${conflict.existingOwner}`})
