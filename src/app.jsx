@@ -6895,18 +6895,18 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                     <div className="rounded-xl border-2 border-primary bg-primary/10 overflow-hidden relative">
                                         {/* Owner/breeder — top-right corner */}
                                         <div className="absolute top-2 right-2 flex flex-col items-center gap-1 text-center z-10">
-                                            <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 border-2 border-primary/20 flex items-center justify-center flex-shrink-0">
-                                                {ownerImgUrl ? <img src={ownerImgUrl} alt="Breeder" className="w-full h-full object-cover" /> : <User size={16} className="text-gray-400" />}
+                                            <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border-2 border-primary/20 flex items-center justify-center flex-shrink-0">
+                                                {ownerImgUrl ? <img src={ownerImgUrl} alt="Breeder" className="w-full h-full object-cover" /> : <User size={18} className="text-gray-400" />}
                                             </div>
                                             <div className="space-y-0">
-                                                {ownerLines.length > 0 ? ownerLines.map((l,i) => <p key={i} className="text-[10px] font-semibold text-gray-700 leading-tight">{l}</p>) : null}
-                                                {ownerUserId && <p className="text-[9px] font-mono text-gray-400">{ownerUserId}</p>}
+                                                {ownerLines.length > 0 ? ownerLines.map((l,i) => <p key={i} className="text-xs font-semibold text-gray-700 leading-tight">{l}</p>) : null}
+                                                {ownerUserId && <p className="text-[10px] font-mono text-gray-400">{ownerUserId}</p>}
                                             </div>
-                                            {ownerQrUrl && <QRCodeSVG value={ownerQrUrl} size={48} bgColor="transparent" fgColor="#374151" level="M" />}
+                                            {ownerQrUrl && <QRCodeSVG value={ownerQrUrl} size={52} bgColor="transparent" fgColor="#374151" level="M" />}
                                         </div>
                                         {/* Animal info — centered */}
                                         <div className="flex flex-col items-center gap-2 text-center p-4 relative">
-                                            {animal.species && <div className="absolute top-2 left-2 text-left"><p className="text-[10px] font-semibold text-gray-600 leading-tight">{animal.species}</p>{getSpeciesLatinName(animal.species) && <p className="text-[9px] italic text-gray-400 leading-tight">{getSpeciesLatinName(animal.species)}</p>}</div>}
+                                            {animal.species && <div className="absolute top-2 left-2 text-left"><p className="text-xs font-semibold text-gray-600 leading-tight">{animal.species}</p>{getSpeciesLatinName(animal.species) && <p className="text-[10px] italic text-gray-400 leading-tight">{getSpeciesLatinName(animal.species)}</p>}</div>}
                                             {subjectImgUrl ? (
                                                 <img src={subjectImgUrl} alt={subjectName} className="w-20 h-20 rounded-full object-cover border-2 border-primary/30" />
                                             ) : (
@@ -8860,18 +8860,18 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                     <div className="rounded-xl border-2 border-primary bg-primary/10 overflow-hidden relative">
                                         {/* Owner/breeder — top-right corner */}
                                         <div className="absolute top-2 right-2 flex flex-col items-center gap-1 text-center z-10">
-                                            <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 border-2 border-primary/20 flex items-center justify-center flex-shrink-0">
-                                                {ownerImgUrl ? <img src={ownerImgUrl} alt="Breeder" className="w-full h-full object-cover" /> : <User size={16} className="text-gray-400" />}
+                                            <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border-2 border-primary/20 flex items-center justify-center flex-shrink-0">
+                                                {ownerImgUrl ? <img src={ownerImgUrl} alt="Breeder" className="w-full h-full object-cover" /> : <User size={18} className="text-gray-400" />}
                                             </div>
                                             <div className="space-y-0">
-                                                {ownerLines.length > 0 ? ownerLines.map((l,i) => <p key={i} className="text-[10px] font-semibold text-gray-700 leading-tight">{l}</p>) : null}
-                                                {ownerUserId && <p className="text-[9px] font-mono text-gray-400">{ownerUserId}</p>}
+                                                {ownerLines.length > 0 ? ownerLines.map((l,i) => <p key={i} className="text-xs font-semibold text-gray-700 leading-tight">{l}</p>) : null}
+                                                {ownerUserId && <p className="text-[10px] font-mono text-gray-400">{ownerUserId}</p>}
                                             </div>
-                                            {ownerQrUrl && <QRCodeSVG value={ownerQrUrl} size={48} bgColor="transparent" fgColor="#374151" level="M" />}
+                                            {ownerQrUrl && <QRCodeSVG value={ownerQrUrl} size={52} bgColor="transparent" fgColor="#374151" level="M" />}
                                         </div>
                                         {/* Animal info — centered */}
                                         <div className="flex flex-col items-center gap-2 text-center p-4 relative">
-                                            {animal.species && <div className="absolute top-2 left-2 text-left"><p className="text-[10px] font-semibold text-gray-600 leading-tight">{animal.species}</p>{getSpeciesLatinName(animal.species) && <p className="text-[9px] italic text-gray-400 leading-tight">{getSpeciesLatinName(animal.species)}</p>}</div>}
+                                            {animal.species && <div className="absolute top-2 left-2 text-left"><p className="text-xs font-semibold text-gray-600 leading-tight">{animal.species}</p>{getSpeciesLatinName(animal.species) && <p className="text-[10px] italic text-gray-400 leading-tight">{getSpeciesLatinName(animal.species)}</p>}</div>}
                                             {subjectImgUrl ? <img src={subjectImgUrl} alt={subjectName} className="w-20 h-20 rounded-full object-cover border-2 border-primary/30" /> : <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-gray-300"><Cat size={32} /></div>}
                                             <div className="flex items-center gap-1 justify-center">
                                                 <SubjectGenderIcon size={14} className={`flex-shrink-0 ${subjectGColor}`} />
@@ -10849,18 +10849,18 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                         <div className="rounded-xl border-2 border-primary bg-primary/10 overflow-hidden relative">
                                             {/* Owner/breeder — top-right corner */}
                                             <div className="absolute top-2 right-2 flex flex-col items-center gap-1 text-center z-10">
-                                                <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 border-2 border-primary/20 flex items-center justify-center flex-shrink-0">
-                                                    {ownerImgUrl ? <img src={ownerImgUrl} alt="Breeder" className="w-full h-full object-cover" /> : <User size={16} className="text-gray-400" />}
+                                                <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border-2 border-primary/20 flex items-center justify-center flex-shrink-0">
+                                                    {ownerImgUrl ? <img src={ownerImgUrl} alt="Breeder" className="w-full h-full object-cover" /> : <User size={18} className="text-gray-400" />}
                                                 </div>
                                                 <div className="space-y-0">
-                                                    {ownerLines.length > 0 ? ownerLines.map((l,i) => <p key={i} className="text-[10px] font-semibold text-gray-700 leading-tight">{l}</p>) : null}
-                                                    {ownerUserId && <p className="text-[9px] font-mono text-gray-400">{ownerUserId}</p>}
+                                                    {ownerLines.length > 0 ? ownerLines.map((l,i) => <p key={i} className="text-xs font-semibold text-gray-700 leading-tight">{l}</p>) : null}
+                                                    {ownerUserId && <p className="text-[10px] font-mono text-gray-400">{ownerUserId}</p>}
                                                 </div>
-                                                {ownerQrUrl && <QRCodeSVG value={ownerQrUrl} size={48} bgColor="transparent" fgColor="#374151" level="M" />}
+                                                {ownerQrUrl && <QRCodeSVG value={ownerQrUrl} size={52} bgColor="transparent" fgColor="#374151" level="M" />}
                                             </div>
                                             {/* Animal info — centered */}
                                             <div className="flex flex-col items-center gap-2 text-center p-4 relative">
-                                                {animal.species && <div className="absolute top-2 left-2 text-left"><p className="text-[10px] font-semibold text-gray-600 leading-tight">{animal.species}</p>{getSpeciesLatinName(animal.species) && <p className="text-[9px] italic text-gray-400 leading-tight">{getSpeciesLatinName(animal.species)}</p>}</div>}
+                                                {animal.species && <div className="absolute top-2 left-2 text-left"><p className="text-xs font-semibold text-gray-600 leading-tight">{animal.species}</p>{getSpeciesLatinName(animal.species) && <p className="text-[10px] italic text-gray-400 leading-tight">{getSpeciesLatinName(animal.species)}</p>}</div>}
                                                 {subjectImgUrl ? <img src={subjectImgUrl} alt={subjectName} className="w-20 h-20 rounded-full object-cover border-2 border-primary/30" /> : <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-gray-300"><Cat size={32} /></div>}
                                                 <div className="flex items-center gap-1 justify-center">
                                                     <SubjectGenderIcon size={14} className={`flex-shrink-0 ${subjectGColor}`} />
