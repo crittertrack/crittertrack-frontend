@@ -23754,7 +23754,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                         <td colSpan="9" className="px-3 pb-2 pt-0">
                                                                             {zeManualMappings[a.zeRegNum] ? (
                                                                                 <div className="flex items-center gap-2 text-xs pt-1">
-                                                                                    <span className="text-blue-700">&#x21AA; Mapped to CT <span className="font-mono font-semibold">{zeManualMappings[a.zeRegNum].id_public}</span> &mdash; {zeManualMappings[a.zeRegNum].name}</span>
+                                                                                    <span className="text-blue-700">&#x21AA; Mapped to <span className="font-mono font-semibold">{zeManualMappings[a.zeRegNum].id_public}</span> &mdash; {zeManualMappings[a.zeRegNum].name}</span>
                                                                                     <button type="button" onClick={() => setZeManualMappings(prev => { const n = { ...prev }; delete n[a.zeRegNum]; return n; })}
                                                                                         className="text-gray-400 hover:text-red-500 transition ml-1" title="Remove mapping"><X size={11} /></button>
                                                                                 </div>
@@ -23829,7 +23829,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                 <span>
                                                                                     {conflict.confidence === 'possible' ? 'Possible match: ' : 'Matches '}
                                                                                     <span className="font-mono">{conflict.existingId}</span>
-                                                                                    {(conflict.existingPrefix || conflict.existingName) && <span> &mdash; {[conflict.existingPrefix, conflict.existingName].filter(Boolean).join(' ')}</span>}
+                                                                                    {conflict.existingName && conflict.existingName !== conflict.name && <span> &ldquo;{conflict.existingName}&rdquo;</span>}
                                                                                     {conflict.existingBirthDate && <span> &middot; {conflict.existingBirthDate}</span>}
                                                                                     {' '}({conflict.isOwnedByImporter ? 'your animal' : `owned by ${conflict.existingOwner}`})
                                                                                     {' · matched by '}{conflict.matchType === 'id' ? 'registration number' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}
@@ -24228,7 +24228,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                         <td colSpan="7" className="px-3 pb-2 pt-0">
                                                                             {ktkManualMappings[aKey] ? (
                                                                                 <div className="flex items-center gap-2 text-xs pt-1">
-                                                                                    <span className="text-blue-700">&#x21AA; Mapped to CT <span className="font-mono font-semibold">{ktkManualMappings[aKey].id_public}</span> &mdash; {ktkManualMappings[aKey].name}</span>
+                                                                                    <span className="text-blue-700">&#x21AA; Mapped to <span className="font-mono font-semibold">{ktkManualMappings[aKey].id_public}</span> &mdash; {ktkManualMappings[aKey].name}</span>
                                                                                     <button type="button" onClick={() => setKtkManualMappings(prev => { const n = { ...prev }; delete n[aKey]; return n; })}
                                                                                         className="text-gray-400 hover:text-red-500 transition ml-1" title="Remove mapping"><X size={11} /></button>
                                                                                 </div>
@@ -24303,7 +24303,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                 <span>
                                                                                     {conflict.confidence === 'possible' ? 'Possible match: ' : 'Matches '}
                                                                                     <span className="font-mono">{conflict.existingId}</span>
-                                                                                    {(conflict.existingPrefix || conflict.existingName) && <span> &mdash; {[conflict.existingPrefix, conflict.existingName].filter(Boolean).join(' ')}</span>}
+                                                                                    {conflict.existingName && conflict.existingName !== conflict.name && <span> &ldquo;{conflict.existingName}&rdquo;</span>}
                                                                                     {conflict.existingBirthDate && <span> &middot; {conflict.existingBirthDate}</span>}
                                                                                     {' '}({conflict.isOwnedByImporter ? 'your animal' : `owned by ${conflict.existingOwner}`})
                                                                                     {' · matched by '}{conflict.matchType === 'id' ? 'registration number' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}
