@@ -22399,6 +22399,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [zeAnimalsFile, setZeAnimalsFile] = useState(null);
     const [zePairsFile, setZePairsFile] = useState(null);
     const [zeSpecies, setZeSpecies] = useState('');
+    const [zeNewSpeciesName, setZeNewSpeciesName] = useState('');
+    const [zeAddingSpecies, setZeAddingSpecies] = useState(false);
     const [zePreview, setZePreview] = useState(null);
     const [zeConflictResolutions, setZeConflictResolutions] = useState({});
     const [zeLoading, setZeLoading] = useState(false);
@@ -23491,13 +23493,76 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     {/* Species */}
                     <div className="mb-4">
                         <label className="block text-xs font-medium text-gray-600 mb-1">Species <span className="text-red-500">*</span> (required when importing animals)</label>
-                        <input
-                            type="text"
-                            placeholder="e.g. Mouse, Rat, Guinea Pig"
-                            value={zeSpecies}
-                            onChange={e => setZeSpecies(e.target.value)}
-                            className="w-full max-w-xs p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary"
-                        />
+                        <div className="flex items-center gap-2 max-w-xs">
+                            <select
+                                value={zeSpecies}
+                                onChange={e => setZeSpecies(e.target.value)}
+                                className="flex-1 p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary bg-white"
+                            >
+                                <option value="">— select species —</option>
+                                {(speciesOptions || []).map(s => (
+                                    <option key={s.name} value={s.name}>{s.name}</option>
+                                ))}
+                            </select>
+                            <button
+                                type="button"
+                                title="Add new species"
+                                onClick={() => { setZeAddingSpecies(v => !v); setZeNewSpeciesName(''); }}
+                                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 text-gray-600 transition"
+                            >
+                                <Plus size={15} />
+                            </button>
+                        </div>
+                        {zeAddingSpecies && (
+                            <div className="flex items-center gap-2 mt-2 max-w-xs">
+                                <input
+                                    type="text"
+                                    placeholder="New species name"
+                                    value={zeNewSpeciesName}
+                                    onChange={e => setZeNewSpeciesName(e.target.value)}
+                                    className="flex-1 p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary"
+                                    onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
+                                />
+                                <button
+                                    type="button"
+                                    disabled={!zeNewSpeciesName.trim()}
+                                    onClick={async () => {
+                                        const name = zeNewSpeciesName.trim();
+                                        if (!name) return;
+                                        try {
+                                            const resp = await axios.post(`${API_BASE_URL}/species`,
+                                                { name, category: 'Mammal' },
+                                                { headers: { Authorization: `Bearer ${authToken}` } }
+                                            );
+                                            const added = resp.data.species;
+                                            setSpeciesOptions(prev => [...prev, added]);
+                                            setZeSpecies(added.name);
+                                            setZeAddingSpecies(false);
+                                            setZeNewSpeciesName('');
+                                        } catch (err) {
+                                            if (err.response?.status === 409) {
+                                                // Already exists — just select it
+                                                const existing = err.response.data.existing?.name || name;
+                                                setZeSpecies(existing);
+                                                setZeAddingSpecies(false);
+                                            } else {
+                                                showModalMessage('Error', err.response?.data?.message || 'Failed to add species.');
+                                            }
+                                        }
+                                    }}
+                                    className="px-3 py-2 bg-primary hover:bg-primary-dark text-black text-xs font-bold rounded-lg transition disabled:opacity-40"
+                                >
+                                    Add
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setZeAddingSpecies(false)}
+                                    className="p-2 text-gray-400 hover:text-gray-600 transition"
+                                >
+                                    <X size={14} />
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* File pickers */}
