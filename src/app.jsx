@@ -22413,6 +22413,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [zeLoading, setZeLoading] = useState(false);
     const [zeConfirmLoading, setZeConfirmLoading] = useState(false);
     const [zeResult, setZeResult] = useState(null);
+    const [zeSelectedAnimals, setZeSelectedAnimals] = useState(() => new Set());
     const [zeSpeciesList, setZeSpeciesList] = useState([]);
     const [importPreview, setImportPreview] = useState(null);
     const [importConflictResolutions, setImportConflictResolutions] = useState({});
@@ -23614,11 +23615,14 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     const resp = await axios.post(`${API_BASE_URL}/import/zooeasy`, fd, {
                                         headers: { Authorization: `Bearer ${authToken}` },
                                     });
-                                    setZePreview(resp.data.preview || {});
-                                    // Default all conflicts to 'skip'
+                                    const preview = resp.data.preview || {};
+                                    setZePreview(preview);
+                                    // Select all animals by default
+                                    setZeSelectedAnimals(new Set((preview.animals?.items || []).map(a => a.zeRegNum).filter(Boolean)));
+                                    // Default conflicts to 'use_existing' (keep CT ID for lineage, don't re-import)
                                     const defaults = {};
-                                    for (const c of (resp.data.preview?.animals?.conflicts || [])) {
-                                        defaults[c.zeRegNum] = 'skip';
+                                    for (const c of (preview.animals?.conflicts || [])) {
+                                        defaults[c.zeRegNum] = 'use_existing';
                                     }
                                     setZeConflictResolutions(defaults);
                                 } catch (err) {
@@ -23637,71 +23641,151 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
 
                     {/* Preview */}
                     {zePreview && (
-                        <div className="space-y-4 mt-3">
-                            <h5 className="font-semibold text-gray-700">Preview</h5>
+                        <div className="space-y-5 mt-3">
 
-                            {/* Summary row */}
-                            <div className="flex flex-wrap gap-4 text-sm">
-                                {zePreview.animals && (
-                                    <div className="bg-white border rounded-lg px-4 py-2">
-                                        <p className="font-medium text-gray-700">Animals</p>
-                                        <p className="text-green-700">{zePreview.animals.new} new</p>
-                                        {zePreview.animals.conflicts?.length > 0 && (
-                                            <p className="text-amber-600">{zePreview.animals.conflicts.length} duplicate{zePreview.animals.conflicts.length !== 1 ? 's' : ''}</p>
-                                        )}
-                                    </div>
-                                )}
-                                {zePreview.litters && (
-                                    <div className="bg-white border rounded-lg px-4 py-2">
-                                        <p className="font-medium text-gray-700">Litters</p>
-                                        <p className="text-green-700">{zePreview.litters.total} to import</p>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Conflict resolution */}
-                            {zePreview.animals?.conflicts?.length > 0 && (
-                                <div className="rounded border bg-amber-50 overflow-hidden">
-                                    <div className="px-3 py-2.5 flex items-center gap-2">
-                                        <AlertTriangle size={14} className="text-amber-600 shrink-0" />
-                                        <p className="text-sm font-semibold text-amber-700 flex-1">Duplicate animals detected in CritterTrack</p>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-xs text-gray-500">Set all:</span>
-                                            {['skip', 'import_anyway'].map(action => (
-                                                <button key={action} type="button"
-                                                    onClick={() => {
-                                                        const all = {};
-                                                        for (const c of zePreview.animals.conflicts) all[c.zeRegNum] = action;
-                                                        setZeConflictResolutions(all);
-                                                    }}
-                                                    className="text-xs px-2 py-1 border rounded bg-white hover:bg-gray-100"
-                                                >
-                                                    {action === 'skip' ? 'Skip all' : 'Import all anyway'}
-                                                </button>
-                                            ))}
+                            {/* Animals table */}
+                            {zePreview.animals && (
+                                <div>
+                                    <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                                        <h5 className="font-semibold text-gray-700">
+                                            Animals &mdash; {zePreview.animals.total} total
+                                            {zePreview.animals.conflicts?.length > 0 && (
+                                                <span className="ml-2 text-xs font-normal text-amber-600">
+                                                    {zePreview.animals.conflicts.length} duplicate{zePreview.animals.conflicts.length !== 1 ? 's' : ''} found
+                                                </span>
+                                            )}
+                                        </h5>
+                                        <div className="flex gap-2 text-xs">
+                                            <button type="button"
+                                                onClick={() => setZeSelectedAnimals(new Set((zePreview.animals.items || []).map(a => a.zeRegNum).filter(Boolean)))}
+                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Select all</button>
+                                            <button type="button"
+                                                onClick={() => setZeSelectedAnimals(new Set())}
+                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Deselect all</button>
                                         </div>
                                     </div>
-                                    <div className="border-t bg-white divide-y max-h-64 overflow-y-auto">
-                                        {zePreview.animals.conflicts.map(c => (
-                                            <div key={c.zeRegNum} className="px-3 py-2 flex flex-wrap items-start gap-x-3 gap-y-1 text-xs">
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="font-medium text-gray-800 truncate">{c.name}</p>
-                                                    <p className="text-gray-500">
-                                                        ZooEasy #{c.zeRegNum} &rarr; already exists as <span className="font-mono">{c.existingId}</span>
-                                                        {' '}({c.isOwnedByImporter ? 'your animal' : `owned by ${c.existingOwner}`})
-                                                    </p>
-                                                    <p className="text-gray-400 italic">Matched by: {c.matchType === 'id' ? 'registration number' : 'name + birth date'}</p>
-                                                </div>
-                                                <select
-                                                    value={zeConflictResolutions[c.zeRegNum] || 'skip'}
-                                                    onChange={e => setZeConflictResolutions(prev => ({ ...prev, [c.zeRegNum]: e.target.value }))}
-                                                    className="text-xs border rounded px-2 py-1 bg-white shrink-0"
-                                                >
-                                                    <option value="skip">Skip</option>
-                                                    <option value="import_anyway">Import anyway</option>
-                                                </select>
-                                            </div>
-                                        ))}
+                                    <div className="border rounded-lg overflow-hidden">
+                                        <div className="overflow-x-auto max-h-96 overflow-y-auto">
+                                            <table className="min-w-full text-xs">
+                                                <thead className="bg-gray-100 sticky top-0 z-10">
+                                                    <tr>
+                                                        <th className="px-2 py-2 w-8"></th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Name</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Gender</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Born</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Reg #</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Sire #</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Dam #</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Color</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Coat</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y bg-white">
+                                                    {(zePreview.animals.items || []).map(a => {
+                                                        const isSelected = zeSelectedAnimals.has(a.zeRegNum);
+                                                        const conflict = zePreview.animals.conflicts?.find(c => c.zeRegNum === a.zeRegNum);
+                                                        const resolution = zeConflictResolutions[a.zeRegNum] || 'use_existing';
+                                                        return (
+                                                            <React.Fragment key={a.zeRegNum || a.name}>
+                                                                <tr className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : conflict ? 'bg-amber-50' : ''}`}>
+                                                                    <td className="px-2 py-1.5 text-center">
+                                                                        <input type="checkbox" checked={isSelected}
+                                                                            onChange={e => setZeSelectedAnimals(prev => {
+                                                                                const next = new Set(prev);
+                                                                                if (e.target.checked) next.add(a.zeRegNum); else next.delete(a.zeRegNum);
+                                                                                return next;
+                                                                            })}
+                                                                            className="rounded" />
+                                                                    </td>
+                                                                    <td className="px-2 py-1.5 font-medium text-gray-800 whitespace-nowrap">{a.name}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600">{a.gender || '—'}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600 whitespace-nowrap">{a.birthDate || '—'}</td>
+                                                                    <td className="px-2 py-1.5 font-mono text-gray-500">{a.zeRegNum || '—'}</td>
+                                                                    <td className="px-2 py-1.5 font-mono text-gray-400">{a.sireRegNum || '—'}</td>
+                                                                    <td className="px-2 py-1.5 font-mono text-gray-400">{a.damRegNum || '—'}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600">{a.color || '—'}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600">{a.coat || '—'}</td>
+                                                                    <td className="px-2 py-1.5">
+                                                                        {conflict
+                                                                            ? <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium">Duplicate</span>
+                                                                            : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
+                                                                    </td>
+                                                                </tr>
+                                                                {conflict && isSelected && (
+                                                                    <tr className="bg-amber-50">
+                                                                        <td></td>
+                                                                        <td colSpan="9" className="px-3 pb-2 pt-0">
+                                                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-amber-800 pt-1">
+                                                                                <AlertTriangle size={11} className="shrink-0 text-amber-500" />
+                                                                                <span>
+                                                                                    Matches CT <span className="font-mono">{conflict.existingId}</span>
+                                                                                    {' '}({conflict.isOwnedByImporter ? 'your animal' : `owned by ${conflict.existingOwner}`})
+                                                                                    {' \u00b7 matched by '}{conflict.matchType === 'id' ? 'registration number' : 'name + birth date'}
+                                                                                </span>
+                                                                                <select
+                                                                                    value={resolution}
+                                                                                    onChange={e => setZeConflictResolutions(prev => ({ ...prev, [a.zeRegNum]: e.target.value }))}
+                                                                                    className="border rounded px-2 py-0.5 bg-white text-gray-700 font-medium text-xs"
+                                                                                >
+                                                                                    <option value="use_existing">Use existing CT animal for parent links (skip import)</option>
+                                                                                    <option value="import_anyway">Import anyway as new entry</option>
+                                                                                </select>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                )}
+                                                            </React.Fragment>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        {zeSelectedAnimals.size} of {zePreview.animals.total} selected
+                                        {(() => {
+                                            const dupeLinks = [...zeSelectedAnimals].filter(r => {
+                                                const c = zePreview.animals.conflicts?.find(x => x.zeRegNum === r);
+                                                return c && (zeConflictResolutions[r] || 'use_existing') === 'use_existing';
+                                            }).length;
+                                            return dupeLinks > 0 ? ` \u00b7 ${dupeLinks} duplicate${dupeLinks !== 1 ? 's' : ''} will link to existing CT animals` : '';
+                                        })()}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Litters table */}
+                            {zePreview.litters?.items?.length > 0 && (
+                                <div>
+                                    <h5 className="font-semibold text-gray-700 mb-2">Litters &mdash; {zePreview.litters.total} total</h5>
+                                    <div className="border rounded-lg overflow-hidden">
+                                        <div className="overflow-x-auto max-h-48 overflow-y-auto">
+                                            <table className="min-w-full text-xs">
+                                                <thead className="bg-gray-100 sticky top-0">
+                                                    <tr>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Nest letter</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Mating date</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Birth date</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Sire Reg #</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Dam Reg #</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Born count</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y bg-white">
+                                                    {zePreview.litters.items.map((l, i) => (
+                                                        <tr key={i}>
+                                                            <td className="px-2 py-1.5 font-medium text-gray-700">{l.nestLetter || '—'}</td>
+                                                            <td className="px-2 py-1.5 text-gray-600">{l.matingDate || '—'}</td>
+                                                            <td className="px-2 py-1.5 text-gray-600">{l.birthDate || '—'}</td>
+                                                            <td className="px-2 py-1.5 font-mono text-gray-400">{l.maleRegNum || '—'}</td>
+                                                            <td className="px-2 py-1.5 font-mono text-gray-400">{l.femaleRegNum || '—'}</td>
+                                                            <td className="px-2 py-1.5 text-gray-600">{l.litterSizeBorn != null ? l.litterSizeBorn : '—'}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -23716,6 +23800,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                             if (zePairsFile) fd.append('breedingpairs', zePairsFile);
                                             fd.append('species', zeSpecies.trim());
                                             fd.append('confirm', 'true');
+                                            fd.append('selectedAnimals', JSON.stringify([...zeSelectedAnimals]));
                                             fd.append('conflictResolutions', JSON.stringify(zeConflictResolutions));
                                             const resp = await axios.post(`${API_BASE_URL}/import/zooeasy`, fd, {
                                                 headers: { Authorization: `Bearer ${authToken}` },
