@@ -23856,8 +23856,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                         <th className="px-2 py-2 text-left font-medium text-gray-600">Nest letter</th>
                                                         <th className="px-2 py-2 text-left font-medium text-gray-600">Mating date</th>
                                                         <th className="px-2 py-2 text-left font-medium text-gray-600">Birth date</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Sire Reg #</th>
-                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Dam Reg #</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Sire</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Dam</th>
                                                         <th className="px-2 py-2 text-left font-medium text-gray-600">Born count</th>
                                                     </tr>
                                                 </thead>
@@ -23867,8 +23867,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                             <td className="px-2 py-1.5 font-medium text-gray-700">{l.nestLetter || '—'}</td>
                                                             <td className="px-2 py-1.5 text-gray-600">{l.matingDate || '—'}</td>
                                                             <td className="px-2 py-1.5 text-gray-600">{l.birthDate || '—'}</td>
-                                                            <td className="px-2 py-1.5 font-mono text-gray-400">{l.maleRegNum || '—'}</td>
-                                                            <td className="px-2 py-1.5 font-mono text-gray-400">{l.femaleRegNum || '—'}</td>
+                                                            <td className="px-2 py-1.5 text-gray-700" title={l.maleRegNum || ''}>{l.maleName || l.maleRegNum || '—'}</td>
+                                                            <td className="px-2 py-1.5 text-gray-700" title={l.femaleRegNum || ''}>{l.femaleName || l.femaleRegNum || '—'}</td>
                                                             <td className="px-2 py-1.5 text-gray-600">{l.litterSizeBorn != null ? l.litterSizeBorn : '—'}</td>
                                                         </tr>
                                                     ))}
