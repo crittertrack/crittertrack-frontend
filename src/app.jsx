@@ -18070,7 +18070,6 @@ const AnimalForm = ({
         if (!formData.name?.trim())    missingFields.push('Name (Overview tab)');
         if (!formData.species?.trim()) missingFields.push('Species (Overview tab)');
         if (!formData.gender?.trim())  missingFields.push('Gender (Overview tab)');
-        if (!formData.birthDate)       missingFields.push('Date of Birth (Overview tab)');
         if (!formData.status?.trim())  missingFields.push('Status (Overview tab)');
 
         if (missingFields.length > 0) {
@@ -18985,8 +18984,8 @@ const AnimalForm = ({
                                 </div>
                                 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Date of Birth*</label>
-                                    <DatePicker name="birthDate" value={formData.birthDate} onChange={handleChange} maxDate={new Date()} required
+                                    <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
+                                    <DatePicker name="birthDate" value={formData.birthDate} onChange={handleChange} maxDate={new Date()}
                                         data-tutorial-target="animal-birthdate-input"
                                         className="mt-1 p-2" />
                                 </div>
@@ -22414,6 +22413,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [zeConfirmLoading, setZeConfirmLoading] = useState(false);
     const [zeResult, setZeResult] = useState(null);
     const [zeSelectedAnimals, setZeSelectedAnimals] = useState(() => new Set());
+    const [zeManualMappings, setZeManualMappings] = useState({});
+    const [zeMappingSearch, setZeMappingSearch] = useState({ regNum: null, query: '', results: [], loading: false });
     const [zeSpeciesList, setZeSpeciesList] = useState([]);
     const [importPreview, setImportPreview] = useState(null);
     const [importConflictResolutions, setImportConflictResolutions] = useState({});
@@ -23619,6 +23620,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     setZePreview(preview);
                                     // Select all animals by default
                                     setZeSelectedAnimals(new Set((preview.animals?.items || []).map(a => a.zeRegNum).filter(Boolean)));
+                                    setZeManualMappings({});
+                                    setZeMappingSearch({ regNum: null, query: '', results: [], loading: false });
                                     // Default conflicts to 'use_existing' (keep CT ID for lineage, don't re-import)
                                     const defaults = {};
                                     for (const c of (preview.animals?.conflicts || [])) {
@@ -23801,7 +23804,12 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                             fd.append('species', zeSpecies.trim());
                                             fd.append('confirm', 'true');
                                             fd.append('selectedAnimals', JSON.stringify([...zeSelectedAnimals]));
-                                            fd.append('conflictResolutions', JSON.stringify(zeConflictResolutions));
+                                            // Merge manual mappings into conflictResolutions as map_to:<id>
+                                            const finalResolutions = { ...zeConflictResolutions };
+                                            for (const [regNum, mapping] of Object.entries(zeManualMappings)) {
+                                                finalResolutions[regNum] = `map_to:${mapping.id_public}`;
+                                            }
+                                            fd.append('conflictResolutions', JSON.stringify(finalResolutions));
                                             const resp = await axios.post(`${API_BASE_URL}/import/zooeasy`, fd, {
                                                 headers: { Authorization: `Bearer ${authToken}` },
                                             });
@@ -23822,7 +23830,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     Confirm Import
                                 </button>
                                 <button
-                                    onClick={() => { setZePreview(null); setZeAnimalsFile(null); setZePairsFile(null); }}
+                                    onClick={() => { setZePreview(null); setZeAnimalsFile(null); setZePairsFile(null); setZeManualMappings({}); setZeMappingSearch({ regNum: null, query: '', results: [], loading: false }); }}
                                     className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition"
                                 >
                                     Cancel
