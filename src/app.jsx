@@ -23829,7 +23829,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                 <span>
                                                                                     {conflict.confidence === 'possible' ? 'Possible match: ' : 'Matches '}
                                                                                     <span className="font-mono">{conflict.existingId}</span>
-                                                                                    {conflict.existingName && conflict.existingName !== conflict.name && <span> &ldquo;{conflict.existingName}&rdquo;</span>}
+                                                                                    {(conflict.existingPrefix || conflict.existingName) && <span> &mdash; {[conflict.existingPrefix, conflict.existingName].filter(Boolean).join(' ')}</span>}
                                                                                     {conflict.existingBirthDate && <span> &middot; {conflict.existingBirthDate}</span>}
                                                                                     {' '}({conflict.isOwnedByImporter ? 'your animal' : `owned by ${conflict.existingOwner}`})
                                                                                     {' · matched by '}{conflict.matchType === 'id' ? 'registration number' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}
@@ -24303,7 +24303,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                 <span>
                                                                                     {conflict.confidence === 'possible' ? 'Possible match: ' : 'Matches '}
                                                                                     <span className="font-mono">{conflict.existingId}</span>
-                                                                                    {conflict.existingName && conflict.existingName !== conflict.name && <span> &ldquo;{conflict.existingName}&rdquo;</span>}
+                                                                                    {(conflict.existingPrefix || conflict.existingName) && <span> &mdash; {[conflict.existingPrefix, conflict.existingName].filter(Boolean).join(' ')}</span>}
                                                                                     {conflict.existingBirthDate && <span> &middot; {conflict.existingBirthDate}</span>}
                                                                                     {' '}({conflict.isOwnedByImporter ? 'your animal' : `owned by ${conflict.existingOwner}`})
                                                                                     {' · matched by '}{conflict.matchType === 'id' ? 'registration number' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}
