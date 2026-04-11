@@ -22413,6 +22413,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [zeConfirmLoading, setZeConfirmLoading] = useState(false);
     const [zeResult, setZeResult] = useState(null);
     const [zeSelectedAnimals, setZeSelectedAnimals] = useState(() => new Set());
+    const [zeSelectedLitters, setZeSelectedLitters] = useState(() => new Set());
     const [zeManualMappings, setZeManualMappings] = useState({});
     const [zeMappingSearch, setZeMappingSearch] = useState({ regNum: null, query: '', results: [], loading: false });
     const [zeSpeciesList, setZeSpeciesList] = useState([]);
@@ -23620,6 +23621,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     setZePreview(preview);
                                     // Select all animals by default
                                     setZeSelectedAnimals(new Set((preview.animals?.items || []).map(a => a.zeRegNum).filter(Boolean)));
+                                    // Select non-duplicate litters by default
+                                    setZeSelectedLitters(new Set((preview.litters?.items || []).filter(l => !l.isDuplicate).map(l => l.litterIndex)));
                                     setZeManualMappings({});
                                     setZeMappingSearch({ regNum: null, query: '', results: [], loading: false });
                                     // Default conflicts to 'use_existing' (keep CT ID for lineage, don't re-import)
@@ -23847,39 +23850,64 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             {/* Litters table */}
                             {zePreview.litters?.items?.length > 0 && (
                                 <div>
-                                    <h5 className="font-semibold text-gray-700 mb-2">Litters &mdash; {zePreview.litters.total} total</h5>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h5 className="font-semibold text-gray-700">Litters &mdash; {zePreview.litters.total} total</h5>
+                                        <div className="flex gap-2 text-xs">
+                                            <button type="button" onClick={() => setZeSelectedLitters(new Set(zePreview.litters.items.map(l => l.litterIndex)))} className="text-primary hover:underline">Select all</button>
+                                            <button type="button" onClick={() => setZeSelectedLitters(new Set())} className="text-gray-400 hover:underline">Deselect all</button>
+                                        </div>
+                                    </div>
                                     <div className="border rounded-lg overflow-hidden">
                                         <div className="overflow-x-auto max-h-48 overflow-y-auto">
                                             <table className="min-w-full text-xs">
                                                 <thead className="bg-gray-100 sticky top-0">
                                                     <tr>
+                                                        <th className="px-2 py-2"></th>
                                                         <th className="px-2 py-2 text-left font-medium text-gray-600">Nest letter</th>
                                                         <th className="px-2 py-2 text-left font-medium text-gray-600">Mating date</th>
                                                         <th className="px-2 py-2 text-left font-medium text-gray-600">Birth date</th>
                                                         <th className="px-2 py-2 text-left font-medium text-gray-600">Sire</th>
                                                         <th className="px-2 py-2 text-left font-medium text-gray-600">Dam</th>
                                                         <th className="px-2 py-2 text-left font-medium text-gray-600">Born count</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Status</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y bg-white">
-                                                    {zePreview.litters.items.map((l, i) => (
-                                                        <tr key={i}>
-                                                            <td className="px-2 py-1.5 font-medium text-gray-700">{l.nestLetter || '—'}</td>
-                                                            <td className="px-2 py-1.5 text-gray-600">{l.matingDate ? String(l.matingDate).slice(0,10) : '—'}</td>
-                                                            <td className="px-2 py-1.5 text-gray-600">{l.birthDate ? String(l.birthDate).slice(0,10) : '—'}</td>
-                                                            <td className="px-2 py-1.5 text-gray-700" title={l.maleRegNum || ''}>
-                                                                {l.maleName || l.maleRegNum || '—'}
-                                                                {l.maleCtId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{l.maleCtId}</span>}
-                                                                {!l.maleCtId && l.maleRegNum && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
-                                                            </td>
-                                                            <td className="px-2 py-1.5 text-gray-700" title={l.femaleRegNum || ''}>
-                                                                {l.femaleName || l.femaleRegNum || '—'}
-                                                                {l.femaleCtId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{l.femaleCtId}</span>}
-                                                                {!l.femaleCtId && l.femaleRegNum && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
-                                                            </td>
-                                                            <td className="px-2 py-1.5 text-gray-600">{l.litterSizeBorn != null ? l.litterSizeBorn : '—'}</td>
-                                                        </tr>
-                                                    ))}
+                                                    {zePreview.litters.items.map((l, i) => {
+                                                        const isSelected = zeSelectedLitters.has(l.litterIndex);
+                                                        return (
+                                                            <tr key={i} className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : l.isDuplicate ? 'bg-amber-50' : ''}`}>
+                                                                <td className="px-2 py-1.5 text-center">
+                                                                    <input type="checkbox" checked={isSelected}
+                                                                        onChange={e => setZeSelectedLitters(prev => {
+                                                                            const next = new Set(prev);
+                                                                            if (e.target.checked) next.add(l.litterIndex); else next.delete(l.litterIndex);
+                                                                            return next;
+                                                                        })}
+                                                                        className="rounded" />
+                                                                </td>
+                                                                <td className="px-2 py-1.5 font-medium text-gray-700">{l.nestLetter || '—'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600">{l.matingDate ? String(l.matingDate).slice(0,10) : '—'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600">{l.birthDate ? String(l.birthDate).slice(0,10) : '—'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-700" title={l.maleRegNum || ''}>
+                                                                    {l.maleName || l.maleRegNum || '—'}
+                                                                    {l.maleCtId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{l.maleCtId}</span>}
+                                                                    {!l.maleCtId && l.maleRegNum && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
+                                                                </td>
+                                                                <td className="px-2 py-1.5 text-gray-700" title={l.femaleRegNum || ''}>
+                                                                    {l.femaleName || l.femaleRegNum || '—'}
+                                                                    {l.femaleCtId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{l.femaleCtId}</span>}
+                                                                    {!l.femaleCtId && l.femaleRegNum && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
+                                                                </td>
+                                                                <td className="px-2 py-1.5 text-gray-600">{l.litterSizeBorn != null ? l.litterSizeBorn : '—'}</td>
+                                                                <td className="px-2 py-1.5">
+                                                                    {l.isDuplicate
+                                                                        ? <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium" title={l.existingLitterId || ''}>Duplicate</span>
+                                                                        : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
                                                 </tbody>
                                             </table>
                                         </div>
@@ -23898,6 +23926,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                             fd.append('species', zeSpecies.trim());
                                             fd.append('confirm', 'true');
                                             fd.append('selectedAnimals', JSON.stringify([...zeSelectedAnimals]));
+                                            fd.append('selectedLitters', JSON.stringify([...zeSelectedLitters]));
                                             // Merge manual mappings into conflictResolutions as map_to:<id>
                                             const finalResolutions = { ...zeConflictResolutions };
                                             for (const [regNum, mapping] of Object.entries(zeManualMappings)) {
@@ -23924,7 +23953,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     Confirm Import
                                 </button>
                                 <button
-                                    onClick={() => { setZePreview(null); setZeAnimalsFile(null); setZePairsFile(null); setZeManualMappings({}); setZeMappingSearch({ regNum: null, query: '', results: [], loading: false }); }}
+                                    onClick={() => { setZePreview(null); setZeAnimalsFile(null); setZePairsFile(null); setZeManualMappings({}); setZeMappingSearch({ regNum: null, query: '', results: [], loading: false }); setZeSelectedLitters(new Set()); }}
                                     className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition"
                                 >
                                     Cancel
