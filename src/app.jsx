@@ -6802,10 +6802,20 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         setMpDownloading(true);
                         try {
                             const el = mpTreeRef.current;
-                            const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            const srcCanvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            // A4 at 200dpi: 1654 x 2339, with 60px padding
+                            const a4W = 1654, a4H = 2339, pad = 60;
+                            const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
+                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height, 1);
+                            const dw = srcCanvas.width * ratio, dh = srcCanvas.height * ratio;
+                            const outCanvas = document.createElement('canvas');
+                            outCanvas.width = a4W; outCanvas.height = a4H;
+                            const ctx = outCanvas.getContext('2d');
+                            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
+                            ctx.drawImage(srcCanvas, (a4W - dw) / 2, pad, dw, dh);
                             const link = document.createElement('a');
                             link.download = `manual-pedigree-${animal.name || animal.id_public}.png`;
-                            link.href = canvas.toDataURL('image/png');
+                            link.href = outCanvas.toDataURL('image/png');
                             link.click();
                         } catch(e) { console.error('Manual pedigree download failed', e); }
                         finally { setMpDownloading(false); }
@@ -8776,10 +8786,19 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                         setMpDownloading(true);
                         try {
                             const el = mpTreeRef.current;
-                            const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            const srcCanvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            const a4W = 1654, a4H = 2339, pad = 60;
+                            const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
+                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height, 1);
+                            const dw = srcCanvas.width * ratio, dh = srcCanvas.height * ratio;
+                            const outCanvas = document.createElement('canvas');
+                            outCanvas.width = a4W; outCanvas.height = a4H;
+                            const ctx = outCanvas.getContext('2d');
+                            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
+                            ctx.drawImage(srcCanvas, (a4W - dw) / 2, pad, dw, dh);
                             const link = document.createElement('a');
                             link.download = `manual-pedigree-${animal.name || animal.id_public}.png`;
-                            link.href = canvas.toDataURL('image/png');
+                            link.href = outCanvas.toDataURL('image/png');
                             link.click();
                         } catch(e) { console.error('Manual pedigree download failed', e); }
                         finally { setMpDownloading(false); }
@@ -10765,10 +10784,19 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                         setMpDownloading(true);
                         try {
                             const el = mpTreeRef.current;
-                            const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            const srcCanvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            const a4W = 1654, a4H = 2339, pad = 60;
+                            const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
+                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height, 1);
+                            const dw = srcCanvas.width * ratio, dh = srcCanvas.height * ratio;
+                            const outCanvas = document.createElement('canvas');
+                            outCanvas.width = a4W; outCanvas.height = a4H;
+                            const ctx = outCanvas.getContext('2d');
+                            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
+                            ctx.drawImage(srcCanvas, (a4W - dw) / 2, pad, dw, dh);
                             const link = document.createElement('a');
                             link.download = `beta-pedigree-${animal.name || animal.id_public}.png`;
-                            link.href = canvas.toDataURL('image/png');
+                            link.href = outCanvas.toDataURL('image/png');
                             link.click();
                         } catch(e) { console.error('Beta pedigree download failed', e); }
                         finally { setMpDownloading(false); }
