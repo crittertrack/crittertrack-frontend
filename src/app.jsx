@@ -24293,7 +24293,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                         </td>
                                                                     </tr>
                                                                 )}
-                                                                {conflict && isSelected && (
+                                                                {conflict && (
                                                                     <tr className={`bg-${conflict.confidence === 'possible' ? 'orange' : 'amber'}-50`}>
                                                                         <td></td>
                                                                         <td colSpan="7" className="px-3 pb-2 pt-0">
@@ -24371,7 +24371,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                         const lm = ktkLitterMappings[l.litterIndex] || {};
                                                         const effectiveSireId = lm.sire?.id_public || l.maleCtId;
                                                         const effectiveDamId  = lm.dam?.id_public  || l.femaleCtId;
-                                                        const showSubRow = isSelected && ((!l.maleCtId && l.sireName) || (!l.femaleCtId && l.damName) || lm.sire || lm.dam);
+                                                        const showSubRow = isSelected && ((!l.maleCtId && !l.sireInThisImport && l.sireName) || (!l.femaleCtId && !l.damInThisImport && l.damName) || lm.sire || lm.dam);
                                                         return (
                                                             <React.Fragment key={i}>
                                                             <tr className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : l.isDuplicate ? 'bg-amber-50' : ''}`}>
@@ -24391,12 +24391,14 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                 <td className="px-2 py-1.5 text-gray-700">
                                                                     {l.sirePrefix && <span className="text-gray-400 mr-0.5">({l.sirePrefix})</span>}{l.sireName || '—'}
                                                                     {effectiveSireId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{effectiveSireId}</span>}
-                                                                    {!effectiveSireId && l.sireName && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
+                                                                    {!effectiveSireId && l.sireInThisImport && <span className="ml-1.5 px-1 py-0.5 text-xs bg-blue-100 text-blue-600 rounded" title="Will be linked after import">in this import</span>}
+                                                                    {!effectiveSireId && !l.sireInThisImport && l.sireName && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
                                                                 </td>
                                                                 <td className="px-2 py-1.5 text-gray-700">
                                                                     {l.damPrefix && <span className="text-gray-400 mr-0.5">({l.damPrefix})</span>}{l.damName || '—'}
                                                                     {effectiveDamId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{effectiveDamId}</span>}
-                                                                    {!effectiveDamId && l.damName && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
+                                                                    {!effectiveDamId && l.damInThisImport && <span className="ml-1.5 px-1 py-0.5 text-xs bg-blue-100 text-blue-600 rounded" title="Will be linked after import">in this import</span>}
+                                                                    {!effectiveDamId && !l.damInThisImport && l.damName && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
                                                                 </td>
                                                                 <td className="px-2 py-1.5 text-gray-600">{l.litterSizeBorn != null ? l.litterSizeBorn : '—'}</td>
                                                                 <td className="px-2 py-1.5">
@@ -24410,7 +24412,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                     <td colSpan="9" className="px-4 pb-2 pt-1">
                                                                         <div className="flex flex-wrap gap-4">
                                                                             {/* Sire mapping */}
-                                                                            {((!l.maleCtId && l.sireName) || lm.sire) && (
+                                                                            {((!l.maleCtId && !l.sireInThisImport && l.sireName) || lm.sire) && (
                                                                                 <div className="flex items-center gap-1.5 text-xs">
                                                                                     <span className="font-medium text-gray-500 min-w-[28px]">Sire:</span>
                                                                                     {lm.sire ? (
@@ -24468,7 +24470,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                 </div>
                                                                             )}
                                                                             {/* Dam mapping */}
-                                                                            {((!l.femaleCtId && l.damName) || lm.dam) && (
+                                                                            {((!l.femaleCtId && !l.damInThisImport && l.damName) || lm.dam) && (
                                                                                 <div className="flex items-center gap-1.5 text-xs">
                                                                                     <span className="font-medium text-gray-500 min-w-[28px]">Dam:</span>
                                                                                     {lm.dam ? (
