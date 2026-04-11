@@ -6826,7 +6826,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             } catch { /* not accessible */ }
                         } : undefined;
                         return (
-                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 min-h-[80px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 min-h-[140px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
                                 <div className={`flex items-center gap-1 mb-1.5 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>
                                     <GIcon size={11} className={`flex-shrink-0 ${gColor}`} />
                                     <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
@@ -8798,7 +8798,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             } catch { /* not accessible */ }
                         } : undefined;
                         return (
-                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 min-h-[80px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 min-h-[140px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
                                 <div className={`flex items-center gap-1 mb-1.5 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>
                                     <GIcon size={11} className={`flex-shrink-0 ${gColor}`} />
                                     <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
@@ -10785,7 +10785,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             } catch { /* not accessible */ }
                         } : undefined;
                         return (
-                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 min-h-[80px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 min-h-[140px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
                                 <div className={`flex items-center gap-1 mb-1.5 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>
                                     <GIcon size={11} className={`flex-shrink-0 ${gColor}`} />
                                     <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
