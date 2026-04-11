@@ -23707,7 +23707,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                             })}
                                                                             className="rounded" />
                                                                     </td>
-                                                                    <td className="px-2 py-1.5 font-medium text-gray-800 whitespace-nowrap">{a.name}</td>
+                                                                    <td className="px-2 py-1.5 font-medium text-gray-800 whitespace-nowrap">{[a.prefix, a.name, a.suffix].filter(Boolean).join(' ')}</td>
                                                                     <td className="px-2 py-1.5 text-gray-600">{a.gender || '—'}</td>
                                                                     <td className="px-2 py-1.5 text-gray-600 whitespace-nowrap">{a.birthDate || '—'}</td>
                                                                     <td className="px-2 py-1.5 font-mono text-gray-500">{a.zeRegNum || '—'}</td>
