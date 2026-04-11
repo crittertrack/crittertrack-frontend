@@ -6842,11 +6842,14 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                             {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
                                             {d.birthDate && <p className="text-[11px] text-gray-400">{formatDate(d.birthDate)}</p>}
                                             {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
-                                            {d.notes && <p className="text-[11px] text-gray-400 border-t border-gray-200 mt-1 pt-1">{d.notes}</p>}
                                         </div>
                                     </div>
                                 ) : (
-                                    <p className="text-[11px] text-gray-300 italic">—</p>
+                                    <div className="flex gap-2.5">
+                                        <div className="flex-1 min-w-0 space-y-0.5 pb-4">
+                                            <p className="text-[11px] text-gray-300 italic">—</p>
+                                        </div>
+                                    </div>
                                 )}
                                 {d.ctcId && <p className="absolute bottom-1.5 right-2 text-[10px] font-mono text-gray-800">{d.ctcId}</p>}
                             </div>
@@ -8809,11 +8812,14 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                             {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
                                             {d.birthDate && <p className="text-[11px] text-gray-400">{formatDate(d.birthDate)}</p>}
                                             {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
-                                            {d.notes && <p className="text-[11px] text-gray-400 border-t border-gray-200 mt-1 pt-1">{d.notes}</p>}
                                         </div>
                                     </div>
                                 ) : (
-                                    <p className="text-[11px] text-gray-300 italic">—</p>
+                                    <div className="flex gap-2.5">
+                                        <div className="flex-1 min-w-0 space-y-0.5 pb-4">
+                                            <p className="text-[11px] text-gray-300 italic">—</p>
+                                        </div>
+                                    </div>
                                 )}
                                 {d.ctcId && <p className="absolute bottom-1.5 right-2 text-[10px] font-mono text-gray-800">{d.ctcId}</p>}
                             </div>
@@ -10793,11 +10799,14 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                             {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
                                             {d.birthDate && <p className="text-[11px] text-gray-400">{formatDate(d.birthDate)}</p>}
                                             {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
-                                            {d.notes && <p className="text-[11px] text-gray-400 border-t border-gray-200 mt-1 pt-1">{d.notes}</p>}
                                         </div>
                                     </div>
                                 ) : (
-                                    <p className="text-[11px] text-gray-300 italic">—</p>
+                                    <div className="flex gap-2.5">
+                                        <div className="flex-1 min-w-0 space-y-0.5 pb-4">
+                                            <p className="text-[11px] text-gray-300 italic">—</p>
+                                        </div>
+                                    </div>
                                 )}
                                 {d.ctcId && <p className="absolute bottom-1.5 right-2 text-[10px] font-mono text-gray-800">{d.ctcId}</p>}
                             </div>
@@ -10817,7 +10826,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     </button>
                                 )}
                             </div>
-                            <p className="text-xs text-gray-400 -mt-3">Ancestors entered by the breeder. Not linked to registered CritterTrack animals and do not affect COI calculations.</p>
+                            <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart.</p>
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
                                 {(() => {
                                     const subjectVariety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => animal[k]).filter(Boolean).join(' ');
