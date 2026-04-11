@@ -24356,6 +24356,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                         <th className="px-2 py-2 text-left font-medium text-gray-600">Nest letter</th>
                                                         <th className="px-2 py-2 text-left font-medium text-gray-600">Mating date</th>
                                                         <th className="px-2 py-2 text-left font-medium text-gray-600">Birth date</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Weaning date</th>
                                                         <th className="px-2 py-2 text-left font-medium text-gray-600">Sire</th>
                                                         <th className="px-2 py-2 text-left font-medium text-gray-600">Dam</th>
                                                         <th className="px-2 py-2 text-left font-medium text-gray-600">Born count</th>
@@ -24379,13 +24380,14 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                 <td className="px-2 py-1.5 font-medium text-gray-700">{l.nestLetter || '—'}</td>
                                                                 <td className="px-2 py-1.5 text-gray-600">{l.matingDate ? String(l.matingDate).slice(0,10) : '—'}</td>
                                                                 <td className="px-2 py-1.5 text-gray-600">{l.birthDate ? String(l.birthDate).slice(0,10) : '—'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600">{l.weaningDate ? String(l.weaningDate).slice(0,10) : '—'}</td>
                                                                 <td className="px-2 py-1.5 text-gray-700">
-                                                                    {l.sireName || '—'}
+                                                                    {l.sirePrefix && <span className="text-gray-400 mr-0.5">({l.sirePrefix})</span>}{l.sireName || '—'}
                                                                     {l.maleCtId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{l.maleCtId}</span>}
                                                                     {!l.maleCtId && l.sireName && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
                                                                 </td>
                                                                 <td className="px-2 py-1.5 text-gray-700">
-                                                                    {l.damName || '—'}
+                                                                    {l.damPrefix && <span className="text-gray-400 mr-0.5">({l.damPrefix})</span>}{l.damName || '—'}
                                                                     {l.femaleCtId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{l.femaleCtId}</span>}
                                                                     {!l.femaleCtId && l.damName && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
                                                                 </td>
