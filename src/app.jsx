@@ -22433,6 +22433,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [ktkSelectedLitters, setKtkSelectedLitters] = useState(() => new Set());
     const [ktkManualMappings, setKtkManualMappings] = useState({});
     const [ktkMappingSearch, setKtkMappingSearch] = useState({ registration: null, query: '', results: [], loading: false });
+    const [ktkLitterMappings, setKtkLitterMappings] = useState({});
+    const [ktkLitterMappingSearch, setKtkLitterMappingSearch] = useState({ litterIndex: null, side: null, query: '', results: [], loading: false });
 
     const [importPreview, setImportPreview] = useState(null);
     const [importConflictResolutions, setImportConflictResolutions] = useState({});
@@ -24366,8 +24368,13 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                 <tbody className="divide-y bg-white">
                                                     {ktkPreview.litters.items.map((l, i) => {
                                                         const isSelected = ktkSelectedLitters.has(l.litterIndex);
+                                                        const lm = ktkLitterMappings[l.litterIndex] || {};
+                                                        const effectiveSireId = lm.sire?.id_public || l.maleCtId;
+                                                        const effectiveDamId  = lm.dam?.id_public  || l.femaleCtId;
+                                                        const showSubRow = isSelected && ((!l.maleCtId && l.sireName) || (!l.femaleCtId && l.damName) || lm.sire || lm.dam);
                                                         return (
-                                                            <tr key={i} className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : l.isDuplicate ? 'bg-amber-50' : ''}`}>
+                                                            <React.Fragment key={i}>
+                                                            <tr className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : l.isDuplicate ? 'bg-amber-50' : ''}`}>
                                                                 <td className="px-2 py-1.5 text-center">
                                                                     <input type="checkbox" checked={isSelected}
                                                                         onChange={e => setKtkSelectedLitters(prev => {
@@ -24383,13 +24390,13 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                 <td className="px-2 py-1.5 text-gray-600">{l.weaningDate ? String(l.weaningDate).slice(0,10) : '—'}</td>
                                                                 <td className="px-2 py-1.5 text-gray-700">
                                                                     {l.sirePrefix && <span className="text-gray-400 mr-0.5">({l.sirePrefix})</span>}{l.sireName || '—'}
-                                                                    {l.maleCtId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{l.maleCtId}</span>}
-                                                                    {!l.maleCtId && l.sireName && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
+                                                                    {effectiveSireId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{effectiveSireId}</span>}
+                                                                    {!effectiveSireId && l.sireName && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
                                                                 </td>
                                                                 <td className="px-2 py-1.5 text-gray-700">
                                                                     {l.damPrefix && <span className="text-gray-400 mr-0.5">({l.damPrefix})</span>}{l.damName || '—'}
-                                                                    {l.femaleCtId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{l.femaleCtId}</span>}
-                                                                    {!l.femaleCtId && l.damName && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
+                                                                    {effectiveDamId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{effectiveDamId}</span>}
+                                                                    {!effectiveDamId && l.damName && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
                                                                 </td>
                                                                 <td className="px-2 py-1.5 text-gray-600">{l.litterSizeBorn != null ? l.litterSizeBorn : '—'}</td>
                                                                 <td className="px-2 py-1.5">
@@ -24398,6 +24405,131 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                         : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
                                                                 </td>
                                                             </tr>
+                                                            {showSubRow && (
+                                                                <tr className="bg-blue-50 border-b">
+                                                                    <td colSpan="9" className="px-4 pb-2 pt-1">
+                                                                        <div className="flex flex-wrap gap-4">
+                                                                            {/* Sire mapping */}
+                                                                            {((!l.maleCtId && l.sireName) || lm.sire) && (
+                                                                                <div className="flex items-center gap-1.5 text-xs">
+                                                                                    <span className="font-medium text-gray-500 min-w-[28px]">Sire:</span>
+                                                                                    {lm.sire ? (
+                                                                                        <>
+                                                                                            <span className="text-blue-700">&#x21AA; <span className="font-mono font-semibold">{lm.sire.id_public}</span> &mdash; {lm.sire.name}</span>
+                                                                                            <button type="button" onClick={() => setKtkLitterMappings(prev => { const n = { ...prev }; const e = { ...n[l.litterIndex] }; delete e.sire; n[l.litterIndex] = e; return n; })} className="text-gray-400 hover:text-red-500 transition" title="Remove mapping"><X size={11} /></button>
+                                                                                        </>
+                                                                                    ) : ktkLitterMappingSearch.litterIndex === l.litterIndex && ktkLitterMappingSearch.side === 'sire' ? (
+                                                                                        <div className="flex flex-col gap-1">
+                                                                                            <div className="flex items-center gap-1">
+                                                                                                <input autoFocus type="text" placeholder="Search CT animal…"
+                                                                                                    value={ktkLitterMappingSearch.query}
+                                                                                                    onChange={async e => {
+                                                                                                        const q = e.target.value;
+                                                                                                        setKtkLitterMappingSearch(prev => ({ ...prev, query: q, loading: true, results: [] }));
+                                                                                                        if (!q.trim()) { setKtkLitterMappingSearch(prev => ({ ...prev, loading: false })); return; }
+                                                                                                        try {
+                                                                                                            const [pr, pub] = await Promise.allSettled([
+                                                                                                                axios.get(`${API_BASE_URL}/animals`, { params: { name: q }, headers: { Authorization: `Bearer ${authToken}` } }),
+                                                                                                                axios.get(`${API_BASE_URL}/public/global/animals`, { params: { name: q, limit: 10 } }),
+                                                                                                            ]);
+                                                                                                            const own = pr.status === 'fulfilled' ? pr.value.data : [];
+                                                                                                            const pub2 = pub.status === 'fulfilled' ? pub.value.data : [];
+                                                                                                            const seen = new Set(own.map(x => x.id_public));
+                                                                                                            setKtkLitterMappingSearch(prev => ({ ...prev, results: [...own, ...pub2.filter(x => !seen.has(x.id_public))].slice(0, 10), loading: false }));
+                                                                                                        } catch { setKtkLitterMappingSearch(prev => ({ ...prev, loading: false })); }
+                                                                                                    }}
+                                                                                                    className="text-xs border rounded px-2 py-1 focus:ring-primary focus:border-primary w-48"
+                                                                                                />
+                                                                                                {ktkLitterMappingSearch.loading && <Loader2 size={11} className="animate-spin text-gray-400" />}
+                                                                                                <button type="button" onClick={() => setKtkLitterMappingSearch({ litterIndex: null, side: null, query: '', results: [], loading: false })} className="text-gray-400 hover:text-gray-600"><X size={11} /></button>
+                                                                                            </div>
+                                                                                            {ktkLitterMappingSearch.results.length > 0 && (
+                                                                                                <div className="border rounded bg-white shadow-sm divide-y max-w-xs max-h-36 overflow-y-auto">
+                                                                                                    {ktkLitterMappingSearch.results.map(r => (
+                                                                                                        <button key={r.id_public} type="button"
+                                                                                                            onClick={() => {
+                                                                                                                setKtkLitterMappings(prev => ({ ...prev, [l.litterIndex]: { ...prev[l.litterIndex], sire: { id_public: r.id_public, name: [r.prefix, r.name, r.suffix].filter(Boolean).join(' ') } } }));
+                                                                                                                setKtkLitterMappingSearch({ litterIndex: null, side: null, query: '', results: [], loading: false });
+                                                                                                            }}
+                                                                                                            className="w-full text-left px-2 py-1.5 hover:bg-blue-50 text-xs"
+                                                                                                        >
+                                                                                                            <span className="font-medium text-gray-800">{[r.prefix, r.name, r.suffix].filter(Boolean).join(' ')}</span>
+                                                                                                            <span className="text-gray-400 ml-2 font-mono">{r.id_public}</span>
+                                                                                                            {r.birthDate && <span className="text-gray-400 ml-1">&middot; {String(r.birthDate).slice(0,10)}</span>}
+                                                                                                            {r.gender && <span className="text-gray-400 ml-1">&middot; {r.gender}</span>}
+                                                                                                        </button>
+                                                                                                    ))}
+                                                                                                </div>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    ) : (
+                                                                                        <button type="button" onClick={() => setKtkLitterMappingSearch({ litterIndex: l.litterIndex, side: 'sire', query: '', results: [], loading: false })} className="text-xs text-blue-600 hover:text-blue-800 hover:underline">+ Map to CT animal</button>
+                                                                                    )}
+                                                                                </div>
+                                                                            )}
+                                                                            {/* Dam mapping */}
+                                                                            {((!l.femaleCtId && l.damName) || lm.dam) && (
+                                                                                <div className="flex items-center gap-1.5 text-xs">
+                                                                                    <span className="font-medium text-gray-500 min-w-[28px]">Dam:</span>
+                                                                                    {lm.dam ? (
+                                                                                        <>
+                                                                                            <span className="text-blue-700">&#x21AA; <span className="font-mono font-semibold">{lm.dam.id_public}</span> &mdash; {lm.dam.name}</span>
+                                                                                            <button type="button" onClick={() => setKtkLitterMappings(prev => { const n = { ...prev }; const e = { ...n[l.litterIndex] }; delete e.dam; n[l.litterIndex] = e; return n; })} className="text-gray-400 hover:text-red-500 transition" title="Remove mapping"><X size={11} /></button>
+                                                                                        </>
+                                                                                    ) : ktkLitterMappingSearch.litterIndex === l.litterIndex && ktkLitterMappingSearch.side === 'dam' ? (
+                                                                                        <div className="flex flex-col gap-1">
+                                                                                            <div className="flex items-center gap-1">
+                                                                                                <input autoFocus type="text" placeholder="Search CT animal…"
+                                                                                                    value={ktkLitterMappingSearch.query}
+                                                                                                    onChange={async e => {
+                                                                                                        const q = e.target.value;
+                                                                                                        setKtkLitterMappingSearch(prev => ({ ...prev, query: q, loading: true, results: [] }));
+                                                                                                        if (!q.trim()) { setKtkLitterMappingSearch(prev => ({ ...prev, loading: false })); return; }
+                                                                                                        try {
+                                                                                                            const [pr, pub] = await Promise.allSettled([
+                                                                                                                axios.get(`${API_BASE_URL}/animals`, { params: { name: q }, headers: { Authorization: `Bearer ${authToken}` } }),
+                                                                                                                axios.get(`${API_BASE_URL}/public/global/animals`, { params: { name: q, limit: 10 } }),
+                                                                                                            ]);
+                                                                                                            const own = pr.status === 'fulfilled' ? pr.value.data : [];
+                                                                                                            const pub2 = pub.status === 'fulfilled' ? pub.value.data : [];
+                                                                                                            const seen = new Set(own.map(x => x.id_public));
+                                                                                                            setKtkLitterMappingSearch(prev => ({ ...prev, results: [...own, ...pub2.filter(x => !seen.has(x.id_public))].slice(0, 10), loading: false }));
+                                                                                                        } catch { setKtkLitterMappingSearch(prev => ({ ...prev, loading: false })); }
+                                                                                                    }}
+                                                                                                    className="text-xs border rounded px-2 py-1 focus:ring-primary focus:border-primary w-48"
+                                                                                                />
+                                                                                                {ktkLitterMappingSearch.loading && <Loader2 size={11} className="animate-spin text-gray-400" />}
+                                                                                                <button type="button" onClick={() => setKtkLitterMappingSearch({ litterIndex: null, side: null, query: '', results: [], loading: false })} className="text-gray-400 hover:text-gray-600"><X size={11} /></button>
+                                                                                            </div>
+                                                                                            {ktkLitterMappingSearch.results.length > 0 && (
+                                                                                                <div className="border rounded bg-white shadow-sm divide-y max-w-xs max-h-36 overflow-y-auto">
+                                                                                                    {ktkLitterMappingSearch.results.map(r => (
+                                                                                                        <button key={r.id_public} type="button"
+                                                                                                            onClick={() => {
+                                                                                                                setKtkLitterMappings(prev => ({ ...prev, [l.litterIndex]: { ...prev[l.litterIndex], dam: { id_public: r.id_public, name: [r.prefix, r.name, r.suffix].filter(Boolean).join(' ') } } }));
+                                                                                                                setKtkLitterMappingSearch({ litterIndex: null, side: null, query: '', results: [], loading: false });
+                                                                                                            }}
+                                                                                                            className="w-full text-left px-2 py-1.5 hover:bg-blue-50 text-xs"
+                                                                                                        >
+                                                                                                            <span className="font-medium text-gray-800">{[r.prefix, r.name, r.suffix].filter(Boolean).join(' ')}</span>
+                                                                                                            <span className="text-gray-400 ml-2 font-mono">{r.id_public}</span>
+                                                                                                            {r.birthDate && <span className="text-gray-400 ml-1">&middot; {String(r.birthDate).slice(0,10)}</span>}
+                                                                                                            {r.gender && <span className="text-gray-400 ml-1">&middot; {r.gender}</span>}
+                                                                                                        </button>
+                                                                                                    ))}
+                                                                                                </div>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    ) : (
+                                                                                        <button type="button" onClick={() => setKtkLitterMappingSearch({ litterIndex: l.litterIndex, side: 'dam', query: '', results: [], loading: false })} className="text-xs text-blue-600 hover:text-blue-800 hover:underline">+ Map to CT animal</button>
+                                                                                    )}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            )}
+                                                            </React.Fragment>
                                                         );
                                                     })}
                                                 </tbody>
@@ -24419,6 +24551,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                             fd.append('confirm', 'true');
                                             fd.append('selectedAnimals', JSON.stringify([...ktkSelectedAnimals]));
                                             fd.append('selectedLitters', JSON.stringify([...ktkSelectedLitters]));
+                                            fd.append('litterMappings', JSON.stringify(ktkLitterMappings));
                                             const finalResolutions = { ...ktkConflictResolutions };
                                             for (const [reg, mapping] of Object.entries(ktkManualMappings)) {
                                                 finalResolutions[reg] = `map_to:${mapping.id_public}`;
@@ -24444,7 +24577,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     Confirm Import
                                 </button>
                                 <button
-                                    onClick={() => { setKtkPreview(null); setKtkAnimalsFile(null); setKtkBreedingFile(null); setKtkManualMappings({}); setKtkMappingSearch({ registration: null, query: '', results: [], loading: false }); setKtkSelectedLitters(new Set()); }}
+                                    onClick={() => { setKtkPreview(null); setKtkAnimalsFile(null); setKtkBreedingFile(null); setKtkManualMappings({}); setKtkMappingSearch({ registration: null, query: '', results: [], loading: false }); setKtkLitterMappings({}); setKtkLitterMappingSearch({ litterIndex: null, side: null, query: '', results: [], loading: false }); setKtkSelectedLitters(new Set()); }}
                                     className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition"
                                 >
                                     Cancel
