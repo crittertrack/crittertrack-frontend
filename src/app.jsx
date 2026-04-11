@@ -23652,11 +23652,17 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                                         <h5 className="font-semibold text-gray-700">
                                             Animals &mdash; {zePreview.animals.total} total
-                                            {zePreview.animals.conflicts?.length > 0 && (
-                                                <span className="ml-2 text-xs font-normal text-amber-600">
-                                                    {zePreview.animals.conflicts.length} duplicate{zePreview.animals.conflicts.length !== 1 ? 's' : ''} found
-                                                </span>
-                                            )}
+                                            {zePreview.animals.conflicts?.length > 0 && (() => {
+                                                const high = zePreview.animals.conflicts.filter(c => c.confidence !== 'possible').length;
+                                                const possible = zePreview.animals.conflicts.filter(c => c.confidence === 'possible').length;
+                                                return (
+                                                    <span className="ml-2 text-xs font-normal">
+                                                        {high > 0 && <span className="text-amber-600">{high} duplicate{high !== 1 ? 's' : ''}</span>}
+                                                        {high > 0 && possible > 0 && <span className="text-gray-400"> · </span>}
+                                                        {possible > 0 && <span className="text-orange-500">{possible} possible match{possible !== 1 ? 'es' : ''}</span>}
+                                                    </span>
+                                                );
+                                            })()}
                                         </h5>
                                         <div className="flex gap-2 text-xs">
                                             <button type="button"
@@ -23711,20 +23717,95 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                     <td className="px-2 py-1.5 text-gray-600">{a.coat || '—'}</td>
                                                                     <td className="px-2 py-1.5">
                                                                         {conflict
-                                                                            ? <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium">Duplicate</span>
-                                                                            : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
+                                                                            ? conflict.confidence === 'possible'
+                                                                                ? <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded text-xs font-medium">Possible match</span>
+                                                                                : <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium">Duplicate</span>
+                                                                            : zeManualMappings[a.zeRegNum]
+                                                                                ? <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">Mapped</span>
+                                                                                : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
                                                                     </td>
                                                                 </tr>
+                                                                {/* Manual mapping sub-row for New/Mapped rows */}
+                                                                {!conflict && isSelected && (
+                                                                    <tr className={zeManualMappings[a.zeRegNum] ? 'bg-blue-50' : 'bg-gray-50'}>
+                                                                        <td></td>
+                                                                        <td colSpan="9" className="px-3 pb-2 pt-0">
+                                                                            {zeManualMappings[a.zeRegNum] ? (
+                                                                                <div className="flex items-center gap-2 text-xs pt-1">
+                                                                                    <span className="text-blue-700">&#x21AA; Mapped to CT <span className="font-mono font-semibold">{zeManualMappings[a.zeRegNum].id_public}</span> &mdash; {zeManualMappings[a.zeRegNum].name}</span>
+                                                                                    <button type="button" onClick={() => setZeManualMappings(prev => { const n = { ...prev }; delete n[a.zeRegNum]; return n; })}
+                                                                                        className="text-gray-400 hover:text-red-500 transition ml-1" title="Remove mapping"><X size={11} /></button>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div className="pt-1">
+                                                                                    {zeMappingSearch.regNum === a.zeRegNum ? (
+                                                                                        <div className="flex flex-col gap-1.5">
+                                                                                            <div className="flex items-center gap-1.5">
+                                                                                                <input autoFocus type="text" placeholder="Search CT animal by name…"
+                                                                                                    value={zeMappingSearch.query}
+                                                                                                    onChange={async e => {
+                                                                                                        const q = e.target.value;
+                                                                                                        setZeMappingSearch(prev => ({ ...prev, query: q, loading: true, results: [] }));
+                                                                                                        if (!q.trim()) { setZeMappingSearch(prev => ({ ...prev, loading: false })); return; }
+                                                                                                        try {
+                                                                                                            const r = await axios.get(`${API_BASE_URL}/animals`, {
+                                                                                                                params: { name: q },
+                                                                                                                headers: { Authorization: `Bearer ${authToken}` },
+                                                                                                            });
+                                                                                                            setZeMappingSearch(prev => ({ ...prev, results: r.data.slice(0, 8), loading: false }));
+                                                                                                        } catch { setZeMappingSearch(prev => ({ ...prev, loading: false })); }
+                                                                                                    }}
+                                                                                                    className="flex-1 max-w-xs text-xs border rounded px-2 py-1 focus:ring-primary focus:border-primary"
+                                                                                                />
+                                                                                                {zeMappingSearch.loading && <Loader2 size={11} className="animate-spin text-gray-400" />}
+                                                                                                <button type="button" onClick={() => setZeMappingSearch({ regNum: null, query: '', results: [], loading: false })}
+                                                                                                    className="text-gray-400 hover:text-gray-600"><X size={11} /></button>
+                                                                                            </div>
+                                                                                            {zeMappingSearch.results.length > 0 && (
+                                                                                                <div className="border rounded bg-white shadow-sm divide-y max-w-sm max-h-40 overflow-y-auto">
+                                                                                                    {zeMappingSearch.results.map(r => (
+                                                                                                        <button key={r.id_public} type="button"
+                                                                                                            onClick={() => {
+                                                                                                                setZeManualMappings(prev => ({ ...prev, [a.zeRegNum]: { id_public: r.id_public, name: r.name } }));
+                                                                                                                setZeMappingSearch({ regNum: null, query: '', results: [], loading: false });
+                                                                                                            }}
+                                                                                                            className="w-full text-left px-2 py-1.5 hover:bg-blue-50 transition text-xs"
+                                                                                                        >
+                                                                                                            <span className="font-medium text-gray-800">{r.name}</span>
+                                                                                                            <span className="text-gray-400 ml-2 font-mono">{r.id_public}</span>
+                                                                                                            {r.birthDate && <span className="text-gray-400 ml-1">&middot; {String(r.birthDate).slice(0,10)}</span>}
+                                                                                                            {r.gender && <span className="text-gray-400 ml-1">&middot; {r.gender}</span>}
+                                                                                                        </button>
+                                                                                                    ))}
+                                                                                                </div>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    ) : (
+                                                                                        <button type="button"
+                                                                                            onClick={() => setZeMappingSearch({ regNum: a.zeRegNum, query: '', results: [], loading: false })}
+                                                                                            className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                                                                                        >
+                                                                                            + Map to existing CT animal (for parent links)
+                                                                                        </button>
+                                                                                    )}
+                                                                                </div>
+                                                                            )}
+                                                                        </td>
+                                                                    </tr>
+                                                                )}
                                                                 {conflict && isSelected && (
-                                                                    <tr className="bg-amber-50">
+                                                                    <tr className={`bg-${conflict.confidence === 'possible' ? 'orange' : 'amber'}-50`}>
                                                                         <td></td>
                                                                         <td colSpan="9" className="px-3 pb-2 pt-0">
                                                                             <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-amber-800 pt-1">
                                                                                 <AlertTriangle size={11} className="shrink-0 text-amber-500" />
                                                                                 <span>
-                                                                                    Matches CT <span className="font-mono">{conflict.existingId}</span>
+                                                                                    {conflict.confidence === 'possible' ? 'Possible match: ' : 'Matches '}
+                                                                                    CT <span className="font-mono">{conflict.existingId}</span>
+                                                                                    {conflict.existingName && conflict.existingName !== conflict.name && <span> &ldquo;{conflict.existingName}&rdquo;</span>}
+                                                                                    {conflict.existingBirthDate && <span> &middot; {conflict.existingBirthDate}</span>}
                                                                                     {' '}({conflict.isOwnedByImporter ? 'your animal' : `owned by ${conflict.existingOwner}`})
-                                                                                    {' \u00b7 matched by '}{conflict.matchType === 'id' ? 'registration number' : 'name + birth date'}
+                                                                                    {' · matched by '}{conflict.matchType === 'id' ? 'registration number' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}
                                                                                 </span>
                                                                                 <select
                                                                                     value={resolution}
