@@ -23748,11 +23748,15 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                                         setZeMappingSearch(prev => ({ ...prev, query: q, loading: true, results: [] }));
                                                                                                         if (!q.trim()) { setZeMappingSearch(prev => ({ ...prev, loading: false })); return; }
                                                                                                         try {
-                                                                                                            const r = await axios.get(`${API_BASE_URL}/animals`, {
-                                                                                                                params: { name: q },
-                                                                                                                headers: { Authorization: `Bearer ${authToken}` },
-                                                                                                            });
-                                                                                                            setZeMappingSearch(prev => ({ ...prev, results: r.data.slice(0, 8), loading: false }));
+                                                                                                            const [privateRes, publicRes] = await Promise.allSettled([
+                                                                                                                axios.get(`${API_BASE_URL}/animals`, { params: { name: q }, headers: { Authorization: `Bearer ${authToken}` } }),
+                                                                                                                axios.get(`${API_BASE_URL}/public/global/animals`, { params: { name: q, limit: 10 } }),
+                                                                                                            ]);
+                                                                                                            const own = privateRes.status === 'fulfilled' ? privateRes.value.data : [];
+                                                                                                            const pub = publicRes.status === 'fulfilled' ? publicRes.value.data : [];
+                                                                                                            const seen = new Set(own.map(a => a.id_public));
+                                                                                                            const merged = [...own, ...pub.filter(a => !seen.has(a.id_public))];
+                                                                                                            setZeMappingSearch(prev => ({ ...prev, results: merged.slice(0, 10), loading: false }));
                                                                                                         } catch { setZeMappingSearch(prev => ({ ...prev, loading: false })); }
                                                                                                     }}
                                                                                                     className="flex-1 max-w-xs text-xs border rounded px-2 py-1 focus:ring-primary focus:border-primary"
@@ -23766,15 +23770,16 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                                     {zeMappingSearch.results.map(r => (
                                                                                                         <button key={r.id_public} type="button"
                                                                                                             onClick={() => {
-                                                                                                                setZeManualMappings(prev => ({ ...prev, [a.zeRegNum]: { id_public: r.id_public, name: r.name } }));
+                                                                                                                setZeManualMappings(prev => ({ ...prev, [a.zeRegNum]: { id_public: r.id_public, name: [r.prefix, r.name, r.suffix].filter(Boolean).join(' ') } }));
                                                                                                                 setZeMappingSearch({ regNum: null, query: '', results: [], loading: false });
                                                                                                             }}
                                                                                                             className="w-full text-left px-2 py-1.5 hover:bg-blue-50 transition text-xs"
                                                                                                         >
-                                                                                                            <span className="font-medium text-gray-800">{r.name}</span>
+                                                                                                            <span className="font-medium text-gray-800">{[r.prefix, r.name, r.suffix].filter(Boolean).join(' ')}</span>
                                                                                                             <span className="text-gray-400 ml-2 font-mono">{r.id_public}</span>
                                                                                                             {r.birthDate && <span className="text-gray-400 ml-1">&middot; {String(r.birthDate).slice(0,10)}</span>}
                                                                                                             {r.gender && <span className="text-gray-400 ml-1">&middot; {r.gender}</span>}
+                                                                                                            {r.breederName && <span className="text-gray-300 ml-1">&middot; {r.breederName}</span>}
                                                                                                         </button>
                                                                                                     ))}
                                                                                                 </div>
