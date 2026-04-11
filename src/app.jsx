@@ -24006,7 +24006,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 {/* ── Kintraks Import ─────────────────────────────────────── */}
                 <div className="border-t pt-5">
                     <h4 className="font-semibold text-gray-700 mb-1 flex items-center gap-2"><Upload size={16} /> Import from Kintraks</h4>
-                    <p className="text-xs text-gray-500 mb-4">Export your animals (Export) and breeding records (Breeding Record - All Records) from Kintraks as CSV, then upload them here. Star (⭐) and heart (❤️) tracking markers and kennel abbreviations like (MM) are automatically stripped when matching against existing animals.</p>
+                    <p className="text-xs text-gray-500 mb-4">Export your animals (Export) and breeding records (Breeding Record - All Records) from Kintraks as CSV, then upload them here.</p>
 
                     {/* Species */}
                     <div className="mb-4">
