@@ -24293,7 +24293,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                         </td>
                                                                     </tr>
                                                                 )}
-                                                                {conflict && (
+                                                                {conflict && isSelected && (
                                                                     <tr className={`bg-${conflict.confidence === 'possible' ? 'orange' : 'amber'}-50`}>
                                                                         <td></td>
                                                                         <td colSpan="7" className="px-3 pb-2 pt-0">
