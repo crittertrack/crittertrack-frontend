@@ -22384,6 +22384,13 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             .finally(() => setMyReceivedRatingsLoading(false));
     }, [settingsTab, userProfile?.id_public]);
 
+    useEffect(() => {
+        if (settingsTab !== 'data') return;
+        axios.get(`${API_BASE_URL}/species`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(r => setZeSpeciesList(Array.isArray(r.data) ? r.data : []))
+            .catch(() => {});
+    }, [settingsTab, API_BASE_URL, authToken]);
+
     // Data Portability — Export
     const [exportSections, setExportSections] = useState({ animals: true, litters: true, enclosures: true, supplies: true, budget: true });
     const [exportFormat, setExportFormat] = useState('json');
@@ -22406,6 +22413,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [zeLoading, setZeLoading] = useState(false);
     const [zeConfirmLoading, setZeConfirmLoading] = useState(false);
     const [zeResult, setZeResult] = useState(null);
+    const [zeSpeciesList, setZeSpeciesList] = useState([]);
     const [importPreview, setImportPreview] = useState(null);
     const [importConflictResolutions, setImportConflictResolutions] = useState({});
     const [importLoading, setImportLoading] = useState(false);
@@ -22780,6 +22788,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     { id: 'directory',       label: 'Directory' },
                     { id: 'ratings',         label: 'Ratings' },
                     { id: 'breeding-lines',  label: 'Breeding Lines' },
+                    { id: 'data',            label: 'Data Portability' },
                     { id: 'account',         label: 'Account' },
                 ].map(tab => (
                     <button key={tab.id} type="button" onClick={() => setSettingsTab(tab.id)}
@@ -23263,11 +23272,12 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     </button>
                 </div>
             </form>
+            </>}
 
-            {/* ── Data Portability ───────────────────────────────────────────── */}
-            <div className="mt-6 mb-6 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden space-y-6">
+            {settingsTab === 'data' && <>
+            <div className="p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden space-y-6">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Data Portability</h3>
-                <p className="text-sm text-gray-500 -mt-2">Export your records as a backup, or import data from a previous CritterTrack export.</p>
+                <p className="text-sm text-gray-500 -mt-2">Export your records as a backup, or import data from a previous CritterTrack export or another service.</p>
 
                 {/* ── Export ────────────────────────────────────────────────── */}
                 <div>
@@ -23500,7 +23510,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 className="flex-1 p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary bg-white"
                             >
                                 <option value="">— select species —</option>
-                                {(speciesOptions || []).map(s => (
+                                {(zeSpeciesList || []).map(s => (
                                     <option key={s.name} value={s.name}>{s.name}</option>
                                 ))}
                             </select>
@@ -23535,7 +23545,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                 { headers: { Authorization: `Bearer ${authToken}` } }
                                             );
                                             const added = resp.data.species;
-                                            setSpeciesOptions(prev => [...prev, added]);
+                                            setZeSpeciesList(prev => [...prev, added]);
                                             setZeSpecies(added.name);
                                             setZeAddingSpecies(false);
                                             setZeNewSpeciesName('');
@@ -23760,7 +23770,9 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     )}
                 </div>
             </div>
+            </>}
 
+            {settingsTab === 'account' && <>
             <div className="mt-2 border-2 border-red-300 rounded-lg bg-red-50 overflow-x-hidden">
                 <button type="button" onClick={() => setDangerZoneOpen(v => !v)}
                     className="w-full flex items-center justify-between p-4 sm:p-6 text-left hover:bg-red-100 transition"
