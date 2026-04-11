@@ -4116,24 +4116,67 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
     useEffect(() => {
         if (detailViewTab !== 16) return;
-        const base = animal?.manualPedigree || {};
-        const ctcSlots = Object.entries(base).filter(([, v]) => v?.ctcId);
-        if (!ctcSlots.length) { setMpEnrichedData(base); return; }
         let cancelled = false;
-        Promise.all(ctcSlots.map(([key, slot]) =>
-            axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(slot.ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } })
-                .then(r => [key, r.data])
-                .catch(() => [key, null])
-        )).then(results => {
+        (async () => {
+            const manual = animal?.manualPedigree || {};
+            const toSlot = (a) => {
+                const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
+                return { mode: 'ctc', ctcId: a.id_public || '', prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
+            };
+            const fetchOne = async (id) => {
+                if (!id) return null;
+                try { const r = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${authToken}` } }); return r.data || null; }
+                catch { return null; }
+            };
+            // Level 1: parents
+            const [sire, dam] = await Promise.all([
+                fetchOne(animal?.sireId_public || animal?.fatherId_public),
+                fetchOne(animal?.damId_public  || animal?.motherId_public),
+            ]);
             if (cancelled) return;
-            const merged = { ...base };
-            results.forEach(([key, data]) => {
-                if (data && (data.breederName || data.manualBreederName)) {
-                    merged[key] = { ...merged[key], breederName: data.breederName || data.manualBreederName };
-                }
+            // Level 2: grandparents
+            const [ss, sd, ds, dd] = await Promise.all([
+                fetchOne(sire?.sireId_public || sire?.fatherId_public),
+                fetchOne(sire?.damId_public  || sire?.motherId_public),
+                fetchOne(dam?.sireId_public  || dam?.fatherId_public),
+                fetchOne(dam?.damId_public   || dam?.motherId_public),
+            ]);
+            if (cancelled) return;
+            // Level 3: great-grandparents
+            const [sss, ssd, sds, sdd, dss, dsd, dds, ddd] = await Promise.all([
+                fetchOne(ss?.sireId_public || ss?.fatherId_public),
+                fetchOne(ss?.damId_public  || ss?.motherId_public),
+                fetchOne(sd?.sireId_public || sd?.fatherId_public),
+                fetchOne(sd?.damId_public  || sd?.motherId_public),
+                fetchOne(ds?.sireId_public || ds?.fatherId_public),
+                fetchOne(ds?.damId_public  || ds?.motherId_public),
+                fetchOne(dd?.sireId_public || dd?.fatherId_public),
+                fetchOne(dd?.damId_public  || dd?.motherId_public),
+            ]);
+            if (cancelled) return;
+            // Build seeded slots from linked ancestry
+            const seeded = {};
+            if (sire) seeded.sire         = toSlot(sire);
+            if (dam)  seeded.dam          = toSlot(dam);
+            if (ss)   seeded.sireSire     = toSlot(ss);
+            if (sd)   seeded.sireDam      = toSlot(sd);
+            if (ds)   seeded.damSire      = toSlot(ds);
+            if (dd)   seeded.damDam       = toSlot(dd);
+            if (sss)  seeded.sireSireSire = toSlot(sss);
+            if (ssd)  seeded.sireSireDam  = toSlot(ssd);
+            if (sds)  seeded.sireDamSire  = toSlot(sds);
+            if (sdd)  seeded.sireDamDam   = toSlot(sdd);
+            if (dss)  seeded.damSireSire  = toSlot(dss);
+            if (dsd)  seeded.damSireDam   = toSlot(dsd);
+            if (dds)  seeded.damDamSire   = toSlot(dds);
+            if (ddd)  seeded.damDamDam    = toSlot(ddd);
+            // Overlay non-empty manualPedigree entries on top of seeded values
+            const merged = { ...seeded };
+            Object.entries(manual).forEach(([k, v]) => {
+                if (v && (v.ctcId || v.name || v.prefix || v.suffix)) merged[k] = v;
             });
             setMpEnrichedData(merged);
-        });
+        })();
         return () => { cancelled = true; };
     }, [detailViewTab, animal?.id_public]);
     useEffect(() => { setMpEnrichedData(null); }, [animal?.id_public]);
@@ -6966,24 +7009,67 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
     useEffect(() => {
         if (detailViewTab !== 16) return;
-        const base = animal?.manualPedigree || {};
-        const ctcSlots = Object.entries(base).filter(([, v]) => v?.ctcId);
-        if (!ctcSlots.length) { setMpEnrichedData(base); return; }
         let cancelled = false;
-        Promise.all(ctcSlots.map(([key, slot]) =>
-            axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(slot.ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } })
-                .then(r => [key, r.data])
-                .catch(() => [key, null])
-        )).then(results => {
+        (async () => {
+            const manual = animal?.manualPedigree || {};
+            const toSlot = (a) => {
+                const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
+                return { mode: 'ctc', ctcId: a.id_public || '', prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
+            };
+            const fetchOne = async (id) => {
+                if (!id) return null;
+                try { const r = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${authToken}` } }); return r.data || null; }
+                catch { return null; }
+            };
+            // Level 1: parents
+            const [sire, dam] = await Promise.all([
+                fetchOne(animal?.sireId_public || animal?.fatherId_public),
+                fetchOne(animal?.damId_public  || animal?.motherId_public),
+            ]);
             if (cancelled) return;
-            const merged = { ...base };
-            results.forEach(([key, data]) => {
-                if (data && (data.breederName || data.manualBreederName)) {
-                    merged[key] = { ...merged[key], breederName: data.breederName || data.manualBreederName };
-                }
+            // Level 2: grandparents
+            const [ss, sd, ds, dd] = await Promise.all([
+                fetchOne(sire?.sireId_public || sire?.fatherId_public),
+                fetchOne(sire?.damId_public  || sire?.motherId_public),
+                fetchOne(dam?.sireId_public  || dam?.fatherId_public),
+                fetchOne(dam?.damId_public   || dam?.motherId_public),
+            ]);
+            if (cancelled) return;
+            // Level 3: great-grandparents
+            const [sss, ssd, sds, sdd, dss, dsd, dds, ddd] = await Promise.all([
+                fetchOne(ss?.sireId_public || ss?.fatherId_public),
+                fetchOne(ss?.damId_public  || ss?.motherId_public),
+                fetchOne(sd?.sireId_public || sd?.fatherId_public),
+                fetchOne(sd?.damId_public  || sd?.motherId_public),
+                fetchOne(ds?.sireId_public || ds?.fatherId_public),
+                fetchOne(ds?.damId_public  || ds?.motherId_public),
+                fetchOne(dd?.sireId_public || dd?.fatherId_public),
+                fetchOne(dd?.damId_public  || dd?.motherId_public),
+            ]);
+            if (cancelled) return;
+            // Build seeded slots from linked ancestry
+            const seeded = {};
+            if (sire) seeded.sire         = toSlot(sire);
+            if (dam)  seeded.dam          = toSlot(dam);
+            if (ss)   seeded.sireSire     = toSlot(ss);
+            if (sd)   seeded.sireDam      = toSlot(sd);
+            if (ds)   seeded.damSire      = toSlot(ds);
+            if (dd)   seeded.damDam       = toSlot(dd);
+            if (sss)  seeded.sireSireSire = toSlot(sss);
+            if (ssd)  seeded.sireSireDam  = toSlot(ssd);
+            if (sds)  seeded.sireDamSire  = toSlot(sds);
+            if (sdd)  seeded.sireDamDam   = toSlot(sdd);
+            if (dss)  seeded.damSireSire  = toSlot(dss);
+            if (dsd)  seeded.damSireDam   = toSlot(dsd);
+            if (dds)  seeded.damDamSire   = toSlot(dds);
+            if (ddd)  seeded.damDamDam    = toSlot(ddd);
+            // Overlay non-empty manualPedigree entries on top of seeded values
+            const merged = { ...seeded };
+            Object.entries(manual).forEach(([k, v]) => {
+                if (v && (v.ctcId || v.name || v.prefix || v.suffix)) merged[k] = v;
             });
             setMpEnrichedData(merged);
-        });
+        })();
         return () => { cancelled = true; };
     }, [detailViewTab, animal?.id_public]);
     useEffect(() => { setMpEnrichedData(null); }, [animal?.id_public]);
@@ -8851,24 +8937,67 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
     useEffect(() => {
         if (detailViewTab !== 14) return;
-        const base = animal?.manualPedigree || {};
-        const ctcSlots = Object.entries(base).filter(([, v]) => v?.ctcId);
-        if (!ctcSlots.length) { setMpEnrichedData(base); return; }
         let cancelled = false;
-        Promise.all(ctcSlots.map(([key, slot]) =>
-            axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(slot.ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } })
-                .then(r => [key, r.data])
-                .catch(() => [key, null])
-        )).then(results => {
+        (async () => {
+            const manual = animal?.manualPedigree || {};
+            const toSlot = (a) => {
+                const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
+                return { mode: 'ctc', ctcId: a.id_public || '', prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
+            };
+            const fetchOne = async (id) => {
+                if (!id) return null;
+                try { const r = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${authToken}` } }); return r.data || null; }
+                catch { return null; }
+            };
+            // Level 1: parents
+            const [sire, dam] = await Promise.all([
+                fetchOne(animal?.sireId_public || animal?.fatherId_public),
+                fetchOne(animal?.damId_public  || animal?.motherId_public),
+            ]);
             if (cancelled) return;
-            const merged = { ...base };
-            results.forEach(([key, data]) => {
-                if (data && (data.breederName || data.manualBreederName)) {
-                    merged[key] = { ...merged[key], breederName: data.breederName || data.manualBreederName };
-                }
+            // Level 2: grandparents
+            const [ss, sd, ds, dd] = await Promise.all([
+                fetchOne(sire?.sireId_public || sire?.fatherId_public),
+                fetchOne(sire?.damId_public  || sire?.motherId_public),
+                fetchOne(dam?.sireId_public  || dam?.fatherId_public),
+                fetchOne(dam?.damId_public   || dam?.motherId_public),
+            ]);
+            if (cancelled) return;
+            // Level 3: great-grandparents
+            const [sss, ssd, sds, sdd, dss, dsd, dds, ddd] = await Promise.all([
+                fetchOne(ss?.sireId_public || ss?.fatherId_public),
+                fetchOne(ss?.damId_public  || ss?.motherId_public),
+                fetchOne(sd?.sireId_public || sd?.fatherId_public),
+                fetchOne(sd?.damId_public  || sd?.motherId_public),
+                fetchOne(ds?.sireId_public || ds?.fatherId_public),
+                fetchOne(ds?.damId_public  || ds?.motherId_public),
+                fetchOne(dd?.sireId_public || dd?.fatherId_public),
+                fetchOne(dd?.damId_public  || dd?.motherId_public),
+            ]);
+            if (cancelled) return;
+            // Build seeded slots from linked ancestry
+            const seeded = {};
+            if (sire) seeded.sire         = toSlot(sire);
+            if (dam)  seeded.dam          = toSlot(dam);
+            if (ss)   seeded.sireSire     = toSlot(ss);
+            if (sd)   seeded.sireDam      = toSlot(sd);
+            if (ds)   seeded.damSire      = toSlot(ds);
+            if (dd)   seeded.damDam       = toSlot(dd);
+            if (sss)  seeded.sireSireSire = toSlot(sss);
+            if (ssd)  seeded.sireSireDam  = toSlot(ssd);
+            if (sds)  seeded.sireDamSire  = toSlot(sds);
+            if (sdd)  seeded.sireDamDam   = toSlot(sdd);
+            if (dss)  seeded.damSireSire  = toSlot(dss);
+            if (dsd)  seeded.damSireDam   = toSlot(dsd);
+            if (dds)  seeded.damDamSire   = toSlot(dds);
+            if (ddd)  seeded.damDamDam    = toSlot(ddd);
+            // Overlay non-empty manualPedigree entries on top of seeded values
+            const merged = { ...seeded };
+            Object.entries(manual).forEach(([k, v]) => {
+                if (v && (v.ctcId || v.name || v.prefix || v.suffix)) merged[k] = v;
             });
             setMpEnrichedData(merged);
-        });
+        })();
         return () => { cancelled = true; };
     }, [detailViewTab, animal?.id_public]);
     // Reset tab when navigating to a different animal
