@@ -22417,6 +22417,23 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [zeManualMappings, setZeManualMappings] = useState({});
     const [zeMappingSearch, setZeMappingSearch] = useState({ regNum: null, query: '', results: [], loading: false });
     const [zeSpeciesList, setZeSpeciesList] = useState([]);
+
+    // Kintraks Import
+    const [ktkAnimalsFile, setKtkAnimalsFile] = useState(null);
+    const [ktkBreedingFile, setKtkBreedingFile] = useState(null);
+    const [ktkSpecies, setKtkSpecies] = useState('');
+    const [ktkNewSpeciesName, setKtkNewSpeciesName] = useState('');
+    const [ktkAddingSpecies, setKtkAddingSpecies] = useState(false);
+    const [ktkPreview, setKtkPreview] = useState(null);
+    const [ktkConflictResolutions, setKtkConflictResolutions] = useState({});
+    const [ktkLoading, setKtkLoading] = useState(false);
+    const [ktkConfirmLoading, setKtkConfirmLoading] = useState(false);
+    const [ktkResult, setKtkResult] = useState(null);
+    const [ktkSelectedAnimals, setKtkSelectedAnimals] = useState(() => new Set());
+    const [ktkSelectedLitters, setKtkSelectedLitters] = useState(() => new Set());
+    const [ktkManualMappings, setKtkManualMappings] = useState({});
+    const [ktkMappingSearch, setKtkMappingSearch] = useState({ registration: null, query: '', results: [], loading: false });
+
     const [importPreview, setImportPreview] = useState(null);
     const [importConflictResolutions, setImportConflictResolutions] = useState({});
     const [importLoading, setImportLoading] = useState(false);
@@ -23982,6 +23999,478 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 </div>
                             )}
                             <button onClick={() => setZeResult(null)} className="mt-3 text-xs text-gray-500 hover:text-gray-700 underline">Dismiss</button>
+                        </div>
+                    )}
+                </div>
+
+                {/* ── Kintraks Import ─────────────────────────────────────── */}
+                <div className="border-t pt-5">
+                    <h4 className="font-semibold text-gray-700 mb-1 flex items-center gap-2"><Upload size={16} /> Import from Kintraks</h4>
+                    <p className="text-xs text-gray-500 mb-4">Export your animals (Export) and breeding records (Breeding Record - All Records) from Kintraks as CSV, then upload them here. Star (⭐) and heart (❤️) tracking markers and kennel abbreviations like (MM) are automatically stripped when matching against existing animals.</p>
+
+                    {/* Species */}
+                    <div className="mb-4">
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Species <span className="text-red-500">*</span> (required when importing animals)</label>
+                        <div className="flex items-center gap-2 max-w-xs">
+                            <select
+                                value={ktkSpecies}
+                                onChange={e => setKtkSpecies(e.target.value)}
+                                className="flex-1 p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary bg-white"
+                            >
+                                <option value="">— select species —</option>
+                                {(zeSpeciesList || []).map(s => (
+                                    <option key={s.name} value={s.name}>{s.name}</option>
+                                ))}
+                            </select>
+                            <button
+                                type="button"
+                                title="Add new species"
+                                onClick={() => { setKtkAddingSpecies(v => !v); setKtkNewSpeciesName(''); }}
+                                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 text-gray-600 transition"
+                            >
+                                <Plus size={15} />
+                            </button>
+                        </div>
+                        {ktkAddingSpecies && (
+                            <div className="flex items-center gap-2 mt-2 max-w-xs">
+                                <input
+                                    type="text"
+                                    placeholder="New species name"
+                                    value={ktkNewSpeciesName}
+                                    onChange={e => setKtkNewSpeciesName(e.target.value)}
+                                    className="flex-1 p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary"
+                                    onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
+                                />
+                                <button
+                                    type="button"
+                                    disabled={!ktkNewSpeciesName.trim()}
+                                    onClick={async () => {
+                                        const name = ktkNewSpeciesName.trim();
+                                        if (!name) return;
+                                        try {
+                                            const resp = await axios.post(`${API_BASE_URL}/species`,
+                                                { name, category: 'Mammal' },
+                                                { headers: { Authorization: `Bearer ${authToken}` } }
+                                            );
+                                            const added = resp.data.species;
+                                            setZeSpeciesList(prev => [...prev, added]);
+                                            setKtkSpecies(added.name);
+                                            setKtkAddingSpecies(false);
+                                            setKtkNewSpeciesName('');
+                                        } catch (err) {
+                                            if (err.response?.status === 409) {
+                                                const existing = err.response.data.existing?.name || name;
+                                                setKtkSpecies(existing);
+                                                setKtkAddingSpecies(false);
+                                            } else {
+                                                showModalMessage('Error', err.response?.data?.message || 'Failed to add species.');
+                                            }
+                                        }
+                                    }}
+                                    className="px-3 py-2 bg-primary hover:bg-primary-dark text-black text-xs font-bold rounded-lg transition disabled:opacity-40"
+                                >
+                                    Add
+                                </button>
+                                <button type="button" onClick={() => setKtkAddingSpecies(false)} className="p-2 text-gray-400 hover:text-gray-600 transition">
+                                    <X size={14} />
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* File pickers */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                        {[['animals', ktkAnimalsFile, setKtkAnimalsFile, 'Animals CSV (Export_*.csv)'],
+                          ['breedingrecords', ktkBreedingFile, setKtkBreedingFile, 'Breeding Records CSV']].map(
+                            ([key, file, setter, label]) => (
+                                <label key={key} className="flex flex-col items-center justify-center h-20 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition relative">
+                                    <input type="file" accept=".csv" className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                                        onChange={e => { setter(e.target.files?.[0] || null); setKtkPreview(null); setKtkResult(null); }} />
+                                    {file
+                                        ? <p className="text-xs font-medium text-gray-700 flex items-center gap-1"><FileText size={13} />{file.name}</p>
+                                        : <><Upload size={16} className="text-gray-400 mb-1" /><p className="text-xs text-gray-500 text-center px-2">{label}</p></>
+                                    }
+                                </label>
+                            )
+                        )}
+                    </div>
+
+                    {(ktkAnimalsFile || ktkBreedingFile) && !ktkPreview && !ktkResult && (
+                        <button
+                            onClick={async () => {
+                                if (ktkAnimalsFile && !ktkSpecies.trim()) {
+                                    showModalMessage('Species Required', 'Please select a species before previewing.');
+                                    return;
+                                }
+                                setKtkLoading(true);
+                                setKtkPreview(null);
+                                setKtkResult(null);
+                                setKtkConflictResolutions({});
+                                try {
+                                    const fd = new FormData();
+                                    if (ktkAnimalsFile) fd.append('animals', ktkAnimalsFile);
+                                    if (ktkBreedingFile) fd.append('breedingrecords', ktkBreedingFile);
+                                    fd.append('species', ktkSpecies.trim());
+                                    const resp = await axios.post(`${API_BASE_URL}/import/kintraks`, fd, {
+                                        headers: { Authorization: `Bearer ${authToken}` },
+                                    });
+                                    const preview = resp.data.preview || {};
+                                    setKtkPreview(preview);
+                                    setKtkSelectedAnimals(new Set((preview.animals?.items || []).map(a => a.registration).filter(Boolean)));
+                                    setKtkSelectedLitters(new Set((preview.litters?.items || []).filter(l => !l.isDuplicate).map(l => l.litterIndex)));
+                                    setKtkManualMappings({});
+                                    setKtkMappingSearch({ registration: null, query: '', results: [], loading: false });
+                                    const defaults = {};
+                                    for (const c of (preview.animals?.conflicts || [])) {
+                                        defaults[c.registration] = 'use_existing';
+                                    }
+                                    setKtkConflictResolutions(defaults);
+                                } catch (err) {
+                                    showModalMessage('Kintraks Preview Failed', err.response?.data?.message || err.message);
+                                } finally {
+                                    setKtkLoading(false);
+                                }
+                            }}
+                            disabled={ktkLoading}
+                            className="bg-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+                        >
+                            {ktkLoading ? <Loader2 className="animate-spin" size={16} /> : <FileText size={16} />}
+                            Preview Import
+                        </button>
+                    )}
+
+                    {/* Preview */}
+                    {ktkPreview && (
+                        <div className="space-y-5 mt-3">
+
+                            {/* Animals table */}
+                            {ktkPreview.animals && (
+                                <div>
+                                    <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                                        <h5 className="font-semibold text-gray-700">
+                                            Animals &mdash; {ktkPreview.animals.total} total
+                                            {ktkPreview.animals.conflicts?.length > 0 && (() => {
+                                                const high     = ktkPreview.animals.conflicts.filter(c => c.confidence !== 'possible').length;
+                                                const possible = ktkPreview.animals.conflicts.filter(c => c.confidence === 'possible').length;
+                                                return (
+                                                    <span className="ml-2 text-xs font-normal">
+                                                        {high > 0 && <span className="text-amber-600">{high} duplicate{high !== 1 ? 's' : ''}</span>}
+                                                        {high > 0 && possible > 0 && <span className="text-gray-400"> · </span>}
+                                                        {possible > 0 && <span className="text-orange-500">{possible} possible match{possible !== 1 ? 'es' : ''}</span>}
+                                                    </span>
+                                                );
+                                            })()}
+                                        </h5>
+                                        <div className="flex gap-2 text-xs">
+                                            <button type="button"
+                                                onClick={() => setKtkSelectedAnimals(new Set((ktkPreview.animals.items || []).map(a => a.registration).filter(Boolean)))}
+                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Select all</button>
+                                            <button type="button"
+                                                onClick={() => setKtkSelectedAnimals(new Set())}
+                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Deselect all</button>
+                                        </div>
+                                    </div>
+                                    <div className="border rounded-lg overflow-hidden">
+                                        <div className="overflow-x-auto max-h-96 overflow-y-auto">
+                                            <table className="min-w-full text-xs">
+                                                <thead className="bg-gray-100 sticky top-0 z-10">
+                                                    <tr>
+                                                        <th className="px-2 py-2 w-8"></th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Name</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Gender</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Born</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Reg #</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Color</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Coat</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y bg-white">
+                                                    {(ktkPreview.animals.items || []).map(a => {
+                                                        const isSelected = ktkSelectedAnimals.has(a.registration);
+                                                        const conflict   = ktkPreview.animals.conflicts?.find(c => c.registration === a.registration);
+                                                        const resolution = ktkConflictResolutions[a.registration] || 'use_existing';
+                                                        return (
+                                                            <React.Fragment key={a.registration || a.name}>
+                                                                <tr className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : conflict ? 'bg-amber-50' : ''}`}>
+                                                                    <td className="px-2 py-1.5 text-center">
+                                                                        <input type="checkbox" checked={isSelected}
+                                                                            onChange={e => setKtkSelectedAnimals(prev => {
+                                                                                const next = new Set(prev);
+                                                                                if (e.target.checked) next.add(a.registration); else next.delete(a.registration);
+                                                                                return next;
+                                                                            })}
+                                                                            className="rounded" />
+                                                                    </td>
+                                                                    <td className="px-2 py-1.5 font-medium text-gray-800 whitespace-nowrap">{[a.prefix, a.name, a.suffix].filter(Boolean).join(' ')}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600">{a.gender || '—'}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600 whitespace-nowrap">{a.birthDate ? String(a.birthDate).slice(0,10) : '—'}</td>
+                                                                    <td className="px-2 py-1.5 font-mono text-gray-500">{a.registration || '—'}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600">{a.color || '—'}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600">{a.coat || '—'}</td>
+                                                                    <td className="px-2 py-1.5">
+                                                                        {conflict
+                                                                            ? conflict.confidence === 'possible'
+                                                                                ? <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded text-xs font-medium">Possible match</span>
+                                                                                : <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium">Duplicate</span>
+                                                                            : ktkManualMappings[a.registration]
+                                                                                ? <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">Mapped</span>
+                                                                                : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
+                                                                    </td>
+                                                                </tr>
+                                                                {/* Manual mapping sub-row for New/Mapped rows */}
+                                                                {!conflict && isSelected && (
+                                                                    <tr className={ktkManualMappings[a.registration] ? 'bg-blue-50' : 'bg-gray-50'}>
+                                                                        <td></td>
+                                                                        <td colSpan="7" className="px-3 pb-2 pt-0">
+                                                                            {ktkManualMappings[a.registration] ? (
+                                                                                <div className="flex items-center gap-2 text-xs pt-1">
+                                                                                    <span className="text-blue-700">&#x21AA; Mapped to CT <span className="font-mono font-semibold">{ktkManualMappings[a.registration].id_public}</span> &mdash; {ktkManualMappings[a.registration].name}</span>
+                                                                                    <button type="button" onClick={() => setKtkManualMappings(prev => { const n = { ...prev }; delete n[a.registration]; return n; })}
+                                                                                        className="text-gray-400 hover:text-red-500 transition ml-1" title="Remove mapping"><X size={11} /></button>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div className="pt-1">
+                                                                                    {ktkMappingSearch.registration === a.registration ? (
+                                                                                        <div className="flex flex-col gap-1.5">
+                                                                                            <div className="flex items-center gap-1.5">
+                                                                                                <input autoFocus type="text" placeholder="Search CT animal by name…"
+                                                                                                    value={ktkMappingSearch.query}
+                                                                                                    onChange={async e => {
+                                                                                                        const q = e.target.value;
+                                                                                                        setKtkMappingSearch(prev => ({ ...prev, query: q, loading: true, results: [] }));
+                                                                                                        if (!q.trim()) { setKtkMappingSearch(prev => ({ ...prev, loading: false })); return; }
+                                                                                                        try {
+                                                                                                            const [privateRes, publicRes] = await Promise.allSettled([
+                                                                                                                axios.get(`${API_BASE_URL}/animals`, { params: { name: q }, headers: { Authorization: `Bearer ${authToken}` } }),
+                                                                                                                axios.get(`${API_BASE_URL}/public/global/animals`, { params: { name: q, limit: 10 } }),
+                                                                                                            ]);
+                                                                                                            const own = privateRes.status === 'fulfilled' ? privateRes.value.data : [];
+                                                                                                            const pub = publicRes.status === 'fulfilled' ? publicRes.value.data : [];
+                                                                                                            const seen = new Set(own.map(x => x.id_public));
+                                                                                                            const merged = [...own, ...pub.filter(x => !seen.has(x.id_public))];
+                                                                                                            setKtkMappingSearch(prev => ({ ...prev, results: merged.slice(0, 10), loading: false }));
+                                                                                                        } catch { setKtkMappingSearch(prev => ({ ...prev, loading: false })); }
+                                                                                                    }}
+                                                                                                    className="flex-1 max-w-xs text-xs border rounded px-2 py-1 focus:ring-primary focus:border-primary"
+                                                                                                />
+                                                                                                {ktkMappingSearch.loading && <Loader2 size={11} className="animate-spin text-gray-400" />}
+                                                                                                <button type="button" onClick={() => setKtkMappingSearch({ registration: null, query: '', results: [], loading: false })}
+                                                                                                    className="text-gray-400 hover:text-gray-600"><X size={11} /></button>
+                                                                                            </div>
+                                                                                            {ktkMappingSearch.results.length > 0 && (
+                                                                                                <div className="border rounded bg-white shadow-sm divide-y max-w-sm max-h-40 overflow-y-auto">
+                                                                                                    {ktkMappingSearch.results.map(r => (
+                                                                                                        <button key={r.id_public} type="button"
+                                                                                                            onClick={() => {
+                                                                                                                setKtkManualMappings(prev => ({ ...prev, [a.registration]: { id_public: r.id_public, name: [r.prefix, r.name, r.suffix].filter(Boolean).join(' ') } }));
+                                                                                                                setKtkMappingSearch({ registration: null, query: '', results: [], loading: false });
+                                                                                                            }}
+                                                                                                            className="w-full text-left px-2 py-1.5 hover:bg-blue-50 transition text-xs"
+                                                                                                        >
+                                                                                                            <span className="font-medium text-gray-800">{[r.prefix, r.name, r.suffix].filter(Boolean).join(' ')}</span>
+                                                                                                            <span className="text-gray-400 ml-2 font-mono">{r.id_public}</span>
+                                                                                                            {r.birthDate && <span className="text-gray-400 ml-1">&middot; {String(r.birthDate).slice(0,10)}</span>}
+                                                                                                            {r.gender && <span className="text-gray-400 ml-1">&middot; {r.gender}</span>}
+                                                                                                            {r.breederName && <span className="text-gray-300 ml-1">&middot; {r.breederName}</span>}
+                                                                                                        </button>
+                                                                                                    ))}
+                                                                                                </div>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    ) : (
+                                                                                        <button type="button"
+                                                                                            onClick={() => setKtkMappingSearch({ registration: a.registration, query: '', results: [], loading: false })}
+                                                                                            className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                                                                                        >
+                                                                                            + Map to existing CT animal (for parent links)
+                                                                                        </button>
+                                                                                    )}
+                                                                                </div>
+                                                                            )}
+                                                                        </td>
+                                                                    </tr>
+                                                                )}
+                                                                {conflict && isSelected && (
+                                                                    <tr className={`bg-${conflict.confidence === 'possible' ? 'orange' : 'amber'}-50`}>
+                                                                        <td></td>
+                                                                        <td colSpan="7" className="px-3 pb-2 pt-0">
+                                                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-amber-800 pt-1">
+                                                                                <AlertTriangle size={11} className="shrink-0 text-amber-500" />
+                                                                                <span>
+                                                                                    {conflict.confidence === 'possible' ? 'Possible match: ' : 'Matches '}
+                                                                                    <span className="font-mono">{conflict.existingId}</span>
+                                                                                    {conflict.existingName && conflict.existingName !== conflict.name && <span> &ldquo;{conflict.existingName}&rdquo;</span>}
+                                                                                    {conflict.existingBirthDate && <span> &middot; {conflict.existingBirthDate}</span>}
+                                                                                    {' '}({conflict.isOwnedByImporter ? 'your animal' : `owned by ${conflict.existingOwner}`})
+                                                                                    {' · matched by '}{conflict.matchType === 'id' ? 'registration number' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}
+                                                                                </span>
+                                                                                <select
+                                                                                    value={resolution}
+                                                                                    onChange={e => setKtkConflictResolutions(prev => ({ ...prev, [a.registration]: e.target.value }))}
+                                                                                    className="border rounded px-2 py-0.5 bg-white text-gray-700 font-medium text-xs"
+                                                                                >
+                                                                                    <option value="use_existing">Use existing CT animal for parent links (skip import)</option>
+                                                                                    <option value="import_anyway">Import anyway as new entry</option>
+                                                                                </select>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                )}
+                                                            </React.Fragment>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        {ktkSelectedAnimals.size} of {ktkPreview.animals.total} selected
+                                        {(() => {
+                                            const dupeLinks = [...ktkSelectedAnimals].filter(r => {
+                                                const c = ktkPreview.animals.conflicts?.find(x => x.registration === r);
+                                                return c && (ktkConflictResolutions[r] || 'use_existing') === 'use_existing';
+                                            }).length;
+                                            return dupeLinks > 0 ? ` · ${dupeLinks} duplicate${dupeLinks !== 1 ? 's' : ''} will link to existing CT animals` : '';
+                                        })()}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Litters table */}
+                            {ktkPreview.litters?.items?.length > 0 && (
+                                <div>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h5 className="font-semibold text-gray-700">Breeding Records &mdash; {ktkPreview.litters.total} total</h5>
+                                        <div className="flex gap-2 text-xs">
+                                            <button type="button" onClick={() => setKtkSelectedLitters(new Set(ktkPreview.litters.items.map(l => l.litterIndex)))} className="text-primary hover:underline">Select all</button>
+                                            <button type="button" onClick={() => setKtkSelectedLitters(new Set())} className="text-gray-400 hover:underline">Deselect all</button>
+                                        </div>
+                                    </div>
+                                    <div className="border rounded-lg overflow-hidden">
+                                        <div className="overflow-x-auto max-h-48 overflow-y-auto">
+                                            <table className="min-w-full text-xs">
+                                                <thead className="bg-gray-100 sticky top-0">
+                                                    <tr>
+                                                        <th className="px-2 py-2"></th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Nest letter</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Mating date</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Birth date</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Sire</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Dam</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Born count</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y bg-white">
+                                                    {ktkPreview.litters.items.map((l, i) => {
+                                                        const isSelected = ktkSelectedLitters.has(l.litterIndex);
+                                                        return (
+                                                            <tr key={i} className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : l.isDuplicate ? 'bg-amber-50' : ''}`}>
+                                                                <td className="px-2 py-1.5 text-center">
+                                                                    <input type="checkbox" checked={isSelected}
+                                                                        onChange={e => setKtkSelectedLitters(prev => {
+                                                                            const next = new Set(prev);
+                                                                            if (e.target.checked) next.add(l.litterIndex); else next.delete(l.litterIndex);
+                                                                            return next;
+                                                                        })}
+                                                                        className="rounded" />
+                                                                </td>
+                                                                <td className="px-2 py-1.5 font-medium text-gray-700">{l.nestLetter || '—'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600">{l.matingDate ? String(l.matingDate).slice(0,10) : '—'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600">{l.birthDate ? String(l.birthDate).slice(0,10) : '—'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-700">
+                                                                    {l.sireName || '—'}
+                                                                    {l.maleCtId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{l.maleCtId}</span>}
+                                                                    {!l.maleCtId && l.sireName && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
+                                                                </td>
+                                                                <td className="px-2 py-1.5 text-gray-700">
+                                                                    {l.damName || '—'}
+                                                                    {l.femaleCtId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{l.femaleCtId}</span>}
+                                                                    {!l.femaleCtId && l.damName && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
+                                                                </td>
+                                                                <td className="px-2 py-1.5 text-gray-600">{l.litterSizeBorn != null ? l.litterSizeBorn : '—'}</td>
+                                                                <td className="px-2 py-1.5">
+                                                                    {l.isDuplicate
+                                                                        ? <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium" title={l.existingLitterId || ''}>Duplicate</span>
+                                                                        : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex gap-3 pt-1">
+                                <button
+                                    onClick={async () => {
+                                        setKtkConfirmLoading(true);
+                                        try {
+                                            const fd = new FormData();
+                                            if (ktkAnimalsFile) fd.append('animals', ktkAnimalsFile);
+                                            if (ktkBreedingFile) fd.append('breedingrecords', ktkBreedingFile);
+                                            fd.append('species', ktkSpecies.trim());
+                                            fd.append('confirm', 'true');
+                                            fd.append('selectedAnimals', JSON.stringify([...ktkSelectedAnimals]));
+                                            fd.append('selectedLitters', JSON.stringify([...ktkSelectedLitters]));
+                                            const finalResolutions = { ...ktkConflictResolutions };
+                                            for (const [reg, mapping] of Object.entries(ktkManualMappings)) {
+                                                finalResolutions[reg] = `map_to:${mapping.id_public}`;
+                                            }
+                                            fd.append('conflictResolutions', JSON.stringify(finalResolutions));
+                                            const resp = await axios.post(`${API_BASE_URL}/import/kintraks`, fd, {
+                                                headers: { Authorization: `Bearer ${authToken}` },
+                                            });
+                                            setKtkResult(resp.data);
+                                            setKtkPreview(null);
+                                            setKtkAnimalsFile(null);
+                                            setKtkBreedingFile(null);
+                                        } catch (err) {
+                                            showModalMessage('Kintraks Import Failed', err.response?.data?.message || err.message);
+                                        } finally {
+                                            setKtkConfirmLoading(false);
+                                        }
+                                    }}
+                                    disabled={ktkConfirmLoading}
+                                    className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+                                >
+                                    {ktkConfirmLoading ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle size={16} />}
+                                    Confirm Import
+                                </button>
+                                <button
+                                    onClick={() => { setKtkPreview(null); setKtkAnimalsFile(null); setKtkBreedingFile(null); setKtkManualMappings({}); setKtkMappingSearch({ registration: null, query: '', results: [], loading: false }); setKtkSelectedLitters(new Set()); }}
+                                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Result */}
+                    {ktkResult && (
+                        <div className="mt-3 p-4 rounded-lg border bg-green-50 border-green-200">
+                            <p className="font-semibold text-green-800 flex items-center gap-1.5 mb-2"><CheckCircle size={16} /> Kintraks import complete</p>
+                            <div className="text-sm text-gray-700 space-y-0.5 mb-2">
+                                {ktkResult.written && Object.entries(ktkResult.written).map(([s, n]) => (
+                                    <p key={s}><span className="capitalize font-medium">{s}</span>: {n} imported{ktkResult.skipped?.[s] ? `, ${ktkResult.skipped[s]} skipped (duplicates)` : ''}</p>
+                                ))}
+                            </div>
+                            {ktkResult.errors?.length > 0 && (
+                                <div className="mt-2">
+                                    <p className="text-sm font-semibold text-red-700 flex items-center gap-1"><AlertTriangle size={13} /> {ktkResult.errors.length} error(s):</p>
+                                    <ul className="text-xs text-red-600 list-disc list-inside mt-1 space-y-0.5 max-h-32 overflow-y-auto">
+                                        {ktkResult.errors.map((e, i) => (
+                                            <li key={i}>[{e.section}] {e.id}: {e.error}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                            <button onClick={() => setKtkResult(null)} className="mt-3 text-xs text-gray-500 hover:text-gray-700 underline">Dismiss</button>
                         </div>
                     )}
                 </div>
