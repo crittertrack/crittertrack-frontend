@@ -6869,7 +6869,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                     )}
                                 </div>
                             </div>
-                            <p className="text-xs text-gray-400 -mt-3">Ancestors entered here are not linked to registered CritterTrack animals and do not affect COI calculations or the pedigree chart.</p>
+                            <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart.</p>
 
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
 
@@ -8833,7 +8833,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                     </button>
                                 )}
                             </div>
-                            <p className="text-xs text-gray-400 -mt-3">Ancestors entered here are not linked to registered CritterTrack animals and do not affect COI calculations or the pedigree chart.</p>
+                            <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart.</p>
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
                             {(() => {
                                 const subjectVariety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => animal[k]).filter(Boolean).join(' ');
@@ -21867,7 +21867,7 @@ const AnimalForm = ({
                                 <Dna size={18} className="text-orange-500" />
                                 <h3 className="text-base font-semibold text-gray-700">Beta Pedigree</h3>
                             </div>
-                            <p className="text-xs text-gray-400 -mt-3">Ancestors entered here are not linked to registered CritterTrack animals and do not affect COI calculations or the pedigree chart. Changes are saved when you click Save Animal.</p>
+                            <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart. Changes are saved when you click Save Animal.</p>
 
                             <div>
                                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 1 — Parents</p>
