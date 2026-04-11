@@ -1,5 +1,5 @@
 // Service Worker for CritterTrack PWA
-const CACHE_NAME = 'crittertrack-v15'; // Increment version to force cache update
+const CACHE_NAME = 'crittertrack-v16'; // Increment version to force cache update
 const urlsToCache = [
   '/',
   '/index.html',
@@ -83,9 +83,17 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(request, { ignoreVary: true })
       .then((response) => {
-        // Cache hit - return response
+        // Cache hit - but reject if a stale HTML was cached for a non-HTML request
+        // (this prevents serving an old index.html when the JS filename changed)
         if (response) {
-          return response;
+          const contentType = response.headers.get('content-type') || '';
+          const isJsOrCss = url.pathname.endsWith('.js') || url.pathname.endsWith('.css');
+          if (isJsOrCss && contentType.includes('text/html')) {
+            // Stale HTML in cache for a JS/CSS request — bypass and fetch fresh
+            caches.open(CACHE_NAME).then(c => c.delete(request));
+          } else {
+            return response;
+          }
         }
         // Cache miss - fetch and cache
         return fetch(request).then(
