@@ -26932,11 +26932,17 @@ const AnimalList = ({
     const [pendingFilters, setPendingFilters] = useState(false); // true when filters changed but not yet applied
     const filterRef = useRef({}); // holds current filter values for fetchAnimals to read without re-creating
     const filterMountedRef = useRef(false); // tracks initial mount for pending-filters detection
-    const [ownedFilterActive, setOwnedFilterActive] = useState(() => {
+    const [showOwned, setShowOwned] = useState(() => {
         try {
-            const saved = localStorage.getItem('animalList_ownedFilterActive');
+            const saved = localStorage.getItem('animalList_showOwned');
             return saved !== null ? saved === 'true' : true;
         } catch { return true; }
+    });
+    const [showUnowned, setShowUnowned] = useState(() => {
+        try {
+            const saved = localStorage.getItem('animalList_showUnowned');
+            return saved !== null ? saved === 'true' : false;
+        } catch { return false; }
     });
     // Archive section collapse states
     const [archiveSoldCollapsed, setArchiveSoldCollapsed] = useState(false);
@@ -27078,9 +27084,14 @@ const AnimalList = ({
     
     useEffect(() => {
         try {
-            localStorage.setItem('animalList_ownedFilterActive', ownedFilterActive.toString());
-        } catch (e) { console.warn('Failed to save ownedFilterActive', e); }
-    }, [ownedFilterActive]);
+            localStorage.setItem('animalList_showOwned', showOwned.toString());
+        } catch (e) { console.warn('Failed to save showOwned', e); }
+    }, [showOwned]);
+    useEffect(() => {
+        try {
+            localStorage.setItem('animalList_showUnowned', showUnowned.toString());
+        } catch (e) { console.warn('Failed to save showUnowned', e); }
+    }, [showUnowned]);
     
     useEffect(() => {
         try {
@@ -27098,7 +27109,7 @@ const AnimalList = ({
     filterRef.current = {
         statusFilter, selectedGenders, selectedSpecies, appliedNameFilter,
         statusFilterPregnant, statusFilterNursing, statusFilterMating,
-        ownedFilterActive, publicFilter
+        showOwned, showUnowned, publicFilter
     };
 
     // Mark filters as pending whenever any filter state changes (except on initial mount)
@@ -27108,7 +27119,13 @@ const AnimalList = ({
             return;
         }
         setPendingFilters(true);
-    }, [statusFilter, selectedGenders, selectedSpecies, statusFilterPregnant, statusFilterNursing, statusFilterMating, ownedFilterActive, publicFilter]);
+    }, [statusFilter, selectedGenders, selectedSpecies, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter]);
+
+    // Auto-apply when ownership filter buttons are clicked
+    useEffect(() => {
+        if (!filterMountedRef.current) return;
+        fetchAnimals();
+    }, [showOwned, showUnowned]);
 
     const fetchAnimals = useCallback(async () => {
         // Do NOT setLoading(true) here — loading starts true only on initial mount
@@ -27119,7 +27136,7 @@ const AnimalList = ({
             statusFilter: _statusFilter, selectedGenders: _selectedGenders,
             selectedSpecies: _selectedSpecies, appliedNameFilter: _appliedNameFilter,
             statusFilterPregnant: _statusFilterPregnant, statusFilterNursing: _statusFilterNursing,
-            statusFilterMating: _statusFilterMating, ownedFilterActive: _ownedFilterActive,
+            statusFilterMating: _statusFilterMating, showOwned: _showOwned, showUnowned: _showUnowned,
             publicFilter: _publicFilter
         } = filterRef.current;
         try {
@@ -27139,7 +27156,7 @@ const AnimalList = ({
             if (_statusFilterMating) {
                 params.push(`isInMating=true`);
             }
-            if (_ownedFilterActive) {
+            if (_showOwned && !_showUnowned) {
                 params.push(`isOwned=true`);
             }
             const queryString = params.length > 0 ? `?${params.join('&')}` : '';
@@ -27174,6 +27191,16 @@ const AnimalList = ({
                 // Some genders selected = filter to those
                 data = data.filter(a => _selectedGenders.includes(a.gender));
             }
+
+            // Client-side ownership filtering for unowned-only or neither case
+            if (!_showOwned && !_showUnowned) {
+                data = [];
+            } else if (!_showOwned && _showUnowned) {
+                data = data.filter(a => !a.isOwned);
+            } else if (_showOwned && _showUnowned) {
+                // both selected — show all, no extra filter needed
+            }
+            // else: showOwned && !showUnowned is already handled server-side
 
             // Always exclude view-only (sold/transferred) animals from My Animals — they appear in Management > Sold/Transferred
             data = data.filter(a => !a.isViewOnly);
@@ -27545,7 +27572,8 @@ const AnimalList = ({
         statusFilterPregnant ||
         statusFilterNursing ||
         statusFilterMating ||
-        !ownedFilterActive ||
+        !showOwned ||
+        showUnowned ||
         publicFilter !== '' ||
         blFilter.length > 0
     );
@@ -27559,7 +27587,8 @@ const AnimalList = ({
         setStatusFilterPregnant(false);
         setStatusFilterNursing(false);
         setStatusFilterMating(false);
-        setOwnedFilterActive(true);
+        setShowOwned(true);
+        setShowUnowned(false);
         setPublicFilter('');
         setBlFilter([]);
         // Schedule fetch after state updates settle
@@ -30242,6 +30271,28 @@ const AnimalList = ({
                     </button>
                 </div>
 
+                {/* Ownership filter buttons — always visible, auto-apply */}
+                <div className="flex items-center justify-center gap-2 px-2 sm:px-3 py-2 border-t border-gray-200">
+                    <button onClick={() => setShowOwned(prev => !prev)}
+                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
+                            showOwned ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                        title={showOwned ? 'Showing owned animals' : 'Not showing owned animals'}
+                    >
+                        <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        Owned
+                    </button>
+                    <button onClick={() => setShowUnowned(prev => !prev)}
+                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
+                            showUnowned ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                        title={showUnowned ? 'Showing unowned animals' : 'Not showing unowned animals'}
+                    >
+                        <HeartOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        Unowned
+                    </button>
+                </div>
+
                 {/* Collapsible filter panel */}
                 {filtersExpanded && (
                 <div className="px-2 sm:px-3 pb-2 sm:pb-3 space-y-2 sm:space-y-3 border-t border-gray-200 pt-2 sm:pt-3">
@@ -30330,16 +30381,6 @@ const AnimalList = ({
                     {/* Row 3: Show filters */}
                     <div className="flex flex-wrap justify-center items-center gap-1 sm:gap-2" data-tutorial-target="collection-filters">
                         <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Show:</span>
-                        
-                        <button onClick={() => setOwnedFilterActive(prev => !prev)}
-                            className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
-                                ownedFilterActive ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                            }`}
-                            title={ownedFilterActive ? 'Showing only your animals' : 'Showing all animals'}
-                        >
-                            {ownedFilterActive ? <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <HeartHandshake className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-                            <span className="hidden sm:inline">{ownedFilterActive ? 'My Animals' : 'All'}</span>
-                        </button>
 
                         <button onClick={handleFilterMating}
                             className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
@@ -32786,7 +32827,8 @@ const App = () => {
                 'animalList_statusFilterPregnant',
                 'animalList_statusFilterNursing',
                 'animalList_statusFilterMating',
-                'animalList_ownedFilterActive',
+                'animalList_showOwned',
+                'animalList_showUnowned',
                 'animalList_publicFilter'
             ];
             
