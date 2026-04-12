@@ -24791,11 +24791,11 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                             </thead>
                                             <tbody className="divide-y bg-white">
                                                 {sbItems.map(a => {
-                                                    // Only allow selection for 'New' animals
-                                                    const isSelectable = isNewAnimal(a);
-                                                    const isSelected = sbSelectedIds.has(a.sbId) && isSelectable;
                                                     const conflict = sbConflicts.find(c => c.sbId === a.sbId);
                                                     const resolution = sbConflictResolutions[a.sbId] || 'use_existing';
+                                                    // Selectable if new, or if user chose "import anyway" on a conflict
+                                                    const isSelectable = isNewAnimal(a) || (!!conflict && resolution === 'import_anyway');
+                                                    const isSelected = isSelectable && (sbSelectedIds.has(a.sbId) || (!!conflict && resolution === 'import_anyway'));
                                                     return (
                                                         <React.Fragment key={a.sbId}>
                                                             <tr className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : conflict ? (conflict.confidence === 'possible' ? 'bg-orange-50' : 'bg-amber-50') : ''}`}>
@@ -24854,7 +24854,15 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                             </span>
                                                                             <select
                                                                                 value={resolution}
-                                                                                onChange={e => setSbConflictResolutions(prev => ({ ...prev, [a.sbId]: e.target.value }))}
+                                                                                onChange={e => {
+                                                                                    const val = e.target.value;
+                                                                                    setSbConflictResolutions(prev => ({ ...prev, [a.sbId]: val }));
+                                                                                    setSbSelectedIds(prev => {
+                                                                                        const next = new Set(prev);
+                                                                                        if (val === 'import_anyway') next.add(a.sbId); else next.delete(a.sbId);
+                                                                                        return next;
+                                                                                    });
+                                                                                }}
                                                                                 className="border rounded px-2 py-0.5 bg-white text-gray-700 font-medium text-xs"
                                                                             >
                                                                                 <option value="use_existing">Use existing CT animal for parent links (skip import)</option>
