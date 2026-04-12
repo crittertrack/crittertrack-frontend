@@ -27572,8 +27572,6 @@ const AnimalList = ({
         statusFilterPregnant ||
         statusFilterNursing ||
         statusFilterMating ||
-        !showOwned ||
-        showUnowned ||
         publicFilter !== '' ||
         blFilter.length > 0
     );
@@ -30228,8 +30226,30 @@ const AnimalList = ({
 
             {animalView === 'list' && !showArchiveScreen && (
             <div className="mb-4 sm:mb-6 border rounded-lg bg-gray-50">
-                {/* Top bar: Search + Filters toggle + Add */}
-                <div className="flex items-center gap-2 p-2 sm:p-3">
+                {/* Ownership filter buttons — always visible, auto-apply */}
+                <div className="flex items-center justify-center gap-2 px-2 sm:px-3 py-2">
+                    <button onClick={() => setShowOwned(prev => !prev)}
+                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
+                            showOwned ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                        title={showOwned ? 'Click to hide owned animals' : 'Click to show owned animals'}
+                    >
+                        <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        {showOwned ? 'Showing Owned' : 'Show Owned'}
+                    </button>
+                    <button onClick={() => setShowUnowned(prev => !prev)}
+                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
+                            showUnowned ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                        title={showUnowned ? 'Click to hide unowned animals' : 'Click to show unowned animals'}
+                    >
+                        <HeartOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        {showUnowned ? 'Showing Unowned' : 'Show Unowned'}
+                    </button>
+                </div>
+
+                {/* Search + Filters toggle + Add */}
+                <div className="flex items-center gap-2 p-2 sm:p-3 border-t border-gray-200">
                     <input
                         type="text"
                         placeholder="Search by name..."
@@ -30268,28 +30288,6 @@ const AnimalList = ({
                         data-tutorial-target="add-animal-btn"
                     >
                         <PlusCircle size={16} /> <span className="hidden sm:inline">Add Animal</span><span className="sm:hidden">Add</span>
-                    </button>
-                </div>
-
-                {/* Ownership filter buttons — always visible, auto-apply */}
-                <div className="flex items-center justify-center gap-2 px-2 sm:px-3 py-2 border-t border-gray-200">
-                    <button onClick={() => setShowOwned(prev => !prev)}
-                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
-                            showOwned ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                        title={showOwned ? 'Showing owned animals' : 'Not showing owned animals'}
-                    >
-                        <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        Owned
-                    </button>
-                    <button onClick={() => setShowUnowned(prev => !prev)}
-                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
-                            showUnowned ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                        title={showUnowned ? 'Showing unowned animals' : 'Not showing unowned animals'}
-                    >
-                        <HeartOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        Unowned
                     </button>
                 </div>
 
