@@ -24743,20 +24743,10 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     <div className="flex gap-2 text-xs flex-wrap">
                                         <button type="button"
                                             onClick={() => setSbSelectedIds(new Set(sbItems.filter(isNewAnimal).map(a => a.sbId)))}
-                                            className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Select all</button>
+                                            className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Select all new</button>
                                         <button type="button"
                                             onClick={() => setSbSelectedIds(new Set())}
                                             className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Deselect all</button>
-                                        <span className="border-l mx-1"></span>
-                                        <button type="button"
-                                            onClick={() => setSbSelectedIds(new Set(sbItems.filter(isNewAnimal).map(a => a.sbId)))}
-                                            className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-green-700">New only</button>
-                                        <button type="button"
-                                            onClick={() => setSbSelectedIds(new Set(sbItems.filter(a => conflictIds.has(a.sbId) && !sbManualMappings[a.sbId]).map(a => a.sbId)))}
-                                            className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-amber-700">Duplicates only</button>
-                                        <button type="button"
-                                            onClick={() => setSbSelectedIds(new Set(sbItems.filter(a => sbConflicts.find(x => x.sbId === a.sbId && x.confidence === 'possible')).map(a => a.sbId)))}
-                                            className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-orange-700">Possible only</button>
                                     </div>
                                 </div>
 
