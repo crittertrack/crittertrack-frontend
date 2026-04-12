@@ -24853,7 +24853,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                             : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
                                                                 </td>
                                                             </tr>
-                                                            {conflict && isSelected && (
+                                                            {conflict && (
                                                                 <tr className={conflict.confidence === 'possible' ? 'bg-orange-50' : 'bg-amber-50'}>
                                                                     <td></td>
                                                                     <td colSpan="8" className="px-3 pb-2 pt-0">
@@ -24862,10 +24862,11 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                             <span>
                                                                                 {conflict.confidence === 'possible' ? 'Possible match: ' : 'Matches '}
                                                                                 <span className="font-mono">{conflict.existingId}</span>
-                                                                                {conflict.existingName && conflict.existingName !== conflict.name && <span> &ldquo;{conflict.existingName}&rdquo;</span>}
+                                                                                {conflict.existingName && conflict.existingName !== a.name && <span> &ldquo;{conflict.existingName}&rdquo;</span>}
                                                                                 {conflict.existingBirthDate && <span> &middot; {conflict.existingBirthDate}</span>}
                                                                                 {' '}({conflict.isOwnedByImporter ? 'your animal' : `owned by ${conflict.existingOwner}`})
-                                                                                {' · matched by '}{conflict.matchType === 'id' ? 'SB ID' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}
+                                                                                {' · matched by '}
+                                                                                <span className="font-semibold">{conflict.matchType === 'id' ? 'SB ID' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}</span>
                                                                             </span>
                                                                             <select
                                                                                 value={resolution}
