@@ -24723,9 +24723,10 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         const isNewAnimal = a => !conflictIds.has(a.sbId) && !sbManualMappings[a.sbId];
                         const highConflictCount = sbConflicts.filter(c => c.confidence !== 'possible').length;
                         const possibleConflictCount = sbConflicts.filter(c => c.confidence === 'possible').length;
-                        // Only allow selection of 'New' animals
-                        const selectableIds = new Set(sbItems.filter(isNewAnimal).map(a => a.sbId));
-                        // Only count selected 'New' animals for import
+                        // Selectable: new animals + conflicts with "import anyway" chosen
+                        const isSelectableAnimal = a => isNewAnimal(a) || (conflictIds.has(a.sbId) && (sbConflictResolutions[a.sbId] || 'use_existing') === 'import_anyway');
+                        const selectableIds = new Set(sbItems.filter(isSelectableAnimal).map(a => a.sbId));
+                        // Only count selected selectable animals for import
                         const selectedNewCount = [...sbSelectedIds].filter(id => selectableIds.has(id)).length;
                         return (
                             <div className="space-y-3">
