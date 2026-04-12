@@ -31639,11 +31639,11 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                                             <span className={`text-xs font-bold flex-shrink-0 ${item.diff < 0 ? 'text-red-600' : item.diff === 0 ? 'text-purple-600' : 'text-gray-600'}`}>{statusText}</span>
                                             {item.type === 'weaned' ? (
                                                 <div className="flex items-center gap-1.5 flex-shrink-0">
-                                                    <button onClick={() => dismissBreeding(item.key)} className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 flex-shrink-0">Dismiss</button>
+                                                    <button onClick={() => dismissBreeding(item.key)} className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 flex-shrink-0">Snooze</button>
                                                     <button onClick={() => dismissWeaningPermanently(item.litterId, item.key)} className="text-xs font-medium px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 hover:bg-pink-200 flex-shrink-0" title="Mark weaning complete — stops this reminder permanently">Done</button>
                                                 </div>
                                             ) : (
-                                                <button onClick={() => dismissBreeding(item.key)} className="p-0.5 text-gray-400 hover:text-gray-600 flex-shrink-0" title="Dismiss for today"><X size={13} /></button>
+                                                <button onClick={() => dismissBreeding(item.key)} className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 flex-shrink-0">Snooze</button>
                                             )}
                                         </div>
                                     );
@@ -31944,7 +31944,7 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
                                             onClick={() => dismiss(item.key)}
                                             className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200"
                                         >
-                                            Dismiss
+                                            Snooze
                                         </button>
                                         <button
                                             onClick={() => dismissWeaningPermanently(item.litterId, item.key)}
@@ -31957,10 +31957,9 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
                                 ) : (
                                     <button
                                         onClick={() => dismiss(item.key)}
-                                        className="p-0.5 text-gray-400 hover:text-gray-600 flex-shrink-0"
-                                        title="Dismiss for today"
+                                        className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 flex-shrink-0"
                                     >
-                                        <X size={14} />
+                                        Snooze
                                     </button>
                                 )}
                             </div>
