@@ -24795,9 +24795,6 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                     <th className="px-2 py-2 text-left font-medium text-gray-600">Name</th>
                                                     <th className="px-2 py-2 text-left font-medium text-gray-600">Born</th>
                                                     <th className="px-2 py-2 text-left font-medium text-gray-600">SB ID</th>
-                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">Sire SB#</th>
-                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">Dam SB#</th>
-                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">Color</th>
                                                     <th className="px-2 py-2 text-left font-medium text-gray-600">Species</th>
                                                     <th className="px-2 py-2 text-left font-medium text-gray-600">Status</th>
                                                 </tr>
@@ -24828,9 +24825,6 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                 <td className="px-2 py-1.5 font-medium text-gray-800 whitespace-nowrap">{a.name}</td>
                                                                 <td className="px-2 py-1.5 text-gray-600 whitespace-nowrap">{a.birthDate || '—'}</td>
                                                                 <td className="px-2 py-1.5 font-mono text-gray-500">{a.sbIdKey || a.sbId}</td>
-                                                                <td className="px-2 py-1.5 font-mono text-gray-400">{a.sireId || '—'}</td>
-                                                                <td className="px-2 py-1.5 font-mono text-gray-400">{a.damId || '—'}</td>
-                                                                <td className="px-2 py-1.5 text-gray-600">{a.color || '—'}</td>
                                                                 <td className="px-2 py-1.5">
                                                                     {(!a.species || a.species === 'Unknown')
                                                                         ? <select
@@ -24856,7 +24850,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                             {conflict && (
                                                                 <tr className={conflict.confidence === 'possible' ? 'bg-orange-50' : 'bg-amber-50'}>
                                                                     <td></td>
-                                                                    <td colSpan="8" className="px-3 pb-2 pt-0">
+                                                                    <td colSpan="5" className="px-3 pb-2 pt-0">
                                                                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-amber-800 pt-1">
                                                                             <AlertTriangle size={11} className="shrink-0 text-amber-500" />
                                                                             <span>
@@ -24884,7 +24878,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                             {!conflict && isSelected && (
                                                                 <tr className={sbManualMappings[a.sbId] ? 'bg-blue-50' : 'bg-gray-50'}>
                                                                     <td></td>
-                                                                    <td colSpan="8" className="px-3 pb-2 pt-0">
+                                                                    <td colSpan="5" className="px-3 pb-2 pt-0">
                                                                         {sbManualMappings[a.sbId] ? (
                                                                             <div className="flex items-center gap-2 text-xs pt-1">
                                                                                 <span className="text-blue-700">&#x21AA; Mapped to <span className="font-mono font-semibold">{sbManualMappings[a.sbId].id_public}</span> &mdash; {sbManualMappings[a.sbId].name}</span>
