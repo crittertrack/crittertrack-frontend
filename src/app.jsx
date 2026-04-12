@@ -24753,6 +24753,32 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     </div>
                                 </div>
 
+                                {/* Bulk species assign — shown when any animal has no detected species */}
+                                {sbItems.some(a => !a.species || a.species === 'Unknown') && (
+                                    <div className="flex items-center gap-2 text-xs bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
+                                        <span className="text-orange-700 font-medium shrink-0">Species not detected for some animals.</span>
+                                        <span className="text-orange-600 shrink-0">Set all to:</span>
+                                        <select
+                                            defaultValue=""
+                                            onChange={e => {
+                                                if (!e.target.value) return;
+                                                const overrides = {};
+                                                for (const a of sbItems) {
+                                                    if (!a.species || a.species === 'Unknown') overrides[a.sbId] = e.target.value;
+                                                }
+                                                setSbSpeciesOverrides(prev => ({ ...prev, ...overrides }));
+                                            }}
+                                            className="border border-orange-300 rounded px-2 py-0.5 bg-white text-gray-700 font-medium"
+                                        >
+                                            <option value="">— pick species —</option>
+                                            {(sbFavoriteSpecies.length > 0 ? sbFavoriteSpecies : DEFAULT_SPECIES_OPTIONS).map(s => <option key={s} value={s}>{s}</option>)}
+                                        </select>
+                                        {Object.keys(sbSpeciesOverrides).length > 0 && (
+                                            <button type="button" onClick={() => setSbSpeciesOverrides({})} className="text-orange-400 hover:text-red-500 underline ml-1">Clear</button>
+                                        )}
+                                    </div>
+                                )}
+
                                 <div className="border rounded-lg overflow-hidden">
                                     <div className="overflow-x-auto max-h-96 overflow-y-auto">
                                         <table className="min-w-full text-xs">
