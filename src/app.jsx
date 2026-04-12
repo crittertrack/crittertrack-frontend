@@ -30115,6 +30115,15 @@ const AnimalList = ({
                             Filtered
                         </span>
                     )}
+                    <button 
+                        onClick={handleRefresh}
+                        disabled={loading}
+                        className="text-gray-500 hover:text-primary transition disabled:opacity-50 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-medium"
+                        title="Refresh List"
+                    >
+                        {loading ? <Loader2 size={14} className="sm:w-4 sm:h-4 animate-spin" /> : <RefreshCw size={14} className="sm:w-4 sm:h-4" />}
+                        <span className="hidden sm:inline">Refresh</span>
+                    </button>
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2 flex-wrap" data-tutorial-target="bulk-privacy-controls">
                     {animalView === 'list' && (<>
@@ -30187,10 +30196,11 @@ const AnimalList = ({
                     <button 
                         onClick={handleRefresh} 
                         disabled={loading}
-                        className="text-gray-600 hover:text-primary transition disabled:opacity-50 flex items-center p-1 sm:p-0"
+                        className="text-gray-500 hover:text-primary transition disabled:opacity-50 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-medium"
                         title="Refresh List"
                     >
-                        {loading ? <Loader2 size={16} className="sm:w-[18px] sm:h-[18px] animate-spin" /> : <RefreshCw size={16} className="sm:w-[18px] sm:h-[18px]" />}
+                        {loading ? <Loader2 size={14} className="sm:w-4 sm:h-4 animate-spin" /> : <RefreshCw size={14} className="sm:w-4 sm:h-4" />}
+                        <span className="hidden sm:inline">Refresh</span>
                     </button>
                     )}
                 </div>
@@ -30294,14 +30304,6 @@ const AnimalList = ({
                         {hasActiveFilters && !filtersExpanded && (
                             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-pink-500 rounded-full" />
                         )}
-                    </button>
-                    <button 
-                        onClick={handleRefresh}
-                        disabled={loading}
-                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-3 rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 text-sm shrink-0 disabled:opacity-50"
-                        title="Refresh List"
-                    >
-                        {loading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
                     </button>
                 </div>
 
