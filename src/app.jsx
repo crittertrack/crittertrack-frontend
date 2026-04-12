@@ -24660,7 +24660,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     <Globe size={18} className="text-sky-600 flex-shrink-0" />
                     <div>
                         <h3 className="font-semibold text-sky-800 text-sm">Import from SimpleBreed</h3>
-                        <p className="text-xs text-sky-600">Paste a SimpleBreed profile URL or username to import animals with parents, colour and status. Duplicates are detected across all CritterTrack users by SB ID and name + birth date. If a species can't be detected, you'll be prompted to pick one — the dropdown shows your <span className="font-medium">starred species</span> (star them via the species selector when adding an animal).</p>
+                        <p className="text-xs text-sky-600">Paste a SimpleBreed profile URL or username to import animals with parents, colour and status. Duplicates are detected across all CritterTrack users by SB ID and name + birth date. If a species can't be detected, you'll be prompted to pick one — the dropdown shows <span className="font-medium">only your starred species</span> (star them via the species selector when adding an animal).</p>
                     </div>
                 </div>
                 <div className="p-4 space-y-3">
