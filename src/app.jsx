@@ -24890,7 +24890,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                 {sbMappingSearch.sbId === a.sbId ? (
                                                                                     <div className="flex flex-col gap-1.5">
                                                                                         <div className="flex items-center gap-1.5">
-                                                                                            <input autoFocus type="text" placeholder="Search CT animal by name…"
+                                                                                            <input autoFocus type="text" placeholder="Search by name or CT ID…"
                                                                                                 value={sbMappingSearch.query}
                                                                                                 onChange={async e => {
                                                                                                     const q = e.target.value;
