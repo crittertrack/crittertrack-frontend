@@ -24875,14 +24875,16 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                 </tr>
                                                             )}
                                                             {/* Manual mapping sub-row for New/Mapped rows */}
-                                                            {!conflict && isSelected && (
+                                                            {!conflict && (isSelected || sbManualMappings[a.sbId]) && (
                                                                 <tr className={sbManualMappings[a.sbId] ? 'bg-blue-50' : 'bg-gray-50'}>
                                                                     <td></td>
                                                                     <td colSpan="5" className="px-3 pb-2 pt-0">
                                                                         {sbManualMappings[a.sbId] ? (
                                                                             <div className="flex items-center gap-2 text-xs pt-1">
                                                                                 <span className="text-blue-700">&#x21AA; Mapped to <span className="font-mono font-semibold">{sbManualMappings[a.sbId].id_public}</span> &mdash; {sbManualMappings[a.sbId].name}</span>
-                                                                                <button type="button" onClick={() => setSbManualMappings(prev => { const n = { ...prev }; delete n[a.sbId]; return n; })}
+                                                                                <button type="button" onClick={() => setSbMappingSearch({ sbId: a.sbId, query: '', results: [], loading: false })}
+                                                                                    className="text-xs text-blue-500 hover:text-blue-700 hover:underline ml-1">Change</button>
+                                                                                <button type="button" onClick={() => { setSbManualMappings(prev => { const n = { ...prev }; delete n[a.sbId]; return n; }); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false }); }}
                                                                                     className="text-gray-400 hover:text-red-500 transition ml-1" title="Remove mapping"><X size={11} /></button>
                                                                             </div>
                                                                         ) : (
@@ -24894,8 +24896,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                                 value={sbMappingSearch.query}
                                                                                                 onChange={async e => {
                                                                                                     const q = e.target.value;
-                                                                                                    setSbMappingSearch(prev => ({ ...prev, query: q, loading: true, results: [] }));
-                                                                                                    if (!q.trim()) { setSbMappingSearch(prev => ({ ...prev, loading: false })); return; }
+                                                                                                    setSbMappingSearch(prev => ({ ...prev, query: q, loading: q.length >= 2, results: [] }));
+                                                                                                    if (q.length < 2) { setSbMappingSearch(prev => ({ ...prev, loading: false })); return; }
                                                                                                     try {
                                                                                                         const [privateRes, publicRes] = await Promise.allSettled([
                                                                                                             axios.get(`${API_BASE_URL}/animals`, { params: { name: q }, headers: { Authorization: `Bearer ${authToken}` } }),
@@ -24905,7 +24907,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                                         const pub = publicRes.status === 'fulfilled' ? publicRes.value.data : [];
                                                                                                         const seen = new Set(own.map(r => r.id_public));
                                                                                                         const merged = [...own, ...pub.filter(r => !seen.has(r.id_public))];
-                                                                                                        setSbMappingSearch(prev => ({ ...prev, results: merged.slice(0, 10), loading: false }));
+                                                                                                        // Discard stale results if query changed while this request was in-flight
+                                                                                                        setSbMappingSearch(prev => prev.query !== q ? prev : { ...prev, results: merged.slice(0, 10), loading: false });
                                                                                                     } catch { setSbMappingSearch(prev => ({ ...prev, loading: false })); }
                                                                                                 }}
                                                                                                 className="flex-1 max-w-xs text-xs border rounded px-2 py-1 focus:ring-primary focus:border-primary"
