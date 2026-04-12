@@ -27124,19 +27124,16 @@ const AnimalList = ({
     };
 
     const fetchAnimals = useCallback(async () => {
-        // Fetch all animals from API — all filtering is done client-side via useMemo
+        // Two-phase fetch: fast owned-only first, then all animals in background
         try {
-            const url = `${API_BASE_URL}/animals`;
-            const response = await axios.get(url, { headers: { Authorization: `Bearer ${authToken}` } });
-            let data = response.data || [];
+            // Phase 1: fetch owned animals quickly to get content on screen
+            const ownedRes = await axios.get(`${API_BASE_URL}/animals?isOwned=true`, { headers: { Authorization: `Bearer ${authToken}` } });
+            let ownedData = (ownedRes.data || []).filter(a => !a.isViewOnly);
 
-            // Always exclude view-only (sold/transferred) animals from My Animals — they appear in Management > Sold/Transferred
-            data = data.filter(a => !a.isViewOnly);
-
-            // Cache-bust images ONLY once per session startup (not on every filter change)
+            // Cache-bust images ONLY once per session startup
             if (!fetchAnimals._cacheBusted) {
                 fetchAnimals._cacheBusted = true;
-                data = data.map(a => {
+                const bustImages = (data) => data.map(a => {
                     const img = a.imageUrl || a.photoUrl || null;
                     if (img) {
                         const busted = img.includes('?') ? `${img}&t=${Date.now()}` : `${img}?t=${Date.now()}`;
@@ -27144,19 +27141,37 @@ const AnimalList = ({
                     }
                     return a;
                 });
+                ownedData = bustImages(ownedData);
             }
 
-            setAnimals(data);
-            // Remember which filters produced this cache so we can skip re-fetch on remount
+            setAnimals(ownedData);
             _alCacheFilters = JSON.stringify(filterRef.current);
-            // Derive species list from already-fetched data instead of a separate API call
-            const speciesList = [...new Set(data.map(a => a.species).filter(Boolean))];
+            const speciesList = [...new Set(ownedData.map(a => a.species).filter(Boolean))];
             if (speciesList.length > 0) setAllUserSpecies(speciesList);
+            setLoading(false);
+
+            // Phase 2: background-fetch ALL animals so unowned toggle works instantly
+            try {
+                const allRes = await axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` } });
+                let allData = (allRes.data || []).filter(a => !a.isViewOnly);
+                // Preserve cache-busted image URLs from phase 1
+                const ownedMap = new Map(ownedData.map(a => [a.id_public || a._id, a]));
+                allData = allData.map(a => {
+                    const key = a.id_public || a._id;
+                    return ownedMap.has(key) ? ownedMap.get(key) : a;
+                });
+                setAnimals(allData);
+                _alCacheFilters = JSON.stringify(filterRef.current);
+                const allSpecies = [...new Set(allData.map(a => a.species).filter(Boolean))];
+                if (allSpecies.length > 0) setAllUserSpecies(allSpecies);
+            } catch (err) {
+                console.warn('[fetchAnimals] Background all-animals fetch failed, owned-only still shown:', err);
+            }
         } catch (error) {
             console.error('Fetch animals error:', error);
             showModalMessage('Error', 'Failed to fetch animal list.');
-        } finally {
             setLoading(false);
+        } finally {
             setPendingFilters(false);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
