@@ -28006,6 +28006,10 @@ const AnimalList = ({
         try {
             setLoading(true);
             
+            // Bust the module-level cache so fetchAnimals does a fresh API call
+            _alCache = null;
+            _alCacheTime = 0;
+
             // Fetch animals first
             const currentAnimals = await axios.get(`${API_BASE_URL}/animals`, {
                 headers: { Authorization: `Bearer ${authToken}` }
