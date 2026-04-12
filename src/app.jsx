@@ -27243,8 +27243,6 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
 
 // ── Module-level cache so AnimalList survives unmount/remount without refetching ──
 let _alCache = null;       // last animals array
-let _alCacheTime = 0;      // timestamp of last cache write
-const AL_CACHE_TTL = 120_000; // 2 min — stale after this
 
 // Keep cache patched even while AnimalList is unmounted
 if (!window.__alCacheListenerAttached) {
@@ -27253,7 +27251,6 @@ if (!window.__alCacheListenerAttached) {
         const u = e.detail;
         if (_alCache && u?.id_public) {
             _alCache = _alCache.map(a => a.id_public === u.id_public ? { ...a, ...u } : a);
-            _alCacheTime = Date.now();
         }
     });
     window.addEventListener('animals-changed', () => { _alCache = null; }); // bust on full reload signal
@@ -27283,7 +27280,6 @@ const AnimalList = ({
         setAnimalsRaw(prev => {
             const next = typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn;
             _alCache = next;
-            _alCacheTime = Date.now();
             return next;
         });
     }, []);
@@ -27636,8 +27632,8 @@ const AnimalList = ({
     }, [authToken, API_BASE_URL]);
 
     useEffect(() => {
-        // Skip fetch if we have a fresh cache (e.g. returning from edit/view)
-        if (_alCache && _alCache.length > 0 && (Date.now() - _alCacheTime < AL_CACHE_TTL)) {
+        // Skip fetch if we have a cache (e.g. returning from edit/view)
+        if (_alCache && _alCache.length > 0) {
             setAnimalsRaw(_alCache);
             setLoading(false);
             // Still derive species from cached data
@@ -28008,7 +28004,6 @@ const AnimalList = ({
             
             // Bust the module-level cache so fetchAnimals does a fresh API call
             _alCache = null;
-            _alCacheTime = 0;
 
             // Re-fetch the animal list from the server
             await fetchAnimals();
