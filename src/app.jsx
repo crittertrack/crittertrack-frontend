@@ -26932,6 +26932,17 @@ const AnimalList = ({
     const [pendingFilters, setPendingFilters] = useState(false); // true when filters changed but not yet applied
     const filterRef = useRef({}); // holds current filter values for fetchAnimals to read without re-creating
     const filterMountedRef = useRef(false); // tracks initial mount for pending-filters detection
+    // Applied filter snapshot — groupedAnimals reads from this, only updated on "Apply Filters" click
+    const [appliedFilters, setAppliedFilters] = useState(() => ({
+        statusFilter: (function() { try { return localStorage.getItem('animalList_statusFilter') || ''; } catch { return ''; } })(),
+        selectedGenders: (function() { try { const s = localStorage.getItem('animalList_selectedGenders'); return s ? JSON.parse(s) : ['Male', 'Female', 'Intersex', 'Unknown']; } catch { return ['Male', 'Female', 'Intersex', 'Unknown']; } })(),
+        selectedSpecies: [], // will be filled on first species load
+        statusFilterPregnant: (function() { try { return localStorage.getItem('animalList_statusFilterPregnant') === 'true'; } catch { return false; } })(),
+        statusFilterNursing: (function() { try { return localStorage.getItem('animalList_statusFilterNursing') === 'true'; } catch { return false; } })(),
+        statusFilterMating: (function() { try { return localStorage.getItem('animalList_statusFilterMating') === 'true'; } catch { return false; } })(),
+        publicFilter: (function() { try { return localStorage.getItem('animalList_publicFilter') || ''; } catch { return ''; } })(),
+        blFilter: (function() { try { const s = localStorage.getItem('animalList_blFilter'); return s ? JSON.parse(s) : []; } catch { return []; } })(),
+    }));
     const [showOwned, setShowOwned] = useState(() => {
         try {
             const saved = localStorage.getItem('animalList_showOwned');
@@ -27109,130 +27120,20 @@ const AnimalList = ({
     filterRef.current = {
         statusFilter, selectedGenders, selectedSpecies, appliedNameFilter,
         statusFilterPregnant, statusFilterNursing, statusFilterMating,
-        showOwned, showUnowned, publicFilter
+        publicFilter
     };
 
-    // Mark filters as pending whenever any filter state changes (except on initial mount)
-    useEffect(() => {
-        if (!filterMountedRef.current) {
-            filterMountedRef.current = true;
-            return;
-        }
-        setPendingFilters(true);
-    }, [statusFilter, selectedGenders, selectedSpecies, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter]);
-
-    // Auto-apply when ownership filter buttons are clicked
-    useEffect(() => {
-        if (!filterMountedRef.current) return;
-        fetchAnimals();
-    }, [showOwned, showUnowned]);
-
     const fetchAnimals = useCallback(async () => {
-        // Do NOT setLoading(true) here — loading starts true only on initial mount
-        // and goes false after the very first fetch. All subsequent re-fetches are
-        // silent so the existing card grid never disappears during filter changes.
-        // Read filter values from ref so this callback doesn't recreate on every filter change
-        const {
-            statusFilter: _statusFilter, selectedGenders: _selectedGenders,
-            selectedSpecies: _selectedSpecies, appliedNameFilter: _appliedNameFilter,
-            statusFilterPregnant: _statusFilterPregnant, statusFilterNursing: _statusFilterNursing,
-            statusFilterMating: _statusFilterMating, showOwned: _showOwned, showUnowned: _showUnowned,
-            publicFilter: _publicFilter
-        } = filterRef.current;
+        // Fetch all animals from API — all filtering is done client-side via useMemo
         try {
-            let params = [];
-            if (_statusFilter) {
-                params.push(`status=${_statusFilter}`);
-            }
-            if (_appliedNameFilter) {
-                params.push(`name=${encodeURIComponent(_appliedNameFilter)}`);
-            }
-            if (_statusFilterPregnant) {
-                params.push(`isPregnant=true`);
-            }
-            if (_statusFilterNursing) {
-                params.push(`isNursing=true`);
-            }
-            if (_statusFilterMating) {
-                params.push(`isInMating=true`);
-            }
-            if (_showOwned && !_showUnowned) {
-                params.push(`isOwned=true`);
-            }
-            const queryString = params.length > 0 ? `?${params.join('&')}` : '';
-            const url = `${API_BASE_URL}/animals${queryString}`;
-
+            const url = `${API_BASE_URL}/animals`;
             const response = await axios.get(url, { headers: { Authorization: `Bearer ${authToken}` } });
             let data = response.data || [];
-            
-            // Client-side fallback filtering in case the API doesn't apply the `name` filter reliably
-            if (_appliedNameFilter) {
-                const term = _appliedNameFilter.toLowerCase();
-                data = data.filter(a => {
-                    const name = (a.name || '').toString().toLowerCase();
-                    const registry = (a.breederAssignedId || a.registryCode || '').toString().toLowerCase();
-                    const idPublic = (a.id_public || '').toString().toLowerCase();
-                    const tags = (a.tags || []).map(t => t.toLowerCase());
-                    const tagsMatch = tags.some(tag => tag.includes(term));
-                    return name.includes(term) || registry.includes(term) || idPublic.includes(term.replace(/^ct-?/,'').toLowerCase()) || tagsMatch;
-                });
-            }
-
-            // Filter by selected species (if any species are selected)
-            if (_selectedSpecies.length > 0) {
-                data = data.filter(a => _selectedSpecies.includes(a.species));
-            }
-
-            // Filter by selected genders (if not all are selected, or if none are selected show nothing)
-            if (_selectedGenders.length === 0) {
-                // No genders selected = show no animals
-                data = [];
-            } else if (_selectedGenders.length < GENDER_OPTIONS.length) {
-                // Some genders selected = filter to those
-                data = data.filter(a => _selectedGenders.includes(a.gender));
-            }
-
-            // Client-side ownership filtering for unowned-only or neither case
-            if (!_showOwned && !_showUnowned) {
-                data = [];
-            } else if (!_showOwned && _showUnowned) {
-                data = data.filter(a => !a.isOwned);
-            } else if (_showOwned && _showUnowned) {
-                // both selected — show all, no extra filter needed
-            }
-            // else: showOwned && !showUnowned is already handled server-side
 
             // Always exclude view-only (sold/transferred) animals from My Animals — they appear in Management > Sold/Transferred
             data = data.filter(a => !a.isViewOnly);
 
-            // Enforce that males are excluded when pregnant or nursing filters are active
-            if (_statusFilterPregnant || _statusFilterNursing) {
-                data = data.filter(a => {
-                    const gender = (a.gender || '').toString().toLowerCase();
-                    return gender !== 'male';
-                });
-            }
-
-            // Ensure only animals with the actual boolean flags are shown when those filters are enabled
-            if (_statusFilterPregnant) {
-                data = data.filter(a => a.isPregnant === true);
-            }
-            if (_statusFilterNursing) {
-                data = data.filter(a => a.isNursing === true);
-            }
-            if (_statusFilterMating) {
-                data = data.filter(a => a.isInMating === true);
-            }
-
-            // Filter by public/private status
-            if (_publicFilter === 'public') {
-                data = data.filter(a => a.showOnPublicProfile === true);
-            } else if (_publicFilter === 'private') {
-                data = data.filter(a => !a.showOnPublicProfile);
-            }
-
             // Cache-bust images ONLY once per session startup (not on every filter change)
-            // Store whether we've already busted this session
             if (!fetchAnimals._cacheBusted) {
                 fetchAnimals._cacheBusted = true;
                 data = data.map(a => {
@@ -27261,11 +27162,15 @@ const AnimalList = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [authToken, showModalMessage]);
 
-    // Apply filters: update ref from current state and fetch
+    // Apply filters: snapshot current UI filter state into appliedFilters
     const applyFilters = useCallback(() => {
+        setAppliedFilters({
+            statusFilter, selectedGenders, selectedSpecies,
+            statusFilterPregnant, statusFilterNursing, statusFilterMating,
+            publicFilter, blFilter,
+        });
         setPendingFilters(false);
-        fetchAnimals();
-    }, [fetchAnimals]);
+    }, [statusFilter, selectedGenders, selectedSpecies, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter, blFilter]);
 
     // Species list is now derived from the fetchAnimals result - no separate API call needed
     const fetchAllSpecies = useCallback(async () => {
@@ -27479,11 +27384,68 @@ const AnimalList = ({
 
     const groupedAnimals = useMemo(() => {
         let source = animals;
-        // Apply breeding line filter client-side so it reacts instantly without re-fetching
-        if (blFilter.length > 0) {
+        // --- Applied panel filters (only update on "Apply Filters" click) ---
+        const af = appliedFilters;
+
+        // Status filter
+        if (af.statusFilter) {
+            source = source.filter(a => a.status === af.statusFilter);
+        }
+
+        // Name search (applied on Search button click)
+        if (appliedNameFilter) {
+            const term = appliedNameFilter.toLowerCase();
+            source = source.filter(a => {
+                const name = (a.name || '').toString().toLowerCase();
+                const registry = (a.breederAssignedId || a.registryCode || '').toString().toLowerCase();
+                const idPublic = (a.id_public || '').toString().toLowerCase();
+                const tags = (a.tags || []).map(t => t.toLowerCase());
+                const tagsMatch = tags.some(tag => tag.includes(term));
+                return name.includes(term) || registry.includes(term) || idPublic.includes(term.replace(/^ct-?/,'').toLowerCase()) || tagsMatch;
+            });
+        }
+
+        // Species filter
+        if (af.selectedSpecies.length > 0) {
+            source = source.filter(a => af.selectedSpecies.includes(a.species));
+        }
+
+        // Gender filter
+        if (af.selectedGenders.length === 0) {
+            source = [];
+        } else if (af.selectedGenders.length < GENDER_OPTIONS.length) {
+            source = source.filter(a => af.selectedGenders.includes(a.gender));
+        }
+
+        // Pregnant / Nursing / Mating filters
+        if (af.statusFilterPregnant || af.statusFilterNursing) {
+            source = source.filter(a => (a.gender || '').toLowerCase() !== 'male');
+        }
+        if (af.statusFilterPregnant) source = source.filter(a => a.isPregnant === true);
+        if (af.statusFilterNursing) source = source.filter(a => a.isNursing === true);
+        if (af.statusFilterMating) source = source.filter(a => a.isInMating === true);
+
+        // Public/private filter
+        if (af.publicFilter === 'public') {
+            source = source.filter(a => a.showOnPublicProfile === true);
+        } else if (af.publicFilter === 'private') {
+            source = source.filter(a => !a.showOnPublicProfile);
+        }
+
+        // --- Instant filters (no Apply needed) ---
+        // Ownership filter
+        if (showOwned && !showUnowned) {
+            source = source.filter(a => a.isOwned !== false);
+        } else if (!showOwned && showUnowned) {
+            source = source.filter(a => a.isOwned === false);
+        } else if (!showOwned && !showUnowned) {
+            source = [];
+        }
+        // Breeding line filter
+        if (af.blFilter.length > 0) {
             source = source.filter(a => {
                 const assigned = animalBreedingLines[a.id_public] || [];
-                return blFilter.some(lineId => assigned.includes(lineId));
+                return af.blFilter.some(lineId => assigned.includes(lineId));
             });
         }
         return source.reduce((groups, animal) => {
@@ -27494,7 +27456,11 @@ const AnimalList = ({
             groups[species].push(animal);
             return groups;
         }, {});
-    }, [animals, blFilter, animalBreedingLines]);
+    }, [animals, appliedFilters, appliedNameFilter, showOwned, showUnowned, animalBreedingLines]);
+
+    const displayedAnimalCount = useMemo(() => {
+        return Object.values(groupedAnimals).reduce((sum, arr) => sum + arr.length, 0);
+    }, [groupedAnimals]);
     
     const speciesNames = useMemo(() => {
         return [...allUserSpecies].sort((a, b) => {
@@ -27533,11 +27499,13 @@ const AnimalList = ({
         if (selectedSpecies.length === 0) {
             // First load: select everything
             setSelectedSpecies([...allUserSpecies]);
+            setAppliedFilters(prev => ({ ...prev, selectedSpecies: [...allUserSpecies] }));
         } else {
             // Add any newly-seen species so they aren't silently hidden
             const newSpecies = allUserSpecies.filter(s => !selectedSpecies.includes(s));
             if (newSpecies.length > 0) {
                 setSelectedSpecies(prev => [...prev, ...newSpecies]);
+                setAppliedFilters(prev => ({ ...prev, selectedSpecies: [...prev.selectedSpecies, ...newSpecies] }));
             }
         }
     }, [allUserSpecies]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -27562,18 +27530,30 @@ const AnimalList = ({
     const handleFilterNursing = () => { setStatusFilterNursing(prev => !prev); setStatusFilterPregnant(false); setStatusFilterMating(false); };
     const handleFilterMating = () => { setStatusFilterMating(prev => !prev); setStatusFilterPregnant(false); setStatusFilterNursing(false); };
     
-    // Check if any filters are active (different from defaults)
+    // Check if any filters are active (different from defaults) — uses appliedFilters for panel filters
     const hasActiveFilters = (
-        statusFilter !== '' ||
+        appliedFilters.statusFilter !== '' ||
         appliedNameFilter !== '' ||
         searchInput !== '' ||
-        selectedGenders.length !== 4 ||
-        !speciesNames.every(species => selectedSpecies.includes(species)) ||
-        statusFilterPregnant ||
-        statusFilterNursing ||
-        statusFilterMating ||
-        publicFilter !== '' ||
-        blFilter.length > 0
+        appliedFilters.selectedGenders.length !== 4 ||
+        (appliedFilters.selectedSpecies.length > 0 && !speciesNames.every(species => appliedFilters.selectedSpecies.includes(species))) ||
+        appliedFilters.statusFilterPregnant ||
+        appliedFilters.statusFilterNursing ||
+        appliedFilters.statusFilterMating ||
+        appliedFilters.publicFilter !== '' ||
+        appliedFilters.blFilter.length > 0
+    );
+
+    // Detect if panel UI state differs from applied snapshot (show pulse on Apply button)
+    const panelDirty = (
+        statusFilter !== appliedFilters.statusFilter ||
+        JSON.stringify(selectedGenders) !== JSON.stringify(appliedFilters.selectedGenders) ||
+        JSON.stringify(selectedSpecies) !== JSON.stringify(appliedFilters.selectedSpecies) ||
+        statusFilterPregnant !== appliedFilters.statusFilterPregnant ||
+        statusFilterNursing !== appliedFilters.statusFilterNursing ||
+        statusFilterMating !== appliedFilters.statusFilterMating ||
+        publicFilter !== appliedFilters.publicFilter ||
+        JSON.stringify(blFilter) !== JSON.stringify(appliedFilters.blFilter)
     );
     
     const handleClearFilters = () => {
@@ -27589,8 +27569,18 @@ const AnimalList = ({
         setShowUnowned(false);
         setPublicFilter('');
         setBlFilter([]);
-        // Schedule fetch after state updates settle
-        setTimeout(() => { setPendingFilters(false); fetchAnimals(); }, 0);
+        // Also reset the applied snapshot to defaults
+        setAppliedFilters({
+            statusFilter: '',
+            selectedGenders: ['Male', 'Female', 'Intersex', 'Unknown'],
+            selectedSpecies: [...speciesNames],
+            statusFilterPregnant: false,
+            statusFilterNursing: false,
+            statusFilterMating: false,
+            publicFilter: '',
+            blFilter: [],
+        });
+        setPendingFilters(false);
     };
     
     const handleRefresh = async () => {
@@ -27628,9 +27618,8 @@ const AnimalList = ({
     const triggerSearch = () => {
         const term = searchInput.trim();
         if (!term) {
-            // empty -> clear filter and fetch all
+            // empty -> clear filter
             setAppliedNameFilter('');
-            setTimeout(() => { setPendingFilters(false); fetchAnimals(); }, 0);
             return;
         }
         if (term.length < 3) {
@@ -27638,7 +27627,6 @@ const AnimalList = ({
             return;
         }
         setAppliedNameFilter(term);
-        setTimeout(() => { setPendingFilters(false); fetchAnimals(); }, 0);
     };
 
     const toggleBulkDeleteMode = (species) => {
@@ -30106,7 +30094,7 @@ const AnimalList = ({
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className='flex items-center gap-2'>
                     <ClipboardList size={20} className="sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
-                    {animalView === 'list' ? `My Animals (${animals.length})` : showActivityLogScreen ? 'Activity Log' : showSuppliesScreen ? 'Supplies & Inventory' : 'Management View'}
+                    {animalView === 'list' ? `My Animals (${displayedAnimalCount})` : showActivityLogScreen ? 'Activity Log' : showSuppliesScreen ? 'Supplies & Inventory' : 'Management View'}
                     {animalView === 'list' && hasActiveFilters && (
                         <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
                             Filtered
@@ -30115,21 +30103,12 @@ const AnimalList = ({
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2 flex-wrap" data-tutorial-target="bulk-privacy-controls">
                     {animalView === 'list' && (<>
-                    <button
-                        onClick={() => toggleAllAnimalsPrivacy(true)}
-                        className="text-green-600 hover:text-green-700 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-green-50 text-xs sm:text-sm"
-                        title="Make All Animals Public"
+                    <button 
+                        onClick={() => navigate('/select-species')} 
+                        className="bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
+                        data-tutorial-target="add-animal-btn"
                     >
-                        <Eye size={14} className="sm:w-4 sm:h-4" />
-                        <span className="font-medium">All Public</span>
-                    </button>
-                    <button
-                        onClick={() => toggleAllAnimalsPrivacy(false)}
-                        className="text-gray-600 hover:text-gray-800 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-gray-100 text-xs sm:text-sm"
-                        title="Make All Animals Private"
-                    >
-                        <EyeOff size={14} className="sm:w-4 sm:h-4" />
-                        <span className="font-medium">All Private</span>
+                        <PlusCircle size={14} className="sm:w-4 sm:h-4" /> <span className="hidden sm:inline">Add Animal</span><span className="sm:hidden">Add</span>
                     </button>
 
                     </>)}
@@ -30189,6 +30168,7 @@ const AnimalList = ({
                             <span className="font-medium hidden sm:inline">Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
                         </button>
                     )}
+                    {animalView !== 'list' && (
                     <button 
                         onClick={handleRefresh} 
                         disabled={loading}
@@ -30197,6 +30177,7 @@ const AnimalList = ({
                     >
                         {loading ? <Loader2 size={16} className="sm:w-[18px] sm:h-[18px] animate-spin" /> : <RefreshCw size={16} className="sm:w-[18px] sm:h-[18px]" />}
                     </button>
+                    )}
                 </div>
             </h2>
 
@@ -30246,6 +30227,23 @@ const AnimalList = ({
                         <HeartOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         {showUnowned ? 'Showing Unowned' : 'Show Unowned'}
                     </button>
+                    <span className="mx-1 text-gray-300">|</span>
+                    <button
+                        onClick={() => toggleAllAnimalsPrivacy(true)}
+                        className="text-green-600 hover:text-green-700 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-green-50 text-xs sm:text-sm font-semibold shadow-sm"
+                        title="Make All Animals Public"
+                    >
+                        <Eye size={14} className="sm:w-4 sm:h-4" />
+                        <span>Set All Public</span>
+                    </button>
+                    <button
+                        onClick={() => toggleAllAnimalsPrivacy(false)}
+                        className="text-gray-600 hover:text-gray-800 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-semibold shadow-sm"
+                        title="Make All Animals Private"
+                    >
+                        <EyeOff size={14} className="sm:w-4 sm:h-4" />
+                        <span>Set All Private</span>
+                    </button>
                 </div>
 
                 {/* Search + Filters toggle + Add */}
@@ -30283,11 +30281,12 @@ const AnimalList = ({
                         )}
                     </button>
                     <button 
-                        onClick={() => navigate('/select-species')} 
-                        className="bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 whitespace-nowrap text-sm shrink-0"
-                        data-tutorial-target="add-animal-btn"
+                        onClick={handleRefresh}
+                        disabled={loading}
+                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-3 rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 text-sm shrink-0 disabled:opacity-50"
+                        title="Refresh List"
                     >
-                        <PlusCircle size={16} /> <span className="hidden sm:inline">Add Animal</span><span className="sm:hidden">Add</span>
+                        {loading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
                     </button>
                 </div>
 
@@ -30438,7 +30437,7 @@ const AnimalList = ({
                         <button
                             onClick={() => { applyFilters(); setFiltersExpanded(false); }}
                             className={`font-semibold py-2 px-5 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1.5 text-sm ${
-                                pendingFilters
+                                panelDirty
                                     ? 'bg-accent hover:bg-accent/90 text-white animate-pulse'
                                     : 'bg-primary hover:bg-primary/90 text-black'
                             }`}
@@ -30481,7 +30480,7 @@ const AnimalList = ({
                         </div>
                     ))}
                 </div>
-            ) : animals.length === 0 ? (
+            ) : displayedAnimalCount === 0 ? (
                 <div className="text-center p-8 bg-gray-50 rounded-lg">
                     <Cat size={48} className="text-gray-400 mx-auto mb-4" />
                     <p className="text-xl font-semibold text-gray-600">No animals found.</p>
