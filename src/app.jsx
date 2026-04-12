@@ -22450,6 +22450,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [sbPreview, setSbPreview] = useState(null); // { animals: [...], profileUrl }
     const [sbSelectedIds, setSbSelectedIds] = useState(() => new Set());
     const [sbConflictResolutions, setSbConflictResolutions] = useState({}); // { sbId: 'skip'|'import_anyway' }
+    const [sbManualMappings, setSbManualMappings] = useState({}); // { sbId: { id_public, name } }
+    const [sbMappingSearch, setSbMappingSearch] = useState({ sbId: null, query: '', results: [], loading: false });
     const [sbImportLoading, setSbImportLoading] = useState(false);
     const [sbResult, setSbResult] = useState(null);
 
@@ -24666,7 +24668,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     className="flex-1 text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-400"
                                     onKeyDown={async e => {
                                         if (e.key !== 'Enter' || sbPreviewLoading || !sbUrl.trim()) return;
-                                        setSbPreviewLoading(true); setSbResult(null); setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({});
+                                        setSbPreviewLoading(true); setSbResult(null); setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); setSbManualMappings({}); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false });
                                         try {
                                             const r = await axios.post(`${API_BASE_URL}/import/simplebreed/preview`, { profileUrl: sbUrl.trim() }, { headers: { Authorization: `Bearer ${authToken}` } });
                                             setSbPreview(r.data);
@@ -24681,7 +24683,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 <button
                                     onClick={async () => {
                                         if (!sbUrl.trim() || sbPreviewLoading) return;
-                                        setSbPreviewLoading(true); setSbResult(null); setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({});
+                                        setSbPreviewLoading(true); setSbResult(null); setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); setSbManualMappings({}); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false });
                                         try {
                                             const r = await axios.post(`${API_BASE_URL}/import/simplebreed/preview`, { profileUrl: sbUrl.trim() }, { headers: { Authorization: `Bearer ${authToken}` } });
                                             setSbPreview(r.data);
@@ -24787,7 +24789,9 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                         ? conflict.confidence === 'possible'
                                                                             ? <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded text-xs font-medium">Possible match</span>
                                                                             : <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium">Duplicate</span>
-                                                                        : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
+                                                                        : sbManualMappings[a.sbId]
+                                                                            ? <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">Mapped</span>
+                                                                            : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
                                                                 </td>
                                                             </tr>
                                                             {conflict && isSelected && (
@@ -24816,6 +24820,79 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                     </td>
                                                                 </tr>
                                                             )}
+                                                            {/* Manual mapping sub-row for New/Mapped rows */}
+                                                            {!conflict && isSelected && (
+                                                                <tr className={sbManualMappings[a.sbId] ? 'bg-blue-50' : 'bg-gray-50'}>
+                                                                    <td></td>
+                                                                    <td colSpan="8" className="px-3 pb-2 pt-0">
+                                                                        {sbManualMappings[a.sbId] ? (
+                                                                            <div className="flex items-center gap-2 text-xs pt-1">
+                                                                                <span className="text-blue-700">&#x21AA; Mapped to <span className="font-mono font-semibold">{sbManualMappings[a.sbId].id_public}</span> &mdash; {sbManualMappings[a.sbId].name}</span>
+                                                                                <button type="button" onClick={() => setSbManualMappings(prev => { const n = { ...prev }; delete n[a.sbId]; return n; })}
+                                                                                    className="text-gray-400 hover:text-red-500 transition ml-1" title="Remove mapping"><X size={11} /></button>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="pt-1">
+                                                                                {sbMappingSearch.sbId === a.sbId ? (
+                                                                                    <div className="flex flex-col gap-1.5">
+                                                                                        <div className="flex items-center gap-1.5">
+                                                                                            <input autoFocus type="text" placeholder="Search CT animal by name…"
+                                                                                                value={sbMappingSearch.query}
+                                                                                                onChange={async e => {
+                                                                                                    const q = e.target.value;
+                                                                                                    setSbMappingSearch(prev => ({ ...prev, query: q, loading: true, results: [] }));
+                                                                                                    if (!q.trim()) { setSbMappingSearch(prev => ({ ...prev, loading: false })); return; }
+                                                                                                    try {
+                                                                                                        const [privateRes, publicRes] = await Promise.allSettled([
+                                                                                                            axios.get(`${API_BASE_URL}/animals`, { params: { name: q }, headers: { Authorization: `Bearer ${authToken}` } }),
+                                                                                                            axios.get(`${API_BASE_URL}/public/global/animals`, { params: { name: q, limit: 10 } }),
+                                                                                                        ]);
+                                                                                                        const own = privateRes.status === 'fulfilled' ? privateRes.value.data : [];
+                                                                                                        const pub = publicRes.status === 'fulfilled' ? publicRes.value.data : [];
+                                                                                                        const seen = new Set(own.map(r => r.id_public));
+                                                                                                        const merged = [...own, ...pub.filter(r => !seen.has(r.id_public))];
+                                                                                                        setSbMappingSearch(prev => ({ ...prev, results: merged.slice(0, 10), loading: false }));
+                                                                                                    } catch { setSbMappingSearch(prev => ({ ...prev, loading: false })); }
+                                                                                                }}
+                                                                                                className="flex-1 max-w-xs text-xs border rounded px-2 py-1 focus:ring-primary focus:border-primary"
+                                                                                            />
+                                                                                            {sbMappingSearch.loading && <Loader2 size={11} className="animate-spin text-gray-400" />}
+                                                                                            <button type="button" onClick={() => setSbMappingSearch({ sbId: null, query: '', results: [], loading: false })}
+                                                                                                className="text-gray-400 hover:text-gray-600"><X size={11} /></button>
+                                                                                        </div>
+                                                                                        {sbMappingSearch.results.length > 0 && (
+                                                                                            <div className="border rounded bg-white shadow-sm divide-y max-w-sm max-h-40 overflow-y-auto">
+                                                                                                {sbMappingSearch.results.map(r => (
+                                                                                                    <button key={r.id_public} type="button"
+                                                                                                        onClick={() => {
+                                                                                                            setSbManualMappings(prev => ({ ...prev, [a.sbId]: { id_public: r.id_public, name: [r.prefix, r.name, r.suffix].filter(Boolean).join(' ') } }));
+                                                                                                            setSbMappingSearch({ sbId: null, query: '', results: [], loading: false });
+                                                                                                        }}
+                                                                                                        className="w-full text-left px-2 py-1.5 hover:bg-blue-50 transition text-xs"
+                                                                                                    >
+                                                                                                        <span className="font-medium text-gray-800">{[r.prefix, r.name, r.suffix].filter(Boolean).join(' ')}</span>
+                                                                                                        <span className="text-gray-400 ml-2 font-mono">{r.id_public}</span>
+                                                                                                        {r.birthDate && <span className="text-gray-400 ml-1">&middot; {String(r.birthDate).slice(0,10)}</span>}
+                                                                                                        {r.gender && <span className="text-gray-400 ml-1">&middot; {r.gender}</span>}
+                                                                                                        {r.breederName && <span className="text-gray-300 ml-1">&middot; {r.breederName}</span>}
+                                                                                                    </button>
+                                                                                                ))}
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </div>
+                                                                                ) : (
+                                                                                    <button type="button"
+                                                                                        onClick={() => setSbMappingSearch({ sbId: a.sbId, query: '', results: [], loading: false })}
+                                                                                        className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                                                                                    >
+                                                                                        + Map to existing CT animal (for parent links)
+                                                                                    </button>
+                                                                                )}
+                                                                            </div>
+                                                                        )}
+                                                                    </td>
+                                                                </tr>
+                                                            )}
                                                         </React.Fragment>
                                                     );
                                                 })}
@@ -24841,9 +24918,13 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                             if (!sbSelectedIds.size || sbImportLoading) return;
                                             setSbImportLoading(true);
                                             try {
+                                                const finalResolutions = { ...sbConflictResolutions };
+                                                for (const [sbId, mapping] of Object.entries(sbManualMappings)) {
+                                                    finalResolutions[sbId] = `map_to:${mapping.id_public}`;
+                                                }
                                                 const r = await axios.post(`${API_BASE_URL}/import/simplebreed/import`, {
                                                     selectedIds: [...sbSelectedIds],
-                                                    conflictResolutions: sbConflictResolutions,
+                                                    conflictResolutions: finalResolutions,
                                                     confirm: true,
                                                 }, { headers: { Authorization: `Bearer ${authToken}` } });
                                                 setSbResult(r.data);
@@ -24861,7 +24942,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                         {sbImportLoading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
                                         {sbImportLoading ? 'Importing…' : `Import ${sbSelectedIds.size} Animal${sbSelectedIds.size !== 1 ? 's' : ''}`}
                                     </button>
-                                    <button onClick={() => { setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); }} className="text-xs text-gray-400 hover:text-gray-600 underline">Cancel</button>
+                                    <button onClick={() => { setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); setSbManualMappings({}); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false }); }} className="text-xs text-gray-400 hover:text-gray-600 underline">Cancel</button>
                                 </div>
                             </div>
                         );
