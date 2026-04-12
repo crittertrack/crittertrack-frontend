@@ -24718,8 +24718,15 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         const sbItems = sbPreview.items || [];
                         const sbConflicts = sbPreview.conflicts || [];
                         const conflictIds = new Set(sbConflicts.map(c => c.sbId));
+                        // Treat mapped animals as duplicates for selection/counting
+                        const isDuplicateOrMapped = a => conflictIds.has(a.sbId) || !!sbManualMappings[a.sbId];
+                        const isNewAnimal = a => !conflictIds.has(a.sbId) && !sbManualMappings[a.sbId];
                         const highConflictCount = sbConflicts.filter(c => c.confidence !== 'possible').length;
                         const possibleConflictCount = sbConflicts.filter(c => c.confidence === 'possible').length;
+                        // Only allow selection of 'New' animals
+                        const selectableIds = new Set(sbItems.filter(isNewAnimal).map(a => a.sbId));
+                        // Only count selected 'New' animals for import
+                        const selectedNewCount = [...sbSelectedIds].filter(id => selectableIds.has(id)).length;
                         return (
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between flex-wrap gap-2">
@@ -24735,20 +24742,20 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     </h5>
                                     <div className="flex gap-2 text-xs flex-wrap">
                                         <button type="button"
-                                            onClick={() => setSbSelectedIds(new Set(sbItems.map(a => a.sbId)))}
+                                            onClick={() => setSbSelectedIds(new Set(sbItems.filter(isNewAnimal).map(a => a.sbId)))}
                                             className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Select all</button>
                                         <button type="button"
                                             onClick={() => setSbSelectedIds(new Set())}
                                             className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Deselect all</button>
                                         <span className="border-l mx-1"></span>
                                         <button type="button"
-                                            onClick={() => setSbSelectedIds(new Set(sbItems.filter(a => !conflictIds.has(a.sbId)).map(a => a.sbId)))}
+                                            onClick={() => setSbSelectedIds(new Set(sbItems.filter(isNewAnimal).map(a => a.sbId)))}
                                             className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-green-700">New only</button>
                                         <button type="button"
-                                            onClick={() => setSbSelectedIds(new Set(sbItems.filter(a => { const c = sbConflicts.find(x => x.sbId === a.sbId); return c && c.confidence !== 'possible'; }).map(a => a.sbId)))}
+                                            onClick={() => setSbSelectedIds(new Set(sbItems.filter(a => conflictIds.has(a.sbId) && !sbManualMappings[a.sbId]).map(a => a.sbId)))}
                                             className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-amber-700">Duplicates only</button>
                                         <button type="button"
-                                            onClick={() => setSbSelectedIds(new Set(sbItems.filter(a => { const c = sbConflicts.find(x => x.sbId === a.sbId); return c && c.confidence === 'possible'; }).map(a => a.sbId)))}
+                                            onClick={() => setSbSelectedIds(new Set(sbItems.filter(a => sbConflicts.find(x => x.sbId === a.sbId && x.confidence === 'possible')).map(a => a.sbId)))}
                                             className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-orange-700">Possible only</button>
                                     </div>
                                 </div>
@@ -24798,7 +24805,9 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                             </thead>
                                             <tbody className="divide-y bg-white">
                                                 {sbItems.map(a => {
-                                                    const isSelected = sbSelectedIds.has(a.sbId);
+                                                    // Only allow selection for 'New' animals
+                                                    const isSelectable = isNewAnimal(a);
+                                                    const isSelected = sbSelectedIds.has(a.sbId) && isSelectable;
                                                     const conflict = sbConflicts.find(c => c.sbId === a.sbId);
                                                     const resolution = sbConflictResolutions[a.sbId] || 'use_existing';
                                                     return (
@@ -24806,11 +24815,15 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                             <tr className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : conflict ? (conflict.confidence === 'possible' ? 'bg-orange-50' : 'bg-amber-50') : ''}`}>
                                                                 <td className="px-2 py-1.5 text-center">
                                                                     <input type="checkbox" checked={isSelected}
-                                                                        onChange={e => setSbSelectedIds(prev => {
-                                                                            const next = new Set(prev);
-                                                                            if (e.target.checked) next.add(a.sbId); else next.delete(a.sbId);
-                                                                            return next;
-                                                                        })}
+                                                                        disabled={!isSelectable}
+                                                                        onChange={e => {
+                                                                            if (!isSelectable) return;
+                                                                            setSbSelectedIds(prev => {
+                                                                                const next = new Set(prev);
+                                                                                if (e.target.checked) next.add(a.sbId); else next.delete(a.sbId);
+                                                                                return next;
+                                                                            });
+                                                                        }}
                                                                         className="rounded" />
                                                                 </td>
                                                                 <td className="px-2 py-1.5 font-medium text-gray-800 whitespace-nowrap">{a.name}</td>
@@ -24838,7 +24851,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                             ? <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded text-xs font-medium">Possible match</span>
                                                                             : <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium">Duplicate</span>
                                                                         : sbManualMappings[a.sbId]
-                                                                            ? <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">Mapped</span>
+                                                                            ? <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium">Duplicate</span>
                                                                             : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
                                                                 </td>
                                                             </tr>
@@ -24950,20 +24963,24 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 </div>
 
                                 <p className="text-xs text-gray-400">
-                                    {sbSelectedIds.size} of {sbPreview.total} selected
+                                    {selectedNewCount} of {sbItems.filter(isNewAnimal).length} new animal{sbItems.filter(isNewAnimal).length !== 1 ? 's' : ''} selected
                                     {(() => {
                                         const dupeLinks = [...sbSelectedIds].filter(id => {
                                             const c = sbConflicts.find(x => x.sbId === id);
                                             return c && (sbConflictResolutions[id] || 'use_existing') === 'use_existing';
                                         }).length;
-                                        return dupeLinks > 0 ? ` · ${dupeLinks} duplicate${dupeLinks !== 1 ? 's' : ''} will link to existing CT animals` : '';
+                                        const mappedLinks = [...sbSelectedIds].filter(id => !!sbManualMappings[id]).length;
+                                        let msg = '';
+                                        if (dupeLinks > 0) msg += ` · ${dupeLinks} duplicate${dupeLinks !== 1 ? 's' : ''} will link to existing CT animals`;
+                                        if (mappedLinks > 0) msg += ` · ${mappedLinks} mapped animal${mappedLinks !== 1 ? 's' : ''} will link to existing CT animals`;
+                                        return msg;
                                     })()}
                                 </p>
 
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={async () => {
-                                            if (!sbSelectedIds.size || sbImportLoading) return;
+                                            if (!selectedNewCount || sbImportLoading) return;
                                             setSbImportLoading(true);
                                             try {
                                                 const finalResolutions = { ...sbConflictResolutions };
@@ -24976,8 +24993,10 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                     ),
                                                     ...sbSpeciesOverrides,
                                                 };
+                                                // Only send selected NEW animal IDs
+                                                const selectedNewIds = [...sbSelectedIds].filter(id => selectableIds.has(id));
                                                 const r = await axios.post(`${API_BASE_URL}/import/simplebreed/import`, {
-                                                    selectedIds: [...sbSelectedIds],
+                                                    selectedIds: selectedNewIds,
                                                     conflictResolutions: finalResolutions,
                                                     speciesMap,
                                                     confirm: true,
@@ -24991,11 +25010,11 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                 setSbImportLoading(false);
                                             }
                                         }}
-                                        disabled={!sbSelectedIds.size || sbImportLoading}
+                                        disabled={!selectedNewCount || sbImportLoading}
                                         className="px-4 py-2 bg-sky-500 hover:bg-sky-600 disabled:opacity-50 text-white text-sm font-medium rounded-lg flex items-center gap-1.5"
                                     >
                                         {sbImportLoading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
-                                        {sbImportLoading ? 'Importing…' : `Import ${sbSelectedIds.size} Animal${sbSelectedIds.size !== 1 ? 's' : ''}`}
+                                        {sbImportLoading ? 'Importing…' : `Import ${selectedNewCount} Animal${selectedNewCount !== 1 ? 's' : ''}`}
                                     </button>
                                     <button onClick={() => { setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); setSbManualMappings({}); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false }); setSbSpeciesOverrides({}); }} className="text-xs text-gray-400 hover:text-gray-600 underline">Cancel</button>
                                 </div>
