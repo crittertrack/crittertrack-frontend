@@ -27244,7 +27244,6 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
 // ── Module-level cache so AnimalList survives unmount/remount without refetching ──
 let _alCache = null;       // last animals array
 let _alCacheTime = 0;      // timestamp of last cache write
-let _alCacheFilters = null; // serialised filterRef snapshot that produced the cache
 const AL_CACHE_TTL = 120_000; // 2 min — stale after this
 
 // Keep cache patched even while AnimalList is unmounted
@@ -27345,7 +27344,7 @@ const AnimalList = ({
         } catch { return []; }
     }); // array of line IDs to filter by (empty = no filter)
     const [pendingFilters, setPendingFilters] = useState(false); // true when filters changed but not yet applied
-    const filterRef = useRef({}); // holds current filter values for fetchAnimals to read without re-creating
+
     const filterMountedRef = useRef(false); // tracks initial mount for pending-filters detection
     // Applied filter snapshot — groupedAnimals reads from this, only updated on "Apply Filters" click
     const [appliedFilters, setAppliedFilters] = useState(() => ({
@@ -27531,13 +27530,6 @@ const AnimalList = ({
         } catch (e) { console.warn('Failed to save blFilter', e); }
     }, [blFilter]);
 
-    // Keep filterRef in sync with current filter state on every render
-    filterRef.current = {
-        statusFilter, selectedGenders, selectedSpecies, appliedNameFilter,
-        statusFilterPregnant, statusFilterNursing, statusFilterMating,
-        publicFilter
-    };
-
     const fetchAnimals = useCallback(async () => {
         // Two-phase fetch: fast owned-only first, then all animals in background
         try {
@@ -27560,7 +27552,6 @@ const AnimalList = ({
             }
 
             setAnimals(ownedData);
-            _alCacheFilters = JSON.stringify(filterRef.current);
             const speciesList = [...new Set(ownedData.map(a => a.species).filter(Boolean))];
             if (speciesList.length > 0) setAllUserSpecies(speciesList);
             setLoading(false);
@@ -27576,7 +27567,6 @@ const AnimalList = ({
                     return ownedMap.has(key) ? ownedMap.get(key) : a;
                 });
                 setAnimals(allData);
-                _alCacheFilters = JSON.stringify(filterRef.current);
                 const allSpecies = [...new Set(allData.map(a => a.species).filter(Boolean))];
                 if (allSpecies.length > 0) setAllUserSpecies(allSpecies);
             } catch (err) {
@@ -27647,8 +27637,7 @@ const AnimalList = ({
 
     useEffect(() => {
         // Skip fetch if we have a fresh cache (e.g. returning from edit/view)
-        const filterSnap = JSON.stringify(filterRef.current);
-        if (_alCache && _alCache.length > 0 && (Date.now() - _alCacheTime < AL_CACHE_TTL) && _alCacheFilters === filterSnap) {
+        if (_alCache && _alCache.length > 0 && (Date.now() - _alCacheTime < AL_CACHE_TTL)) {
             setAnimalsRaw(_alCache);
             setLoading(false);
             // Still derive species from cached data
