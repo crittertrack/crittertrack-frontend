@@ -22453,6 +22453,14 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [sbManualMappings, setSbManualMappings] = useState({}); // { sbId: { id_public, name } }
     const [sbMappingSearch, setSbMappingSearch] = useState({ sbId: null, query: '', results: [], loading: false });
     const [sbSpeciesOverrides, setSbSpeciesOverrides] = useState({}); // { sbId: 'species' } for animals where SB couldn't determine species
+    const [sbFavoriteSpecies, setSbFavoriteSpecies] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('speciesFavorites') || '[]'); } catch { return []; }
+    });
+    useEffect(() => {
+        const onFavChange = (e) => setSbFavoriteSpecies(e.detail || []);
+        window.addEventListener('speciesFavoritesChanged', onFavChange);
+        return () => window.removeEventListener('speciesFavoritesChanged', onFavChange);
+    }, []);
     const [sbImportLoading, setSbImportLoading] = useState(false);
     const [sbResult, setSbResult] = useState(null);
 
@@ -24652,7 +24660,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     <Globe size={18} className="text-sky-600 flex-shrink-0" />
                     <div>
                         <h3 className="font-semibold text-sky-800 text-sm">Import from SimpleBreed</h3>
-                        <p className="text-xs text-sky-600">Paste a SimpleBreed profile URL or username to import animals with parents, colour and status. Duplicates are detected across all CritterTrack users by SB ID and name + birth date.</p>
+                        <p className="text-xs text-sky-600">Paste a SimpleBreed profile URL or username to import animals with parents, colour and status. Duplicates are detected across all CritterTrack users by SB ID and name + birth date. If a species can't be detected, you'll be prompted to pick one — the dropdown shows your <span className="font-medium">starred species</span> (manage in Settings → Species).</p>
                     </div>
                 </div>
                 <div className="p-4 space-y-3">
@@ -24794,7 +24802,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                             className={`border rounded px-1 py-0.5 text-xs font-medium ${sbSpeciesOverrides[a.sbId] ? 'bg-white text-gray-700 border-gray-300' : 'bg-orange-50 text-orange-600 border-orange-300'}`}
                                                                           >
                                                                             <option value="">— pick —</option>
-                                                                            {DEFAULT_SPECIES_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                                                                            {(sbFavoriteSpecies.length > 0 ? sbFavoriteSpecies : DEFAULT_SPECIES_OPTIONS).map(s => <option key={s} value={s}>{s}</option>)}
                                                                           </select>
                                                                         : <span className="text-gray-500">{a.species}</span>}
                                                                 </td>
