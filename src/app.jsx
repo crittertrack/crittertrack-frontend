@@ -24974,20 +24974,27 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={async () => {
-                                            if (!selectedNewCount || sbImportLoading) return;
+                                            const finalResolutions = { ...sbConflictResolutions };
+                                            // Convert auto-detected use_existing conflicts → map_to:<existingId>
+                                            // so the backend knows exactly which CT animal to tag with the SB ID
+                                            for (const conflict of sbConflicts) {
+                                                if (!finalResolutions[conflict.sbId] || finalResolutions[conflict.sbId] === 'use_existing') {
+                                                    if (conflict.existingId) finalResolutions[conflict.sbId] = `map_to:${conflict.existingId}`;
+                                                }
+                                            }
+                                            for (const [sbId, mapping] of Object.entries(sbManualMappings)) {
+                                                finalResolutions[sbId] = `map_to:${mapping.id_public}`;
+                                            }
+                                            const confirmCount = Object.values(finalResolutions).filter(v => typeof v === 'string' && v.startsWith('map_to:')).length;
+                                            if ((!selectedNewCount && !confirmCount) || sbImportLoading) return;
                                             setSbImportLoading(true);
                                             try {
-                                                const finalResolutions = { ...sbConflictResolutions };
-                                                for (const [sbId, mapping] of Object.entries(sbManualMappings)) {
-                                                    finalResolutions[sbId] = `map_to:${mapping.id_public}`;
-                                                }
                                                 const speciesMap = {
                                                     ...Object.fromEntries(
                                                         (sbPreview.items || []).map(a => [a.sbId, a.species]).filter(([, s]) => s && s !== 'Unknown')
                                                     ),
                                                     ...sbSpeciesOverrides,
                                                 };
-                                                // Only send selected NEW animal IDs
                                                 const selectedNewIds = [...sbSelectedIds].filter(id => selectableIds.has(id));
                                                 const r = await axios.post(`${API_BASE_URL}/import/simplebreed/import`, {
                                                     selectedIds: selectedNewIds,
@@ -25004,11 +25011,17 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                 setSbImportLoading(false);
                                             }
                                         }}
-                                        disabled={!selectedNewCount || sbImportLoading}
+                                        disabled={(() => {
+                                            const finalRes = { ...sbConflictResolutions };
+                                            for (const c of sbConflicts) { if (!finalRes[c.sbId] || finalRes[c.sbId] === 'use_existing') { if (c.existingId) finalRes[c.sbId] = `map_to:${c.existingId}`; } }
+                                            for (const [sbId, m] of Object.entries(sbManualMappings)) finalRes[sbId] = `map_to:${m.id_public}`;
+                                            const confirmCount = Object.values(finalRes).filter(v => typeof v === 'string' && v.startsWith('map_to:')).length;
+                                            return (!selectedNewCount && !confirmCount) || sbImportLoading;
+                                        })()}
                                         className="px-4 py-2 bg-sky-500 hover:bg-sky-600 disabled:opacity-50 text-white text-sm font-medium rounded-lg flex items-center gap-1.5"
                                     >
                                         {sbImportLoading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
-                                        {sbImportLoading ? 'Importing…' : `Import ${selectedNewCount} Animal${selectedNewCount !== 1 ? 's' : ''}`}
+                                        {sbImportLoading ? 'Importing…' : selectedNewCount > 0 ? `Import ${selectedNewCount} Animal${selectedNewCount !== 1 ? 's' : ''}` : 'Confirm Stubs'}
                                     </button>
                                     <button onClick={() => { setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); setSbManualMappings({}); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false }); setSbSpeciesOverrides({}); }} className="text-xs text-gray-400 hover:text-gray-600 underline">Cancel</button>
                                 </div>
@@ -25020,7 +25033,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     {sbResult && (
                         <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm space-y-1">
                             <p className="font-semibold text-green-800 flex items-center gap-1"><CheckCircle size={14} /> Import complete!</p>
-                            <p className="text-green-700">{sbResult.written?.animals ?? 0} animal{sbResult.written?.animals !== 1 ? 's' : ''} imported · {sbResult.skipped?.animals ?? 0} skipped · {sbResult.parentLinked ?? 0} parent link{sbResult.parentLinked !== 1 ? 's' : ''} set{sbResult.imagesUploaded > 0 ? ` · ${sbResult.imagesUploaded} image${sbResult.imagesUploaded !== 1 ? 's' : ''} uploaded` : ''}</p>
+                            <p className="text-green-700">{sbResult.written?.animals ?? 0} animal{sbResult.written?.animals !== 1 ? 's' : ''} imported · {sbResult.skipped?.animals ?? 0} skipped · {sbResult.parentLinked ?? 0} parent link{sbResult.parentLinked !== 1 ? 's' : ''} set{sbResult.stubsLinked > 0 ? ` · ${sbResult.stubsLinked} stub${sbResult.stubsLinked !== 1 ? 's' : ''} linked` : ''}{sbResult.imagesUploaded > 0 ? ` · ${sbResult.imagesUploaded} image${sbResult.imagesUploaded !== 1 ? 's' : ''} uploaded` : ''}</p>
                             {sbResult.errors?.length > 0 && (
                                 <div>
                                     <p className="text-xs font-semibold text-red-600">{sbResult.errors.length} error(s):</p>
