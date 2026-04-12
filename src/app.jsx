@@ -24649,12 +24649,12 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     <Globe size={18} className="text-sky-600 flex-shrink-0" />
                     <div>
                         <h3 className="font-semibold text-sky-800 text-sm">Import from SimpleBreed</h3>
-                        <p className="text-xs text-sky-600">Paste a SimpleBreed profile URL to import animals with parents, colour and status.</p>
+                        <p className="text-xs text-sky-600">Paste a SimpleBreed profile URL or username to import animals with parents, colour and status. Duplicates are detected across all CritterTrack users by SB ID and name + birth date.</p>
                     </div>
                 </div>
                 <div className="p-4 space-y-3">
                     {/* URL input */}
-                    {!sbPreview && (
+                    {!sbPreview && !sbResult && (
                         <div className="space-y-2">
                             <label className="text-xs font-medium text-gray-600">SimpleBreed profile URL or username</label>
                             <div className="flex gap-2">
@@ -24664,22 +24664,33 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     onChange={e => setSbUrl(e.target.value)}
                                     placeholder="https://www.simplebreed.com/morningstardb"
                                     className="flex-1 text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-400"
-                                    onKeyDown={e => e.key === 'Enter' && !sbPreviewLoading && sbUrl.trim() && (() => {
+                                    onKeyDown={async e => {
+                                        if (e.key !== 'Enter' || sbPreviewLoading || !sbUrl.trim()) return;
                                         setSbPreviewLoading(true); setSbResult(null); setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({});
-                                        axios.post(`${API_BASE_URL}/import/simplebreed/preview`, { profileUrl: sbUrl.trim() }, { headers: { Authorization: `Bearer ${authToken}` } })
-                                            .then(r => { setSbPreview(r.data); setSbSelectedIds(new Set(r.data.animals.filter(a => !a.duplicate).map(a => a.sbId))); })
-                                            .catch(e => alert(e.response?.data?.message || 'Failed to fetch profile.'))
-                                            .finally(() => setSbPreviewLoading(false));
-                                    })()}
+                                        try {
+                                            const r = await axios.post(`${API_BASE_URL}/import/simplebreed/preview`, { profileUrl: sbUrl.trim() }, { headers: { Authorization: `Bearer ${authToken}` } });
+                                            setSbPreview(r.data);
+                                            setSbSelectedIds(new Set((r.data.items || []).map(a => a.sbId)));
+                                            const defaults = {};
+                                            for (const c of (r.data.conflicts || [])) defaults[c.sbId] = 'use_existing';
+                                            setSbConflictResolutions(defaults);
+                                        } catch (err) { showModalMessage('SimpleBreed Preview Failed', err.response?.data?.message || err.message); }
+                                        finally { setSbPreviewLoading(false); }
+                                    }}
                                 />
                                 <button
-                                    onClick={() => {
+                                    onClick={async () => {
                                         if (!sbUrl.trim() || sbPreviewLoading) return;
                                         setSbPreviewLoading(true); setSbResult(null); setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({});
-                                        axios.post(`${API_BASE_URL}/import/simplebreed/preview`, { profileUrl: sbUrl.trim() }, { headers: { Authorization: `Bearer ${authToken}` } })
-                                            .then(r => { setSbPreview(r.data); setSbSelectedIds(new Set(r.data.animals.filter(a => !a.duplicate).map(a => a.sbId))); })
-                                            .catch(e => alert(e.response?.data?.message || 'Failed to fetch profile.'))
-                                            .finally(() => setSbPreviewLoading(false));
+                                        try {
+                                            const r = await axios.post(`${API_BASE_URL}/import/simplebreed/preview`, { profileUrl: sbUrl.trim() }, { headers: { Authorization: `Bearer ${authToken}` } });
+                                            setSbPreview(r.data);
+                                            setSbSelectedIds(new Set((r.data.items || []).map(a => a.sbId)));
+                                            const defaults = {};
+                                            for (const c of (r.data.conflicts || [])) defaults[c.sbId] = 'use_existing';
+                                            setSbConflictResolutions(defaults);
+                                        } catch (err) { showModalMessage('SimpleBreed Preview Failed', err.response?.data?.message || err.message); }
+                                        finally { setSbPreviewLoading(false); }
                                     }}
                                     disabled={!sbUrl.trim() || sbPreviewLoading}
                                     className="px-4 py-2 bg-sky-500 hover:bg-sky-600 disabled:opacity-50 text-white text-sm font-medium rounded-lg flex items-center gap-1.5"
@@ -24691,90 +24702,176 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         </div>
                     )}
 
-                    {/* Preview list */}
-                    {sbPreview && !sbResult && (
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                                <p className="text-sm font-semibold text-gray-700">{sbPreview.animals.length} animal{sbPreview.animals.length !== 1 ? 's' : ''} found — {sbSelectedIds.size} selected</p>
-                                <div className="flex gap-2">
-                                    <button onClick={() => setSbSelectedIds(new Set(sbPreview.animals.filter(a => !a.duplicate || sbConflictResolutions[a.sbId] === 'import_anyway').map(a => a.sbId)))} className="text-xs text-sky-600 hover:underline">All new</button>
-                                    <button onClick={() => setSbSelectedIds(new Set(sbPreview.animals.map(a => a.sbId)))} className="text-xs text-sky-600 hover:underline">Select all</button>
-                                    <button onClick={() => setSbSelectedIds(new Set())} className="text-xs text-gray-400 hover:underline">None</button>
+                    {/* Preview table */}
+                    {sbPreview && !sbResult && (() => {
+                        const sbItems = sbPreview.items || [];
+                        const sbConflicts = sbPreview.conflicts || [];
+                        const conflictIds = new Set(sbConflicts.map(c => c.sbId));
+                        const highConflictCount = sbConflicts.filter(c => c.confidence !== 'possible').length;
+                        const possibleConflictCount = sbConflicts.filter(c => c.confidence === 'possible').length;
+                        return (
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between flex-wrap gap-2">
+                                    <h5 className="font-semibold text-gray-700">
+                                        {sbPreview.total} animal{sbPreview.total !== 1 ? 's' : ''} found
+                                        {(highConflictCount > 0 || possibleConflictCount > 0) && (
+                                            <span className="ml-2 text-xs font-normal">
+                                                {highConflictCount > 0 && <span className="text-amber-600">{highConflictCount} duplicate{highConflictCount !== 1 ? 's' : ''}</span>}
+                                                {highConflictCount > 0 && possibleConflictCount > 0 && <span className="text-gray-400"> · </span>}
+                                                {possibleConflictCount > 0 && <span className="text-orange-500">{possibleConflictCount} possible match{possibleConflictCount !== 1 ? 'es' : ''}</span>}
+                                            </span>
+                                        )}
+                                    </h5>
+                                    <div className="flex gap-2 text-xs flex-wrap">
+                                        <button type="button"
+                                            onClick={() => setSbSelectedIds(new Set(sbItems.map(a => a.sbId)))}
+                                            className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Select all</button>
+                                        <button type="button"
+                                            onClick={() => setSbSelectedIds(new Set())}
+                                            className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Deselect all</button>
+                                        <span className="border-l mx-1"></span>
+                                        <button type="button"
+                                            onClick={() => setSbSelectedIds(new Set(sbItems.filter(a => !conflictIds.has(a.sbId)).map(a => a.sbId)))}
+                                            className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-green-700">New only</button>
+                                        <button type="button"
+                                            onClick={() => setSbSelectedIds(new Set(sbItems.filter(a => { const c = sbConflicts.find(x => x.sbId === a.sbId); return c && c.confidence !== 'possible'; }).map(a => a.sbId)))}
+                                            className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-amber-700">Duplicates only</button>
+                                        <button type="button"
+                                            onClick={() => setSbSelectedIds(new Set(sbItems.filter(a => { const c = sbConflicts.find(x => x.sbId === a.sbId); return c && c.confidence === 'possible'; }).map(a => a.sbId)))}
+                                            className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-orange-700">Possible only</button>
+                                    </div>
+                                </div>
+
+                                <div className="border rounded-lg overflow-hidden">
+                                    <div className="overflow-x-auto max-h-96 overflow-y-auto">
+                                        <table className="min-w-full text-xs">
+                                            <thead className="bg-gray-100 sticky top-0 z-10">
+                                                <tr>
+                                                    <th className="px-2 py-2 w-8"></th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">Name</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">Gender</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">Born</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">SB ID</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">Sire SB#</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">Dam SB#</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">Color</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y bg-white">
+                                                {sbItems.map(a => {
+                                                    const isSelected = sbSelectedIds.has(a.sbId);
+                                                    const conflict = sbConflicts.find(c => c.sbId === a.sbId);
+                                                    const resolution = sbConflictResolutions[a.sbId] || 'use_existing';
+                                                    return (
+                                                        <React.Fragment key={a.sbId}>
+                                                            <tr className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : conflict ? (conflict.confidence === 'possible' ? 'bg-orange-50' : 'bg-amber-50') : ''}`}>
+                                                                <td className="px-2 py-1.5 text-center">
+                                                                    <input type="checkbox" checked={isSelected}
+                                                                        onChange={e => setSbSelectedIds(prev => {
+                                                                            const next = new Set(prev);
+                                                                            if (e.target.checked) next.add(a.sbId); else next.delete(a.sbId);
+                                                                            return next;
+                                                                        })}
+                                                                        className="rounded" />
+                                                                </td>
+                                                                <td className="px-2 py-1.5 font-medium text-gray-800 whitespace-nowrap">{a.name}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600">{a.gender || '—'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600 whitespace-nowrap">{a.birthDate || '—'}</td>
+                                                                <td className="px-2 py-1.5 font-mono text-gray-500">{a.sbId}</td>
+                                                                <td className="px-2 py-1.5 font-mono text-gray-400">{a.sireId || '—'}</td>
+                                                                <td className="px-2 py-1.5 font-mono text-gray-400">{a.damId || '—'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600">{a.color || '—'}</td>
+                                                                <td className="px-2 py-1.5">
+                                                                    {conflict
+                                                                        ? conflict.confidence === 'possible'
+                                                                            ? <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded text-xs font-medium">Possible match</span>
+                                                                            : <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium">Duplicate</span>
+                                                                        : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
+                                                                </td>
+                                                            </tr>
+                                                            {conflict && isSelected && (
+                                                                <tr className={conflict.confidence === 'possible' ? 'bg-orange-50' : 'bg-amber-50'}>
+                                                                    <td></td>
+                                                                    <td colSpan="8" className="px-3 pb-2 pt-0">
+                                                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-amber-800 pt-1">
+                                                                            <AlertTriangle size={11} className="shrink-0 text-amber-500" />
+                                                                            <span>
+                                                                                {conflict.confidence === 'possible' ? 'Possible match: ' : 'Matches '}
+                                                                                <span className="font-mono">{conflict.existingId}</span>
+                                                                                {conflict.existingName && conflict.existingName !== conflict.name && <span> &ldquo;{conflict.existingName}&rdquo;</span>}
+                                                                                {conflict.existingBirthDate && <span> &middot; {conflict.existingBirthDate}</span>}
+                                                                                {' '}({conflict.isOwnedByImporter ? 'your animal' : `owned by ${conflict.existingOwner}`})
+                                                                                {' · matched by '}{conflict.matchType === 'id' ? 'SB ID' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}
+                                                                            </span>
+                                                                            <select
+                                                                                value={resolution}
+                                                                                onChange={e => setSbConflictResolutions(prev => ({ ...prev, [a.sbId]: e.target.value }))}
+                                                                                className="border rounded px-2 py-0.5 bg-white text-gray-700 font-medium text-xs"
+                                                                            >
+                                                                                <option value="use_existing">Use existing CT animal for parent links (skip import)</option>
+                                                                                <option value="import_anyway">Import anyway as new entry</option>
+                                                                            </select>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            )}
+                                                        </React.Fragment>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <p className="text-xs text-gray-400">
+                                    {sbSelectedIds.size} of {sbPreview.total} selected
+                                    {(() => {
+                                        const dupeLinks = [...sbSelectedIds].filter(id => {
+                                            const c = sbConflicts.find(x => x.sbId === id);
+                                            return c && (sbConflictResolutions[id] || 'use_existing') === 'use_existing';
+                                        }).length;
+                                        return dupeLinks > 0 ? ` · ${dupeLinks} duplicate${dupeLinks !== 1 ? 's' : ''} will link to existing CT animals` : '';
+                                    })()}
+                                </p>
+
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={async () => {
+                                            if (!sbSelectedIds.size || sbImportLoading) return;
+                                            setSbImportLoading(true);
+                                            try {
+                                                const r = await axios.post(`${API_BASE_URL}/import/simplebreed/import`, {
+                                                    selectedIds: [...sbSelectedIds],
+                                                    conflictResolutions: sbConflictResolutions,
+                                                    confirm: true,
+                                                }, { headers: { Authorization: `Bearer ${authToken}` } });
+                                                setSbResult(r.data);
+                                                setSbPreview(null);
+                                                if (typeof fetchAnimals === 'function') fetchAnimals();
+                                            } catch (err) {
+                                                showModalMessage('Import Failed', err.response?.data?.message || err.message);
+                                            } finally {
+                                                setSbImportLoading(false);
+                                            }
+                                        }}
+                                        disabled={!sbSelectedIds.size || sbImportLoading}
+                                        className="px-4 py-2 bg-sky-500 hover:bg-sky-600 disabled:opacity-50 text-white text-sm font-medium rounded-lg flex items-center gap-1.5"
+                                    >
+                                        {sbImportLoading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                                        {sbImportLoading ? 'Importing…' : `Import ${sbSelectedIds.size} Animal${sbSelectedIds.size !== 1 ? 's' : ''}`}
+                                    </button>
+                                    <button onClick={() => { setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); }} className="text-xs text-gray-400 hover:text-gray-600 underline">Cancel</button>
                                 </div>
                             </div>
-
-                            <div className="border border-gray-200 rounded-lg overflow-hidden max-h-80 overflow-y-auto divide-y divide-gray-100">
-                                {sbPreview.animals.map(animal => {
-                                    const isSelected = sbSelectedIds.has(animal.sbId);
-                                    const isDup = !!animal.duplicate;
-                                    const resolution = sbConflictResolutions[animal.sbId];
-                                    return (
-                                        <div key={animal.sbId} className={`flex items-center gap-3 px-3 py-2 text-sm ${isDup && resolution !== 'import_anyway' ? 'bg-amber-50' : isSelected ? 'bg-sky-50' : 'bg-white'}`}>
-                                            <input
-                                                type="checkbox"
-                                                checked={isSelected}
-                                                onChange={e => {
-                                                    const next = new Set(sbSelectedIds);
-                                                    if (e.target.checked) next.add(animal.sbId); else next.delete(animal.sbId);
-                                                    setSbSelectedIds(next);
-                                                }}
-                                                className="flex-shrink-0"
-                                            />
-                                            <div className="flex-1 min-w-0">
-                                                <span className="font-medium text-gray-800 truncate">{animal.name}</span>
-                                                <span className="text-xs text-gray-400 ml-2">#{animal.sbId}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 flex-shrink-0">
-                                                {animal.species && animal.species !== 'Unknown' && <span className="text-xs text-gray-500">{animal.species}</span>}
-                                                {animal.birthDate && <span className="text-xs text-gray-400">{animal.birthDate}</span>}
-                                                <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full ${animal.status === 'Retired' ? 'bg-gray-100 text-gray-600' : animal.status === 'Breeder' ? 'bg-green-100 text-green-700' : animal.status === 'Deceased' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-700'}`}>{animal.status}</span>
-                                                {isDup && (
-                                                    resolution === 'import_anyway'
-                                                        ? <button onClick={() => setSbConflictResolutions(p => { const n = {...p}; delete n[animal.sbId]; return n; })} className="text-xs px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 hover:bg-orange-200">Re-import ✕</button>
-                                                        : <button onClick={() => setSbConflictResolutions(p => ({...p, [animal.sbId]: 'import_anyway'}))} className="text-xs px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 hover:bg-amber-200">Duplicate — import anyway?</button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={async () => {
-                                        if (!sbSelectedIds.size || sbImportLoading) return;
-                                        setSbImportLoading(true);
-                                        try {
-                                            const r = await axios.post(`${API_BASE_URL}/import/simplebreed/import`, {
-                                                selectedIds: [...sbSelectedIds],
-                                                conflictResolutions: sbConflictResolutions,
-                                                confirm: true,
-                                            }, { headers: { Authorization: `Bearer ${authToken}` } });
-                                            setSbResult(r.data);
-                                            setSbPreview(null);
-                                            if (typeof fetchAnimals === 'function') fetchAnimals();
-                                        } catch (e) {
-                                            alert(e.response?.data?.message || 'Import failed.');
-                                        } finally {
-                                            setSbImportLoading(false);
-                                        }
-                                    }}
-                                    disabled={!sbSelectedIds.size || sbImportLoading}
-                                    className="px-4 py-2 bg-sky-500 hover:bg-sky-600 disabled:opacity-50 text-white text-sm font-medium rounded-lg flex items-center gap-1.5"
-                                >
-                                    {sbImportLoading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
-                                    {sbImportLoading ? 'Importing…' : `Import ${sbSelectedIds.size} Animal${sbSelectedIds.size !== 1 ? 's' : ''}`}
-                                </button>
-                                <button onClick={() => { setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); }} className="text-xs text-gray-400 hover:text-gray-600 underline">Cancel</button>
-                            </div>
-                        </div>
-                    )}
+                        );
+                    })()}
 
                     {/* Result */}
                     {sbResult && (
                         <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm space-y-1">
                             <p className="font-semibold text-green-800 flex items-center gap-1"><CheckCircle size={14} /> Import complete!</p>
-                            <p className="text-green-700">{sbResult.written?.animals ?? 0} animal{sbResult.written?.animals !== 1 ? 's' : ''} imported · {sbResult.skipped?.animals ?? 0} skipped · {sbResult.parentLinked ?? 0} parent link{sbResult.parentLinked !== 1 ? 's' : ''} set</p>
+                            <p className="text-green-700">{sbResult.written?.animals ?? 0} animal{sbResult.written?.animals !== 1 ? 's' : ''} imported · {sbResult.skipped?.animals ?? 0} skipped · {sbResult.parentLinked ?? 0} parent link{sbResult.parentLinked !== 1 ? 's' : ''} set{sbResult.imagesUploaded > 0 ? ` · ${sbResult.imagesUploaded} image${sbResult.imagesUploaded !== 1 ? 's' : ''} uploaded` : ''}</p>
                             {sbResult.errors?.length > 0 && (
                                 <div>
                                     <p className="text-xs font-semibold text-red-600">{sbResult.errors.length} error(s):</p>
