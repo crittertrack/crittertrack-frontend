@@ -22452,6 +22452,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [sbConflictResolutions, setSbConflictResolutions] = useState({}); // { sbId: 'skip'|'import_anyway' }
     const [sbManualMappings, setSbManualMappings] = useState({}); // { sbId: { id_public, name } }
     const [sbMappingSearch, setSbMappingSearch] = useState({ sbId: null, query: '', results: [], loading: false });
+    const [sbSpeciesOverrides, setSbSpeciesOverrides] = useState({}); // { sbId: 'species' } for animals where SB couldn't determine species
     const [sbImportLoading, setSbImportLoading] = useState(false);
     const [sbResult, setSbResult] = useState(null);
 
@@ -24668,7 +24669,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     className="flex-1 text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-400"
                                     onKeyDown={async e => {
                                         if (e.key !== 'Enter' || sbPreviewLoading || !sbUrl.trim()) return;
-                                        setSbPreviewLoading(true); setSbResult(null); setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); setSbManualMappings({}); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false });
+                                        setSbPreviewLoading(true); setSbResult(null); setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); setSbManualMappings({}); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false }); setSbSpeciesOverrides({});
                                         try {
                                             const r = await axios.post(`${API_BASE_URL}/import/simplebreed/preview`, { profileUrl: sbUrl.trim() }, { headers: { Authorization: `Bearer ${authToken}` } });
                                             setSbPreview(r.data);
@@ -24683,7 +24684,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 <button
                                     onClick={async () => {
                                         if (!sbUrl.trim() || sbPreviewLoading) return;
-                                        setSbPreviewLoading(true); setSbResult(null); setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); setSbManualMappings({}); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false });
+                                        setSbPreviewLoading(true); setSbResult(null); setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); setSbManualMappings({}); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false }); setSbSpeciesOverrides({});
                                         try {
                                             const r = await axios.post(`${API_BASE_URL}/import/simplebreed/preview`, { profileUrl: sbUrl.trim() }, { headers: { Authorization: `Bearer ${authToken}` } });
                                             setSbPreview(r.data);
@@ -24757,6 +24758,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                     <th className="px-2 py-2 text-left font-medium text-gray-600">Sire SB#</th>
                                                     <th className="px-2 py-2 text-left font-medium text-gray-600">Dam SB#</th>
                                                     <th className="px-2 py-2 text-left font-medium text-gray-600">Color</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">Species</th>
                                                     <th className="px-2 py-2 text-left font-medium text-gray-600">Status</th>
                                                 </tr>
                                             </thead>
@@ -24785,6 +24787,18 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                 <td className="px-2 py-1.5 font-mono text-gray-400">{a.damId || '—'}</td>
                                                                 <td className="px-2 py-1.5 text-gray-600">{a.color || '—'}</td>
                                                                 <td className="px-2 py-1.5">
+                                                                    {(!a.species || a.species === 'Unknown')
+                                                                        ? <select
+                                                                            value={sbSpeciesOverrides[a.sbId] || ''}
+                                                                            onChange={e => setSbSpeciesOverrides(prev => ({ ...prev, [a.sbId]: e.target.value }))}
+                                                                            className={`border rounded px-1 py-0.5 text-xs font-medium ${sbSpeciesOverrides[a.sbId] ? 'bg-white text-gray-700 border-gray-300' : 'bg-orange-50 text-orange-600 border-orange-300'}`}
+                                                                          >
+                                                                            <option value="">— pick —</option>
+                                                                            {DEFAULT_SPECIES_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                                                                          </select>
+                                                                        : <span className="text-gray-500">{a.species}</span>}
+                                                                </td>
+                                                                <td className="px-2 py-1.5">
                                                                     {conflict
                                                                         ? conflict.confidence === 'possible'
                                                                             ? <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded text-xs font-medium">Possible match</span>
@@ -24797,7 +24811,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                             {conflict && isSelected && (
                                                                 <tr className={conflict.confidence === 'possible' ? 'bg-orange-50' : 'bg-amber-50'}>
                                                                     <td></td>
-                                                                    <td colSpan="8" className="px-3 pb-2 pt-0">
+                                                                    <td colSpan="9" className="px-3 pb-2 pt-0">
                                                                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-amber-800 pt-1">
                                                                             <AlertTriangle size={11} className="shrink-0 text-amber-500" />
                                                                             <span>
@@ -24824,7 +24838,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                             {!conflict && isSelected && (
                                                                 <tr className={sbManualMappings[a.sbId] ? 'bg-blue-50' : 'bg-gray-50'}>
                                                                     <td></td>
-                                                                    <td colSpan="8" className="px-3 pb-2 pt-0">
+                                                                    <td colSpan="9" className="px-3 pb-2 pt-0">
                                                                         {sbManualMappings[a.sbId] ? (
                                                                             <div className="flex items-center gap-2 text-xs pt-1">
                                                                                 <span className="text-blue-700">&#x21AA; Mapped to <span className="font-mono font-semibold">{sbManualMappings[a.sbId].id_public}</span> &mdash; {sbManualMappings[a.sbId].name}</span>
@@ -24922,9 +24936,16 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                 for (const [sbId, mapping] of Object.entries(sbManualMappings)) {
                                                     finalResolutions[sbId] = `map_to:${mapping.id_public}`;
                                                 }
+                                                const speciesMap = {
+                                                    ...Object.fromEntries(
+                                                        (sbPreview.items || []).map(a => [a.sbId, a.species]).filter(([, s]) => s && s !== 'Unknown')
+                                                    ),
+                                                    ...sbSpeciesOverrides,
+                                                };
                                                 const r = await axios.post(`${API_BASE_URL}/import/simplebreed/import`, {
                                                     selectedIds: [...sbSelectedIds],
                                                     conflictResolutions: finalResolutions,
+                                                    speciesMap,
                                                     confirm: true,
                                                 }, { headers: { Authorization: `Bearer ${authToken}` } });
                                                 setSbResult(r.data);
@@ -24942,7 +24963,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                         {sbImportLoading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
                                         {sbImportLoading ? 'Importing…' : `Import ${sbSelectedIds.size} Animal${sbSelectedIds.size !== 1 ? 's' : ''}`}
                                     </button>
-                                    <button onClick={() => { setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); setSbManualMappings({}); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false }); }} className="text-xs text-gray-400 hover:text-gray-600 underline">Cancel</button>
+                                    <button onClick={() => { setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); setSbManualMappings({}); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false }); setSbSpeciesOverrides({}); }} className="text-xs text-gray-400 hover:text-gray-600 underline">Cancel</button>
                                 </div>
                             </div>
                         );
