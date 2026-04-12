@@ -28010,26 +28010,7 @@ const AnimalList = ({
             _alCache = null;
             _alCacheTime = 0;
 
-            // Fetch animals first
-            const currentAnimals = await axios.get(`${API_BASE_URL}/animals`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            
-            // Recalculate COI for all animals with parents
-            for (const animal of currentAnimals.data) {
-                if (animal.fatherId_public || animal.motherId_public || animal.sireId_public || animal.damId_public) {
-                    try {
-                        await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/inbreeding`, {
-                            params: { generations: 50 },
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        });
-                    } catch (error) {
-                        console.log(`Failed to calculate COI for ${animal.name}:`, error);
-                    }
-                }
-            }
-
-            // Refresh the list with updated COI values
+            // Re-fetch the animal list from the server
             await fetchAnimals();
         } catch (error) {
             console.error('Error refreshing:', error);
