@@ -142,9 +142,14 @@ self.addEventListener('activate', (event) => {
         })
       );
     }).then(() => {
-      // Take control of all clients immediately - this forces page reload
+      // Take control of all clients immediately
       console.log('[SW] Taking control of all clients');
       return self.clients.claim();
+    }).then(() => {
+      // Notify all open clients to reload so they get the new version
+      return self.clients.matchAll({ type: 'window' }).then(clients => {
+        clients.forEach(client => client.navigate(client.url));
+      });
     })
   );
 });

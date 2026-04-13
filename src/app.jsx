@@ -21895,8 +21895,7 @@ const AnimalForm = ({
                                             </label>
                                             {d.imageUrl && <button type="button" onClick={() => setSlotField(slotKey, 'imageUrl', '')} className="text-[10px] text-red-400 hover:text-red-600 transition-colors flex-shrink-0">Remove</button>}
                                         </div>
-                                        <textarea placeholder="Notes" value={d.notes || ''} onChange={e => setSlotField(slotKey, 'notes', e.target.value)} rows={2}
-                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs resize-none focus:ring-1 focus:ring-primary focus:border-primary"></textarea>
+
                                     </>
                                 )}
                             </div>
