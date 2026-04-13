@@ -274,6 +274,12 @@ export default function ModOversightPanel({
     const [showWorkload, setShowWorkload] = useState(false);
     const [assigningReport, setAssigningReport] = useState(false);
 
+    // Warn / Inform state
+    const [userActionModal, setUserActionModal] = useState(null); // { mode: 'warn'|'inform', userId, userName }
+    const [userActionText, setUserActionText] = useState('');
+    const [userActionLoading, setUserActionLoading] = useState(false);
+    const [userActionSuccess, setUserActionSuccess] = useState('');
+
     const baseUrl = useMemo(() => API_BASE_URL || '/api', [API_BASE_URL]);
 
     // Calculate date range from preset
@@ -398,9 +404,65 @@ export default function ModOversightPanel({
 
     // Get report type from report object
     const getReportType = (report) => {
-    if (report.ratingId) return 'rating';
+        if (report._reportType) return report._reportType;
+        if (report.ratingId) return 'rating';
         if (report.messageId || report.conversationMessages?.length > 0) return 'message';
+        if (report.reportedAnimalId) return 'animal';
         return 'profile';
+    };
+
+    // Returns { userId, userName } for the content owner of a report
+    const getContentOwnerUserInfo = (report) => {
+        if (report.reportedAnimalId?.ownerId && typeof report.reportedAnimalId.ownerId === 'object') {
+            const o = report.reportedAnimalId.ownerId;
+            return { userId: o._id, userName: o.breederName || o.personalName || o.id_public || 'Unknown' };
+        }
+        if (report.reportedUserId && typeof report.reportedUserId === 'object') {
+            const u = report.reportedUserId;
+            return { userId: u._id, userName: u.breederName || u.personalName || u.id_public || 'Unknown' };
+        }
+        return null;
+    };
+
+    const openUserActionModal = (mode) => {
+        const info = getContentOwnerUserInfo(selectedReport);
+        if (!info) return;
+        setUserActionModal({ mode, ...info });
+        setUserActionText('');
+        setUserActionSuccess('');
+    };
+
+    const handleUserAction = async () => {
+        if (!userActionModal || !userActionText.trim()) return;
+        setUserActionLoading(true);
+        setUserActionSuccess('');
+        setError('');
+        try {
+            if (userActionModal.mode === 'warn') {
+                const res = await fetch(`${baseUrl}/moderation/users/${userActionModal.userId}/warn`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+                    body: JSON.stringify({ reason: userActionText, category: 'report_action' })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Failed to warn user');
+                setUserActionSuccess(`Warning issued. Total active warnings: ${data.warningCount}`);
+            } else {
+                const res = await fetch(`${baseUrl}/messages/send`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+                    body: JSON.stringify({ receiverId: userActionModal.userId, message: userActionText })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || data.error || 'Failed to send message');
+                setUserActionSuccess('Message sent successfully.');
+            }
+            setUserActionText('');
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setUserActionLoading(false);
+        }
     };
 
     // Claim a report for yourself
@@ -1530,6 +1592,65 @@ export default function ModOversightPanel({
                                         </button>
                                     </div>
                                 </div>
+
+                                {/* Warn / Inform Actions */}
+                                {getContentOwnerUserInfo(selectedReport) && (
+                                    <div className="mod-actions">
+                                        <h5>User Actions</h5>
+                                        <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                                            <button
+                                                className="mod-action-btn"
+                                                style={{ backgroundColor: '#e3f2fd', borderColor: '#1976d2', color: '#0d47a1' }}
+                                                onClick={() => openUserActionModal('inform')}
+                                                disabled={actionLoading}
+                                            >
+                                                💬 Inform User
+                                            </button>
+                                            <button
+                                                className="mod-action-btn"
+                                                style={{ backgroundColor: '#fff3e0', borderColor: '#f57c00', color: '#e65100' }}
+                                                onClick={() => openUserActionModal('warn')}
+                                                disabled={actionLoading}
+                                            >
+                                                ⚠️ Warn User
+                                            </button>
+                                        </div>
+                                        <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>
+                                            Targeting: <strong>{getContentOwnerUserInfo(selectedReport)?.userName}</strong>
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* Warn/Inform Modal */}
+                                {userActionModal && (
+                                    <div style={{ margin: '12px 0', padding: '14px', backgroundColor: userActionModal.mode === 'warn' ? '#fff8e1' : '#e3f2fd', border: `1px solid ${userActionModal.mode === 'warn' ? '#f57c00' : '#1976d2'}`, borderRadius: '8px' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                            <strong style={{ fontSize: '14px' }}>
+                                                {userActionModal.mode === 'warn' ? '⚠️ Issue Warning' : '💬 Inform User'} — {userActionModal.userName}
+                                            </strong>
+                                            <button onClick={() => setUserActionModal(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', color: '#666' }}>✕</button>
+                                        </div>
+                                        <textarea
+                                            value={userActionText}
+                                            onChange={(e) => setUserActionText(e.target.value)}
+                                            placeholder={userActionModal.mode === 'warn' ? 'Reason for warning...' : 'Message to send to the user...'}
+                                            rows={4}
+                                            maxLength={1000}
+                                            style={{ width: '100%', boxSizing: 'border-box', padding: '8px', borderRadius: '4px', border: '1px solid #ccc', fontSize: '13px', resize: 'vertical' }}
+                                        />
+                                        {userActionSuccess && <p style={{ color: '#388e3c', fontSize: '13px', margin: '6px 0 0' }}>{userActionSuccess}</p>}
+                                        <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                                            <button
+                                                onClick={handleUserAction}
+                                                disabled={userActionLoading || !userActionText.trim()}
+                                                style={{ padding: '6px 16px', backgroundColor: userActionModal.mode === 'warn' ? '#f57c00' : '#1976d2', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', opacity: (!userActionText.trim() || userActionLoading) ? 0.6 : 1 }}
+                                            >
+                                                {userActionLoading ? 'Sending...' : (userActionModal.mode === 'warn' ? 'Issue Warning' : 'Send Message')}
+                                            </button>
+                                            <button onClick={() => setUserActionModal(null)} style={{ padding: '6px 14px', background: 'none', border: '1px solid #ccc', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' }}>Cancel</button>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="mod-actions">
                                     <h5>Update Status</h5>
