@@ -27661,6 +27661,8 @@ const AnimalList = ({
             // Still derive species from cached data
             const speciesList = [...new Set(_alCache.map(a => a.species).filter(Boolean))];
             if (speciesList.length > 0) setAllUserSpecies(speciesList);
+            // Still run Phase 2 in background so unowned toggle works
+            fetchAnimals();
             return;
         }
         fetchAnimals();
