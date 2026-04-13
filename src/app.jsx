@@ -27308,6 +27308,7 @@ const AnimalList = ({
     const [soldTransferredRaw, setSoldTransferredRaw] = useState([]); // View-only/transferred animals — shown in Management > Sold/Transferred section
     const [soldOwnerFilter, setSoldOwnerFilter] = useState(''); // Filter sold/transferred section by recipient owner
     const [loading, setLoading] = useState(() => !_alCache);
+    const [allAnimalsFetched, setAllAnimalsFetched] = useState(false); // true once Phase 2 (all animals) fetch completes
     
     // Load filters from localStorage or use defaults
     const [statusFilter, setStatusFilter] = useState(() => {
@@ -27587,6 +27588,8 @@ const AnimalList = ({
                 if (allSpecies.length > 0) setAllUserSpecies(allSpecies);
             } catch (err) {
                 console.warn('[fetchAnimals] Background all-animals fetch failed, owned-only still shown:', err);
+            } finally {
+                setAllAnimalsFetched(true);
             }
         } catch (error) {
             console.error('Fetch animals error:', error);
@@ -30648,10 +30651,12 @@ const AnimalList = ({
                         {showOwned ? 'Showing Owned' : 'Show Owned'}
                     </button>
                     <button onClick={() => setShowUnowned(prev => !prev)}
+                        disabled={!allAnimalsFetched}
                         className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
+                            !allAnimalsFetched ? 'bg-gray-100 text-gray-400 cursor-not-allowed' :
                             showUnowned ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                         }`}
-                        title={showUnowned ? 'Click to hide unowned animals' : 'Click to show unowned animals'}
+                        title={!allAnimalsFetched ? 'Loading all animals...' : showUnowned ? 'Click to hide unowned animals' : 'Click to show unowned animals'}
                     >
                         <HeartOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         {showUnowned ? 'Showing Unowned' : 'Show Unowned'}
