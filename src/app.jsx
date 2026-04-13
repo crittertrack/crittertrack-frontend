@@ -3682,7 +3682,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 }, {});
 
                 const bornLitters = publicLitters.filter(l => !l.isPlanned);
-                const plannedLitters = publicLitters.filter(l => l.isPlanned);
+                const plannedLitters = publicLitters.filter(l => l.isPlanned && !(l.matingDate && new Date(l.matingDate) <= new Date()));
 
                 const totalOffspring = bornLitters.reduce((sum, l) => sum + (l.litterSizeBorn ?? 0), 0);
 
@@ -3708,7 +3708,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 const forSaleOrStud = animals.filter(a => a.isForSale || a.availableForBreeding).length;
                 const withBreederStatus = animals.filter(a => a.status === 'Breeder').length;
                 const withPetStatus = animals.filter(a => a.status === 'Pet').length;
-                const matedLitters = publicLitters.filter(l => !l.isPlanned && !l.birthDate).length;
+                const today = new Date();
+                const matedLitters = publicLitters.filter(l => l.isPlanned && l.matingDate && new Date(l.matingDate) <= today).length;
 
                 const StatCard = ({ label, value, sub }) => (
                     <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1">
