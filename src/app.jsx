@@ -3752,8 +3752,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             <StatCard label="Pet Status" value={withPetStatus} />
                             <StatCard label="For Sale / Stud" value={forSaleOrStud} />
                             <StatCard label="Total Litters" value={publicLitters.length} />
-                            <StatCard label="Mated Litters" value={matedLitters} />
-                            <StatCard label="Planned Litters" value={plannedLitters.length} />
+                            <StatCard label="Mated Pairings" value={matedLitters} />
+                            <StatCard label="Planned Pairings" value={plannedLitters.length} />
                             <StatCard label="Total Offspring" value={totalOffspring} />
                             <StatCard label="Total Offspring" value={totalOffspring} />
                         </div>
