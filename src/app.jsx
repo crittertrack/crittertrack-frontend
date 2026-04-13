@@ -3705,7 +3705,10 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 
                 const availableForSale = animals.filter(a => a.isForSale).length;
                 const availableForStud = animals.filter(a => a.availableForBreeding).length;
+                const forSaleOrStud = animals.filter(a => a.isForSale || a.availableForBreeding).length;
                 const withBreederStatus = animals.filter(a => a.status === 'Breeder').length;
+                const withPetStatus = animals.filter(a => a.status === 'Pet').length;
+                const matedLitters = publicLitters.filter(l => !l.isPlanned).length;
 
                 const StatCard = ({ label, value, sub }) => (
                     <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1">
@@ -3744,11 +3747,12 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         {/* Summary cards */}
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                             <StatCard label="Total Animals" value={animals.length} />
-                            <StatCard label="With Breeder Status" value={withBreederStatus} />
-                            <StatCard label="Available for Sale" value={availableForSale} />
-                            <StatCard label="Available for Stud" value={availableForStud} />
-                            <StatCard label="Total Pairings" value={publicLitters.length} />
-                            <StatCard label="Planned Matings" value={plannedLitters.length} />
+                            <StatCard label="Breeder Status" value={withBreederStatus} />
+                            <StatCard label="Pet Status" value={withPetStatus} />
+                            <StatCard label="For Sale / Stud" value={forSaleOrStud} />
+                            <StatCard label="Total Litters" value={publicLitters.length} />
+                            <StatCard label="Mated Litters" value={matedLitters} />
+                            <StatCard label="Planned Litters" value={plannedLitters.length} />
                             <StatCard label="Total Offspring" value={totalOffspring} />
                         </div>
 
