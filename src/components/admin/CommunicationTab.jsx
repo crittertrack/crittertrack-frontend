@@ -27,6 +27,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
     const [pollOptions, setPollOptions] = useState(['', '']);
     const [pollEndsAt, setPollEndsAt] = useState('');
     const [allowMultipleChoices, setAllowMultipleChoices] = useState(false);
+    const [allowUserSuggestions, setAllowUserSuggestions] = useState(false);
     const [isAnonymous, setIsAnonymous] = useState(false);
 
     // History state
@@ -103,6 +104,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
         setPollOptions(['', '']);
         setPollEndsAt('');
         setAllowMultipleChoices(false);
+        setAllowUserSuggestions(false);
         setIsAnonymous(false);
     };
 
@@ -286,6 +288,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                 payload.pollQuestion = pollQuestion;
                 payload.pollOptions = pollOptions.filter(opt => opt.trim() !== '');
                 payload.allowMultipleChoices = allowMultipleChoices;
+                payload.allowUserSuggestions = allowUserSuggestions;
                 payload.isAnonymous = isAnonymous;
                 if (pollEndTime) {
                     payload.pollEndsAt = pollEndTime.toISOString();
@@ -729,6 +732,15 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                         <label className="checkbox-label">
                                             <input
                                                 type="checkbox"
+                                                checked={allowUserSuggestions}
+                                                onChange={(e) => setAllowUserSuggestions(e.target.checked)}
+                                                disabled={loading}
+                                            />
+                                            <span>➕ Allow users to add options</span>
+                                        </label>
+                                        <label className="checkbox-label">
+                                            <input
+                                                type="checkbox"
                                                 checked={isAnonymous}
                                                 onChange={(e) => setIsAnonymous(e.target.checked)}
                                                 disabled={loading}
@@ -961,9 +973,11 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                                                 style={{ width: `${percentage}%` }}
                                                             />
                                                         </div>
-                                                        {!poll.isAnonymous && option.voters && option.voters.length > 0 && (
+                                                        {!poll.isAnonymous && option.voterDetails && option.voterDetails.length > 0 && (
                                                             <div className="voters-list">
-                                                                <small>Voters: {option.voters.length} user{option.voters.length !== 1 ? 's' : ''}</small>
+                                                                <small>Voted by: {option.voterDetails.map((v, i) => (
+                                                                    <span key={i}>{v.id_public ? `${v.displayName} (${v.id_public})` : v.displayName}{i < option.voterDetails.length - 1 ? ', ' : ''}</span>
+                                                                ))}</small>
                                                             </div>
                                                         )}
                                                     </div>

@@ -21895,8 +21895,7 @@ const AnimalForm = ({
                                             </label>
                                             {d.imageUrl && <button type="button" onClick={() => setSlotField(slotKey, 'imageUrl', '')} className="text-[10px] text-red-400 hover:text-red-600 transition-colors flex-shrink-0">Remove</button>}
                                         </div>
-                                        <textarea placeholder="Notes" value={d.notes || ''} onChange={e => setSlotField(slotKey, 'notes', e.target.value)} rows={2}
-                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs resize-none focus:ring-1 focus:ring-primary focus:border-primary"></textarea>
+
                                     </>
                                 )}
                             </div>
@@ -31606,8 +31605,11 @@ const WarningBanner = ({ authToken, API_BASE_URL, userProfile }) => {
 };
 
 // Poll Component for Broadcasts
-const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
+const BroadcastPoll = ({ poll, onVote, isVoting, styles, authToken, API_BASE_URL, notificationId, onOptionsUpdated }) => {
     const [selectedOptions, setSelectedOptions] = useState([]);
+    const [suggestionText, setSuggestionText] = useState('');
+    const [isSuggesting, setIsSuggesting] = useState(false);
+    const [suggestError, setSuggestError] = useState('');
     const hasEnded = poll.pollEndsAt && new Date() > new Date(poll.pollEndsAt);
     const hasVoted = poll.userVote && poll.userVote.length > 0;
     
@@ -31712,6 +31714,50 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
                 >
                     {isVoting ? 'Voting...' : `Vote ${poll.allowMultipleChoices ? '(Multiple allowed)' : ''}`}
                 </button>
+            )}
+
+            {poll.allowUserSuggestions && !hasEnded && (
+                <div className="mt-3">
+                    <p className={`text-xs font-medium ${styles.subtitle} mb-1`}>Suggest an option:</p>
+                    <div className="flex gap-1.5">
+                        <input
+                            type="text"
+                            maxLength={100}
+                            placeholder="Your option…"
+                            value={suggestionText}
+                            onChange={e => { setSuggestionText(e.target.value); setSuggestError(''); }}
+                            className="flex-1 px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
+                        <button
+                            onClick={async () => {
+                                if (!suggestionText.trim() || isSuggesting) return;
+                                setIsSuggesting(true);
+                                setSuggestError('');
+                                try {
+                                    const res = await axios.post(`${API_BASE_URL}/moderation/poll/suggest-option`,
+                                        { notificationId, optionText: suggestionText.trim() },
+                                        { headers: { Authorization: `Bearer ${authToken}` } }
+                                    );
+                                    setSuggestionText('');
+                                    if (onOptionsUpdated) onOptionsUpdated(res.data.pollOptions);
+                                } catch (err) {
+                                    setSuggestError(err.response?.data?.error || 'Failed to add option');
+                                } finally {
+                                    setIsSuggesting(false);
+                                }
+                            }}
+                            disabled={!suggestionText.trim() || isSuggesting}
+                            className={`px-2 py-1 rounded text-xs font-medium transition ${
+                                !suggestionText.trim() || isSuggesting
+                                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                    : styles.button
+                            }`}
+                        >
+                            {isSuggesting ? '…' : 'Add'}
+                        </button>
+                    </div>
+                    {suggestError && <p className="text-xs text-red-500 mt-1">{suggestError}</p>}
+                </div>
             )}
             
             <div className={`mt-2 text-xs ${styles.subtitle} flex justify-between`}>
@@ -32152,6 +32198,10 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                                     }}
                                     isVoting={votingInProgress[selectedBroadcast._id] || false}
                                     styles={styles}
+                                    authToken={authToken}
+                                    API_BASE_URL={API_BASE_URL}
+                                    notificationId={selectedBroadcast._id}
+                                    onOptionsUpdated={(opts) => setSelectedBroadcast(prev => prev ? { ...prev, pollOptions: opts } : null)}
                                 />
                             )}
                             <p className={`text-xs ${styles.sub}`}>{new Date(selectedBroadcast.createdAt).toLocaleString('en-GB')}</p>
@@ -32742,6 +32792,10 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                                             onVote={(selectedOptions) => handlePollVote(broadcast._id, selectedOptions)}
                                             isVoting={votingInProgress[broadcast._id] || false}
                                             styles={styles}
+                                            authToken={authToken}
+                                            API_BASE_URL={API_BASE_URL}
+                                            notificationId={broadcast._id}
+                                            onOptionsUpdated={(opts) => setBroadcasts(prev => prev.map(b => b._id === broadcast._id ? { ...b, pollOptions: opts } : b))}
                                         />
                                     )}
                                     
