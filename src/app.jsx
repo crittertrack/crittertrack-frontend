@@ -3708,7 +3708,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 const forSaleOrStud = animals.filter(a => a.isForSale || a.availableForBreeding).length;
                 const withBreederStatus = animals.filter(a => a.status === 'Breeder').length;
                 const withPetStatus = animals.filter(a => a.status === 'Pet').length;
-                const matedLitters = publicLitters.filter(l => !l.isPlanned).length;
+                const matedLitters = publicLitters.filter(l => !l.isPlanned && !l.birthDate).length;
+                const bornLitters = publicLitters.filter(l => !!l.birthDate).length;
 
                 const StatCard = ({ label, value, sub }) => (
                     <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1">
@@ -3753,6 +3754,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             <StatCard label="Total Litters" value={publicLitters.length} />
                             <StatCard label="Mated Litters" value={matedLitters} />
                             <StatCard label="Planned Litters" value={plannedLitters.length} />
+                            <StatCard label="Total Offspring" value={totalOffspring} />
                             <StatCard label="Total Offspring" value={totalOffspring} />
                         </div>
 
@@ -23539,6 +23541,21 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             <button onClick={() => setImportResult(null)} className="mt-3 text-xs text-gray-500 hover:text-gray-700 underline">Dismiss</button>
                         </div>
                     )}
+                </div>
+
+                {/* ── Third-party import disclaimer ──────────────────────────── */}
+                <div className="border-t pt-5">
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-5 flex gap-2.5">
+                        <AlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />
+                        <div className="text-xs text-amber-800 space-y-1">
+                            <p className="font-semibold">Important — please read before importing</p>
+                            <ul className="list-disc list-inside space-y-0.5">
+                                <li><strong>Images are not imported</strong> — ZooEasy, Kintraks, and SimpleBreed imports do not transfer any animal photos. You will need to upload images manually after importing.</li>
+                                <li><strong>Use at your own risk</strong> — importing may overwrite existing animal records, parent links, and other data. Always export a backup first.</li>
+                                <li><strong>Parent links may be inaccurate</strong> — parent names and relationships are matched by name and date; mismatches or missing links can occur and should be reviewed after import.</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 {/* ── ZooEasy Import ─────────────────────────────────────────── */}
