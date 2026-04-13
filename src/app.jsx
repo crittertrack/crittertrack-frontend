@@ -30659,7 +30659,7 @@ const AnimalList = ({
                         title={!allAnimalsFetched ? 'Loading all animals...' : showUnowned ? 'Click to hide unowned animals' : 'Click to show unowned animals'}
                     >
                         <HeartOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        {showUnowned ? 'Showing Unowned' : 'Show Unowned'}
+                        {!allAnimalsFetched ? 'Loading...' : showUnowned ? 'Showing Unowned' : 'Show Unowned'}
                     </button>
                     <span className="mx-1 text-gray-300">|</span>
                     <button
