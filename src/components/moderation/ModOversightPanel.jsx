@@ -446,7 +446,25 @@ export default function ModOversightPanel({
     const openUserActionModal = (mode) => {
         const info = getContentOwnerUserInfo(selectedReport);
         if (!info) return;
-        setUserActionModal({ mode, ...info });
+        // Build a subject description from the report
+        let subject = null;
+        if (selectedReport) {
+            const type = getReportType(selectedReport);
+            if (type === 'animal' && selectedReport.reportedAnimalId) {
+                const a = selectedReport.reportedAnimalId;
+                const parts = [a.prefix, a.name, a.suffix].filter(Boolean).join(' ');
+                subject = a.id_public ? `${parts} (${a.id_public})` : parts;
+            } else if (type === 'profile' && selectedReport.reportedUserId) {
+                const u = selectedReport.reportedUserId;
+                const name = u.breederName || u.personalName || u.email || '';
+                subject = u.id_public ? `${name} (${u.id_public}) — profile` : `${name} — profile`;
+            } else if (type === 'rating') {
+                subject = 'Your breeder rating';
+            } else if (type === 'message') {
+                subject = 'A message/conversation';
+            }
+        }
+        setUserActionModal({ mode, ...info, subject });
         setUserActionText('');
         setUserActionSuccess('');
     };
@@ -461,7 +479,7 @@ export default function ModOversightPanel({
                 const res = await fetch(`${baseUrl}/moderation/users/${userActionModal.userId}/warn`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
-                    body: JSON.stringify({ reason: userActionText, category: 'report_action' })
+                    body: JSON.stringify({ reason: userActionText, category: 'report_action', subject: userActionModal.subject || null })
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message || 'Failed to warn user');
@@ -470,7 +488,7 @@ export default function ModOversightPanel({
                 const res = await fetch(`${baseUrl}/moderation/users/${userActionModal.userId}/inform`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
-                    body: JSON.stringify({ message: userActionText })
+                    body: JSON.stringify({ message: userActionText, subject: userActionModal.subject || null })
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message || data.error || 'Failed to send notice');

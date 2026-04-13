@@ -31584,6 +31584,7 @@ const WarningBanner = ({ authToken, API_BASE_URL, userProfile }) => {
                                     {warnings.map((warning, index) => (
                                         <div key={index} className="bg-yellow-100 p-2 rounded text-xs">
                                             <p className="font-semibold">Warning #{index + 1}</p>
+                                            {warning.subject && <p className="mt-1"><strong>Regarding:</strong> {warning.subject}</p>}
                                             <p className="mt-1"><strong>Reason:</strong> {warning.reason}</p>
                                             <p className="mt-1"><strong>Date:</strong> {new Date(warning.date).toLocaleString('en-GB')}</p>
                                             {warning.category && <p className="mt-1"><strong>Category:</strong> {warning.category}</p>}
@@ -31655,6 +31656,7 @@ const InformBanner = ({ authToken, API_BASE_URL }) => {
                                 </h3>
                                 <div className="mt-2 text-blue-700">
                                     <p className="text-sm">{msg.message}</p>
+                                    {msg.metadata?.subject && <p className="text-xs font-semibold mt-1"><strong>Regarding:</strong> {msg.metadata.subject}</p>}
                                     <p className="text-xs text-blue-500 mt-1">{new Date(msg.createdAt).toLocaleString('en-GB')}</p>
                                 </div>
                                 <div className="mt-3">
