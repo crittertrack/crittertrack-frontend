@@ -3709,7 +3709,6 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 const withBreederStatus = animals.filter(a => a.status === 'Breeder').length;
                 const withPetStatus = animals.filter(a => a.status === 'Pet').length;
                 const matedLitters = publicLitters.filter(l => !l.isPlanned && !l.birthDate).length;
-                const bornLitters = publicLitters.filter(l => !!l.birthDate).length;
 
                 const StatCard = ({ label, value, sub }) => (
                     <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1">
