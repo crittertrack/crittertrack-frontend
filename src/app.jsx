@@ -32183,7 +32183,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                         <div className={`flex items-start justify-between px-5 py-4 border-b border-gray-100`}>
                             <div className="flex items-center gap-2 min-w-0">
                                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${styles.pill}`}>{styles.label}</span>
-                                <h3 className={`text-base font-bold ${styles.title} truncate`}>{selectedBroadcast.broadcastType === 'poll' ? (selectedBroadcast.pollQuestion || selectedBroadcast.title) : (selectedBroadcast.title || `System ${styles.label}`)}</h3>
+                                <h3 className={`text-base font-bold ${styles.title} leading-snug`}>{selectedBroadcast.broadcastType === 'poll' ? (selectedBroadcast.pollQuestion || selectedBroadcast.title) : (selectedBroadcast.title || `System ${styles.label}`)}</h3>
                             </div>
                             <button onClick={() => setSelectedBroadcast(null)} className="text-gray-400 hover:text-gray-600 flex-shrink-0 ml-2"><X size={18} /></button>
                         </div>
@@ -32772,7 +32772,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                                 </div>
                                 <div className="ml-2.5 flex-1">
                                     <div className="flex justify-between items-start">
-                                        <h3 className={`text-base font-bold ${styles.title}`}>
+                                        <h3 className={`text-base font-bold ${styles.title} leading-snug`}>
                                             {styles.emoji} {broadcast.broadcastType === 'poll' ? (broadcast.pollQuestion || broadcast.title) : (broadcast.title || `System ${styles.label}`)}
                                         </h3>
                                         <button 
