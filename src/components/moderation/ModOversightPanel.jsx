@@ -280,6 +280,9 @@ export default function ModOversightPanel({
     const [userActionLoading, setUserActionLoading] = useState(false);
     const [userActionSuccess, setUserActionSuccess] = useState('');
 
+    // Global stats (all report types, all statuses, unaffected by pagination/filters)
+    const [globalStats, setGlobalStats] = useState(null);
+
     const baseUrl = useMemo(() => API_BASE_URL || '/api', [API_BASE_URL]);
 
     // Calculate date range from preset
@@ -322,8 +325,24 @@ export default function ModOversightPanel({
         if (isOpen) {
             fetchReports();
             fetchWorkloadStats();
+            fetchGlobalStats();
         }
     }, [isOpen, statusFilter, reportType]);
+
+    const fetchGlobalStats = async () => {
+        if (!authToken) return;
+        try {
+            const res = await fetch(`${baseUrl}/moderation/reports/stats`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setGlobalStats(data);
+            }
+        } catch (err) {
+            console.error('[ModOversightPanel] Error fetching global stats:', err);
+        }
+    };
 
     const fetchWorkloadStats = async () => {
         if (!authToken) return;
@@ -542,15 +561,15 @@ export default function ModOversightPanel({
         }
     };
 
-    // Calculate stats
+    // Calculate stats (from loaded reports — used for filtered list context)
     const stats = useMemo(() => ({
-        total: reports.length,
-        pending: reports.filter(r => r.status === 'pending').length,
-        inProgress: reports.filter(r => r.status === 'in_progress').length,
-        reviewed: reports.filter(r => r.status === 'reviewed').length,
-        resolved: reports.filter(r => r.status === 'resolved').length,
-        dismissed: reports.filter(r => r.status === 'dismissed').length
-    }), [reports]);
+        total: globalStats?.total ?? reports.length,
+        pending: globalStats?.pending ?? reports.filter(r => r.status === 'pending').length,
+        inProgress: globalStats?.in_progress ?? reports.filter(r => r.status === 'in_progress').length,
+        reviewed: globalStats?.reviewed ?? reports.filter(r => r.status === 'reviewed').length,
+        resolved: globalStats?.resolved ?? reports.filter(r => r.status === 'resolved').length,
+        dismissed: globalStats?.dismissed ?? reports.filter(r => r.status === 'dismissed').length
+    }), [reports, globalStats]);
 
     // Filter reports by search term, date, and sort
     const filteredReports = useMemo(() => {
@@ -700,6 +719,7 @@ export default function ModOversightPanel({
 
             // Refresh the list and close the report detail view
             await fetchReports();
+            fetchGlobalStats();
             setSelectedReport(null);
             setAdminNotes('');
             if (onActionTaken) onActionTaken();
