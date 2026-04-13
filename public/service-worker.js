@@ -1,5 +1,5 @@
 // Service Worker for CritterTrack PWA
-const CACHE_NAME = 'crittertrack-v17'; // Increment version to force cache update
+const CACHE_NAME = 'crittertrack-v18'; // Increment version to force cache update
 const urlsToCache = [
   '/',
   '/index.html',
