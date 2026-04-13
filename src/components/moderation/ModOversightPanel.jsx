@@ -467,14 +467,14 @@ export default function ModOversightPanel({
                 if (!res.ok) throw new Error(data.message || 'Failed to warn user');
                 setUserActionSuccess(`Warning issued. Total active warnings: ${data.warningCount}`);
             } else {
-                const res = await fetch(`${baseUrl}/messages/send`, {
+                const res = await fetch(`${baseUrl}/moderation/users/${userActionModal.userId}/inform`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
-                    body: JSON.stringify({ receiverId: userActionModal.userId, message: userActionText })
+                    body: JSON.stringify({ message: userActionText })
                 });
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.message || data.error || 'Failed to send message');
-                setUserActionSuccess('Message sent successfully.');
+                if (!res.ok) throw new Error(data.message || data.error || 'Failed to send notice');
+                setUserActionSuccess('Notice sent successfully.');
             }
             setUserActionText('');
         } catch (err) {

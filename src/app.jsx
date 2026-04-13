@@ -33086,6 +33086,8 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                         <div key={notification._id} className={`border rounded-lg p-4 mb-2 ${
                                             notification.type === 'content_edited' 
                                                 ? 'bg-orange-100 border-orange-400' 
+                                                : notification.type === 'moderator_message'
+                                                ? 'bg-blue-50 border-blue-400'
                                                 : notification.type === 'litter_assignment'
                                                 ? 'bg-green-50 border-green-300'
                                                 : notification.type === 'mating_reminder'
@@ -33097,6 +33099,13 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                 <div className="flex items-center text-orange-700 font-semibold mb-2">
                                                     <AlertTriangle size={16} className="mr-2 flex-shrink-0" />
                                                     <span>Moderation Notice</span>
+                                                </div>
+                                            )}
+                                            {/* Moderator Message Header */}
+                                            {notification.type === 'moderator_message' && (
+                                                <div className="flex items-center text-blue-700 font-semibold mb-2">
+                                                    <Info size={16} className="mr-2 flex-shrink-0" />
+                                                    <span>💬 Notice from Moderation</span>
                                                 </div>
                                             )}
                                             {/* Litter Assignment Header */}
@@ -33120,8 +33129,14 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                         <Shield size={32} className="text-orange-600" />
                                                     </div>
                                                 )}
-                                                {/* Animal Thumbnail - hide for content_edited */}
-                                                {notification.type !== 'content_edited' && (
+                                                {/* Moderation icon for moderator_message */}
+                                                {notification.type === 'moderator_message' && (
+                                                    <div className="flex-shrink-0 w-16 h-16 bg-blue-100 rounded-md overflow-hidden flex items-center justify-center">
+                                                        <Info size={32} className="text-blue-500" />
+                                                    </div>
+                                                )}
+                                                {/* Animal Thumbnail - hide for content_edited and moderator_message */}
+                                                {notification.type !== 'content_edited' && notification.type !== 'moderator_message' && (
                                                 <div 
                                                     className={`flex-shrink-0 w-16 h-16 bg-gray-200 rounded-md overflow-hidden transition-opacity ${notification.type === 'litter_assignment' ? '' : 'cursor-pointer hover:opacity-80'}`}
                                                     onClick={() => {
@@ -33246,13 +33261,25 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                         <span>Acknowledge</span>
                                                     </button>
                                                 )}
+                                                {/* Moderator Message - Acknowledge button */}
+                                                {notification.type === 'moderator_message' && (
+                                                    <button
+                                                        onClick={() => handleApprove(notification._id)}
+                                                        disabled={processing === notification._id}
+                                                        className="flex items-center space-x-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
+                                                    >
+                                                        <CheckCircle size={14} />
+                                                        <span>Acknowledge</span>
+                                                    </button>
+                                                )}
                                                 {/* Delete button for other notifications */}
                                                 {notification.type !== 'link_request' && 
                                                  notification.type !== 'breeder_request' &&
                                                  notification.type !== 'parent_request' &&
                                                  notification.type !== 'transfer_request' && 
                                                  notification.type !== 'view_only_offer' &&
-                                                 notification.type !== 'content_edited' && (
+                                                 notification.type !== 'content_edited' &&
+                                                 notification.type !== 'moderator_message' && (
                                                     <button
                                                         onClick={() => handleDelete(notification._id)}
                                                         className="flex items-center space-x-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"
