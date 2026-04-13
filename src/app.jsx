@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, TableOfContents, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2, Hash, Dna, TreeDeciduous, Tag, Egg, Hospital, Brain, Trophy, Scale, FileCheck, Palette, Sprout, Ruler, FolderOpen, Leaf, Microscope, Pill, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Feather, Medal, Target, Key, Dumbbell, Gem, Flame, Baby, PawPrint, ArrowRight, LockOpen, Camera, BarChart2, Bird, Fish, Bug, Worm, Turtle } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, TableOfContents, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2, Hash, Dna, TreeDeciduous, Tag, Egg, Hospital, Brain, Trophy, Scale, FileCheck, Palette, Sprout, Ruler, FolderOpen, Leaf, Microscope, Pill, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Feather, Medal, Target, Key, Dumbbell, Gem, Flame, Baby, PawPrint, ArrowRight, LockOpen, Camera, BarChart2, Bird, Fish, Bug, Worm, Turtle, SlidersHorizontal } from 'lucide-react';
 import ArchiveScreen from './components/ArchiveScreen';
 import { QRCodeSVG } from 'qrcode.react';
 import jsPDF from 'jspdf';
@@ -34,7 +34,7 @@ import AnimalTree from './components/AnimalTree';
 const API_BASE_URL = '/api'; // Production via Vercel proxy - v2
 
 // App version for cache invalidation - increment to force cache clear
-const APP_VERSION = '7.0.3';
+const APP_VERSION = '7.0.4';
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'];
 const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
@@ -3165,7 +3165,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             ) : null}
 
             {/* Tab Bar */}
-            <div className="flex border-b border-gray-200 mb-6 overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div className="flex flex-wrap border-b border-gray-200 mb-6">
                 <button
                     onClick={() => setActiveTab('animals')}
                     className={`flex-shrink-0 whitespace-nowrap text-center px-3 py-2.5 text-sm font-semibold border-b-2 transition -mb-px ${activeTab === 'animals' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
@@ -3682,7 +3682,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 }, {});
 
                 const bornLitters = publicLitters.filter(l => !l.isPlanned);
-                const plannedLitters = publicLitters.filter(l => l.isPlanned);
+                const plannedLitters = publicLitters.filter(l => l.isPlanned && !(l.matingDate && new Date(l.matingDate) <= new Date()));
 
                 const totalOffspring = bornLitters.reduce((sum, l) => sum + (l.litterSizeBorn ?? 0), 0);
 
@@ -3705,7 +3705,11 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 
                 const availableForSale = animals.filter(a => a.isForSale).length;
                 const availableForStud = animals.filter(a => a.availableForBreeding).length;
+                const forSaleOrStud = animals.filter(a => a.isForSale || a.availableForBreeding).length;
                 const withBreederStatus = animals.filter(a => a.status === 'Breeder').length;
+                const withPetStatus = animals.filter(a => a.status === 'Pet').length;
+                const today = new Date();
+                const matedLitters = publicLitters.filter(l => l.isPlanned && l.matingDate && new Date(l.matingDate) <= today).length;
 
                 const StatCard = ({ label, value, sub }) => (
                     <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1">
@@ -3742,14 +3746,15 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 return (
                     <div className="space-y-6">
                         {/* Summary cards */}
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             <StatCard label="Total Animals" value={animals.length} />
-                            <StatCard label="With Breeder Status" value={withBreederStatus} />
-                            <StatCard label="Total Pairings" value={publicLitters.length} />
+                            <StatCard label="Breeder Status" value={withBreederStatus} />
+                            <StatCard label="Pet Status" value={withPetStatus} />
+                            <StatCard label="For Sale / Stud" value={forSaleOrStud} />
+                            <StatCard label="Total Litters" value={publicLitters.length} />
+                            <StatCard label="Mated Pairings" value={matedLitters} />
+                            <StatCard label="Planned Pairings" value={plannedLitters.length} />
                             <StatCard label="Total Offspring" value={totalOffspring} />
-                            <StatCard label="Planned Matings" value={plannedLitters.length} />
-                            <StatCard label="Available for Sale" value={availableForSale} />
-                            <StatCard label="Available for Stud" value={availableForStud} />
                         </div>
 
                         {/* Breakdowns */}
@@ -4088,10 +4093,10 @@ const computeRelationships = (animal, userAnimals) => {
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
-const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onToggleOwned, userProfile, userAnimals = [], breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onViewPublicAnimal, onToggleOwned, userProfile, userAnimals = [], breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, initialTab = 1 }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
-    const [detailViewTab, setDetailViewTab] = useState(1);
+    const [detailViewTab, setDetailViewTab] = useState(initialTab);
     const [copySuccess, setCopySuccess] = useState(false);
     const [showQR, setShowQR] = useState(false);
     const [enclosureInfo, setEnclosureInfo] = useState(null);
@@ -4110,6 +4115,80 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
     const [globalRels, setGlobalRels] = useState(null); // null = not yet fetched
     const [globalRelsLoading, setGlobalRelsLoading] = useState(false);
     const [parentCardKey, setParentCardKey] = useState(0); // increment to force parent cards to refetch
+    // Manual Pedigree (Beta) — Tab 16
+    const [mpDownloading, setMpDownloading] = useState(false);
+    const [mpLoading, setMpLoading] = useState(false);
+    const mpTreeRef = useRef(null);
+    const [mpEnrichedData, setMpEnrichedData] = useState(null);
+    useEffect(() => {
+        if (detailViewTab !== 16) return;
+        let cancelled = false;
+        setMpLoading(true);
+        (async () => {
+            const manual = animal?.manualPedigree || {};
+            const toSlot = (a) => {
+                const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
+                return { mode: 'ctc', ctcId: a.id_public || '', prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
+            };
+            const fetchOne = async (id) => {
+                if (!id) return null;
+                try { const r = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${authToken}` } }); return r.data || null; }
+                catch { return null; }
+            };
+            // Level 1: parents
+            const [sire, dam] = await Promise.all([
+                fetchOne(animal?.sireId_public || animal?.fatherId_public),
+                fetchOne(animal?.damId_public  || animal?.motherId_public),
+            ]);
+            if (cancelled) return;
+            // Level 2: grandparents
+            const [ss, sd, ds, dd] = await Promise.all([
+                fetchOne(sire?.sireId_public || sire?.fatherId_public),
+                fetchOne(sire?.damId_public  || sire?.motherId_public),
+                fetchOne(dam?.sireId_public  || dam?.fatherId_public),
+                fetchOne(dam?.damId_public   || dam?.motherId_public),
+            ]);
+            if (cancelled) return;
+            // Level 3: great-grandparents
+            const [sss, ssd, sds, sdd, dss, dsd, dds, ddd] = await Promise.all([
+                fetchOne(ss?.sireId_public || ss?.fatherId_public),
+                fetchOne(ss?.damId_public  || ss?.motherId_public),
+                fetchOne(sd?.sireId_public || sd?.fatherId_public),
+                fetchOne(sd?.damId_public  || sd?.motherId_public),
+                fetchOne(ds?.sireId_public || ds?.fatherId_public),
+                fetchOne(ds?.damId_public  || ds?.motherId_public),
+                fetchOne(dd?.sireId_public || dd?.fatherId_public),
+                fetchOne(dd?.damId_public  || dd?.motherId_public),
+            ]);
+            if (cancelled) return;
+            // Build seeded slots from linked ancestry
+            const seeded = {};
+            if (sire) seeded.sire         = toSlot(sire);
+            if (dam)  seeded.dam          = toSlot(dam);
+            if (ss)   seeded.sireSire     = toSlot(ss);
+            if (sd)   seeded.sireDam      = toSlot(sd);
+            if (ds)   seeded.damSire      = toSlot(ds);
+            if (dd)   seeded.damDam       = toSlot(dd);
+            if (sss)  seeded.sireSireSire = toSlot(sss);
+            if (ssd)  seeded.sireSireDam  = toSlot(ssd);
+            if (sds)  seeded.sireDamSire  = toSlot(sds);
+            if (sdd)  seeded.sireDamDam   = toSlot(sdd);
+            if (dss)  seeded.damSireSire  = toSlot(dss);
+            if (dsd)  seeded.damSireDam   = toSlot(dsd);
+            if (dds)  seeded.damDamSire   = toSlot(dds);
+            if (ddd)  seeded.damDamDam    = toSlot(ddd);
+            // Overlay seeded (real CTC links) on top of manual entries — seed wins
+            const merged = {};
+            Object.entries(manual).forEach(([k, v]) => {
+                if (v && (v.ctcId || v.name || v.prefix || v.suffix)) merged[k] = v;
+            });
+            Object.assign(merged, seeded);
+            if (!cancelled) { setMpEnrichedData(merged); setMpLoading(false); }
+        })();
+        return () => { cancelled = true; };
+    }, [detailViewTab, animal?.id_public]);
+    useEffect(() => { setMpEnrichedData(null); setMpLoading(false); }, [animal?.id_public]);
+    useEffect(() => { setDetailViewTab(initialTab); }, [animal?.id_public, initialTab]);
 
     // Fetch ALL animals on the account + global relationships lazily when Lineage tab opens
     useEffect(() => {
@@ -4535,7 +4614,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             { id: 12, label: 'Show', icon: Trophy, color: 'text-yellow-600' },
                             { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' },
                             { id: 14, label: 'Gallery', icon: Images, color: 'text-rose-500' },
-                            { id: 15, label: 'Logs', icon: ScrollText, color: 'text-gray-600' }
+                            { id: 15, label: 'Logs', icon: ScrollText, color: 'text-gray-600' },
+                            { id: 16, label: 'Beta Pedigree', icon: Dna, color: 'text-orange-500' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -6710,6 +6790,210 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                     </div>
                 )}
 
+                {/* ── TAB 16: Manual Pedigree (Beta) ── */}
+                {detailViewTab === 16 && (() => {
+                    if (mpLoading) return <div className="flex items-center justify-center py-16 gap-2 text-gray-400"><Loader2 size={18} className="animate-spin" /><span className="text-sm">Loading ancestry…</span></div>;
+                    const mpData = mpEnrichedData || animal?.manualPedigree || {};
+                    const emptySlot = () => ({ mode: 'manual', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
+                    const getSlot = (key) => mpData[key] || emptySlot();
+                    const hasAnyData = ['sire','dam','sireSire','sireDam','damSire','damDam',
+                        'sireSireSire','sireSireDam','sireDamSire','sireDamDam',
+                        'damSireSire','damSireDam','damDamSire','damDamDam'].some(k => {
+                        const d = mpData[k];
+                        return d && (d.ctcId || Object.entries(d).some(([fk,v]) => fk !== 'mode' && v && String(v).trim()));
+                    });
+                    const handleDownloadMP = async () => {
+                        if (!mpTreeRef.current) return;
+                        setMpDownloading(true);
+                        try {
+                            const el = mpTreeRef.current;
+                            const srcCanvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            // A4 at 200dpi: 1654 x 2339, with 60px padding
+                            const a4W = 1654, a4H = 2339, pad = 60;
+                            const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
+                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height, 1);
+                            const dw = srcCanvas.width * ratio, dh = srcCanvas.height * ratio;
+                            const outCanvas = document.createElement('canvas');
+                            outCanvas.width = a4W; outCanvas.height = a4H;
+                            const ctx = outCanvas.getContext('2d');
+                            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
+                            ctx.drawImage(srcCanvas, (a4W - dw) / 2, pad, dw, dh);
+                            const link = document.createElement('a');
+                            link.download = `manual-pedigree-${animal.name || animal.id_public}.png`;
+                            link.href = outCanvas.toDataURL('image/png');
+                            link.click();
+                        } catch(e) { console.error('Manual pedigree download failed', e); }
+                        finally { setMpDownloading(false); }
+                    };
+
+                    const renderSlot = (slotKey, label, sideColor) => {
+                        const d = getSlot(slotKey);
+                        const hasData = d && (d.ctcId || Object.entries(d).some(([fk,v]) => fk !== 'mode' && v && String(v).trim()));
+                        const fullName = [d.prefix, d.name, d.suffix].filter(Boolean).join(' ');
+                        const slotGender = (slotKey === 'sire' || slotKey.endsWith('Sire')) ? 'Male' : 'Female';
+                        const isSire = slotGender === 'Male';
+                        const GIcon = isSire ? Mars : Venus;
+                        const gColor = isSire ? 'text-blue-400' : 'text-pink-400';
+                        const handleSlotClick = d.ctcId && onViewAnimal ? async () => {
+                            try {
+                                const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(d.ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                                if (res.data) onViewAnimal(res.data, 16);
+                            } catch { /* not accessible */ }
+                        } : undefined;
+                        return (
+                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 min-h-[140px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                                <div className={`flex items-center gap-1 mb-1.5 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>
+                                    <GIcon size={11} className={`flex-shrink-0 ${gColor}`} />
+                                    <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
+                                </div>
+                                {hasData ? (
+                                    <div className="flex gap-2.5">
+                                        {d.imageUrl && (
+                                            <img src={d.imageUrl} alt={fullName} className="w-16 h-16 rounded-lg object-cover flex-shrink-0 border border-gray-200 self-start" />
+                                        )}
+                                        <div className="flex-1 min-w-0 space-y-0.5 pb-4">
+                                            {fullName && <p className="text-xs font-semibold text-gray-800 leading-tight">{fullName}</p>}
+                                            {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
+                                            {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
+                                            {d.birthDate && <p className="text-[11px] text-gray-400">{formatDate(d.birthDate)}</p>}
+                                            {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex gap-2.5">
+                                        <div className="flex-1 min-w-0 space-y-0.5 pb-4">
+                                            <p className="text-[11px] text-gray-300 italic">—</p>
+                                        </div>
+                                    </div>
+                                )}
+                                {d.ctcId && <p className="absolute bottom-1.5 right-2 text-[10px] font-mono text-gray-800">{d.ctcId}</p>}
+                            </div>
+                        );
+                    };
+
+                    return (
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-between flex-wrap gap-2">
+                                <div className="flex items-center gap-2">
+                                    <Dna size={18} className="text-orange-500" />
+                                    <h3 className="text-base font-semibold text-gray-700">Beta Pedigree</h3>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    {hasAnyData && (
+                                        <button onClick={handleDownloadMP} disabled={mpDownloading}
+                                            className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
+                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save as Image</>}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                            <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart. To add or edit manual ancestors, use the Edit button.</p>
+
+                            <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
+
+                            {(() => {
+                                const subjectVariety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => animal[k]).filter(Boolean).join(' ');
+                                const subjectImgUrl = animal.imageUrl || animal.photoUrl || null;
+                                const subjectName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+                                const isMale = animal.gender === 'Male';
+                                const SubjectGenderIcon = isMale ? Mars : Venus;
+                                const subjectGColor = isMale ? 'text-blue-500' : 'text-pink-500';
+                                const ownerImgUrl = userProfile?.profileImage || userProfile?.profileImageUrl || null;
+                                const ownerShowPersonal = userProfile?.showPersonalName ?? true;
+                                const ownerShowBreeder = userProfile?.showBreederName ?? true;
+                                const ownerLines = [];
+                                if (ownerShowPersonal && userProfile?.personalName) ownerLines.push(userProfile.personalName);
+                                if (ownerShowBreeder && userProfile?.breederName) ownerLines.push(userProfile.breederName);
+                                const ownerUserId = userProfile?.id_public || null;
+                                const ownerQrUrl = ownerUserId ? `${window.location.origin}/user/${ownerUserId}` : null;
+                                return (
+                                    <div className="rounded-xl border-2 border-primary bg-primary/10 overflow-hidden relative">
+                                        {/* Owner/breeder — top-right corner */}
+                                        <div className="absolute top-2 right-2 flex flex-col items-center gap-1 text-center z-10">
+                                            <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border-2 border-primary/20 flex items-center justify-center flex-shrink-0">
+                                                {ownerImgUrl ? <img src={ownerImgUrl} alt="Breeder" className="w-full h-full object-cover" /> : <User size={18} className="text-gray-400" />}
+                                            </div>
+                                            <div className="space-y-0">
+                                                {ownerLines.length > 0 ? ownerLines.map((l,i) => <p key={i} className="text-xs font-semibold text-gray-700 leading-tight">{l}</p>) : null}
+                                                {ownerUserId && <p className="text-[10px] font-mono text-gray-400">{ownerUserId}</p>}
+                                            </div>
+                                            {ownerQrUrl && <QRCodeSVG value={ownerQrUrl} size={52} bgColor="transparent" fgColor="#374151" level="M" />}
+                                        </div>
+                                        {/* Animal info — centered */}
+                                        <div className="flex flex-col items-center gap-2 text-center p-4 relative">
+                                            {animal.species && <div className="absolute top-2 left-2 text-left"><p className="text-xs font-semibold text-gray-600 leading-tight">{animal.species}</p>{getSpeciesLatinName(animal.species) && <p className="text-[10px] italic text-gray-400 leading-tight">{getSpeciesLatinName(animal.species)}</p>}</div>}
+                                            {subjectImgUrl ? (
+                                                <img src={subjectImgUrl} alt={subjectName} className="w-20 h-20 rounded-full object-cover border-2 border-primary/30" />
+                                            ) : (
+                                                <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-gray-300"><Cat size={32} /></div>
+                                            )}
+                                            <div className="flex items-center gap-1 justify-center">
+                                                <SubjectGenderIcon size={14} className={`flex-shrink-0 ${subjectGColor}`} />
+                                                <p className="text-base font-bold text-gray-800 leading-tight">{subjectName}</p>
+                                            </div>
+                                            {subjectVariety && <p className="text-xs text-gray-500 -mt-1">{subjectVariety}</p>}
+                                            {animal.geneticCode && <p className="text-xs font-mono text-indigo-600">{animal.geneticCode}</p>}
+                                            {animal.birthDate && <p className="text-xs text-gray-400">{formatDate(animal.birthDate)}</p>}
+                                            {(animal.manualBreederName || (breederInfo && (breederInfo.breederName || breederInfo.personalName))) && <p className="text-xs text-gray-500 italic">{animal.manualBreederName || breederInfo.breederName || breederInfo.personalName}</p>}
+                                            {animal.remarks && <p className="text-xs text-gray-400 border-t border-primary/20 pt-1 mt-1 max-w-xs">{animal.remarks}</p>}
+                                            {animal.id_public && <p className="text-xs font-mono text-gray-400">{animal.id_public}</p>}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 1 — Parents</p>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {renderSlot('sire', 'Sire', 'sire')}
+                                    {renderSlot('dam', 'Dam', 'dam')}
+                                </div>
+                            </div>
+
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 2 — Grandparents</p>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                        {renderSlot('sireSire', 'Grandsire', 'sire')}
+                                        {renderSlot('sireDam', 'Granddam', 'sire')}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                        {renderSlot('damSire', 'Grandsire', 'dam')}
+                                        {renderSlot('damDam', 'Granddam', 'dam')}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 3 — Great-Grandparents</p>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                        <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
+                                        {renderSlot('sireSireSire', 'Great-Grandsire', 'sire')}
+                                        {renderSlot('sireSireDam', 'Great-Granddam', 'sire')}
+                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                        {renderSlot('sireDamSire', 'Great-Grandsire', 'sire')}
+                                        {renderSlot('sireDamDam', 'Great-Granddam', 'sire')}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                        <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
+                                        {renderSlot('damSireSire', 'Great-Grandsire', 'dam')}
+                                        {renderSlot('damSireDam', 'Great-Granddam', 'dam')}
+                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                        {renderSlot('damDamSire', 'Great-Grandsire', 'dam')}
+                                        {renderSlot('damDamDam', 'Great-Granddam', 'dam')}
+                                    </div>
+                                </div>
+                            </div>
+                            </div>{/* end mpTreeRef */}
+                        </div>
+                    );
+                })()}
+
                 {/* QR Share Modal */}
                 {showQR && <QRModal url={`${window.location.origin}/animal/${animal.id_public}`} title={animal.name} onClose={() => setShowQR(false)} />}
 
@@ -6731,10 +7015,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 // ==================== VIEW-ONLY PRIVATE ANIMAL DETAIL (SOLD/TRANSFERRED) ====================
 // Identical to PrivateAnimalDetail but without edit/delete and privacy controls
 // Used for animals you have view-only access to (sold, transferred, purchased)
-const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, showModalMessage, onViewAnimal, breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine }) => {
+const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, showModalMessage, onViewAnimal, breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, initialTab = 1 }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
-    const [detailViewTab, setDetailViewTab] = useState(1);
+    const [detailViewTab, setDetailViewTab] = useState(initialTab);
     const [enclosureInfo, setEnclosureInfo] = useState(null);
     const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
     const [breedingRecordOffspring, setBreedingRecordOffspring] = useState({});
@@ -6742,6 +7026,79 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
     const [animalLitters, setAnimalLitters] = useState(null);
     const [pedigreeOffspring, setPedigreeOffspring] = useState(null);
     const [expandedPedigreeRecords, setExpandedPedigreeRecords] = useState({});
+    const [mpDownloading, setMpDownloading] = useState(false);
+    const [mpLoading, setMpLoading] = useState(false);
+    const mpTreeRef = useRef(null);
+    const [mpEnrichedData, setMpEnrichedData] = useState(null);
+    useEffect(() => {
+        if (detailViewTab !== 16) return;
+        let cancelled = false;
+        setMpLoading(true);
+        (async () => {
+            const manual = animal?.manualPedigree || {};
+            const toSlot = (a) => {
+                const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
+                return { mode: 'ctc', ctcId: a.id_public || '', prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
+            };
+            const fetchOne = async (id) => {
+                if (!id) return null;
+                try { const r = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${authToken}` } }); return r.data || null; }
+                catch { return null; }
+            };
+            // Level 1: parents
+            const [sire, dam] = await Promise.all([
+                fetchOne(animal?.sireId_public || animal?.fatherId_public),
+                fetchOne(animal?.damId_public  || animal?.motherId_public),
+            ]);
+            if (cancelled) return;
+            // Level 2: grandparents
+            const [ss, sd, ds, dd] = await Promise.all([
+                fetchOne(sire?.sireId_public || sire?.fatherId_public),
+                fetchOne(sire?.damId_public  || sire?.motherId_public),
+                fetchOne(dam?.sireId_public  || dam?.fatherId_public),
+                fetchOne(dam?.damId_public   || dam?.motherId_public),
+            ]);
+            if (cancelled) return;
+            // Level 3: great-grandparents
+            const [sss, ssd, sds, sdd, dss, dsd, dds, ddd] = await Promise.all([
+                fetchOne(ss?.sireId_public || ss?.fatherId_public),
+                fetchOne(ss?.damId_public  || ss?.motherId_public),
+                fetchOne(sd?.sireId_public || sd?.fatherId_public),
+                fetchOne(sd?.damId_public  || sd?.motherId_public),
+                fetchOne(ds?.sireId_public || ds?.fatherId_public),
+                fetchOne(ds?.damId_public  || ds?.motherId_public),
+                fetchOne(dd?.sireId_public || dd?.fatherId_public),
+                fetchOne(dd?.damId_public  || dd?.motherId_public),
+            ]);
+            if (cancelled) return;
+            // Build seeded slots from linked ancestry
+            const seeded = {};
+            if (sire) seeded.sire         = toSlot(sire);
+            if (dam)  seeded.dam          = toSlot(dam);
+            if (ss)   seeded.sireSire     = toSlot(ss);
+            if (sd)   seeded.sireDam      = toSlot(sd);
+            if (ds)   seeded.damSire      = toSlot(ds);
+            if (dd)   seeded.damDam       = toSlot(dd);
+            if (sss)  seeded.sireSireSire = toSlot(sss);
+            if (ssd)  seeded.sireSireDam  = toSlot(ssd);
+            if (sds)  seeded.sireDamSire  = toSlot(sds);
+            if (sdd)  seeded.sireDamDam   = toSlot(sdd);
+            if (dss)  seeded.damSireSire  = toSlot(dss);
+            if (dsd)  seeded.damSireDam   = toSlot(dsd);
+            if (dds)  seeded.damDamSire   = toSlot(dds);
+            if (ddd)  seeded.damDamDam    = toSlot(ddd);
+            // Overlay seeded (real CTC links) on top of manual entries — seed wins
+            const merged = {};
+            Object.entries(manual).forEach(([k, v]) => {
+                if (v && (v.ctcId || v.name || v.prefix || v.suffix)) merged[k] = v;
+            });
+            Object.assign(merged, seeded);
+            if (!cancelled) { setMpEnrichedData(merged); setMpLoading(false); }
+        })();
+        return () => { cancelled = true; };
+    }, [detailViewTab, animal?.id_public]);
+    useEffect(() => { setMpEnrichedData(null); setMpLoading(false); }, [animal?.id_public]);
+    useEffect(() => { setDetailViewTab(initialTab); }, [animal?.id_public, initialTab]);
 
     // Fetch all litters where this animal is sire or dam
     React.useEffect(() => {
@@ -6873,7 +7230,8 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             { id: 11, label: 'End of Life', icon: Scale, color: 'text-gray-500' },
                             { id: 12, label: 'Show', icon: Trophy, color: 'text-yellow-600' },
                             { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' },
-                            { id: 14, label: 'Logs', icon: ScrollText, color: 'text-gray-600' }
+                            { id: 14, label: 'Logs', icon: ScrollText, color: 'text-gray-600' },
+                            { id: 16, label: 'Beta Pedigree', icon: Dna, color: 'text-orange-500' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -8415,21 +8773,278 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                         onClose={() => setShowPedigree(false)}
                     />
                 )}
+
+                {/* Tab 16: Beta Pedigree */}
+                {detailViewTab === 16 && (() => {
+                    if (mpLoading) return <div className="flex items-center justify-center py-16 gap-2 text-gray-400"><Loader2 size={18} className="animate-spin" /><span className="text-sm">Loading ancestry…</span></div>;
+                    const mpData = mpEnrichedData || animal?.manualPedigree || {};
+                    const emptySlot = () => ({ mode: 'manual', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
+                    const getSlot = (key) => mpData[key] || emptySlot();
+                    const hasAnyData = ['sire','dam','sireSire','sireDam','damSire','damDam',
+                        'sireSireSire','sireSireDam','sireDamSire','sireDamDam',
+                        'damSireSire','damSireDam','damDamSire','damDamDam'].some(k => {
+                        const d = mpData[k];
+                        return d && (d.ctcId || Object.entries(d).some(([fk,v]) => fk !== 'mode' && v && String(v).trim()));
+                    });
+                    const handleDownloadMP = async () => {
+                        if (!mpTreeRef.current) return;
+                        setMpDownloading(true);
+                        try {
+                            const el = mpTreeRef.current;
+                            const srcCanvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            const a4W = 1654, a4H = 2339, pad = 60;
+                            const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
+                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height, 1);
+                            const dw = srcCanvas.width * ratio, dh = srcCanvas.height * ratio;
+                            const outCanvas = document.createElement('canvas');
+                            outCanvas.width = a4W; outCanvas.height = a4H;
+                            const ctx = outCanvas.getContext('2d');
+                            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
+                            ctx.drawImage(srcCanvas, (a4W - dw) / 2, pad, dw, dh);
+                            const link = document.createElement('a');
+                            link.download = `manual-pedigree-${animal.name || animal.id_public}.png`;
+                            link.href = outCanvas.toDataURL('image/png');
+                            link.click();
+                        } catch(e) { console.error('Manual pedigree download failed', e); }
+                        finally { setMpDownloading(false); }
+                    };
+                    const renderSlot = (slotKey, label) => {
+                        const d = getSlot(slotKey);
+                        const hasData = d && (d.ctcId || Object.entries(d).some(([fk,v]) => fk !== 'mode' && v && String(v).trim()));
+                        const fullName = [d.prefix, d.name, d.suffix].filter(Boolean).join(' ');
+                        const isSire = slotKey === 'sire' || slotKey.endsWith('Sire');
+                        const GIcon = isSire ? Mars : Venus;
+                        const gColor = isSire ? 'text-blue-400' : 'text-pink-400';
+                        const handleSlotClick = d.ctcId && onViewAnimal ? async () => {
+                            try {
+                                const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(d.ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                                if (res.data) onViewAnimal(res.data, 16);
+                            } catch { /* not accessible */ }
+                        } : undefined;
+                        return (
+                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 min-h-[140px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                                <div className={`flex items-center gap-1 mb-1.5 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>
+                                    <GIcon size={11} className={`flex-shrink-0 ${gColor}`} />
+                                    <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
+                                </div>
+                                {hasData ? (
+                                    <div className="flex gap-2.5">
+                                        {d.imageUrl && <img src={d.imageUrl} alt={fullName} className="w-16 h-16 rounded-lg object-cover flex-shrink-0 border border-gray-200 self-start" />}
+                                        <div className="flex-1 min-w-0 space-y-0.5 pb-4">
+                                            {fullName && <p className="text-xs font-semibold text-gray-800 leading-tight">{fullName}</p>}
+                                            {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
+                                            {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
+                                            {d.birthDate && <p className="text-[11px] text-gray-400">{formatDate(d.birthDate)}</p>}
+                                            {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex gap-2.5">
+                                        <div className="flex-1 min-w-0 space-y-0.5 pb-4">
+                                            <p className="text-[11px] text-gray-300 italic">—</p>
+                                        </div>
+                                    </div>
+                                )}
+                                {d.ctcId && <p className="absolute bottom-1.5 right-2 text-[10px] font-mono text-gray-800">{d.ctcId}</p>}
+                            </div>
+                        );
+                    };
+                    return (
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-between flex-wrap gap-2">
+                                <div className="flex items-center gap-2">
+                                    <Dna size={18} className="text-orange-500" />
+                                    <h3 className="text-base font-semibold text-gray-700">Beta Pedigree</h3>
+                                </div>
+                                {hasAnyData && (
+                                    <button onClick={handleDownloadMP} disabled={mpDownloading}
+                                        className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
+                                        {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save as Image</>}
+                                    </button>
+                                )}
+                            </div>
+                            <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart.</p>
+                            <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
+                            {(() => {
+                                const subjectVariety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => animal[k]).filter(Boolean).join(' ');
+                                const subjectImgUrl = animal.imageUrl || animal.photoUrl || null;
+                                const subjectName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+                                const isMale = animal.gender === 'Male';
+                                const SubjectGenderIcon = isMale ? Mars : Venus;
+                                const subjectGColor = isMale ? 'text-blue-500' : 'text-pink-500';
+                                const ownerImgUrl = breederInfo?.profileImage || null;
+                                const ownerShowPersonal = breederInfo?.showPersonalName ?? true;
+                                const ownerShowBreeder = breederInfo?.showBreederName ?? true;
+                                const ownerLines = [];
+                                if (ownerShowPersonal && breederInfo?.personalName) ownerLines.push(breederInfo.personalName);
+                                if (ownerShowBreeder && breederInfo?.breederName) ownerLines.push(breederInfo.breederName);
+                                const ownerUserId = breederInfo?.id_public || animal.ownerId_public || null;
+                                const ownerQrUrl = ownerUserId ? `${window.location.origin}/user/${ownerUserId}` : null;
+                                return (
+                                    <div className="rounded-xl border-2 border-primary bg-primary/10 overflow-hidden relative">
+                                        {/* Owner/breeder — top-right corner */}
+                                        <div className="absolute top-2 right-2 flex flex-col items-center gap-1 text-center z-10">
+                                            <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border-2 border-primary/20 flex items-center justify-center flex-shrink-0">
+                                                {ownerImgUrl ? <img src={ownerImgUrl} alt="Breeder" className="w-full h-full object-cover" /> : <User size={18} className="text-gray-400" />}
+                                            </div>
+                                            <div className="space-y-0">
+                                                {ownerLines.length > 0 ? ownerLines.map((l,i) => <p key={i} className="text-xs font-semibold text-gray-700 leading-tight">{l}</p>) : null}
+                                                {ownerUserId && <p className="text-[10px] font-mono text-gray-400">{ownerUserId}</p>}
+                                            </div>
+                                            {ownerQrUrl && <QRCodeSVG value={ownerQrUrl} size={52} bgColor="transparent" fgColor="#374151" level="M" />}
+                                        </div>
+                                        {/* Animal info — centered */}
+                                        <div className="flex flex-col items-center gap-2 text-center p-4 relative">
+                                            {animal.species && <div className="absolute top-2 left-2 text-left"><p className="text-xs font-semibold text-gray-600 leading-tight">{animal.species}</p>{getSpeciesLatinName(animal.species) && <p className="text-[10px] italic text-gray-400 leading-tight">{getSpeciesLatinName(animal.species)}</p>}</div>}
+                                            {subjectImgUrl ? <img src={subjectImgUrl} alt={subjectName} className="w-20 h-20 rounded-full object-cover border-2 border-primary/30" /> : <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-gray-300"><Cat size={32} /></div>}
+                                            <div className="flex items-center gap-1 justify-center">
+                                                <SubjectGenderIcon size={14} className={`flex-shrink-0 ${subjectGColor}`} />
+                                                <p className="text-base font-bold text-gray-800 leading-tight">{subjectName}</p>
+                                            </div>
+                                            {subjectVariety && <p className="text-xs text-gray-500 -mt-1">{subjectVariety}</p>}
+                                            {animal.geneticCode && <p className="text-xs font-mono text-indigo-600">{animal.geneticCode}</p>}
+                                            {animal.birthDate && <p className="text-xs text-gray-400">{formatDate(animal.birthDate)}</p>}
+                                            {(animal.manualBreederName || (breederInfo && (breederInfo.breederName || breederInfo.personalName))) && <p className="text-xs text-gray-500 italic">{animal.manualBreederName || breederInfo.breederName || breederInfo.personalName}</p>}
+                                            {animal.id_public && <p className="text-xs font-mono text-gray-400">{animal.id_public}</p>}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 1 — Parents</p>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {renderSlot('sire', 'Sire')}
+                                    {renderSlot('dam', 'Dam')}
+                                </div>
+                            </div>
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 2 — Grandparents</p>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                        {renderSlot('sireSire', 'Grandsire')}
+                                        {renderSlot('sireDam', 'Granddam')}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                        {renderSlot('damSire', 'Grandsire')}
+                                        {renderSlot('damDam', 'Granddam')}
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 3 — Great-Grandparents</p>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                        <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
+                                        {renderSlot('sireSireSire', 'Great-Grandsire')}
+                                        {renderSlot('sireSireDam', 'Great-Granddam')}
+                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                        {renderSlot('sireDamSire', 'Great-Grandsire')}
+                                        {renderSlot('sireDamDam', 'Great-Granddam')}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                        <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
+                                        {renderSlot('damSireSire', 'Great-Grandsire')}
+                                        {renderSlot('damSireDam', 'Great-Granddam')}
+                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                        {renderSlot('damDamSire', 'Great-Grandsire')}
+                                        {renderSlot('damDamDam', 'Great-Granddam')}
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    );
+                })()}
             </div>
         </div>
     </div>
     );
 };
-
-// ==================== PUBLIC ANIMAL DETAIL (VIEW-ONLY FOR OTHERS) ====================
 // Respects privacy toggles - only shows public sections
 // Accessed from: Global search, user profiles, offspring links
-const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onViewProfile, onViewAnimal, authToken, setModCurrentContext, setShowImageModal, setEnlargedImageUrl }) => {
+const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onViewProfile, onViewAnimal, authToken, setModCurrentContext, setShowImageModal, setEnlargedImageUrl, initialTab = 1 }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
     const [showQR, setShowQR] = useState(false);
-    const [detailViewTab, setDetailViewTab] = useState(1);
+    const [detailViewTab, setDetailViewTab] = useState(initialTab);
+    const [mpDownloading, setMpDownloading] = useState(false);
+    const [mpLoading, setMpLoading] = useState(false);
+    const mpTreeRef = useRef(null);
+    const [mpEnrichedData, setMpEnrichedData] = useState(null);
+    useEffect(() => {
+        if (detailViewTab !== 14) return;
+        let cancelled = false;
+        setMpLoading(true);
+        (async () => {
+            const manual = animal?.manualPedigree || {};
+            const toSlot = (a) => {
+                const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
+                return { mode: 'ctc', ctcId: a.id_public || '', prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
+            };
+            const fetchOne = async (id) => {
+                if (!id) return null;
+                try { const r = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${authToken}` } }); return r.data || null; }
+                catch { return null; }
+            };
+            // Level 1: parents
+            const [sire, dam] = await Promise.all([
+                fetchOne(animal?.sireId_public || animal?.fatherId_public),
+                fetchOne(animal?.damId_public  || animal?.motherId_public),
+            ]);
+            if (cancelled) return;
+            // Level 2: grandparents
+            const [ss, sd, ds, dd] = await Promise.all([
+                fetchOne(sire?.sireId_public || sire?.fatherId_public),
+                fetchOne(sire?.damId_public  || sire?.motherId_public),
+                fetchOne(dam?.sireId_public  || dam?.fatherId_public),
+                fetchOne(dam?.damId_public   || dam?.motherId_public),
+            ]);
+            if (cancelled) return;
+            // Level 3: great-grandparents
+            const [sss, ssd, sds, sdd, dss, dsd, dds, ddd] = await Promise.all([
+                fetchOne(ss?.sireId_public || ss?.fatherId_public),
+                fetchOne(ss?.damId_public  || ss?.motherId_public),
+                fetchOne(sd?.sireId_public || sd?.fatherId_public),
+                fetchOne(sd?.damId_public  || sd?.motherId_public),
+                fetchOne(ds?.sireId_public || ds?.fatherId_public),
+                fetchOne(ds?.damId_public  || ds?.motherId_public),
+                fetchOne(dd?.sireId_public || dd?.fatherId_public),
+                fetchOne(dd?.damId_public  || dd?.motherId_public),
+            ]);
+            if (cancelled) return;
+            // Build seeded slots from linked ancestry
+            const seeded = {};
+            if (sire) seeded.sire         = toSlot(sire);
+            if (dam)  seeded.dam          = toSlot(dam);
+            if (ss)   seeded.sireSire     = toSlot(ss);
+            if (sd)   seeded.sireDam      = toSlot(sd);
+            if (ds)   seeded.damSire      = toSlot(ds);
+            if (dd)   seeded.damDam       = toSlot(dd);
+            if (sss)  seeded.sireSireSire = toSlot(sss);
+            if (ssd)  seeded.sireSireDam  = toSlot(ssd);
+            if (sds)  seeded.sireDamSire  = toSlot(sds);
+            if (sdd)  seeded.sireDamDam   = toSlot(sdd);
+            if (dss)  seeded.damSireSire  = toSlot(dss);
+            if (dsd)  seeded.damSireDam   = toSlot(dsd);
+            if (dds)  seeded.damDamSire   = toSlot(dds);
+            if (ddd)  seeded.damDamDam    = toSlot(ddd);
+            // Overlay seeded (real CTC links) on top of manual entries — seed wins
+            const merged = {};
+            Object.entries(manual).forEach(([k, v]) => {
+                if (v && (v.ctcId || v.name || v.prefix || v.suffix)) merged[k] = v;
+            });
+            Object.assign(merged, seeded);
+            if (!cancelled) { setMpEnrichedData(merged); setMpLoading(false); }
+        })();
+        return () => { cancelled = true; };
+    }, [detailViewTab, animal?.id_public]);
+    // Reset tab when navigating to a different animal
+    React.useEffect(() => { setDetailViewTab(initialTab); setMpEnrichedData(null); setMpLoading(false); }, [animal?.id_public, initialTab]);
     const [animalCOI, setAnimalCOI] = useState(null);
     const [loadingCOI, setLoadingCOI] = useState(false);
     const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});
@@ -8709,7 +9324,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             { id: 10, label: 'Records', icon: FileText, color: 'text-indigo-500' },
                             { id: 11, label: 'End of Life', icon: Scale, color: 'text-gray-500' },
                             { id: 12, label: 'Show', icon: Trophy, color: 'text-yellow-600' },
-                            { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' }
+                            { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' },
+                            { id: 14, label: 'Beta Pedigree', icon: Dna, color: 'text-orange-500' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -10155,6 +10771,192 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             )}
                         </div>
                     )}
+
+                {/* Tab 14: Beta Pedigree */}
+                {detailViewTab === 14 && (() => {
+                    if (mpLoading) return <div className="flex items-center justify-center py-16 gap-2 text-gray-400"><Loader2 size={18} className="animate-spin" /><span className="text-sm">Loading ancestry…</span></div>;
+                    const mpData = mpEnrichedData || animal?.manualPedigree || {};
+                    const emptySlot = () => ({ mode: 'manual', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
+                    const getSlot = (key) => mpData[key] || emptySlot();
+                    const hasAnyData = ['sire','dam','sireSire','sireDam','damSire','damDam',
+                        'sireSireSire','sireSireDam','sireDamSire','sireDamDam',
+                        'damSireSire','damSireDam','damDamSire','damDamDam'].some(k => {
+                        const d = mpData[k];
+                        return d && (d.ctcId || Object.entries(d).some(([fk,v]) => fk !== 'mode' && v && String(v).trim()));
+                    });
+                    const handleDownloadMP = async () => {
+                        if (!mpTreeRef.current) return;
+                        setMpDownloading(true);
+                        try {
+                            const el = mpTreeRef.current;
+                            const srcCanvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            const a4W = 1654, a4H = 2339, pad = 60;
+                            const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
+                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height, 1);
+                            const dw = srcCanvas.width * ratio, dh = srcCanvas.height * ratio;
+                            const outCanvas = document.createElement('canvas');
+                            outCanvas.width = a4W; outCanvas.height = a4H;
+                            const ctx = outCanvas.getContext('2d');
+                            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
+                            ctx.drawImage(srcCanvas, (a4W - dw) / 2, pad, dw, dh);
+                            const link = document.createElement('a');
+                            link.download = `beta-pedigree-${animal.name || animal.id_public}.png`;
+                            link.href = outCanvas.toDataURL('image/png');
+                            link.click();
+                        } catch(e) { console.error('Beta pedigree download failed', e); }
+                        finally { setMpDownloading(false); }
+                    };
+                    const renderSlot = (slotKey, label) => {
+                        const d = getSlot(slotKey);
+                        const hasData = d && (d.ctcId || Object.entries(d).some(([fk,v]) => fk !== 'mode' && v && String(v).trim()));
+                        const fullName = [d.prefix, d.name, d.suffix].filter(Boolean).join(' ');
+                        const isSire = slotKey === 'sire' || slotKey.endsWith('Sire');
+                        const GIcon = isSire ? Mars : Venus;
+                        const gColor = isSire ? 'text-blue-400' : 'text-pink-400';
+                        const handleSlotClick = d.ctcId && onViewAnimal ? async () => {
+                            try {
+                                const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(d.ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                                if (res.data) onViewAnimal(res.data, 14);
+                            } catch { /* not accessible */ }
+                        } : undefined;
+                        return (
+                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 min-h-[140px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                                <div className={`flex items-center gap-1 mb-1.5 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>
+                                    <GIcon size={11} className={`flex-shrink-0 ${gColor}`} />
+                                    <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
+                                </div>
+                                {hasData ? (
+                                    <div className="flex gap-2.5">
+                                        {d.imageUrl && <img src={d.imageUrl} alt={fullName} className="w-16 h-16 rounded-lg object-cover flex-shrink-0 border border-gray-200 self-start" />}
+                                        <div className="flex-1 min-w-0 space-y-0.5 pb-4">
+                                            {fullName && <p className="text-xs font-semibold text-gray-800 leading-tight">{fullName}</p>}
+                                            {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
+                                            {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
+                                            {d.birthDate && <p className="text-[11px] text-gray-400">{formatDate(d.birthDate)}</p>}
+                                            {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex gap-2.5">
+                                        <div className="flex-1 min-w-0 space-y-0.5 pb-4">
+                                            <p className="text-[11px] text-gray-300 italic">—</p>
+                                        </div>
+                                    </div>
+                                )}
+                                {d.ctcId && <p className="absolute bottom-1.5 right-2 text-[10px] font-mono text-gray-800">{d.ctcId}</p>}
+                            </div>
+                        );
+                    };
+                    return (
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-between flex-wrap gap-2">
+                                <div className="flex items-center gap-2">
+                                    <Dna size={18} className="text-orange-500" />
+                                    <h3 className="text-base font-semibold text-gray-700">Beta Pedigree</h3>
+                                </div>
+                                {hasAnyData && (
+                                    <button onClick={handleDownloadMP} disabled={mpDownloading}
+                                        className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
+                                        {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save as Image</>}
+                                    </button>
+                                )}
+                            </div>
+                            <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart.</p>
+                            <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
+                                {(() => {
+                                    const subjectVariety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => animal[k]).filter(Boolean).join(' ');
+                                    const subjectImgUrl = animal.imageUrl || animal.photoUrl || null;
+                                    const subjectName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+                                    const isMale = animal.gender === 'Male';
+                                    const SubjectGenderIcon = isMale ? Mars : Venus;
+                                    const subjectGColor = isMale ? 'text-blue-500' : 'text-pink-500';
+                                    const ownerImgUrl = breederInfo?.profileImage || breederInfo?.profileImageUrl || null;
+                                    const ownerShowPersonal = breederInfo?.showPersonalName ?? true;
+                                    const ownerShowBreeder = breederInfo?.showBreederName ?? true;
+                                    const ownerLines = [];
+                                    if (ownerShowPersonal && breederInfo?.personalName) ownerLines.push(breederInfo.personalName);
+                                    if (ownerShowBreeder && breederInfo?.breederName) ownerLines.push(breederInfo.breederName);
+                                    const ownerUserId = breederInfo?.id_public || animal.ownerId_public || null;
+                                    const ownerQrUrl = ownerUserId ? `${window.location.origin}/user/${ownerUserId}` : null;
+                                    return (
+                                        <div className="rounded-xl border-2 border-primary bg-primary/10 overflow-hidden relative">
+                                            {/* Owner/breeder — top-right corner */}
+                                            <div className="absolute top-2 right-2 flex flex-col items-center gap-1 text-center z-10">
+                                                <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border-2 border-primary/20 flex items-center justify-center flex-shrink-0">
+                                                    {ownerImgUrl ? <img src={ownerImgUrl} alt="Breeder" className="w-full h-full object-cover" /> : <User size={18} className="text-gray-400" />}
+                                                </div>
+                                                <div className="space-y-0">
+                                                    {ownerLines.length > 0 ? ownerLines.map((l,i) => <p key={i} className="text-xs font-semibold text-gray-700 leading-tight">{l}</p>) : null}
+                                                    {ownerUserId && <p className="text-[10px] font-mono text-gray-400">{ownerUserId}</p>}
+                                                </div>
+                                                {ownerQrUrl && <QRCodeSVG value={ownerQrUrl} size={52} bgColor="transparent" fgColor="#374151" level="M" />}
+                                            </div>
+                                            {/* Animal info — centered */}
+                                            <div className="flex flex-col items-center gap-2 text-center p-4 relative">
+                                                {animal.species && <div className="absolute top-2 left-2 text-left"><p className="text-xs font-semibold text-gray-600 leading-tight">{animal.species}</p>{getSpeciesLatinName(animal.species) && <p className="text-[10px] italic text-gray-400 leading-tight">{getSpeciesLatinName(animal.species)}</p>}</div>}
+                                                {subjectImgUrl ? <img src={subjectImgUrl} alt={subjectName} className="w-20 h-20 rounded-full object-cover border-2 border-primary/30" /> : <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-gray-300"><Cat size={32} /></div>}
+                                                <div className="flex items-center gap-1 justify-center">
+                                                    <SubjectGenderIcon size={14} className={`flex-shrink-0 ${subjectGColor}`} />
+                                                    <p className="text-base font-bold text-gray-800 leading-tight">{subjectName}</p>
+                                                </div>
+                                                {subjectVariety && <p className="text-xs text-gray-500 -mt-1">{subjectVariety}</p>}
+                                                {animal.geneticCode && <p className="text-xs font-mono text-indigo-600">{animal.geneticCode}</p>}
+                                                {animal.birthDate && <p className="text-xs text-gray-400">{formatDate(animal.birthDate)}</p>}
+                                                {(animal.manualBreederName || (breederInfo && (breederInfo.breederName || breederInfo.personalName))) && <p className="text-xs text-gray-500 italic">{animal.manualBreederName || breederInfo.breederName || breederInfo.personalName}</p>}
+                                                {animal.id_public && <p className="text-xs font-mono text-gray-400">{animal.id_public}</p>}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 1 — Parents</p>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {renderSlot('sire', 'Sire')}
+                                        {renderSlot('dam', 'Dam')}
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 2 — Grandparents</p>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                            {renderSlot('sireSire', 'Grandsire')}
+                                            {renderSlot('sireDam', 'Granddam')}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                            {renderSlot('damSire', 'Grandsire')}
+                                            {renderSlot('damDam', 'Granddam')}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 3 — Great-Grandparents</p>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                            <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
+                                            {renderSlot('sireSireSire', 'Great-Grandsire')}
+                                            {renderSlot('sireSireDam', 'Great-Granddam')}
+                                            <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                            {renderSlot('sireDamSire', 'Great-Grandsire')}
+                                            {renderSlot('sireDamDam', 'Great-Granddam')}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                            <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
+                                            {renderSlot('damSireSire', 'Great-Grandsire')}
+                                            {renderSlot('damSireDam', 'Great-Granddam')}
+                                            <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                            {renderSlot('damDamSire', 'Great-Grandsire')}
+                                            {renderSlot('damDamDam', 'Great-Granddam')}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })()}
 
                 {/* Pedigree Chart Modal */}
                 {showPedigree && (
@@ -16142,6 +16944,10 @@ const AnimalForm = ({
     const [showCommunityGeneticsModal, setShowCommunityGeneticsModal] = useState(false);
     const [activeTab, setActiveTab] = useState(1); // Tab navigation state
     const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
+    // Manual Pedigree (Beta) — Tab 15
+    const [mpEditForm, setMpEditForm] = useState(() => animalToEdit?.manualPedigree || {});
+    const [mpCTCOpenSlot, setMpCTCOpenSlot] = useState(null);
+    const [mpSlotUploading, setMpSlotUploading] = useState({});
     // Gallery state (edit-only; changes are applied immediately via API)
     const [editGalleryImages, setEditGalleryImages] = useState(animalToEdit?.extraImages || []);
     const [galleryUploading, setGalleryUploading] = useState(false);
@@ -17269,7 +18075,6 @@ const AnimalForm = ({
         if (!formData.name?.trim())    missingFields.push('Name (Overview tab)');
         if (!formData.species?.trim()) missingFields.push('Species (Overview tab)');
         if (!formData.gender?.trim())  missingFields.push('Gender (Overview tab)');
-        if (!formData.birthDate)       missingFields.push('Date of Birth (Overview tab)');
         if (!formData.status?.trim())  missingFields.push('Status (Overview tab)');
 
         if (missingFields.length > 0) {
@@ -17377,6 +18182,7 @@ const AnimalForm = ({
             // Prepare explicit payload to send to the API and log it for debugging
             // Merge in any immediate pedigree selections stored in `pedigreeRef` to avoid race conditions
             const payloadToSave = { ...formData };
+            payloadToSave.manualPedigree = mpEditForm;
             
             // Include growth records
             payloadToSave.growthRecords = growthRecords;
@@ -18034,7 +18840,8 @@ const AnimalForm = ({
                             { id: 11, label: 'End of Life', icon: Scale, color: 'text-gray-500' },
                             { id: 12, label: 'Show', icon: Trophy, color: 'text-yellow-600' },
                             { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' },
-                            { id: 14, label: 'Gallery', icon: Images, color: 'text-rose-500' }
+                            { id: 14, label: 'Gallery', icon: Images, color: 'text-rose-500' },
+                            { id: 15, label: 'Beta Pedigree', icon: Dna, color: 'text-orange-500' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -18182,8 +18989,8 @@ const AnimalForm = ({
                                 </div>
                                 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Date of Birth*</label>
-                                    <DatePicker name="birthDate" value={formData.birthDate} onChange={handleChange} maxDate={new Date()} required
+                                    <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
+                                    <DatePicker name="birthDate" value={formData.birthDate} onChange={handleChange} maxDate={new Date()}
                                         data-tutorial-target="animal-birthdate-input"
                                         className="mt-1 p-2" />
                                 </div>
@@ -20947,6 +21754,215 @@ const AnimalForm = ({
                     </div>
                 )}
 
+                {/* Tab 15: Beta Pedigree */}
+                {(() => {
+                    // Hoisted so the CTC modal (rendered outside the tab guard) can always call linkAnimal
+                    const mpEmptySlot = () => ({ mode: 'manual', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
+                    const mpToSlot = (a) => {
+                        const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
+                        return { mode: 'ctc', ctcId: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? a.birthDate.slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
+                    };
+                    const mpFetchByCtc = async (id) => {
+                        try {
+                            const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                            return res.data || null;
+                        } catch { return null; }
+                    };
+                    const MP_SLOT_CHILDREN = {
+                        sire:    { father: 'sireSire',    mother: 'sireDam'    },
+                        dam:     { father: 'damSire',     mother: 'damDam'     },
+                        sireSire:{ father: 'sireSireSire',mother: 'sireSireDam'},
+                        sireDam: { father: 'sireDamSire', mother: 'sireDamDam' },
+                        damSire: { father: 'damSireSire', mother: 'damSireDam' },
+                        damDam:  { father: 'damDamSire',  mother: 'damDamDam'  },
+                    };
+                    const mpLinkAnimal = async (slotKey, a) => {
+                        const updates = { [slotKey]: mpToSlot(a) };
+                        const queue = [{ animal: a, slot: slotKey }];
+                        while (queue.length) {
+                            const { animal: cur, slot } = queue.shift();
+                            const children = MP_SLOT_CHILDREN[slot];
+                            if (!children) continue;
+                            const fatherId = cur.fatherId_public || cur.sireId_public;
+                            const motherId = cur.motherId_public || cur.damId_public;
+                            if (fatherId) { const f = await mpFetchByCtc(fatherId); if (f) { updates[children.father] = mpToSlot(f); queue.push({ animal: f, slot: children.father }); } }
+                            if (motherId) { const m = await mpFetchByCtc(motherId); if (m) { updates[children.mother] = mpToSlot(m); queue.push({ animal: m, slot: children.mother }); } }
+                        }
+                        setMpEditForm(f => ({ ...f, ...updates }));
+                    };
+
+                    // CTC selector modal — always rendered so it works regardless of activeTab
+                    const ctcModal = mpCTCOpenSlot ? (
+                        <ParentSearchModal
+                            title={mpCTCOpenSlot.endsWith('Sire') || mpCTCOpenSlot === 'sire' ? 'Sire' : 'Dam'}
+                            currentId={animalToEdit?.id_public}
+                            onSelect={async (a) => { setMpCTCOpenSlot(null); if (a) await mpLinkAnimal(mpCTCOpenSlot, a); }}
+                            onClose={() => setMpCTCOpenSlot(null)}
+                            authToken={authToken}
+                            showModalMessage={showModalMessage}
+                            API_BASE_URL={API_BASE_URL}
+                            X={X}
+                            Search={Search}
+                            Loader2={Loader2}
+                            LoadingSpinner={LoadingSpinner}
+                            requiredGender={mpCTCOpenSlot.endsWith('Sire') || mpCTCOpenSlot === 'sire' ? 'Male' : 'Female'}
+                            species={formData.species}
+                        />
+                    ) : null;
+
+                    if (activeTab !== 15) return ctcModal;
+
+                    const getSlot = (key) => mpEditForm[key] || mpEmptySlot();
+                    const setSlotField = (key, field, val) => setMpEditForm(f => ({ ...f, [key]: { ...(f[key] || mpEmptySlot()), [field]: val } }));
+
+                    const renderEditSlot = (slotKey, label, sideColor) => {
+                        const d = getSlot(slotKey);
+                        const isSire = slotKey === 'sire' || slotKey.endsWith('Sire');
+                        const isCTC = d.mode === 'ctc';
+                        const bdr = isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40';
+                        const lbl = isSire ? 'text-blue-500' : 'text-pink-500';
+
+                        return (
+                            <div key={slotKey} className={`rounded-lg border p-3 space-y-2 text-xs ${bdr}`}>
+                                <div className="flex items-center justify-between">
+                                    <p className={`text-[10px] font-bold uppercase tracking-widest ${lbl}`}>{label}</p>
+                                    <div className="flex rounded border border-gray-300 overflow-hidden text-[10px]">
+                                        <button type="button" onClick={() => setSlotField(slotKey, 'mode', 'manual')}
+                                            className={`px-2 py-0.5 transition-colors ${!isCTC ? 'bg-gray-200 font-semibold text-gray-800' : 'text-gray-400 hover:bg-gray-100'}`}>Manual</button>
+                                        <button type="button" onClick={() => setSlotField(slotKey, 'mode', 'ctc')}
+                                            className={`px-2 py-0.5 transition-colors ${isCTC ? 'bg-primary font-semibold text-black' : 'text-gray-400 hover:bg-gray-100'}`}>Link CTC</button>
+                                    </div>
+                                </div>
+
+                                {isCTC ? (
+                                    d.ctcId ? (
+                                        <div className="space-y-1.5">
+                                            <div className="flex items-center gap-2 p-2 bg-white rounded border border-primary/30">
+                                                {d.imageUrl
+                                                    ? <img src={d.imageUrl} className="w-10 h-10 rounded-full object-cover flex-shrink-0" alt="" />
+                                                    : <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0"><Cat size={16} className="text-gray-300" /></div>
+                                                }
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-xs font-semibold text-gray-800 truncate">{[d.prefix,d.name,d.suffix].filter(Boolean).join(' ')}</p>
+                                                    {d.variety && <p className="text-[11px] text-gray-500 truncate">{d.variety}</p>}
+                                                    <p className="text-[10px] font-mono text-gray-800">{d.ctcId}</p>
+                                                </div>
+                                            </div>
+                                            <button type="button"
+                                                onClick={() => setMpEditForm(f => ({ ...f, [slotKey]: { ...f[slotKey], mode: 'manual', ctcId: '' } }))}
+                                                className="text-[10px] text-red-400 hover:text-red-600 transition-colors">Unlink</button>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-1.5">
+                                            <button type="button" onClick={() => setMpCTCOpenSlot(slotKey)}
+                                                className="w-full px-2 py-1.5 border border-dashed border-primary/40 rounded text-xs text-primary hover:bg-primary/5 transition flex items-center gap-1.5 justify-center">
+                                                <Search size={12} /> Search CTC Animal…
+                                            </button>
+                                        </div>
+                                    )
+                                ) : (
+                                    <>
+                                        <input placeholder="Name" value={d.name || ''} onChange={e => setSlotField(slotKey, 'name', e.target.value)}
+                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                        <input placeholder="Variety / Morph" value={d.variety || ''} onChange={e => setSlotField(slotKey, 'variety', e.target.value)}
+                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                        <input placeholder="Genetic Code" value={d.genCode || ''} onChange={e => setSlotField(slotKey, 'genCode', e.target.value)}
+                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs font-mono focus:ring-1 focus:ring-primary focus:border-primary" />
+                                        <input type="date" value={d.birthDate || ''} onChange={e => setSlotField(slotKey, 'birthDate', e.target.value)}
+                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                        <input placeholder="Breeder Name" value={d.breederName || ''} onChange={e => setSlotField(slotKey, 'breederName', e.target.value)}
+                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary focus:border-primary" />
+                                        <div className="flex items-center gap-2">
+                                            {d.imageUrl && <img src={d.imageUrl} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-gray-200" />}
+                                            <label className={`flex-1 flex items-center gap-1.5 px-2 py-1 border border-gray-300 rounded text-xs cursor-pointer bg-white hover:bg-gray-50 transition ${mpSlotUploading[slotKey] ? 'opacity-50 pointer-events-none' : ''}`}>
+                                                {mpSlotUploading[slotKey] ? <><Loader2 size={11} className="animate-spin" /> Uploading…</> : <><Camera size={11} /> {d.imageUrl ? 'Change Photo' : 'Add Photo'}</>}
+                                                <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                                                    const file = e.target.files?.[0];
+                                                    e.target.value = '';
+                                                    if (!file) return;
+                                                    setMpSlotUploading(p => ({ ...p, [slotKey]: true }));
+                                                    try {
+                                                        let blob;
+                                                        try { blob = await compressImageWithWorker(file, 480 * 1024, { maxWidth: 1200, maxHeight: 1200, startQuality: 0.85 }); } catch { blob = null; }
+                                                        if (!blob) { try { blob = await compressImageToMaxSize(file, 480 * 1024, { maxWidth: 1200, maxHeight: 1200 }); } catch { blob = await compressImageFile(file, { maxWidth: 1200, maxHeight: 1200, quality: 0.82 }); } }
+                                                        const fd = new FormData();
+                                                        fd.append('file', new File([blob], 'ancestor.jpg', { type: 'image/jpeg' }));
+                                                        const up = await axios.post(`${API_BASE_URL}/upload`, fd, { headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'multipart/form-data' } });
+                                                        setSlotField(slotKey, 'imageUrl', up.data.url);
+                                                    } catch { showModalMessage('Upload failed', 'Could not upload ancestor image. Please try again.'); }
+                                                    setMpSlotUploading(p => ({ ...p, [slotKey]: false }));
+                                                }} />
+                                            </label>
+                                            {d.imageUrl && <button type="button" onClick={() => setSlotField(slotKey, 'imageUrl', '')} className="text-[10px] text-red-400 hover:text-red-600 transition-colors flex-shrink-0">Remove</button>}
+                                        </div>
+                                        <textarea placeholder="Notes" value={d.notes || ''} onChange={e => setSlotField(slotKey, 'notes', e.target.value)} rows={2}
+                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs resize-none focus:ring-1 focus:ring-primary focus:border-primary"></textarea>
+                                    </>
+                                )}
+                            </div>
+                        );
+                    };
+
+                    return (<>
+                        {ctcModal}
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-2">
+                                <Dna size={18} className="text-orange-500" />
+                                <h3 className="text-base font-semibold text-gray-700">Beta Pedigree</h3>
+                            </div>
+                            <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart. Changes are saved when you click Save Animal.</p>
+
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 1 — Parents</p>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {renderEditSlot('sire', 'Sire', 'sire')}
+                                    {renderEditSlot('dam', 'Dam', 'dam')}
+                                </div>
+                            </div>
+
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 2 — Grandparents</p>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                        {renderEditSlot('sireSire', 'Grandsire', 'sire')}
+                                        {renderEditSlot('sireDam', 'Granddam', 'sire')}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                        {renderEditSlot('damSire', 'Grandsire', 'dam')}
+                                        {renderEditSlot('damDam', 'Granddam', 'dam')}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 3 — Great-Grandparents</p>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                        <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
+                                        {renderEditSlot('sireSireSire', 'Great-Grandsire', 'sire')}
+                                        {renderEditSlot('sireSireDam', 'Great-Granddam', 'sire')}
+                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                        {renderEditSlot('sireDamSire', 'Great-Grandsire', 'sire')}
+                                        {renderEditSlot('sireDamDam', 'Great-Granddam', 'sire')}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                        <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
+                                        {renderEditSlot('damSireSire', 'Great-Grandsire', 'dam')}
+                                        {renderEditSlot('damSireDam', 'Great-Granddam', 'dam')}
+                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                        {renderEditSlot('damDamSire', 'Great-Grandsire', 'dam')}
+                                        {renderEditSlot('damDamDam', 'Great-Granddam', 'dam')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </>);
+                })()}
+
                 {/* Tab 14: Gallery */}
                 {activeTab === 14 && (
                     <div className="space-y-4">
@@ -21152,8 +22168,6 @@ const AnimalForm = ({
 };
 
 const UserProfileCard = ({ userProfile, API_BASE_URL }) => {
-    if (!userProfile) return null;
-
     const [avgRating, setAvgRating] = useState(0);
     const [ratingCount, setRatingCount] = useState(0);
 
@@ -21166,6 +22180,8 @@ const UserProfileCard = ({ userProfile, API_BASE_URL }) => {
             })
             .catch(() => {});
     }, [API_BASE_URL, userProfile?.id_public]);
+
+    if (!userProfile) return null;
 
     const formattedCreationDate = userProfile.creationDate
         ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(userProfile.creationDate))
@@ -21372,6 +22388,13 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             .finally(() => setMyReceivedRatingsLoading(false));
     }, [settingsTab, userProfile?.id_public]);
 
+    useEffect(() => {
+        if (settingsTab !== 'data') return;
+        axios.get(`${API_BASE_URL}/species`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(r => setZeSpeciesList(Array.isArray(r.data) ? r.data : []))
+            .catch(() => {});
+    }, [settingsTab, API_BASE_URL, authToken]);
+
     // Data Portability — Export
     const [exportSections, setExportSections] = useState({ animals: true, litters: true, enclosures: true, supplies: true, budget: true });
     const [exportFormat, setExportFormat] = useState('json');
@@ -21382,6 +22405,42 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
 
     // Data Portability — Import
     const [importFile, setImportFile] = useState(null);
+
+    // ZooEasy Import
+    const [zeAnimalsFile, setZeAnimalsFile] = useState(null);
+    const [zePairsFile, setZePairsFile] = useState(null);
+    const [zeSpecies, setZeSpecies] = useState('');
+    const [zeNewSpeciesName, setZeNewSpeciesName] = useState('');
+    const [zeAddingSpecies, setZeAddingSpecies] = useState(false);
+    const [zePreview, setZePreview] = useState(null);
+    const [zeConflictResolutions, setZeConflictResolutions] = useState({});
+    const [zeLoading, setZeLoading] = useState(false);
+    const [zeConfirmLoading, setZeConfirmLoading] = useState(false);
+    const [zeResult, setZeResult] = useState(null);
+    const [zeSelectedAnimals, setZeSelectedAnimals] = useState(() => new Set());
+    const [zeSelectedLitters, setZeSelectedLitters] = useState(() => new Set());
+    const [zeManualMappings, setZeManualMappings] = useState({});
+    const [zeMappingSearch, setZeMappingSearch] = useState({ regNum: null, query: '', results: [], loading: false });
+    const [zeSpeciesList, setZeSpeciesList] = useState([]);
+
+    // Kintraks Import
+    const [ktkAnimalsFile, setKtkAnimalsFile] = useState(null);
+    const [ktkBreedingFile, setKtkBreedingFile] = useState(null);
+    const [ktkSpecies, setKtkSpecies] = useState('');
+    const [ktkNewSpeciesName, setKtkNewSpeciesName] = useState('');
+    const [ktkAddingSpecies, setKtkAddingSpecies] = useState(false);
+    const [ktkPreview, setKtkPreview] = useState(null);
+    const [ktkConflictResolutions, setKtkConflictResolutions] = useState({});
+    const [ktkLoading, setKtkLoading] = useState(false);
+    const [ktkConfirmLoading, setKtkConfirmLoading] = useState(false);
+    const [ktkResult, setKtkResult] = useState(null);
+    const [ktkSelectedAnimals, setKtkSelectedAnimals] = useState(() => new Set());
+    const [ktkSelectedLitters, setKtkSelectedLitters] = useState(() => new Set());
+    const [ktkManualMappings, setKtkManualMappings] = useState({});
+    const [ktkMappingSearch, setKtkMappingSearch] = useState({ registration: null, query: '', results: [], loading: false });
+    const [ktkLitterMappings, setKtkLitterMappings] = useState({});
+    const [ktkLitterMappingSearch, setKtkLitterMappingSearch] = useState({ litterIndex: null, side: null, query: '', results: [], loading: false });
+
     const [importPreview, setImportPreview] = useState(null);
     const [importConflictResolutions, setImportConflictResolutions] = useState({});
     const [importLoading, setImportLoading] = useState(false);
@@ -21389,6 +22448,26 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [importResult, setImportResult] = useState(null);
     const [importSectionActions, setImportSectionActions] = useState({});
     const [importConflictsExpanded, setImportConflictsExpanded] = useState({});
+
+    // SimpleBreed Import
+    const [sbUrl, setSbUrl] = useState('');
+    const [sbPreviewLoading, setSbPreviewLoading] = useState(false);
+    const [sbPreview, setSbPreview] = useState(null); // { animals: [...], profileUrl }
+    const [sbSelectedIds, setSbSelectedIds] = useState(() => new Set());
+    const [sbConflictResolutions, setSbConflictResolutions] = useState({}); // { sbId: 'skip'|'import_anyway' }
+    const [sbManualMappings, setSbManualMappings] = useState({}); // { sbId: { id_public, name } }
+    const [sbMappingSearch, setSbMappingSearch] = useState({ sbId: null, query: '', results: [], loading: false });
+    const [sbSpeciesOverrides, setSbSpeciesOverrides] = useState({}); // { sbId: 'species' } for animals where SB couldn't determine species
+    const [sbFavoriteSpecies, setSbFavoriteSpecies] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('speciesFavorites') || '[]'); } catch { return []; }
+    });
+    useEffect(() => {
+        const onFavChange = (e) => setSbFavoriteSpecies(e.detail || []);
+        window.addEventListener('speciesFavoritesChanged', onFavChange);
+        return () => window.removeEventListener('speciesFavoritesChanged', onFavChange);
+    }, []);
+    const [sbImportLoading, setSbImportLoading] = useState(false);
+    const [sbResult, setSbResult] = useState(null);
 
     const handleImageChange = async (e) => {
         if (e.target.files && e.target.files[0]) {
@@ -21756,6 +22835,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     { id: 'directory',       label: 'Directory' },
                     { id: 'ratings',         label: 'Ratings' },
                     { id: 'breeding-lines',  label: 'Breeding Lines' },
+                    { id: 'data',            label: 'Data Portability' },
                     { id: 'account',         label: 'Account' },
                 ].map(tab => (
                     <button key={tab.id} type="button" onClick={() => setSettingsTab(tab.id)}
@@ -22239,11 +23319,12 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     </button>
                 </div>
             </form>
+            </>}
 
-            {/* ── Data Portability ───────────────────────────────────────────── */}
-            <div className="mt-6 mb-6 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden space-y-6">
+            {settingsTab === 'data' && <>
+            <div className="p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden space-y-6">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Data Portability</h3>
-                <p className="text-sm text-gray-500 -mt-2">Export your records as a backup, or import data from a previous CritterTrack export.</p>
+                <p className="text-sm text-gray-500 -mt-2">Export your records as a backup, or import data from a previous CritterTrack export or another service.</p>
 
                 {/* ── Export ────────────────────────────────────────────────── */}
                 <div>
@@ -22460,8 +23541,1536 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         </div>
                     )}
                 </div>
+
+                {/* ── Third-party import disclaimer ──────────────────────────── */}
+                <div className="border-t pt-5">
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-5 flex gap-2.5">
+                        <AlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />
+                        <div className="text-xs text-amber-800 space-y-1">
+                            <p className="font-semibold">Important — please read before importing</p>
+                            <ul className="list-disc list-inside space-y-0.5">
+                                <li><strong>Images are not imported</strong> — ZooEasy, Kintraks, and SimpleBreed imports do not transfer any animal photos. You will need to upload images manually after importing.</li>
+                                <li><strong>Use at your own risk</strong> — importing may overwrite existing animal records, parent links, and other data. Always export a backup first.</li>
+                                <li><strong>Parent links may be inaccurate</strong> — parent names and relationships are matched by name and date; mismatches or missing links can occur and should be reviewed after import.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── ZooEasy Import ─────────────────────────────────────────── */}
+                <div className="border-t pt-5">
+                    <h4 className="font-semibold text-gray-700 mb-1 flex items-center gap-2"><Upload size={16} /> Import from ZooEasy</h4>
+                    <p className="text-xs text-gray-500 mb-4">Export your animals and/or breeding pairs from ZooEasy as CSV, then upload them here. Duplicates are detected across all CritterTrack users by registration number and name + birth date.</p>
+
+                    {/* Species */}
+                    <div className="mb-4">
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Species <span className="text-red-500">*</span> (required when importing animals)</label>
+                        <div className="flex items-center gap-2 max-w-xs">
+                            <select
+                                value={zeSpecies}
+                                onChange={e => setZeSpecies(e.target.value)}
+                                className="flex-1 p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary bg-white"
+                            >
+                                <option value="">— select species —</option>
+                                {(zeSpeciesList || []).map(s => (
+                                    <option key={s.name} value={s.name}>{s.name}</option>
+                                ))}
+                            </select>
+                            <button
+                                type="button"
+                                title="Add new species"
+                                onClick={() => { setZeAddingSpecies(v => !v); setZeNewSpeciesName(''); }}
+                                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 text-gray-600 transition"
+                            >
+                                <Plus size={15} />
+                            </button>
+                        </div>
+                        {zeAddingSpecies && (
+                            <div className="flex items-center gap-2 mt-2 max-w-xs">
+                                <input
+                                    type="text"
+                                    placeholder="New species name"
+                                    value={zeNewSpeciesName}
+                                    onChange={e => setZeNewSpeciesName(e.target.value)}
+                                    className="flex-1 p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary"
+                                    onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
+                                />
+                                <button
+                                    type="button"
+                                    disabled={!zeNewSpeciesName.trim()}
+                                    onClick={async () => {
+                                        const name = zeNewSpeciesName.trim();
+                                        if (!name) return;
+                                        try {
+                                            const resp = await axios.post(`${API_BASE_URL}/species`,
+                                                { name, category: 'Mammal' },
+                                                { headers: { Authorization: `Bearer ${authToken}` } }
+                                            );
+                                            const added = resp.data.species;
+                                            setZeSpeciesList(prev => [...prev, added]);
+                                            setZeSpecies(added.name);
+                                            setZeAddingSpecies(false);
+                                            setZeNewSpeciesName('');
+                                        } catch (err) {
+                                            if (err.response?.status === 409) {
+                                                // Already exists — just select it
+                                                const existing = err.response.data.existing?.name || name;
+                                                setZeSpecies(existing);
+                                                setZeAddingSpecies(false);
+                                            } else {
+                                                showModalMessage('Error', err.response?.data?.message || 'Failed to add species.');
+                                            }
+                                        }
+                                    }}
+                                    className="px-3 py-2 bg-primary hover:bg-primary-dark text-black text-xs font-bold rounded-lg transition disabled:opacity-40"
+                                >
+                                    Add
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setZeAddingSpecies(false)}
+                                    className="p-2 text-gray-400 hover:text-gray-600 transition"
+                                >
+                                    <X size={14} />
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* File pickers */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                        {[['animals', zeAnimalsFile, setZeAnimalsFile, 'Animals CSV (animals.csv)'],
+                          ['breedingpairs', zePairsFile, setZePairsFile, 'Breeding Pairs CSV (breedingpairs.csv)']].map(
+                            ([key, file, setter, label]) => (
+                                <label key={key} className="flex flex-col items-center justify-center h-20 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition relative">
+                                    <input type="file" accept=".csv" className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                                        onChange={e => { setter(e.target.files?.[0] || null); setZePreview(null); setZeResult(null); }} />
+                                    {file
+                                        ? <p className="text-xs font-medium text-gray-700 flex items-center gap-1"><FileText size={13} />{file.name}</p>
+                                        : <>
+                                            <Upload size={16} className="text-gray-400 mb-1" />
+                                            <p className="text-xs text-gray-500 text-center px-2">{label}</p>
+                                          </>
+                                    }
+                                </label>
+                            )
+                        )}
+                    </div>
+
+                    {(zeAnimalsFile || zePairsFile) && !zePreview && !zeResult && (
+                        <button
+                            onClick={async () => {
+                                if (zeAnimalsFile && !zeSpecies.trim()) {
+                                    showModalMessage('Species Required', 'Please enter a species name before previewing.');
+                                    return;
+                                }
+                                setZeLoading(true);
+                                setZePreview(null);
+                                setZeResult(null);
+                                setZeConflictResolutions({});
+                                try {
+                                    const fd = new FormData();
+                                    if (zeAnimalsFile) fd.append('animals', zeAnimalsFile);
+                                    if (zePairsFile) fd.append('breedingpairs', zePairsFile);
+                                    fd.append('species', zeSpecies.trim());
+                                    const resp = await axios.post(`${API_BASE_URL}/import/zooeasy`, fd, {
+                                        headers: { Authorization: `Bearer ${authToken}` },
+                                    });
+                                    const preview = resp.data.preview || {};
+                                    setZePreview(preview);
+                                    // Select all animals by default
+                                    setZeSelectedAnimals(new Set((preview.animals?.items || []).map(a => a.zeRegNum).filter(Boolean)));
+                                    // Select non-duplicate litters by default
+                                    setZeSelectedLitters(new Set((preview.litters?.items || []).filter(l => !l.isDuplicate).map(l => l.litterIndex)));
+                                    setZeManualMappings({});
+                                    setZeMappingSearch({ regNum: null, query: '', results: [], loading: false });
+                                    // Default conflicts to 'use_existing' (keep CT ID for lineage, don't re-import)
+                                    const defaults = {};
+                                    for (const c of (preview.animals?.conflicts || [])) {
+                                        defaults[c.zeRegNum] = 'use_existing';
+                                    }
+                                    setZeConflictResolutions(defaults);
+                                } catch (err) {
+                                    showModalMessage('ZooEasy Preview Failed', err.response?.data?.message || err.message);
+                                } finally {
+                                    setZeLoading(false);
+                                }
+                            }}
+                            disabled={zeLoading}
+                            className="bg-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+                        >
+                            {zeLoading ? <Loader2 className="animate-spin" size={16} /> : <FileText size={16} />}
+                            Preview Import
+                        </button>
+                    )}
+
+                    {/* Preview */}
+                    {zePreview && (
+                        <div className="space-y-5 mt-3">
+
+                            {/* Animals table */}
+                            {zePreview.animals && (
+                                <div>
+                                    <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                                        <h5 className="font-semibold text-gray-700">
+                                            Animals &mdash; {zePreview.animals.total} total
+                                            {zePreview.animals.conflicts?.length > 0 && (() => {
+                                                const high = zePreview.animals.conflicts.filter(c => c.confidence !== 'possible').length;
+                                                const possible = zePreview.animals.conflicts.filter(c => c.confidence === 'possible').length;
+                                                return (
+                                                    <span className="ml-2 text-xs font-normal">
+                                                        {high > 0 && <span className="text-amber-600">{high} duplicate{high !== 1 ? 's' : ''}</span>}
+                                                        {high > 0 && possible > 0 && <span className="text-gray-400"> · </span>}
+                                                        {possible > 0 && <span className="text-orange-500">{possible} possible match{possible !== 1 ? 'es' : ''}</span>}
+                                                    </span>
+                                                );
+                                            })()}
+                                        </h5>
+                                        <div className="flex gap-2 text-xs flex-wrap">
+                                            <button type="button"
+                                                onClick={() => setZeSelectedAnimals(new Set((zePreview.animals.items || []).map(a => a.zeRegNum).filter(Boolean)))}
+                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Select all</button>
+                                            <button type="button"
+                                                onClick={() => setZeSelectedAnimals(new Set())}
+                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Deselect all</button>
+                                            <span className="border-l mx-1"></span>
+                                            <button type="button"
+                                                onClick={() => { const conflictRegs = new Set((zePreview.animals.conflicts || []).map(c => c.zeRegNum)); setZeSelectedAnimals(new Set((zePreview.animals.items || []).filter(a => !conflictRegs.has(a.zeRegNum)).map(a => a.zeRegNum).filter(Boolean))); }}
+                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-green-700">New only</button>
+                                            <button type="button"
+                                                onClick={() => { const dupRegs = new Set((zePreview.animals.conflicts || []).filter(c => c.confidence !== 'possible').map(c => c.zeRegNum)); setZeSelectedAnimals(new Set((zePreview.animals.items || []).filter(a => dupRegs.has(a.zeRegNum)).map(a => a.zeRegNum).filter(Boolean))); }}
+                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-amber-700">Duplicates only</button>
+                                            <button type="button"
+                                                onClick={() => { const possRegs = new Set((zePreview.animals.conflicts || []).filter(c => c.confidence === 'possible').map(c => c.zeRegNum)); setZeSelectedAnimals(new Set((zePreview.animals.items || []).filter(a => possRegs.has(a.zeRegNum)).map(a => a.zeRegNum).filter(Boolean))); }}
+                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-orange-700">Possible only</button>
+                                        </div>
+                                    </div>
+                                    <div className="border rounded-lg overflow-hidden">
+                                        <div className="overflow-x-auto max-h-96 overflow-y-auto">
+                                            <table className="min-w-full text-xs">
+                                                <thead className="bg-gray-100 sticky top-0 z-10">
+                                                    <tr>
+                                                        <th className="px-2 py-2 w-8"></th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Name</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Gender</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Born</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Reg #</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Sire #</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Dam #</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Color</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Coat</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y bg-white">
+                                                    {(zePreview.animals.items || []).map(a => {
+                                                        const isSelected = zeSelectedAnimals.has(a.zeRegNum);
+                                                        const conflict = zePreview.animals.conflicts?.find(c => c.zeRegNum === a.zeRegNum);
+                                                        const resolution = zeConflictResolutions[a.zeRegNum] || 'use_existing';
+                                                        return (
+                                                            <React.Fragment key={a.zeRegNum || a.name}>
+                                                                <tr className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : conflict ? 'bg-amber-50' : ''}`}>
+                                                                    <td className="px-2 py-1.5 text-center">
+                                                                        <input type="checkbox" checked={isSelected}
+                                                                            onChange={e => setZeSelectedAnimals(prev => {
+                                                                                const next = new Set(prev);
+                                                                                if (e.target.checked) next.add(a.zeRegNum); else next.delete(a.zeRegNum);
+                                                                                return next;
+                                                                            })}
+                                                                            className="rounded" />
+                                                                    </td>
+                                                                    <td className="px-2 py-1.5 font-medium text-gray-800 whitespace-nowrap">{[a.prefix, a.name, a.suffix].filter(Boolean).join(' ')}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600">{a.gender || '—'}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600 whitespace-nowrap">{a.birthDate || '—'}</td>
+                                                                    <td className="px-2 py-1.5 font-mono text-gray-500">{a.zeRegNum || '—'}</td>
+                                                                    <td className="px-2 py-1.5 font-mono text-gray-400">{a.sireRegNum || '—'}</td>
+                                                                    <td className="px-2 py-1.5 font-mono text-gray-400">{a.damRegNum || '—'}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600">{a.color || '—'}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600">{a.coat || '—'}</td>
+                                                                    <td className="px-2 py-1.5">
+                                                                        {conflict
+                                                                            ? conflict.confidence === 'possible'
+                                                                                ? <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded text-xs font-medium">Possible match</span>
+                                                                                : <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium">Duplicate</span>
+                                                                            : zeManualMappings[a.zeRegNum]
+                                                                                ? <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">Mapped</span>
+                                                                                : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
+                                                                    </td>
+                                                                </tr>
+                                                                {/* Manual mapping sub-row for New/Mapped rows */}
+                                                                {!conflict && isSelected && (
+                                                                    <tr className={zeManualMappings[a.zeRegNum] ? 'bg-blue-50' : 'bg-gray-50'}>
+                                                                        <td></td>
+                                                                        <td colSpan="9" className="px-3 pb-2 pt-0">
+                                                                            {zeManualMappings[a.zeRegNum] ? (
+                                                                                <div className="flex items-center gap-2 text-xs pt-1">
+                                                                                    <span className="text-blue-700">&#x21AA; Mapped to <span className="font-mono font-semibold">{zeManualMappings[a.zeRegNum].id_public}</span> &mdash; {zeManualMappings[a.zeRegNum].name}</span>
+                                                                                    <button type="button" onClick={() => setZeManualMappings(prev => { const n = { ...prev }; delete n[a.zeRegNum]; return n; })}
+                                                                                        className="text-gray-400 hover:text-red-500 transition ml-1" title="Remove mapping"><X size={11} /></button>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div className="pt-1">
+                                                                                    {zeMappingSearch.regNum === a.zeRegNum ? (
+                                                                                        <div className="flex flex-col gap-1.5">
+                                                                                            <div className="flex items-center gap-1.5">
+                                                                                                <input autoFocus type="text" placeholder="Search CT animal by name…"
+                                                                                                    value={zeMappingSearch.query}
+                                                                                                    onChange={async e => {
+                                                                                                        const q = e.target.value;
+                                                                                                        setZeMappingSearch(prev => ({ ...prev, query: q, loading: true, results: [] }));
+                                                                                                        if (!q.trim()) { setZeMappingSearch(prev => ({ ...prev, loading: false })); return; }
+                                                                                                        try {
+                                                                                                            const [privateRes, publicRes] = await Promise.allSettled([
+                                                                                                                axios.get(`${API_BASE_URL}/animals`, { params: { name: q }, headers: { Authorization: `Bearer ${authToken}` } }),
+                                                                                                                axios.get(`${API_BASE_URL}/public/global/animals`, { params: { name: q, limit: 10 } }),
+                                                                                                            ]);
+                                                                                                            const own = privateRes.status === 'fulfilled' ? privateRes.value.data : [];
+                                                                                                            const pub = publicRes.status === 'fulfilled' ? publicRes.value.data : [];
+                                                                                                            const seen = new Set(own.map(a => a.id_public));
+                                                                                                            const merged = [...own, ...pub.filter(a => !seen.has(a.id_public))];
+                                                                                                            setZeMappingSearch(prev => ({ ...prev, results: merged.slice(0, 10), loading: false }));
+                                                                                                        } catch { setZeMappingSearch(prev => ({ ...prev, loading: false })); }
+                                                                                                    }}
+                                                                                                    className="flex-1 max-w-xs text-xs border rounded px-2 py-1 focus:ring-primary focus:border-primary"
+                                                                                                />
+                                                                                                {zeMappingSearch.loading && <Loader2 size={11} className="animate-spin text-gray-400" />}
+                                                                                                <button type="button" onClick={() => setZeMappingSearch({ regNum: null, query: '', results: [], loading: false })}
+                                                                                                    className="text-gray-400 hover:text-gray-600"><X size={11} /></button>
+                                                                                            </div>
+                                                                                            {zeMappingSearch.results.length > 0 && (
+                                                                                                <div className="border rounded bg-white shadow-sm divide-y max-w-sm max-h-40 overflow-y-auto">
+                                                                                                    {zeMappingSearch.results.map(r => (
+                                                                                                        <button key={r.id_public} type="button"
+                                                                                                            onClick={() => {
+                                                                                                                setZeManualMappings(prev => ({ ...prev, [a.zeRegNum]: { id_public: r.id_public, name: [r.prefix, r.name, r.suffix].filter(Boolean).join(' ') } }));
+                                                                                                                setZeMappingSearch({ regNum: null, query: '', results: [], loading: false });
+                                                                                                            }}
+                                                                                                            className="w-full text-left px-2 py-1.5 hover:bg-blue-50 transition text-xs"
+                                                                                                        >
+                                                                                                            <span className="font-medium text-gray-800">{[r.prefix, r.name, r.suffix].filter(Boolean).join(' ')}</span>
+                                                                                                            <span className="text-gray-400 ml-2 font-mono">{r.id_public}</span>
+                                                                                                            {r.birthDate && <span className="text-gray-400 ml-1">&middot; {String(r.birthDate).slice(0,10)}</span>}
+                                                                                                            {r.gender && <span className="text-gray-400 ml-1">&middot; {r.gender}</span>}
+                                                                                                            {r.breederName && <span className="text-gray-300 ml-1">&middot; {r.breederName}</span>}
+                                                                                                        </button>
+                                                                                                    ))}
+                                                                                                </div>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    ) : (
+                                                                                        <button type="button"
+                                                                                            onClick={() => setZeMappingSearch({ regNum: a.zeRegNum, query: '', results: [], loading: false })}
+                                                                                            className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                                                                                        >
+                                                                                            + Map to existing CT animal (for parent links)
+                                                                                        </button>
+                                                                                    )}
+                                                                                </div>
+                                                                            )}
+                                                                        </td>
+                                                                    </tr>
+                                                                )}
+                                                                {conflict && isSelected && (
+                                                                    <tr className={`bg-${conflict.confidence === 'possible' ? 'orange' : 'amber'}-50`}>
+                                                                        <td></td>
+                                                                        <td colSpan="9" className="px-3 pb-2 pt-0">
+                                                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-amber-800 pt-1">
+                                                                                <AlertTriangle size={11} className="shrink-0 text-amber-500" />
+                                                                                <span>
+                                                                                    {conflict.confidence === 'possible' ? 'Possible match: ' : 'Matches '}
+                                                                                    <span className="font-mono">{conflict.existingId}</span>
+                                                                                    {conflict.existingName && conflict.existingName !== conflict.name && <span> &ldquo;{conflict.existingName}&rdquo;</span>}
+                                                                                    {conflict.existingBirthDate && <span> &middot; {conflict.existingBirthDate}</span>}
+                                                                                    {' '}({conflict.isOwnedByImporter ? 'your animal' : `owned by ${conflict.existingOwner}`})
+                                                                                    {' · matched by '}{conflict.matchType === 'id' ? 'registration number' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}
+                                                                                </span>
+                                                                                <select
+                                                                                    value={resolution}
+                                                                                    onChange={e => setZeConflictResolutions(prev => ({ ...prev, [a.zeRegNum]: e.target.value }))}
+                                                                                    className="border rounded px-2 py-0.5 bg-white text-gray-700 font-medium text-xs"
+                                                                                >
+                                                                                    <option value="use_existing">Use existing CT animal for parent links (skip import)</option>
+                                                                                    <option value="import_anyway">Import anyway as new entry</option>
+                                                                                </select>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                )}
+                                                            </React.Fragment>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        {zeSelectedAnimals.size} of {zePreview.animals.total} selected
+                                        {(() => {
+                                            const dupeLinks = [...zeSelectedAnimals].filter(r => {
+                                                const c = zePreview.animals.conflicts?.find(x => x.zeRegNum === r);
+                                                return c && (zeConflictResolutions[r] || 'use_existing') === 'use_existing';
+                                            }).length;
+                                            return dupeLinks > 0 ? ` \u00b7 ${dupeLinks} duplicate${dupeLinks !== 1 ? 's' : ''} will link to existing CT animals` : '';
+                                        })()}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Litters table */}
+                            {zePreview.litters?.items?.length > 0 && (
+                                <div>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h5 className="font-semibold text-gray-700">Litters &mdash; {zePreview.litters.total} total</h5>
+                                        <div className="flex gap-2 text-xs">
+                                            <button type="button" onClick={() => setZeSelectedLitters(new Set(zePreview.litters.items.map(l => l.litterIndex)))} className="text-primary hover:underline">Select all</button>
+                                            <button type="button" onClick={() => setZeSelectedLitters(new Set())} className="text-gray-400 hover:underline">Deselect all</button>
+                                        </div>
+                                    </div>
+                                    <div className="border rounded-lg overflow-hidden">
+                                        <div className="overflow-x-auto max-h-48 overflow-y-auto">
+                                            <table className="min-w-full text-xs">
+                                                <thead className="bg-gray-100 sticky top-0">
+                                                    <tr>
+                                                        <th className="px-2 py-2"></th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Nest letter</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Mating date</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Birth date</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Sire</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Dam</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Born count</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y bg-white">
+                                                    {zePreview.litters.items.map((l, i) => {
+                                                        const isSelected = zeSelectedLitters.has(l.litterIndex);
+                                                        return (
+                                                            <tr key={i} className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : l.isDuplicate ? 'bg-amber-50' : ''}`}>
+                                                                <td className="px-2 py-1.5 text-center">
+                                                                    <input type="checkbox" checked={isSelected}
+                                                                        onChange={e => setZeSelectedLitters(prev => {
+                                                                            const next = new Set(prev);
+                                                                            if (e.target.checked) next.add(l.litterIndex); else next.delete(l.litterIndex);
+                                                                            return next;
+                                                                        })}
+                                                                        className="rounded" />
+                                                                </td>
+                                                                <td className="px-2 py-1.5 font-medium text-gray-700">{l.nestLetter || '—'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600">{l.matingDate ? String(l.matingDate).slice(0,10) : '—'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600">{l.birthDate ? String(l.birthDate).slice(0,10) : '—'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-700" title={l.maleRegNum || ''}>
+                                                                    {l.maleName || l.maleRegNum || '—'}
+                                                                    {l.maleCtId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{l.maleCtId}</span>}
+                                                                    {!l.maleCtId && l.maleRegNum && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
+                                                                </td>
+                                                                <td className="px-2 py-1.5 text-gray-700" title={l.femaleRegNum || ''}>
+                                                                    {l.femaleName || l.femaleRegNum || '—'}
+                                                                    {l.femaleCtId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{l.femaleCtId}</span>}
+                                                                    {!l.femaleCtId && l.femaleRegNum && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
+                                                                </td>
+                                                                <td className="px-2 py-1.5 text-gray-600">{l.litterSizeBorn != null ? l.litterSizeBorn : '—'}</td>
+                                                                <td className="px-2 py-1.5">
+                                                                    {l.isDuplicate
+                                                                        ? <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium" title={l.existingLitterId || ''}>Duplicate</span>
+                                                                        : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex gap-3 pt-1">
+                                <button
+                                    onClick={async () => {
+                                        setZeConfirmLoading(true);
+                                        try {
+                                            const fd = new FormData();
+                                            if (zeAnimalsFile) fd.append('animals', zeAnimalsFile);
+                                            if (zePairsFile) fd.append('breedingpairs', zePairsFile);
+                                            fd.append('species', zeSpecies.trim());
+                                            fd.append('confirm', 'true');
+                                            fd.append('selectedAnimals', JSON.stringify([...zeSelectedAnimals]));
+                                            fd.append('selectedLitters', JSON.stringify([...zeSelectedLitters]));
+                                            // Merge manual mappings into conflictResolutions as map_to:<id>
+                                            const finalResolutions = { ...zeConflictResolutions };
+                                            for (const [regNum, mapping] of Object.entries(zeManualMappings)) {
+                                                finalResolutions[regNum] = `map_to:${mapping.id_public}`;
+                                            }
+                                            fd.append('conflictResolutions', JSON.stringify(finalResolutions));
+                                            const resp = await axios.post(`${API_BASE_URL}/import/zooeasy`, fd, {
+                                                headers: { Authorization: `Bearer ${authToken}` },
+                                            });
+                                            setZeResult(resp.data);
+                                            setZePreview(null);
+                                            setZeAnimalsFile(null);
+                                            setZePairsFile(null);
+                                        } catch (err) {
+                                            showModalMessage('ZooEasy Import Failed', err.response?.data?.message || err.message);
+                                        } finally {
+                                            setZeConfirmLoading(false);
+                                        }
+                                    }}
+                                    disabled={zeConfirmLoading}
+                                    className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+                                >
+                                    {zeConfirmLoading ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle size={16} />}
+                                    Confirm Import
+                                </button>
+                                <button
+                                    onClick={() => { setZePreview(null); setZeAnimalsFile(null); setZePairsFile(null); setZeManualMappings({}); setZeMappingSearch({ regNum: null, query: '', results: [], loading: false }); setZeSelectedLitters(new Set()); }}
+                                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Result */}
+                    {zeResult && (
+                        <div className="mt-3 p-4 rounded-lg border bg-green-50 border-green-200">
+                            <p className="font-semibold text-green-800 flex items-center gap-1.5 mb-2"><CheckCircle size={16} /> ZooEasy import complete</p>
+                            <div className="text-sm text-gray-700 space-y-0.5 mb-2">
+                                {zeResult.written && Object.entries(zeResult.written).map(([s, n]) => (
+                                    <p key={s}><span className="capitalize font-medium">{s}</span>: {n} imported{zeResult.skipped?.[s] ? `, ${zeResult.skipped[s]} skipped (duplicates)` : ''}</p>
+                                ))}
+                            </div>
+                            {zeResult.errors?.length > 0 && (
+                                <div className="mt-2">
+                                    <p className="text-sm font-semibold text-red-700 flex items-center gap-1"><AlertTriangle size={13} /> {zeResult.errors.length} error(s):</p>
+                                    <ul className="text-xs text-red-600 list-disc list-inside mt-1 space-y-0.5 max-h-32 overflow-y-auto">
+                                        {zeResult.errors.map((e, i) => (
+                                            <li key={i}>[{e.section}] {e.id}: {e.error}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                            <button onClick={() => setZeResult(null)} className="mt-3 text-xs text-gray-500 hover:text-gray-700 underline">Dismiss</button>
+                        </div>
+                    )}
+                </div>
+
+                {/* ── Kintraks Import ─────────────────────────────────────── */}
+                <div className="border-t pt-5">
+                    <h4 className="font-semibold text-gray-700 mb-1 flex items-center gap-2"><Upload size={16} /> Import from Kintraks</h4>
+                    <p className="text-xs text-gray-500 mb-4">Export your animals (Export) and breeding records (Breeding Record - All Records) from Kintraks as CSV, then upload them here.</p>
+
+                    {/* Species */}
+                    <div className="mb-4">
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Species <span className="text-red-500">*</span> (required when importing animals)</label>
+                        <div className="flex items-center gap-2 max-w-xs">
+                            <select
+                                value={ktkSpecies}
+                                onChange={e => setKtkSpecies(e.target.value)}
+                                className="flex-1 p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary bg-white"
+                            >
+                                <option value="">— select species —</option>
+                                {(zeSpeciesList || []).map(s => (
+                                    <option key={s.name} value={s.name}>{s.name}</option>
+                                ))}
+                            </select>
+                            <button
+                                type="button"
+                                title="Add new species"
+                                onClick={() => { setKtkAddingSpecies(v => !v); setKtkNewSpeciesName(''); }}
+                                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 text-gray-600 transition"
+                            >
+                                <Plus size={15} />
+                            </button>
+                        </div>
+                        {ktkAddingSpecies && (
+                            <div className="flex items-center gap-2 mt-2 max-w-xs">
+                                <input
+                                    type="text"
+                                    placeholder="New species name"
+                                    value={ktkNewSpeciesName}
+                                    onChange={e => setKtkNewSpeciesName(e.target.value)}
+                                    className="flex-1 p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary"
+                                    onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
+                                />
+                                <button
+                                    type="button"
+                                    disabled={!ktkNewSpeciesName.trim()}
+                                    onClick={async () => {
+                                        const name = ktkNewSpeciesName.trim();
+                                        if (!name) return;
+                                        try {
+                                            const resp = await axios.post(`${API_BASE_URL}/species`,
+                                                { name, category: 'Mammal' },
+                                                { headers: { Authorization: `Bearer ${authToken}` } }
+                                            );
+                                            const added = resp.data.species;
+                                            setZeSpeciesList(prev => [...prev, added]);
+                                            setKtkSpecies(added.name);
+                                            setKtkAddingSpecies(false);
+                                            setKtkNewSpeciesName('');
+                                        } catch (err) {
+                                            if (err.response?.status === 409) {
+                                                const existing = err.response.data.existing?.name || name;
+                                                setKtkSpecies(existing);
+                                                setKtkAddingSpecies(false);
+                                            } else {
+                                                showModalMessage('Error', err.response?.data?.message || 'Failed to add species.');
+                                            }
+                                        }
+                                    }}
+                                    className="px-3 py-2 bg-primary hover:bg-primary-dark text-black text-xs font-bold rounded-lg transition disabled:opacity-40"
+                                >
+                                    Add
+                                </button>
+                                <button type="button" onClick={() => setKtkAddingSpecies(false)} className="p-2 text-gray-400 hover:text-gray-600 transition">
+                                    <X size={14} />
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* File pickers */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                        {[['animals', ktkAnimalsFile, setKtkAnimalsFile, 'Animals CSV (Export_*.csv)'],
+                          ['breedingrecords', ktkBreedingFile, setKtkBreedingFile, 'Breeding Records CSV']].map(
+                            ([key, file, setter, label]) => (
+                                <label key={key} className="flex flex-col items-center justify-center h-20 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition relative">
+                                    <input type="file" accept=".csv" className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                                        onChange={e => { setter(e.target.files?.[0] || null); setKtkPreview(null); setKtkResult(null); }} />
+                                    {file
+                                        ? <p className="text-xs font-medium text-gray-700 flex items-center gap-1"><FileText size={13} />{file.name}</p>
+                                        : <><Upload size={16} className="text-gray-400 mb-1" /><p className="text-xs text-gray-500 text-center px-2">{label}</p></>
+                                    }
+                                </label>
+                            )
+                        )}
+                    </div>
+
+                    {(ktkAnimalsFile || ktkBreedingFile) && !ktkPreview && !ktkResult && (
+                        <button
+                            onClick={async () => {
+                                if (ktkAnimalsFile && !ktkSpecies.trim()) {
+                                    showModalMessage('Species Required', 'Please select a species before previewing.');
+                                    return;
+                                }
+                                setKtkLoading(true);
+                                setKtkPreview(null);
+                                setKtkResult(null);
+                                setKtkConflictResolutions({});
+                                try {
+                                    const fd = new FormData();
+                                    if (ktkAnimalsFile) fd.append('animals', ktkAnimalsFile);
+                                    if (ktkBreedingFile) fd.append('breedingrecords', ktkBreedingFile);
+                                    fd.append('species', ktkSpecies.trim());
+                                    const resp = await axios.post(`${API_BASE_URL}/import/kintraks`, fd, {
+                                        headers: { Authorization: `Bearer ${authToken}` },
+                                    });
+                                    const preview = resp.data.preview || {};
+                                    setKtkPreview(preview);
+                                    setKtkSelectedAnimals(new Set((preview.animals?.items || []).map(a => a.registration || a.kintrakId).filter(Boolean)));
+                                    setKtkSelectedLitters(new Set((preview.litters?.items || []).map(l => l.litterIndex)));
+                                    setKtkManualMappings({});
+                                    setKtkMappingSearch({ registration: null, query: '', results: [], loading: false });
+                                    const defaults = {};
+                                    for (const c of (preview.animals?.conflicts || [])) {
+                                        defaults[c.registration || c.kintrakId] = 'use_existing';
+                                    }
+                                    setKtkConflictResolutions(defaults);
+                                } catch (err) {
+                                    showModalMessage('Kintraks Preview Failed', err.response?.data?.message || err.message);
+                                } finally {
+                                    setKtkLoading(false);
+                                }
+                            }}
+                            disabled={ktkLoading}
+                            className="bg-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+                        >
+                            {ktkLoading ? <Loader2 className="animate-spin" size={16} /> : <FileText size={16} />}
+                            Preview Import
+                        </button>
+                    )}
+
+                    {/* Preview */}
+                    {ktkPreview && (
+                        <div className="space-y-5 mt-3">
+
+                            {/* Animals table */}
+                            {ktkPreview.animals && (
+                                <div>
+                                    <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                                        <h5 className="font-semibold text-gray-700">
+                                            Animals &mdash; {ktkPreview.animals.total} total
+                                            {ktkPreview.animals.conflicts?.length > 0 && (() => {
+                                                const high     = ktkPreview.animals.conflicts.filter(c => c.confidence !== 'possible').length;
+                                                const possible = ktkPreview.animals.conflicts.filter(c => c.confidence === 'possible').length;
+                                                return (
+                                                    <span className="ml-2 text-xs font-normal">
+                                                        {high > 0 && <span className="text-amber-600">{high} duplicate{high !== 1 ? 's' : ''}</span>}
+                                                        {high > 0 && possible > 0 && <span className="text-gray-400"> · </span>}
+                                                        {possible > 0 && <span className="text-orange-500">{possible} possible match{possible !== 1 ? 'es' : ''}</span>}
+                                                    </span>
+                                                );
+                                            })()}
+                                        </h5>
+                                        <div className="flex gap-2 text-xs flex-wrap">
+                                            <button type="button"
+                                                onClick={() => setKtkSelectedAnimals(new Set((ktkPreview.animals.items || []).map(a => a.registration || a.kintrakId).filter(Boolean)))}
+                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Select all</button>
+                                            <button type="button"
+                                                onClick={() => setKtkSelectedAnimals(new Set())}
+                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Deselect all</button>
+                                            <span className="border-l mx-1"></span>
+                                            <button type="button"
+                                                onClick={() => { const conflictKtIds = new Set((ktkPreview.animals.conflicts || []).map(c => c.kintrakId)); setKtkSelectedAnimals(new Set((ktkPreview.animals.items || []).filter(a => !conflictKtIds.has(a.kintrakId)).map(a => a.registration || a.kintrakId).filter(Boolean))); }}
+                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-green-700">New only</button>
+                                            <button type="button"
+                                                onClick={() => { const dupKtIds = new Set((ktkPreview.animals.conflicts || []).filter(c => c.confidence !== 'possible').map(c => c.kintrakId)); setKtkSelectedAnimals(new Set((ktkPreview.animals.items || []).filter(a => dupKtIds.has(a.kintrakId)).map(a => a.registration || a.kintrakId).filter(Boolean))); }}
+                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-amber-700">Duplicates only</button>
+                                            <button type="button"
+                                                onClick={() => { const possKtIds = new Set((ktkPreview.animals.conflicts || []).filter(c => c.confidence === 'possible').map(c => c.kintrakId)); setKtkSelectedAnimals(new Set((ktkPreview.animals.items || []).filter(a => possKtIds.has(a.kintrakId)).map(a => a.registration || a.kintrakId).filter(Boolean))); }}
+                                                className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-orange-700">Possible only</button>
+                                        </div>
+                                    </div>
+                                    <div className="border rounded-lg overflow-hidden">
+                                        <div className="overflow-x-auto max-h-96 overflow-y-auto">
+                                            <table className="min-w-full text-xs">
+                                                <thead className="bg-gray-100 sticky top-0 z-10">
+                                                    <tr>
+                                                        <th className="px-2 py-2 w-8"></th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Name</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Gender</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Born</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Reg #</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Color</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Coat</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y bg-white">
+                                                    {(ktkPreview.animals.items || []).map(a => {
+                                                        const aKey = a.registration || a.kintrakId;
+                                                        const isSelected = ktkSelectedAnimals.has(aKey);
+                                                        const conflict   = ktkPreview.animals.conflicts?.find(c => c.kintrakId === a.kintrakId);
+                                                        const resolution = ktkConflictResolutions[aKey] || 'use_existing';
+                                                        return (
+                                                            <React.Fragment key={aKey}>
+                                                                <tr className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : conflict ? (conflict.confidence === 'possible' ? 'bg-orange-50' : 'bg-amber-50') : ''}`}>
+                                                                    <td className="px-2 py-1.5 text-center">
+                                                                        <input type="checkbox" checked={isSelected}
+                                                                            onChange={e => setKtkSelectedAnimals(prev => {
+                                                                                const next = new Set(prev);
+                                                                                if (e.target.checked) next.add(aKey); else next.delete(aKey);
+                                                                                return next;
+                                                                            })}
+                                                                            className="rounded" />
+                                                                    </td>
+                                                                    <td className="px-2 py-1.5 font-medium text-gray-800 whitespace-nowrap">{[a.prefix, a.name, a.suffix].filter(Boolean).join(' ')}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600">{a.gender || '—'}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600 whitespace-nowrap">{a.birthDate ? String(a.birthDate).slice(0,10) : '—'}</td>
+                                                                    <td className="px-2 py-1.5 font-mono text-gray-500">{a.registration || '—'}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600">{a.color || '—'}</td>
+                                                                    <td className="px-2 py-1.5 text-gray-600">{a.coat || '—'}</td>
+                                                                    <td className="px-2 py-1.5">
+                                                                        {conflict
+                                                                            ? conflict.confidence === 'possible'
+                                                                                ? <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded text-xs font-medium">Possible match</span>
+                                                                                : <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium">Duplicate</span>
+                                                                            : ktkManualMappings[aKey]
+                                                                                ? <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">Mapped</span>
+                                                                                : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
+                                                                    </td>
+                                                                </tr>
+                                                                {/* Manual mapping sub-row for New/Mapped rows */}
+                                                                {!conflict && isSelected && (
+                                                                    <tr className={ktkManualMappings[aKey] ? 'bg-blue-50' : 'bg-gray-50'}>
+                                                                        <td></td>
+                                                                        <td colSpan="7" className="px-3 pb-2 pt-0">
+                                                                            {ktkManualMappings[aKey] ? (
+                                                                                <div className="flex items-center gap-2 text-xs pt-1">
+                                                                                    <span className="text-blue-700">&#x21AA; Mapped to <span className="font-mono font-semibold">{ktkManualMappings[aKey].id_public}</span> &mdash; {ktkManualMappings[aKey].name}</span>
+                                                                                    <button type="button" onClick={() => setKtkManualMappings(prev => { const n = { ...prev }; delete n[aKey]; return n; })}
+                                                                                        className="text-gray-400 hover:text-red-500 transition ml-1" title="Remove mapping"><X size={11} /></button>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div className="pt-1">
+                                                                                    {ktkMappingSearch.registration === aKey ? (
+                                                                                        <div className="flex flex-col gap-1.5">
+                                                                                            <div className="flex items-center gap-1.5">
+                                                                                                <input autoFocus type="text" placeholder="Search CT animal by name…"
+                                                                                                    value={ktkMappingSearch.query}
+                                                                                                    onChange={async e => {
+                                                                                                        const q = e.target.value;
+                                                                                                        setKtkMappingSearch(prev => ({ ...prev, query: q, loading: true, results: [] }));
+                                                                                                        if (!q.trim()) { setKtkMappingSearch(prev => ({ ...prev, loading: false })); return; }
+                                                                                                        try {
+                                                                                                            const [privateRes, publicRes] = await Promise.allSettled([
+                                                                                                                axios.get(`${API_BASE_URL}/animals`, { params: { name: q }, headers: { Authorization: `Bearer ${authToken}` } }),
+                                                                                                                axios.get(`${API_BASE_URL}/public/global/animals`, { params: { name: q, limit: 10 } }),
+                                                                                                            ]);
+                                                                                                            const own = privateRes.status === 'fulfilled' ? privateRes.value.data : [];
+                                                                                                            const pub = publicRes.status === 'fulfilled' ? publicRes.value.data : [];
+                                                                                                            const seen = new Set(own.map(x => x.id_public));
+                                                                                                            const merged = [...own, ...pub.filter(x => !seen.has(x.id_public))];
+                                                                                                            setKtkMappingSearch(prev => ({ ...prev, results: merged.slice(0, 10), loading: false }));
+                                                                                                        } catch { setKtkMappingSearch(prev => ({ ...prev, loading: false })); }
+                                                                                                    }}
+                                                                                                    className="flex-1 max-w-xs text-xs border rounded px-2 py-1 focus:ring-primary focus:border-primary"
+                                                                                                />
+                                                                                                {ktkMappingSearch.loading && <Loader2 size={11} className="animate-spin text-gray-400" />}
+                                                                                                <button type="button" onClick={() => setKtkMappingSearch({ registration: null, query: '', results: [], loading: false })}
+                                                                                                    className="text-gray-400 hover:text-gray-600"><X size={11} /></button>
+                                                                                            </div>
+                                                                                            {ktkMappingSearch.results.length > 0 && (
+                                                                                                <div className="border rounded bg-white shadow-sm divide-y max-w-sm max-h-40 overflow-y-auto">
+                                                                                                    {ktkMappingSearch.results.map(r => (
+                                                                                                        <button key={r.id_public} type="button"
+                                                                                                            onClick={() => {
+                                                                                                                setKtkManualMappings(prev => ({ ...prev, [aKey]: { id_public: r.id_public, name: [r.prefix, r.name, r.suffix].filter(Boolean).join(' ') } }));
+                                                                                                                setKtkMappingSearch({ registration: null, query: '', results: [], loading: false });
+                                                                                                            }}
+                                                                                                            className="w-full text-left px-2 py-1.5 hover:bg-blue-50 transition text-xs"
+                                                                                                        >
+                                                                                                            <span className="font-medium text-gray-800">{[r.prefix, r.name, r.suffix].filter(Boolean).join(' ')}</span>
+                                                                                                            <span className="text-gray-400 ml-2 font-mono">{r.id_public}</span>
+                                                                                                            {r.birthDate && <span className="text-gray-400 ml-1">&middot; {String(r.birthDate).slice(0,10)}</span>}
+                                                                                                            {r.gender && <span className="text-gray-400 ml-1">&middot; {r.gender}</span>}
+                                                                                                            {r.breederName && <span className="text-gray-300 ml-1">&middot; {r.breederName}</span>}
+                                                                                                        </button>
+                                                                                                    ))}
+                                                                                                </div>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    ) : (
+                                                                                        <button type="button"
+                                                                                            onClick={() => setKtkMappingSearch({ registration: aKey, query: '', results: [], loading: false })}
+                                                                                            className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                                                                                        >
+                                                                                            + Map to existing CT animal (for parent links)
+                                                                                        </button>
+                                                                                    )}
+                                                                                </div>
+                                                                            )}
+                                                                        </td>
+                                                                    </tr>
+                                                                )}
+                                                                {conflict && isSelected && (
+                                                                    <tr className={`bg-${conflict.confidence === 'possible' ? 'orange' : 'amber'}-50`}>
+                                                                        <td></td>
+                                                                        <td colSpan="7" className="px-3 pb-2 pt-0">
+                                                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-amber-800 pt-1">
+                                                                                <AlertTriangle size={11} className="shrink-0 text-amber-500" />
+                                                                                <span>
+                                                                                    {conflict.confidence === 'possible' ? 'Possible match: ' : 'Matches '}
+                                                                                    <span className="font-mono">{conflict.existingId}</span>
+                                                                                    {conflict.existingName && conflict.existingName !== conflict.name && <span> &ldquo;{conflict.existingName}&rdquo;</span>}
+                                                                                    {conflict.existingBirthDate && <span> &middot; {conflict.existingBirthDate}</span>}
+                                                                                    {' '}({conflict.isOwnedByImporter ? 'your animal' : `owned by ${conflict.existingOwner}`})
+                                                                                    {' · matched by '}{conflict.matchType === 'id' ? 'registration number' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}
+                                                                                </span>
+                                                                                <select
+                                                                                    value={resolution}
+                                                                                    onChange={e => setKtkConflictResolutions(prev => ({ ...prev, [aKey]: e.target.value }))}
+                                                                                    className="border rounded px-2 py-0.5 bg-white text-gray-700 font-medium text-xs"
+                                                                                >
+                                                                                    <option value="use_existing">Use existing CT animal for parent links (skip import)</option>
+                                                                                    <option value="import_anyway">Import anyway as new entry</option>
+                                                                                </select>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                )}
+                                                            </React.Fragment>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        {ktkSelectedAnimals.size} of {ktkPreview.animals.total} selected
+                                        {(() => {
+                                            const dupeLinks = [...ktkSelectedAnimals].filter(r => {
+                                                const c = ktkPreview.animals.conflicts?.find(x => (x.registration || x.kintrakId) === r);
+                                                return c && (ktkConflictResolutions[r] || 'use_existing') === 'use_existing';
+                                            }).length;
+                                            return dupeLinks > 0 ? ` · ${dupeLinks} duplicate${dupeLinks !== 1 ? 's' : ''} will link to existing CT animals` : '';
+                                        })()}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Litters table */}
+                            {ktkPreview.litters?.items?.length > 0 && (
+                                <div>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h5 className="font-semibold text-gray-700">Breeding Records &mdash; {ktkPreview.litters.total} total</h5>
+                                        <div className="flex gap-2 text-xs">
+                                            <button type="button" onClick={() => setKtkSelectedLitters(new Set(ktkPreview.litters.items.map(l => l.litterIndex)))} className="text-primary hover:underline">Select all</button>
+                                            <button type="button" onClick={() => setKtkSelectedLitters(new Set())} className="text-gray-400 hover:underline">Deselect all</button>
+                                        </div>
+                                    </div>
+                                    <div className="border rounded-lg overflow-hidden">
+                                        <div className="overflow-x-auto max-h-48 overflow-y-auto">
+                                            <table className="min-w-full text-xs">
+                                                <thead className="bg-gray-100 sticky top-0">
+                                                    <tr>
+                                                        <th className="px-2 py-2"></th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Nest letter</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Mating date</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Birth date</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Weaning date</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Sire</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Dam</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Born count</th>
+                                                        <th className="px-2 py-2 text-left font-medium text-gray-600">Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y bg-white">
+                                                    {ktkPreview.litters.items.map((l, i) => {
+                                                        const isSelected = ktkSelectedLitters.has(l.litterIndex);
+                                                        const lm = ktkLitterMappings[l.litterIndex] || {};
+                                                        const effectiveSireId = lm.sire?.id_public || l.maleCtId;
+                                                        const effectiveDamId  = lm.dam?.id_public  || l.femaleCtId;
+                                                        const showSubRow = isSelected && ((!l.maleCtId && !l.sireInThisImport && l.sireName) || (!l.femaleCtId && !l.damInThisImport && l.damName) || lm.sire || lm.dam);
+                                                        return (
+                                                            <React.Fragment key={i}>
+                                                            <tr className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : l.isDuplicate ? 'bg-amber-50' : ''}`}>
+                                                                <td className="px-2 py-1.5 text-center">
+                                                                    <input type="checkbox" checked={isSelected}
+                                                                        onChange={e => setKtkSelectedLitters(prev => {
+                                                                            const next = new Set(prev);
+                                                                            if (e.target.checked) next.add(l.litterIndex); else next.delete(l.litterIndex);
+                                                                            return next;
+                                                                        })}
+                                                                        className="rounded" />
+                                                                </td>
+                                                                <td className="px-2 py-1.5 font-medium text-gray-700">{l.nestLetter || '—'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600">{l.matingDate ? String(l.matingDate).slice(0,10) : '—'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600">{l.birthDate ? String(l.birthDate).slice(0,10) : '—'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600">{l.weaningDate ? String(l.weaningDate).slice(0,10) : '—'}</td>
+                                                                <td className="px-2 py-1.5 text-gray-700">
+                                                                    {l.sirePrefix && <span className="text-gray-400 mr-0.5">({l.sirePrefix})</span>}{l.sireName || '—'}
+                                                                    {effectiveSireId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{effectiveSireId}</span>}
+                                                                    {!effectiveSireId && l.sireInThisImport && <span className="ml-1.5 px-1 py-0.5 text-xs bg-blue-100 text-blue-600 rounded" title="Will be linked after import">in this import</span>}
+                                                                    {!effectiveSireId && !l.sireInThisImport && l.sireName && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
+                                                                </td>
+                                                                <td className="px-2 py-1.5 text-gray-700">
+                                                                    {l.damPrefix && <span className="text-gray-400 mr-0.5">({l.damPrefix})</span>}{l.damName || '—'}
+                                                                    {effectiveDamId && <span className="ml-1.5 px-1 py-0.5 text-xs font-mono bg-green-100 text-green-700 rounded">{effectiveDamId}</span>}
+                                                                    {!effectiveDamId && l.damInThisImport && <span className="ml-1.5 px-1 py-0.5 text-xs bg-blue-100 text-blue-600 rounded" title="Will be linked after import">in this import</span>}
+                                                                    {!effectiveDamId && !l.damInThisImport && l.damName && <span className="ml-1.5 px-1 py-0.5 text-xs bg-gray-100 text-gray-400 rounded">no CT match</span>}
+                                                                </td>
+                                                                <td className="px-2 py-1.5 text-gray-600">{l.litterSizeBorn != null ? l.litterSizeBorn : '—'}</td>
+                                                                <td className="px-2 py-1.5">
+                                                                    {l.isDuplicate
+                                                                        ? <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium" title={l.existingLitterId || ''}>Duplicate</span>
+                                                                        : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
+                                                                </td>
+                                                            </tr>
+                                                            {showSubRow && (
+                                                                <tr className="bg-blue-50 border-b">
+                                                                    <td colSpan="9" className="px-4 pb-2 pt-1">
+                                                                        <div className="flex flex-wrap gap-4">
+                                                                            {/* Sire mapping */}
+                                                                            {((!l.maleCtId && !l.sireInThisImport && l.sireName) || lm.sire) && (
+                                                                                <div className="flex items-center gap-1.5 text-xs">
+                                                                                    <span className="font-medium text-gray-500 min-w-[28px]">Sire:</span>
+                                                                                    {lm.sire ? (
+                                                                                        <>
+                                                                                            <span className="text-blue-700">&#x21AA; <span className="font-mono font-semibold">{lm.sire.id_public}</span> &mdash; {lm.sire.name}</span>
+                                                                                            <button type="button" onClick={() => setKtkLitterMappings(prev => { const n = { ...prev }; const e = { ...n[l.litterIndex] }; delete e.sire; n[l.litterIndex] = e; return n; })} className="text-gray-400 hover:text-red-500 transition" title="Remove mapping"><X size={11} /></button>
+                                                                                        </>
+                                                                                    ) : ktkLitterMappingSearch.litterIndex === l.litterIndex && ktkLitterMappingSearch.side === 'sire' ? (
+                                                                                        <div className="flex flex-col gap-1">
+                                                                                            <div className="flex items-center gap-1">
+                                                                                                <input autoFocus type="text" placeholder="Search CT animal…"
+                                                                                                    value={ktkLitterMappingSearch.query}
+                                                                                                    onChange={async e => {
+                                                                                                        const q = e.target.value;
+                                                                                                        setKtkLitterMappingSearch(prev => ({ ...prev, query: q, loading: true, results: [] }));
+                                                                                                        if (!q.trim()) { setKtkLitterMappingSearch(prev => ({ ...prev, loading: false })); return; }
+                                                                                                        try {
+                                                                                                            const [pr, pub] = await Promise.allSettled([
+                                                                                                                axios.get(`${API_BASE_URL}/animals`, { params: { name: q }, headers: { Authorization: `Bearer ${authToken}` } }),
+                                                                                                                axios.get(`${API_BASE_URL}/public/global/animals`, { params: { name: q, limit: 10 } }),
+                                                                                                            ]);
+                                                                                                            const own = pr.status === 'fulfilled' ? pr.value.data : [];
+                                                                                                            const pub2 = pub.status === 'fulfilled' ? pub.value.data : [];
+                                                                                                            const seen = new Set(own.map(x => x.id_public));
+                                                                                                            setKtkLitterMappingSearch(prev => ({ ...prev, results: [...own, ...pub2.filter(x => !seen.has(x.id_public))].slice(0, 10), loading: false }));
+                                                                                                        } catch { setKtkLitterMappingSearch(prev => ({ ...prev, loading: false })); }
+                                                                                                    }}
+                                                                                                    className="text-xs border rounded px-2 py-1 focus:ring-primary focus:border-primary w-48"
+                                                                                                />
+                                                                                                {ktkLitterMappingSearch.loading && <Loader2 size={11} className="animate-spin text-gray-400" />}
+                                                                                                <button type="button" onClick={() => setKtkLitterMappingSearch({ litterIndex: null, side: null, query: '', results: [], loading: false })} className="text-gray-400 hover:text-gray-600"><X size={11} /></button>
+                                                                                            </div>
+                                                                                            {ktkLitterMappingSearch.results.length > 0 && (
+                                                                                                <div className="border rounded bg-white shadow-sm divide-y max-w-xs max-h-36 overflow-y-auto">
+                                                                                                    {ktkLitterMappingSearch.results.map(r => (
+                                                                                                        <button key={r.id_public} type="button"
+                                                                                                            onClick={() => {
+                                                                                                                setKtkLitterMappings(prev => ({ ...prev, [l.litterIndex]: { ...prev[l.litterIndex], sire: { id_public: r.id_public, name: [r.prefix, r.name, r.suffix].filter(Boolean).join(' ') } } }));
+                                                                                                                setKtkLitterMappingSearch({ litterIndex: null, side: null, query: '', results: [], loading: false });
+                                                                                                            }}
+                                                                                                            className="w-full text-left px-2 py-1.5 hover:bg-blue-50 text-xs"
+                                                                                                        >
+                                                                                                            <span className="font-medium text-gray-800">{[r.prefix, r.name, r.suffix].filter(Boolean).join(' ')}</span>
+                                                                                                            <span className="text-gray-400 ml-2 font-mono">{r.id_public}</span>
+                                                                                                            {r.birthDate && <span className="text-gray-400 ml-1">&middot; {String(r.birthDate).slice(0,10)}</span>}
+                                                                                                            {r.gender && <span className="text-gray-400 ml-1">&middot; {r.gender}</span>}
+                                                                                                        </button>
+                                                                                                    ))}
+                                                                                                </div>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    ) : (
+                                                                                        <button type="button" onClick={() => setKtkLitterMappingSearch({ litterIndex: l.litterIndex, side: 'sire', query: '', results: [], loading: false })} className="text-xs text-blue-600 hover:text-blue-800 hover:underline">+ Map to CT animal</button>
+                                                                                    )}
+                                                                                </div>
+                                                                            )}
+                                                                            {/* Dam mapping */}
+                                                                            {((!l.femaleCtId && !l.damInThisImport && l.damName) || lm.dam) && (
+                                                                                <div className="flex items-center gap-1.5 text-xs">
+                                                                                    <span className="font-medium text-gray-500 min-w-[28px]">Dam:</span>
+                                                                                    {lm.dam ? (
+                                                                                        <>
+                                                                                            <span className="text-blue-700">&#x21AA; <span className="font-mono font-semibold">{lm.dam.id_public}</span> &mdash; {lm.dam.name}</span>
+                                                                                            <button type="button" onClick={() => setKtkLitterMappings(prev => { const n = { ...prev }; const e = { ...n[l.litterIndex] }; delete e.dam; n[l.litterIndex] = e; return n; })} className="text-gray-400 hover:text-red-500 transition" title="Remove mapping"><X size={11} /></button>
+                                                                                        </>
+                                                                                    ) : ktkLitterMappingSearch.litterIndex === l.litterIndex && ktkLitterMappingSearch.side === 'dam' ? (
+                                                                                        <div className="flex flex-col gap-1">
+                                                                                            <div className="flex items-center gap-1">
+                                                                                                <input autoFocus type="text" placeholder="Search CT animal…"
+                                                                                                    value={ktkLitterMappingSearch.query}
+                                                                                                    onChange={async e => {
+                                                                                                        const q = e.target.value;
+                                                                                                        setKtkLitterMappingSearch(prev => ({ ...prev, query: q, loading: true, results: [] }));
+                                                                                                        if (!q.trim()) { setKtkLitterMappingSearch(prev => ({ ...prev, loading: false })); return; }
+                                                                                                        try {
+                                                                                                            const [pr, pub] = await Promise.allSettled([
+                                                                                                                axios.get(`${API_BASE_URL}/animals`, { params: { name: q }, headers: { Authorization: `Bearer ${authToken}` } }),
+                                                                                                                axios.get(`${API_BASE_URL}/public/global/animals`, { params: { name: q, limit: 10 } }),
+                                                                                                            ]);
+                                                                                                            const own = pr.status === 'fulfilled' ? pr.value.data : [];
+                                                                                                            const pub2 = pub.status === 'fulfilled' ? pub.value.data : [];
+                                                                                                            const seen = new Set(own.map(x => x.id_public));
+                                                                                                            setKtkLitterMappingSearch(prev => ({ ...prev, results: [...own, ...pub2.filter(x => !seen.has(x.id_public))].slice(0, 10), loading: false }));
+                                                                                                        } catch { setKtkLitterMappingSearch(prev => ({ ...prev, loading: false })); }
+                                                                                                    }}
+                                                                                                    className="text-xs border rounded px-2 py-1 focus:ring-primary focus:border-primary w-48"
+                                                                                                />
+                                                                                                {ktkLitterMappingSearch.loading && <Loader2 size={11} className="animate-spin text-gray-400" />}
+                                                                                                <button type="button" onClick={() => setKtkLitterMappingSearch({ litterIndex: null, side: null, query: '', results: [], loading: false })} className="text-gray-400 hover:text-gray-600"><X size={11} /></button>
+                                                                                            </div>
+                                                                                            {ktkLitterMappingSearch.results.length > 0 && (
+                                                                                                <div className="border rounded bg-white shadow-sm divide-y max-w-xs max-h-36 overflow-y-auto">
+                                                                                                    {ktkLitterMappingSearch.results.map(r => (
+                                                                                                        <button key={r.id_public} type="button"
+                                                                                                            onClick={() => {
+                                                                                                                setKtkLitterMappings(prev => ({ ...prev, [l.litterIndex]: { ...prev[l.litterIndex], dam: { id_public: r.id_public, name: [r.prefix, r.name, r.suffix].filter(Boolean).join(' ') } } }));
+                                                                                                                setKtkLitterMappingSearch({ litterIndex: null, side: null, query: '', results: [], loading: false });
+                                                                                                            }}
+                                                                                                            className="w-full text-left px-2 py-1.5 hover:bg-blue-50 text-xs"
+                                                                                                        >
+                                                                                                            <span className="font-medium text-gray-800">{[r.prefix, r.name, r.suffix].filter(Boolean).join(' ')}</span>
+                                                                                                            <span className="text-gray-400 ml-2 font-mono">{r.id_public}</span>
+                                                                                                            {r.birthDate && <span className="text-gray-400 ml-1">&middot; {String(r.birthDate).slice(0,10)}</span>}
+                                                                                                            {r.gender && <span className="text-gray-400 ml-1">&middot; {r.gender}</span>}
+                                                                                                        </button>
+                                                                                                    ))}
+                                                                                                </div>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    ) : (
+                                                                                        <button type="button" onClick={() => setKtkLitterMappingSearch({ litterIndex: l.litterIndex, side: 'dam', query: '', results: [], loading: false })} className="text-xs text-blue-600 hover:text-blue-800 hover:underline">+ Map to CT animal</button>
+                                                                                    )}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            )}
+                                                            </React.Fragment>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex gap-3 pt-1">
+                                <button
+                                    onClick={async () => {
+                                        setKtkConfirmLoading(true);
+                                        try {
+                                            const fd = new FormData();
+                                            if (ktkAnimalsFile) fd.append('animals', ktkAnimalsFile);
+                                            if (ktkBreedingFile) fd.append('breedingrecords', ktkBreedingFile);
+                                            fd.append('species', ktkSpecies.trim());
+                                            fd.append('confirm', 'true');
+                                            fd.append('selectedAnimals', JSON.stringify([...ktkSelectedAnimals]));
+                                            fd.append('selectedLitters', JSON.stringify([...ktkSelectedLitters]));
+                                            fd.append('litterMappings', JSON.stringify(ktkLitterMappings));
+                                            const finalResolutions = { ...ktkConflictResolutions };
+                                            for (const [reg, mapping] of Object.entries(ktkManualMappings)) {
+                                                finalResolutions[reg] = `map_to:${mapping.id_public}`;
+                                            }
+                                            fd.append('conflictResolutions', JSON.stringify(finalResolutions));
+                                            const resp = await axios.post(`${API_BASE_URL}/import/kintraks`, fd, {
+                                                headers: { Authorization: `Bearer ${authToken}` },
+                                            });
+                                            setKtkResult(resp.data);
+                                            setKtkPreview(null);
+                                            setKtkAnimalsFile(null);
+                                            setKtkBreedingFile(null);
+                                        } catch (err) {
+                                            showModalMessage('Kintraks Import Failed', err.response?.data?.message || err.message);
+                                        } finally {
+                                            setKtkConfirmLoading(false);
+                                        }
+                                    }}
+                                    disabled={ktkConfirmLoading}
+                                    className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+                                >
+                                    {ktkConfirmLoading ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle size={16} />}
+                                    Confirm Import
+                                </button>
+                                <button
+                                    onClick={() => { setKtkPreview(null); setKtkAnimalsFile(null); setKtkBreedingFile(null); setKtkManualMappings({}); setKtkMappingSearch({ registration: null, query: '', results: [], loading: false }); setKtkLitterMappings({}); setKtkLitterMappingSearch({ litterIndex: null, side: null, query: '', results: [], loading: false }); setKtkSelectedLitters(new Set()); }}
+                                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Result */}
+                    {ktkResult && (
+                        <div className="mt-3 p-4 rounded-lg border bg-green-50 border-green-200">
+                            <p className="font-semibold text-green-800 flex items-center gap-1.5 mb-2"><CheckCircle size={16} /> Kintraks import complete</p>
+                            <div className="text-sm text-gray-700 space-y-0.5 mb-2">
+                                {ktkResult.written && Object.entries(ktkResult.written).map(([s, n]) => (
+                                    <p key={s}><span className="capitalize font-medium">{s}</span>: {n} imported{ktkResult.skipped?.[s] ? `, ${ktkResult.skipped[s]} skipped (duplicates)` : ''}</p>
+                                ))}
+                            </div>
+                            {ktkResult.errors?.length > 0 && (
+                                <div className="mt-2">
+                                    <p className="text-sm font-semibold text-red-700 flex items-center gap-1"><AlertTriangle size={13} /> {ktkResult.errors.length} error(s):</p>
+                                    <ul className="text-xs text-red-600 list-disc list-inside mt-1 space-y-0.5 max-h-32 overflow-y-auto">
+                                        {ktkResult.errors.map((e, i) => (
+                                            <li key={i}>[{e.section}] {e.id}: {e.error}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                            <button onClick={() => setKtkResult(null)} className="mt-3 text-xs text-gray-500 hover:text-gray-700 underline">Dismiss</button>
+                        </div>
+                    )}
+                </div>
             </div>
 
+            {/* ── SimpleBreed Import ─────────────────────────────────────── */}
+            <div className="mt-4 border border-sky-200 rounded-xl bg-white overflow-hidden">
+                <div className="flex items-center gap-3 px-4 py-3 bg-sky-50 border-b border-sky-200">
+                    <Globe size={18} className="text-sky-600 flex-shrink-0" />
+                    <div>
+                        <h3 className="font-semibold text-sky-800 text-sm">Import from SimpleBreed</h3>
+                        <p className="text-xs text-sky-600">Paste a SimpleBreed profile URL or username to import animals with parents, colour and status. Duplicates are detected across all CritterTrack users by SB ID and name + birth date. If a species can't be detected, you'll be prompted to pick one — the dropdown shows <span className="font-medium">only your starred species</span> (star them via the species selector when adding an animal).</p>
+                    </div>
+                </div>
+                <div className="p-4 space-y-3">
+                    {/* URL input */}
+                    {!sbPreview && !sbResult && (
+                        <div className="space-y-2">
+                            <label className="text-xs font-medium text-gray-600">SimpleBreed profile URL or username</label>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={sbUrl}
+                                    onChange={e => setSbUrl(e.target.value)}
+                                    placeholder="https://www.simplebreed.com/morningstardb"
+                                    className="flex-1 text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-400"
+                                    onKeyDown={async e => {
+                                        if (e.key !== 'Enter' || sbPreviewLoading || !sbUrl.trim()) return;
+                                        setSbPreviewLoading(true); setSbResult(null); setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); setSbManualMappings({}); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false }); setSbSpeciesOverrides({});
+                                        try {
+                                            const r = await axios.post(`${API_BASE_URL}/import/simplebreed/preview`, { profileUrl: sbUrl.trim() }, { headers: { Authorization: `Bearer ${authToken}` } });
+                                            setSbPreview(r.data);
+                                            setSbSelectedIds(new Set((r.data.items || []).map(a => a.sbId)));
+                                            const defaults = {};
+                                            for (const c of (r.data.conflicts || [])) defaults[c.sbId] = 'use_existing';
+                                            setSbConflictResolutions(defaults);
+                                        } catch (err) { showModalMessage('SimpleBreed Preview Failed', err.response?.data?.message || err.message); }
+                                        finally { setSbPreviewLoading(false); }
+                                    }}
+                                />
+                                <button
+                                    onClick={async () => {
+                                        if (!sbUrl.trim() || sbPreviewLoading) return;
+                                        setSbPreviewLoading(true); setSbResult(null); setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); setSbManualMappings({}); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false }); setSbSpeciesOverrides({});
+                                        try {
+                                            const r = await axios.post(`${API_BASE_URL}/import/simplebreed/preview`, { profileUrl: sbUrl.trim() }, { headers: { Authorization: `Bearer ${authToken}` } });
+                                            setSbPreview(r.data);
+                                            setSbSelectedIds(new Set((r.data.items || []).map(a => a.sbId)));
+                                            const defaults = {};
+                                            for (const c of (r.data.conflicts || [])) defaults[c.sbId] = 'use_existing';
+                                            setSbConflictResolutions(defaults);
+                                        } catch (err) { showModalMessage('SimpleBreed Preview Failed', err.response?.data?.message || err.message); }
+                                        finally { setSbPreviewLoading(false); }
+                                    }}
+                                    disabled={!sbUrl.trim() || sbPreviewLoading}
+                                    className="px-4 py-2 bg-sky-500 hover:bg-sky-600 disabled:opacity-50 text-white text-sm font-medium rounded-lg flex items-center gap-1.5"
+                                >
+                                    {sbPreviewLoading ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+                                    {sbPreviewLoading ? 'Fetching…' : 'Fetch Animals'}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Preview table */}
+                    {sbPreview && !sbResult && (() => {
+                        const sbItems = sbPreview.items || [];
+                        const sbConflicts = sbPreview.conflicts || [];
+                        const conflictIds = new Set(sbConflicts.map(c => c.sbId));
+                        // Treat mapped animals as duplicates for selection/counting
+                        const isDuplicateOrMapped = a => conflictIds.has(a.sbId) || !!sbManualMappings[a.sbId];
+                        const isNewAnimal = a => !conflictIds.has(a.sbId) && !sbManualMappings[a.sbId];
+                        const highConflictCount = sbConflicts.filter(c => c.confidence !== 'possible').length;
+                        const possibleConflictCount = sbConflicts.filter(c => c.confidence === 'possible').length;
+                        // Selectable: new animals + conflicts with "import anyway" chosen
+                        const isSelectableAnimal = a => isNewAnimal(a) || (conflictIds.has(a.sbId) && (sbConflictResolutions[a.sbId] || 'use_existing') === 'import_anyway');
+                        const selectableIds = new Set(sbItems.filter(isSelectableAnimal).map(a => a.sbId));
+                        // Only count selected selectable animals for import
+                        const selectedNewCount = [...sbSelectedIds].filter(id => selectableIds.has(id)).length;
+                        return (
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between flex-wrap gap-2">
+                                    <h5 className="font-semibold text-gray-700">
+                                        {sbPreview.total} animal{sbPreview.total !== 1 ? 's' : ''} found
+                                        {(highConflictCount > 0 || possibleConflictCount > 0) && (
+                                            <span className="ml-2 text-xs font-normal">
+                                                {highConflictCount > 0 && <span className="text-amber-600">{highConflictCount} duplicate{highConflictCount !== 1 ? 's' : ''}</span>}
+                                                {highConflictCount > 0 && possibleConflictCount > 0 && <span className="text-gray-400"> · </span>}
+                                                {possibleConflictCount > 0 && <span className="text-orange-500">{possibleConflictCount} possible match{possibleConflictCount !== 1 ? 'es' : ''}</span>}
+                                            </span>
+                                        )}
+                                    </h5>
+                                    <div className="flex gap-2 text-xs flex-wrap">
+                                        <button type="button"
+                                            onClick={() => setSbSelectedIds(new Set(sbItems.filter(isNewAnimal).map(a => a.sbId)))}
+                                            className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Select all new</button>
+                                        <button type="button"
+                                            onClick={() => setSbSelectedIds(new Set())}
+                                            className="px-2 py-1 border rounded bg-white hover:bg-gray-50 text-gray-600">Deselect all</button>
+                                    </div>
+                                </div>
+
+                                {/* Bulk species assign — shown when any animal has no detected species */}
+                                {sbItems.some(a => !a.species || a.species === 'Unknown') && (
+                                    <div className="flex items-center gap-2 text-xs bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
+                                        <span className="text-orange-700 font-medium shrink-0">Species not detected for some animals.</span>
+                                        <span className="text-orange-600 shrink-0">Set all to:</span>
+                                        <select
+                                            defaultValue=""
+                                            onChange={e => {
+                                                if (!e.target.value) return;
+                                                const overrides = {};
+                                                for (const a of sbItems) {
+                                                    if (!a.species || a.species === 'Unknown') overrides[a.sbId] = e.target.value;
+                                                }
+                                                setSbSpeciesOverrides(prev => ({ ...prev, ...overrides }));
+                                            }}
+                                            className="border border-orange-300 rounded px-2 py-0.5 bg-white text-gray-700 font-medium"
+                                        >
+                                            <option value="">— pick species —</option>
+                                            {(sbFavoriteSpecies.length > 0 ? sbFavoriteSpecies : DEFAULT_SPECIES_OPTIONS).map(s => <option key={s} value={s}>{s}</option>)}
+                                        </select>
+                                        {Object.keys(sbSpeciesOverrides).length > 0 && (
+                                            <button type="button" onClick={() => setSbSpeciesOverrides({})} className="text-orange-400 hover:text-red-500 underline ml-1">Clear</button>
+                                        )}
+                                    </div>
+                                )}
+
+                                <div className="border rounded-lg overflow-hidden">
+                                    <div className="overflow-x-auto max-h-96 overflow-y-auto">
+                                        <table className="min-w-full text-xs">
+                                            <thead className="bg-gray-100 sticky top-0 z-10">
+                                                <tr>
+                                                    <th className="px-2 py-2 w-8"></th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">Name</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">Born</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">SB ID</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">Species</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-600">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y bg-white">
+                                                {sbItems.map(a => {
+                                                    const conflict = sbConflicts.find(c => c.sbId === a.sbId);
+                                                    const resolution = sbConflictResolutions[a.sbId] || 'use_existing';
+                                                    // Selectable if new, or if user chose "import anyway" on a conflict
+                                                    const isSelectable = isNewAnimal(a) || (!!conflict && resolution === 'import_anyway');
+                                                    const isSelected = isSelectable && (sbSelectedIds.has(a.sbId) || (!!conflict && resolution === 'import_anyway'));
+                                                    return (
+                                                        <React.Fragment key={a.sbId}>
+                                                            <tr className={`transition ${!isSelected ? 'opacity-40 bg-gray-50' : conflict ? (conflict.confidence === 'possible' ? 'bg-orange-50' : 'bg-amber-50') : ''}`}>
+                                                                <td className="px-2 py-1.5 text-center">
+                                                                    <input type="checkbox" checked={isSelected}
+                                                                        disabled={!isSelectable}
+                                                                        onChange={e => {
+                                                                            if (!isSelectable) return;
+                                                                            setSbSelectedIds(prev => {
+                                                                                const next = new Set(prev);
+                                                                                if (e.target.checked) next.add(a.sbId); else next.delete(a.sbId);
+                                                                                return next;
+                                                                            });
+                                                                        }}
+                                                                        className="rounded" />
+                                                                </td>
+                                                                <td className="px-2 py-1.5 font-medium text-gray-800 whitespace-nowrap">{a.name}</td>
+                                                                <td className="px-2 py-1.5 text-gray-600 whitespace-nowrap">{a.birthDate || '—'}</td>
+                                                                <td className="px-2 py-1.5 font-mono text-gray-500">{a.sbIdKey || a.sbId}</td>
+                                                                <td className="px-2 py-1.5">
+                                                                    {(!a.species || a.species === 'Unknown')
+                                                                        ? <select
+                                                                            value={sbSpeciesOverrides[a.sbId] || ''}
+                                                                            onChange={e => setSbSpeciesOverrides(prev => ({ ...prev, [a.sbId]: e.target.value }))}
+                                                                            className={`border rounded px-1 py-0.5 text-xs font-medium ${sbSpeciesOverrides[a.sbId] ? 'bg-white text-gray-700 border-gray-300' : 'bg-orange-50 text-orange-600 border-orange-300'}`}
+                                                                          >
+                                                                            <option value="">— pick —</option>
+                                                                            {(sbFavoriteSpecies.length > 0 ? sbFavoriteSpecies : DEFAULT_SPECIES_OPTIONS).map(s => <option key={s} value={s}>{s}</option>)}
+                                                                          </select>
+                                                                        : <span className="text-gray-500">{a.species}</span>}
+                                                                </td>
+                                                                <td className="px-2 py-1.5">
+                                                                    {conflict
+                                                                        ? conflict.confidence === 'possible'
+                                                                            ? <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded text-xs font-medium">Possible match</span>
+                                                                            : <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium">Duplicate</span>
+                                                                        : sbManualMappings[a.sbId]
+                                                                            ? <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-medium">Duplicate</span>
+                                                                            : <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">New</span>}
+                                                                </td>
+                                                            </tr>
+                                                            {conflict && (
+                                                                <tr className={conflict.confidence === 'possible' ? 'bg-orange-50' : 'bg-amber-50'}>
+                                                                    <td></td>
+                                                                    <td colSpan="5" className="px-3 pb-2 pt-0">
+                                                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-amber-800 pt-1">
+                                                                            <AlertTriangle size={11} className="shrink-0 text-amber-500" />
+                                                                            <span>
+                                                                                {conflict.confidence === 'possible' ? 'Possible match: ' : 'Matches '}
+                                                                                <span className="font-mono">{conflict.existingId}</span>
+                                                                                {conflict.existingName && conflict.existingName !== a.name && <span> &ldquo;{conflict.existingName}&rdquo;</span>}
+                                                                                {conflict.existingBirthDate && <span> &middot; {conflict.existingBirthDate}</span>}
+                                                                                {' '}({conflict.isOwnedByImporter ? 'your animal' : `owned by ${conflict.existingOwner}`})
+                                                                                {' · matched by '}
+                                                                                <span className="font-semibold">{conflict.matchType === 'id' ? 'SB ID' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}</span>
+                                                                            </span>
+                                                                            <select
+                                                                                value={resolution}
+                                                                                onChange={e => {
+                                                                                    const val = e.target.value;
+                                                                                    setSbConflictResolutions(prev => ({ ...prev, [a.sbId]: val }));
+                                                                                    setSbSelectedIds(prev => {
+                                                                                        const next = new Set(prev);
+                                                                                        if (val === 'import_anyway') next.add(a.sbId); else next.delete(a.sbId);
+                                                                                        return next;
+                                                                                    });
+                                                                                }}
+                                                                                className="border rounded px-2 py-0.5 bg-white text-gray-700 font-medium text-xs"
+                                                                            >
+                                                                                <option value="use_existing">Use existing CT animal for parent links (skip import)</option>
+                                                                                <option value="import_anyway">Import anyway as new entry</option>
+                                                                            </select>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            )}
+                                                            {/* Manual mapping sub-row for New/Mapped rows */}
+                                                            {!conflict && (isSelected || sbManualMappings[a.sbId]) && (
+                                                                <tr className={sbManualMappings[a.sbId] ? 'bg-blue-50' : 'bg-gray-50'}>
+                                                                    <td></td>
+                                                                    <td colSpan="5" className="px-3 pb-2 pt-0">
+                                                                        {sbManualMappings[a.sbId] ? (
+                                                                            <div className="flex items-center gap-2 text-xs pt-1">
+                                                                                <span className="text-blue-700">&#x21AA; Mapped to <span className="font-mono font-semibold">{sbManualMappings[a.sbId].id_public}</span> &mdash; {sbManualMappings[a.sbId].name}</span>
+                                                                                <button type="button" onClick={() => setSbMappingSearch({ sbId: a.sbId, query: '', results: [], loading: false })}
+                                                                                    className="text-xs text-blue-500 hover:text-blue-700 hover:underline ml-1">Change</button>
+                                                                                <button type="button" onClick={() => { setSbManualMappings(prev => { const n = { ...prev }; delete n[a.sbId]; return n; }); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false }); }}
+                                                                                    className="text-gray-400 hover:text-red-500 transition ml-1" title="Remove mapping"><X size={11} /></button>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="pt-1">
+                                                                                {sbMappingSearch.sbId === a.sbId ? (
+                                                                                    <div className="flex flex-col gap-1.5">
+                                                                                        <div className="flex items-center gap-1.5">
+                                                                                            <input autoFocus type="text" placeholder="Search by name or CT ID…"
+                                                                                                value={sbMappingSearch.query}
+                                                                                                onChange={async e => {
+                                                                                                    const q = e.target.value;
+                                                                                                    setSbMappingSearch(prev => ({ ...prev, query: q, loading: q.length >= 2, results: [] }));
+                                                                                                    if (q.length < 2) { setSbMappingSearch(prev => ({ ...prev, loading: false })); return; }
+                                                                                                    try {
+                                                                                                        const [privateRes, publicRes] = await Promise.allSettled([
+                                                                                                            axios.get(`${API_BASE_URL}/animals`, { params: { name: q }, headers: { Authorization: `Bearer ${authToken}` } }),
+                                                                                                            axios.get(`${API_BASE_URL}/public/global/animals`, { params: { name: q, limit: 10 } }),
+                                                                                                        ]);
+                                                                                                        const own = privateRes.status === 'fulfilled' ? privateRes.value.data : [];
+                                                                                                        const pub = publicRes.status === 'fulfilled' ? publicRes.value.data : [];
+                                                                                                        const seen = new Set(own.map(r => r.id_public));
+                                                                                                        const merged = [...own, ...pub.filter(r => !seen.has(r.id_public))];
+                                                                                                        // Discard stale results if query changed while this request was in-flight
+                                                                                                        setSbMappingSearch(prev => prev.query !== q ? prev : { ...prev, results: merged.slice(0, 10), loading: false });
+                                                                                                    } catch { setSbMappingSearch(prev => ({ ...prev, loading: false })); }
+                                                                                                }}
+                                                                                                className="flex-1 max-w-xs text-xs border rounded px-2 py-1 focus:ring-primary focus:border-primary"
+                                                                                            />
+                                                                                            {sbMappingSearch.loading && <Loader2 size={11} className="animate-spin text-gray-400" />}
+                                                                                            <button type="button" onClick={() => setSbMappingSearch({ sbId: null, query: '', results: [], loading: false })}
+                                                                                                className="text-gray-400 hover:text-gray-600"><X size={11} /></button>
+                                                                                        </div>
+                                                                                        {sbMappingSearch.results.length > 0 && (
+                                                                                            <div className="border rounded bg-white shadow-sm divide-y max-w-sm max-h-40 overflow-y-auto">
+                                                                                                {sbMappingSearch.results.map(r => (
+                                                                                                    <button key={r.id_public} type="button"
+                                                                                                        onClick={() => {
+                                                                                                            setSbManualMappings(prev => ({ ...prev, [a.sbId]: { id_public: r.id_public, name: [r.prefix, r.name, r.suffix].filter(Boolean).join(' ') } }));
+                                                                                                            setSbMappingSearch({ sbId: null, query: '', results: [], loading: false });
+                                                                                                        }}
+                                                                                                        className="w-full text-left px-2 py-1.5 hover:bg-blue-50 transition text-xs"
+                                                                                                    >
+                                                                                                        <span className="font-medium text-gray-800">{[r.prefix, r.name, r.suffix].filter(Boolean).join(' ')}</span>
+                                                                                                        <span className="text-gray-400 ml-2 font-mono">{r.id_public}</span>
+                                                                                                        {r.birthDate && <span className="text-gray-400 ml-1">&middot; {String(r.birthDate).slice(0,10)}</span>}
+                                                                                                        {r.gender && <span className="text-gray-400 ml-1">&middot; {r.gender}</span>}
+                                                                                                        {r.breederName && <span className="text-gray-300 ml-1">&middot; {r.breederName}</span>}
+                                                                                                    </button>
+                                                                                                ))}
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </div>
+                                                                                ) : (
+                                                                                    <button type="button"
+                                                                                        onClick={() => setSbMappingSearch({ sbId: a.sbId, query: '', results: [], loading: false })}
+                                                                                        className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                                                                                    >
+                                                                                        + Map to existing CT animal (for parent links)
+                                                                                    </button>
+                                                                                )}
+                                                                            </div>
+                                                                        )}
+                                                                    </td>
+                                                                </tr>
+                                                            )}
+                                                        </React.Fragment>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <p className="text-xs text-gray-400">
+                                    {selectedNewCount} of {sbItems.filter(isNewAnimal).length} new animal{sbItems.filter(isNewAnimal).length !== 1 ? 's' : ''} selected
+                                    {(() => {
+                                        const dupeLinks = [...sbSelectedIds].filter(id => {
+                                            const c = sbConflicts.find(x => x.sbId === id);
+                                            return c && (sbConflictResolutions[id] || 'use_existing') === 'use_existing';
+                                        }).length;
+                                        const mappedLinks = [...sbSelectedIds].filter(id => !!sbManualMappings[id]).length;
+                                        let msg = '';
+                                        if (dupeLinks > 0) msg += ` · ${dupeLinks} duplicate${dupeLinks !== 1 ? 's' : ''} will link to existing CT animals`;
+                                        if (mappedLinks > 0) msg += ` · ${mappedLinks} mapped animal${mappedLinks !== 1 ? 's' : ''} will link to existing CT animals`;
+                                        return msg;
+                                    })()}
+                                </p>
+
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={async () => {
+                                            const finalResolutions = { ...sbConflictResolutions };
+                                            // Convert auto-detected use_existing conflicts → map_to:<existingId>
+                                            // so the backend knows exactly which CT animal to tag with the SB ID
+                                            for (const conflict of sbConflicts) {
+                                                if (!finalResolutions[conflict.sbId] || finalResolutions[conflict.sbId] === 'use_existing') {
+                                                    if (conflict.existingId) finalResolutions[conflict.sbId] = `map_to:${conflict.existingId}`;
+                                                }
+                                            }
+                                            for (const [sbId, mapping] of Object.entries(sbManualMappings)) {
+                                                finalResolutions[sbId] = `map_to:${mapping.id_public}`;
+                                            }
+                                            const confirmCount = Object.values(finalResolutions).filter(v => typeof v === 'string' && v.startsWith('map_to:')).length;
+                                            if ((!selectedNewCount && !confirmCount) || sbImportLoading) return;
+                                            setSbImportLoading(true);
+                                            try {
+                                                const speciesMap = {
+                                                    ...Object.fromEntries(
+                                                        (sbPreview.items || []).map(a => [a.sbId, a.species]).filter(([, s]) => s && s !== 'Unknown')
+                                                    ),
+                                                    ...sbSpeciesOverrides,
+                                                };
+                                                const selectedNewIds = [...sbSelectedIds].filter(id => selectableIds.has(id));
+                                                const r = await axios.post(`${API_BASE_URL}/import/simplebreed/import`, {
+                                                    selectedIds: selectedNewIds,
+                                                    conflictResolutions: finalResolutions,
+                                                    speciesMap,
+                                                    confirm: true,
+                                                }, { headers: { Authorization: `Bearer ${authToken}` } });
+                                                setSbResult(r.data);
+                                                setSbPreview(null);
+                                                if (typeof fetchAnimals === 'function') fetchAnimals();
+                                            } catch (err) {
+                                                showModalMessage('Import Failed', err.response?.data?.message || err.message);
+                                            } finally {
+                                                setSbImportLoading(false);
+                                            }
+                                        }}
+                                        disabled={(() => {
+                                            const finalRes = { ...sbConflictResolutions };
+                                            for (const c of sbConflicts) { if (!finalRes[c.sbId] || finalRes[c.sbId] === 'use_existing') { if (c.existingId) finalRes[c.sbId] = `map_to:${c.existingId}`; } }
+                                            for (const [sbId, m] of Object.entries(sbManualMappings)) finalRes[sbId] = `map_to:${m.id_public}`;
+                                            const confirmCount = Object.values(finalRes).filter(v => typeof v === 'string' && v.startsWith('map_to:')).length;
+                                            return (!selectedNewCount && !confirmCount) || sbImportLoading;
+                                        })()}
+                                        className="px-4 py-2 bg-sky-500 hover:bg-sky-600 disabled:opacity-50 text-white text-sm font-medium rounded-lg flex items-center gap-1.5"
+                                    >
+                                        {sbImportLoading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                                        {sbImportLoading ? 'Importing…' : selectedNewCount > 0 ? `Import ${selectedNewCount} Animal${selectedNewCount !== 1 ? 's' : ''}` : 'Confirm Stubs'}
+                                    </button>
+                                    <button onClick={() => { setSbPreview(null); setSbSelectedIds(new Set()); setSbConflictResolutions({}); setSbManualMappings({}); setSbMappingSearch({ sbId: null, query: '', results: [], loading: false }); setSbSpeciesOverrides({}); }} className="text-xs text-gray-400 hover:text-gray-600 underline">Cancel</button>
+                                </div>
+                            </div>
+                        );
+                    })()}
+
+                    {/* Result */}
+                    {sbResult && (
+                        <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm space-y-1">
+                            <p className="font-semibold text-green-800 flex items-center gap-1"><CheckCircle size={14} /> Import complete!</p>
+                            <p className="text-green-700">{sbResult.written?.animals ?? 0} animal{sbResult.written?.animals !== 1 ? 's' : ''} imported · {sbResult.skipped?.animals ?? 0} skipped · {sbResult.parentLinked ?? 0} parent link{sbResult.parentLinked !== 1 ? 's' : ''} set{sbResult.stubsLinked > 0 ? ` · ${sbResult.stubsLinked} stub${sbResult.stubsLinked !== 1 ? 's' : ''} linked` : ''}{sbResult.imagesUploaded > 0 ? ` · ${sbResult.imagesUploaded} image${sbResult.imagesUploaded !== 1 ? 's' : ''} uploaded` : ''}</p>
+                            {sbResult.errors?.length > 0 && (
+                                <div>
+                                    <p className="text-xs font-semibold text-red-600">{sbResult.errors.length} error(s):</p>
+                                    <ul className="text-xs text-red-500 list-disc list-inside max-h-24 overflow-y-auto">
+                                        {sbResult.errors.map((e, i) => <li key={i}>#{e.sbId}: {e.error}</li>)}
+                                    </ul>
+                                </div>
+                            )}
+                            <button onClick={() => { setSbResult(null); setSbUrl(''); }} className="mt-2 text-xs text-gray-500 hover:text-gray-700 underline">Dismiss</button>
+                        </div>
+                    )}
+                </div>
+            </div>
+            </>}
+
+            {settingsTab === 'account' && <>
             <div className="mt-2 border-2 border-red-300 rounded-lg bg-red-50 overflow-x-hidden">
                 <button type="button" onClick={() => setDangerZoneOpen(v => !v)}
                     className="w-full flex items-center justify-between p-4 sm:p-6 text-left hover:bg-red-100 transition"
@@ -24652,6 +27261,21 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     );
 };
 
+// ── Module-level cache so AnimalList survives unmount/remount without refetching ──
+let _alCache = null;       // last animals array
+
+// Keep cache patched even while AnimalList is unmounted
+if (!window.__alCacheListenerAttached) {
+    window.__alCacheListenerAttached = true;
+    window.addEventListener('animal-updated', (e) => {
+        const u = e.detail;
+        if (_alCache && u?.id_public) {
+            _alCache = _alCache.map(a => a.id_public === u.id_public ? { ...a, ...u } : a);
+        }
+    });
+    window.addEventListener('animals-changed', () => { _alCache = null; }); // bust on full reload signal
+}
+
 const AnimalList = ({ 
     authToken, 
     showModalMessage, 
@@ -24671,12 +27295,20 @@ const AnimalList = ({
     breedingLineDefs = [],
     animalBreedingLines = {}
 }) => {
-    const [animals, setAnimals] = useState([]);
+    const [animals, setAnimalsRaw] = useState(() => _alCache || []);
+    const setAnimals = useCallback((valOrFn) => {
+        setAnimalsRaw(prev => {
+            const next = typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn;
+            _alCache = next;
+            return next;
+        });
+    }, []);
     const [allAnimalsRaw, setAllAnimalsRaw] = useState([]); // Unfiltered ? used by Management View
     const [availableAnimalsRaw, setAvailableAnimalsRaw] = useState([]); // All user-created animals with status=Available (no ownership filter)
     const [soldTransferredRaw, setSoldTransferredRaw] = useState([]); // View-only/transferred animals — shown in Management > Sold/Transferred section
     const [soldOwnerFilter, setSoldOwnerFilter] = useState(''); // Filter sold/transferred section by recipient owner
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(() => !_alCache);
+    const [allAnimalsFetched, setAllAnimalsFetched] = useState(false); // true once Phase 2 (all animals) fetch completes
     
     // Load filters from localStorage or use defaults
     const [statusFilter, setStatusFilter] = useState(() => {
@@ -24722,12 +27354,37 @@ const AnimalList = ({
             return localStorage.getItem('animalList_statusFilterMating') === 'true';
         } catch { return false; }
     });
-    const [blFilter, setBlFilter] = useState([]); // array of line IDs to filter by (empty = no filter)
-    const [ownedFilterActive, setOwnedFilterActive] = useState(() => {
+    const [blFilter, setBlFilter] = useState(() => {
         try {
-            const saved = localStorage.getItem('animalList_ownedFilterActive');
+            const saved = localStorage.getItem('animalList_blFilter');
+            return saved ? JSON.parse(saved) : [];
+        } catch { return []; }
+    }); // array of line IDs to filter by (empty = no filter)
+    const [pendingFilters, setPendingFilters] = useState(false); // true when filters changed but not yet applied
+
+    const filterMountedRef = useRef(false); // tracks initial mount for pending-filters detection
+    // Applied filter snapshot — groupedAnimals reads from this, only updated on "Apply Filters" click
+    const [appliedFilters, setAppliedFilters] = useState(() => ({
+        statusFilter: (function() { try { return localStorage.getItem('animalList_statusFilter') || ''; } catch { return ''; } })(),
+        selectedGenders: (function() { try { const s = localStorage.getItem('animalList_selectedGenders'); return s ? JSON.parse(s) : ['Male', 'Female', 'Intersex', 'Unknown']; } catch { return ['Male', 'Female', 'Intersex', 'Unknown']; } })(),
+        selectedSpecies: [], // will be filled on first species load
+        statusFilterPregnant: (function() { try { return localStorage.getItem('animalList_statusFilterPregnant') === 'true'; } catch { return false; } })(),
+        statusFilterNursing: (function() { try { return localStorage.getItem('animalList_statusFilterNursing') === 'true'; } catch { return false; } })(),
+        statusFilterMating: (function() { try { return localStorage.getItem('animalList_statusFilterMating') === 'true'; } catch { return false; } })(),
+        publicFilter: (function() { try { return localStorage.getItem('animalList_publicFilter') || ''; } catch { return ''; } })(),
+        blFilter: (function() { try { const s = localStorage.getItem('animalList_blFilter'); return s ? JSON.parse(s) : []; } catch { return []; } })(),
+    }));
+    const [showOwned, setShowOwned] = useState(() => {
+        try {
+            const saved = localStorage.getItem('animalList_showOwned');
             return saved !== null ? saved === 'true' : true;
         } catch { return true; }
+    });
+    const [showUnowned, setShowUnowned] = useState(() => {
+        try {
+            const saved = localStorage.getItem('animalList_showUnowned');
+            return saved !== null ? saved === 'true' : false;
+        } catch { return false; }
     });
     // Archive section collapse states
     const [archiveSoldCollapsed, setArchiveSoldCollapsed] = useState(false);
@@ -24743,6 +27400,7 @@ const AnimalList = ({
     const [selectedAnimals, setSelectedAnimals] = useState({}); // { species: [id1, id2, ...] }
     const [collapsedSpecies, setCollapsedSpecies] = useState({}); // { species: true/false } - for mobile collapse
     const [userSpeciesOrder, setUserSpeciesOrder] = useState([]); // User's custom species order
+    const [filtersExpanded, setFiltersExpanded] = useState(false); // toggle filter panel visibility
     const [animalView, setAnimalView] = useState('list'); // 'list' | 'management'
     const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({ enclosures: true }); // { sectionKey: bool }
     const [collapsedMgmtGroups, setCollapsedMgmtGroups] = useState({}); // { groupKey: bool }
@@ -24868,107 +27526,38 @@ const AnimalList = ({
     
     useEffect(() => {
         try {
-            localStorage.setItem('animalList_ownedFilterActive', ownedFilterActive.toString());
-        } catch (e) { console.warn('Failed to save ownedFilterActive', e); }
-    }, [ownedFilterActive]);
+            localStorage.setItem('animalList_showOwned', showOwned.toString());
+        } catch (e) { console.warn('Failed to save showOwned', e); }
+    }, [showOwned]);
+    useEffect(() => {
+        try {
+            localStorage.setItem('animalList_showUnowned', showUnowned.toString());
+        } catch (e) { console.warn('Failed to save showUnowned', e); }
+    }, [showUnowned]);
     
     useEffect(() => {
         try {
             localStorage.setItem('animalList_publicFilter', publicFilter);
         } catch (e) { console.warn('Failed to save publicFilter', e); }
     }, [publicFilter]);
-    
-    const fetchAnimals = useCallback(async () => {
-        // Do NOT setLoading(true) here — loading starts true only on initial mount
-        // and goes false after the very first fetch. All subsequent re-fetches are
-        // silent so the existing card grid never disappears during filter changes.
+
+    useEffect(() => {
         try {
-            let params = [];
-            if (statusFilter) {
-                params.push(`status=${statusFilter}`);
-            }
-            if (appliedNameFilter) {
-                params.push(`name=${encodeURIComponent(appliedNameFilter)}`);
-            }
-            if (statusFilterPregnant) {
-                params.push(`isPregnant=true`);
-            }
-            if (statusFilterNursing) {
-                params.push(`isNursing=true`);
-            }
-            if (statusFilterMating) {
-                params.push(`isInMating=true`);
-            }
-            if (ownedFilterActive) {
-                params.push(`isOwned=true`);
-            }
-            const queryString = params.length > 0 ? `?${params.join('&')}` : '';
-            const url = `${API_BASE_URL}/animals${queryString}`;
+            localStorage.setItem('animalList_blFilter', JSON.stringify(blFilter));
+        } catch (e) { console.warn('Failed to save blFilter', e); }
+    }, [blFilter]);
 
-            const response = await axios.get(url, { headers: { Authorization: `Bearer ${authToken}` } });
-            let data = response.data || [];
-            
-            // Client-side fallback filtering in case the API doesn't apply the `name` filter reliably
-            if (appliedNameFilter) {
-                const term = appliedNameFilter.toLowerCase();
-                data = data.filter(a => {
-                    const name = (a.name || '').toString().toLowerCase();
-                    const registry = (a.breederAssignedId || a.registryCode || '').toString().toLowerCase();
-                    const idPublic = (a.id_public || '').toString().toLowerCase();
-                    const tags = (a.tags || []).map(t => t.toLowerCase());
-                    const tagsMatch = tags.some(tag => tag.includes(term));
-                    return name.includes(term) || registry.includes(term) || idPublic.includes(term.replace(/^ct-?/,'').toLowerCase()) || tagsMatch;
-                });
-            }
+    const fetchAnimals = useCallback(async () => {
+        // Two-phase fetch: fast owned-only first, then all animals in background
+        try {
+            // Phase 1: fetch owned animals quickly to get content on screen
+            const ownedRes = await axios.get(`${API_BASE_URL}/animals?isOwned=true`, { headers: { Authorization: `Bearer ${authToken}` } });
+            let ownedData = (ownedRes.data || []).filter(a => !a.isViewOnly);
 
-            // Filter by selected species (if any species are selected)
-            if (selectedSpecies.length > 0) {
-                data = data.filter(a => selectedSpecies.includes(a.species));
-            }
-
-            // Filter by selected genders (if not all are selected, or if none are selected show nothing)
-            if (selectedGenders.length === 0) {
-                // No genders selected = show no animals
-                data = [];
-            } else if (selectedGenders.length < GENDER_OPTIONS.length) {
-                // Some genders selected = filter to those
-                data = data.filter(a => selectedGenders.includes(a.gender));
-            }
-
-            // Always exclude view-only (sold/transferred) animals from My Animals — they appear in Management > Sold/Transferred
-            data = data.filter(a => !a.isViewOnly);
-
-            // Enforce that males are excluded when pregnant or nursing filters are active
-            if (statusFilterPregnant || statusFilterNursing) {
-                data = data.filter(a => {
-                    const gender = (a.gender || '').toString().toLowerCase();
-                    return gender !== 'male';
-                });
-            }
-
-            // Ensure only animals with the actual boolean flags are shown when those filters are enabled
-            if (statusFilterPregnant) {
-                data = data.filter(a => a.isPregnant === true);
-            }
-            if (statusFilterNursing) {
-                data = data.filter(a => a.isNursing === true);
-            }
-            if (statusFilterMating) {
-                data = data.filter(a => a.isInMating === true);
-            }
-
-            // Filter by public/private status
-            if (publicFilter === 'public') {
-                data = data.filter(a => a.showOnPublicProfile === true);
-            } else if (publicFilter === 'private') {
-                data = data.filter(a => !a.showOnPublicProfile);
-            }
-
-            // Cache-bust images ONLY once per session startup (not on every filter change)
-            // Store whether we've already busted this session
+            // Cache-bust images ONLY once per session startup
             if (!fetchAnimals._cacheBusted) {
                 fetchAnimals._cacheBusted = true;
-                data = data.map(a => {
+                const bustImages = (data) => data.map(a => {
                     const img = a.imageUrl || a.photoUrl || null;
                     if (img) {
                         const busted = img.includes('?') ? `${img}&t=${Date.now()}` : `${img}?t=${Date.now()}`;
@@ -24976,19 +27565,51 @@ const AnimalList = ({
                     }
                     return a;
                 });
+                ownedData = bustImages(ownedData);
             }
 
-            setAnimals(data);
-            // Derive species list from already-fetched data instead of a separate API call
-            const speciesList = [...new Set(data.map(a => a.species).filter(Boolean))];
+            setAnimals(ownedData);
+            const speciesList = [...new Set(ownedData.map(a => a.species).filter(Boolean))];
             if (speciesList.length > 0) setAllUserSpecies(speciesList);
+            setLoading(false);
+
+            // Phase 2: background-fetch ALL animals so unowned toggle works instantly
+            try {
+                const allRes = await axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` } });
+                let allData = (allRes.data || []).filter(a => !a.isViewOnly);
+                // Preserve cache-busted image URLs from phase 1
+                const ownedMap = new Map(ownedData.map(a => [a.id_public || a._id, a]));
+                allData = allData.map(a => {
+                    const key = a.id_public || a._id;
+                    return ownedMap.has(key) ? ownedMap.get(key) : a;
+                });
+                setAnimals(allData);
+                const allSpecies = [...new Set(allData.map(a => a.species).filter(Boolean))];
+                if (allSpecies.length > 0) setAllUserSpecies(allSpecies);
+            } catch (err) {
+                console.warn('[fetchAnimals] Background all-animals fetch failed, owned-only still shown:', err);
+            } finally {
+                setAllAnimalsFetched(true);
+            }
         } catch (error) {
             console.error('Fetch animals error:', error);
             showModalMessage('Error', 'Failed to fetch animal list.');
-        } finally {
             setLoading(false);
+        } finally {
+            setPendingFilters(false);
         }
-    }, [authToken, statusFilter, selectedGenders, selectedSpecies, appliedNameFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, ownedFilterActive, publicFilter, showModalMessage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [authToken, showModalMessage]);
+
+    // Apply filters: snapshot current UI filter state into appliedFilters
+    const applyFilters = useCallback(() => {
+        setAppliedFilters({
+            statusFilter, selectedGenders, selectedSpecies,
+            statusFilterPregnant, statusFilterNursing, statusFilterMating,
+            publicFilter, blFilter,
+        });
+        setPendingFilters(false);
+    }, [statusFilter, selectedGenders, selectedSpecies, statusFilterPregnant, statusFilterNursing, statusFilterMating, publicFilter, blFilter]);
 
     // Species list is now derived from the fetchAnimals result - no separate API call needed
     const fetchAllSpecies = useCallback(async () => {
@@ -25034,6 +27655,15 @@ const AnimalList = ({
     }, [authToken, API_BASE_URL]);
 
     useEffect(() => {
+        // Skip fetch if we have a cache (e.g. returning from edit/view)
+        if (_alCache && _alCache.length > 0) {
+            setAnimalsRaw(_alCache);
+            setLoading(false);
+            // Still derive species from cached data
+            const speciesList = [...new Set(_alCache.map(a => a.species).filter(Boolean))];
+            if (speciesList.length > 0) setAllUserSpecies(speciesList);
+            return;
+        }
         fetchAnimals();
     }, [fetchAnimals]);
 
@@ -25192,11 +27822,68 @@ const AnimalList = ({
 
     const groupedAnimals = useMemo(() => {
         let source = animals;
-        // Apply breeding line filter client-side so it reacts instantly without re-fetching
-        if (blFilter.length > 0) {
+        // --- Applied panel filters (only update on "Apply Filters" click) ---
+        const af = appliedFilters;
+
+        // Status filter
+        if (af.statusFilter) {
+            source = source.filter(a => a.status === af.statusFilter);
+        }
+
+        // Name search (applied on Search button click)
+        if (appliedNameFilter) {
+            const term = appliedNameFilter.toLowerCase();
+            source = source.filter(a => {
+                const name = (a.name || '').toString().toLowerCase();
+                const registry = (a.breederAssignedId || a.registryCode || '').toString().toLowerCase();
+                const idPublic = (a.id_public || '').toString().toLowerCase();
+                const tags = (a.tags || []).map(t => t.toLowerCase());
+                const tagsMatch = tags.some(tag => tag.includes(term));
+                return name.includes(term) || registry.includes(term) || idPublic.includes(term.replace(/^ct-?/,'').toLowerCase()) || tagsMatch;
+            });
+        }
+
+        // Species filter
+        if (af.selectedSpecies.length > 0) {
+            source = source.filter(a => af.selectedSpecies.includes(a.species));
+        }
+
+        // Gender filter
+        if (af.selectedGenders.length === 0) {
+            source = [];
+        } else if (af.selectedGenders.length < GENDER_OPTIONS.length) {
+            source = source.filter(a => af.selectedGenders.includes(a.gender));
+        }
+
+        // Pregnant / Nursing / Mating filters
+        if (af.statusFilterPregnant || af.statusFilterNursing) {
+            source = source.filter(a => (a.gender || '').toLowerCase() !== 'male');
+        }
+        if (af.statusFilterPregnant) source = source.filter(a => a.isPregnant === true);
+        if (af.statusFilterNursing) source = source.filter(a => a.isNursing === true);
+        if (af.statusFilterMating) source = source.filter(a => a.isInMating === true);
+
+        // Public/private filter
+        if (af.publicFilter === 'public') {
+            source = source.filter(a => a.showOnPublicProfile === true);
+        } else if (af.publicFilter === 'private') {
+            source = source.filter(a => !a.showOnPublicProfile);
+        }
+
+        // --- Instant filters (no Apply needed) ---
+        // Ownership filter
+        if (showOwned && !showUnowned) {
+            source = source.filter(a => a.isOwned !== false);
+        } else if (!showOwned && showUnowned) {
+            source = source.filter(a => a.isOwned === false);
+        } else if (!showOwned && !showUnowned) {
+            source = [];
+        }
+        // Breeding line filter
+        if (af.blFilter.length > 0) {
             source = source.filter(a => {
                 const assigned = animalBreedingLines[a.id_public] || [];
-                return blFilter.some(lineId => assigned.includes(lineId));
+                return af.blFilter.some(lineId => assigned.includes(lineId));
             });
         }
         return source.reduce((groups, animal) => {
@@ -25207,7 +27894,11 @@ const AnimalList = ({
             groups[species].push(animal);
             return groups;
         }, {});
-    }, [animals, blFilter, animalBreedingLines]);
+    }, [animals, appliedFilters, appliedNameFilter, showOwned, showUnowned, animalBreedingLines]);
+
+    const displayedAnimalCount = useMemo(() => {
+        return Object.values(groupedAnimals).reduce((sum, arr) => sum + arr.length, 0);
+    }, [groupedAnimals]);
     
     const speciesNames = useMemo(() => {
         return [...allUserSpecies].sort((a, b) => {
@@ -25246,11 +27937,13 @@ const AnimalList = ({
         if (selectedSpecies.length === 0) {
             // First load: select everything
             setSelectedSpecies([...allUserSpecies]);
+            setAppliedFilters(prev => ({ ...prev, selectedSpecies: [...allUserSpecies] }));
         } else {
             // Add any newly-seen species so they aren't silently hidden
             const newSpecies = allUserSpecies.filter(s => !selectedSpecies.includes(s));
             if (newSpecies.length > 0) {
                 setSelectedSpecies(prev => [...prev, ...newSpecies]);
+                setAppliedFilters(prev => ({ ...prev, selectedSpecies: [...prev.selectedSpecies, ...newSpecies] }));
             }
         }
     }, [allUserSpecies]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -25275,19 +27968,30 @@ const AnimalList = ({
     const handleFilterNursing = () => { setStatusFilterNursing(prev => !prev); setStatusFilterPregnant(false); setStatusFilterMating(false); };
     const handleFilterMating = () => { setStatusFilterMating(prev => !prev); setStatusFilterPregnant(false); setStatusFilterNursing(false); };
     
-    // Check if any filters are active (different from defaults)
+    // Check if any filters are active (different from defaults) — uses appliedFilters for panel filters
     const hasActiveFilters = (
-        statusFilter !== '' ||
+        appliedFilters.statusFilter !== '' ||
         appliedNameFilter !== '' ||
         searchInput !== '' ||
-        selectedGenders.length !== 4 ||
-        !speciesNames.every(species => selectedSpecies.includes(species)) ||
-        statusFilterPregnant ||
-        statusFilterNursing ||
-        statusFilterMating ||
-        !ownedFilterActive ||
-        publicFilter !== '' ||
-        blFilter.length > 0
+        appliedFilters.selectedGenders.length !== 4 ||
+        (appliedFilters.selectedSpecies.length > 0 && !speciesNames.every(species => appliedFilters.selectedSpecies.includes(species))) ||
+        appliedFilters.statusFilterPregnant ||
+        appliedFilters.statusFilterNursing ||
+        appliedFilters.statusFilterMating ||
+        appliedFilters.publicFilter !== '' ||
+        appliedFilters.blFilter.length > 0
+    );
+
+    // Detect if panel UI state differs from applied snapshot (show pulse on Apply button)
+    const panelDirty = (
+        statusFilter !== appliedFilters.statusFilter ||
+        JSON.stringify(selectedGenders) !== JSON.stringify(appliedFilters.selectedGenders) ||
+        JSON.stringify(selectedSpecies) !== JSON.stringify(appliedFilters.selectedSpecies) ||
+        statusFilterPregnant !== appliedFilters.statusFilterPregnant ||
+        statusFilterNursing !== appliedFilters.statusFilterNursing ||
+        statusFilterMating !== appliedFilters.statusFilterMating ||
+        publicFilter !== appliedFilters.publicFilter ||
+        JSON.stringify(blFilter) !== JSON.stringify(appliedFilters.blFilter)
     );
     
     const handleClearFilters = () => {
@@ -25299,35 +28003,32 @@ const AnimalList = ({
         setStatusFilterPregnant(false);
         setStatusFilterNursing(false);
         setStatusFilterMating(false);
-        setOwnedFilterActive(true);
+        setShowOwned(true);
+        setShowUnowned(false);
         setPublicFilter('');
         setBlFilter([]);
+        // Also reset the applied snapshot to defaults
+        setAppliedFilters({
+            statusFilter: '',
+            selectedGenders: ['Male', 'Female', 'Intersex', 'Unknown'],
+            selectedSpecies: [...speciesNames],
+            statusFilterPregnant: false,
+            statusFilterNursing: false,
+            statusFilterMating: false,
+            publicFilter: '',
+            blFilter: [],
+        });
+        setPendingFilters(false);
     };
     
     const handleRefresh = async () => {
         try {
             setLoading(true);
             
-            // Fetch animals first
-            const currentAnimals = await axios.get(`${API_BASE_URL}/animals`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            
-            // Recalculate COI for all animals with parents
-            for (const animal of currentAnimals.data) {
-                if (animal.fatherId_public || animal.motherId_public || animal.sireId_public || animal.damId_public) {
-                    try {
-                        await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/inbreeding`, {
-                            params: { generations: 50 },
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        });
-                    } catch (error) {
-                        console.log(`Failed to calculate COI for ${animal.name}:`, error);
-                    }
-                }
-            }
+            // Bust the module-level cache so fetchAnimals does a fresh API call
+            _alCache = null;
 
-            // Refresh the list with updated COI values
+            // Re-fetch the animal list from the server
             await fetchAnimals();
         } catch (error) {
             console.error('Error refreshing:', error);
@@ -25339,7 +28040,7 @@ const AnimalList = ({
     const triggerSearch = () => {
         const term = searchInput.trim();
         if (!term) {
-            // empty -> clear filter and fetch all
+            // empty -> clear filter
             setAppliedNameFilter('');
             return;
         }
@@ -27815,40 +30516,30 @@ const AnimalList = ({
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className='flex items-center gap-2'>
                     <ClipboardList size={20} className="sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
-                    {animalView === 'list' ? `My Animals (${animals.length})` : showActivityLogScreen ? 'Activity Log' : showSuppliesScreen ? 'Supplies & Inventory' : 'Management View'}
+                    {animalView === 'list' ? `My Animals (${displayedAnimalCount})` : showActivityLogScreen ? 'Activity Log' : showSuppliesScreen ? 'Supplies & Inventory' : 'Management View'}
                     {animalView === 'list' && hasActiveFilters && (
                         <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
                             Filtered
                         </span>
                     )}
+                    <button 
+                        onClick={handleRefresh}
+                        disabled={loading}
+                        className="text-gray-500 hover:text-primary transition disabled:opacity-50 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-medium"
+                        title="Refresh List"
+                    >
+                        {loading ? <Loader2 size={14} className="sm:w-4 sm:h-4 animate-spin" /> : <RefreshCw size={14} className="sm:w-4 sm:h-4" />}
+                        <span className="hidden sm:inline">Refresh</span>
+                    </button>
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2 flex-wrap" data-tutorial-target="bulk-privacy-controls">
-                    {animalView === 'list' && hasActiveFilters && (
-                        <button
-                            onClick={handleClearFilters}
-                            className="text-gray-600 hover:text-gray-800 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-gray-100 text-xs sm:text-sm"
-                            title="Clear All Filters"
-                        >
-                            <X size={14} className="sm:w-4 sm:h-4" />
-                            <span className="font-medium">Clear Filters</span>
-                        </button>
-                    )}
                     {animalView === 'list' && (<>
-                    <button
-                        onClick={() => toggleAllAnimalsPrivacy(true)}
-                        className="text-green-600 hover:text-green-700 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-green-50 text-xs sm:text-sm"
-                        title="Make All Animals Public"
+                    <button 
+                        onClick={() => navigate('/select-species')} 
+                        className="bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
+                        data-tutorial-target="add-animal-btn"
                     >
-                        <Eye size={14} className="sm:w-4 sm:h-4" />
-                        <span className="font-medium">All Public</span>
-                    </button>
-                    <button
-                        onClick={() => toggleAllAnimalsPrivacy(false)}
-                        className="text-gray-600 hover:text-gray-800 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-gray-100 text-xs sm:text-sm"
-                        title="Make All Animals Private"
-                    >
-                        <EyeOff size={14} className="sm:w-4 sm:h-4" />
-                        <span className="font-medium">All Private</span>
+                        <PlusCircle size={14} className="sm:w-4 sm:h-4" /> <span className="hidden sm:inline">Add Animal</span><span className="sm:hidden">Add</span>
                     </button>
 
                     </>)}
@@ -27908,14 +30599,17 @@ const AnimalList = ({
                             <span className="font-medium hidden sm:inline">Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
                         </button>
                     )}
+                    {animalView !== 'list' && (
                     <button 
                         onClick={handleRefresh} 
                         disabled={loading}
-                        className="text-gray-600 hover:text-primary transition disabled:opacity-50 flex items-center p-1 sm:p-0"
+                        className="text-gray-500 hover:text-primary transition disabled:opacity-50 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-medium"
                         title="Refresh List"
                     >
-                        {loading ? <Loader2 size={16} className="sm:w-[18px] sm:h-[18px] animate-spin" /> : <RefreshCw size={16} className="sm:w-[18px] sm:h-[18px]" />}
+                        {loading ? <Loader2 size={14} className="sm:w-4 sm:h-4 animate-spin" /> : <RefreshCw size={14} className="sm:w-4 sm:h-4" />}
+                        <span className="hidden sm:inline">Refresh</span>
                     </button>
+                    )}
                 </div>
             </h2>
 
@@ -27944,204 +30638,250 @@ const AnimalList = ({
             )}
 
             {animalView === 'list' && !showArchiveScreen && (
-            <div className="mb-4 sm:mb-6 p-2 sm:p-4 border rounded-lg bg-gray-50 space-y-2 sm:space-y-3">
-                {/* Search and Add buttons - Stack on mobile */}
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <div className="mb-4 sm:mb-6 border rounded-lg bg-gray-50">
+                {/* Ownership filter buttons — always visible, auto-apply */}
+                <div className="flex items-center justify-center gap-2 px-2 sm:px-3 py-2">
+                    <button onClick={() => setShowOwned(prev => !prev)}
+                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
+                            showOwned ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                        title={showOwned ? 'Click to hide owned animals' : 'Click to show owned animals'}
+                    >
+                        <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        {showOwned ? 'Showing Owned' : 'Show Owned'}
+                    </button>
+                    <button onClick={() => setShowUnowned(prev => !prev)}
+                        disabled={!allAnimalsFetched}
+                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
+                            !allAnimalsFetched ? 'bg-gray-100 text-gray-400 cursor-not-allowed' :
+                            showUnowned ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                        title={!allAnimalsFetched ? 'Loading all animals...' : showUnowned ? 'Click to hide unowned animals' : 'Click to show unowned animals'}
+                    >
+                        <HeartOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        {!allAnimalsFetched ? 'Loading...' : showUnowned ? 'Showing Unowned' : 'Show Unowned'}
+                    </button>
+                    <span className="mx-1 text-gray-300">|</span>
+                    <button
+                        onClick={() => toggleAllAnimalsPrivacy(true)}
+                        className="text-green-600 hover:text-green-700 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-green-50 text-xs sm:text-sm font-semibold shadow-sm"
+                        title="Make All Animals Public"
+                    >
+                        <Eye size={14} className="sm:w-4 sm:h-4" />
+                        <span>Set All Public</span>
+                    </button>
+                    <button
+                        onClick={() => toggleAllAnimalsPrivacy(false)}
+                        className="text-gray-600 hover:text-gray-800 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-semibold shadow-sm"
+                        title="Make All Animals Private"
+                    >
+                        <EyeOff size={14} className="sm:w-4 sm:h-4" />
+                        <span>Set All Private</span>
+                    </button>
+                </div>
+
+                {/* Search + Filters toggle + Add */}
+                <div className="flex items-center gap-2 p-2 sm:p-3 border-t border-gray-200">
                     <input
                         type="text"
                         placeholder="Search by name..."
                         value={searchInput}
                         onChange={handleSearchInputChange}
                         onKeyPress={(e) => { if (e.key === 'Enter') triggerSearch(); }}
-                        className="flex-grow p-2 text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition"
+                        className="flex-grow p-2 text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-0"
                         disabled={loading}
                         data-tutorial-target="my-animals-search"
                     />
-                    <div className="flex gap-2">
-                        <button
-                            onClick={triggerSearch}
-                            disabled={loading}
-                            className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-3 sm:px-4 rounded-lg transition duration-150 shadow-md flex items-center justify-center space-x-1 text-sm"
-                            title="Search"
-                        >
-                            <Search size={16} />
-                            <span className="hidden sm:inline">Search</span>
-                        </button>
-                        <button 
-                            onClick={() => navigate('/select-species')} 
-                            className="flex-1 sm:flex-none bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-3 sm:px-4 rounded-lg transition duration-150 shadow-md flex items-center justify-center space-x-1 whitespace-nowrap text-sm"
-                            data-tutorial-target="add-animal-btn"
-                        >
-                            <PlusCircle size={16} /> <span className="hidden sm:inline">Add Animal</span><span className="sm:hidden">Add</span>
-                        </button>
-                    </div>
+                    <button
+                        onClick={triggerSearch}
+                        disabled={loading}
+                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 text-sm shrink-0"
+                        title="Search"
+                    >
+                        <Search size={16} />
+                        <span className="hidden sm:inline">Search</span>
+                    </button>
+                    <button
+                        onClick={() => setFiltersExpanded(prev => !prev)}
+                        className={`relative py-2 px-3 rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1 text-sm font-semibold shrink-0 ${
+                            filtersExpanded ? 'bg-gray-700 text-white' : hasActiveFilters ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                        title="Toggle Filters"
+                    >
+                        <SlidersHorizontal size={16} />
+                        <span className="hidden sm:inline">Filters</span>
+                        {hasActiveFilters && !filtersExpanded && (
+                            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-pink-500 rounded-full" />
+                        )}
+                    </button>
                 </div>
 
-                {/* Line 1: Species + Status dropdowns (centered) */}
-                <div className="flex flex-wrap justify-center gap-3 sm:gap-4 pt-2 border-t border-gray-200">
-                    <div className="flex gap-1 sm:gap-2 items-center" data-tutorial-target="species-filter">
-                        <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
-                        <select 
-                            value={
-                                // Show "All" if all available species are selected
-                                speciesNames.every(species => selectedSpecies.includes(species)) ? '' : 
-                                // Otherwise show first selected species (or empty)
-                                (selectedSpecies.find(s => speciesNames.includes(s)) || '')
-                            }
-                            onChange={(e) => {
-                                const value = e.target.value;
-                                if (value === '') {
-                                    setSelectedSpecies([...speciesNames]);
-                                } else {
-                                    setSelectedSpecies([value]);
+                {/* Collapsible filter panel */}
+                {filtersExpanded && (
+                <div className="px-2 sm:px-3 pb-2 sm:pb-3 space-y-2 sm:space-y-3 border-t border-gray-200 pt-2 sm:pt-3">
+                    {/* Row 1: Species + Status dropdowns */}
+                    <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
+                        <div className="flex gap-1 sm:gap-2 items-center" data-tutorial-target="species-filter">
+                            <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
+                            <select 
+                                value={
+                                    speciesNames.every(species => selectedSpecies.includes(species)) ? '' : 
+                                    (selectedSpecies.find(s => speciesNames.includes(s)) || '')
                                 }
-                            }}
-                            className="p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[120px] sm:min-w-[160px]"
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (value === '') {
+                                        setSelectedSpecies([...speciesNames]);
+                                    } else {
+                                        setSelectedSpecies([value]);
+                                    }
+                                }}
+                                className="p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[110px] sm:min-w-[160px]"
+                            >
+                                <option value="">All</option>
+                                {speciesNames.map(species => (
+                                    <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
+                                ))}
+                            </select>
+                        </div>
+                        
+                        <div className="flex gap-1 sm:gap-2 items-center" data-tutorial-target="status-filter">
+                            <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Status:</span>
+                            <select value={statusFilter} onChange={handleStatusFilterChange} 
+                                className="p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[110px] sm:min-w-[160px]"
+                            >
+                                <option value="">All</option>
+                                {STATUS_OPTIONS.filter(s => s !== 'Sold').map(status => (
+                                    <option key={status} value={status}>{status}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* Row 2: Gender + Visibility */}
+                    <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-6">
+                        <div className="flex items-center gap-1 sm:gap-2" data-tutorial-target="gender-filter">
+                            <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
+                            {GENDER_OPTIONS.map(gender => {
+                                const isSelected = selectedGenders.includes(gender);
+                                let Icon, bgColor;
+                                switch(gender) {
+                                    case 'Male': Icon = Mars; bgColor = isSelected ? 'bg-primary' : 'bg-gray-300 hover:bg-gray-400'; break;
+                                    case 'Female': Icon = Venus; bgColor = isSelected ? 'bg-pink-400' : 'bg-gray-300 hover:bg-gray-400'; break;
+                                    case 'Intersex': Icon = VenusAndMars; bgColor = isSelected ? 'bg-purple-400' : 'bg-gray-300 hover:bg-gray-400'; break;
+                                    case 'Unknown': Icon = Circle; bgColor = isSelected ? 'bg-teal-400' : 'bg-gray-300 hover:bg-gray-400'; break;
+                                    default: Icon = Circle; bgColor = 'bg-gray-300 hover:bg-gray-400';
+                                }
+                                return (
+                                    <button key={gender} onClick={() => toggleGender(gender)}
+                                        className={`p-1.5 sm:p-2 rounded-lg transition duration-150 shadow-sm ${bgColor}`}
+                                        title={gender}
+                                    >
+                                        <Icon className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-black" />
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        <div className="flex items-center gap-1 sm:gap-2" data-tutorial-target="visibility-filter">
+                            <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Visibility:</span>
+                            {['All', 'Public', 'Private'].map(option => {
+                                const value = option === 'All' ? '' : option.toLowerCase();
+                                const isSelected = publicFilter === value;
+                                return (
+                                    <button key={option} onClick={() => setPublicFilter(value)}
+                                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
+                                            isSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        }`}
+                                    >
+                                        {option}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Row 3: Show filters */}
+                    <div className="flex flex-wrap justify-center items-center gap-1 sm:gap-2" data-tutorial-target="collection-filters">
+                        <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Show:</span>
+
+                        <button onClick={handleFilterMating}
+                            className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
+                                statusFilterMating ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                            title="Mating"
                         >
-                            <option value="">All</option>
-                            {speciesNames.map(species => (
-                                <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
-                            ))}
-                        </select>
-                    </div>
-                    
-                    <div className="flex gap-1 sm:gap-2 items-center" data-tutorial-target="status-filter">
-                        <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Status:</span>
-                        <select value={statusFilter} onChange={handleStatusFilterChange} 
-                            className="p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[120px] sm:min-w-[160px]"
+                            <Hourglass className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            <span className="hidden sm:inline">Mating</span>
+                        </button>
+                        <button onClick={handleFilterPregnant}
+                            className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
+                                statusFilterPregnant ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                            title="Pregnant"
                         >
-                            <option value="">All</option>
-                            {STATUS_OPTIONS.filter(s => s !== 'Sold').map(status => (
-                                <option key={status} value={status}>{status}</option>
-                            ))}
-                        </select>
+                            <Bean className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            <span className="hidden sm:inline">Pregnant</span>
+                        </button>
+                        <button onClick={handleFilterNursing}
+                            className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
+                                statusFilterNursing ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                            title="Nursing"
+                        >
+                            <Milk className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            <span className="hidden sm:inline">Nursing</span>
+                        </button>
+                    </div>
+
+                    {/* Row 4: Breeding Line filters */}
+                    {breedingLineDefs.some(l => l.name) && (
+                        <div className="flex flex-wrap justify-center items-center gap-2">
+                            <span className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">Breeding Line:</span>
+                            {breedingLineDefs.filter(l => l.name).map(line => {
+                                const isActive = blFilter.includes(line.id);
+                                return (
+                                    <button
+                                        key={line.id}
+                                        onClick={() => setBlFilter(prev => isActive ? prev.filter(id => id !== line.id) : [...prev, line.id])}
+                                        title={line.name}
+                                        className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm border ${
+                                            isActive ? 'text-white border-transparent' : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300'
+                                        }`}
+                                        style={isActive ? { backgroundColor: line.color, borderColor: line.color } : {}}
+                                    >
+                                        <span style={{ color: isActive ? 'white' : line.color }} className="text-base leading-none">&#x25C6;</span>
+                                        {line.name}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {/* Apply / Clear row */}
+                    <div className="flex justify-center items-center gap-2 pt-2 border-t border-gray-200">
+                        <button
+                            onClick={() => { applyFilters(); setFiltersExpanded(false); }}
+                            className={`font-semibold py-2 px-5 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1.5 text-sm ${
+                                panelDirty
+                                    ? 'bg-accent hover:bg-accent/90 text-white animate-pulse'
+                                    : 'bg-primary hover:bg-primary/90 text-black'
+                            }`}
+                        >
+                            <Check size={16} />
+                            Apply Filters
+                        </button>
+                        {hasActiveFilters && (
+                            <button
+                                onClick={() => { handleClearFilters(); setFiltersExpanded(false); }}
+                                className="text-gray-600 hover:text-gray-800 transition flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-gray-100 text-sm font-medium"
+                            >
+                                <X size={14} />
+                                Clear All
+                            </button>
+                        )}
                     </div>
                 </div>
-
-                {/* Line 2: Gender icons + Visibility filters (both centered with gap) */}
-                <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-8">
-                    <div className="flex items-center gap-1 sm:gap-2" data-tutorial-target="gender-filter">
-                        <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
-                        {GENDER_OPTIONS.map(gender => {
-                            const isSelected = selectedGenders.includes(gender);
-                            let Icon, bgColor;
-                            
-                            switch(gender) {
-                                case 'Male':
-                                    Icon = Mars;
-                                    bgColor = isSelected ? 'bg-primary' : 'bg-gray-300 hover:bg-gray-400';
-                                    break;
-                                case 'Female':
-                                    Icon = Venus;
-                                    bgColor = isSelected ? 'bg-pink-400' : 'bg-gray-300 hover:bg-gray-400';
-                                    break;
-                                case 'Intersex':
-                                    Icon = VenusAndMars;
-                                    bgColor = isSelected ? 'bg-purple-400' : 'bg-gray-300 hover:bg-gray-400';
-                                    break;
-                                case 'Unknown':
-                                    Icon = Circle;
-                                    bgColor = isSelected ? 'bg-teal-400' : 'bg-gray-300 hover:bg-gray-400';
-                                    break;
-                                default:
-                                    Icon = Circle;
-                                    bgColor = 'bg-gray-300 hover:bg-gray-400';
-                            }
-                            
-                            return (
-                                <button key={gender} onClick={() => toggleGender(gender)}
-                                    className={`p-1.5 sm:p-2 rounded-lg transition duration-150 shadow-sm ${bgColor}`}
-                                    title={gender}
-                                >
-                                    <Icon className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-black" />
-                                </button>
-                            );
-                        })}
-                    </div>
-
-                    <div className="flex items-center gap-1 sm:gap-2" data-tutorial-target="visibility-filter">
-                        <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Visibility:</span>
-                        {['All', 'Public', 'Private'].map(option => {
-                            const value = option === 'All' ? '' : option.toLowerCase();
-                            const isSelected = publicFilter === value;
-                            return (
-                                <button key={option} onClick={() => setPublicFilter(value)}
-                                    className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
-                                        isSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                    }`}
-                                >
-                                    {option}
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* Line 3: Show filters (centered) */}
-                <div className="flex justify-center items-center gap-1 sm:gap-2" data-tutorial-target="collection-filters">
-                    <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Show:</span>
-                    
-                    <button onClick={() => setOwnedFilterActive(prev => !prev)}
-                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
-                            ownedFilterActive ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                        title={ownedFilterActive ? 'Showing only your animals' : 'Showing all animals'}
-                    >
-                        {ownedFilterActive ? <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <HeartHandshake className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-                        <span className="hidden sm:inline">{ownedFilterActive ? 'My Animals' : 'All'}</span>
-                    </button>
-
-                    <button onClick={handleFilterMating}
-                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
-                            statusFilterMating ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                        title="Mating"
-                    >
-                        <Hourglass className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        <span className="hidden sm:inline">Mating</span>
-                    </button>
-                    <button onClick={handleFilterPregnant}
-                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
-                            statusFilterPregnant ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                        title="Pregnant"
-                    >
-                        <Bean className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        <span className="hidden sm:inline">Pregnant</span>
-                    </button>
-                    <button onClick={handleFilterNursing}
-                        className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
-                            statusFilterNursing ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                        title="Nursing"
-                    >
-                        <Milk className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        <span className="hidden sm:inline">Nursing</span>
-                    </button>
-                </div>
-
-                {/* Line 4: Breeding Line filters (only shown when user has named lines) */}
-                {breedingLineDefs.some(l => l.name) && (
-                    <div className="flex flex-wrap justify-center items-center gap-2">
-                        <span className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">Breeding Line:</span>
-                        {breedingLineDefs.filter(l => l.name).map(line => {
-                            const isActive = blFilter.includes(line.id);
-                            return (
-                                <button
-                                    key={line.id}
-                                    onClick={() => setBlFilter(prev => isActive ? prev.filter(id => id !== line.id) : [...prev, line.id])}
-                                    title={line.name}
-                                    className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm border ${
-                                        isActive ? 'text-white border-transparent' : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300'
-                                    }`}
-                                    style={isActive ? { backgroundColor: line.color, borderColor: line.color } : {}}
-                                >
-                                    <span style={{ color: isActive ? 'white' : line.color }} className="text-base leading-none">&#x25C6;</span>
-                                    {line.name}
-                                </button>
-                            );
-                        })}
-                    </div>
                 )}
             </div>
             )}
@@ -28166,7 +30906,7 @@ const AnimalList = ({
                         </div>
                     ))}
                 </div>
-            ) : animals.length === 0 ? (
+            ) : displayedAnimalCount === 0 ? (
                 <div className="text-center p-8 bg-gray-50 rounded-lg">
                     <Cat size={48} className="text-gray-400 mx-auto mb-4" />
                     <p className="text-xl font-semibold text-gray-600">No animals found.</p>
@@ -29121,13 +31861,13 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                     }
                 }
             }
-            if (l.weaningDate) {
+            if (l.weaningDate && !l.weaningDismissed) {
                 const wean = parseLocalDate(l.weaningDate);
                 if (wean) {
                     const diff = Math.round((wean - today) / 86400000);
                     if (diff <= 0) {
                         const key = `${l._id}-weaned-${todayStr}`;
-                        if (!breedingDismissed[key]) breedingItems.push({ key, type: 'weaned', pairName, sireDam, callId, diff });
+                        if (!breedingDismissed[key]) breedingItems.push({ key, type: 'weaned', pairName, sireDam, callId, diff, litterId: l._id });
                     }
                 }
             }
@@ -29185,6 +31925,13 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
         const next = { ...breedingDismissed, [key]: true };
         setBreedingDismissed(next);
         try { localStorage.setItem('ct_urgency_dismissed', JSON.stringify(next)); } catch {}
+    };
+    const dismissWeaningPermanently = async (litterId, key) => {
+        try {
+            await axios.put(`${API_BASE_URL}/litters/${litterId}`, { weaningDismissed: true }, { headers: { Authorization: `Bearer ${authToken}` } });
+            setLitters(prev => prev.map(l => l._id === litterId ? { ...l, weaningDismissed: true } : l));
+        } catch { /* fall back to local dismiss */ }
+        dismissBreeding(key);
     };
     const dismissMgmt = (key) => {
         const next = { ...mgmtDismissed, [key]: true };
@@ -29299,7 +32046,14 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                                                 <p className="text-xs text-gray-500 truncate">{item.sireDam}</p>
                                             </div>
                                             <span className={`text-xs font-bold flex-shrink-0 ${item.diff < 0 ? 'text-red-600' : item.diff === 0 ? 'text-purple-600' : 'text-gray-600'}`}>{statusText}</span>
-                                            <button onClick={() => dismissBreeding(item.key)} className="p-0.5 text-gray-400 hover:text-gray-600 flex-shrink-0"><X size={13} /></button>
+                                            {item.type === 'weaned' ? (
+                                                <div className="flex items-center gap-1.5 flex-shrink-0">
+                                                    <button onClick={() => dismissBreeding(item.key)} className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 flex-shrink-0">Snooze</button>
+                                                    <button onClick={() => dismissWeaningPermanently(item.litterId, item.key)} className="text-xs font-medium px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 hover:bg-pink-200 flex-shrink-0" title="Mark weaning complete — stops this reminder permanently">Done</button>
+                                                </div>
+                                            ) : (
+                                                <button onClick={() => dismissBreeding(item.key)} className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 flex-shrink-0">Snooze</button>
+                                            )}
                                         </div>
                                     );
                                 })}
@@ -29460,6 +32214,14 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
         try { localStorage.setItem('ct_urgency_dismissed', JSON.stringify(next)); } catch {}
     };
 
+    const dismissWeaningPermanently = async (litterId, key) => {
+        try {
+            await axios.put(`${API_BASE_URL}/litters/${litterId}`, { weaningDismissed: true }, { headers: { Authorization: `Bearer ${authToken}` } });
+            setLitters(prev => prev.map(l => l._id === litterId ? { ...l, weaningDismissed: true } : l));
+        } catch { /* fall back to local dismiss */ }
+        dismiss(key);
+    };
+
     const dismissAll = (items) => {
         const next = { ...dismissed };
         items.forEach(item => { next[item.key] = true; });
@@ -29513,13 +32275,13 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
         }
 
         // Weaning
-        if (l.weaningDate) {
+        if (l.weaningDate && !l.weaningDismissed) {
             const wean = parseLocalDate(l.weaningDate);
             if (wean) {
                 const diff = Math.round((wean - today) / 86400000);
                 if (diff <= 0) {
                     const key = `${l._id}-weaned-${todayStr}`;
-                    if (!dismissed[key]) urgentItems.push({ key, type: 'weaned', pairName, sireDam, callId, diff });
+                    if (!dismissed[key]) urgentItems.push({ key, type: 'weaned', pairName, sireDam, callId, diff, litterId: l._id });
                 }
             }
         }
@@ -29585,13 +32347,30 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
                                 <span className={`text-xs font-bold flex-shrink-0 ${item.diff === 0 ? 'text-purple-600' : 'text-red-600'}`}>
                                     {statusText}
                                 </span>
-                                <button
-                                    onClick={() => dismiss(item.key)}
-                                    className="p-0.5 text-gray-400 hover:text-gray-600 flex-shrink-0"
-                                    title="Dismiss"
-                                >
-                                    <X size={14} />
-                                </button>
+                                {item.type === 'weaned' ? (
+                                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                                        <button
+                                            onClick={() => dismiss(item.key)}
+                                            className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                        >
+                                            Snooze
+                                        </button>
+                                        <button
+                                            onClick={() => dismissWeaningPermanently(item.litterId, item.key)}
+                                            className="text-xs font-medium px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 hover:bg-pink-200"
+                                            title="Mark weaning complete — stops this reminder permanently"
+                                        >
+                                            Done
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={() => dismiss(item.key)}
+                                        className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 flex-shrink-0"
+                                    >
+                                        Snooze
+                                    </button>
+                                )}
                             </div>
                         );
                     })}
@@ -30510,6 +33289,8 @@ const App = () => {
                 'animalList_statusFilterPregnant',
                 'animalList_statusFilterNursing',
                 'animalList_statusFilterMating',
+                'animalList_showOwned',
+                'animalList_showUnowned',
                 'animalList_ownedFilterActive',
                 'animalList_publicFilter'
             ];
@@ -30640,6 +33421,8 @@ const App = () => {
     const [viewingPublicProfile, setViewingPublicProfile] = useState(null);
     const [viewingPublicAnimal, setViewingPublicAnimal] = useState(null);
     const [publicAnimalViewHistory, setPublicAnimalViewHistory] = useState([]); // Navigation history for public animals
+    const [publicAnimalInitialTab, setPublicAnimalInitialTab] = useState(1);
+    const [privateAnimalInitialTab, setPrivateAnimalInitialTab] = useState(1);
     const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
     const [animalToView, setAnimalToView] = useState(null);
     const [animalViewHistory, setAnimalViewHistory] = useState([]); // Navigation history stack for animals
@@ -31877,7 +34660,7 @@ const App = () => {
         navigate('/edit-animal');
     };
 
-    const handleViewAnimal = async (animal) => {
+    const handleViewAnimal = async (animal, initialTab = 1) => {
         console.log('[handleViewAnimal] Viewing animal:', animal);
         
         // If we're already viewing an animal, push it to history before navigating to new one
@@ -31917,6 +34700,7 @@ const App = () => {
         
         console.log('[handleViewAnimal] Father ID:', normalizedAnimal.fatherId_public, 'Mother ID:', normalizedAnimal.motherId_public);
         viewReturnPathRef.current = location.pathname;
+        setPrivateAnimalInitialTab(initialTab);
         setAnimalToView(normalizedAnimal);
         navigate('/view-animal');
         
@@ -31969,7 +34753,7 @@ const App = () => {
     };
     
     // Handle viewing public animals with history support
-    const handleViewPublicAnimal = (animal) => {
+    const handleViewPublicAnimal = (animal, initialTab = 1) => {
         console.log('[handleViewPublicAnimal] Viewing public animal:', animal);
         
         // If we're already viewing a public animal, push it to history before navigating to new one
@@ -31978,6 +34762,7 @@ const App = () => {
             console.log('[handleViewPublicAnimal] Pushed current animal to history, stack size:', publicAnimalViewHistory.length + 1);
         }
         
+        setPublicAnimalInitialTab(initialTab);
         setViewingPublicAnimal(animal);
     };
     
@@ -31987,12 +34772,14 @@ const App = () => {
             // Pop the last animal from history and view it
             const previousAnimal = publicAnimalViewHistory[publicAnimalViewHistory.length - 1];
             setPublicAnimalViewHistory(prev => prev.slice(0, -1));
+            setPublicAnimalInitialTab(1);
             setViewingPublicAnimal(previousAnimal);
             console.log('[handleBackFromPublicAnimal] Navigating back to previous animal, remaining history:', publicAnimalViewHistory.length - 1);
         } else {
             // No history, close the detail view entirely
             setViewingPublicAnimal(null);
             setPublicAnimalViewHistory([]);
+            setPublicAnimalInitialTab(1);
             console.log('[handleBackFromPublicAnimal] No history, closing detail view');
         }
     };
@@ -32001,6 +34788,7 @@ const App = () => {
     const handleCloseAllPublicAnimals = () => {
         setViewingPublicAnimal(null);
         setPublicAnimalViewHistory([]);
+        setPublicAnimalInitialTab(1);
         console.log('[handleCloseAllPublicAnimals] Closed entire public animal modal stack');
     };
 
@@ -32224,6 +35012,7 @@ const App = () => {
                             onViewProfile={(user) => setViewingPublicProfile(user)}
                             onViewAnimal={handleViewPublicAnimal}
                             setModCurrentContext={setModCurrentContext}
+                            initialTab={publicAnimalInitialTab}
                         />
                     )}
 
@@ -32364,6 +35153,7 @@ const App = () => {
                             setModCurrentContext={setModCurrentContext}
                             setShowImageModal={setShowImageModal}
                             setEnlargedImageUrl={setEnlargedImageUrl}
+                            initialTab={publicAnimalInitialTab}
                         />
                     )}
                     
@@ -33539,6 +36329,7 @@ const App = () => {
                                 return (
                                     <PrivateAnimalDetail
                                         animal={animalToView}
+                                        initialTab={privateAnimalInitialTab}
                                         onClose={handleBackFromAnimal}
                                         onCloseAll={handleCloseAllAnimals}
                                         onEdit={handleEditAnimal}
@@ -33554,6 +36345,7 @@ const App = () => {
                                             setShowTransferModal(true);
                                         }}
                                         onViewAnimal={handleViewAnimal}
+                                        onViewPublicAnimal={handleViewPublicAnimal}
                                         onToggleOwned={toggleAnimalOwned}
                                         userProfile={userProfile}
                                         breedingLineDefs={breedingLineDefs}
@@ -33566,6 +36358,7 @@ const App = () => {
                                 return (
                                     <ViewOnlyPrivateAnimalDetail
                                         animal={animalToView}
+                                        initialTab={privateAnimalInitialTab}
                                         onClose={handleBackFromAnimal}
                                         onCloseAll={handleCloseAllAnimals}
                                         API_BASE_URL={API_BASE_URL}

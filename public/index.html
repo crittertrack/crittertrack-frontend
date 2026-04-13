@@ -109,17 +109,29 @@
     
     <script>
       // Version identifier - increment this when deploying breaking changes
-      const APP_VERSION = '2025-12-12-v5';
+      const APP_VERSION = '2026-04-11-v1';
       
       // Store version in session storage on load
       const savedVersion = sessionStorage.getItem('appVersion');
       if (!savedVersion) {
         sessionStorage.setItem('appVersion', APP_VERSION);
       } else if (savedVersion !== APP_VERSION) {
-        console.log('[App] Version changed from', savedVersion, 'to', APP_VERSION, '- performing hard refresh');
-        // Version mismatch - do a hard refresh to clear everything
+        console.log('[App] Version changed from', savedVersion, 'to', APP_VERSION, '- unregistering old SW and reloading');
         sessionStorage.setItem('appVersion', APP_VERSION);
-        window.location.reload(true); // Force refresh from server
+        // Unregister all service workers before reload to clear stale caches
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(regs => {
+            Promise.all(regs.map(r => r.unregister())).then(() => {
+              caches.keys().then(keys => {
+                Promise.all(keys.map(k => caches.delete(k))).then(() => {
+                  window.location.reload(true);
+                });
+              });
+            });
+          });
+        } else {
+          window.location.reload(true);
+        }
       }
 
       // Register service worker with update checking
