@@ -35070,8 +35070,8 @@ const App = () => {
                         />
                     )}
 
-                    {/* Moderator Action Sidebar - Shows when viewing animals in mod mode */}
-                    {inModeratorMode && !showModReportQueue && !showAdminPanel && localStorage.getItem('moderationAuthenticated') === 'true' && (
+                    {/* Moderator Action Sidebar - disabled, use mod panel instead */}
+                    {false && inModeratorMode && !showModReportQueue && !showAdminPanel && localStorage.getItem('moderationAuthenticated') === 'true' && (
                         <ModeratorActionSidebar
                             isActive={true}
                             onOpenReportQueue={() => setShowModReportQueue(true)}
@@ -35136,8 +35136,8 @@ const App = () => {
                         currentUserRole={userProfile?.role}
                     />
 
-                    {/* Moderator Action Sidebar - Shows in moderator mode even when viewing public profiles */}
-                    {inModeratorMode && !showModReportQueue && ['admin', 'moderator'].includes(userProfile?.role) && (
+                    {/* Moderator Action Sidebar - disabled, use mod panel instead */}
+                    {false && inModeratorMode && !showModReportQueue && ['admin', 'moderator'].includes(userProfile?.role) && (
                         <ModeratorActionSidebar
                             isActive={true}
                             onOpenReportQueue={() => setShowModReportQueue(true)}
@@ -36089,8 +36089,8 @@ const App = () => {
                 />
             )}
 
-            {/* Moderator Action Sidebar - Shows while browsing in moderator mode */}
-            {inModeratorMode && !showModReportQueue && !showAdminPanel && localStorage.getItem('moderationAuthenticated') === 'true' && (
+            {/* Moderator Action Sidebar - disabled, use mod panel instead */}
+            {false && inModeratorMode && !showModReportQueue && !showAdminPanel && localStorage.getItem('moderationAuthenticated') === 'true' && (
                 <ModeratorActionSidebar
                     isActive={true}
                     onOpenReportQueue={() => setShowModReportQueue(true)}
@@ -38434,8 +38434,8 @@ const PublicAnimalPage = () => {
                 </div>
             )}
             
-            {/* Moderator Action Sidebar */}
-            {inModeratorMode && (
+            {/* Moderator Action Sidebar - disabled, use mod panel instead */}
+            {false && inModeratorMode && (
                 <ModeratorActionSidebar
                     isActive={true}
                     onOpenReportQueue={() => navigate('/')}
@@ -38765,8 +38765,8 @@ const PublicProfilePage = () => {
                 } : null}
             />
             
-            {/* Moderator Action Sidebar - Shows if user is authenticated moderator */}
-            {inModeratorMode && localStorage.getItem('moderationAuthenticated') === 'true' && (
+            {/* Moderator Action Sidebar - disabled, use mod panel instead */}
+            {false && inModeratorMode && localStorage.getItem('moderationAuthenticated') === 'true' && (
                 <ModeratorActionSidebar
                     isActive={true}
                     onOpenReportQueue={() => navigate('/')}
