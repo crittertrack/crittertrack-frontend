@@ -902,6 +902,9 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             el.style.minHeight = 'unset';
             el.style.overflow = 'visible';
             el.style.padding = '40px 20px 32px 20px';
+            const ggpStyle = document.createElement('style');
+            ggpStyle.textContent = '.ggp-chart-img { display: none !important; }';
+            document.head.appendChild(ggpStyle);
             await new Promise(r => setTimeout(r, 500));
             const srcCanvas = await html2canvas(el, {
                 scale: 2, backgroundColor: '#ffffff', logging: false,
@@ -909,6 +912,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 windowWidth: 2000, windowHeight: 9999,
                 imageTimeout: 15000, scrollX: 0, scrollY: 0
             });
+            document.head.removeChild(ggpStyle);
             Object.assign(el.style, { width: orig.w, height: orig.h, minHeight: orig.mh, overflow: orig.ov, padding: orig.p });
             // Fit into A4 landscape (297 × 210mm) with 4mm padding using mm-based jsPDF
             const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
@@ -935,6 +939,9 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             el.style.minHeight = 'unset';
             el.style.overflow = 'visible';
             el.style.padding = '40px 20px 32px 20px';
+            const ggpStyle2 = document.createElement('style');
+            ggpStyle2.textContent = '.ggp-chart-img { display: none !important; }';
+            document.head.appendChild(ggpStyle2);
             await new Promise(r => setTimeout(r, 500));
             const srcCanvas = await html2canvas(el, {
                 scale: 2, backgroundColor: '#ffffff', logging: false,
@@ -942,6 +949,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 windowWidth: 2000, windowHeight: 9999,
                 imageTimeout: 15000, scrollX: 0, scrollY: 0
             });
+            document.head.removeChild(ggpStyle2);
             Object.assign(el.style, { width: orig.w, height: orig.h, minHeight: orig.mh, overflow: orig.ov, padding: orig.p });
             // Fit into A4 landscape canvas at 200dpi (2339 × 1654) with 30px padding
             const a4W = 2339, a4H = 1654, pad = 30;
@@ -1092,7 +1100,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 onClick={onClick ? () => onClick(animal) : undefined}
             >
                 {/* Image - 1/3 width */}
-                <div className="hide-for-pdf w-2/5 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
+                <div className="hide-for-pdf w-1/4 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
                     {imgSrc ? (
                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={window.innerWidth < 640 ? 24 : 32} />
                     ) : (
@@ -1206,7 +1214,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 onClick={onClick ? () => onClick(animal) : undefined}
             >
                 {/* Image - 1/4 width */}
-                <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
+                <div className="hide-for-pdf w-1/4 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
                     {imgSrc ? (
                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={18} />
                     ) : (
@@ -1290,7 +1298,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             return (
                 <div className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} flex gap-1 h-full items-center relative`}>
                     {/* Icon placeholder */}
-                    <div className="hide-for-pdf w-8 h-8 bg-gray-100 rounded-lg border border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
+                    <div className="hide-for-pdf ggp-chart-img w-8 h-8 bg-gray-100 rounded-lg border border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                         <EyeOff size={12} className="text-gray-500" />
                     </div>
                     {/* Text */}
@@ -1313,7 +1321,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 onClick={onClick ? () => onClick(animal) : undefined}
             >
                 {/* Image */}
-                <div className="hide-for-pdf w-10 h-10 bg-gray-100 rounded-lg border border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
+                <div className="hide-for-pdf ggp-chart-img w-8 h-8 bg-gray-100 rounded-lg border border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
                     {imgSrc ? (
                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={12} />
                     ) : (
