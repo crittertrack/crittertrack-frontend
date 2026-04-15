@@ -606,22 +606,70 @@ const LitterSyncConflictModal = ({ items, onResolve, onSkip }) => {
 };
 
 // Pedigree Chart Component
-const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken = null, inline = false }) => {
+const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken = null, inline = false, manualData = null }) => {
     const [pedigreeData, setPedigreeData] = useState(null);
+    const [displayData, setDisplayData] = useState(null);
     const [ownerProfile, setOwnerProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [imagesLoaded, setImagesLoaded] = useState(false);
     const [stackedPedigree, setStackedPedigree] = useState(null); // For nested pedigree viewing
     const pedigreeRef = useRef(null);
 
+    // Merge manual ancestors into fetched pedigree tree wherever API returned nothing
+    useEffect(() => {
+        if (!pedigreeData) { setDisplayData(null); return; }
+        if (!manualData) { setDisplayData(pedigreeData); return; }
+        const slotToAnimal = (slot) => {
+            if (!slot) return null;
+            if (!slot.ctcId && !slot.name && !slot.prefix && !slot.suffix) return null;
+            return {
+                name: slot.name || '', prefix: slot.prefix || '', suffix: slot.suffix || '',
+                color: slot.variety || '', imageUrl: slot.imageUrl || null, photoUrl: slot.imageUrl || null,
+                birthDate: slot.birthDate || null, breederName: slot.breederName || '',
+                gender: slot.gender || '', id_public: slot.ctcId || null, geneticCode: slot.genCode || '',
+            };
+        };
+        const d = JSON.parse(JSON.stringify(pedigreeData));
+        // Level 1 — parents
+        if (!d.father && manualData.sire) d.father = slotToAnimal(manualData.sire);
+        if (!d.mother && manualData.dam)  d.mother = slotToAnimal(manualData.dam);
+        // Level 2 — grandparents
+        if (d.father) {
+            if (!d.father.father && manualData.sireSire) d.father.father = slotToAnimal(manualData.sireSire);
+            if (!d.father.mother && manualData.sireDam)  d.father.mother = slotToAnimal(manualData.sireDam);
+        }
+        if (d.mother) {
+            if (!d.mother.father && manualData.damSire) d.mother.father = slotToAnimal(manualData.damSire);
+            if (!d.mother.mother && manualData.damDam)  d.mother.mother = slotToAnimal(manualData.damDam);
+        }
+        // Level 3 — great-grandparents
+        if (d.father?.father) {
+            if (!d.father.father.father && manualData.sireSireSire) d.father.father.father = slotToAnimal(manualData.sireSireSire);
+            if (!d.father.father.mother && manualData.sireSireDam)  d.father.father.mother = slotToAnimal(manualData.sireSireDam);
+        }
+        if (d.father?.mother) {
+            if (!d.father.mother.father && manualData.sireDamSire) d.father.mother.father = slotToAnimal(manualData.sireDamSire);
+            if (!d.father.mother.mother && manualData.sireDamDam)  d.father.mother.mother = slotToAnimal(manualData.sireDamDam);
+        }
+        if (d.mother?.father) {
+            if (!d.mother.father.father && manualData.damSireSire) d.mother.father.father = slotToAnimal(manualData.damSireSire);
+            if (!d.mother.father.mother && manualData.damSireDam)  d.mother.father.mother = slotToAnimal(manualData.damSireDam);
+        }
+        if (d.mother?.mother) {
+            if (!d.mother.mother.father && manualData.damDamSire) d.mother.mother.father = slotToAnimal(manualData.damDamSire);
+            if (!d.mother.mother.mother && manualData.damDamDam)  d.mother.mother.mother = slotToAnimal(manualData.damDamDam);
+        }
+        setDisplayData(d);
+    }, [pedigreeData, manualData]);
+
     useEffect(() => {
         const fetchPedigreeData = async () => {
             setLoading(true);
             try {
                 // Enhanced recursive function to fetch animal, ancestors, and descendants
-                // resultCache: Map<id, data> ? avoids redundant API calls but allows the same
+                // resultCache: Map<id, data> — avoids redundant API calls but allows the same
                 //   ancestor to appear in *multiple* pedigree positions (inbreeding).
-                // pathIds: Set of IDs in the current call-chain ? detects true circular loops only.
+                // pathIds: Set of IDs in the current call-chain — detects true circular loops only.
                 const resultCache = new Map();
                 const fetchAnimalWithFamily = async (id, depth = 0, pathIds = new Set()) => {
                     if (!id || depth > 4) return null;
@@ -1458,7 +1506,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                                     </div>
                                 </div>
                             </div>
-                            <div>{renderPedigreeTree(pedigreeData)}</div>
+                            <div>{renderPedigreeTree(displayData)}</div>
                             <div className="mt-4 pt-3 pb-2 border-t border-gray-200 flex justify-between items-center text-xs text-gray-500">
                                 <div>{getOwnerDisplayInfoBottomLeft()}</div>
                                 <div>{formatDate(new Date())}</div>
@@ -1565,7 +1613,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
                             {/* Pedigree Tree */}
                             <div>
-                                {renderPedigreeTree(pedigreeData)}
+                                {renderPedigreeTree(displayData)}
                             </div>
 
                             {/* Footer - Inside scrollable content */}
@@ -6942,7 +6990,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart. To add or edit manual ancestors, use the Edit button.</p>
 
                             <div className={betaPedigreeView === 'chart' ? '' : 'hidden'}>
-                                <PedigreeChart inline animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} />
+                                <PedigreeChart inline animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} manualData={mpEnrichedData} />
                             </div>
                             <div className={betaPedigreeView === 'vertical' ? '' : 'hidden'}>
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
@@ -8929,7 +8977,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             </div>
                             <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart.</p>
                             <div className={betaPedigreeView === 'chart' ? '' : 'hidden'}>
-                                <PedigreeChart inline animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} />
+                                <PedigreeChart inline animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} manualData={mpEnrichedData} />
                             </div>
                             <div className={betaPedigreeView === 'vertical' ? '' : 'hidden'}>
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
@@ -10939,7 +10987,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             </div>
                             <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart.</p>
                             <div className={betaPedigreeView === 'chart' ? '' : 'hidden'}>
-                                <PedigreeChart inline animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} />
+                                <PedigreeChart inline animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} manualData={mpEnrichedData} />
                             </div>
                             <div className={betaPedigreeView === 'vertical' ? '' : 'hidden'}>
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
