@@ -897,7 +897,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         try {
             const el = pedigreeRef.current;
             const orig = { w: el.style.width, h: el.style.height, mh: el.style.minHeight, ov: el.style.overflow, p: el.style.padding };
-            el.style.width = '1400px';
+            el.style.width = '2000px';
             el.style.height = 'auto';
             el.style.minHeight = 'unset';
             el.style.overflow = 'visible';
@@ -906,11 +906,11 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             const srcCanvas = await html2canvas(el, {
                 scale: 2, backgroundColor: '#ffffff', logging: false,
                 useCORS: true, allowTaint: true, letterRendering: true,
-                windowWidth: 1400, windowHeight: 9999,
+                windowWidth: 2000, windowHeight: 9999,
                 imageTimeout: 15000, scrollX: 0, scrollY: 0
             });
             Object.assign(el.style, { width: orig.w, height: orig.h, minHeight: orig.mh, overflow: orig.ov, padding: orig.p });
-            // Fit into A4 landscape (297 × 210mm) with 10mm padding using mm-based jsPDF
+            // Fit into A4 landscape (297 × 210mm) with 4mm padding using mm-based jsPDF
             const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
             const pageW = 297, pageH = 210, pad_mm = 4;
             const maxW = pageW - pad_mm * 2, maxH = pageH - pad_mm * 2;
@@ -933,7 +933,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         try {
             const el = pedigreeRef.current;
             const orig = { w: el.style.width, h: el.style.height, mh: el.style.minHeight, ov: el.style.overflow, p: el.style.padding };
-            el.style.width = '1400px';
+            el.style.width = '2000px';
             el.style.height = 'auto';
             el.style.minHeight = 'unset';
             el.style.overflow = 'visible';
@@ -942,11 +942,11 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             const srcCanvas = await html2canvas(el, {
                 scale: 2, backgroundColor: '#ffffff', logging: false,
                 useCORS: true, allowTaint: true, letterRendering: true,
-                windowWidth: 1400, windowHeight: 9999,
+                windowWidth: 2000, windowHeight: 9999,
                 imageTimeout: 15000, scrollX: 0, scrollY: 0
             });
             Object.assign(el.style, { width: orig.w, height: orig.h, minHeight: orig.mh, overflow: orig.ov, padding: orig.p });
-            // Fit into A4 landscape canvas at 200dpi (2339 × 1654) with 80px padding
+            // Fit into A4 landscape canvas at 200dpi (2339 × 1654) with 30px padding
             const a4W = 2339, a4H = 1654, pad = 30;
             const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
             const srcRatio = srcCanvas.width / srcCanvas.height;
