@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.19",
+    "baseline-browser-mapping": "^2.10.19",
     "cross-env": "^10.1.0",
     "postcss": "^8.4.38",
     "sharp": "^0.34.5",

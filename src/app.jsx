@@ -4841,7 +4841,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                         {/* DOB + age */}
                                         {animal.birthDate && (
                                             <p className="text-sm text-gray-700">
-                                                <span className="font-semibold">Born:</span> {formatDate(animal.birthDate)} (~{(() => {
+                                                <span className="font-semibold">Born:</span> {formatDate(animal.birthDate)} {(() => {
                                                     const birth = new Date(animal.birthDate);
                                                     const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
                                                     let years = endDate.getFullYear() - birth.getFullYear();
@@ -4849,11 +4849,13 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                     let days = endDate.getDate() - birth.getDate();
                                                     if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
                                                     if (months < 0) { years--; months += 12; }
-                                                    if (years > 0) return `${years}y ${months}m ${days}d`;
-                                                    if (months > 0) return `${months}m ${days}d`;
-                                                    return `${days}d`;
-                                                })()})
-                                                {animal.deceasedDate && <span className="text-red-600 font-semibold ml-2">{"†"} {formatDate(animal.deceasedDate)}</span>}
+                                                    const ageStr = years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
+                                                    if (animal.deceasedDate) {
+                                                        return <span className="text-red-600 font-semibold ml-2">{"†"} {formatDate(animal.deceasedDate)} (Lived {ageStr})</span>;
+                                                    } else {
+                                                        return <span>(~{ageStr})</span>;
+                                                    }
+                                                })()}
                                             </p>
                                         )}
                                         {/* Variety */}
@@ -7351,7 +7353,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                         {/* DOB + age */}
                                         {animal.birthDate && (
                                             <p className="text-sm text-gray-700">
-                                                <span className="font-semibold">Born:</span> {formatDate(animal.birthDate)} (~{(() => {
+                                                <span className="font-semibold">Born:</span> {formatDate(animal.birthDate)} {(() => {
                                                     const birth = new Date(animal.birthDate);
                                                     const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
                                                     let years = endDate.getFullYear() - birth.getFullYear();
@@ -7359,11 +7361,13 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                     let days = endDate.getDate() - birth.getDate();
                                                     if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
                                                     if (months < 0) { years--; months += 12; }
-                                                    if (years > 0) return `${years}y ${months}m ${days}d`;
-                                                    if (months > 0) return `${months}m ${days}d`;
-                                                    return `${days}d`;
-                                                })()})
-                                                {animal.deceasedDate && <span className="text-red-600 font-semibold ml-2">{"†"} {formatDate(animal.deceasedDate)}</span>}
+                                                    const ageStr = years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
+                                                    if (animal.deceasedDate) {
+                                                        return <span className="text-red-600 font-semibold ml-2">{"†"} {formatDate(animal.deceasedDate)} (Lived {ageStr})</span>;
+                                                    } else {
+                                                        return <span>(~{ageStr})</span>;
+                                                    }
+                                                })()}
                                             </p>
                                         )}
                                         {/* Variety */}
@@ -9384,7 +9388,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                         {/* DOB + age */}
                                         {animal.birthDate && (
                                             <p className="text-sm text-gray-700">
-                                                <span className="font-semibold">Born:</span> {formatDate(animal.birthDate)} (~{(() => {
+                                                <span className="font-semibold">Born:</span> {formatDate(animal.birthDate)} {(() => {
                                                     const birth = new Date(animal.birthDate);
                                                     const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
                                                     let years = endDate.getFullYear() - birth.getFullYear();
@@ -9392,11 +9396,13 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                     let days = endDate.getDate() - birth.getDate();
                                                     if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
                                                     if (months < 0) { years--; months += 12; }
-                                                    if (years > 0) return `${years}y ${months}m ${days}d`;
-                                                    if (months > 0) return `${months}m ${days}d`;
-                                                    return `${days}d`;
-                                                })()})
-                                                {animal.deceasedDate && <span className="text-red-600 font-semibold ml-2">{"†"} {formatDate(animal.deceasedDate)}</span>}
+                                                    const ageStr = years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
+                                                    if (animal.deceasedDate) {
+                                                        return <span className="text-red-600 font-semibold ml-2">{"†"} {formatDate(animal.deceasedDate)} (Lived {ageStr})</span>;
+                                                    } else {
+                                                        return <span>(~{ageStr})</span>;
+                                                    }
+                                                })()}
                                             </p>
                                         )}
                                         {/* Variety */}
