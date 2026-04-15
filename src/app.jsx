@@ -4853,7 +4853,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                     if (months > 0) return `${months}m ${days}d`;
                                                     return `${days}d`;
                                                 })()})
-                                                {animal.deceasedDate && <span className="text-red-600 font-semibold ml-2">{"·"} Deceased: {formatDate(animal.deceasedDate)}</span>}
+                                                {animal.deceasedDate && <span className="text-red-600 font-semibold ml-2">{"†"} {formatDate(animal.deceasedDate)}</span>}
                                             </p>
                                         )}
                                         {/* Variety */}
@@ -7363,7 +7363,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                     if (months > 0) return `${months}m ${days}d`;
                                                     return `${days}d`;
                                                 })()})
-                                                {animal.deceasedDate && <span className="text-red-600 font-semibold ml-2">{"·"} Deceased: {formatDate(animal.deceasedDate)}</span>}
+                                                {animal.deceasedDate && <span className="text-red-600 font-semibold ml-2">{"†"} {formatDate(animal.deceasedDate)}</span>}
                                             </p>
                                         )}
                                         {/* Variety */}
@@ -9396,7 +9396,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                     if (months > 0) return `${months}m ${days}d`;
                                                     return `${days}d`;
                                                 })()})
-                                                {animal.deceasedDate && <span className="text-red-600 font-semibold ml-2">{"·"} Deceased: {formatDate(animal.deceasedDate)}</span>}
+                                                {animal.deceasedDate && <span className="text-red-600 font-semibold ml-2">{"†"} {formatDate(animal.deceasedDate)}</span>}
                                             </p>
                                         )}
                                         {/* Variety */}
