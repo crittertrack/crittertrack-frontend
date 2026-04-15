@@ -150,7 +150,7 @@ const GENE_LOCI = {
   },
   Rst: {
     name: 'Rosette',
-    description: 'Whorls/rosettes in coat. Also called Abyssinian. Recessive; rst/rst shows rosette phenotype. Homozygous (Rst/Rst) intensifies the rosetting.',
+    description: 'Whorls/rosettes in coat. Also called Abyssinian. Recessive; rst/rst shows rosette phenotype.',
     combinations: [
       'rst/rst',
       'Rst/rst', 'Rst/Rst'
