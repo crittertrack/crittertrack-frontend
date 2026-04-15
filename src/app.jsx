@@ -4780,12 +4780,12 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                         <div className="text-sm font-medium text-gray-700">{animal.status || 'Unknown'}</div>
                                         {animal.isForSale && (
                                             <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
-                                                <Tag size={11} /> For Sale
+                                                <Tag size={11} /> For Sale{animal.salePriceCurrency !== 'Negotiable' && animal.salePriceAmount ? ` · ${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount}` : ''}
                                             </span>
                                         )}
                                         {animal.availableForBreeding && (
                                             <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
-                                                <Tag size={11} /> Stud
+                                                <Tag size={11} /> Stud{animal.studFeeCurrency !== 'Negotiable' && animal.studFeeAmount ? ` · ${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount}` : ''}
                                             </span>
                                         )}
                                         {animal.tags && animal.tags.length > 0 && (
@@ -4798,7 +4798,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                     </div>
                                     {/* Right: All info */}
                                     <div className="flex-1 p-4 space-y-2">
-                                        {/* Top row: species/CTC + toggles */}
+                                        {/* Top row: species/CTC + toggles */
                                         <div className="flex items-center justify-between gap-2 flex-wrap">
                                             <p className="text-sm text-gray-500">
                                                 {animal.species || 'Unknown'}
@@ -7319,12 +7319,12 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                         </div>
                                         {animal.isForSale && (
                                             <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
-                                                <Tag size={11} /> For Sale
+                                                <Tag size={11} /> For Sale{animal.salePriceCurrency !== 'Negotiable' && animal.salePriceAmount ? ` · ${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount}` : ''}
                                             </span>
                                         )}
                                         {animal.availableForBreeding && (
                                             <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
-                                                <Tag size={11} /> Stud
+                                                <Tag size={11} /> Stud{animal.studFeeCurrency !== 'Negotiable' && animal.studFeeAmount ? ` · ${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount}` : ''}
                                             </span>
                                         )}
                                         {animal.tags && animal.tags.length > 0 && (
@@ -9350,14 +9350,14 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                             )}
                                         </div>
                                         <div className="text-sm font-medium text-gray-700">{animal.status || 'Unknown'}</div>
-                                        {animal.isForSale && (animal.salePriceCurrency || animal.salePriceAmount) && (
+                                        {animal.isForSale && (
                                             <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
-                                                <Tag size={11} /> For Sale
+                                                <Tag size={11} /> For Sale{animal.salePriceCurrency !== 'Negotiable' && animal.salePriceAmount ? ` · ${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount}` : ''}
                                             </span>
                                         )}
-                                        {animal.availableForBreeding && (animal.studFeeCurrency || animal.studFeeAmount) && (
+                                        {animal.availableForBreeding && (
                                             <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
-                                                <Tag size={11} /> Stud
+                                                <Tag size={11} /> Stud{animal.studFeeCurrency !== 'Negotiable' && animal.studFeeAmount ? ` · ${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount}` : ''}
                                             </span>
                                         )}
                                         {animal.tags && animal.tags.length > 0 && (
