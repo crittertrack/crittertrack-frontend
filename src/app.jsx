@@ -4368,9 +4368,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
     useEffect(() => { setMpEnrichedData(null); setMpLoading(false); }, [animal?.id_public]);
     useEffect(() => { setDetailViewTab(initialTab); setBetaPedigreeView(initialBetaView); }, [animal?.id_public, initialTab, initialBetaView]);
 
-    // Fetch ALL animals on the account + global relationships lazily when Lineage tab opens
+    // Fetch ALL animals on the account + global relationships lazily when Family tab opens
     useEffect(() => {
-        if (detailViewTab !== 5 || ownedAnimalsLoadedRef.current || !authToken || !animal?.id_public) return;
+        if (detailViewTab !== 6 || ownedAnimalsLoadedRef.current || !authToken || !animal?.id_public) return;
         ownedAnimalsLoadedRef.current = true;
         setParentCardKey(k => k + 1); // force parent cards to refetch when tab opens
         // Fetch all account animals (no ownership filter)
@@ -5084,7 +5084,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                     {/* Tab 4: Appearance */}
                     {detailViewTab === 4 && (
                         <div className="space-y-6">
-                            {/* Appearance - Always show */}}
+                            {/* Appearance - Always show */}
                             {(() => {
                                 const fields = [
                                     { key: 'color', label: 'Color' },
