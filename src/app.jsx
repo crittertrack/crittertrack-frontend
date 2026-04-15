@@ -625,7 +625,8 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             return {
                 name: slot.name || '', prefix: slot.prefix || '', suffix: slot.suffix || '',
                 color: slot.variety || '', imageUrl: slot.imageUrl || null, photoUrl: slot.imageUrl || null,
-                birthDate: slot.birthDate || null, breederName: slot.breederName || '',
+                birthDate: slot.birthDate || null, deceasedDate: slot.deceasedDate || null,
+                breederName: slot.breederName || '',
                 gender: slot.gender || '', id_public: slot.ctcId || null, geneticCode: slot.genCode || '',
             };
         };
@@ -1002,11 +1003,11 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     </div>
                     
                     {/* Deceased Date */}
-                    {animal.deceasedDate && (
+                    {animal.deceasedDate ? (
                         <div className="text-red-600 leading-tight font-semibold text-xs" style={{lineHeight: '1.2'}}>
                             <span>† {formatDate(animal.deceasedDate)}</span>
                         </div>
-                    )}
+                    ) : null}
                     
                     {/* Breeder Info */}
                     <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
@@ -1074,7 +1075,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         return (
             <div 
-                className={`border ${getBorderColor(animal)} rounded p-1.5 ${bgColor} relative flex gap-2 h-full items-start overflow-hidden ${onClick ? 'cursor-pointer hover:opacity-80 transition' : ''}`}
+                className={`border ${getBorderColor(animal)} rounded p-1.5 ${bgColor} relative flex gap-2 h-full items-center ${onClick ? 'cursor-pointer hover:opacity-80 transition' : ''}`}
                 onClick={onClick ? () => onClick(animal) : undefined}
             >
                 {/* Image - 1/3 width */}
@@ -1192,7 +1193,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         return (
             <div 
-                className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} relative flex gap-1.5 h-full items-start overflow-hidden ${onClick ? 'cursor-pointer hover:opacity-80 transition' : ''}`}
+                className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} relative flex gap-1.5 h-full items-center ${onClick ? 'cursor-pointer hover:opacity-80 transition' : ''}`}
                 onClick={onClick ? () => onClick(animal) : undefined}
             >
                 {/* Image - 1/4 width */}
@@ -1232,11 +1233,11 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     </div>
                     
                     {/* Deceased Date */}
-                    {animal.deceasedDate && (
+                    {animal.deceasedDate ? (
                         <div className="text-red-600 leading-tight font-semibold" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
                             <span>† {formatDate(animal.deceasedDate)}</span>
                         </div>
-                    )}
+                    ) : null}
                     
                     {/* Breeder */}
                     <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
@@ -1303,7 +1304,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         return (
             <div 
-                className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} relative h-full flex gap-1 items-start overflow-hidden ${onClick ? 'cursor-pointer hover:opacity-80 transition' : ''}`}
+                className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} relative h-full flex gap-1 items-center ${onClick ? 'cursor-pointer hover:opacity-80 transition' : ''}`}
                 onClick={onClick ? () => onClick(animal) : undefined}
             >
                 {/* Image */}
@@ -1335,11 +1336,11 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     </div>
                     
                     {/* Deceased Date */}
-                    {animal.deceasedDate && (
+                    {animal.deceasedDate ? (
                         <div className="text-red-600 leading-tight font-semibold" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
                             <span>† {formatDate(animal.deceasedDate)}</span>
                         </div>
-                    )}
+                    ) : null}
                     
                     {/* Breeder */}
                     <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
