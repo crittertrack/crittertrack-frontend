@@ -1030,6 +1030,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
     // Render card for parents (medium with image)
     const renderParentCard = (animal, isSire, onClick = null) => {
+        if (animal) {
+            console.log(`[renderParentCard] Animal ${animal.id_public}: birthDate=${animal.birthDate}, deceasedDate=${animal.deceasedDate}`);
+        }
         const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
         const GenderIcon = isSire ? Mars : Venus;
         
