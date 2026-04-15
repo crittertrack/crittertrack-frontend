@@ -17,7 +17,7 @@ const GENE_LOCI = {
   },
   B: {
     name: 'Brown',
-    description: 'Turns black colour brown. e.g. Chocolate (b/b), Cinnamon (b/b + Agouti)',
+    description: 'Turns black pigment brown. e.g. Chocolate (b/b), Cinnamon (b/b + Agouti)',
     combinations: [
       'b/b',
       'B/b', 'B/B'
@@ -25,7 +25,7 @@ const GENE_LOCI = {
   },
   C: {
     name: 'Albino',
-    description: 'Dilutes colour. e.g. Albino (c/c), Siamese (ch/ch), Burmese (ch/cch), Chinchilla (cch/cch)',
+    description: 'Dilutes pigment. e.g. Albino (c/c), Siamese (ch/ch), Burmese (ch/cch), Chinchilla (cch/cch)',
     combinations: [
       'c/c',
       'c/ch', 'ch/ch',
@@ -36,7 +36,7 @@ const GENE_LOCI = {
   },
   D: {
     name: 'Dilution',
-    description: 'Dilutes colour. e.g. Blue (d/d on black), Blue Agouti (d/d on agouti)',
+    description: 'Dilutes pigment. e.g. Blue (d/d on black), Blue Agouti (d/d on agouti)',
     combinations: [
       'd/d',
       'D/d', 'D/D'
@@ -44,7 +44,7 @@ const GENE_LOCI = {
   },
   E: {
     name: 'Extension',
-    description: 'Controls colour expression. e.g. Recessive Red (e/e)',
+    description: 'Controls pigment expression. e.g. Recessive Red (e/e)',
     combinations: [
       'e/e',
       'E/e', 'E/E'
@@ -52,7 +52,7 @@ const GENE_LOCI = {
   },
   P: {
     name: 'Pink-eye',
-    description: 'Dilutes colour with pink eyes. e.g. Dove (p/p on black), Argente (p/p on agouti)',
+    description: 'Dilutes pigment with pink eyes. e.g. Dove (p/p on black), Argente (p/p on agouti)',
     combinations: [
       'p/p',
       'P/p', 'P/P'
@@ -68,7 +68,7 @@ const GENE_LOCI = {
   },
   W: {
     name: 'Dominant Spotting',
-    description: 'White spotting alleles. e.g. Banded (W/w), Variegated (Wsh/-), Rumpwhite (Rw/-)',
+    description: 'White spotting patterns. e.g. Banded (W/w), Variegated (Wsh/-), Rumpwhite (Rw/-)',
     combinations: [
       'w/w',
       'W/w', 'W/W',
