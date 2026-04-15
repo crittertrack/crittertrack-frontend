@@ -914,11 +914,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
             const pageW = 297, pageH = 210, pad_mm = 4;
             const maxW = pageW - pad_mm * 2, maxH = pageH - pad_mm * 2;
-            const srcRatio = srcCanvas.width / srcCanvas.height;
-            const imgW = srcRatio > maxW / maxH ? maxW : maxH * srcRatio;
-            const imgH = srcRatio > maxW / maxH ? maxW / srcRatio : maxH;
             pdf.addImage(srcCanvas.toDataURL('image/png'), 'PNG',
-                (pageW - imgW) / 2, (pageH - imgH) / 2, imgW, imgH);
+                (pageW - maxW) / 2, (pageH - maxH) / 2, maxW, maxH);
             pdf.save(`pedigree-${pedigreeData?.name || 'chart'}.pdf`);
         } catch (error) {
             console.error('Error generating PDF:', error);
@@ -949,14 +946,11 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             // Fit into A4 landscape canvas at 200dpi (2339 × 1654) with 30px padding
             const a4W = 2339, a4H = 1654, pad = 30;
             const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
-            const srcRatio = srcCanvas.width / srcCanvas.height;
-            const dw = srcRatio > maxW / maxH ? maxW : Math.round(maxH * srcRatio);
-            const dh = srcRatio > maxW / maxH ? Math.round(maxW / srcRatio) : maxH;
             const out = document.createElement('canvas');
             out.width = a4W; out.height = a4H;
             const ctx = out.getContext('2d');
             ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
-            ctx.drawImage(srcCanvas, Math.round((a4W - dw) / 2), Math.round((a4H - dh) / 2), dw, dh);
+            ctx.drawImage(srcCanvas, (a4W - maxW) / 2, (a4H - maxH) / 2, maxW, maxH);
             const link = document.createElement('a');
             link.download = `pedigree-${pedigreeData?.name || 'chart'}.png`;
             link.href = out.toDataURL('image/png');
