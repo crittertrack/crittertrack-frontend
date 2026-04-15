@@ -17,7 +17,7 @@ const GENE_LOCI = {
   },
   B: {
     name: 'Brown',
-    description: 'Turns black pigment brown. e.g. Chocolate (b/b), Cinnamon (b/b + Agouti)',
+    description: 'Turns black colour brown. e.g. Chocolate (b/b), Cinnamon (b/b + Agouti)',
     combinations: [
       'b/b',
       'B/b', 'B/B'
@@ -25,7 +25,7 @@ const GENE_LOCI = {
   },
   C: {
     name: 'Albino',
-    description: 'Dilutes pigment. e.g. Albino (c/c), Siamese (ch/ch), Burmese (ch/cch), Chinchilla (cch/cch)',
+    description: 'Dilutes colour. e.g. Albino (c/c), Siamese (ch/ch), Burmese (ch/cch), Chinchilla (cch/cch)',
     combinations: [
       'c/c',
       'c/ch', 'ch/ch',
@@ -44,7 +44,7 @@ const GENE_LOCI = {
   },
   E: {
     name: 'Extension',
-    description: 'Controls pigment expression. e.g. Recessive Red (e/e)',
+    description: 'Controls colour expression. e.g. Recessive Red (e/e)',
     combinations: [
       'e/e',
       'E/e', 'E/E'
