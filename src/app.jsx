@@ -613,6 +613,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     const [loading, setLoading] = useState(true);
     const [imagesLoaded, setImagesLoaded] = useState(false);
     const [stackedPedigree, setStackedPedigree] = useState(null); // For nested pedigree viewing
+    const [isSaving, setIsSaving] = useState(false);
     const pedigreeRef = useRef(null);
 
     // Merge manual ancestors into fetched pedigree tree wherever API returned nothing
@@ -892,9 +893,8 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
     const downloadPDF = async () => {
         if (!pedigreeRef.current) return;
-
+        setIsSaving(true);
         try {
-            // Store original styles
             const originalWidth = pedigreeRef.current.style.width;
             const originalHeight = pedigreeRef.current.style.height;
             const originalAspectRatio = pedigreeRef.current.style.aspectRatio;
@@ -935,20 +935,61 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             pedigreeRef.current.style.padding = originalPadding;
 
             const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF({
-                orientation: 'landscape',
-                unit: 'px',
-                format: [1400, 1000]
-            });
-
-            // Add image at exact dimensions without scaling
-            pdf.addImage(imgData, 'PNG', 0, 0, 1400, 1000);
+            const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+            pdf.addImage(imgData, 'PNG', 0, 0, 297, 210);
             pdf.save(`pedigree-${pedigreeData?.name || 'chart'}.pdf`);
         } catch (error) {
             console.error('Error generating PDF:', error);
-            // Restore images even if there's an error
-            const imageContainers = pedigreeRef.current?.querySelectorAll('.hide-for-pdf');
-            imageContainers?.forEach(el => el.style.display = '');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const downloadImage = async () => {
+        if (!pedigreeRef.current) return;
+        setIsSaving(true);
+        try {
+            const originalWidth = pedigreeRef.current.style.width;
+            const originalHeight = pedigreeRef.current.style.height;
+            const originalAspectRatio = pedigreeRef.current.style.aspectRatio;
+            const originalMinHeight = pedigreeRef.current.style.minHeight;
+            const originalPadding = pedigreeRef.current.style.padding;
+            pedigreeRef.current.style.width = '1400px';
+            pedigreeRef.current.style.height = '1000px';
+            pedigreeRef.current.style.aspectRatio = 'unset';
+            pedigreeRef.current.style.minHeight = 'unset';
+            pedigreeRef.current.style.overflow = 'visible';
+            pedigreeRef.current.style.padding = '70px 20px 20px 20px';
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const srcCanvas = await html2canvas(pedigreeRef.current, {
+                scale: 3, backgroundColor: '#ffffff', logging: false,
+                useCORS: true, allowTaint: true, letterRendering: true,
+                windowWidth: 1400, windowHeight: 1000, imageTimeout: 15000,
+                removeContainer: true, scrollX: 0, scrollY: 0
+            });
+            pedigreeRef.current.style.width = originalWidth;
+            pedigreeRef.current.style.height = originalHeight;
+            pedigreeRef.current.style.aspectRatio = originalAspectRatio;
+            pedigreeRef.current.style.minHeight = originalMinHeight;
+            pedigreeRef.current.style.padding = originalPadding;
+            // Fit onto A4 landscape canvas at 200dpi (2339 x 1654)
+            const a4W = 2339, a4H = 1654, pad = 60;
+            const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
+            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height, 1);
+            const dw = srcCanvas.width * ratio, dh = srcCanvas.height * ratio;
+            const outCanvas = document.createElement('canvas');
+            outCanvas.width = a4W; outCanvas.height = a4H;
+            const ctx = outCanvas.getContext('2d');
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
+            ctx.drawImage(srcCanvas, (a4W - dw) / 2, (a4H - dh) / 2, dw, dh);
+            const link = document.createElement('a');
+            link.download = `pedigree-${pedigreeData?.name || 'chart'}.png`;
+            link.href = outCanvas.toDataURL('image/png');
+            link.click();
+        } catch (error) {
+            console.error('Error generating image:', error);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -1557,6 +1598,31 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         <PedigreeChart animalId={stackedPedigree.id_public} animalData={stackedPedigree} onClose={() => setStackedPedigree(null)} API_BASE_URL={API_BASE_URL} authToken={authToken} />
                     </div>
                 )}
+                {/* Inline chart save buttons */}
+                <div className="flex justify-end gap-2 mt-2">
+                    <button
+                        onClick={downloadPDF}
+                        disabled={!imagesLoaded || isSaving}
+                        className={`flex items-center gap-1 px-3 py-1.5 text-sm font-semibold rounded-lg border transition ${
+                            imagesLoaded && !isSaving ? 'bg-primary hover:bg-primary/90 text-black border-primary/40 cursor-pointer' : 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed'
+                        }`}
+                        title={!imagesLoaded ? 'Waiting for images...' : 'Save as PDF (A4 Landscape)'}
+                    >
+                        <Download size={14} />
+                        {isSaving ? 'Saving...' : 'Save PDF'}
+                    </button>
+                    <button
+                        onClick={downloadImage}
+                        disabled={!imagesLoaded || isSaving}
+                        className={`flex items-center gap-1 px-3 py-1.5 text-sm font-semibold rounded-lg border transition ${
+                            imagesLoaded && !isSaving ? 'bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-300 cursor-pointer' : 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed'
+                        }`}
+                        title={!imagesLoaded ? 'Waiting for images...' : 'Save as Image (A4 Landscape)'}
+                    >
+                        <Images size={14} />
+                        {isSaving ? 'Saving...' : 'Save Image'}
+                    </button>
+                </div>
             </>
         );
     }
@@ -1585,8 +1651,22 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                                 title={!imagesLoaded ? 'Waiting for images to load...' : 'Download PDF'}
                             >
                                 <Download size={16} />
-                                <span className="hidden sm:inline">{imagesLoaded ? 'Download PDF' : 'Loading...'}</span>
-                                <span className="sm:hidden">{imagesLoaded ? 'PDF' : '...'}</span>
+                                <span className="hidden sm:inline">{isSaving ? 'Saving...' : imagesLoaded ? 'Save PDF' : 'Loading...'}</span>
+                                <span className="sm:hidden">{isSaving ? '...' : imagesLoaded ? 'PDF' : '...'}</span>
+                            </button>
+                            <button
+                                onClick={downloadImage}
+                                disabled={!imagesLoaded || isSaving}
+                                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 font-semibold rounded-lg transition text-xs sm:text-base ${
+                                    imagesLoaded && !isSaving
+                                        ? 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 cursor-pointer'
+                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                }`}
+                                title={!imagesLoaded ? 'Waiting for images to load...' : 'Save as Image (A4 Landscape)'}
+                            >
+                                <Images size={16} />
+                                <span className="hidden sm:inline">{isSaving ? 'Saving...' : imagesLoaded ? 'Save Image' : 'Loading...'}</span>
+                                <span className="sm:hidden">{isSaving ? '...' : imagesLoaded ? 'Img' : '...'}</span>
                             </button>
                             <button
                                 onClick={onClose}
@@ -6869,6 +6949,27 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         } catch(e) { console.error('Manual pedigree download failed', e); }
                         finally { setMpDownloading(false); }
                     };
+                    const handleDownloadMPPDF = async () => {
+                        if (!mpTreeRef.current) return;
+                        setMpDownloading(true);
+                        try {
+                            const srcCanvas = await html2canvas(mpTreeRef.current, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            const a4W = 1654, a4H = 2339, pad = 60;
+                            const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
+                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height, 1);
+                            const dw = srcCanvas.width * ratio, dh = srcCanvas.height * ratio;
+                            const outCanvas = document.createElement('canvas');
+                            outCanvas.width = a4W; outCanvas.height = a4H;
+                            const ctx = outCanvas.getContext('2d');
+                            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
+                            ctx.drawImage(srcCanvas, (a4W - dw) / 2, pad, dw, dh);
+                            const imgData = outCanvas.toDataURL('image/png');
+                            const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+                            pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+                            pdf.save(`pedigree-${animal.name || animal.id_public}.pdf`);
+                        } catch(e) { console.error('Pedigree PDF failed', e); }
+                        finally { setMpDownloading(false); }
+                    };
 
                     const renderSlot = (slotKey, label, sideColor) => {
                         const d = getSlot(slotKey);
@@ -6929,10 +7030,16 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                         <button onClick={() => setBetaPedigreeView('chart')} className={`px-2 py-1 transition-colors ${betaPedigreeView === 'chart' ? 'bg-primary font-semibold text-black' : 'text-gray-400 hover:bg-gray-100'}`}>Chart</button>
                                     </div>
                                     {hasAnyData && betaPedigreeView === 'vertical' && (
+                                        <>
+                                        <button onClick={handleDownloadMPPDF} disabled={mpDownloading}
+                                            className="px-3 py-1.5 text-sm bg-primary hover:bg-primary/90 text-black rounded-lg border border-primary/40 transition flex items-center gap-1.5 disabled:opacity-60 font-semibold">
+                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save PDF</>}
+                                        </button>
                                         <button onClick={handleDownloadMP} disabled={mpDownloading}
                                             className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
-                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save as Image</>}
+                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Images size={14} /> Save Image</>}
                                         </button>
+                                        </>
                                     )}
                                 </div>
                             </div>
@@ -8800,6 +8907,27 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                         } catch(e) { console.error('Manual pedigree download failed', e); }
                         finally { setMpDownloading(false); }
                     };
+                    const handleDownloadMPPDF = async () => {
+                        if (!mpTreeRef.current) return;
+                        setMpDownloading(true);
+                        try {
+                            const srcCanvas = await html2canvas(mpTreeRef.current, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            const a4W = 1654, a4H = 2339, pad = 60;
+                            const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
+                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height, 1);
+                            const dw = srcCanvas.width * ratio, dh = srcCanvas.height * ratio;
+                            const outCanvas = document.createElement('canvas');
+                            outCanvas.width = a4W; outCanvas.height = a4H;
+                            const ctx = outCanvas.getContext('2d');
+                            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
+                            ctx.drawImage(srcCanvas, (a4W - dw) / 2, pad, dw, dh);
+                            const imgData = outCanvas.toDataURL('image/png');
+                            const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+                            pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+                            pdf.save(`pedigree-${animal.name || animal.id_public}.pdf`);
+                        } catch(e) { console.error('Pedigree PDF failed', e); }
+                        finally { setMpDownloading(false); }
+                    };
                     const renderSlot = (slotKey, label) => {
                         const d = getSlot(slotKey);
                         const hasData = d && (d.ctcId || Object.entries(d).some(([fk,v]) => fk !== 'mode' && v && String(v).trim()));
@@ -8855,10 +8983,16 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                         <button onClick={() => setBetaPedigreeView('chart')} className={`px-2 py-1 transition-colors ${betaPedigreeView === 'chart' ? 'bg-primary font-semibold text-black' : 'text-gray-400 hover:bg-gray-100'}`}>Chart</button>
                                     </div>
                                     {hasAnyData && betaPedigreeView === 'vertical' && (
+                                        <>
+                                        <button onClick={handleDownloadMPPDF} disabled={mpDownloading}
+                                            className="px-3 py-1.5 text-sm bg-primary hover:bg-primary/90 text-black rounded-lg border border-primary/40 transition flex items-center gap-1.5 disabled:opacity-60 font-semibold">
+                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save PDF</>}
+                                        </button>
                                         <button onClick={handleDownloadMP} disabled={mpDownloading}
                                             className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
-                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save as Image</>}
+                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Images size={14} /> Save Image</>}
                                         </button>
+                                        </>
                                     )}
                                 </div>
                             </div>
@@ -10733,6 +10867,27 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                         } catch(e) { console.error('Beta pedigree download failed', e); }
                         finally { setMpDownloading(false); }
                     };
+                    const handleDownloadMPPDF = async () => {
+                        if (!mpTreeRef.current) return;
+                        setMpDownloading(true);
+                        try {
+                            const srcCanvas = await html2canvas(mpTreeRef.current, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            const a4W = 1654, a4H = 2339, pad = 60;
+                            const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
+                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height, 1);
+                            const dw = srcCanvas.width * ratio, dh = srcCanvas.height * ratio;
+                            const outCanvas = document.createElement('canvas');
+                            outCanvas.width = a4W; outCanvas.height = a4H;
+                            const ctx = outCanvas.getContext('2d');
+                            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
+                            ctx.drawImage(srcCanvas, (a4W - dw) / 2, pad, dw, dh);
+                            const imgData = outCanvas.toDataURL('image/png');
+                            const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+                            pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+                            pdf.save(`pedigree-${animal.name || animal.id_public}.pdf`);
+                        } catch(e) { console.error('Pedigree PDF failed', e); }
+                        finally { setMpDownloading(false); }
+                    };
                     const renderSlot = (slotKey, label) => {
                         const d = getSlot(slotKey);
                         const hasData = d && (d.ctcId || Object.entries(d).some(([fk,v]) => fk !== 'mode' && v && String(v).trim()));
@@ -10788,10 +10943,16 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                         <button onClick={() => setBetaPedigreeView('chart')} className={`px-2 py-1 transition-colors ${betaPedigreeView === 'chart' ? 'bg-primary font-semibold text-black' : 'text-gray-400 hover:bg-gray-100'}`}>Chart</button>
                                     </div>
                                     {hasAnyData && betaPedigreeView === 'vertical' && (
+                                        <>
+                                        <button onClick={handleDownloadMPPDF} disabled={mpDownloading}
+                                            className="px-3 py-1.5 text-sm bg-primary hover:bg-primary/90 text-black rounded-lg border border-primary/40 transition flex items-center gap-1.5 disabled:opacity-60 font-semibold">
+                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save PDF</>}
+                                        </button>
                                         <button onClick={handleDownloadMP} disabled={mpDownloading}
                                             className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
-                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save as Image</>}
+                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Images size={14} /> Save Image</>}
                                         </button>
+                                        </>
                                     )}
                                 </div>
                             </div>
