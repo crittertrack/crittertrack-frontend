@@ -142,7 +142,7 @@ const GENE_LOCI = {
   },
   Sa: {
     name: 'Satin',
-    description: 'High-sheen silky coat. Heterozygous (Sa/sa) is typical show satin.',
+    description: 'High-sheen silky coat. Satin is recessive; only sa/sa shows the satin phenotype.',
     combinations: [
       'sa/sa',
       'Sa/sa', 'Sa/Sa'
