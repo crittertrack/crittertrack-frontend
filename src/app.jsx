@@ -17023,6 +17023,31 @@ const AnimalForm = ({
     const [mpEditForm, setMpEditForm] = useState(() => animalToEdit?.manualPedigree || {});
     const [mpCTCOpenSlot, setMpCTCOpenSlot] = useState(null);
     const [mpSlotUploading, setMpSlotUploading] = useState({});
+    const mpAutoFetchedRef = useRef(false);
+
+    // Auto-refresh all CTC-linked slots when Beta Pedigree tab is first opened in edit
+    useEffect(() => {
+        if (activeTab !== 5 || mpAutoFetchedRef.current || !authToken) return;
+        mpAutoFetchedRef.current = true;
+        const pedigree = animalToEdit?.manualPedigree || {};
+        const allSlots = ['sire','dam','sireSire','sireDam','damSire','damDam',
+            'sireSireSire','sireSireDam','sireDamSire','sireDamDam',
+            'damSireSire','damSireDam','damDamSire','damDamDam'];
+        const linked = allSlots.filter(k => pedigree[k]?.mode === 'ctc' && pedigree[k]?.ctcId);
+        if (!linked.length) return;
+        Promise.all(linked.map(async k => {
+            try {
+                const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(pedigree[k].ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                const a = res.data;
+                if (!a) return null;
+                const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(f => a[f]).filter(Boolean).join(' ');
+                return [k, { mode: 'ctc', ctcId: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: pedigree[k].notes || '' }];
+            } catch { return null; }
+        })).then(results => {
+            const updates = Object.fromEntries(results.filter(Boolean));
+            if (Object.keys(updates).length) setMpEditForm(f => ({ ...f, ...updates }));
+        });
+    }, [activeTab, authToken, API_BASE_URL, animalToEdit?.manualPedigree]);
     // Gallery state (edit-only; changes are applied immediately via API)
     const [editGalleryImages, setEditGalleryImages] = useState(animalToEdit?.extraImages || []);
     const [galleryUploading, setGalleryUploading] = useState(false);
