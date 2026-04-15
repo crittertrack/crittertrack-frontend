@@ -1001,6 +1001,13 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         {animal.birthDate ? formatDate(animal.birthDate) : 'N/A'}
                     </div>
                     
+                    {/* Deceased Date */}
+                    {animal.deceasedDate && (
+                        <div className="text-red-600 leading-tight font-semibold text-xs" style={{lineHeight: '1.2'}}>
+                            <span>† {formatDate(animal.deceasedDate)}</span>
+                        </div>
+                    )}
+                    
                     {/* Breeder Info */}
                     <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
                         <span className="font-semibold">Breeder: </span>
@@ -1105,6 +1112,13 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         <span className="font-semibold">Birthdate: </span>
                         {animal.birthDate ? formatDate(animal.birthDate) : 'N/A'}
                     </div>
+                    
+                    {/* Deceased Date */}
+                    {animal.deceasedDate && (
+                        <div className="text-red-600 leading-tight font-semibold text-xs" style={{lineHeight: '1.2'}}>
+                            <span>† {formatDate(animal.deceasedDate)}</span>
+                        </div>
+                    )}
                     
                     {/* Breeder */}
                     <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
@@ -1217,6 +1231,13 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         {animal.birthDate ? formatDate(animal.birthDate) : 'N/A'}
                     </div>
                     
+                    {/* Deceased Date */}
+                    {animal.deceasedDate && (
+                        <div className="text-red-600 leading-tight font-semibold" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
+                            <span>† {formatDate(animal.deceasedDate)}</span>
+                        </div>
+                    )}
+                    
                     {/* Breeder */}
                     <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
                         <span className="font-semibold">Breeder: </span>
@@ -1306,6 +1327,19 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
+                    
+                    {/* Birth Date */}
+                    <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
+                        <span className="font-semibold">Birthdate: </span>
+                        {animal.birthDate ? formatDate(animal.birthDate) : 'N/A'}
+                    </div>
+                    
+                    {/* Deceased Date */}
+                    {animal.deceasedDate && (
+                        <div className="text-red-600 leading-tight font-semibold" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
+                            <span>† {formatDate(animal.deceasedDate)}</span>
+                        </div>
+                    )}
                     
                     {/* Breeder */}
                     <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
