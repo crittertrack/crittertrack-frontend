@@ -895,48 +895,30 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         if (!pedigreeRef.current) return;
         setIsSaving(true);
         try {
-            const originalWidth = pedigreeRef.current.style.width;
-            const originalHeight = pedigreeRef.current.style.height;
-            const originalAspectRatio = pedigreeRef.current.style.aspectRatio;
-            const originalMinHeight = pedigreeRef.current.style.minHeight;
-            const originalPadding = pedigreeRef.current.style.padding;
-
-            // Set fixed dimensions for PDF generation
-            pedigreeRef.current.style.width = '1400px';
-            pedigreeRef.current.style.height = '1000px';
-            pedigreeRef.current.style.aspectRatio = 'unset';
-            pedigreeRef.current.style.minHeight = 'unset';
-            pedigreeRef.current.style.overflow = 'visible';
-            pedigreeRef.current.style.padding = '70px 20px 20px 20px'; // More top padding for vertical centering
-
-            // Wait for layout to stabilize and images to load
-            await new Promise(resolve => setTimeout(resolve, 500));
-
-            const canvas = await html2canvas(pedigreeRef.current, {
-                scale: 3,
-                backgroundColor: '#ffffff',
-                logging: false,
-                useCORS: true,
-                allowTaint: true,
-                letterRendering: true,
-                windowWidth: 1400,
-                windowHeight: 1000,
-                imageTimeout: 15000,
-                removeContainer: true,
-                scrollX: 0,
-                scrollY: 0
+            const el = pedigreeRef.current;
+            const orig = { w: el.style.width, h: el.style.height, mh: el.style.minHeight, ov: el.style.overflow, p: el.style.padding };
+            el.style.width = '1400px';
+            el.style.height = 'auto';
+            el.style.minHeight = 'unset';
+            el.style.overflow = 'visible';
+            el.style.padding = '40px 20px 32px 20px';
+            await new Promise(r => setTimeout(r, 500));
+            const srcCanvas = await html2canvas(el, {
+                scale: 2, backgroundColor: '#ffffff', logging: false,
+                useCORS: true, allowTaint: true, letterRendering: true,
+                windowWidth: 1400, windowHeight: 9999,
+                imageTimeout: 15000, scrollX: 0, scrollY: 0
             });
-
-            // Restore original styles
-            pedigreeRef.current.style.width = originalWidth;
-            pedigreeRef.current.style.height = originalHeight;
-            pedigreeRef.current.style.aspectRatio = originalAspectRatio;
-            pedigreeRef.current.style.minHeight = originalMinHeight;
-            pedigreeRef.current.style.padding = originalPadding;
-
-            const imgData = canvas.toDataURL('image/png');
+            Object.assign(el.style, { width: orig.w, height: orig.h, minHeight: orig.mh, overflow: orig.ov, padding: orig.p });
+            // Fit into A4 landscape (297 × 210mm) with 10mm padding using mm-based jsPDF
             const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-            pdf.addImage(imgData, 'PNG', 0, 0, 297, 210);
+            const pageW = 297, pageH = 210, pad_mm = 10;
+            const maxW = pageW - pad_mm * 2, maxH = pageH - pad_mm * 2;
+            const srcRatio = srcCanvas.width / srcCanvas.height;
+            const imgW = srcRatio > maxW / maxH ? maxW : maxH * srcRatio;
+            const imgH = srcRatio > maxW / maxH ? maxW / srcRatio : maxH;
+            pdf.addImage(srcCanvas.toDataURL('image/png'), 'PNG',
+                (pageW - imgW) / 2, (pageH - imgH) / 2, imgW, imgH);
             pdf.save(`pedigree-${pedigreeData?.name || 'chart'}.pdf`);
         } catch (error) {
             console.error('Error generating PDF:', error);
@@ -949,42 +931,35 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         if (!pedigreeRef.current) return;
         setIsSaving(true);
         try {
-            const originalWidth = pedigreeRef.current.style.width;
-            const originalHeight = pedigreeRef.current.style.height;
-            const originalAspectRatio = pedigreeRef.current.style.aspectRatio;
-            const originalMinHeight = pedigreeRef.current.style.minHeight;
-            const originalPadding = pedigreeRef.current.style.padding;
-            pedigreeRef.current.style.width = '1400px';
-            pedigreeRef.current.style.height = '1000px';
-            pedigreeRef.current.style.aspectRatio = 'unset';
-            pedigreeRef.current.style.minHeight = 'unset';
-            pedigreeRef.current.style.overflow = 'visible';
-            pedigreeRef.current.style.padding = '70px 20px 20px 20px';
-            await new Promise(resolve => setTimeout(resolve, 500));
-            const srcCanvas = await html2canvas(pedigreeRef.current, {
-                scale: 3, backgroundColor: '#ffffff', logging: false,
+            const el = pedigreeRef.current;
+            const orig = { w: el.style.width, h: el.style.height, mh: el.style.minHeight, ov: el.style.overflow, p: el.style.padding };
+            el.style.width = '1400px';
+            el.style.height = 'auto';
+            el.style.minHeight = 'unset';
+            el.style.overflow = 'visible';
+            el.style.padding = '40px 20px 32px 20px';
+            await new Promise(r => setTimeout(r, 500));
+            const srcCanvas = await html2canvas(el, {
+                scale: 2, backgroundColor: '#ffffff', logging: false,
                 useCORS: true, allowTaint: true, letterRendering: true,
-                windowWidth: 1400, windowHeight: 1000, imageTimeout: 15000,
-                removeContainer: true, scrollX: 0, scrollY: 0
+                windowWidth: 1400, windowHeight: 9999,
+                imageTimeout: 15000, scrollX: 0, scrollY: 0
             });
-            pedigreeRef.current.style.width = originalWidth;
-            pedigreeRef.current.style.height = originalHeight;
-            pedigreeRef.current.style.aspectRatio = originalAspectRatio;
-            pedigreeRef.current.style.minHeight = originalMinHeight;
-            pedigreeRef.current.style.padding = originalPadding;
-            // Fit onto A4 landscape canvas at 200dpi (2339 x 1654)
-            const a4W = 2339, a4H = 1654, pad = 60;
+            Object.assign(el.style, { width: orig.w, height: orig.h, minHeight: orig.mh, overflow: orig.ov, padding: orig.p });
+            // Fit into A4 landscape canvas at 200dpi (2339 × 1654) with 80px padding
+            const a4W = 2339, a4H = 1654, pad = 80;
             const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
-            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height, 1);
-            const dw = srcCanvas.width * ratio, dh = srcCanvas.height * ratio;
-            const outCanvas = document.createElement('canvas');
-            outCanvas.width = a4W; outCanvas.height = a4H;
-            const ctx = outCanvas.getContext('2d');
+            const srcRatio = srcCanvas.width / srcCanvas.height;
+            const dw = srcRatio > maxW / maxH ? maxW : Math.round(maxH * srcRatio);
+            const dh = srcRatio > maxW / maxH ? Math.round(maxW / srcRatio) : maxH;
+            const out = document.createElement('canvas');
+            out.width = a4W; out.height = a4H;
+            const ctx = out.getContext('2d');
             ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
-            ctx.drawImage(srcCanvas, (a4W - dw) / 2, (a4H - dh) / 2, dw, dh);
+            ctx.drawImage(srcCanvas, Math.round((a4W - dw) / 2), Math.round((a4H - dh) / 2), dw, dh);
             const link = document.createElement('a');
             link.download = `pedigree-${pedigreeData?.name || 'chart'}.png`;
-            link.href = outCanvas.toDataURL('image/png');
+            link.href = out.toDataURL('image/png');
             link.click();
         } catch (error) {
             console.error('Error generating image:', error);
@@ -6913,21 +6888,19 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         if (!mpTreeRef.current) return;
                         setMpDownloading(true);
                         try {
-                            const el = mpTreeRef.current;
-                            const srcCanvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
-                            // A4 at 200dpi: 1654 x 2339, with 60px padding
-                            const a4W = 1654, a4H = 2339, pad = 60;
+                            const srcCanvas = await html2canvas(mpTreeRef.current, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            const a4W = 1654, a4H = 2339, pad = 80;
                             const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
-                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height, 1);
-                            const dw = srcCanvas.width * ratio, dh = srcCanvas.height * ratio;
-                            const outCanvas = document.createElement('canvas');
-                            outCanvas.width = a4W; outCanvas.height = a4H;
-                            const ctx = outCanvas.getContext('2d');
+                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height);
+                            const dw = Math.round(srcCanvas.width * ratio), dh = Math.round(srcCanvas.height * ratio);
+                            const out = document.createElement('canvas');
+                            out.width = a4W; out.height = a4H;
+                            const ctx = out.getContext('2d');
                             ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
-                            ctx.drawImage(srcCanvas, (a4W - dw) / 2, pad, dw, dh);
+                            ctx.drawImage(srcCanvas, Math.round((a4W - dw) / 2), Math.round((a4H - dh) / 2), dw, dh);
                             const link = document.createElement('a');
                             link.download = `manual-pedigree-${animal.name || animal.id_public}.png`;
-                            link.href = outCanvas.toDataURL('image/png');
+                            link.href = out.toDataURL('image/png');
                             link.click();
                         } catch(e) { console.error('Manual pedigree download failed', e); }
                         finally { setMpDownloading(false); }
@@ -6937,18 +6910,17 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         setMpDownloading(true);
                         try {
                             const srcCanvas = await html2canvas(mpTreeRef.current, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
-                            const a4W = 1654, a4H = 2339, pad = 60;
+                            const a4W = 1654, a4H = 2339, pad = 80;
                             const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
-                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height, 1);
-                            const dw = srcCanvas.width * ratio, dh = srcCanvas.height * ratio;
-                            const outCanvas = document.createElement('canvas');
-                            outCanvas.width = a4W; outCanvas.height = a4H;
-                            const ctx = outCanvas.getContext('2d');
+                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height);
+                            const dw = Math.round(srcCanvas.width * ratio), dh = Math.round(srcCanvas.height * ratio);
+                            const out = document.createElement('canvas');
+                            out.width = a4W; out.height = a4H;
+                            const ctx = out.getContext('2d');
                             ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
-                            ctx.drawImage(srcCanvas, (a4W - dw) / 2, pad, dw, dh);
-                            const imgData = outCanvas.toDataURL('image/png');
-                            const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-                            pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+                            ctx.drawImage(srcCanvas, Math.round((a4W - dw) / 2), Math.round((a4H - dh) / 2), dw, dh);
+                            const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [a4W, a4H] });
+                            pdf.addImage(out.toDataURL('image/png'), 'PNG', 0, 0, a4W, a4H);
                             pdf.save(`pedigree-${animal.name || animal.id_public}.pdf`);
                         } catch(e) { console.error('Pedigree PDF failed', e); }
                         finally { setMpDownloading(false); }
@@ -8885,20 +8857,19 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                         if (!mpTreeRef.current) return;
                         setMpDownloading(true);
                         try {
-                            const el = mpTreeRef.current;
-                            const srcCanvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
-                            const a4W = 1654, a4H = 2339, pad = 60;
+                            const srcCanvas = await html2canvas(mpTreeRef.current, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            const a4W = 1654, a4H = 2339, pad = 80;
                             const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
-                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height, 1);
-                            const dw = srcCanvas.width * ratio, dh = srcCanvas.height * ratio;
-                            const outCanvas = document.createElement('canvas');
-                            outCanvas.width = a4W; outCanvas.height = a4H;
-                            const ctx = outCanvas.getContext('2d');
+                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height);
+                            const dw = Math.round(srcCanvas.width * ratio), dh = Math.round(srcCanvas.height * ratio);
+                            const out = document.createElement('canvas');
+                            out.width = a4W; out.height = a4H;
+                            const ctx = out.getContext('2d');
                             ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
-                            ctx.drawImage(srcCanvas, (a4W - dw) / 2, pad, dw, dh);
+                            ctx.drawImage(srcCanvas, Math.round((a4W - dw) / 2), Math.round((a4H - dh) / 2), dw, dh);
                             const link = document.createElement('a');
                             link.download = `manual-pedigree-${animal.name || animal.id_public}.png`;
-                            link.href = outCanvas.toDataURL('image/png');
+                            link.href = out.toDataURL('image/png');
                             link.click();
                         } catch(e) { console.error('Manual pedigree download failed', e); }
                         finally { setMpDownloading(false); }
@@ -8908,18 +8879,17 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                         setMpDownloading(true);
                         try {
                             const srcCanvas = await html2canvas(mpTreeRef.current, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
-                            const a4W = 1654, a4H = 2339, pad = 60;
+                            const a4W = 1654, a4H = 2339, pad = 80;
                             const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
-                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height, 1);
-                            const dw = srcCanvas.width * ratio, dh = srcCanvas.height * ratio;
-                            const outCanvas = document.createElement('canvas');
-                            outCanvas.width = a4W; outCanvas.height = a4H;
-                            const ctx = outCanvas.getContext('2d');
+                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height);
+                            const dw = Math.round(srcCanvas.width * ratio), dh = Math.round(srcCanvas.height * ratio);
+                            const out = document.createElement('canvas');
+                            out.width = a4W; out.height = a4H;
+                            const ctx = out.getContext('2d');
                             ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
-                            ctx.drawImage(srcCanvas, (a4W - dw) / 2, pad, dw, dh);
-                            const imgData = outCanvas.toDataURL('image/png');
-                            const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-                            pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+                            ctx.drawImage(srcCanvas, Math.round((a4W - dw) / 2), Math.round((a4H - dh) / 2), dw, dh);
+                            const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [a4W, a4H] });
+                            pdf.addImage(out.toDataURL('image/png'), 'PNG', 0, 0, a4W, a4H);
                             pdf.save(`pedigree-${animal.name || animal.id_public}.pdf`);
                         } catch(e) { console.error('Pedigree PDF failed', e); }
                         finally { setMpDownloading(false); }
