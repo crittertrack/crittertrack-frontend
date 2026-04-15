@@ -4368,11 +4368,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
     useEffect(() => { setMpEnrichedData(null); setMpLoading(false); }, [animal?.id_public]);
     useEffect(() => { setDetailViewTab(initialTab); setBetaPedigreeView(initialBetaView); }, [animal?.id_public, initialTab, initialBetaView]);
 
-    // Fetch ALL animals on the account + global relationships lazily when Family tab opens
+    // Fetch ALL animals on the account + global relationships on mount
     useEffect(() => {
-        if (detailViewTab !== 6 || ownedAnimalsLoadedRef.current || !authToken || !animal?.id_public) return;
+        if (ownedAnimalsLoadedRef.current || !authToken || !animal?.id_public) return;
         ownedAnimalsLoadedRef.current = true;
-        setParentCardKey(k => k + 1); // force parent cards to refetch when tab opens
         // Fetch all account animals (no ownership filter)
         axios.get(`${API_BASE_URL}/animals`, {
             headers: { Authorization: `Bearer ${authToken}` }
@@ -4382,7 +4381,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
         axios.get(`${API_BASE_URL}/animals/${animal.id_public}/relationships`, {
             headers: { Authorization: `Bearer ${authToken}` }
         }).then(res => setGlobalRels(res.data || null)).catch(() => setGlobalRels(null)).finally(() => setGlobalRelsLoading(false));
-    }, [detailViewTab, authToken, API_BASE_URL, animal?.id_public]);
+    }, [authToken, API_BASE_URL, animal?.id_public]);
 
     // Relationship Insights — computed from all account animals (shown in Lineage tab)
     const relationships = useMemo(() => computeRelationships(animal, ownedAnimals), [animal, ownedAnimals]);
