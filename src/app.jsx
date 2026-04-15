@@ -1030,9 +1030,6 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
     // Render card for parents (medium with image)
     const renderParentCard = (animal, isSire, onClick = null) => {
-        if (animal) {
-            console.log(`[renderParentCard] Animal ${animal.id_public}: birthDate=${animal.birthDate}, deceasedDate=${animal.deceasedDate}`);
-        }
         const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
         const GenderIcon = isSire ? Mars : Venus;
         
@@ -1077,7 +1074,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         return (
             <div 
-                className={`border ${getBorderColor(animal)} rounded p-1.5 ${bgColor} relative flex gap-2 h-full items-center ${onClick ? 'cursor-pointer hover:opacity-80 transition' : ''}`}
+                className={`border ${getBorderColor(animal)} rounded p-1.5 ${bgColor} relative flex gap-2 h-full items-start overflow-hidden ${onClick ? 'cursor-pointer hover:opacity-80 transition' : ''}`}
                 onClick={onClick ? () => onClick(animal) : undefined}
             >
                 {/* Image - 1/3 width */}
@@ -1195,7 +1192,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         return (
             <div 
-                className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} relative flex gap-1.5 h-full items-center ${onClick ? 'cursor-pointer hover:opacity-80 transition' : ''}`}
+                className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} relative flex gap-1.5 h-full items-start overflow-hidden ${onClick ? 'cursor-pointer hover:opacity-80 transition' : ''}`}
                 onClick={onClick ? () => onClick(animal) : undefined}
             >
                 {/* Image - 1/4 width */}
@@ -1306,7 +1303,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         return (
             <div 
-                className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} relative h-full flex gap-1 items-center ${onClick ? 'cursor-pointer hover:opacity-80 transition' : ''}`}
+                className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} relative h-full flex gap-1 items-start overflow-hidden ${onClick ? 'cursor-pointer hover:opacity-80 transition' : ''}`}
                 onClick={onClick ? () => onClick(animal) : undefined}
             >
                 {/* Image */}
@@ -1396,7 +1393,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
         // Responsive heights - reasonable mobile sizing
         const isMobile = window.innerWidth < 640; // sm breakpoint
-        const contentHeight = isMobile ? 450 : 600; // Increased height to fit text
+        const contentHeight = isMobile ? 600 : 900; // Increased height to fit text
         const gap = isMobile ? 4 : 8; // gap-1 = 4px, gap-2 = 8px
         const gapClass = isMobile ? 'gap-1' : 'gap-2';
         
