@@ -5478,88 +5478,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                     {/* Tab 6: Family */}
                     {detailViewTab === 6 && (
                         <div className="space-y-6">
-                            {/* 1st Section: Pedigree */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
-                                        <TreeDeciduous size={14} className="inline-block align-middle mr-1" /> Pedigree: Sire and Dam
-                                        {ownedAnimals.length > 0 && (
-                                            pedigreeIssues.some(i => i.severity === 'error')
-                                                ? <AlertCircle size={16} className="text-red-500" />
-                                                : pedigreeIssues.some(i => i.severity === 'warning')
-                                                    ? <AlertTriangle size={16} className="text-yellow-500" />
-                                                    : <CheckCircle size={16} className="text-green-500" />
-                                        )}
-                                    </h3>
-                                    {/* BETA: button hidden while chart is available on the Beta Pedigree tab */}
-                                    <button
-                                        onClick={() => setShowPedigree(true)}
-                                        data-tutorial-target="pedigree-btn"
-                                        className="hidden px-3 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition text-sm"
-                                    >
-                                        View Pedigree Chart
-                                    </button>
-                                    <span className="text-xs text-orange-500 font-medium">📊 Pedigree chart available on the <button onClick={() => setDetailViewTab(5)} className="underline hover:text-orange-600 transition">Beta Pedigree</button> tab</span>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <ViewOnlyParentCard 
-                                        key={`sire-${parentCardKey}`}
-                                        parentId={animal.fatherId_public || animal.sireId_public} 
-                                        parentType="Sire"
-                                        API_BASE_URL={API_BASE_URL}
-                                        onViewAnimal={onViewAnimal}
-                                        authToken={authToken}
-                                    />
-                                    <ViewOnlyParentCard 
-                                        key={`dam-${parentCardKey}`}
-                                        parentId={animal.motherId_public || animal.damId_public} 
-                                        parentType="Dam"
-                                        API_BASE_URL={API_BASE_URL}
-                                        onViewAnimal={onViewAnimal}
-                                        authToken={authToken}
-                                    />
-                                </div>
+                            {/* Pedigree & Litter links */}
+                            <div className="flex items-center justify-between flex-wrap gap-2">
+                                <span className="text-xs text-orange-500 font-medium">📊 Pedigree chart available on the <button onClick={() => setDetailViewTab(5)} className="underline hover:text-orange-600 transition">Beta Pedigree</button> tab</span>
+                                <RouterLink to="/litters" className="text-xs text-purple-600 hover:text-purple-800 font-medium flex items-center gap-1 underline"><BookOpen size={12} className="inline-block align-middle" /> Litter Management</RouterLink>
                             </div>
-
-                            {/* Pedigree Validation — only shown when issues exist */}
-                            {ownedAnimals.length > 0 && pedigreeIssues.length > 0 && (
-                                <div className="rounded-lg border bg-red-50 border-red-200">
-                                    <button
-                                        type="button"
-                                        onClick={() => setPedigreeValidationOpen(o => !o)}
-                                        className="w-full flex items-center justify-between p-4 text-left"
-                                    >
-                                        <h3 className="text-base font-semibold text-gray-700 flex items-center gap-2">
-                                            {pedigreeIssues.length > 0
-                                                ? <AlertTriangle size={18} className="text-red-500 flex-shrink-0" />
-                                                : <CheckCircle size={18} className="text-green-500 flex-shrink-0" />}
-                                            Pedigree Validation
-                                            {pedigreeIssues.length > 0 && (
-                                                <span className="text-xs font-normal text-red-700 bg-red-100 border border-red-200 rounded-full px-2 py-0.5">
-                                                    {pedigreeIssues.filter(i => i.severity === 'error').length > 0 && `${pedigreeIssues.filter(i => i.severity === 'error').length} error${pedigreeIssues.filter(i => i.severity === 'error').length !== 1 ? 's' : ''}`}
-                                                    {pedigreeIssues.filter(i => i.severity === 'error').length > 0 && pedigreeIssues.filter(i => i.severity === 'warning').length > 0 && ' — '}
-                                                    {pedigreeIssues.filter(i => i.severity === 'warning').length > 0 && `${pedigreeIssues.filter(i => i.severity === 'warning').length} warning${pedigreeIssues.filter(i => i.severity === 'warning').length !== 1 ? 's' : ''}`}
-                                                </span>
-                                            )}
-                                        </h3>
-                                        {pedigreeValidationOpen ? <ChevronUp size={18} className="text-gray-400 flex-shrink-0" /> : <ChevronDown size={18} className="text-gray-400 flex-shrink-0" />}
-                                    </button>
-                                    {pedigreeValidationOpen && (
-                                        <div className="px-4 pb-4">
-                                            <div className="space-y-2">
-                                                    {pedigreeIssues.map((issue, idx) => (
-                                                        <div key={idx} className={`flex items-start gap-2.5 p-2.5 rounded-lg border text-sm ${issue.severity === 'error' ? 'bg-white border-red-200 text-red-800' : 'bg-white border-yellow-200 text-yellow-800'}`}>
-                                                            {issue.severity === 'error'
-                                                                ? <AlertCircle size={15} className="text-red-500 flex-shrink-0 mt-0.5" />
-                                                                : <AlertTriangle size={15} className="text-yellow-500 flex-shrink-0 mt-0.5" />}
-                                                            <div><span className="font-semibold mr-1">{issue.field}:</span>{issue.message}</div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
 
                             {/* Relationship Insights */}
                             {(relationships.length > 0 || externalRelGroups.length > 0 || globalRelsLoading) && (
@@ -7755,36 +7678,9 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                     {/* Tab 6: Family */}
                     {detailViewTab === 6 && (
                         <div className="space-y-6">
-                            {/* 1st Section: Pedigree */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <h3 className="text-lg font-semibold text-gray-700"><TreeDeciduous size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Pedigree: Sire and Dam</h3>
-                                    {/* BETA: button hidden while chart is available on the Beta Pedigree tab */}
-                                    <button
-                                        onClick={() => setShowPedigree(true)}
-                                        data-tutorial-target="pedigree-btn"
-                                        className="hidden px-3 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition text-sm"
-                                    >
-                                        View Pedigree Chart
-                                    </button>
-                                    <span className="text-xs text-orange-500 font-medium">&#x1F4CA; Pedigree chart available on the <button onClick={() => setDetailViewTab(5)} className="underline hover:text-orange-600 transition">Beta Pedigree</button> tab</span>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <ViewOnlyParentCard 
-                                        parentId={animal.fatherId_public || animal.sireId_public} 
-                                        parentType="Sire"
-                                        API_BASE_URL={API_BASE_URL}
-                                        onViewAnimal={onViewAnimal}
-                                        authToken={authToken}
-                                    />
-                                    <ViewOnlyParentCard 
-                                        parentId={animal.motherId_public || animal.damId_public} 
-                                        parentType="Dam"
-                                        API_BASE_URL={API_BASE_URL}
-                                        onViewAnimal={onViewAnimal}
-                                        authToken={authToken}
-                                    />
-                                </div>
+                            {/* Pedigree link */}
+                            <div>
+                                <span className="text-xs text-orange-500 font-medium">&#x1F4CA; Pedigree chart available on the <button onClick={() => setDetailViewTab(5)} className="underline hover:text-orange-600 transition">Beta Pedigree</button> tab</span>
                             </div>
 
                             {/* 2nd Section: Keeper History */}
@@ -9843,36 +9739,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                     {/* Tab 6: Family */}
                     {detailViewTab === 6 && (
                         <div className="space-y-6">
-                            {/* 1st Section: Pedigree */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <h3 className="text-lg font-semibold text-gray-700"><TreeDeciduous size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Pedigree: Sire and Dam</h3>
-                                    {/* BETA: button hidden while chart is available on the Beta Pedigree tab */}
-                                    <button
-                                        onClick={() => setShowPedigree(true)}
-                                        data-tutorial-target="pedigree-btn"
-                                        className="hidden px-3 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition text-sm"
-                                    >
-                                        View Pedigree Chart
-                                    </button>
-                                    <span className="text-xs text-orange-500 font-medium">&#x1F4CA; Pedigree chart available on the <button onClick={() => setDetailViewTab(5)} className="underline hover:text-orange-600 transition">Beta Pedigree</button> tab</span>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <ViewOnlyParentCard 
-                                        parentId={animal.fatherId_public || animal.sireId_public} 
-                                        parentType="Sire"
-                                        API_BASE_URL={API_BASE_URL}
-                                        onViewAnimal={onViewAnimal}
-                                        authToken={authToken}
-                                    />
-                                    <ViewOnlyParentCard 
-                                        parentId={animal.motherId_public || animal.damId_public} 
-                                        parentType="Dam"
-                                        API_BASE_URL={API_BASE_URL}
-                                        onViewAnimal={onViewAnimal}
-                                        authToken={authToken}
-                                    />
-                                </div>
+                            {/* Pedigree link */}
+                            <div>
+                                <span className="text-xs text-orange-500 font-medium">&#x1F4CA; Pedigree chart available on the <button onClick={() => setDetailViewTab(5)} className="underline hover:text-orange-600 transition">Beta Pedigree</button> tab</span>
                             </div>
 
                             {/* Offspring & Litters - merged litters + pedigree offspring */}
@@ -20281,87 +20150,27 @@ const AnimalForm = ({
                 {/* Tab 6: Family */}
                 {activeTab === 6 && (
                     <div className="space-y-6">
-                        {/* Pedigree Section */}
-                        <div 
-                            data-tutorial-target="pedigree-section"
-                            className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4"
-                        >
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2"><TreeDeciduous size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Pedigree: Sire and Dam</h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                <div className='flex flex-col'>
-                                    <label className='text-sm font-medium text-gray-600 mb-1'>Sire (Father)</label>
-                                    <div 
-                                        onClick={() => !loading && setModalTarget('father')}
-                                        data-tutorial-target="select-sire-btn"
-                                        className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
-                                    >
-                                        <div className="flex items-center space-x-2 w-full">
-                                        {formData.fatherId_public && fatherInfo ? (
-                                            <span className="text-gray-800">
-                                                {fatherInfo.prefix && `${fatherInfo.prefix} `}{fatherInfo.name}
-                                            </span>
-                                        ) : (
-                                            <span className={formData.fatherId_public ? "text-gray-800 font-mono" : "text-gray-400"}>
-                                                {formData.fatherId_public ? `${formData.fatherId_public}` : 'Click to Select Sire'}
-                                            </span>
-                                        )}
-                                        {formData.fatherId_public && (
-                                            <button
-                                                type="button"
-                                                onClick={(e) => { e.stopPropagation(); clearParentSelection('father'); }}
-                                                title="Clear sire selection"
-                                                className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
-                                            >
-                                                <X size={14} />
-                                            </button>
-                                        )}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className='flex flex-col'>
-                                    <label className='text-sm font-medium text-gray-600 mb-1'>Dam (Mother)</label>
-                                    <div 
-                                        onClick={() => !loading && setModalTarget('mother')}
-                                        data-tutorial-target="select-dam-btn"
-                                        className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
-                                    >
-                                        <div className="flex items-center space-x-2 w-full">
-                                            {formData.motherId_public && motherInfo ? (
-                                                <span className="text-gray-800">
-                                                    {motherInfo.prefix && `${motherInfo.prefix} `}{motherInfo.name}
-                                                </span>
-                                            ) : (
-                                                <span className={formData.motherId_public ? "text-gray-800 font-mono" : "text-gray-400"}>
-                                                    {formData.motherId_public ? `${formData.motherId_public}` : 'Click to Select Dam'}
-                                                </span>
-                                            )}
-                                            {formData.motherId_public && (
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => { e.stopPropagation(); clearParentSelection('mother'); }}
-                                                    title="Clear dam selection"
-                                                    className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
-                                                >
-                                                    <X size={14} />
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className='flex flex-col'>
-                                    <label className='text-sm font-medium text-gray-600 mb-1'>Other Parent</label>
-                                    <div 
-                                        onClick={() => !loading && setModalTarget('other-parent')}
-                                        data-tutorial-target="select-other-parent-btn"
-                                        className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
-                                    >
-                                        <div className="flex items-center space-x-2 w-full">
-                                            <span className="text-gray-400">
-                                                Intersex/Unknown
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
+                        {/* Parents — view only; edit via Beta Pedigree tab */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <div className="flex items-center justify-between flex-wrap gap-2 border-b pb-2">
+                                <h3 className="text-lg font-semibold text-gray-700"><TreeDeciduous size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Parents</h3>
+                                <span className="text-xs text-orange-500 font-medium">📊 Edit pedigree on the <button type="button" onClick={() => setActiveTab(5)} className="underline hover:text-orange-600 transition">Beta Pedigree</button> tab</span>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <ViewOnlyParentCard
+                                    parentId={formData.fatherId_public}
+                                    parentType="Sire"
+                                    API_BASE_URL={API_BASE_URL}
+                                    onViewAnimal={null}
+                                    authToken={authToken}
+                                />
+                                <ViewOnlyParentCard
+                                    parentId={formData.motherId_public}
+                                    parentType="Dam"
+                                    API_BASE_URL={API_BASE_URL}
+                                    onViewAnimal={null}
+                                    authToken={authToken}
+                                />
                             </div>
                         </div>
 
