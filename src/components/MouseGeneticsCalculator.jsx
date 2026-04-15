@@ -25,7 +25,7 @@ const GENE_LOCI = {
   },
   C: {
     name: 'Albino',
-    description: 'Dilutes pigment. e.g. Albino (c/c), Siamese (ce/ce), Burmese (ce/ch), Chinchilla (cch/cch)',
+    description: 'Dilutes pigment. e.g. Albino (c/c), Siamese (ch/ch), Burmese (ch/cch), Chinchilla (cch/cch)',
     combinations: [
       'c/c',
       'c/ch', 'ch/ch',
