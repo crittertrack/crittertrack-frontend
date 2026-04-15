@@ -4922,7 +4922,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             </div>
                         </div>
                     )}
-                    )}
 
                     {/* Tab 2: Status & Privacy */}
                     {detailViewTab === 2 && (
