@@ -1086,7 +1086,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-start gap-1.5 py-1 pointer-events-none">
                     {/* Name */}
-                    <div className="text-xs text-gray-900 font-semibold leading-tight" style={{lineHeight: '1.2'}}>
+                    <div className="text-xs text-gray-900 font-bold leading-tight" style={{lineHeight: '1.2'}}>
                         {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </div>
                     
@@ -1200,7 +1200,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-start gap-1 py-0.5 pointer-events-none">
                     {/* Name */}
-                    <div className="text-gray-900 font-semibold leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
+                    <div className="text-gray-900 font-bold leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
                         {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </div>
                     
@@ -1307,7 +1307,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-start gap-0.5 py-0.5 pointer-events-none">
                     {/* Name */}
-                    <div className="text-gray-900 font-semibold leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
+                    <div className="text-gray-900 font-bold leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
                         {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </div>
                 
