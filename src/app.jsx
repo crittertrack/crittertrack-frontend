@@ -606,7 +606,7 @@ const LitterSyncConflictModal = ({ items, onResolve, onSkip }) => {
 };
 
 // Pedigree Chart Component
-const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken = null, inline = false, manualData = null }) => {
+const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken = null, inline = false, manualData = null, onViewAnimal = null }) => {
     const [pedigreeData, setPedigreeData] = useState(null);
     const [displayData, setDisplayData] = useState(null);
     const [ownerProfile, setOwnerProfile] = useState(null);
@@ -1007,7 +1007,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     ) : null}
                     
                     {/* Breeder Info */}
-                    <div className="text-xs text-gray-500 leading-tight italic" style={{lineHeight: '1.2'}}>
+                    <div className="text-xs text-gray-700 leading-tight italic" style={{lineHeight: '1.2'}}>
                         {animal.breederName || 'N/A'}
                     </div>
                 </div>
@@ -1075,7 +1075,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 onClick={onClick ? () => onClick(animal) : undefined}
             >
                 {/* Image - 1/3 width */}
-                <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
+                <div className="hide-for-pdf w-2/5 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
                     {imgSrc ? (
                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={window.innerWidth < 640 ? 24 : 32} />
                     ) : (
@@ -1115,7 +1115,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     )}
                     
                     {/* Breeder */}
-                    <div className="text-xs text-gray-500 leading-tight italic" style={{lineHeight: '1.2'}}>
+                    <div className="text-xs text-gray-700 leading-tight italic" style={{lineHeight: '1.2'}}>
                         {animal.breederName || 'N/A'}
                     </div>
                 </div>
@@ -1189,7 +1189,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 onClick={onClick ? () => onClick(animal) : undefined}
             >
                 {/* Image - 1/4 width */}
-                <div className="hide-for-pdf w-1/4 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
+                <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
                     {imgSrc ? (
                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={18} />
                     ) : (
@@ -1229,7 +1229,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     ) : null}
                     
                     {/* Breeder */}
-                    <div className="text-gray-500 leading-tight italic" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
+                    <div className="text-gray-700 leading-tight italic" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
                         {animal.breederName || 'N/A'}
                     </div>
                 </div>
@@ -1296,7 +1296,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 onClick={onClick ? () => onClick(animal) : undefined}
             >
                 {/* Image */}
-                <div className="hide-for-pdf w-8 h-8 bg-gray-100 rounded-lg border border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
+                <div className="hide-for-pdf w-10 h-10 bg-gray-100 rounded-lg border border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
                     {imgSrc ? (
                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={12} />
                     ) : (
@@ -1329,7 +1329,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     ) : null}
                     
                     {/* Breeder */}
-                    <div className="text-gray-500 leading-tight italic" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
+                    <div className="text-gray-700 leading-tight italic" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
                         {animal.breederName || 'N/A'}
                     </div>
                 </div>
@@ -1353,7 +1353,11 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         // Handler for clicking on pedigree cards
         const handleCardClick = (clickedAnimal) => {
             if (clickedAnimal && clickedAnimal.id_public) {
-                setStackedPedigree(clickedAnimal);
+                if (onViewAnimal) {
+                    onViewAnimal(clickedAnimal, 16, 'chart');
+                } else {
+                    setStackedPedigree(clickedAnimal);
+                }
             }
         };
 
@@ -1672,6 +1676,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         onClose={() => setStackedPedigree(null)}
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
+                        onViewAnimal={onViewAnimal}
                     />
                 </div>
             )}
@@ -4222,7 +4227,7 @@ const computeRelationships = (animal, userAnimals) => {
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
-const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onViewPublicAnimal, onToggleOwned, userProfile, userAnimals = [], breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, initialTab = 1 }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onViewPublicAnimal, onToggleOwned, userProfile, userAnimals = [], breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, initialTab = 1, initialBetaView = 'vertical' }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(initialTab);
@@ -4249,7 +4254,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
     const [mpLoading, setMpLoading] = useState(false);
     const mpTreeRef = useRef(null);
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
-    const [betaPedigreeView, setBetaPedigreeView] = useState('vertical');
+    const [betaPedigreeView, setBetaPedigreeView] = useState(initialBetaView);
     useEffect(() => {
         if (detailViewTab !== 16) return;
         let cancelled = false;
@@ -4318,7 +4323,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
         return () => { cancelled = true; };
     }, [detailViewTab, animal?.id_public]);
     useEffect(() => { setMpEnrichedData(null); setMpLoading(false); }, [animal?.id_public]);
-    useEffect(() => { setDetailViewTab(initialTab); }, [animal?.id_public, initialTab]);
+    useEffect(() => { setDetailViewTab(initialTab); setBetaPedigreeView(initialBetaView); }, [animal?.id_public, initialTab, initialBetaView]);
 
     // Fetch ALL animals on the account + global relationships lazily when Lineage tab opens
     useEffect(() => {
@@ -6877,7 +6882,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             } catch { /* not accessible */ }
                         } : undefined;
                         return (
-                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 min-h-[140px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 h-full relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
                                 <div className={`flex items-center gap-1 mb-1.5 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>
                                     <GIcon size={11} className={`flex-shrink-0 ${gColor}`} />
                                     <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
@@ -6931,7 +6936,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart. To add or edit manual ancestors, use the Edit button.</p>
 
                             <div className={betaPedigreeView === 'chart' ? '' : 'hidden'}>
-                                <PedigreeChart inline animalId={animal.id_public} animalData={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} manualData={mpEnrichedData} />
+                                <PedigreeChart inline animalId={animal.id_public} animalData={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />
                             </div>
                             <div className={betaPedigreeView === 'vertical' ? '' : 'hidden'}>
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
@@ -6943,17 +6948,18 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 const isMale = animal.gender === 'Male';
                                 const SubjectGenderIcon = isMale ? Mars : Venus;
                                 const subjectGColor = isMale ? 'text-blue-500' : 'text-pink-500';
-                                const ownerImgUrl = userProfile?.profileImage || userProfile?.profileImageUrl || null;
-                                const ownerShowPersonal = userProfile?.showPersonalName ?? true;
-                                const ownerShowBreeder = userProfile?.showBreederName ?? true;
+                                const ownerImgUrl = breederInfo?.profileImage || breederInfo?.profileImageUrl || null;
+                                const ownerShowPersonal = breederInfo?.showPersonalName ?? true;
+                                const ownerShowBreeder = breederInfo?.showBreederName ?? true;
                                 const ownerLines = [];
-                                if (ownerShowPersonal && userProfile?.personalName) ownerLines.push(userProfile.personalName);
-                                if (ownerShowBreeder && userProfile?.breederName) ownerLines.push(userProfile.breederName);
-                                const ownerUserId = userProfile?.id_public || null;
+                                if (ownerShowPersonal && breederInfo?.personalName) ownerLines.push(breederInfo.personalName);
+                                if (ownerShowBreeder && breederInfo?.breederName) ownerLines.push(breederInfo.breederName);
+                                const ownerUserId = breederInfo?.id_public || null;
                                 const ownerQrUrl = ownerUserId ? `${window.location.origin}/user/${ownerUserId}` : null;
                                 return (
                                     <div className="rounded-xl border-2 border-primary bg-primary/10 overflow-hidden relative">
                                         {/* Owner/breeder — top-right corner */}
+                                        {breederInfo && (
                                         <div className="absolute top-2 right-2 flex flex-col items-center gap-1 text-center z-10">
                                             <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border-2 border-primary/20 flex items-center justify-center flex-shrink-0">
                                                 {ownerImgUrl ? <img src={ownerImgUrl} alt="Breeder" className="w-full h-full object-cover" /> : <User size={18} className="text-gray-400" />}
@@ -6964,6 +6970,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                             </div>
                                             {ownerQrUrl && <QRCodeSVG value={ownerQrUrl} size={52} bgColor="transparent" fgColor="#374151" level="M" />}
                                         </div>
+                                        )}
                                         {/* Animal info — centered */}
                                         <div className="flex flex-col items-center gap-2 text-center p-4 relative">
                                             {animal.species && <div className="absolute top-2 left-2 text-left"><p className="text-xs font-semibold text-gray-600 leading-tight">{animal.species}</p>{getSpeciesLatinName(animal.species) && <p className="text-[10px] italic text-gray-400 leading-tight">{getSpeciesLatinName(animal.species)}</p>}</div>}
@@ -6997,41 +7004,33 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 
                             <div>
                                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 2 — Grandparents</p>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
-                                        {renderSlot('sireSire', 'Grandsire', 'sire')}
-                                        {renderSlot('sireDam', 'Granddam', 'sire')}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
-                                        {renderSlot('damSire', 'Grandsire', 'dam')}
-                                        {renderSlot('damDam', 'Granddam', 'dam')}
-                                    </div>
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                    <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                    <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                    {renderSlot('sireSire', 'Grandsire', 'sire')}
+                                    {renderSlot('damSire', 'Grandsire', 'dam')}
+                                    {renderSlot('sireDam', 'Granddam', 'sire')}
+                                    {renderSlot('damDam', 'Granddam', 'dam')}
                                 </div>
                             </div>
 
                             <div>
                                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 3 — Great-Grandparents</p>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
-                                        <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
-                                        {renderSlot('sireSireSire', 'Great-Grandsire', 'sire')}
-                                        {renderSlot('sireSireDam', 'Great-Granddam', 'sire')}
-                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
-                                        {renderSlot('sireDamSire', 'Great-Grandsire', 'sire')}
-                                        {renderSlot('sireDamDam', 'Great-Granddam', 'sire')}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
-                                        <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
-                                        {renderSlot('damSireSire', 'Great-Grandsire', 'dam')}
-                                        {renderSlot('damSireDam', 'Great-Granddam', 'dam')}
-                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
-                                        {renderSlot('damDamSire', 'Great-Grandsire', 'dam')}
-                                        {renderSlot('damDamDam', 'Great-Granddam', 'dam')}
-                                    </div>
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                    <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                    <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                    <p className="text-[10px] text-gray-400 mb-0.5">via Grandsire</p>
+                                    <p className="text-[10px] text-gray-400 mb-0.5">via Grandsire</p>
+                                    {renderSlot('sireSireSire', 'Great-Grandsire', 'sire')}
+                                    {renderSlot('damSireSire', 'Great-Grandsire', 'dam')}
+                                    {renderSlot('sireSireDam', 'Great-Granddam', 'sire')}
+                                    {renderSlot('damSireDam', 'Great-Granddam', 'dam')}
+                                    <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                    <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                    {renderSlot('sireDamSire', 'Great-Grandsire', 'sire')}
+                                    {renderSlot('damDamSire', 'Great-Grandsire', 'dam')}
+                                    {renderSlot('sireDamDam', 'Great-Granddam', 'sire')}
+                                    {renderSlot('damDamDam', 'Great-Granddam', 'dam')}
                                 </div>
                             </div>
                             </div>
@@ -7050,6 +7049,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
                         onClose={() => setShowPedigree(false)}
+                        onViewAnimal={onViewAnimal}
                     />
                 )}
             </div>
@@ -7061,7 +7061,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 // ==================== VIEW-ONLY PRIVATE ANIMAL DETAIL (SOLD/TRANSFERRED) ====================
 // Identical to PrivateAnimalDetail but without edit/delete and privacy controls
 // Used for animals you have view-only access to (sold, transferred, purchased)
-const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, showModalMessage, onViewAnimal, breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, initialTab = 1 }) => {
+const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, showModalMessage, onViewAnimal, breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, initialTab = 1, initialBetaView = 'vertical' }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(initialTab);
@@ -7076,7 +7076,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
     const [mpLoading, setMpLoading] = useState(false);
     const mpTreeRef = useRef(null);
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
-    const [betaPedigreeView, setBetaPedigreeView] = useState('vertical');
+    const [betaPedigreeView, setBetaPedigreeView] = useState(initialBetaView);
     useEffect(() => {
         if (detailViewTab !== 16) return;
         let cancelled = false;
@@ -7145,7 +7145,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
         return () => { cancelled = true; };
     }, [detailViewTab, animal?.id_public]);
     useEffect(() => { setMpEnrichedData(null); setMpLoading(false); }, [animal?.id_public]);
-    useEffect(() => { setDetailViewTab(initialTab); }, [animal?.id_public, initialTab]);
+    useEffect(() => { setDetailViewTab(initialTab); setBetaPedigreeView(initialBetaView); }, [animal?.id_public, initialTab, initialBetaView]);
 
     // Fetch all litters where this animal is sire or dam
     React.useEffect(() => {
@@ -8759,6 +8759,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
                         onClose={() => setShowPedigree(false)}
+                        onViewAnimal={onViewAnimal}
                     />
                 )}
 
@@ -8810,7 +8811,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             } catch { /* not accessible */ }
                         } : undefined;
                         return (
-                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 min-h-[140px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 h-full relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
                                 <div className={`flex items-center gap-1 mb-1.5 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>
                                     <GIcon size={11} className={`flex-shrink-0 ${gColor}`} />
                                     <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
@@ -8860,7 +8861,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             </div>
                             <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart.</p>
                             <div className={betaPedigreeView === 'chart' ? '' : 'hidden'}>
-                                <PedigreeChart inline animalId={animal.id_public} animalData={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} manualData={mpEnrichedData} />
+                                <PedigreeChart inline animalId={animal.id_public} animalData={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />
                             </div>
                             <div className={betaPedigreeView === 'vertical' ? '' : 'hidden'}>
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
@@ -8877,11 +8878,12 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 const ownerLines = [];
                                 if (ownerShowPersonal && breederInfo?.personalName) ownerLines.push(breederInfo.personalName);
                                 if (ownerShowBreeder && breederInfo?.breederName) ownerLines.push(breederInfo.breederName);
-                                const ownerUserId = breederInfo?.id_public || animal.ownerId_public || null;
+                                const ownerUserId = breederInfo?.id_public || null;
                                 const ownerQrUrl = ownerUserId ? `${window.location.origin}/user/${ownerUserId}` : null;
                                 return (
                                     <div className="rounded-xl border-2 border-primary bg-primary/10 overflow-hidden relative">
                                         {/* Owner/breeder — top-right corner */}
+                                        {breederInfo && (
                                         <div className="absolute top-2 right-2 flex flex-col items-center gap-1 text-center z-10">
                                             <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border-2 border-primary/20 flex items-center justify-center flex-shrink-0">
                                                 {ownerImgUrl ? <img src={ownerImgUrl} alt="Breeder" className="w-full h-full object-cover" /> : <User size={18} className="text-gray-400" />}
@@ -8892,6 +8894,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                             </div>
                                             {ownerQrUrl && <QRCodeSVG value={ownerQrUrl} size={52} bgColor="transparent" fgColor="#374151" level="M" />}
                                         </div>
+                                        )}
                                         {/* Animal info — centered */}
                                         <div className="flex flex-col items-center gap-2 text-center p-4 relative">
                                             {animal.species && <div className="absolute top-2 left-2 text-left"><p className="text-xs font-semibold text-gray-600 leading-tight">{animal.species}</p>{getSpeciesLatinName(animal.species) && <p className="text-[10px] italic text-gray-400 leading-tight">{getSpeciesLatinName(animal.species)}</p>}</div>}
@@ -8918,40 +8921,32 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             </div>
                             <div>
                                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 2 — Grandparents</p>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
-                                        {renderSlot('sireSire', 'Grandsire')}
-                                        {renderSlot('sireDam', 'Granddam')}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
-                                        {renderSlot('damSire', 'Grandsire')}
-                                        {renderSlot('damDam', 'Granddam')}
-                                    </div>
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                    <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                    <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                    {renderSlot('sireSire', 'Grandsire')}
+                                    {renderSlot('damSire', 'Grandsire')}
+                                    {renderSlot('sireDam', 'Granddam')}
+                                    {renderSlot('damDam', 'Granddam')}
                                 </div>
                             </div>
                             <div>
                                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 3 — Great-Grandparents</p>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
-                                        <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
-                                        {renderSlot('sireSireSire', 'Great-Grandsire')}
-                                        {renderSlot('sireSireDam', 'Great-Granddam')}
-                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
-                                        {renderSlot('sireDamSire', 'Great-Grandsire')}
-                                        {renderSlot('sireDamDam', 'Great-Granddam')}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
-                                        <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
-                                        {renderSlot('damSireSire', 'Great-Grandsire')}
-                                        {renderSlot('damSireDam', 'Great-Granddam')}
-                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
-                                        {renderSlot('damDamSire', 'Great-Grandsire')}
-                                        {renderSlot('damDamDam', 'Great-Granddam')}
-                                    </div>
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                    <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                    <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                    <p className="text-[10px] text-gray-400 mb-0.5">via Grandsire</p>
+                                    <p className="text-[10px] text-gray-400 mb-0.5">via Grandsire</p>
+                                    {renderSlot('sireSireSire', 'Great-Grandsire')}
+                                    {renderSlot('damSireSire', 'Great-Grandsire')}
+                                    {renderSlot('sireSireDam', 'Great-Granddam')}
+                                    {renderSlot('damSireDam', 'Great-Granddam')}
+                                    <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                    <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                    {renderSlot('sireDamSire', 'Great-Grandsire')}
+                                    {renderSlot('damDamSire', 'Great-Grandsire')}
+                                    {renderSlot('sireDamDam', 'Great-Granddam')}
+                                    {renderSlot('damDamDam', 'Great-Granddam')}
                                 </div>
                             </div>
                             </div>
@@ -10749,7 +10744,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             } catch { /* not accessible */ }
                         } : undefined;
                         return (
-                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 min-h-[140px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 h-full relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
                                 <div className={`flex items-center gap-1 mb-1.5 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>
                                     <GIcon size={11} className={`flex-shrink-0 ${gColor}`} />
                                     <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
@@ -10799,7 +10794,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             </div>
                             <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart.</p>
                             <div className={betaPedigreeView === 'chart' ? '' : 'hidden'}>
-                                <PedigreeChart inline animalId={animal.id_public} animalData={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} manualData={mpEnrichedData} />
+                                <PedigreeChart inline animalId={animal.id_public} animalData={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />
                             </div>
                             <div className={betaPedigreeView === 'vertical' ? '' : 'hidden'}>
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
@@ -10816,11 +10811,12 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     const ownerLines = [];
                                     if (ownerShowPersonal && breederInfo?.personalName) ownerLines.push(breederInfo.personalName);
                                     if (ownerShowBreeder && breederInfo?.breederName) ownerLines.push(breederInfo.breederName);
-                                    const ownerUserId = breederInfo?.id_public || animal.ownerId_public || null;
+                                    const ownerUserId = breederInfo?.id_public || null;
                                     const ownerQrUrl = ownerUserId ? `${window.location.origin}/user/${ownerUserId}` : null;
                                     return (
                                         <div className="rounded-xl border-2 border-primary bg-primary/10 overflow-hidden relative">
                                             {/* Owner/breeder — top-right corner */}
+                                            {breederInfo && (
                                             <div className="absolute top-2 right-2 flex flex-col items-center gap-1 text-center z-10">
                                                 <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border-2 border-primary/20 flex items-center justify-center flex-shrink-0">
                                                     {ownerImgUrl ? <img src={ownerImgUrl} alt="Breeder" className="w-full h-full object-cover" /> : <User size={18} className="text-gray-400" />}
@@ -10831,6 +10827,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                 </div>
                                                 {ownerQrUrl && <QRCodeSVG value={ownerQrUrl} size={52} bgColor="transparent" fgColor="#374151" level="M" />}
                                             </div>
+                                            )}
                                             {/* Animal info — centered */}
                                             <div className="flex flex-col items-center gap-2 text-center p-4 relative">
                                                 {animal.species && <div className="absolute top-2 left-2 text-left"><p className="text-xs font-semibold text-gray-600 leading-tight">{animal.species}</p>{getSpeciesLatinName(animal.species) && <p className="text-[10px] italic text-gray-400 leading-tight">{getSpeciesLatinName(animal.species)}</p>}</div>}
@@ -10857,40 +10854,32 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                 </div>
                                 <div>
                                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 2 — Grandparents</p>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
-                                            {renderSlot('sireSire', 'Grandsire')}
-                                            {renderSlot('sireDam', 'Granddam')}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
-                                            {renderSlot('damSire', 'Grandsire')}
-                                            {renderSlot('damDam', 'Granddam')}
-                                        </div>
+                                    <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                        {renderSlot('sireSire', 'Grandsire')}
+                                        {renderSlot('damSire', 'Grandsire')}
+                                        {renderSlot('sireDam', 'Granddam')}
+                                        {renderSlot('damDam', 'Granddam')}
                                     </div>
                                 </div>
                                 <div>
                                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 3 — Great-Grandparents</p>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
-                                            <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
-                                            {renderSlot('sireSireSire', 'Great-Grandsire')}
-                                            {renderSlot('sireSireDam', 'Great-Granddam')}
-                                            <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
-                                            {renderSlot('sireDamSire', 'Great-Grandsire')}
-                                            {renderSlot('sireDamDam', 'Great-Granddam')}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
-                                            <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
-                                            {renderSlot('damSireSire', 'Great-Grandsire')}
-                                            {renderSlot('damSireDam', 'Great-Granddam')}
-                                            <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
-                                            {renderSlot('damDamSire', 'Great-Grandsire')}
-                                            {renderSlot('damDamDam', 'Great-Granddam')}
-                                        </div>
+                                    <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                        <p className="text-[10px] text-gray-400 mb-0.5">via Grandsire</p>
+                                        <p className="text-[10px] text-gray-400 mb-0.5">via Grandsire</p>
+                                        {renderSlot('sireSireSire', 'Great-Grandsire')}
+                                        {renderSlot('damSireSire', 'Great-Grandsire')}
+                                        {renderSlot('sireSireDam', 'Great-Granddam')}
+                                        {renderSlot('damSireDam', 'Great-Granddam')}
+                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                        {renderSlot('sireDamSire', 'Great-Grandsire')}
+                                        {renderSlot('damDamSire', 'Great-Grandsire')}
+                                        {renderSlot('sireDamDam', 'Great-Granddam')}
+                                        {renderSlot('damDamDam', 'Great-Granddam')}
                                     </div>
                                 </div>
                             </div>
@@ -10906,6 +10895,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                         onClose={() => setShowPedigree(false)}
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
+                        onViewAnimal={onViewAnimal}
                     />
                 )}
             </div>
@@ -33495,6 +33485,7 @@ const App = () => {
     const [publicAnimalViewHistory, setPublicAnimalViewHistory] = useState([]); // Navigation history for public animals
     const [publicAnimalInitialTab, setPublicAnimalInitialTab] = useState(1);
     const [privateAnimalInitialTab, setPrivateAnimalInitialTab] = useState(1);
+    const [privateBetaView, setPrivateBetaView] = useState('vertical');
     const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
     const [animalToView, setAnimalToView] = useState(null);
     const [animalViewHistory, setAnimalViewHistory] = useState([]); // Navigation history stack for animals
@@ -34732,7 +34723,7 @@ const App = () => {
         navigate('/edit-animal');
     };
 
-    const handleViewAnimal = async (animal, initialTab = 1) => {
+    const handleViewAnimal = async (animal, initialTab = 1, initialBetaView = 'vertical') => {
         console.log('[handleViewAnimal] Viewing animal:', animal);
         
         // If we're already viewing an animal, push it to history before navigating to new one
@@ -34773,6 +34764,7 @@ const App = () => {
         console.log('[handleViewAnimal] Father ID:', normalizedAnimal.fatherId_public, 'Mother ID:', normalizedAnimal.motherId_public);
         viewReturnPathRef.current = location.pathname;
         setPrivateAnimalInitialTab(initialTab);
+        setPrivateBetaView(initialBetaView);
         setAnimalToView(normalizedAnimal);
         navigate('/view-animal');
         
@@ -36404,6 +36396,7 @@ const App = () => {
                                     <PrivateAnimalDetail
                                         animal={animalToView}
                                         initialTab={privateAnimalInitialTab}
+                                        initialBetaView={privateBetaView}
                                         onClose={handleBackFromAnimal}
                                         onCloseAll={handleCloseAllAnimals}
                                         onEdit={handleEditAnimal}
@@ -36433,6 +36426,7 @@ const App = () => {
                                     <ViewOnlyPrivateAnimalDetail
                                         animal={animalToView}
                                         initialTab={privateAnimalInitialTab}
+                                        initialBetaView={privateBetaView}
                                         onClose={handleBackFromAnimal}
                                         onCloseAll={handleCloseAllAnimals}
                                         API_BASE_URL={API_BASE_URL}
@@ -37964,6 +37958,7 @@ const App = () => {
                                             onClose={() => setShowPedigreeChart(false)}
                                             API_BASE_URL={API_BASE_URL}
                                             authToken={authToken}
+                                            onViewAnimal={handleViewAnimal}
                                         />
                                     )}
                                         </div>
