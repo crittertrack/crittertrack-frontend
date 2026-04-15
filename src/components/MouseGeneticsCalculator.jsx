@@ -89,7 +89,7 @@ const GENE_LOCI = {
   },
   Rn: {
     name: 'Roan',
-    description: 'Intermingled white hairs. e.g. Roan (rn/rn with evenly patterned white), Merle (rn/rn with solid colored patches)',
+    description: 'Intermingled white hairs. e.g. Roan (rn/rn - evenly intermingled white hairs), Merle (rn/rn - intermingled white hairs + solid patches of original color)',
     combinations: [
       'rn/rn',
       'Rn/rn', 'Rn/Rn'
