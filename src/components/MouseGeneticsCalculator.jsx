@@ -158,7 +158,7 @@ const GENE_LOCI = {
   },
   Fz: {
     name: 'Fuzz',
-    description: 'Short fuzzy coat. Combined with other coat genes (e.g. Satin, Astrex) it creates unique textures.',
+    description: 'Short fuzzy coat (fz/fz). Combined with other coat genes (e.g. Satin, Astrex) it creates unique textures.',
     combinations: [
       'fz/fz',
       'Fz/fz', 'Fz/Fz'
@@ -166,7 +166,7 @@ const GENE_LOCI = {
   },
   Nu: {
     name: 'Nude/Hairless',
-    description: 'Causes hairlessness. Homozygous (nu/nu) removes all coat expression, overriding other coat genes.',
+    description: 'Causes hairlessness. Dominant gene; Nu/- removes all coat expression, overriding other coat genes.',
     combinations: [
       'nu/nu',
       'Nu/nu', 'Nu/Nu'
