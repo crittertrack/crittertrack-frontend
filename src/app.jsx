@@ -1,5 +1,5 @@
 ﻿// CritterTrack Frontend Application
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
 import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, TableOfContents, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2, Hash, Dna, TreeDeciduous, Tag, Egg, Hospital, Brain, Trophy, Scale, FileCheck, Palette, Sprout, Ruler, FolderOpen, Leaf, Microscope, Pill, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Feather, Medal, Target, Key, Dumbbell, Gem, Flame, Baby, PawPrint, ArrowRight, LockOpen, Camera, BarChart2, Bird, Fish, Bug, Worm, Turtle, SlidersHorizontal } from 'lucide-react';
@@ -45,39 +45,39 @@ const DEFAULT_SPECIES_OPTIONS = ['Fancy Mouse', 'Fancy Rat', 'Russian Dwarf Hams
 const getSpeciesEmoji = (speciesName) => {
     const emojiMap = {
         // Small mammals
-        'Fancy Mouse': '🐭', 'Mouse': '🐭',
-        'Fancy Rat': '🐀', 'Rat': '🐀',
-        'Syrian Hamster': '🐹', 'Roborovski Dwarf Hamster': '🐹',
-        'Russian Dwarf Hamster': '🐹', 'Campbells Dwarf Hamster': '🐹', 'Chinese Dwarf Hamster': '🐹', 'Hamster': '🐹',
-        'Guinea Pig': '🐾', 'Gerbil': '🐭', 'Fat-tailed Gerbil': '🐭', 'Fat-tailed gerbil': '🐭',
-        'Degu': '🐾', 'Chinchilla': '🐭', 'African Pygmy Mouse': '🐭', 'African Pygmy Dormouse': '🐭',
+        'Fancy Mouse': '??', 'Mouse': '??',
+        'Fancy Rat': '??', 'Rat': '??',
+        'Syrian Hamster': '??', 'Roborovski Dwarf Hamster': '??',
+        'Russian Dwarf Hamster': '??', 'Campbells Dwarf Hamster': '??', 'Chinese Dwarf Hamster': '??', 'Hamster': '??',
+        'Guinea Pig': '??', 'Gerbil': '??', 'Fat-tailed Gerbil': '??', 'Fat-tailed gerbil': '??',
+        'Degu': '??', 'Chinchilla': '??', 'African Pygmy Mouse': '??', 'African Pygmy Dormouse': '??',
         // Full mammals
-        'Rabbit': '🐰', 'Ferret': '🦦', 'Hedgehog': '🦔', 'Sugar Glider': '🐿️',
-        'Prairie Dog': '🐾', 'Cat': '🐱', 'Dog': '🐶',
+        'Rabbit': '??', 'Ferret': '??', 'Hedgehog': '??', 'Sugar Glider': '???',
+        'Prairie Dog': '??', 'Cat': '??', 'Dog': '??',
         // Reptiles
-        'Leopard Gecko': '🦎', 'Crested Gecko': '🦎', 'Gargoyle Gecko': '🦎',
-        'Bearded Dragon': '🦎', 'Blue-Tongued Skink': '🦎', 'Chameleon': '🦎',
-        'Ball Python': '🐍', 'Corn Snake': '🐍', 'Cape African House Snake': '🐍',
-        'Red-Eared Slider': '🐢', 'Russian Tortoise': '🐢',
+        'Leopard Gecko': '??', 'Crested Gecko': '??', 'Gargoyle Gecko': '??',
+        'Bearded Dragon': '??', 'Blue-Tongued Skink': '??', 'Chameleon': '??',
+        'Ball Python': '??', 'Corn Snake': '??', 'Cape African House Snake': '??',
+        'Red-Eared Slider': '??', 'Russian Tortoise': '??',
         // Birds
-        'Budgie': '🦜', 'Budgerigar': '🦜', 'Cockatiel': '🦜', 'Lovebird': '🦜',
-        'Conure': '🦜', 'African Grey Parrot': '🦜', 'Macaw': '🦜', 'Cockatoo': '🦜',
-        'Canary': '🐦', 'Zebra Finch': '🐦', 'Dove': '🕊️',
+        'Budgie': '??', 'Budgerigar': '??', 'Cockatiel': '??', 'Lovebird': '??',
+        'Conure': '??', 'African Grey Parrot': '??', 'Macaw': '??', 'Cockatoo': '??',
+        'Canary': '??', 'Zebra Finch': '??', 'Dove': '???',
         // Amphibians
-        'Axolotl': '🐾', 'Pacman Frog': '🐸', 'Dart Poison Frog': '🐸',
-        "White's Tree Frog": '🐸', 'Fire-Bellied Toad': '🐸', 'Tomato Frog': '🐸', 'Tiger Salamander': '🦎',
+        'Axolotl': '??', 'Pacman Frog': '??', 'Dart Poison Frog': '??',
+        "White's Tree Frog": '??', 'Fire-Bellied Toad': '??', 'Tomato Frog': '??', 'Tiger Salamander': '??',
         // Fish
-        'Betta Fish': '🐠', 'Guppy': '🐠', 'Platy': '🐠',
-        'Fancy Goldfish': '🐟', 'Koi': '🐟', 'Discus': '🐟', 'Angelfish': '🐟', 'Corydoras': '🐟', 'Oscar': '🐟',
+        'Betta Fish': '??', 'Guppy': '??', 'Platy': '??',
+        'Fancy Goldfish': '??', 'Koi': '??', 'Discus': '??', 'Angelfish': '??', 'Corydoras': '??', 'Oscar': '??',
         // Invertebrates
-        'Tarantula': '🕷️', 'Jumping Spider': '🕷️', 'Scorpion': '🦂',
-        'Giant African Millipede': '🐛', 'Praying Mantis': '🦗', 'Stick Insect': '🦗',
-        'Hissing Cockroach': '🦗', 'Hermit Crab': '🦀', 'Land Snail': '🐌',
-        'Honey Bee': '🐝', 'Bumble Bee': '🐝',
+        'Tarantula': '???', 'Jumping Spider': '???', 'Scorpion': '??',
+        'Giant African Millipede': '??', 'Praying Mantis': '??', 'Stick Insect': '??',
+        'Hissing Cockroach': '??', 'Hermit Crab': '??', 'Land Snail': '??',
+        'Honey Bee': '??', 'Bumble Bee': '??',
         // Default
-        'Other': '🐾',
+        'Other': '??',
     };
-    return emojiMap[speciesName] || '🐾';
+    return emojiMap[speciesName] || '??';
 };
 
 const getSpeciesDisplayName = (species) => {
@@ -157,13 +157,13 @@ const getStateName = (stateCode) => {
 // Get currency symbol from currency code
 const getCurrencySymbol = (currencyCode) => {
     const currencySymbols = {
-        'USD': '$', 'EUR': '€', 'GBP': '£', 'JPY': '¥', 'CNY': '¥', 'KRW': '?',
+        'USD': '$', 'EUR': '€', 'GBP': '£', 'JPY': '¥', 'CNY': '¥', 'KRW': '₩',
         'CAD': 'C$', 'AUD': 'A$', 'CHF': 'CHF', 'SEK': 'kr', 'NOK': 'kr', 'DKK': 'kr',
         'PLN': 'zl', 'CZK': 'Kc', 'HUF': 'Ft', 'RON': 'lei', 'BGN': 'лв', 'HRK': 'kn',
         'RUB': '₽', 'UAH': '₴', 'TRY': '₺', 'ILS': '₪', 'AED': 'د.إ', 'SAR': '﷼',
         'INR': '₹', 'PKR': '₨', 'BDT': '৳', 'LKR': 'Rs', 'THB': '฿', 'VND': '₫',
         'IDR': 'Rp', 'MYR': 'RM', 'SGD': 'S$', 'PHP': '₱', 'HKD': 'HK$', 'TWD': 'NT$',
-        'NZD': 'NZ$', 'ZAR': 'R', 'EGP': 'E£', 'NGN': '?', 'KES': 'Sh', 'GHS': '?',
+        'NZD': 'NZ$', 'ZAR': 'R', 'EGP': 'E£', 'NGN': '₦', 'KES': 'Sh', 'GHS': '₵',
         'BRL': 'R$', 'ARS': '$', 'CLP': '$', 'COP': '$', 'PEN': 'S/', 'MXN': '$'
     };
     return currencySymbols[currencyCode] || currencyCode || '';
@@ -606,22 +606,87 @@ const LitterSyncConflictModal = ({ items, onResolve, onSkip }) => {
 };
 
 // Pedigree Chart Component
-const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken = null }) => {
+const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BASE_URL, authToken = null, inline = false, manualData = null, onViewAnimal = null }, ref) => {
     const [pedigreeData, setPedigreeData] = useState(null);
+    const [displayData, setDisplayData] = useState(null);
     const [ownerProfile, setOwnerProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [imagesLoaded, setImagesLoaded] = useState(false);
     const [stackedPedigree, setStackedPedigree] = useState(null); // For nested pedigree viewing
+    const [isSaving, setIsSaving] = useState(false);
     const pedigreeRef = useRef(null);
 
+    // Merge manual ancestors into fetched pedigree tree wherever API returned nothing
     useEffect(() => {
+        if (!pedigreeData) { setDisplayData(null); return; }
+        if (!manualData) { setDisplayData(pedigreeData); return; }
+        const slotToAnimal = (slot) => {
+            if (!slot) return null;
+            if (!slot.ctcId && !slot.name && !slot.prefix && !slot.suffix) return null;
+            return {
+                name: slot.name || '', prefix: slot.prefix || '', suffix: slot.suffix || '',
+                color: slot.variety || '', imageUrl: slot.imageUrl || null, photoUrl: slot.imageUrl || null,
+                birthDate: slot.birthDate || null, deceasedDate: slot.deceasedDate || null,
+                breederName: slot.breederName || '',
+                gender: slot.gender || '', id_public: slot.ctcId || null, geneticCode: slot.genCode || '',
+            };
+        };
+        const d = JSON.parse(JSON.stringify(pedigreeData));
+        // Level 1 — parents
+        if (!d.father && manualData.sire) d.father = slotToAnimal(manualData.sire);
+        if (!d.mother && manualData.dam)  d.mother = slotToAnimal(manualData.dam);
+        // Level 2 — grandparents
+        if (d.father) {
+            if (!d.father.father && manualData.sireSire) d.father.father = slotToAnimal(manualData.sireSire);
+            if (!d.father.mother && manualData.sireDam)  d.father.mother = slotToAnimal(manualData.sireDam);
+        }
+        if (d.mother) {
+            if (!d.mother.father && manualData.damSire) d.mother.father = slotToAnimal(manualData.damSire);
+            if (!d.mother.mother && manualData.damDam)  d.mother.mother = slotToAnimal(manualData.damDam);
+        }
+        // Level 3 — great-grandparents
+        if (d.father?.father) {
+            if (!d.father.father.father && manualData.sireSireSire) d.father.father.father = slotToAnimal(manualData.sireSireSire);
+            if (!d.father.father.mother && manualData.sireSireDam)  d.father.father.mother = slotToAnimal(manualData.sireSireDam);
+        }
+        if (d.father?.mother) {
+            if (!d.father.mother.father && manualData.sireDamSire) d.father.mother.father = slotToAnimal(manualData.sireDamSire);
+            if (!d.father.mother.mother && manualData.sireDamDam)  d.father.mother.mother = slotToAnimal(manualData.sireDamDam);
+        }
+        if (d.mother?.father) {
+            if (!d.mother.father.father && manualData.damSireSire) d.mother.father.father = slotToAnimal(manualData.damSireSire);
+            if (!d.mother.father.mother && manualData.damSireDam)  d.mother.father.mother = slotToAnimal(manualData.damSireDam);
+        }
+        if (d.mother?.mother) {
+            if (!d.mother.mother.father && manualData.damDamSire) d.mother.mother.father = slotToAnimal(manualData.damDamSire);
+            if (!d.mother.mother.mother && manualData.damDamDam)  d.mother.mother.mother = slotToAnimal(manualData.damDamDam);
+        }
+        setDisplayData(d);
+    }, [pedigreeData, manualData]);
+
+    useEffect(() => {
+        // Inline mode with animalData already supplied: skip the expensive recursive fetch.
+        // The merge useEffect will overlay manualData ancestors on top.
+        if (inline && animalData) {
+            setPedigreeData(animalData);
+            setLoading(false);
+            // Still fetch the breeder profile for display purposes
+            const breederId = animalData.breederId_public;
+            if (breederId) {
+                axios.get(`${API_BASE_URL}/public/profiles/search?query=${breederId}&limit=1`)
+                    .then(r => { if (r.data?.[0]) setOwnerProfile(r.data[0]); })
+                    .catch(() => {});
+            }
+            return;
+        }
+
         const fetchPedigreeData = async () => {
             setLoading(true);
             try {
                 // Enhanced recursive function to fetch animal, ancestors, and descendants
-                // resultCache: Map<id, data> ? avoids redundant API calls but allows the same
+                // resultCache: Map<id, data> — avoids redundant API calls but allows the same
                 //   ancestor to appear in *multiple* pedigree positions (inbreeding).
-                // pathIds: Set of IDs in the current call-chain ? detects true circular loops only.
+                // pathIds: Set of IDs in the current call-chain — detects true circular loops only.
                 const resultCache = new Map();
                 const fetchAnimalWithFamily = async (id, depth = 0, pathIds = new Set()) => {
                     if (!id || depth > 4) return null;
@@ -761,13 +826,13 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 const data = await fetchAnimalWithFamily(animalId || animalData?.id_public);
                 setPedigreeData(data);
 
-                // Fetch owner profile for the main animal
-                if (data?.ownerId_public || data?.breederId_public) {
+                // Fetch breeder profile for the main animal
+                if (data?.breederId_public) {
                     try {
-                        const ownerId = data.ownerId_public || data.breederId_public;
-                        console.log('[PEDIGREE] Fetching owner profile for ID:', ownerId);
+                        const breederId = data.breederId_public;
+                        console.log('[PEDIGREE] Fetching breeder profile for ID:', breederId);
                         const ownerResponse = await axios.get(
-                            `${API_BASE_URL}/public/profiles/search?query=${ownerId}&limit=1`
+                            `${API_BASE_URL}/public/profiles/search?query=${breederId}&limit=1`
                         );
                         console.log('[PEDIGREE] Owner profile response:', ownerResponse.data);
                         if (ownerResponse.data && ownerResponse.data.length > 0) {
@@ -828,65 +893,89 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
     const downloadPDF = async () => {
         if (!pedigreeRef.current) return;
-
+        setIsSaving(true);
         try {
-            // Store original styles
-            const originalWidth = pedigreeRef.current.style.width;
-            const originalHeight = pedigreeRef.current.style.height;
-            const originalAspectRatio = pedigreeRef.current.style.aspectRatio;
-            const originalMinHeight = pedigreeRef.current.style.minHeight;
-            const originalPadding = pedigreeRef.current.style.padding;
-
-            // Set fixed dimensions for PDF generation
-            pedigreeRef.current.style.width = '1400px';
-            pedigreeRef.current.style.height = '1000px';
-            pedigreeRef.current.style.aspectRatio = 'unset';
-            pedigreeRef.current.style.minHeight = 'unset';
-            pedigreeRef.current.style.overflow = 'visible';
-            pedigreeRef.current.style.padding = '70px 20px 20px 20px'; // More top padding for vertical centering
-
-            // Wait for layout to stabilize and images to load
-            await new Promise(resolve => setTimeout(resolve, 500));
-
-            const canvas = await html2canvas(pedigreeRef.current, {
-                scale: 3,
-                backgroundColor: '#ffffff',
-                logging: false,
-                useCORS: true,
-                allowTaint: true,
-                letterRendering: true,
-                windowWidth: 1400,
-                windowHeight: 1000,
-                imageTimeout: 15000,
-                removeContainer: true,
-                scrollX: 0,
-                scrollY: 0
+            const el = pedigreeRef.current;
+            const orig = { w: el.style.width, h: el.style.height, mh: el.style.minHeight, ov: el.style.overflow, p: el.style.padding };
+            el.style.width = '2000px';
+            el.style.height = 'auto';
+            el.style.minHeight = 'unset';
+            el.style.overflow = 'visible';
+            el.style.padding = '40px 20px 32px 20px';
+            const ggpStyle = document.createElement('style');
+            ggpStyle.textContent = '.ggp-chart-img { display: none !important; }';
+            document.head.appendChild(ggpStyle);
+            await new Promise(r => setTimeout(r, 500));
+            const srcCanvas = await html2canvas(el, {
+                scale: 2, backgroundColor: '#ffffff', logging: false,
+                useCORS: true, allowTaint: true, letterRendering: true,
+                windowWidth: 2000, windowHeight: 9999,
+                imageTimeout: 15000, scrollX: 0, scrollY: 0
             });
-
-            // Restore original styles
-            pedigreeRef.current.style.width = originalWidth;
-            pedigreeRef.current.style.height = originalHeight;
-            pedigreeRef.current.style.aspectRatio = originalAspectRatio;
-            pedigreeRef.current.style.minHeight = originalMinHeight;
-            pedigreeRef.current.style.padding = originalPadding;
-
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF({
-                orientation: 'landscape',
-                unit: 'px',
-                format: [1400, 1000]
-            });
-
-            // Add image at exact dimensions without scaling
-            pdf.addImage(imgData, 'PNG', 0, 0, 1400, 1000);
+            document.head.removeChild(ggpStyle);
+            Object.assign(el.style, { width: orig.w, height: orig.h, minHeight: orig.mh, overflow: orig.ov, padding: orig.p });
+            // Fit into A4 landscape (297 × 210mm) with 4mm padding using mm-based jsPDF
+            const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+            const pageW = 297, pageH = 210, pad_mm = 4;
+            const maxW = pageW - pad_mm * 2, maxH = pageH - pad_mm * 2;
+            pdf.addImage(srcCanvas.toDataURL('image/png'), 'PNG',
+                (pageW - maxW) / 2, (pageH - maxH) / 2, maxW, maxH);
             pdf.save(`pedigree-${pedigreeData?.name || 'chart'}.pdf`);
         } catch (error) {
             console.error('Error generating PDF:', error);
-            // Restore images even if there's an error
-            const imageContainers = pedigreeRef.current?.querySelectorAll('.hide-for-pdf');
-            imageContainers?.forEach(el => el.style.display = '');
+        } finally {
+            setIsSaving(false);
         }
     };
+
+    const downloadImage = async () => {
+        if (!pedigreeRef.current) return;
+        setIsSaving(true);
+        try {
+            const el = pedigreeRef.current;
+            const orig = { w: el.style.width, h: el.style.height, mh: el.style.minHeight, ov: el.style.overflow, p: el.style.padding };
+            el.style.width = '2000px';
+            el.style.height = 'auto';
+            el.style.minHeight = 'unset';
+            el.style.overflow = 'visible';
+            el.style.padding = '40px 20px 32px 20px';
+            const ggpStyle2 = document.createElement('style');
+            ggpStyle2.textContent = '.ggp-chart-img { display: none !important; }';
+            document.head.appendChild(ggpStyle2);
+            await new Promise(r => setTimeout(r, 500));
+            const srcCanvas = await html2canvas(el, {
+                scale: 2, backgroundColor: '#ffffff', logging: false,
+                useCORS: true, allowTaint: true, letterRendering: true,
+                windowWidth: 2000, windowHeight: 9999,
+                imageTimeout: 15000, scrollX: 0, scrollY: 0
+            });
+            document.head.removeChild(ggpStyle2);
+            Object.assign(el.style, { width: orig.w, height: orig.h, minHeight: orig.mh, overflow: orig.ov, padding: orig.p });
+            // Fit into A4 landscape canvas at 200dpi (2339 × 1654) with 30px padding
+            const a4W = 2339, a4H = 1654, pad = 30;
+            const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
+            const out = document.createElement('canvas');
+            out.width = a4W; out.height = a4H;
+            const ctx = out.getContext('2d');
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
+            ctx.drawImage(srcCanvas, (a4W - maxW) / 2, (a4H - maxH) / 2, maxW, maxH);
+            const link = document.createElement('a');
+            link.download = `pedigree-${pedigreeData?.name || 'chart'}.png`;
+            link.href = out.toDataURL('image/png');
+            link.click();
+        } catch (error) {
+            console.error('Error generating image:', error);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    useImperativeHandle(ref, () => ({
+        downloadPDF,
+        downloadImage,
+        get imagesLoaded() { return imagesLoaded; },
+        get isSaving() { return isSaving; },
+    }), [downloadPDF, downloadImage, imagesLoaded, isSaving]);
 
     // Render card for main animal (larger with image)
     const renderMainAnimalCard = (animal) => {
@@ -914,33 +1003,36 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-start gap-2 py-2">
                     {/* Name */}
-                    <div className="text-sm text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        <span className="font-bold">Name: </span>{animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                    <div className="text-sm text-gray-900 font-bold leading-tight" style={{lineHeight: '1.2'}}>
+                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </div>
                     
                     {/* Variety */}
                     <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
                     
                     {/* Genetic Code */}
                     {animal.geneticCode && (
                         <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                            <span className="font-semibold">Code: </span>
                             {animal.geneticCode}
                         </div>
                     )}
                     
                     {/* Birth Date */}
                     <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        <span className="font-semibold">Birthdate: </span>
                         {animal.birthDate ? formatDate(animal.birthDate) : 'N/A'}
                     </div>
                     
+                    {/* Deceased Date */}
+                    {animal.deceasedDate ? (
+                        <div className="text-red-600 leading-tight font-semibold text-xs" style={{lineHeight: '1.2'}}>
+                            † {formatDate(animal.deceasedDate)}
+                        </div>
+                    ) : null}
+                    
                     {/* Breeder Info */}
-                    <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        <span className="font-semibold">Breeder: </span>
+                    <div className="text-xs text-gray-700 leading-tight italic" style={{lineHeight: '1.2'}}>
                         {animal.breederName || 'N/A'}
                     </div>
                 </div>
@@ -1008,7 +1100,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 onClick={onClick ? () => onClick(animal) : undefined}
             >
                 {/* Image - 1/3 width */}
-                <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
+                <div className="hide-for-pdf w-1/4 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
                     {imgSrc ? (
                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={window.innerWidth < 640 ? 24 : 32} />
                     ) : (
@@ -1019,33 +1111,36 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-start gap-1.5 py-1 pointer-events-none">
                     {/* Name */}
-                    <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        <span className="font-semibold">Name: </span>{animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                    <div className="text-xs text-gray-900 font-bold leading-tight" style={{lineHeight: '1.2'}}>
+                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </div>
                     
                     {/* Variety */}
                     <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
                     
                     {/* Genetic Code */}
                     {animal.geneticCode && (
                         <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                            <span className="font-semibold">Genotype: </span>
                             {animal.geneticCode}
                         </div>
                     )}
                     
                     {/* Birth Date */}
                     <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        <span className="font-semibold">Birthdate: </span>
                         {animal.birthDate ? formatDate(animal.birthDate) : 'N/A'}
                     </div>
                     
+                    {/* Deceased Date */}
+                    {animal.deceasedDate && (
+                        <div className="text-red-600 leading-tight font-semibold text-xs" style={{lineHeight: '1.2'}}>
+                            † {formatDate(animal.deceasedDate)}
+                        </div>
+                    )}
+                    
                     {/* Breeder */}
-                    <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        <span className="font-semibold">Breeder: </span>
+                    <div className="text-xs text-gray-700 leading-tight italic" style={{lineHeight: '1.2'}}>
                         {animal.breederName || 'N/A'}
                     </div>
                 </div>
@@ -1130,33 +1225,36 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-start gap-1 py-0.5 pointer-events-none">
                     {/* Name */}
-                    <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
-                        <span className="font-semibold">Name: </span>{animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                    <div className="text-gray-900 font-bold leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
+                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </div>
                     
                     {/* Variety */}
                     <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
-                        <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
                     
                     {/* Genetic Code */}
                     {animal.geneticCode && (
                         <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
-                            <span className="font-semibold">Genotype: </span>
                             {animal.geneticCode}
                         </div>
                     )}
                     
                     {/* Birth Date */}
                     <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
-                        <span className="font-semibold">Birthdate: </span>
                         {animal.birthDate ? formatDate(animal.birthDate) : 'N/A'}
                     </div>
                     
+                    {/* Deceased Date */}
+                    {animal.deceasedDate ? (
+                        <div className="text-red-600 leading-tight font-semibold" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
+                            † {formatDate(animal.deceasedDate)}
+                        </div>
+                    ) : null}
+                    
                     {/* Breeder */}
-                    <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
-                        <span className="font-semibold">Breeder: </span>
+                    <div className="text-gray-700 leading-tight italic" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
                         {animal.breederName || 'N/A'}
                     </div>
                 </div>
@@ -1200,7 +1298,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             return (
                 <div className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} flex gap-1 h-full items-center relative`}>
                     {/* Icon placeholder */}
-                    <div className="hide-for-pdf w-8 h-8 bg-gray-100 rounded-lg border border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
+                    <div className="hide-for-pdf ggp-chart-img w-8 h-8 bg-gray-100 rounded-lg border border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                         <EyeOff size={12} className="text-gray-500" />
                     </div>
                     {/* Text */}
@@ -1223,7 +1321,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 onClick={onClick ? () => onClick(animal) : undefined}
             >
                 {/* Image */}
-                <div className="hide-for-pdf w-8 h-8 bg-gray-100 rounded-lg border border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
+                <div className="hide-for-pdf ggp-chart-img w-8 h-8 bg-gray-100 rounded-lg border border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
                     {imgSrc ? (
                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={12} />
                     ) : (
@@ -1233,20 +1331,30 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-start gap-0.5 py-0.5 pointer-events-none">
-                    {/* Name - inline */}
-                    <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
-                        <span className="font-semibold">Name: </span>{animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                    {/* Name */}
+                    <div className="text-gray-900 font-bold leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
+                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </div>
                 
                     {/* Variety */}
                     <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
-                        <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
                     
-                    {/* Breeder */}
+                    {/* Birth Date */}
                     <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
-                        <span className="font-semibold">Breeder: </span>
+                        {animal.birthDate ? formatDate(animal.birthDate) : 'N/A'}
+                    </div>
+                    
+                    {/* Deceased Date */}
+                    {animal.deceasedDate ? (
+                        <div className="text-red-600 leading-tight font-semibold" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
+                            † {formatDate(animal.deceasedDate)}
+                        </div>
+                    ) : null}
+                    
+                    {/* Breeder */}
+                    <div className="text-gray-700 leading-tight italic" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
                         {animal.breederName || 'N/A'}
                     </div>
                 </div>
@@ -1270,7 +1378,11 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         // Handler for clicking on pedigree cards
         const handleCardClick = (clickedAnimal) => {
             if (clickedAnimal && clickedAnimal.id_public) {
-                setStackedPedigree(clickedAnimal);
+                if (onViewAnimal) {
+                    onViewAnimal(clickedAnimal, 16, 'chart');
+                } else {
+                    setStackedPedigree(clickedAnimal);
+                }
             }
         };
 
@@ -1296,7 +1408,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
         // Responsive heights - reasonable mobile sizing
         const isMobile = window.innerWidth < 640; // sm breakpoint
-        const contentHeight = isMobile ? 450 : 600; // Increased height to fit text
+        const contentHeight = isMobile ? 600 : 900; // Increased height to fit text
         const gap = isMobile ? 4 : 8; // gap-1 = 4px, gap-2 = 8px
         const gapClass = isMobile ? 'gap-1' : 'gap-2';
         
@@ -1365,6 +1477,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     };
 
     if (loading) {
+        if (inline) {
+            return <div className="flex items-center justify-center py-12 gap-2 text-gray-400"><Loader2 size={18} className="animate-spin" /><span className="text-sm">Loading pedigree chart…</span></div>;
+        }
         return (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                 <div className="bg-white rounded-xl p-6 max-w-6xl w-full">
@@ -1376,20 +1491,17 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
     // Top right - 3 lines (Personal Name, Breeder Name, CTID)
     const getOwnerDisplayInfoTopRight = () => {
-        if (!ownerProfile) return { lines: ['Unknown Owner'], userId: null };
+        if (!ownerProfile) return null;
         
-        const userId = ownerProfile.id_public || pedigreeData?.ownerId_public || pedigreeData?.breederId_public;
+        const userId = ownerProfile.id_public;
         const lines = [];
         
         const showPersonalName = ownerProfile.showPersonalName ?? false;
         const showBreederName = ownerProfile.showBreederName ?? false;
         
-        // Add personal name if privacy allows and available
         if (showPersonalName && ownerProfile.personalName) {
             lines.push(ownerProfile.personalName);
         }
-        
-        // Add breeder name if it's public and available
         if (showBreederName && ownerProfile.breederName) {
             lines.push(ownerProfile.breederName);
         }
@@ -1402,9 +1514,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     
     // Bottom left - 1 line (CTID - Personal Name - Breeder Name)
     const getOwnerDisplayInfoBottomLeft = () => {
-        if (!ownerProfile) return 'Unknown Owner';
+        if (!ownerProfile) return '';
         
-        const userId = ownerProfile.id_public || pedigreeData?.ownerId_public || pedigreeData?.breederId_public;
+        const userId = ownerProfile.id_public;
         const parts = [];
         
         const showPersonalName = ownerProfile.showPersonalName ?? false;
@@ -1427,6 +1539,52 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         return parts.length > 0 ? parts.join(' - ') : 'Anonymous Breeder';
     };
+
+    if (inline) {
+        return (
+            <>
+                <div ref={pedigreeRef} className="bg-white rounded-xl border border-gray-200 relative w-full overflow-x-auto">
+                    <div style={{minWidth: '700px'}}>
+                        <div className="flex gap-0.5 sm:gap-2 mb-0.5 sm:mb-2 items-start">
+                            <div className="w-1/3">{pedigreeData && renderMainAnimalCard(pedigreeData)}</div>
+                            <div className="w-1/3 flex items-center justify-center">
+                                <div className="text-center">
+                                    <h3 className="text-xs sm:text-lg font-bold text-gray-800">{pedigreeData?.species || 'Unknown Species'}</h3>
+                                    {pedigreeData?.species && getSpeciesLatinName(pedigreeData.species) && (
+                                        <p className="text-xs sm:text-sm italic text-gray-600">{getSpeciesLatinName(pedigreeData.species)}</p>
+                                    )}
+                                </div>
+                            </div>
+                            {ownerProfile && (
+                            <div className="w-1/3 flex items-center justify-end gap-0.5 sm:gap-3">
+                                <div className="text-right">
+                                    {(() => {
+                                        const ownerInfo = getOwnerDisplayInfoTopRight();
+                                        if (!ownerInfo) return null;
+                                        return (<>{ownerInfo.lines.map((line, idx) => (<div key={idx} className="text-xs sm:text-base font-semibold text-gray-800 leading-tight">{line}</div>))}{ownerInfo.userId && <div className="text-xs text-gray-600 mt-1">{ownerInfo.userId}</div>}</>);
+                                    })()}
+                                </div>
+                                <div className="w-6 h-6 sm:w-16 sm:h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                                    {(ownerProfile?.profileImage || ownerProfile?.profileImageUrl) ? <img src={ownerProfile.profileImage || ownerProfile.profileImageUrl} alt="Breeder" className="w-full h-full object-cover" /> : <User size={12} className="text-gray-400 sm:w-8 sm:h-8" />}
+                                </div>
+                            </div>
+                            )}
+                        </div>
+                        <div>{renderPedigreeTree(displayData)}</div>
+                        <div className="mt-4 pt-3 pb-2 border-t border-gray-200 flex justify-between items-center text-xs text-gray-500">
+                            <div>{getOwnerDisplayInfoBottomLeft()}</div>
+                            <div>{formatDate(new Date())}</div>
+                        </div>
+                    </div>
+                </div>
+                {stackedPedigree && (
+                    <div className="fixed inset-0 z-[90]">
+                        <PedigreeChart animalId={stackedPedigree.id_public} animalData={stackedPedigree} onClose={() => setStackedPedigree(null)} API_BASE_URL={API_BASE_URL} authToken={authToken} />
+                    </div>
+                )}
+            </>
+        );
+    }
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
@@ -1452,8 +1610,22 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                                 title={!imagesLoaded ? 'Waiting for images to load...' : 'Download PDF'}
                             >
                                 <Download size={16} />
-                                <span className="hidden sm:inline">{imagesLoaded ? 'Download PDF' : 'Loading...'}</span>
-                                <span className="sm:hidden">{imagesLoaded ? 'PDF' : '...'}</span>
+                                <span className="hidden sm:inline">{isSaving ? 'Saving...' : imagesLoaded ? 'Save PDF' : 'Loading...'}</span>
+                                <span className="sm:hidden">{isSaving ? '...' : imagesLoaded ? 'PDF' : '...'}</span>
+                            </button>
+                            <button
+                                onClick={downloadImage}
+                                disabled={!imagesLoaded || isSaving}
+                                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 font-semibold rounded-lg transition text-xs sm:text-base ${
+                                    imagesLoaded && !isSaving
+                                        ? 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 cursor-pointer'
+                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                }`}
+                                title={!imagesLoaded ? 'Waiting for images to load...' : 'Save as Image (A4 Landscape)'}
+                            >
+                                <Images size={16} />
+                                <span className="hidden sm:inline">{isSaving ? 'Saving...' : imagesLoaded ? 'Save Image' : 'Loading...'}</span>
+                                <span className="sm:hidden">{isSaving ? '...' : imagesLoaded ? 'Img' : '...'}</span>
                             </button>
                             <button
                                 onClick={onClose}
@@ -1489,36 +1661,39 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                                     </div>
                                 </div>
 
-                                {/* Owner Profile */}
-                                <div className="w-1/3 flex items-center justify-end gap-0.5 sm:gap-3">
-                                    <div className="text-right">
-                                        {(() => {
-                                            const ownerInfo = getOwnerDisplayInfoTopRight();
-                                            return (
-                                                <>
-                                                    {ownerInfo.lines.map((line, idx) => (
-                                                        <div key={idx} className="text-xs sm:text-base font-semibold text-gray-800 leading-tight">{line}</div>
-                                                    ))}
-                                                    {ownerInfo.userId && (
-                                                        <div className="text-xs text-gray-600 mt-1">{ownerInfo.userId}</div>
-                                                    )}
-                                                </>
-                                            );
-                                        })()}
+                                {/* Breeder Profile */}
+                                {ownerProfile && (
+                                    <div className="w-1/3 flex items-center justify-end gap-0.5 sm:gap-3">
+                                        <div className="text-right">
+                                            {(() => {
+                                                const ownerInfo = getOwnerDisplayInfoTopRight();
+                                                if (!ownerInfo) return null;
+                                                return (
+                                                    <>
+                                                        {ownerInfo.lines.map((line, idx) => (
+                                                            <div key={idx} className="text-xs sm:text-base font-semibold text-gray-800 leading-tight">{line}</div>
+                                                        ))}
+                                                        {ownerInfo.userId && (
+                                                            <div className="text-xs text-gray-600 mt-1">{ownerInfo.userId}</div>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
+                                        <div className="hide-for-pdf w-6 h-6 sm:w-16 sm:h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                                            {(ownerProfile?.profileImage || ownerProfile?.profileImageUrl) ? (
+                                                <img src={ownerProfile.profileImage || ownerProfile.profileImageUrl} alt="Breeder" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <User size={12} className="text-gray-400 sm:w-8 sm:h-8" />
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="hide-for-pdf w-6 h-6 sm:w-16 sm:h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
-                                        {(ownerProfile?.profileImage || ownerProfile?.profileImageUrl) ? (
-                                            <img src={ownerProfile.profileImage || ownerProfile.profileImageUrl} alt="Owner" className="w-full h-full object-cover" />
-                                        ) : (
-                                            <User size={12} className="text-gray-400 sm:w-8 sm:h-8" />
-                                        )}
-                                    </div>
-                                </div>
+                                )}
                             </div>
 
                             {/* Pedigree Tree */}
                             <div>
-                                {renderPedigreeTree(pedigreeData)}
+                                {renderPedigreeTree(displayData)}
                             </div>
 
                             {/* Footer - Inside scrollable content */}
@@ -1543,13 +1718,14 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         onClose={() => setStackedPedigree(null)}
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
+                        onViewAnimal={onViewAnimal}
                     />
                 </div>
             )}
         </div>
         </div>
     );
-};
+});
 
 // (Removed unused `AnimalListItem` component to reduce redundancy)
 
@@ -1673,9 +1849,9 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
                                 className="px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary text-sm"
                                 disabled={loading}
                             >
-                                <option value="owner">🏠 Owner</option>
-                                <option value="breeder">⭐ Active Breeder</option>
-                                <option value="retired">🌙 Retired Breeder</option>
+                                <option value="owner">?? Owner</option>
+                                <option value="breeder">? Active Breeder</option>
+                                <option value="retired">?? Retired Breeder</option>
                             </select>
                         </div>
                     );
@@ -2591,7 +2767,7 @@ const GlobalSearchBar = ({ API_BASE_URL, onSelectUser, onSelectAnimal, className
                                                     {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                                                 </p>
                                                 <p className="text-xs text-gray-500 truncate">
-                                                    {animal.species} • {animal.gender} • {animal.id_public}
+                                                    {animal.species} · {animal.gender} · {animal.id_public}
                                                 </p>
                                             </div>
                                         </div>
@@ -3063,7 +3239,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 
             {/* Profile Header — two equal columns */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-4 pb-4 border-b">
-                {/* Left column: name → avatar → ctu → member since → country — centered */}
+                {/* Left column: name ? avatar ? ctu ? member since ? country — centered */}
                 <div className="flex flex-col items-center gap-1.5 text-center">
                     <div className="flex items-center justify-center flex-wrap">
                         <h2 className="text-xl font-bold text-gray-900 leading-tight inline">{displayName}</h2>
@@ -3435,7 +3611,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 )}
                                 {isStud && studLabel && (
                                     <span className="inline-flex items-center gap-1 text-xs font-semibold text-purple-700 bg-purple-50 border border-purple-200 rounded-full px-2 py-0.5 w-fit">
-                                        <Heart size={11} /> Stud · {studLabel}
+                                        <Heart size={11} /> Stud — {studLabel}
                                     </span>
                                 )}
                             </div>
@@ -3576,7 +3752,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             )}
                         </div>
                         
-                        {/* Second line: Sire × Dam mini-cards */}
+                        {/* Second line: Sire — Dam mini-cards */}
                         {(l.sireAnimal || l.damAnimal) && (
                             <div className="flex items-center gap-2">
                                 <ParentMiniCard role="Sire" animal={l.sireAnimal} />
@@ -3594,7 +3770,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 <span className="font-semibold text-gray-700">{l.litterSizeBorn} born</span>
                                 {(l.maleCount != null || l.femaleCount != null || l.unknownCount != null) && (
                                     <>
-                                        <span className="text-gray-400 mx-2">•</span>
+                                        <span className="text-gray-400 mx-2">·</span>
                                         <span>
                                             <span className="text-blue-500 font-semibold">{l.maleCount ?? 0}M</span>
                                             <span className="text-gray-400 mx-0.5">/</span>
@@ -4093,7 +4269,7 @@ const computeRelationships = (animal, userAnimals) => {
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
-const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onViewPublicAnimal, onToggleOwned, userProfile, userAnimals = [], breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, initialTab = 1 }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onViewPublicAnimal, onToggleOwned, userProfile, userAnimals = [], breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, initialTab = 1, initialBetaView = 'vertical' }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(initialTab);
@@ -4119,7 +4295,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
     const [mpDownloading, setMpDownloading] = useState(false);
     const [mpLoading, setMpLoading] = useState(false);
     const mpTreeRef = useRef(null);
+    const chartRef = useRef(null);
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
+    const [betaPedigreeView, setBetaPedigreeView] = useState(initialBetaView);
     useEffect(() => {
         if (detailViewTab !== 16) return;
         let cancelled = false;
@@ -4128,7 +4306,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
             const manual = animal?.manualPedigree || {};
             const toSlot = (a) => {
                 const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
-                return { mode: 'ctc', ctcId: a.id_public || '', prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
+                return { mode: 'ctc', ctcId: a.id_public || '', prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', deceasedDate: a.deceasedDate ? String(a.deceasedDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
             };
             const fetchOne = async (id) => {
                 if (!id) return null;
@@ -4188,7 +4366,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
         return () => { cancelled = true; };
     }, [detailViewTab, animal?.id_public]);
     useEffect(() => { setMpEnrichedData(null); setMpLoading(false); }, [animal?.id_public]);
-    useEffect(() => { setDetailViewTab(initialTab); }, [animal?.id_public, initialTab]);
+    useEffect(() => { setDetailViewTab(initialTab); setBetaPedigreeView(initialBetaView); }, [animal?.id_public, initialTab, initialBetaView]);
 
     // Fetch ALL animals on the account + global relationships lazily when Lineage tab opens
     useEffect(() => {
@@ -4639,22 +4817,21 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                 <div className="bg-white border border-t-0 border-gray-300 rounded-b-lg p-3 sm:p-6 overflow-y-auto max-h-[calc(95vh-160px)] sm:max-h-[calc(90vh-180px)]">
                     {/* Tab 1: Overview */}
                     {detailViewTab === 1 && (
-                        <div className="space-y-4">
+                        <div className="space-y-3">
+                            {/* Main info card */}
                             <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden">
-                                <div className="flex flex-col md:flex-row relative">
-                                    <div className="w-full md:w-1/3 p-4 sm:p-6 flex flex-col items-center justify-center relative min-h-60 md:min-h-80">
-                                        <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
-                                            {animal.birthDate ? formatDate(animal.birthDate) : ''}
-                                        </div>
-                                        <div className="absolute top-2 right-2">
-                                            {animal.gender === 'Male' ? <Mars size={20} strokeWidth={2.5} className="text-blue-600" /> : animal.gender === 'Female' ? <Venus size={20} strokeWidth={2.5} className="text-pink-600" /> : animal.gender === 'Intersex' ? <VenusAndMars size={20} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={20} strokeWidth={2.5} className="text-gray-500" />}
-                                        </div>
-                                        <div className="flex items-center justify-center h-40 w-full">
+                                <div className="flex flex-col md:flex-row">
+                                    {/* Left: Photo + status + badges */}
+                                    <div className="w-full md:w-1/4 p-4 flex flex-col items-center gap-2 border-b md:border-b-0 md:border-r border-gray-300">
+                                        <div className="relative w-full flex justify-center">
+                                            <div className="absolute top-0 right-0">
+                                                {animal.gender === 'Male' ? <Mars size={16} strokeWidth={2.5} className="text-blue-600" /> : animal.gender === 'Female' ? <Venus size={16} strokeWidth={2.5} className="text-pink-600" /> : animal.gender === 'Intersex' ? <VenusAndMars size={16} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={16} strokeWidth={2.5} className="text-gray-500" />}
+                                            </div>
                                             {(animal.imageUrl || animal.photoUrl) ? (
-                                                <img 
-                                                    src={animal.imageUrl || animal.photoUrl} 
-                                                    alt={animal.name} 
-                                                    className="max-w-32 max-h-32 w-auto h-auto object-contain rounded-md cursor-pointer hover:opacity-80 transition"
+                                                <img
+                                                    src={animal.imageUrl || animal.photoUrl}
+                                                    alt={animal.name}
+                                                    className="w-28 h-28 object-cover rounded-lg cursor-pointer hover:opacity-80 transition"
                                                     onClick={() => {
                                                         if (setEnlargedImageUrl && setShowImageModal) {
                                                             setEnlargedImageUrl(animal.imageUrl || animal.photoUrl);
@@ -4663,251 +4840,156 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                     }}
                                                 />
                                             ) : (
-                                                <div className="w-32 h-32 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
-                                                    <Cat size={48} />
+                                                <div className="w-28 h-28 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                                                    <Cat size={40} />
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="text-sm font-medium text-gray-700 mt-2">
-                                            {animal.status || 'Unknown'}
-                                        </div>
+                                        <div className="text-sm font-medium text-gray-700">{animal.status || 'Unknown'}</div>
+                                        {animal.isForSale && (
+                                            <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                <Tag size={11} /> For Sale{animal.salePriceCurrency !== 'Negotiable' && animal.salePriceAmount ? ` · ${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount}` : ''}
+                                            </span>
+                                        )}
+                                        {animal.availableForBreeding && (
+                                            <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                <Tag size={11} /> Stud{animal.studFeeCurrency !== 'Negotiable' && animal.studFeeAmount ? ` · ${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount}` : ''}
+                                            </span>
+                                        )}
+                                        {animal.tags && animal.tags.length > 0 && (
+                                            <div className="flex flex-wrap gap-1 justify-center">
+                                                {animal.tags.map((tag, idx) => (
+                                                    <span key={idx} className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs">{tag}</span>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
-
-                                    <div className="w-full md:w-2/3 p-4 sm:p-6 flex flex-col border-t md:border-t-0 md:border-l border-gray-300 space-y-3">
-                                        {/* Species/Breed/Strain/CTC + Toggle Controls - same row */}
-                                        <div className="flex items-center justify-between gap-2">
-                                            <p className="text-sm text-gray-600">
+                                    {/* Right: All info */}
+                                    <div className="flex-1 p-4 space-y-2">
+                                        {/* Top row: species/CTC + toggles */}
+                                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                                            <p className="text-sm text-gray-500">
                                                 {animal.species || 'Unknown'}
-                                                {animal.breed && ` • ${animal.breed}`}
-                                                {animal.strain && ` • ${animal.strain}`}
-                                                {animal.id_public && ` • ${animal.id_public}`}
+                                                {animal.breed && ` \u2022 ${animal.breed}`}
+                                                {animal.strain && ` \u2022 ${animal.strain}`}
+                                                {animal.id_public && ` \u2022 ${animal.id_public}`}
                                             </p>
                                             <div className="flex gap-2 shrink-0">
-                                            {/* Owned Toggle */}
-                                            <button
-                                                onClick={() => {
-                                                    onToggleOwned && onToggleOwned(animal.id_public, !animal.isOwned);
-                                                }}
-                                                className={`flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg font-medium text-sm transition ${
-                                                    animal.isOwned 
-                                                        ? 'bg-red-100 text-red-800 hover:bg-red-200' 
-                                                        : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                                                }`}
-                                                title="Toggle owned status"
-                                                data-tutorial-target="detail-owned-toggle"
-                                            >
-                                                {animal.isOwned ? <Heart size={16} /> : <HeartOff size={16} />}
-                                                <span>{animal.isOwned ? 'Owned' : 'Not Owned'}</span>
-                                            </button>
-
-                                            {/* Public Profile Toggle */}
-                                            <button
-                                                onClick={() => {
-                                                    const newIsDisplay = !animal.isDisplay;
-                                                    axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isDisplay: newIsDisplay }, {
-                                                        headers: { Authorization: `Bearer ${authToken}` }
-                                                    }).then(() => {
-                                                        // Update animal state directly without closing modal
-                                                        if (onUpdateAnimal) {
-                                                            onUpdateAnimal({ ...animal, isDisplay: newIsDisplay });
-                                                        }
-                                                    }).catch(err => {
-                                                        console.error('Failed to update isDisplay:', err);
-                                                    });
-                                                }}
-                                                data-tutorial-target="detail-private-toggle"
-                                                className={`flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg font-medium text-sm transition ${animal.isDisplay ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
-                                                title="Toggle public profile visibility"
-                                            >
-                                                {animal.isDisplay ? <Eye size={16} /> : <EyeOff size={16} />}
-                                                <span>{animal.isDisplay ? 'Public' : 'Private'}</span>
-                                            </button>
+                                                <button
+                                                    onClick={() => { onToggleOwned && onToggleOwned(animal.id_public, !animal.isOwned); }}
+                                                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium text-xs transition ${animal.isOwned ? 'bg-red-100 text-red-800 hover:bg-red-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                                                    title="Toggle owned status"
+                                                    data-tutorial-target="detail-owned-toggle"
+                                                >
+                                                    {animal.isOwned ? <Heart size={13} /> : <HeartOff size={13} />}
+                                                    <span>{animal.isOwned ? 'Owned' : 'Not Owned'}</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        const newIsDisplay = !animal.isDisplay;
+                                                        axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isDisplay: newIsDisplay }, {
+                                                            headers: { Authorization: `Bearer ${authToken}` }
+                                                        }).then(() => {
+                                                            if (onUpdateAnimal) onUpdateAnimal({ ...animal, isDisplay: newIsDisplay });
+                                                        }).catch(err => console.error('Failed to update isDisplay:', err));
+                                                    }}
+                                                    data-tutorial-target="detail-private-toggle"
+                                                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium text-xs transition ${animal.isDisplay ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                                                    title="Toggle public profile visibility"
+                                                >
+                                                    {animal.isDisplay ? <Eye size={13} /> : <EyeOff size={13} />}
+                                                    <span>{animal.isDisplay ? 'Public' : 'Private'}</span>
+                                                </button>
                                             </div>
                                         </div>
-
-                                        {/* Full Name */}
-                                        <h2 className="text-2xl font-bold text-gray-800">
-                                            {animal.prefix ? `${animal.prefix} ` : ''}
-                                            {animal.name}
-                                            {animal.suffix ? ` ${animal.suffix}` : ''}
+                                        {/* Name */}
+                                        <h2 className="text-xl font-bold text-gray-800 leading-tight">
+                                            {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
                                         </h2>
-
-                                        {/* For Sale Badge */}
-                                        {animal.isForSale && (
-                                            <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
-                                                <Tag size={18} className="inline-block align-middle" />
-                                                <div>
-                                                    <p className="text-sm font-semibold text-gray-700">For Sale</p>
-                                                    <p className="text-sm text-gray-600">
-                                                        {animal.salePriceCurrency === 'Negotiable' || !animal.salePriceAmount ? 'Negotiable' : `${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount ? ` ${animal.salePriceAmount}` : ''}`}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* For Stud Badge */}
-                                        {animal.availableForBreeding && (
-                                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-2">
-                                                <Tag size={18} className="inline-block align-middle" />
-                                                <div>
-                                                    <p className="text-sm font-semibold text-gray-700">Available for Stud</p>
-                                                    <p className="text-sm text-gray-600">
-                                                        {animal.studFeeCurrency === 'Negotiable' || !animal.studFeeAmount ? 'Negotiable' : `${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount ? ` ${animal.studFeeAmount}` : ''}`}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Variety */}
-                                        <p className="text-sm text-gray-700">
-                                            <span className="font-semibold">Variety:</span> {[
-                                                animal.color,
-                                                animal.coatPattern,
-                                                animal.coat,
-                                                animal.earset,
-                                                animal.phenotype,
-                                                animal.morph,
-                                                animal.markings,
-                                                animal.eyeColor,
-                                                animal.nailColor,
-                                                animal.size
-                                            ].filter(Boolean).join(' ') || ''}
-                                        </p>
-
-                                        {/* Carrier Traits */}
-                                        {animal.carrierTraits && (
+                                        {/* DOB + age */}
+                                        {animal.birthDate && (
                                             <p className="text-sm text-gray-700">
-                                                <span className="font-semibold">Carrier Traits:</span> {animal.carrierTraits}
-                                            </p>
-                                        )}
-
-                                        {/* Genetic Code */}
-                                        {animal.geneticCode && (
-                                            <p className="text-sm text-gray-700">
-                                                <span className="font-semibold">Genetic Code:</span> <code className="bg-gray-100 px-1 rounded font-mono">{animal.geneticCode}</code>
-                                            </p>
-                                        )}
-
-                                        {/* Date of Birth and Age/Deceased */}
-                                        <div className="text-sm text-gray-700 space-y-1">
-                                            <p>
-                                                <span className="font-semibold">Date of Birth:</span> {animal.birthDate ? `${formatDate(animal.birthDate)} (~${(() => {
+                                                <span className="font-semibold">Born:</span> {formatDate(animal.birthDate)} {(() => {
                                                     const birth = new Date(animal.birthDate);
                                                     const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
                                                     let years = endDate.getFullYear() - birth.getFullYear();
                                                     let months = endDate.getMonth() - birth.getMonth();
                                                     let days = endDate.getDate() - birth.getDate();
-                                                    
-                                                    if (days < 0) {
-                                                        months--;
-                                                        const prevMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 0);
-                                                        days += prevMonth.getDate();
-                                                    }
-                                                    if (months < 0) {
-                                                        years--;
-                                                        months += 12;
-                                                    }
-                                                    
-                                                    if (years > 0) {
-                                                        return `${years}y ${months}m ${days}d`;
-                                                    } else if (months > 0) {
-                                                        return `${months}m ${days}d`;
+                                                    if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
+                                                    if (months < 0) { years--; months += 12; }
+                                                    const ageStr = years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
+                                                    if (animal.deceasedDate) {
+                                                        return <span className="text-red-600 font-semibold ml-2">{"†"} {formatDate(animal.deceasedDate)} (Lived {ageStr})</span>;
                                                     } else {
-                                                        return `${days}d`;
+                                                        return <span>(~{ageStr})</span>;
                                                     }
-                                                })()})` : ''}
+                                                })()}
                                             </p>
-                                            {animal.deceasedDate && (
-                                                <p className="text-red-600 font-semibold">
-                                                    Deceased: {formatDate(animal.deceasedDate)}
-                                                </p>
-                                            )}
-                                        </div>
-
-                                        {/* Remarks */}
+                                        )}
+                                        {/* Variety */}
+                                        {[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).length > 0 && (
+                                            <p className="text-sm text-gray-700">
+                                                <span className="font-semibold">Variety:</span> {[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ')}
+                                            </p>
+                                        )}
+                                        {animal.carrierTraits && (
+                                            <p className="text-sm text-gray-700"><span className="font-semibold">Carrier:</span> {animal.carrierTraits}</p>
+                                        )}
+                                        {animal.geneticCode && (
+                                            <p className="text-sm text-gray-700"><span className="font-semibold">Genetic Code:</span> <code className="bg-gray-100 px-1 rounded font-mono">{animal.geneticCode}</code></p>
+                                        )}
                                         {animal.remarks && (
-                                            <div className="text-sm text-gray-700">
-                                                <span className="font-semibold">Remarks:</span>
-                                                <strong className="block mt-0.5 whitespace-pre-wrap">{animal.remarks}</strong>
-                                            </div>
+                                            <p className="text-sm text-gray-700 line-clamp-2"><span className="font-semibold">Remarks:</span> {animal.remarks}</p>
                                         )}
-
-                                        {/* Tags - Bottom Right */}
-                                        {animal.tags && animal.tags.length > 0 && (
-                                            <div className="absolute bottom-4 right-4 flex flex-wrap gap-1.5 justify-end max-w-xs">
-                                                {animal.tags.map((tag, idx) => (
-                                                    <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                                                        {tag}
-                                                    </span>
-                                                ))}
+                                        {/* Breeder + IDs */}
+                                        <div className="border-t border-gray-200 pt-2 space-y-2 text-sm">
+                                            <div>
+                                                <span className="text-gray-500">Breeder:</span>{' '}
+                                                {breederInfo ? (() => {
+                                                    const showPersonal = breederInfo.showPersonalName ?? false;
+                                                    const showBreeder = breederInfo.showBreederName ?? false;
+                                                    let bDisplayName;
+                                                    if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
+                                                        bDisplayName = `${breederInfo.personalName} (${breederInfo.breederName})`;
+                                                    } else if (showBreeder && breederInfo.breederName) {
+                                                        bDisplayName = breederInfo.breederName;
+                                                    } else if (showPersonal && breederInfo.personalName) {
+                                                        bDisplayName = breederInfo.personalName;
+                                                    } else {
+                                                        bDisplayName = 'Unknown Breeder';
+                                                    }
+                                                    return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-blue-600 hover:underline font-semibold">{bDisplayName}</RouterLink>;
+                                                })() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}
                                             </div>
-                                        )}
+                                            {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
+                                                <hr className="border-gray-200" />
+                                            )}
+                                            <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                                                {animal.breederAssignedId && <div><span className="text-gray-500">Assigned ID:</span> <strong>{animal.breederAssignedId}</strong></div>}
+                                                {animal.microchipNumber && <div><span className="text-gray-500">Microchip:</span> <strong>{animal.microchipNumber}</strong></div>}
+                                                {animal.pedigreeRegistrationId && <div><span className="text-gray-500">Pedigree Reg:</span> <strong>{animal.pedigreeRegistrationId}</strong></div>}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Breeder Section */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3 flex items-center gap-1.5"><Star size={16} className="flex-shrink-0 text-gray-400" /> Breeder</h3>
-                                <p className="text-gray-700">
-                                    {breederInfo ? (() => {
-                                        const showPersonal = breederInfo.showPersonalName ?? false;
-                                        const showBreeder = breederInfo.showBreederName ?? false;
-                                        let bDisplayName;
-                                        if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
-                                            bDisplayName = `${breederInfo.personalName} (${breederInfo.breederName})`;
-                                        } else if (showBreeder && breederInfo.breederName) {
-                                            bDisplayName = breederInfo.breederName;
-                                        } else if (showPersonal && breederInfo.personalName) {
-                                            bDisplayName = breederInfo.personalName;
-                                        } else {
-                                            bDisplayName = 'Unknown Breeder';
-                                        }
-                                        return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-blue-600 hover:underline font-semibold">{bDisplayName}</RouterLink>;
-                                    })() : ((animal.manualBreederName || animal.breederId_public) ? <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public}</span> : '')}
-                                </p>
-                            </div>
-
-                            {/* Identification Numbers Section */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
-                                <div className="space-y-2 text-sm">
-                                    <p><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></p>
-                                    {animal.breederAssignedId && <p><span className="text-gray-600">Identification:</span> <strong>{animal.breederAssignedId}</strong></p>}
-                                    {animal.microchipNumber && <p><span className="text-gray-600">Microchip:</span> <strong>{animal.microchipNumber}</strong></p>}
-                                    {animal.pedigreeRegistrationId && <p><span className="text-gray-600">Pedigree Reg ID:</span> <strong>{animal.pedigreeRegistrationId}</strong></p>}
+                            {/* Parents */}
+                            <div>
+                                <div className="flex items-center justify-between mb-2">
+                                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Parents</h3>
+                                    {animalCOI != null && <span className="text-sm text-gray-700"><span className="font-medium">COI:</span> {animalCOI.toFixed(2)}%</span>}
+                                    {loadingCOI && <span className="text-xs text-gray-400">Calculating COI...</span>}
                                 </div>
-                            </div>
-
-                            {/* Genetic Code Display Section */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3"><Dna size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Genetic Code</h3>
-                                <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || ''}</p>
-                            </div>
-
-                            {/* Parents Section */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <div className="flex items-center justify-between border-b pb-2 mb-4">
-                                    <h3 className="text-lg font-semibold text-gray-700"><TreeDeciduous size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Parents</h3>
-                                    {animalCOI != null && (
-                                        <div className="text-sm text-gray-800">
-                                            <span className="font-medium">COI:</span> {animalCOI.toFixed(2)}%
-                                        </div>
-                                    )}
-                                    {loadingCOI && (
-                                        <div className="text-xs text-gray-400">Calculating...</div>
-                                    )}
-                                </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <ViewOnlyParentCard 
-                                        parentId={animal.fatherId_public || animal.sireId_public} 
+                                <div className="grid grid-cols-2 gap-3">
+                                    <ViewOnlyParentCard
+                                        parentId={animal.fatherId_public || animal.sireId_public}
                                         parentType="Sire"
                                         API_BASE_URL={API_BASE_URL}
                                         onViewAnimal={onViewAnimal}
                                         authToken={authToken}
                                     />
-                                    <ViewOnlyParentCard 
-                                        parentId={animal.motherId_public || animal.damId_public} 
+                                    <ViewOnlyParentCard
+                                        parentId={animal.motherId_public || animal.damId_public}
                                         parentType="Dam"
                                         API_BASE_URL={API_BASE_URL}
                                         onViewAnimal={onViewAnimal}
@@ -5409,13 +5491,15 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                     : <CheckCircle size={16} className="text-green-500" />
                                         )}
                                     </h3>
+                                    {/* BETA: button hidden while chart is available on the Beta Pedigree tab */}
                                     <button
                                         onClick={() => setShowPedigree(true)}
                                         data-tutorial-target="pedigree-btn"
-                                        className="px-3 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition text-sm"
+                                        className="hidden px-3 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition text-sm"
                                     >
                                         View Pedigree Chart
                                     </button>
+                                    <span className="text-xs text-orange-500 font-medium">📊 Pedigree chart available on the <button onClick={() => setDetailViewTab(16)} className="underline hover:text-orange-600 transition">Beta Pedigree</button> tab</span>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <ViewOnlyParentCard 
@@ -5453,7 +5537,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                             {pedigreeIssues.length > 0 && (
                                                 <span className="text-xs font-normal text-red-700 bg-red-100 border border-red-200 rounded-full px-2 py-0.5">
                                                     {pedigreeIssues.filter(i => i.severity === 'error').length > 0 && `${pedigreeIssues.filter(i => i.severity === 'error').length} error${pedigreeIssues.filter(i => i.severity === 'error').length !== 1 ? 's' : ''}`}
-                                                    {pedigreeIssues.filter(i => i.severity === 'error').length > 0 && pedigreeIssues.filter(i => i.severity === 'warning').length > 0 && ' · '}
+                                                    {pedigreeIssues.filter(i => i.severity === 'error').length > 0 && pedigreeIssues.filter(i => i.severity === 'warning').length > 0 && ' — '}
                                                     {pedigreeIssues.filter(i => i.severity === 'warning').length > 0 && `${pedigreeIssues.filter(i => i.severity === 'warning').length} warning${pedigreeIssues.filter(i => i.severity === 'warning').length !== 1 ? 's' : ''}`}
                                                 </span>
                                             )}
@@ -5627,7 +5711,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             {/* 2nd Section: Offspring & Litters - merged litters + pedigree offspring */}
                             {(animalLitters === null || pedigreeOffspring === null) ? (
                                 <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                                    <div className="text-sm text-gray-500 animate-pulse">Loading offspring & litters—</div>
+                                    <div className="text-sm text-gray-500 animate-pulse">Loading offspring & litters…</div>
                                 </div>
                             ) : (() => {
                                 const litterItems = (animalLitters || []).map(l => ({ ...l, _recordType: 'litter' }));
@@ -5687,7 +5771,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                                         {!litter.isPlanned && (litter.litterSizeBorn != null || litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
                                                                             <span className="inline-flex items-center gap-1 whitespace-nowrap">
                                                                                 {litter.litterSizeBorn != null && <span className="font-bold text-gray-900">{litter.litterSizeBorn}</span>}
-                                                                                {litter.litterSizeBorn != null && (litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && <span className="text-gray-400">—</span>}
+                                                                                {litter.litterSizeBorn != null && (litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && <span className="text-gray-400">·</span>}
                                                                                 {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
                                                                                     <span className="inline-flex gap-0.5 font-semibold">
                                                                                         <span className="text-blue-500">{litter.maleCount ?? 0}M</span>
@@ -5709,7 +5793,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                                         {lIsMated && <span className="text-xs font-semibold text-purple-600 bg-purple-50 border border-purple-200 rounded px-1.5 py-0.5 inline-block mt-0.5"><Heart size={12} className="inline-block align-middle mr-0.5" /> Mated</span>}
                                                                     </div>
                                                                     <div className="min-w-0">
-                                                                        {lid ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block w-fit">{lid}</span> : <span className="text-xs text-gray-400">—</span>}
+                                                                        {lid ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block w-fit">{lid}</span> : <span className="text-xs text-gray-400">·</span>}
                                                                     </div>
                                                                     <div>
                                                                         {lIsPlannedOnly ? (<>
@@ -6188,7 +6272,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, preventiveCare: !p.preventiveCare}))} className="w-full flex items-center justify-between text-left group">
                                     <h3 className="text-lg font-semibold text-gray-700"><Shield size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Preventive Care</h3>
-                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.preventiveCare ? '▶' : '▼'}</span>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.preventiveCare ? '?' : '?'}</span>
                                 </button>
                                 {!collapsedHealthSections.preventiveCare && (<div className="space-y-4 mt-4">
                                     {animal.vaccinations && (
@@ -6227,7 +6311,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, proceduresDiagnostics: !p.proceduresDiagnostics}))} className="w-full flex items-center justify-between text-left group">
                                     <h3 className="text-lg font-semibold text-gray-700"><Microscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Procedures & Diagnostics</h3>
-                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.proceduresDiagnostics ? '▶' : '▼'}</span>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.proceduresDiagnostics ? '?' : '?'}</span>
                                 </button>
                                 {!collapsedHealthSections.proceduresDiagnostics && (<div className="space-y-4 mt-4">
                                     {animal.medicalProcedures && (
@@ -6253,7 +6337,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, activeMedical: !p.activeMedical}))} className="w-full flex items-center justify-between text-left group">
                                     <h3 className="text-lg font-semibold text-gray-700"><Pill size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Active Medical Records</h3>
-                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? '▶' : '▼'}</span>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? '?' : '?'}</span>
                                 </button>
                                 {!collapsedHealthSections.activeMedical && (<div className="space-y-3 mt-4">
                                     {animal.medicalConditions && (() => {
@@ -6327,7 +6411,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                         <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, healthClearances: !p.healthClearances}))} className="w-full flex items-center justify-between text-left group">
                                             <h3 className="text-lg font-semibold text-gray-700"><Hospital size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Health Clearances & Screening</h3>
-                                            <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? '▶' : '▼'}</span>
+                                            <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? '?' : '?'}</span>
                                         </button>
                                         {!collapsedHealthSections.healthClearances && (<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
                                             {spayDate && <div><span className="text-gray-600">{getLabel('spayNeuterDate', 'Spay/Neuter Date')}:</span> <strong>{formatDate(animal.spayNeuterDate)}</strong></div>}
@@ -6344,7 +6428,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, vetCare: !p.vetCare}))} className="w-full flex items-center justify-between text-left group">
                                     <h3 className="text-lg font-semibold text-gray-700"><Stethoscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Veterinary Care</h3>
-                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.vetCare ? '▶' : '▼'}</span>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.vetCare ? '?' : '?'}</span>
                                 </button>
                                 {!collapsedHealthSections.vetCare && (<div className="space-y-4 text-sm mt-4">
                                     {animal.primaryVet && <div><span className="text-gray-600">Primary Veterinarian:</span> <strong>{animal.primaryVet}</strong></div>}
@@ -6652,7 +6736,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         <div className="flex items-center justify-between">
                             <div>
                                 <h3 className="text-lg font-semibold text-gray-700"><Images size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Photo Gallery</h3>
-                                <p className="text-xs text-gray-400 mt-0.5">{(animal.extraImages || []).length} / 20 photos — manage in <strong>Edit</strong></p>
+                                <p className="text-xs text-gray-400 mt-0.5">{(animal.extraImages || []).length} / 20 photos · manage in <strong>Edit</strong></p>
                             </div>
                         </div>
 
@@ -6708,7 +6792,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                             {feedingLogs.map(log => {
                                                 const ev = log.changes?.[0]?.newValue || {};
                                                 const foodLabel = ev.supplyName
-                                                    ? `${ev.supplyName}${ev.feederType ? ` (${ev.feederType}${ev.feederSize ? ` • ${ev.feederSize}` : ''})` : ''}`
+                                                    ? `${ev.supplyName}${ev.feederType ? ` (${ev.feederType}${ev.feederSize ? ` · ${ev.feederSize}` : ''})` : ''}`
                                                     : null;
                                                 const qtyLabel = ev.quantity != null ? `${ev.quantity}${ev.unit ? ` ${ev.unit}` : ''}` : null;
                                                 return (
@@ -6775,7 +6859,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                         <div key={i} className="text-sm flex items-start gap-1.5 flex-wrap">
                                                             <span className="font-medium text-gray-700 shrink-0">{c.label}:</span>
                                                             <span className="text-gray-500">
-                                                                {c.oldValue != null ? <span className="line-through text-red-400 mr-1">{fmtVal(c.oldValue)}</span> : <span className="text-gray-400 mr-1">→</span>}
+                                                                {c.oldValue != null ? <span className="line-through text-red-400 mr-1">{fmtVal(c.oldValue)}</span> : <span className="text-gray-400 mr-1">?</span>}
                                                                 <ArrowRight size={14} className="inline-block align-middle mr-0.5" /> <span className="text-green-600">{fmtVal(c.newValue)}</span>
                                                             </span>
                                                         </div>
@@ -6790,7 +6874,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                     </div>
                 )}
 
-                {/* ── TAB 16: Manual Pedigree (Beta) ── */}
+                {/* -- TAB 16: Manual Pedigree (Beta) -- */}
                 {detailViewTab === 16 && (() => {
                     if (mpLoading) return <div className="flex items-center justify-center py-16 gap-2 text-gray-400"><Loader2 size={18} className="animate-spin" /><span className="text-sm">Loading ancestry…</span></div>;
                     const mpData = mpEnrichedData || animal?.manualPedigree || {};
@@ -6806,23 +6890,41 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         if (!mpTreeRef.current) return;
                         setMpDownloading(true);
                         try {
-                            const el = mpTreeRef.current;
-                            const srcCanvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
-                            // A4 at 200dpi: 1654 x 2339, with 60px padding
-                            const a4W = 1654, a4H = 2339, pad = 60;
+                            const srcCanvas = await html2canvas(mpTreeRef.current, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            const a4W = 1654, a4H = 2339, pad = 80;
                             const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
-                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height, 1);
-                            const dw = srcCanvas.width * ratio, dh = srcCanvas.height * ratio;
-                            const outCanvas = document.createElement('canvas');
-                            outCanvas.width = a4W; outCanvas.height = a4H;
-                            const ctx = outCanvas.getContext('2d');
+                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height);
+                            const dw = Math.round(srcCanvas.width * ratio), dh = Math.round(srcCanvas.height * ratio);
+                            const out = document.createElement('canvas');
+                            out.width = a4W; out.height = a4H;
+                            const ctx = out.getContext('2d');
                             ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
-                            ctx.drawImage(srcCanvas, (a4W - dw) / 2, pad, dw, dh);
+                            ctx.drawImage(srcCanvas, Math.round((a4W - dw) / 2), Math.round((a4H - dh) / 2), dw, dh);
                             const link = document.createElement('a');
                             link.download = `manual-pedigree-${animal.name || animal.id_public}.png`;
-                            link.href = outCanvas.toDataURL('image/png');
+                            link.href = out.toDataURL('image/png');
                             link.click();
                         } catch(e) { console.error('Manual pedigree download failed', e); }
+                        finally { setMpDownloading(false); }
+                    };
+                    const handleDownloadMPPDF = async () => {
+                        if (!mpTreeRef.current) return;
+                        setMpDownloading(true);
+                        try {
+                            const srcCanvas = await html2canvas(mpTreeRef.current, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            const a4W = 1654, a4H = 2339, pad = 80;
+                            const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
+                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height);
+                            const dw = Math.round(srcCanvas.width * ratio), dh = Math.round(srcCanvas.height * ratio);
+                            const out = document.createElement('canvas');
+                            out.width = a4W; out.height = a4H;
+                            const ctx = out.getContext('2d');
+                            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
+                            ctx.drawImage(srcCanvas, Math.round((a4W - dw) / 2), Math.round((a4H - dh) / 2), dw, dh);
+                            const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [a4W, a4H] });
+                            pdf.addImage(out.toDataURL('image/png'), 'PNG', 0, 0, a4W, a4H);
+                            pdf.save(`pedigree-${animal.name || animal.id_public}.pdf`);
+                        } catch(e) { console.error('Pedigree PDF failed', e); }
                         finally { setMpDownloading(false); }
                     };
 
@@ -6841,7 +6943,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             } catch { /* not accessible */ }
                         } : undefined;
                         return (
-                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 min-h-[140px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 h-full relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
                                 <div className={`flex items-center gap-1 mb-1.5 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>
                                     <GIcon size={11} className={`flex-shrink-0 ${gColor}`} />
                                     <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
@@ -6856,6 +6958,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                             {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
                                             {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
                                             {d.birthDate && <p className="text-[11px] text-gray-400">{formatDate(d.birthDate)}</p>}
+                                            {d.deceasedDate && <p className="text-[11px] text-red-600 font-semibold">† {formatDate(d.deceasedDate)}</p>}
                                             {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
                                         </div>
                                     </div>
@@ -6879,16 +6982,42 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                     <h3 className="text-base font-semibold text-gray-700">Beta Pedigree</h3>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    {hasAnyData && (
+                                    <div className="flex rounded border border-gray-300 overflow-hidden text-xs">
+                                        <button onClick={() => setBetaPedigreeView('vertical')} className={`px-2 py-1 transition-colors ${betaPedigreeView === 'vertical' ? 'bg-gray-200 font-semibold text-gray-800' : 'text-gray-400 hover:bg-gray-100'}`}>Vertical</button>
+                                        <button onClick={() => setBetaPedigreeView('chart')} className={`px-2 py-1 transition-colors ${betaPedigreeView === 'chart' ? 'bg-primary font-semibold text-black' : 'text-gray-400 hover:bg-gray-100'}`}>Chart</button>
+                                    </div>
+                                    {hasAnyData && betaPedigreeView === 'vertical' && (
+                                        <>
+                                        <button onClick={handleDownloadMPPDF} disabled={mpDownloading}
+                                            className="px-3 py-1.5 text-sm bg-primary hover:bg-primary/90 text-black rounded-lg border border-primary/40 transition flex items-center gap-1.5 disabled:opacity-60 font-semibold">
+                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save PDF</>}
+                                        </button>
                                         <button onClick={handleDownloadMP} disabled={mpDownloading}
                                             className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
-                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save as Image</>}
+                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Images size={14} /> Save Image</>}
                                         </button>
+                                        </>
+                                    )}
+                                    {betaPedigreeView === 'chart' && (
+                                        <>
+                                        <button onClick={() => chartRef.current?.downloadPDF()} disabled={!chartRef.current?.imagesLoaded || chartRef.current?.isSaving}
+                                            className="px-3 py-1.5 text-sm bg-primary hover:bg-primary/90 text-black rounded-lg border border-primary/40 transition flex items-center gap-1.5 disabled:opacity-60 font-semibold">
+                                            <Download size={14} /> Save PDF
+                                        </button>
+                                        <button onClick={() => chartRef.current?.downloadImage()} disabled={!chartRef.current?.imagesLoaded || chartRef.current?.isSaving}
+                                            className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
+                                            <Images size={14} /> Save Image
+                                        </button>
+                                        </>
                                     )}
                                 </div>
                             </div>
                             <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart. To add or edit manual ancestors, use the Edit button.</p>
 
+                            <div className={betaPedigreeView === 'chart' ? '' : 'hidden'}>
+                                <PedigreeChart ref={chartRef} inline animalId={animal.id_public} animalData={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />
+                            </div>
+                            <div className={betaPedigreeView === 'vertical' ? '' : 'hidden'}>
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
 
                             {(() => {
@@ -6898,17 +7027,18 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 const isMale = animal.gender === 'Male';
                                 const SubjectGenderIcon = isMale ? Mars : Venus;
                                 const subjectGColor = isMale ? 'text-blue-500' : 'text-pink-500';
-                                const ownerImgUrl = userProfile?.profileImage || userProfile?.profileImageUrl || null;
-                                const ownerShowPersonal = userProfile?.showPersonalName ?? true;
-                                const ownerShowBreeder = userProfile?.showBreederName ?? true;
+                                const ownerImgUrl = breederInfo?.profileImage || breederInfo?.profileImageUrl || null;
+                                const ownerShowPersonal = breederInfo?.showPersonalName ?? true;
+                                const ownerShowBreeder = breederInfo?.showBreederName ?? true;
                                 const ownerLines = [];
-                                if (ownerShowPersonal && userProfile?.personalName) ownerLines.push(userProfile.personalName);
-                                if (ownerShowBreeder && userProfile?.breederName) ownerLines.push(userProfile.breederName);
-                                const ownerUserId = userProfile?.id_public || null;
+                                if (ownerShowPersonal && breederInfo?.personalName) ownerLines.push(breederInfo.personalName);
+                                if (ownerShowBreeder && breederInfo?.breederName) ownerLines.push(breederInfo.breederName);
+                                const ownerUserId = breederInfo?.id_public || null;
                                 const ownerQrUrl = ownerUserId ? `${window.location.origin}/user/${ownerUserId}` : null;
                                 return (
                                     <div className="rounded-xl border-2 border-primary bg-primary/10 overflow-hidden relative">
                                         {/* Owner/breeder — top-right corner */}
+                                        {breederInfo && (
                                         <div className="absolute top-2 right-2 flex flex-col items-center gap-1 text-center z-10">
                                             <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border-2 border-primary/20 flex items-center justify-center flex-shrink-0">
                                                 {ownerImgUrl ? <img src={ownerImgUrl} alt="Breeder" className="w-full h-full object-cover" /> : <User size={18} className="text-gray-400" />}
@@ -6919,6 +7049,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                             </div>
                                             {ownerQrUrl && <QRCodeSVG value={ownerQrUrl} size={52} bgColor="transparent" fgColor="#374151" level="M" />}
                                         </div>
+                                        )}
                                         {/* Animal info — centered */}
                                         <div className="flex flex-col items-center gap-2 text-center p-4 relative">
                                             {animal.species && <div className="absolute top-2 left-2 text-left"><p className="text-xs font-semibold text-gray-600 leading-tight">{animal.species}</p>{getSpeciesLatinName(animal.species) && <p className="text-[10px] italic text-gray-400 leading-tight">{getSpeciesLatinName(animal.species)}</p>}</div>}
@@ -6952,44 +7083,37 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 
                             <div>
                                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 2 — Grandparents</p>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
-                                        {renderSlot('sireSire', 'Grandsire', 'sire')}
-                                        {renderSlot('sireDam', 'Granddam', 'sire')}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
-                                        {renderSlot('damSire', 'Grandsire', 'dam')}
-                                        {renderSlot('damDam', 'Granddam', 'dam')}
-                                    </div>
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                    <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                    <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                    {renderSlot('sireSire', 'Grandsire', 'sire')}
+                                    {renderSlot('damSire', 'Grandsire', 'dam')}
+                                    {renderSlot('sireDam', 'Granddam', 'sire')}
+                                    {renderSlot('damDam', 'Granddam', 'dam')}
                                 </div>
                             </div>
 
                             <div>
                                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 3 — Great-Grandparents</p>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
-                                        <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
-                                        {renderSlot('sireSireSire', 'Great-Grandsire', 'sire')}
-                                        {renderSlot('sireSireDam', 'Great-Granddam', 'sire')}
-                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
-                                        {renderSlot('sireDamSire', 'Great-Grandsire', 'sire')}
-                                        {renderSlot('sireDamDam', 'Great-Granddam', 'sire')}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
-                                        <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
-                                        {renderSlot('damSireSire', 'Great-Grandsire', 'dam')}
-                                        {renderSlot('damSireDam', 'Great-Granddam', 'dam')}
-                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
-                                        {renderSlot('damDamSire', 'Great-Grandsire', 'dam')}
-                                        {renderSlot('damDamDam', 'Great-Granddam', 'dam')}
-                                    </div>
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                    <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                    <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                    <p className="text-[10px] text-gray-400 mb-0.5">via Grandsire</p>
+                                    <p className="text-[10px] text-gray-400 mb-0.5">via Grandsire</p>
+                                    {renderSlot('sireSireSire', 'Great-Grandsire', 'sire')}
+                                    {renderSlot('damSireSire', 'Great-Grandsire', 'dam')}
+                                    {renderSlot('sireSireDam', 'Great-Granddam', 'sire')}
+                                    {renderSlot('damSireDam', 'Great-Granddam', 'dam')}
+                                    <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                    <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                    {renderSlot('sireDamSire', 'Great-Grandsire', 'sire')}
+                                    {renderSlot('damDamSire', 'Great-Grandsire', 'dam')}
+                                    {renderSlot('sireDamDam', 'Great-Granddam', 'sire')}
+                                    {renderSlot('damDamDam', 'Great-Granddam', 'dam')}
                                 </div>
                             </div>
-                            </div>{/* end mpTreeRef */}
+                            </div>
+                            </div>
                         </div>
                     );
                 })()}
@@ -7004,6 +7128,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
                         onClose={() => setShowPedigree(false)}
+                        onViewAnimal={onViewAnimal}
                     />
                 )}
             </div>
@@ -7015,7 +7140,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 // ==================== VIEW-ONLY PRIVATE ANIMAL DETAIL (SOLD/TRANSFERRED) ====================
 // Identical to PrivateAnimalDetail but without edit/delete and privacy controls
 // Used for animals you have view-only access to (sold, transferred, purchased)
-const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, showModalMessage, onViewAnimal, breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, initialTab = 1 }) => {
+const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, showModalMessage, onViewAnimal, breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, initialTab = 1, initialBetaView = 'vertical' }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(initialTab);
@@ -7029,7 +7154,9 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
     const [mpDownloading, setMpDownloading] = useState(false);
     const [mpLoading, setMpLoading] = useState(false);
     const mpTreeRef = useRef(null);
+    const chartRef = useRef(null);
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
+    const [betaPedigreeView, setBetaPedigreeView] = useState(initialBetaView);
     useEffect(() => {
         if (detailViewTab !== 16) return;
         let cancelled = false;
@@ -7038,7 +7165,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
             const manual = animal?.manualPedigree || {};
             const toSlot = (a) => {
                 const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
-                return { mode: 'ctc', ctcId: a.id_public || '', prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
+                return { mode: 'ctc', ctcId: a.id_public || '', prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', deceasedDate: a.deceasedDate ? String(a.deceasedDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
             };
             const fetchOne = async (id) => {
                 if (!id) return null;
@@ -7098,7 +7225,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
         return () => { cancelled = true; };
     }, [detailViewTab, animal?.id_public]);
     useEffect(() => { setMpEnrichedData(null); setMpLoading(false); }, [animal?.id_public]);
-    useEffect(() => { setDetailViewTab(initialTab); }, [animal?.id_public, initialTab]);
+    useEffect(() => { setDetailViewTab(initialTab); setBetaPedigreeView(initialBetaView); }, [animal?.id_public, initialTab, initialBetaView]);
 
     // Fetch all litters where this animal is sire or dam
     React.useEffect(() => {
@@ -7255,22 +7382,21 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                 <div className="bg-white border border-t-0 border-gray-300 rounded-b-lg p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
                     {/* Tab 1: Overview - NO PRIVACY TOGGLE */}
                     {detailViewTab === 1 && (
-                        <div className="space-y-4">
+                        <div className="space-y-3">
+                            {/* Main info card */}
                             <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden">
-                                <div className="flex flex-col md:flex-row relative">
-                                    <div className="w-full md:w-1/3 p-4 sm:p-6 flex flex-col items-center justify-center relative min-h-60 md:min-h-80">
-                                        <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
-                                            {animal.birthDate ? formatDate(animal.birthDate) : ''}
-                                        </div>
-                                        <div className="absolute top-2 right-2">
-                                            {animal.gender === 'Male' ? <Mars size={20} strokeWidth={2.5} className="text-blue-600" /> : animal.gender === 'Female' ? <Venus size={20} strokeWidth={2.5} className="text-pink-600" /> : animal.gender === 'Intersex' ? <VenusAndMars size={20} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={20} strokeWidth={2.5} className="text-gray-500" />}
-                                        </div>
-                                        <div className="flex items-center justify-center h-40 w-full">
+                                <div className="flex flex-col md:flex-row">
+                                    {/* Left: Photo + status + badges */}
+                                    <div className="w-full md:w-1/4 p-4 flex flex-col items-center gap-2 border-b md:border-b-0 md:border-r border-gray-300">
+                                        <div className="relative w-full flex justify-center">
+                                            <div className="absolute top-0 right-0">
+                                                {animal.gender === 'Male' ? <Mars size={16} strokeWidth={2.5} className="text-blue-600" /> : animal.gender === 'Female' ? <Venus size={16} strokeWidth={2.5} className="text-pink-600" /> : animal.gender === 'Intersex' ? <VenusAndMars size={16} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={16} strokeWidth={2.5} className="text-gray-500" />}
+                                            </div>
                                             {(animal.imageUrl || animal.photoUrl) ? (
-                                                <img 
-                                                    src={animal.imageUrl || animal.photoUrl} 
-                                                    alt={animal.name} 
-                                                    className="max-w-32 max-h-32 w-auto h-auto object-contain rounded-md cursor-pointer hover:opacity-80 transition"
+                                                <img
+                                                    src={animal.imageUrl || animal.photoUrl}
+                                                    alt={animal.name}
+                                                    className="w-28 h-28 object-cover rounded-lg cursor-pointer hover:opacity-80 transition"
                                                     onClick={() => {
                                                         if (setEnlargedImageUrl && setShowImageModal) {
                                                             setEnlargedImageUrl(animal.imageUrl || animal.photoUrl);
@@ -7279,194 +7405,134 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                     }}
                                                 />
                                             ) : (
-                                                <div className="w-32 h-32 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
-                                                    <Cat size={48} />
+                                                <div className="w-28 h-28 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                                                    <Cat size={40} />
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="text-sm font-medium mt-2">
+                                        <div className="text-sm font-medium text-gray-700">
                                             {animal.breederId_public && animal.ownerId_public && animal.breederId_public !== animal.ownerId_public ? (
-                                                <div className="space-y-1">
-                                                    <div className="text-gray-700">Sold</div>
-                                                    {animal.status && <div className="text-gray-700">{animal.status}</div>}
+                                                <div className="space-y-0.5 text-center">
+                                                    <div>Sold</div>
+                                                    {animal.status && <div>{animal.status}</div>}
                                                 </div>
                                             ) : (
-                                                <span className="text-gray-700">{animal.status || 'Unknown'}</span>
+                                                <span>{animal.status || 'Unknown'}</span>
                                             )}
                                         </div>
-                                    </div>
-
-                                    <div className="w-full md:w-2/3 p-4 sm:p-6 flex flex-col border-t md:border-t-0 md:border-l border-gray-300 space-y-3">
-                                        {/* Species/Breed/Strain/CTC - At Top (NO PRIVACY TOGGLE) */}
-                                        <p className="text-sm text-gray-600">
-                                            {animal.species || 'Unknown'}
-                                            {animal.breed && ` • ${animal.breed}`}
-                                            {animal.strain && ` • ${animal.strain}`}
-                                            {animal.id_public && ` • ${animal.id_public}`}
-                                        </p>
-
-                                        {/* Full Name */}
-                                        <h2 className="text-2xl font-bold text-gray-800">
-                                            {animal.prefix ? `${animal.prefix} ` : ''}
-                                            {animal.name}
-                                            {animal.suffix ? ` ${animal.suffix}` : ''}
-                                        </h2>
-
-                                        {/* For Sale Badge */}
                                         {animal.isForSale && (
-                                            <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
-                                                <Tag size={18} className="inline-block align-middle" />
-                                                <div>
-                                                    <p className="text-sm font-semibold text-gray-700">For Sale</p>
-                                                    <p className="text-sm text-gray-600">
-                                                        {animal.salePriceCurrency === 'Negotiable' || !animal.salePriceAmount ? 'Negotiable' : `${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount ? ` ${animal.salePriceAmount}` : ''}`}
-                                                    </p>
-                                                </div>
-                                            </div>
+                                            <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                <Tag size={11} /> For Sale{animal.salePriceCurrency !== 'Negotiable' && animal.salePriceAmount ? ` · ${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount}` : ''}
+                                            </span>
                                         )}
-
-                                        {/* For Stud Badge */}
                                         {animal.availableForBreeding && (
-                                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-2">
-                                                <Tag size={18} className="inline-block align-middle" />
-                                                <div>
-                                                    <p className="text-sm font-semibold text-gray-700">Available for Stud</p>
-                                                    <p className="text-sm text-gray-600">
-                                                        {animal.studFeeCurrency === 'Negotiable' || !animal.studFeeAmount ? 'Negotiable' : `${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount ? ` ${animal.studFeeAmount}` : ''}`}
-                                                    </p>
-                                                </div>
+                                            <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                <Tag size={11} /> Stud{animal.studFeeCurrency !== 'Negotiable' && animal.studFeeAmount ? ` · ${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount}` : ''}
+                                            </span>
+                                        )}
+                                        {animal.tags && animal.tags.length > 0 && (
+                                            <div className="flex flex-wrap gap-1 justify-center">
+                                                {animal.tags.map((tag, idx) => (
+                                                    <span key={idx} className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs">{tag}</span>
+                                                ))}
                                             </div>
                                         )}
-
-                                        {/* Variety */}
-                                        <p className="text-sm text-gray-700">
-                                            <span className="font-semibold">Variety:</span> {[
-                                                animal.color,
-                                                animal.coatPattern,
-                                                animal.coat,
-                                                animal.earset,
-                                                animal.phenotype,
-                                                animal.morph,
-                                                animal.markings,
-                                                animal.eyeColor,
-                                                animal.nailColor,
-                                                animal.size
-                                            ].filter(Boolean).join(' ') || ''}
+                                    </div>
+                                    {/* Right: All info */}
+                                    <div className="flex-1 p-4 space-y-2">
+                                        {/* Species/CTC row */}
+                                        <p className="text-sm text-gray-500">
+                                            {animal.species || 'Unknown'}
+                                            {animal.breed && ` \u2022 ${animal.breed}`}
+                                            {animal.strain && ` \u2022 ${animal.strain}`}
+                                            {animal.id_public && ` \u2022 ${animal.id_public}`}
                                         </p>
-
-                                        {/* Carrier Traits */}
-                                        {animal.carrierTraits && (
+                                        {/* Name */}
+                                        <h2 className="text-xl font-bold text-gray-800 leading-tight">
+                                            {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
+                                        </h2>
+                                        {/* DOB + age */}
+                                        {animal.birthDate && (
                                             <p className="text-sm text-gray-700">
-                                                <span className="font-semibold">Carrier Traits:</span> {animal.carrierTraits}
-                                            </p>
-                                        )}
-
-                                        {/* Genetic Code */}
-                                        {animal.geneticCode && (
-                                            <p className="text-sm text-gray-700">
-                                                <span className="font-semibold">Genetic Code:</span> <code className="bg-gray-100 px-1 rounded font-mono">{animal.geneticCode}</code>
-                                            </p>
-                                        )}
-
-                                        {/* Date of Birth and Age/Deceased */}
-                                        <div className="text-sm text-gray-700 space-y-1">
-                                            <p>
-                                                <span className="font-semibold">Date of Birth:</span> {animal.birthDate ? `${formatDate(animal.birthDate)} (~${(() => {
+                                                <span className="font-semibold">Born:</span> {formatDate(animal.birthDate)} {(() => {
                                                     const birth = new Date(animal.birthDate);
                                                     const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
                                                     let years = endDate.getFullYear() - birth.getFullYear();
                                                     let months = endDate.getMonth() - birth.getMonth();
                                                     let days = endDate.getDate() - birth.getDate();
-                                                    
-                                                    if (days < 0) {
-                                                        months--;
-                                                        const prevMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 0);
-                                                        days += prevMonth.getDate();
-                                                    }
-                                                    if (months < 0) {
-                                                        years--;
-                                                        months += 12;
-                                                    }
-                                                    
-                                                    if (years > 0) {
-                                                        return `${years}y ${months}m ${days}d`;
-                                                    } else if (months > 0) {
-                                                        return `${months}m ${days}d`;
+                                                    if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
+                                                    if (months < 0) { years--; months += 12; }
+                                                    const ageStr = years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
+                                                    if (animal.deceasedDate) {
+                                                        return <span className="text-red-600 font-semibold ml-2">{"†"} {formatDate(animal.deceasedDate)} (Lived {ageStr})</span>;
                                                     } else {
-                                                        return `${days}d`;
+                                                        return <span>(~{ageStr})</span>;
                                                     }
-                                                })()})` : ''}
+                                                })()}
                                             </p>
-                                            {animal.deceasedDate && (
-                                                <p className="text-red-600 font-semibold">
-                                                    Deceased: {formatDate(animal.deceasedDate)}
-                                                </p>
-                                            )}
-                                        </div>
-
-                                        {/* Remarks */}
-                                        {animal.remarks && (
-                                            <div className="text-sm text-gray-700">
-                                                <span className="font-semibold">Remarks:</span>
-                                                <strong className="block mt-0.5 whitespace-pre-wrap">{animal.remarks}</strong>
-                                            </div>
                                         )}
+                                        {/* Variety */}
+                                        {[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).length > 0 && (
+                                            <p className="text-sm text-gray-700">
+                                                <span className="font-semibold">Variety:</span> {[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ')}
+                                            </p>
+                                        )}
+                                        {animal.carrierTraits && (
+                                            <p className="text-sm text-gray-700"><span className="font-semibold">Carrier:</span> {animal.carrierTraits}</p>
+                                        )}
+                                        {animal.geneticCode && (
+                                            <p className="text-sm text-gray-700"><span className="font-semibold">Genetic Code:</span> <code className="bg-gray-100 px-1 rounded font-mono">{animal.geneticCode}</code></p>
+                                        )}
+                                        {animal.remarks && (
+                                            <p className="text-sm text-gray-700 line-clamp-2"><span className="font-semibold">Remarks:</span> {animal.remarks}</p>
+                                        )}
+                                        {/* Breeder + IDs */}
+                                        <div className="border-t border-gray-200 pt-2 space-y-2 text-sm">
+                                            <div>
+                                                <span className="text-gray-500">Breeder:</span>{' '}
+                                                {breederInfo ? (() => {
+                                                    const showPersonal = breederInfo.showPersonalName ?? false;
+                                                    const showBreeder = breederInfo.showBreederName ?? false;
+                                                    let bDisplayName;
+                                                    if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
+                                                        bDisplayName = `${breederInfo.personalName} (${breederInfo.breederName})`;
+                                                    } else if (showBreeder && breederInfo.breederName) {
+                                                        bDisplayName = breederInfo.breederName;
+                                                    } else if (showPersonal && breederInfo.personalName) {
+                                                        bDisplayName = breederInfo.personalName;
+                                                    } else {
+                                                        bDisplayName = 'Unknown Breeder';
+                                                    }
+                                                    return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-blue-600 hover:underline font-semibold">{bDisplayName}</RouterLink>;
+                                                })() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}
+                                            </div>
+                                            {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
+                                                <hr className="border-gray-200" />
+                                            )}
+                                            <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                                                {animal.breederAssignedId && <div><span className="text-gray-500">Assigned ID:</span> <strong>{animal.breederAssignedId}</strong></div>}
+                                                {animal.microchipNumber && <div><span className="text-gray-500">Microchip:</span> <strong>{animal.microchipNumber}</strong></div>}
+                                                {animal.pedigreeRegistrationId && <div><span className="text-gray-500">Pedigree Reg:</span> <strong>{animal.pedigreeRegistrationId}</strong></div>}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Breeder Section */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3 flex items-center gap-1.5"><Star size={16} className="flex-shrink-0 text-gray-400" /> Breeder</h3>
-                                <p className="text-gray-700">
-                                    {breederInfo ? (() => {
-                                        const showPersonal = breederInfo.showPersonalName ?? false;
-                                        const showBreeder = breederInfo.showBreederName ?? false;
-                                        let bDisplayName;
-                                        if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
-                                            bDisplayName = `${breederInfo.personalName} (${breederInfo.breederName})`;
-                                        } else if (showBreeder && breederInfo.breederName) {
-                                            bDisplayName = breederInfo.breederName;
-                                        } else if (showPersonal && breederInfo.personalName) {
-                                            bDisplayName = breederInfo.personalName;
-                                        } else {
-                                            bDisplayName = 'Unknown Breeder';
-                                        }
-                                        return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-blue-600 hover:underline font-semibold">{bDisplayName}</RouterLink>;
-                                    })() : ((animal.manualBreederName || animal.breederId_public) ? <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public}</span> : '')}
-                                </p>
-                            </div>
-
-                            {/* Identification Numbers Section */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
-                                <div className="space-y-2 text-sm">
-                                    <p><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></p>
-                                    {animal.breederAssignedId && <p><span className="text-gray-600">Identification:</span> <strong>{animal.breederAssignedId}</strong></p>}
-                                    {animal.microchipNumber && <p><span className="text-gray-600">Microchip:</span> <strong>{animal.microchipNumber}</strong></p>}
-                                    {animal.pedigreeRegistrationId && <p><span className="text-gray-600">Pedigree Reg ID:</span> <strong>{animal.pedigreeRegistrationId}</strong></p>}
+                            {/* Parents */}
+                            <div>
+                                <div className="flex items-center justify-between mb-2">
+                                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Parents</h3>
                                 </div>
-                            </div>
-
-                            {/* Genetic Code Display Section */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3"><Dna size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Genetic Code</h3>
-                                <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || ''}</p>
-                            </div>
-
-                            {/* Parents Section */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4"><TreeDeciduous size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Parents</h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <ViewOnlyParentCard 
-                                        parentId={animal.fatherId_public || animal.sireId_public} 
+                                <div className="grid grid-cols-2 gap-3">
+                                    <ViewOnlyParentCard
+                                        parentId={animal.fatherId_public || animal.sireId_public}
                                         parentType="Sire"
                                         API_BASE_URL={API_BASE_URL}
                                         onViewAnimal={onViewAnimal}
                                         authToken={authToken}
                                     />
-                                    <ViewOnlyParentCard 
-                                        parentId={animal.motherId_public || animal.damId_public} 
+                                    <ViewOnlyParentCard
+                                        parentId={animal.motherId_public || animal.damId_public}
                                         parentType="Dam"
                                         API_BASE_URL={API_BASE_URL}
                                         onViewAnimal={onViewAnimal}
@@ -7723,13 +7789,15 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <div className="flex justify-between items-center">
                                     <h3 className="text-lg font-semibold text-gray-700"><TreeDeciduous size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Pedigree: Sire and Dam</h3>
+                                    {/* BETA: button hidden while chart is available on the Beta Pedigree tab */}
                                     <button
                                         onClick={() => setShowPedigree(true)}
                                         data-tutorial-target="pedigree-btn"
-                                        className="px-3 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition text-sm"
+                                        className="hidden px-3 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition text-sm"
                                     >
                                         View Pedigree Chart
                                     </button>
+                                    <span className="text-xs text-orange-500 font-medium">&#x1F4CA; Pedigree chart available on the <button onClick={() => setDetailViewTab(16)} className="underline hover:text-orange-600 transition">Beta Pedigree</button> tab</span>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <ViewOnlyParentCard 
@@ -7777,7 +7845,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             {/* 2nd Section: Offspring & Litters - merged litters + pedigree offspring */}
                             {(animalLitters === null || pedigreeOffspring === null) ? (
                                 <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                                    <div className="text-sm text-gray-500 animate-pulse">Loading offspring & litters—</div>
+                                    <div className="text-sm text-gray-500 animate-pulse">Loading offspring & litters…</div>
                                 </div>
                             ) : (() => {
                                 const litterItems = (animalLitters || []).map(l => ({ ...l, _recordType: 'litter' }));
@@ -7834,7 +7902,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                                         {!litter.isPlanned && (litter.litterSizeBorn != null || litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
                                                                             <span className="inline-flex items-center gap-1 whitespace-nowrap">
                                                                                 {litter.litterSizeBorn != null && <span className="font-bold text-gray-900">{litter.litterSizeBorn}</span>}
-                                                                                {litter.litterSizeBorn != null && (litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && <span className="text-gray-400">—</span>}
+                                                                                {litter.litterSizeBorn != null && (litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && <span className="text-gray-400">·</span>}
                                                                                 {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
                                                                                     <span className="inline-flex gap-0.5 font-semibold">
                                                                                         <span className="text-blue-500">{litter.maleCount ?? 0}M</span>
@@ -7856,7 +7924,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                                         {lIsMated && <span className="text-xs font-semibold text-purple-600 bg-purple-50 border border-purple-200 rounded px-1.5 py-0.5 inline-block mt-0.5"><Heart size={12} className="inline-block align-middle mr-0.5" /> Mated</span>}
                                                                     </div>
                                                                     <div className="min-w-0">
-                                                                        {lid ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block w-fit">{lid}</span> : <span className="text-xs text-gray-400">—</span>}
+                                                                        {lid ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block w-fit">{lid}</span> : <span className="text-xs text-gray-400">·</span>}
                                                                     </div>
                                                                     <div>
                                                                         {lIsPlannedOnly ? (<>
@@ -8353,7 +8421,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, preventiveCare: !p.preventiveCare}))} className="w-full flex items-center justify-between text-left group">
                                     <h3 className="text-lg font-semibold text-gray-700"><Shield size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Preventive Care</h3>
-                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.preventiveCare ? '▶' : '▼'}</span>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.preventiveCare ? '?' : '?'}</span>
                                 </button>
                                 {!collapsedHealthSections.preventiveCare && (<div className="space-y-4 mt-4">
                                     {animal.vaccinations && (
@@ -8392,7 +8460,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, proceduresDiagnostics: !p.proceduresDiagnostics}))} className="w-full flex items-center justify-between text-left group">
                                     <h3 className="text-lg font-semibold text-gray-700"><Microscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Procedures & Diagnostics</h3>
-                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.proceduresDiagnostics ? '▶' : '▼'}</span>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.proceduresDiagnostics ? '?' : '?'}</span>
                                 </button>
                                 {!collapsedHealthSections.proceduresDiagnostics && (<div className="space-y-4 mt-4">
                                     {animal.medicalProcedures && (
@@ -8418,7 +8486,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, activeMedical: !p.activeMedical}))} className="w-full flex items-center justify-between text-left group">
                                     <h3 className="text-lg font-semibold text-gray-700"><Pill size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Active Medical Records</h3>
-                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? '▶' : '▼'}</span>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? '?' : '?'}</span>
                                 </button>
                                 {!collapsedHealthSections.activeMedical && (<div className="space-y-3 mt-4">
                                     {animal.medicalConditions && (() => {
@@ -8492,7 +8560,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                         <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, healthClearances: !p.healthClearances}))} className="w-full flex items-center justify-between text-left group">
                                             <h3 className="text-lg font-semibold text-gray-700"><Hospital size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Health Clearances & Screening</h3>
-                                            <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? '▶' : '▼'}</span>
+                                            <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? '?' : '?'}</span>
                                         </button>
                                         {!collapsedHealthSections.healthClearances && (<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
                                             {spayDate && <div><span className="text-gray-600">{getLabel('spayNeuterDate', 'Spay/Neuter Date')}:</span> <strong>{formatDate(animal.spayNeuterDate)}</strong></div>}
@@ -8509,7 +8577,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, vetCare: !p.vetCare}))} className="w-full flex items-center justify-between text-left group">
                                     <h3 className="text-lg font-semibold text-gray-700"><Stethoscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Veterinary Care</h3>
-                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.vetCare ? '▶' : '▼'}</span>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.vetCare ? '?' : '?'}</span>
                                 </button>
                                 {!collapsedHealthSections.vetCare && (<div className="space-y-4 text-sm mt-4">
                                     {animal.primaryVet && <div><span className="text-gray-600">Primary Veterinarian:</span> <strong>{animal.primaryVet}</strong></div>}
@@ -8771,6 +8839,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
                         onClose={() => setShowPedigree(false)}
+                        onViewAnimal={onViewAnimal}
                     />
                 )}
 
@@ -8790,22 +8859,41 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                         if (!mpTreeRef.current) return;
                         setMpDownloading(true);
                         try {
-                            const el = mpTreeRef.current;
-                            const srcCanvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
-                            const a4W = 1654, a4H = 2339, pad = 60;
+                            const srcCanvas = await html2canvas(mpTreeRef.current, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            const a4W = 1654, a4H = 2339, pad = 80;
                             const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
-                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height, 1);
-                            const dw = srcCanvas.width * ratio, dh = srcCanvas.height * ratio;
-                            const outCanvas = document.createElement('canvas');
-                            outCanvas.width = a4W; outCanvas.height = a4H;
-                            const ctx = outCanvas.getContext('2d');
+                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height);
+                            const dw = Math.round(srcCanvas.width * ratio), dh = Math.round(srcCanvas.height * ratio);
+                            const out = document.createElement('canvas');
+                            out.width = a4W; out.height = a4H;
+                            const ctx = out.getContext('2d');
                             ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
-                            ctx.drawImage(srcCanvas, (a4W - dw) / 2, pad, dw, dh);
+                            ctx.drawImage(srcCanvas, Math.round((a4W - dw) / 2), Math.round((a4H - dh) / 2), dw, dh);
                             const link = document.createElement('a');
                             link.download = `manual-pedigree-${animal.name || animal.id_public}.png`;
-                            link.href = outCanvas.toDataURL('image/png');
+                            link.href = out.toDataURL('image/png');
                             link.click();
                         } catch(e) { console.error('Manual pedigree download failed', e); }
+                        finally { setMpDownloading(false); }
+                    };
+                    const handleDownloadMPPDF = async () => {
+                        if (!mpTreeRef.current) return;
+                        setMpDownloading(true);
+                        try {
+                            const srcCanvas = await html2canvas(mpTreeRef.current, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            const a4W = 1654, a4H = 2339, pad = 80;
+                            const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
+                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height);
+                            const dw = Math.round(srcCanvas.width * ratio), dh = Math.round(srcCanvas.height * ratio);
+                            const out = document.createElement('canvas');
+                            out.width = a4W; out.height = a4H;
+                            const ctx = out.getContext('2d');
+                            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
+                            ctx.drawImage(srcCanvas, Math.round((a4W - dw) / 2), Math.round((a4H - dh) / 2), dw, dh);
+                            const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [a4W, a4H] });
+                            pdf.addImage(out.toDataURL('image/png'), 'PNG', 0, 0, a4W, a4H);
+                            pdf.save(`pedigree-${animal.name || animal.id_public}.pdf`);
+                        } catch(e) { console.error('Pedigree PDF failed', e); }
                         finally { setMpDownloading(false); }
                     };
                     const renderSlot = (slotKey, label) => {
@@ -8822,7 +8910,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             } catch { /* not accessible */ }
                         } : undefined;
                         return (
-                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 min-h-[140px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 h-full relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
                                 <div className={`flex items-center gap-1 mb-1.5 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>
                                     <GIcon size={11} className={`flex-shrink-0 ${gColor}`} />
                                     <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
@@ -8835,6 +8923,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                             {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
                                             {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
                                             {d.birthDate && <p className="text-[11px] text-gray-400">{formatDate(d.birthDate)}</p>}
+                                            {d.deceasedDate && <p className="text-[11px] text-red-600 font-semibold">† {formatDate(d.deceasedDate)}</p>}
                                             {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
                                         </div>
                                     </div>
@@ -8856,14 +8945,42 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                     <Dna size={18} className="text-orange-500" />
                                     <h3 className="text-base font-semibold text-gray-700">Beta Pedigree</h3>
                                 </div>
-                                {hasAnyData && (
-                                    <button onClick={handleDownloadMP} disabled={mpDownloading}
-                                        className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
-                                        {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save as Image</>}
-                                    </button>
-                                )}
+                                <div className="flex items-center gap-2">
+                                    <div className="flex rounded border border-gray-300 overflow-hidden text-xs">
+                                        <button onClick={() => setBetaPedigreeView('vertical')} className={`px-2 py-1 transition-colors ${betaPedigreeView === 'vertical' ? 'bg-gray-200 font-semibold text-gray-800' : 'text-gray-400 hover:bg-gray-100'}`}>Vertical</button>
+                                        <button onClick={() => setBetaPedigreeView('chart')} className={`px-2 py-1 transition-colors ${betaPedigreeView === 'chart' ? 'bg-primary font-semibold text-black' : 'text-gray-400 hover:bg-gray-100'}`}>Chart</button>
+                                    </div>
+                                    {hasAnyData && betaPedigreeView === 'vertical' && (
+                                        <>
+                                        <button onClick={handleDownloadMPPDF} disabled={mpDownloading}
+                                            className="px-3 py-1.5 text-sm bg-primary hover:bg-primary/90 text-black rounded-lg border border-primary/40 transition flex items-center gap-1.5 disabled:opacity-60 font-semibold">
+                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save PDF</>}
+                                        </button>
+                                        <button onClick={handleDownloadMP} disabled={mpDownloading}
+                                            className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
+                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Images size={14} /> Save Image</>}
+                                        </button>
+                                        </>
+                                    )}
+                                    {betaPedigreeView === 'chart' && (
+                                        <>
+                                        <button onClick={() => chartRef.current?.downloadPDF()} disabled={!chartRef.current?.imagesLoaded || chartRef.current?.isSaving}
+                                            className="px-3 py-1.5 text-sm bg-primary hover:bg-primary/90 text-black rounded-lg border border-primary/40 transition flex items-center gap-1.5 disabled:opacity-60 font-semibold">
+                                            <Download size={14} /> Save PDF
+                                        </button>
+                                        <button onClick={() => chartRef.current?.downloadImage()} disabled={!chartRef.current?.imagesLoaded || chartRef.current?.isSaving}
+                                            className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
+                                            <Images size={14} /> Save Image
+                                        </button>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                             <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart.</p>
+                            <div className={betaPedigreeView === 'chart' ? '' : 'hidden'}>
+                                <PedigreeChart ref={chartRef} inline animalId={animal.id_public} animalData={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />
+                            </div>
+                            <div className={betaPedigreeView === 'vertical' ? '' : 'hidden'}>
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
                             {(() => {
                                 const subjectVariety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => animal[k]).filter(Boolean).join(' ');
@@ -8878,11 +8995,12 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 const ownerLines = [];
                                 if (ownerShowPersonal && breederInfo?.personalName) ownerLines.push(breederInfo.personalName);
                                 if (ownerShowBreeder && breederInfo?.breederName) ownerLines.push(breederInfo.breederName);
-                                const ownerUserId = breederInfo?.id_public || animal.ownerId_public || null;
+                                const ownerUserId = breederInfo?.id_public || null;
                                 const ownerQrUrl = ownerUserId ? `${window.location.origin}/user/${ownerUserId}` : null;
                                 return (
                                     <div className="rounded-xl border-2 border-primary bg-primary/10 overflow-hidden relative">
                                         {/* Owner/breeder — top-right corner */}
+                                        {breederInfo && (
                                         <div className="absolute top-2 right-2 flex flex-col items-center gap-1 text-center z-10">
                                             <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border-2 border-primary/20 flex items-center justify-center flex-shrink-0">
                                                 {ownerImgUrl ? <img src={ownerImgUrl} alt="Breeder" className="w-full h-full object-cover" /> : <User size={18} className="text-gray-400" />}
@@ -8893,6 +9011,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                             </div>
                                             {ownerQrUrl && <QRCodeSVG value={ownerQrUrl} size={52} bgColor="transparent" fgColor="#374151" level="M" />}
                                         </div>
+                                        )}
                                         {/* Animal info — centered */}
                                         <div className="flex flex-col items-center gap-2 text-center p-4 relative">
                                             {animal.species && <div className="absolute top-2 left-2 text-left"><p className="text-xs font-semibold text-gray-600 leading-tight">{animal.species}</p>{getSpeciesLatinName(animal.species) && <p className="text-[10px] italic text-gray-400 leading-tight">{getSpeciesLatinName(animal.species)}</p>}</div>}
@@ -8919,41 +9038,34 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             </div>
                             <div>
                                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 2 — Grandparents</p>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
-                                        {renderSlot('sireSire', 'Grandsire')}
-                                        {renderSlot('sireDam', 'Granddam')}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
-                                        {renderSlot('damSire', 'Grandsire')}
-                                        {renderSlot('damDam', 'Granddam')}
-                                    </div>
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                    <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                    <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                    {renderSlot('sireSire', 'Grandsire')}
+                                    {renderSlot('damSire', 'Grandsire')}
+                                    {renderSlot('sireDam', 'Granddam')}
+                                    {renderSlot('damDam', 'Granddam')}
                                 </div>
                             </div>
                             <div>
                                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 3 — Great-Grandparents</p>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
-                                        <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
-                                        {renderSlot('sireSireSire', 'Great-Grandsire')}
-                                        {renderSlot('sireSireDam', 'Great-Granddam')}
-                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
-                                        {renderSlot('sireDamSire', 'Great-Grandsire')}
-                                        {renderSlot('sireDamDam', 'Great-Granddam')}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
-                                        <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
-                                        {renderSlot('damSireSire', 'Great-Grandsire')}
-                                        {renderSlot('damSireDam', 'Great-Granddam')}
-                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
-                                        {renderSlot('damDamSire', 'Great-Grandsire')}
-                                        {renderSlot('damDamDam', 'Great-Granddam')}
-                                    </div>
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                    <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                    <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                    <p className="text-[10px] text-gray-400 mb-0.5">via Grandsire</p>
+                                    <p className="text-[10px] text-gray-400 mb-0.5">via Grandsire</p>
+                                    {renderSlot('sireSireSire', 'Great-Grandsire')}
+                                    {renderSlot('damSireSire', 'Great-Grandsire')}
+                                    {renderSlot('sireSireDam', 'Great-Granddam')}
+                                    {renderSlot('damSireDam', 'Great-Granddam')}
+                                    <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                    <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                    {renderSlot('sireDamSire', 'Great-Grandsire')}
+                                    {renderSlot('damDamSire', 'Great-Grandsire')}
+                                    {renderSlot('sireDamDam', 'Great-Granddam')}
+                                    {renderSlot('damDamDam', 'Great-Granddam')}
                                 </div>
+                            </div>
                             </div>
                             </div>
                         </div>
@@ -8975,7 +9087,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
     const [mpDownloading, setMpDownloading] = useState(false);
     const [mpLoading, setMpLoading] = useState(false);
     const mpTreeRef = useRef(null);
+    const chartRef = useRef(null);
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
+    const [betaPedigreeView, setBetaPedigreeView] = useState('vertical');
     useEffect(() => {
         if (detailViewTab !== 14) return;
         let cancelled = false;
@@ -8984,7 +9098,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
             const manual = animal?.manualPedigree || {};
             const toSlot = (a) => {
                 const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
-                return { mode: 'ctc', ctcId: a.id_public || '', prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
+                return { mode: 'ctc', ctcId: a.id_public || '', prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', deceasedDate: a.deceasedDate ? String(a.deceasedDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
             };
             const fetchOne = async (id) => {
                 if (!id) return null;
@@ -9346,31 +9460,21 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                 <div className="bg-white border border-t-0 border-gray-300 rounded-b-lg p-3 sm:p-6 overflow-y-auto max-h-[calc(95vh-160px)] sm:max-h-[calc(90vh-180px)] pb-8">
                     {/* Tab 1: Overview */}
                     {detailViewTab === 1 && (
-                        <div className="space-y-4">
-                            {/* Main Animal Card - 2 Column Layout */}
+                        <div className="space-y-3">
+                            {/* Main info card */}
                             <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden">
-                                <div className="flex flex-col md:flex-row relative">
-                                    {/* Left Column - Image (1/3 on desktop, full width on mobile) */}
-                                    <div className="w-full md:w-1/3 p-4 sm:p-6 flex flex-col items-center justify-center relative min-h-60 md:min-h-80">
-                                        {/* Birthdate badge */}
-                                        {animal.birthDate && (
-                                            <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
-                                                {formatDate(animal.birthDate)}
+                                <div className="flex flex-col md:flex-row">
+                                    {/* Left: Photo + status + badges */}
+                                    <div className="w-full md:w-1/4 p-4 flex flex-col items-center gap-2 border-b md:border-b-0 md:border-r border-gray-300">
+                                        <div className="relative w-full flex justify-center">
+                                            <div className="absolute top-0 right-0">
+                                                {animal.gender === 'Male' ? <Mars size={16} strokeWidth={2.5} className="text-blue-600" /> : animal.gender === 'Female' ? <Venus size={16} strokeWidth={2.5} className="text-pink-600" /> : animal.gender === 'Intersex' ? <VenusAndMars size={16} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={16} strokeWidth={2.5} className="text-gray-500" />}
                                             </div>
-                                        )}
-
-                                        {/* Gender badge */}
-                                        <div className="absolute top-2 right-2">
-                                            {animal.gender === 'Male' ? <Mars size={20} strokeWidth={2.5} className="text-blue-600" /> : animal.gender === 'Female' ? <Venus size={20} strokeWidth={2.5} className="text-pink-600" /> : animal.gender === 'Intersex' ? <VenusAndMars size={20} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={20} strokeWidth={2.5} className="text-gray-500" />}
-                                        </div>
-
-                                        {/* Profile Image */}
-                                        <div className="flex items-center justify-center h-40 w-full">
                                             {(animal.imageUrl || animal.photoUrl) ? (
-                                                <img 
-                                                    src={animal.imageUrl || animal.photoUrl} 
-                                                    alt={animal.name} 
-                                                    className="max-w-32 max-h-32 w-auto h-auto object-contain rounded-md cursor-pointer hover:opacity-80 transition"
+                                                <img
+                                                    src={animal.imageUrl || animal.photoUrl}
+                                                    alt={animal.name}
+                                                    className="w-28 h-28 object-cover rounded-lg cursor-pointer hover:opacity-80 transition"
                                                     onClick={() => {
                                                         if (setEnlargedImageUrl && setShowImageModal) {
                                                             setEnlargedImageUrl(animal.imageUrl || animal.photoUrl);
@@ -9379,201 +9483,137 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                     }}
                                                 />
                                             ) : (
-                                                <div className="w-32 h-32 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
-                                                    <Cat size={48} />
+                                                <div className="w-28 h-28 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                                                    <Cat size={40} />
                                                 </div>
                                             )}
                                         </div>
-
-                                        {/* Status text */}
-                                        <div className="text-sm font-medium text-gray-700 mt-2">
-                                            {animal.status || 'Unknown'}
-                                        </div>
+                                        <div className="text-sm font-medium text-gray-700">{animal.status || 'Unknown'}</div>
+                                        {animal.isForSale && (
+                                            <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                <Tag size={11} /> For Sale{animal.salePriceCurrency !== 'Negotiable' && animal.salePriceAmount ? ` · ${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount}` : ''}
+                                            </span>
+                                        )}
+                                        {animal.availableForBreeding && (
+                                            <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                <Tag size={11} /> Stud{animal.studFeeCurrency !== 'Negotiable' && animal.studFeeAmount ? ` · ${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount}` : ''}
+                                            </span>
+                                        )}
+                                        {animal.tags && animal.tags.length > 0 && (
+                                            <div className="flex flex-wrap gap-1 justify-center">
+                                                {animal.tags.map((tag, idx) => (
+                                                    <span key={idx} className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs">{tag}</span>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
-
-                                    {/* Right Column - Info (2/3 on desktop, full width on mobile) */}
-                                    <div className="w-full md:w-2/3 p-4 sm:p-6 flex flex-col border-t md:border-t-0 md:border-l border-gray-300 space-y-3">
-                                        {/* Species/Breed/Strain/CTC - At Top */}
-                                        <p className="text-sm text-gray-600">
+                                    {/* Right: All info */}
+                                    <div className="flex-1 p-4 space-y-2">
+                                        {/* Species/CTC row */}
+                                        <p className="text-sm text-gray-500">
                                             {animal.species}
-                                            {animal.breed && ` • ${animal.breed}`}
-                                            {animal.strain && ` • ${animal.strain}`}
-                                            {animal.id_public && ` • ${animal.id_public}`}
+                                            {animal.breed && ` \u2022 ${animal.breed}`}
+                                            {animal.strain && ` \u2022 ${animal.strain}`}
+                                            {animal.id_public && ` \u2022 ${animal.id_public}`}
                                         </p>
-
-                                        {/* Full Name */}
-                                        <h2 className="text-2xl font-bold text-gray-800">
-                                            {animal.prefix ? `${animal.prefix} ` : ''}
-                                            {animal.name}
-                                            {animal.suffix ? ` ${animal.suffix}` : ''}
+                                        {/* Name */}
+                                        <h2 className="text-xl font-bold text-gray-800 leading-tight">
+                                            {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
                                         </h2>
-
-                                        {/* For Sale Badge */}
-                                        {animal.isForSale && (animal.salePriceCurrency || animal.salePriceAmount) && (
-                                            <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
-                                                <Tag size={18} className="inline-block align-middle" />
-                                                <div>
-                                                    <p className="text-sm font-semibold text-gray-700">For Sale</p>
-                                                    <p className="text-sm text-gray-600">
-                                                        {animal.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount ? ` ${animal.salePriceAmount}` : ''}`}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* For Stud Badge */}
-                                        {animal.availableForBreeding && (animal.studFeeCurrency || animal.studFeeAmount) && (
-                                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-2">
-                                                <Tag size={18} className="inline-block align-middle" />
-                                                <div>
-                                                    <p className="text-sm font-semibold text-gray-700">Available for Stud</p>
-                                                    <p className="text-sm text-gray-600">
-                                                        {animal.studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount ? ` ${animal.studFeeAmount}` : ''}`}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Variety */}
-                        {(animal.color || animal.coat || animal.coatPattern || animal.earset) && (
-                            <p className="text-sm text-gray-700">
-                                <span className="font-semibold">Variety:</span> {[
-                                    animal.color,
-                                    animal.coatPattern,
-                                    animal.coat,
-                                                animal.earset,
-                                                animal.phenotype,
-                                                animal.morph,
-                                                animal.markings,
-                                                animal.eyeColor,
-                                                animal.nailColor,
-                                                animal.size
-                                            ].filter(Boolean).join(' ')}
-                            </p>
-                        )}
-                        {/* Carrier Traits */}
-                        {animal.carrierTraits && (
-                            <p className="text-sm text-gray-700">
-                                <span className="font-semibold">Carrier Traits:</span> {animal.carrierTraits}
-                            </p>
-                        )}
-
-                                        {/* Date of Birth and Age/Deceased */}
+                                        {/* DOB + age */}
                                         {animal.birthDate && (
-                                            <div className="text-sm text-gray-700 space-y-1">
-                                                <p>
-                                                    <span className="font-semibold">Date of Birth:</span> {formatDate(animal.birthDate)} (~{(() => {
-                                                        const birth = new Date(animal.birthDate);
-                                                        const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
-                                                        let years = endDate.getFullYear() - birth.getFullYear();
-                                                        let months = endDate.getMonth() - birth.getMonth();
-                                                        let days = endDate.getDate() - birth.getDate();
-                                                        
-                                                        if (days < 0) {
-                                                            months--;
-                                                            const prevMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 0);
-                                                            days += prevMonth.getDate();
-                                                        }
-                                                        if (months < 0) {
-                                                            years--;
-                                                            months += 12;
-                                                        }
-                                                        
-                                                        if (years > 0) {
-                                                            return `${years}y ${months}m ${days}d`;
-                                                        } else if (months > 0) {
-                                                            return `${months}m ${days}d`;
-                                                        } else {
-                                                            return `${days}d`;
-                                                        }
-                                                    })()})
-                                                </p>
-                                                {animal.deceasedDate && (
-                                                    <p className="text-red-600 font-semibold">
-                                                        Deceased: {formatDate(animal.deceasedDate)}
-                                                    </p>
+                                            <p className="text-sm text-gray-700">
+                                                <span className="font-semibold">Born:</span> {formatDate(animal.birthDate)} {(() => {
+                                                    const birth = new Date(animal.birthDate);
+                                                    const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
+                                                    let years = endDate.getFullYear() - birth.getFullYear();
+                                                    let months = endDate.getMonth() - birth.getMonth();
+                                                    let days = endDate.getDate() - birth.getDate();
+                                                    if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
+                                                    if (months < 0) { years--; months += 12; }
+                                                    const ageStr = years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
+                                                    if (animal.deceasedDate) {
+                                                        return <span className="text-red-600 font-semibold ml-2">{"†"} {formatDate(animal.deceasedDate)} (Lived {ageStr})</span>;
+                                                    } else {
+                                                        return <span>(~{ageStr})</span>;
+                                                    }
+                                                })()}
+                                            </p>
+                                        )}
+                                        {/* Variety */}
+                                        {(animal.color || animal.coat || animal.coatPattern || animal.earset) && (
+                                            <p className="text-sm text-gray-700">
+                                                <span className="font-semibold">Variety:</span> {[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ')}
+                                            </p>
+                                        )}
+                                        {animal.carrierTraits && (
+                                            <p className="text-sm text-gray-700"><span className="font-semibold">Carrier:</span> {animal.carrierTraits}</p>
+                                        )}
+                                        {animal.geneticCode && (
+                                            <p className="text-sm text-gray-700"><span className="font-semibold">Genetic Code:</span> <code className="bg-gray-100 px-1 rounded font-mono">{animal.geneticCode}</code></p>
+                                        )}
+                                        {animal.remarks && (
+                                            <p className="text-sm text-gray-700 line-clamp-2"><span className="font-semibold">Remarks:</span> {animal.remarks}</p>
+                                        )}
+                                        {/* Breeder + IDs */}
+                                        {animal.breederId_public && (
+                                            <div className="border-t border-gray-200 pt-2 space-y-2 text-sm">
+                                                <div>
+                                                    <span className="text-gray-500">Breeder:</span>{' '}
+                                                    {breederInfo ? (
+                                                        <button
+                                                            onClick={() => onViewProfile && onViewProfile(breederInfo)}
+                                                            className="text-primary hover:underline font-medium"
+                                                        >
+                                                            {(() => {
+                                                                const showPersonal = breederInfo.showPersonalName ?? false;
+                                                                const showBreeder = breederInfo.showBreederName ?? false;
+                                                                if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
+                                                                    return `${breederInfo.personalName} (${breederInfo.breederName})`;
+                                                                } else if (showBreeder && breederInfo.breederName) {
+                                                                    return breederInfo.breederName;
+                                                                } else if (showPersonal && breederInfo.personalName) {
+                                                                    return breederInfo.personalName;
+                                                                } else {
+                                                                    return 'Unknown Breeder';
+                                                                }
+                                                            })()}
+                                                        </button>
+                                                    ) : (
+                                                        <span className="font-mono text-accent">{animal.breederId_public}</span>
+                                                    )}
+                                                </div>
+                                                {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
+                                                    <hr className="border-gray-200" />
                                                 )}
+                                                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                                                    {animal.breederAssignedId && <div><span className="text-gray-500">Assigned ID:</span> <strong>{animal.breederAssignedId}</strong></div>}
+                                                    {animal.microchipNumber && <div><span className="text-gray-500">Microchip:</span> <strong>{animal.microchipNumber}</strong></div>}
+                                                    {animal.pedigreeRegistrationId && <div><span className="text-gray-500">Pedigree Reg:</span> <strong>{animal.pedigreeRegistrationId}</strong></div>}
+                                                </div>
                                             </div>
                                         )}
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Breeder Section */}
-                            {animal.breederId_public && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3 flex items-center gap-1.5"><Star size={16} className="flex-shrink-0 text-gray-400" /> Breeder</h3>
-                                    <p className="text-gray-700 flex items-center gap-2">
-                                        {breederInfo ? (
-                                            <>
-                                                <button
-                                                    onClick={() => onViewProfile && onViewProfile(breederInfo)}
-                                                    className="text-primary hover:underline font-medium"
-                                                >
-                                                    {(() => {
-                                                        const showPersonal = breederInfo.showPersonalName ?? false;
-                                                        const showBreeder = breederInfo.showBreederName ?? false;
-                                                        if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
-                                                            return `${breederInfo.personalName} (${breederInfo.breederName})`;
-                                                        } else if (showBreeder && breederInfo.breederName) {
-                                                            return breederInfo.breederName;
-                                                        } else if (showPersonal && breederInfo.personalName) {
-                                                            return breederInfo.personalName;
-                                                        } else {
-                                                            return 'Unknown Breeder';
-                                                        }
-                                                    })()}
-                                                </button>
-                                            </>
-                                        ) : (
-                                            <span className="font-mono text-accent">{animal.breederId_public}</span>
-                                        )}
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Identification Numbers Section */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
-                                <div className="space-y-2 text-sm">
-                                    <p><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></p>
-                                    {animal.breederAssignedId && <p><span className="text-gray-600">Identification:</span> <strong>{animal.breederAssignedId}</strong></p>}
-                                    {animal.microchipNumber && <p><span className="text-gray-600">Microchip:</span> <strong>{animal.microchipNumber}</strong></p>}
-                                    {animal.pedigreeRegistrationId && <p><span className="text-gray-600">Pedigree Reg ID:</span> <strong>{animal.pedigreeRegistrationId}</strong></p>}
-                                </div>
-                            </div>
-                            {/* Genetic Code Display Section */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3"><Dna size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Genetic Code</h3>
-                                <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || ''}</p>
-                            </div>
-
-                            {/* Parents Section */}
+                            {/* Parents */}
                             {(animal.fatherId_public || animal.sireId_public || animal.motherId_public || animal.damId_public) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <div className="flex items-center justify-between border-b pb-2 mb-4">
-                                        <h3 className="text-lg font-semibold text-gray-700"><TreeDeciduous size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Parents</h3>
-                                        <div className="flex items-center gap-3">
-                                            {animalCOI != null && (
-                                                <div className="text-sm text-gray-800">
-                                                    <span className="font-medium">COI:</span> {animalCOI.toFixed(2)}%
-                                                </div>
-                                            )}
-                                            {loadingCOI && (
-                                                <div className="text-xs text-gray-400">Calculating...</div>
-                                            )}
-                                        </div>
+                                <div>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Parents</h3>
+                                        {animalCOI != null && <span className="text-sm text-gray-700"><span className="font-medium">COI:</span> {animalCOI.toFixed(2)}%</span>}
+                                        {loadingCOI && <span className="text-xs text-gray-400">Calculating COI...</span>}
                                     </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <ViewOnlyParentCard 
-                                            parentId={animal.fatherId_public || animal.sireId_public} 
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <ViewOnlyParentCard
+                                            parentId={animal.fatherId_public || animal.sireId_public}
                                             parentType="Sire"
                                             API_BASE_URL={API_BASE_URL}
                                             onViewAnimal={onViewAnimal}
                                             authToken={authToken}
                                         />
-                                        <ViewOnlyParentCard 
-                                            parentId={animal.motherId_public || animal.damId_public} 
+                                        <ViewOnlyParentCard
+                                            parentId={animal.motherId_public || animal.damId_public}
                                             parentType="Dam"
                                             API_BASE_URL={API_BASE_URL}
                                             onViewAnimal={onViewAnimal}
@@ -9827,13 +9867,15 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <div className="flex justify-between items-center">
                                     <h3 className="text-lg font-semibold text-gray-700"><TreeDeciduous size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Pedigree: Sire and Dam</h3>
+                                    {/* BETA: button hidden while chart is available on the Beta Pedigree tab */}
                                     <button
                                         onClick={() => setShowPedigree(true)}
                                         data-tutorial-target="pedigree-btn"
-                                        className="px-3 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition text-sm"
+                                        className="hidden px-3 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition text-sm"
                                     >
                                         View Pedigree Chart
                                     </button>
+                                    <span className="text-xs text-orange-500 font-medium">&#x1F4CA; Pedigree chart available on the <button onClick={() => setDetailViewTab(14)} className="underline hover:text-orange-600 transition">Beta Pedigree</button> tab</span>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <ViewOnlyParentCard 
@@ -9856,7 +9898,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* Offspring & Litters - merged litters + pedigree offspring */}
                             {(animalLitters === null || pedigreeOffspring === null) ? (
                                 <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                                    <div className="text-sm text-gray-500 animate-pulse">Loading offspring & litters—</div>
+                                    <div className="text-sm text-gray-500 animate-pulse">Loading offspring & litters…</div>
                                 </div>
                             ) : (() => {
                                 const litterItems = (animalLitters || []).map(l => ({ ...l, _recordType: 'litter' }));
@@ -9913,7 +9955,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                                         {(litter.litterSizeBorn != null || litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
                                                                             <span className="inline-flex items-center gap-1 whitespace-nowrap">
                                                                                 {litter.litterSizeBorn != null && <span className="font-bold text-gray-900">{litter.litterSizeBorn}</span>}
-                                                                                {litter.litterSizeBorn != null && (litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && <span className="text-gray-400">—</span>}
+                                                                                {litter.litterSizeBorn != null && (litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && <span className="text-gray-400">·</span>}
                                                                                 {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
                                                                                     <span className="inline-flex gap-0.5 font-semibold">
                                                                                         <span className="text-blue-500">{litter.maleCount ?? 0}M</span>
@@ -9935,7 +9977,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                                         {lIsMated && <span className="text-xs font-semibold text-purple-600 bg-purple-50 border border-purple-200 rounded px-1.5 py-0.5 inline-block mt-0.5"><Heart size={12} className="inline-block align-middle mr-0.5" /> Mated</span>}
                                                                     </div>
                                                                     <div className="min-w-0">
-                                                                        {lid ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block w-fit">{lid}</span> : <span className="text-xs text-gray-400">—</span>}
+                                                                        {lid ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block w-fit">{lid}</span> : <span className="text-xs text-gray-400">·</span>}
                                                                     </div>
                                                                     <div>
                                                                         {lIsPlannedOnly ? (<>
@@ -10314,7 +10356,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, preventiveCare: !p.preventiveCare}))} className="w-full flex items-center justify-between text-left group">
                                     <h3 className="text-lg font-semibold text-gray-700"><Shield size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Preventive Care</h3>
-                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.preventiveCare ? '▶' : '▼'}</span>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.preventiveCare ? '?' : '?'}</span>
                                 </button>
                                 {!collapsedHealthSections.preventiveCare && (<div className="space-y-4 mt-4">
                                     {animal.vaccinations && (
@@ -10353,7 +10395,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, proceduresDiagnostics: !p.proceduresDiagnostics}))} className="w-full flex items-center justify-between text-left group">
                                     <h3 className="text-lg font-semibold text-gray-700"><Microscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Procedures & Diagnostics</h3>
-                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.proceduresDiagnostics ? '▶' : '▼'}</span>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.proceduresDiagnostics ? '?' : '?'}</span>
                                 </button>
                                 {!collapsedHealthSections.proceduresDiagnostics && (<div className="space-y-4 mt-4">
                                     {animal.medicalProcedures && (
@@ -10379,7 +10421,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, activeMedical: !p.activeMedical}))} className="w-full flex items-center justify-between text-left group">
                                     <h3 className="text-lg font-semibold text-gray-700"><Pill size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Active Medical Records</h3>
-                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? '▶' : '▼'}</span>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? '?' : '?'}</span>
                                 </button>
                                 {!collapsedHealthSections.activeMedical && (<div className="space-y-3 mt-4">
                                     {animal.medicalConditions && (() => {
@@ -10453,7 +10495,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                         <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, healthClearances: !p.healthClearances}))} className="w-full flex items-center justify-between text-left group">
                                             <h3 className="text-lg font-semibold text-gray-700"><Hospital size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Health Clearances & Screening</h3>
-                                            <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? '▶' : '▼'}</span>
+                                            <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? '?' : '?'}</span>
                                         </button>
                                         {!collapsedHealthSections.healthClearances && (<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
                                             {spayDate && <div><span className="text-gray-600">{getLabel('spayNeuterDate', 'Spay/Neuter Date')}:</span> <strong>{formatDate(animal.spayNeuterDate)}</strong></div>}
@@ -10470,7 +10512,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, vetCare: !p.vetCare}))} className="w-full flex items-center justify-between text-left group">
                                     <h3 className="text-lg font-semibold text-gray-700"><Stethoscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Veterinary Care</h3>
-                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.vetCare ? '▶' : '▼'}</span>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.vetCare ? '?' : '?'}</span>
                                 </button>
                                 {!collapsedHealthSections.vetCare && (<div className="space-y-4 text-sm mt-4">
                                     {animal.primaryVet && <div><span className="text-gray-600">Primary Veterinarian:</span> <strong>{animal.primaryVet}</strong></div>}
@@ -10806,6 +10848,27 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                         } catch(e) { console.error('Beta pedigree download failed', e); }
                         finally { setMpDownloading(false); }
                     };
+                    const handleDownloadMPPDF = async () => {
+                        if (!mpTreeRef.current) return;
+                        setMpDownloading(true);
+                        try {
+                            const srcCanvas = await html2canvas(mpTreeRef.current, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            const a4W = 1654, a4H = 2339, pad = 60;
+                            const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
+                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height, 1);
+                            const dw = srcCanvas.width * ratio, dh = srcCanvas.height * ratio;
+                            const outCanvas = document.createElement('canvas');
+                            outCanvas.width = a4W; outCanvas.height = a4H;
+                            const ctx = outCanvas.getContext('2d');
+                            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
+                            ctx.drawImage(srcCanvas, (a4W - dw) / 2, pad, dw, dh);
+                            const imgData = outCanvas.toDataURL('image/png');
+                            const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+                            pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+                            pdf.save(`pedigree-${animal.name || animal.id_public}.pdf`);
+                        } catch(e) { console.error('Pedigree PDF failed', e); }
+                        finally { setMpDownloading(false); }
+                    };
                     const renderSlot = (slotKey, label) => {
                         const d = getSlot(slotKey);
                         const hasData = d && (d.ctcId || Object.entries(d).some(([fk,v]) => fk !== 'mode' && v && String(v).trim()));
@@ -10820,7 +10883,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             } catch { /* not accessible */ }
                         } : undefined;
                         return (
-                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 min-h-[140px] relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 h-full relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
                                 <div className={`flex items-center gap-1 mb-1.5 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>
                                     <GIcon size={11} className={`flex-shrink-0 ${gColor}`} />
                                     <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
@@ -10833,6 +10896,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                             {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
                                             {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
                                             {d.birthDate && <p className="text-[11px] text-gray-400">{formatDate(d.birthDate)}</p>}
+                                            {d.deceasedDate && <p className="text-[11px] text-red-600 font-semibold">† {formatDate(d.deceasedDate)}</p>}
                                             {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
                                         </div>
                                     </div>
@@ -10854,14 +10918,42 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     <Dna size={18} className="text-orange-500" />
                                     <h3 className="text-base font-semibold text-gray-700">Beta Pedigree</h3>
                                 </div>
-                                {hasAnyData && (
-                                    <button onClick={handleDownloadMP} disabled={mpDownloading}
-                                        className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
-                                        {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save as Image</>}
-                                    </button>
-                                )}
+                                <div className="flex items-center gap-2">
+                                    <div className="flex rounded border border-gray-300 overflow-hidden text-xs">
+                                        <button onClick={() => setBetaPedigreeView('vertical')} className={`px-2 py-1 transition-colors ${betaPedigreeView === 'vertical' ? 'bg-gray-200 font-semibold text-gray-800' : 'text-gray-400 hover:bg-gray-100'}`}>Vertical</button>
+                                        <button onClick={() => setBetaPedigreeView('chart')} className={`px-2 py-1 transition-colors ${betaPedigreeView === 'chart' ? 'bg-primary font-semibold text-black' : 'text-gray-400 hover:bg-gray-100'}`}>Chart</button>
+                                    </div>
+                                    {hasAnyData && betaPedigreeView === 'vertical' && (
+                                        <>
+                                        <button onClick={handleDownloadMPPDF} disabled={mpDownloading}
+                                            className="px-3 py-1.5 text-sm bg-primary hover:bg-primary/90 text-black rounded-lg border border-primary/40 transition flex items-center gap-1.5 disabled:opacity-60 font-semibold">
+                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save PDF</>}
+                                        </button>
+                                        <button onClick={handleDownloadMP} disabled={mpDownloading}
+                                            className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
+                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Images size={14} /> Save Image</>}
+                                        </button>
+                                        </>
+                                    )}
+                                    {betaPedigreeView === 'chart' && (
+                                        <>
+                                        <button onClick={() => chartRef.current?.downloadPDF()} disabled={!chartRef.current?.imagesLoaded || chartRef.current?.isSaving}
+                                            className="px-3 py-1.5 text-sm bg-primary hover:bg-primary/90 text-black rounded-lg border border-primary/40 transition flex items-center gap-1.5 disabled:opacity-60 font-semibold">
+                                            <Download size={14} /> Save PDF
+                                        </button>
+                                        <button onClick={() => chartRef.current?.downloadImage()} disabled={!chartRef.current?.imagesLoaded || chartRef.current?.isSaving}
+                                            className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
+                                            <Images size={14} /> Save Image
+                                        </button>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                             <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart.</p>
+                            <div className={betaPedigreeView === 'chart' ? '' : 'hidden'}>
+                                <PedigreeChart ref={chartRef} inline animalId={animal.id_public} animalData={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />
+                            </div>
+                            <div className={betaPedigreeView === 'vertical' ? '' : 'hidden'}>
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
                                 {(() => {
                                     const subjectVariety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => animal[k]).filter(Boolean).join(' ');
@@ -10876,11 +10968,12 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     const ownerLines = [];
                                     if (ownerShowPersonal && breederInfo?.personalName) ownerLines.push(breederInfo.personalName);
                                     if (ownerShowBreeder && breederInfo?.breederName) ownerLines.push(breederInfo.breederName);
-                                    const ownerUserId = breederInfo?.id_public || animal.ownerId_public || null;
+                                    const ownerUserId = breederInfo?.id_public || null;
                                     const ownerQrUrl = ownerUserId ? `${window.location.origin}/user/${ownerUserId}` : null;
                                     return (
                                         <div className="rounded-xl border-2 border-primary bg-primary/10 overflow-hidden relative">
                                             {/* Owner/breeder — top-right corner */}
+                                            {breederInfo && (
                                             <div className="absolute top-2 right-2 flex flex-col items-center gap-1 text-center z-10">
                                                 <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border-2 border-primary/20 flex items-center justify-center flex-shrink-0">
                                                     {ownerImgUrl ? <img src={ownerImgUrl} alt="Breeder" className="w-full h-full object-cover" /> : <User size={18} className="text-gray-400" />}
@@ -10891,6 +10984,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                 </div>
                                                 {ownerQrUrl && <QRCodeSVG value={ownerQrUrl} size={52} bgColor="transparent" fgColor="#374151" level="M" />}
                                             </div>
+                                            )}
                                             {/* Animal info — centered */}
                                             <div className="flex flex-col items-center gap-2 text-center p-4 relative">
                                                 {animal.species && <div className="absolute top-2 left-2 text-left"><p className="text-xs font-semibold text-gray-600 leading-tight">{animal.species}</p>{getSpeciesLatinName(animal.species) && <p className="text-[10px] italic text-gray-400 leading-tight">{getSpeciesLatinName(animal.species)}</p>}</div>}
@@ -10917,42 +11011,35 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                 </div>
                                 <div>
                                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 2 — Grandparents</p>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
-                                            {renderSlot('sireSire', 'Grandsire')}
-                                            {renderSlot('sireDam', 'Granddam')}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
-                                            {renderSlot('damSire', 'Grandsire')}
-                                            {renderSlot('damDam', 'Granddam')}
-                                        </div>
+                                    <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                        {renderSlot('sireSire', 'Grandsire')}
+                                        {renderSlot('damSire', 'Grandsire')}
+                                        {renderSlot('sireDam', 'Granddam')}
+                                        {renderSlot('damDam', 'Granddam')}
                                     </div>
                                 </div>
                                 <div>
                                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 3 — Great-Grandparents</p>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
-                                            <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
-                                            {renderSlot('sireSireSire', 'Great-Grandsire')}
-                                            {renderSlot('sireSireDam', 'Great-Granddam')}
-                                            <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
-                                            {renderSlot('sireDamSire', 'Great-Grandsire')}
-                                            {renderSlot('sireDamDam', 'Great-Granddam')}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
-                                            <p className="text-[10px] text-gray-400 -mt-1 mb-0.5">via Grandsire</p>
-                                            {renderSlot('damSireSire', 'Great-Grandsire')}
-                                            {renderSlot('damSireDam', 'Great-Granddam')}
-                                            <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
-                                            {renderSlot('damDamSire', 'Great-Grandsire')}
-                                            {renderSlot('damDamDam', 'Great-Granddam')}
-                                        </div>
+                                    <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                        <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                        <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                        <p className="text-[10px] text-gray-400 mb-0.5">via Grandsire</p>
+                                        <p className="text-[10px] text-gray-400 mb-0.5">via Grandsire</p>
+                                        {renderSlot('sireSireSire', 'Great-Grandsire')}
+                                        {renderSlot('damSireSire', 'Great-Grandsire')}
+                                        {renderSlot('sireSireDam', 'Great-Granddam')}
+                                        {renderSlot('damSireDam', 'Great-Granddam')}
+                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                        <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                        {renderSlot('sireDamSire', 'Great-Grandsire')}
+                                        {renderSlot('damDamSire', 'Great-Grandsire')}
+                                        {renderSlot('sireDamDam', 'Great-Granddam')}
+                                        {renderSlot('damDamDam', 'Great-Granddam')}
                                     </div>
                                 </div>
+                            </div>
                             </div>
                         </div>
                     );
@@ -10965,6 +11052,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                         onClose={() => setShowPedigree(false)}
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
+                        onViewAnimal={onViewAnimal}
                     />
                 )}
             </div>
@@ -12940,7 +13028,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         
         return false;
     }).sort((a, b) => {
-        // Sort order: Mated (isPlanned + past matingDate) → Planned-only → Born (newest first)
+        // Sort order: Mated (isPlanned + past matingDate) ? Planned-only ? Born (newest first)
         const today = new Date();
         const aIsMated = a.isPlanned && a.matingDate && new Date(a.matingDate) <= today;
         const bIsMated = b.isPlanned && b.matingDate && new Date(b.matingDate) <= today;
@@ -13687,7 +13775,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </label>
                                         <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                                             <p className="text-xs text-blue-800 mb-3">
-                                                <strong>Create placeholder animals:</strong> Created with names M1, M2— / F1, F2— You can edit names and details after saving.
+                                                <strong>Create placeholder animals:</strong> Created with names M1, M2… / F1, F2… You can edit names and details after saving.
                                             </p>
                                             {(() => {
                                                 const linkedMales = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length;
@@ -13977,7 +14065,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         <p className="text-sm text-gray-500 mb-5">
                             {matingEditChoice.litter_id_public && <span className="font-mono bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded text-xs mr-2">{matingEditChoice.litter_id_public}</span>}
                             {[matingEditChoice.sire?.prefix, matingEditChoice.sire?.name].filter(Boolean).join(' ') || matingEditChoice.sireId_public || '?'}
-                            {' × '}
+                            {' — '}
                             {[matingEditChoice.dam?.prefix, matingEditChoice.dam?.name].filter(Boolean).join(' ') || matingEditChoice.damId_public || '?'}
                         </p>
                         <div className="space-y-3">
@@ -14160,7 +14248,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         <div className="min-w-0">
                                             {litter.litter_id_public
                                                 ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block mb-0.5 w-fit">{litter.litter_id_public}</span>
-                                                : <span className="text-xs text-gray-400">—</span>}
+                                                : <span className="text-xs text-gray-400">·</span>}
                                             {isPlannedOnly
                                                 ? <span className="text-xs font-semibold text-indigo-600"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Planned</span>
                                                 : isMated
@@ -14673,7 +14761,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     </div>
                                                 </div>
                                                 <div className="text-xs text-gray-500 mb-3">
-                                                    Autofilled: Species ({sire?.species}), Birth Date ({formatDate(litter.birthDate)}), Parents ({litter.sireId_public} — {litter.damId_public})
+                                                    Autofilled: Species ({sire?.species}), Birth Date ({formatDate(litter.birthDate)}), Parents ({litter.sireId_public} · {litter.damId_public})
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <button
@@ -14722,7 +14810,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     try {
                         const loc = new Intl.Locale(navigator.language || 'en-US');
                         const fw = loc.weekInfo?.firstDay ?? (loc.getWeekInfo?.()?.firstDay ?? 7);
-                        return fw % 7; // JS: 7(Sun)→0, 1(Mon)→1, 6(Sat)→6
+                        return fw % 7; // JS: 7(Sun)?0, 1(Mon)?1, 6(Sat)?6
                     } catch(e) { return 0; }
                 })();
 
@@ -14776,7 +14864,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 const getSireDam = (l) => {
                     const sn = l.sire?.name || l.sireId_public || '?';
                     const dn = l.dam?.name || l.damId_public || '?';
-                    return `${sn} × ${dn}`;
+                    return `${sn} · ${dn}`;
                 };
                 // Format a date value as "10 Jan 2026"
                 const fmtD = (v) => {
@@ -14789,19 +14877,19 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     const pairName = l.breedingPairCodeName || l.litter_id_public || 'Unnamed';
                     const sn = l.sire?.name || l.sireId_public || '?';
                     const dn = l.dam?.name || l.damId_public || '?';
-                    if (ev.type === 'due') return `${pairName} • ${dn}`;
+                    if (ev.type === 'due') return `${pairName} · ${dn}`;
                     if (ev.type === 'born') {
                         const total = l.litterSizeBorn ?? l.numberBorn ?? 0;
                         const m = l.maleCount ?? 0;
                         const f = l.femaleCount ?? 0;
-                        return `${pairName} • ${total} born (${m}M/${f}F)`;
+                        return `${pairName} · ${total} born (${m}M/${f}F)`;
                     }
                     if (ev.type === 'weaned') {
                         const total = l.litterSizeWeaned ?? l.numberWeaned ?? (l.litterSizeBorn ?? l.numberBorn ?? 0);
-                        return `${pairName} • ${total} to wean`;
+                        return `${pairName} · ${total} to wean`;
                     }
                     // mated
-                    return `${pairName} • ${sn} × ${dn}`;
+                    return `${pairName} · ${sn} · ${dn}`;
                 };
 
                 return (
@@ -14914,7 +15002,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${tooltipPillStyle.bg}`}>
                                                     {tooltipPillStyle.label}
                                                 </span>
-                                                <span className="font-bold text-gray-800 text-sm">{pairName} — {sn} × {dn}</span>
+                                                <span className="font-bold text-gray-800 text-sm">{pairName} · {sn} · {dn}</span>
                                             </div>
                                             {callId && <p className="text-xs text-gray-400 mt-0.5">{callId}</p>}
                                         </div>
@@ -15731,7 +15819,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
 
             <div className="mt-8 border-t pt-4 flex justify-between items-center">
                 <p className="text-sm text-gray-500">
-                    <span className="font-semibold">{sortedSpecies.length}</span> species available{favCount > 0 ? <span className="ml-2 text-amber-600 font-medium">· {favCount} favourited</span> : ''}
+                    <span className="font-semibold">{sortedSpecies.length}</span> species available{favCount > 0 ? <span className="ml-2 text-amber-600 font-medium">★ {favCount} favourited</span> : ''}
                 </p>
                 <button
                     data-tutorial-target="add-species-btn"
@@ -19252,11 +19340,11 @@ const AnimalForm = ({
                                         <select name="salePriceCurrency" value={formData.salePriceCurrency} onChange={handleChange} 
                                             className="block w-24 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                             <option value="USD">USD ($)</option>
-                                            <option value="EUR">EUR (—)</option>
-                                            <option value="GBP">GBP (—)</option>
+                                            <option value="EUR">EUR (€)</option>
+                                            <option value="GBP">GBP (£)</option>
                                             <option value="CAD">CAD (C$)</option>
                                             <option value="AUD">AUD (A$)</option>
-                                            <option value="JPY">JPY (—)</option>
+                                            <option value="JPY">JPY (¥)</option>
                                             <option value="Negotiable">Negotiable</option>
                                         </select>
                                         <input type="number" name="salePriceAmount" value={formData.salePriceAmount || ''} onChange={handleChange} 
@@ -19280,11 +19368,11 @@ const AnimalForm = ({
                                         <select name="studFeeCurrency" value={formData.studFeeCurrency || 'USD'} onChange={handleChange} 
                                             className="block w-24 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                             <option value="USD">USD ($)</option>
-                                            <option value="EUR">EUR (—)</option>
-                                            <option value="GBP">GBP (—)</option>
+                                            <option value="EUR">EUR (€)</option>
+                                            <option value="GBP">GBP (£)</option>
                                             <option value="CAD">CAD (C$)</option>
                                             <option value="AUD">AUD (A$)</option>
-                                            <option value="JPY">JPY (—)</option>
+                                            <option value="JPY">JPY (¥)</option>
                                             <option value="Negotiable">Negotiable</option>
                                         </select>
                                         <input type="number" name="studFeeAmount" value={formData.studFeeAmount || ''} onChange={handleChange} 
@@ -20497,7 +20585,7 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="preventive-care-section">
                             <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, preventiveCare: !p.preventiveCare}))} className="w-full flex items-center justify-between text-left group">
                                 <h3 className="text-lg font-semibold text-gray-700"><Shield size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Preventive Care</h3>
-                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.preventiveCare ? '▶' : '▼'}</span>
+                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.preventiveCare ? '?' : '?'}</span>
                             </button>
                             {!collapsedHealthSections.preventiveCare && (<div className="space-y-6 mt-4">
                             {/* Vaccinations */}
@@ -20629,7 +20717,7 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="procedures-section">
                             <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, proceduresDiagnostics: !p.proceduresDiagnostics}))} className="w-full flex items-center justify-between text-left group">
                                 <h3 className="text-lg font-semibold text-gray-700"><Microscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Procedures & Diagnostics</h3>
-                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.proceduresDiagnostics ? '▶' : '▼'}</span>
+                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.proceduresDiagnostics ? '?' : '?'}</span>
                             </button>
                             {!collapsedHealthSections.proceduresDiagnostics && (<div className="space-y-6 mt-4">
                             {/* Medical Procedures */}
@@ -20725,7 +20813,7 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="medical-history-section">
                             <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, activeMedical: !p.activeMedical}))} className="w-full flex items-center justify-between text-left group">
                                 <h3 className="text-lg font-semibold text-gray-700"><Pill size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Active Medical Records</h3>
-                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? '▶' : '▼'}</span>
+                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? '?' : '?'}</span>
                             </button>
                             {!collapsedHealthSections.activeMedical && (<div className="space-y-4 mt-4">
                             {/* Quarantine toggle */}
@@ -20857,7 +20945,7 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, healthClearances: !p.healthClearances}))} className="w-full flex items-center justify-between text-left group">
                                 <h3 className="text-lg font-semibold text-gray-700"><Hospital size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Health Clearances & Screening</h3>
-                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? '▶' : '▼'}</span>
+                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? '?' : '?'}</span>
                             </button>
                             {!collapsedHealthSections.healthClearances && (<div className="space-y-4 mt-4">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -20942,7 +21030,7 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="vet-care-section">
                             <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, vetCare: !p.vetCare}))} className="w-full flex items-center justify-between text-left group">
                                 <h3 className="text-lg font-semibold text-gray-700"><Stethoscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Veterinary Care</h3>
-                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.vetCare ? '▶' : '▼'}</span>
+                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.vetCare ? '?' : '?'}</span>
                             </button>
                             {!collapsedHealthSections.vetCare && (<div className="space-y-4 mt-4">
                             <div className="space-y-4">
@@ -21082,7 +21170,7 @@ const AnimalForm = ({
                                         <option value="">* None / Unassigned *</option>
                                         {enclosureOptions.map(enc => (
                                             <option key={enc._id} value={enc._id}>
-                                                {enc.name}{enc.enclosureType ? ` (${enc.enclosureType})` : ''}{enc.size ? ` • ${enc.size}` : ''}
+                                                {enc.name}{enc.enclosureType ? ` (${enc.enclosureType})` : ''}{enc.size ? ` · ${enc.size}` : ''}
                                             </option>
                                         ))}
                                     </select>
@@ -21282,7 +21370,7 @@ const AnimalForm = ({
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Temperature Range</label>
                                     <input type="text" name="temperatureRange" value={formData.temperatureRange} onChange={handleChange} 
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., 68-72—F, 20-22—C" />
+                                        placeholder="e.g., 68-72°F, 20-22°C" />
                                 </div>
                                 )}
 
@@ -22689,7 +22777,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         }
     };
 
-    // ── Data Portability handlers ─────────────────────────────────────────────
+    // -- Data Portability handlers ---------------------------------------------
 
     const handleExport = async () => {
         const selectedSections = Object.entries(exportSections)
@@ -22882,7 +22970,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none" 
                             disabled={profileLoading}
                         />
-                        {bio && <p className="text-xs text-gray-500 mt-1">{bio.length}/1000 characters · {bio.split('\n').length}/15 lines</p>}
+                        {bio && <p className="text-xs text-gray-500 mt-1">{bio.length}/1000 characters — {bio.split('\n').length}/15 lines</p>}
 
                         <select value={country} onChange={(e) => { setCountry(e.target.value); if (e.target.value !== 'US') setUsState(''); }}
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading}>
@@ -23325,7 +23413,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Data Portability</h3>
                 <p className="text-sm text-gray-500 -mt-2">Export your records as a backup, or import data from a previous CritterTrack export or another service.</p>
 
-                {/* ── Export ────────────────────────────────────────────────── */}
+                {/* -- Export -------------------------------------------------- */}
                 <div>
                     <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2"><Download size={16} /> Export</h4>
 
@@ -23377,7 +23465,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     </button>
                 </div>
 
-                {/* ── Import ────────────────────────────────────────────────── */}
+                {/* -- Import -------------------------------------------------- */}
                 <div className="border-t pt-5">
                     <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2"><Upload size={16} /> Import</h4>
                     <p className="text-xs text-gray-500 mb-3">Upload a <code>.json</code> or <code>.zip</code> (CSV bundle) previously exported from CritterTrack.</p>
@@ -23541,7 +23629,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     )}
                 </div>
 
-                {/* ── Third-party import disclaimer ──────────────────────────── */}
+                {/* -- Third-party import disclaimer ---------------------------- */}
                 <div className="border-t pt-5">
                     <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-5 flex gap-2.5">
                         <AlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />
@@ -23556,7 +23644,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     </div>
                 </div>
 
-                {/* ── ZooEasy Import ─────────────────────────────────────────── */}
+                {/* -- ZooEasy Import ------------------------------------------- */}
                 <div className="border-t pt-5">
                     <h4 className="font-semibold text-gray-700 mb-1 flex items-center gap-2"><Upload size={16} /> Import from ZooEasy</h4>
                     <p className="text-xs text-gray-500 mb-4">Export your animals and/or breeding pairs from ZooEasy as CSV, then upload them here. Duplicates are detected across all CritterTrack users by registration number and name + birth date.</p>
@@ -23719,7 +23807,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                 return (
                                                     <span className="ml-2 text-xs font-normal">
                                                         {high > 0 && <span className="text-amber-600">{high} duplicate{high !== 1 ? 's' : ''}</span>}
-                                                        {high > 0 && possible > 0 && <span className="text-gray-400"> · </span>}
+                                                        {high > 0 && possible > 0 && <span className="text-gray-400"> — </span>}
                                                         {possible > 0 && <span className="text-orange-500">{possible} possible match{possible !== 1 ? 'es' : ''}</span>}
                                                     </span>
                                                 );
@@ -23881,7 +23969,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                     {conflict.existingName && conflict.existingName !== conflict.name && <span> &ldquo;{conflict.existingName}&rdquo;</span>}
                                                                                     {conflict.existingBirthDate && <span> &middot; {conflict.existingBirthDate}</span>}
                                                                                     {' '}({conflict.isOwnedByImporter ? 'your animal' : `owned by ${conflict.existingOwner}`})
-                                                                                    {' · matched by '}{conflict.matchType === 'id' ? 'registration number' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}
+                                                                                    {' — matched by '}{conflict.matchType === 'id' ? 'registration number' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}
                                                                                 </span>
                                                                                 <select
                                                                                     value={resolution}
@@ -24054,7 +24142,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     )}
                 </div>
 
-                {/* ── Kintraks Import ─────────────────────────────────────── */}
+                {/* -- Kintraks Import --------------------------------------- */}
                 <div className="border-t pt-5">
                     <h4 className="font-semibold text-gray-700 mb-1 flex items-center gap-2"><Upload size={16} /> Import from Kintraks</h4>
                     <p className="text-xs text-gray-500 mb-4">Export your animals (Export) and breeding records (Breeding Record - All Records) from Kintraks as CSV, then upload them here.</p>
@@ -24206,7 +24294,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                 return (
                                                     <span className="ml-2 text-xs font-normal">
                                                         {high > 0 && <span className="text-amber-600">{high} duplicate{high !== 1 ? 's' : ''}</span>}
-                                                        {high > 0 && possible > 0 && <span className="text-gray-400"> · </span>}
+                                                        {high > 0 && possible > 0 && <span className="text-gray-400"> — </span>}
                                                         {possible > 0 && <span className="text-orange-500">{possible} possible match{possible !== 1 ? 'es' : ''}</span>}
                                                     </span>
                                                 );
@@ -24365,7 +24453,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                     {conflict.existingName && conflict.existingName !== conflict.name && <span> &ldquo;{conflict.existingName}&rdquo;</span>}
                                                                                     {conflict.existingBirthDate && <span> &middot; {conflict.existingBirthDate}</span>}
                                                                                     {' '}({conflict.isOwnedByImporter ? 'your animal' : `owned by ${conflict.existingOwner}`})
-                                                                                    {' · matched by '}{conflict.matchType === 'id' ? 'registration number' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}
+                                                                                    {' — matched by '}{conflict.matchType === 'id' ? 'registration number' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}
                                                                                 </span>
                                                                                 <select
                                                                                     value={resolution}
@@ -24673,7 +24761,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 </div>
             </div>
 
-            {/* ── SimpleBreed Import ─────────────────────────────────────── */}
+            {/* -- SimpleBreed Import --------------------------------------- */}
             <div className="mt-4 border border-sky-200 rounded-xl bg-white overflow-hidden">
                 <div className="flex items-center gap-3 px-4 py-3 bg-sky-50 border-b border-sky-200">
                     <Globe size={18} className="text-sky-600 flex-shrink-0" />
@@ -24755,7 +24843,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                         {(highConflictCount > 0 || possibleConflictCount > 0) && (
                                             <span className="ml-2 text-xs font-normal">
                                                 {highConflictCount > 0 && <span className="text-amber-600">{highConflictCount} duplicate{highConflictCount !== 1 ? 's' : ''}</span>}
-                                                {highConflictCount > 0 && possibleConflictCount > 0 && <span className="text-gray-400"> · </span>}
+                                                {highConflictCount > 0 && possibleConflictCount > 0 && <span className="text-gray-400"> — </span>}
                                                 {possibleConflictCount > 0 && <span className="text-orange-500">{possibleConflictCount} possible match{possibleConflictCount !== 1 ? 'es' : ''}</span>}
                                             </span>
                                         )}
@@ -24869,7 +24957,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                                                 {conflict.existingName && conflict.existingName !== a.name && <span> &ldquo;{conflict.existingName}&rdquo;</span>}
                                                                                 {conflict.existingBirthDate && <span> &middot; {conflict.existingBirthDate}</span>}
                                                                                 {' '}({conflict.isOwnedByImporter ? 'your animal' : `owned by ${conflict.existingOwner}`})
-                                                                                {' · matched by '}
+                                                                                {' — matched by '}
                                                                                 <span className="font-semibold">{conflict.matchType === 'id' ? 'SB ID' : conflict.matchType === 'name+birthDate' ? 'name + birth date' : 'name only'}</span>
                                                                             </span>
                                                                             <select
@@ -24995,7 +25083,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                     <button
                                         onClick={async () => {
                                             const finalResolutions = { ...sbConflictResolutions };
-                                            // Convert auto-detected use_existing conflicts → map_to:<existingId>
+                                            // Convert auto-detected use_existing conflicts ? map_to:<existingId>
                                             // so the backend knows exactly which CT animal to tag with the SB ID
                                             for (const conflict of sbConflicts) {
                                                 if (!finalResolutions[conflict.sbId] || finalResolutions[conflict.sbId] === 'use_existing') {
@@ -25024,7 +25112,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                                 }, { headers: { Authorization: `Bearer ${authToken}` } });
                                                 setSbResult(r.data);
                                                 setSbPreview(null);
-                                                if (typeof fetchAnimals === 'function') fetchAnimals();
+                                                if (typeof fetchAnimals === 'function') fetchAnimals(); // eslint-disable-line no-undef
                                             } catch (err) {
                                                 showModalMessage('Import Failed', err.response?.data?.message || err.message);
                                             } finally {
@@ -25053,7 +25141,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     {sbResult && (
                         <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm space-y-1">
                             <p className="font-semibold text-green-800 flex items-center gap-1"><CheckCircle size={14} /> Import complete!</p>
-                            <p className="text-green-700">{sbResult.written?.animals ?? 0} animal{sbResult.written?.animals !== 1 ? 's' : ''} imported · {sbResult.skipped?.animals ?? 0} skipped · {sbResult.parentLinked ?? 0} parent link{sbResult.parentLinked !== 1 ? 's' : ''} set{sbResult.stubsLinked > 0 ? ` · ${sbResult.stubsLinked} stub${sbResult.stubsLinked !== 1 ? 's' : ''} linked` : ''}{sbResult.imagesUploaded > 0 ? ` · ${sbResult.imagesUploaded} image${sbResult.imagesUploaded !== 1 ? 's' : ''} uploaded` : ''}</p>
+                            <p className="text-green-700">{sbResult.written?.animals ?? 0} animal{sbResult.written?.animals !== 1 ? 's' : ''} imported — {sbResult.skipped?.animals ?? 0} skipped — {sbResult.parentLinked ?? 0} parent link{sbResult.parentLinked !== 1 ? 's' : ''} set{sbResult.stubsLinked > 0 ? ` · ${sbResult.stubsLinked} stub${sbResult.stubsLinked !== 1 ? 's' : ''} linked` : ''}{sbResult.imagesUploaded > 0 ? ` · ${sbResult.imagesUploaded} image${sbResult.imagesUploaded !== 1 ? 's' : ''} uploaded` : ''}</p>
                             {sbResult.errors?.length > 0 && (
                                 <div>
                                     <p className="text-xs font-semibold text-red-600">{sbResult.errors.length} error(s):</p>
@@ -25578,7 +25666,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
                                                     {fullName}
                                                     {animal.gender === 'Male' ? <Mars size={14} strokeWidth={2.5} className="text-primary flex-shrink-0" /> : animal.gender === 'Female' ? <Venus size={14} strokeWidth={2.5} className="text-accent flex-shrink-0" /> : animal.gender === 'Intersex' ? <VenusAndMars size={14} strokeWidth={2.5} className="text-purple-500 flex-shrink-0" /> : <Circle size={14} strokeWidth={2.5} className="text-gray-400 flex-shrink-0" />}
                                                 </p>
-                                                <p className="text-xs text-gray-500 truncate">{animal.id_public} • {animal.species}</p>
+                                                <p className="text-xs text-gray-500 truncate">{animal.id_public} · {animal.species}</p>
                                                 {variety && <p className="text-xs text-gray-400 truncate">{variety}</p>}
                                             </div>
                                             <button
@@ -27260,7 +27348,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     );
 };
 
-// ── Module-level cache so AnimalList survives unmount/remount without refetching ──
+// -- Module-level cache so AnimalList survives unmount/remount without refetching --
 let _alCache = null;       // last animals array
 
 // Keep cache patched even while AnimalList is unmounted
@@ -28707,7 +28795,7 @@ const AnimalList = ({
                                     <div className="flex-1 min-w-0">
                                         <div className="text-sm text-gray-800 font-medium">
                                             {getActionLabel(log.action)}
-                                            {(log.details?.name || log.details?.enclosureName) && <span className="text-gray-500 font-normal"> → <span className="font-medium text-gray-700">{log.details.name || log.details.enclosureName}</span></span>}
+                                            {(log.details?.name || log.details?.enclosureName) && <span className="text-gray-500 font-normal"> ? <span className="font-medium text-gray-700">{log.details.name || log.details.enclosureName}</span></span>}
                                             {log.details?.species && !log.details?.name && <span className="text-gray-500 font-normal"> ({log.details.species})</span>}
                                             {log.details?.status && <span className="text-indigo-500 font-normal text-xs ml-1">({log.details.status})</span>}
                                         </div>
@@ -28720,7 +28808,7 @@ const AnimalList = ({
                                                     .filter(([k]) => !['name', 'species', 'status', 'enclosureName'].includes(k))
                                                     .slice(0, 3)
                                                     .map(([k, v]) => `${k}: ${v}`)
-                                                    .join(' • ')
+                                                    .join(' — ')
                                                 }
                                             </div>
                                         )}
@@ -28851,7 +28939,7 @@ const AnimalList = ({
 
                 // 2. Log budget expense
                 const feederLabel = item.isFeederAnimal && (item.feederType || item.feederSize)
-                    ? ` • ${[item.feederType, item.feederSize].filter(Boolean).join(' ')}`
+                    ? ` · ${[item.feederType, item.feederSize].filter(Boolean).join(' ')}`
                     : '';
                 await axios.post(
                     `${API_BASE_URL}/budget/transactions`,
@@ -28860,7 +28948,7 @@ const AnimalList = ({
                         price: cost,
                         date: restockForm.date || new Date().toISOString().slice(0, 10),
                         category: BUDGET_CATEGORY_MAP[item.category] || 'other',
-                        description: `Supplies restock: ${item.name}${feederLabel} (—${qty}${item.unit ? ' ' + item.unit : ''})`,
+                        description: `Supplies restock: ${item.name}${feederLabel} ($${qty}${item.unit ? ' ' + item.unit : ''})`,
 
                         notes: restockForm.notes || null,
                     },
@@ -29059,7 +29147,7 @@ const AnimalList = ({
                                 {/* Inline restock form */}
                                 {restockingSupplyId === item._id && (
                                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5 mt-1 space-y-2">
-                                        <p className="text-xs font-semibold text-blue-700">Restock ? logs an expense in Budget{item.isFeederAnimal ? ` • ${[item.feederType, item.feederSize].filter(Boolean).join(' ')}` : ''}</p>
+                                        <p className="text-xs font-semibold text-blue-700">Restock ? logs an expense in Budget{item.isFeederAnimal ? ` · ${[item.feederType, item.feederSize].filter(Boolean).join(' ')}` : ''}</p>
                                         <div className="grid grid-cols-2 gap-2">
                                             <div>
                                                 <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Qty received *</label>
@@ -29222,7 +29310,7 @@ const AnimalList = ({
                 if (r === 'same_birthdate_species') return 'Same birthdate & species';
                 if (r === 'same_parents') return 'Same parents';
                 return r;
-            }).join(' • ');
+            }).join(' — ');
         };
 
         return (
@@ -29302,7 +29390,7 @@ const AnimalList = ({
                                                         </div>
                                                         <div className="flex-1 min-w-0">
                                                             <p className="font-semibold text-gray-800 text-sm truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</p>
-                                                            <p className="text-xs text-gray-500">{animal.species} • {animal.gender || 'Unknown'}</p>
+                                                            <p className="text-xs text-gray-500">{animal.species} · {animal.gender || 'Unknown'}</p>
                                                             {animal.breederAssignedId && <p className="text-xs text-gray-400">ID: {animal.breederAssignedId}</p>}
                                                         </div>
                                                     </div>
@@ -29313,7 +29401,7 @@ const AnimalList = ({
                                                     )}
                                                     {(animal.fatherId_public || animal.sireId_public || animal.motherId_public || animal.damId_public) && (
                                                         <div className="text-xs text-gray-600">
-                                                            <span className="text-gray-400">Parents:</span> {[animal.fatherId_public || animal.sireId_public, animal.motherId_public || animal.damId_public].filter(Boolean).join(' × ')}
+                                                            <span className="text-gray-400">Parents:</span> {[animal.fatherId_public || animal.sireId_public, animal.motherId_public || animal.damId_public].filter(Boolean).join(' — ')}
                                                         </div>
                                                     )}
                                                     <div className="text-xs"><span className="text-gray-400">Status:</span> <span className={animal.status === 'Deceased' ? 'text-gray-500' : 'text-green-600'}>{animal.status || 'N/A'}</span></div>
@@ -29377,14 +29465,14 @@ const AnimalList = ({
                         {[animal.prefix, animal.name || 'Unnamed', animal.suffix].filter(Boolean).join(' ')}
                     </div>
                     <div className="text-xs text-gray-500 truncate">
-                        {getSpeciesDisplayName(animal.species)}{animal.gender ? ` • ${animal.gender}` : ''}
-                        {animal.dateOfBirth ? ` • ${formatDateShort(animal.dateOfBirth)}` : ''}
+                        {getSpeciesDisplayName(animal.species)}{animal.gender ? ` · ${animal.gender}` : ''}
+                        {animal.dateOfBirth ? ` · ${formatDateShort(animal.dateOfBirth)}` : ''}
                     </div>
                     {(() => {
                         const variety = getAnimalVariety(animal);
                         const parts = [animal.status, variety].filter(Boolean);
                         return parts.length > 0 ? (
-                            <div className="text-xs text-gray-400 truncate">{parts.join(' • ')}</div>
+                            <div className="text-xs text-gray-400 truncate">{parts.join(' — ')}</div>
                         ) : null;
                     })()}
                 </div>
@@ -29794,7 +29882,7 @@ const AnimalList = ({
                                     <label className="block text-xs font-medium text-gray-600 mb-1">Size</label>
                                     <input type="text" value={enclosureFormData.size}
                                         onChange={e => setEnclosureFormData(p => ({...p, size: e.target.value}))}
-                                        placeholder="e.g. 40 gallon, 48—24—24, 10 sq ft"
+                                        placeholder="e.g. 40 gallon, 48×24×24, 10 sq ft"
                                         className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" />
                                 </div>
                                 <div>
@@ -30435,7 +30523,7 @@ const AnimalList = ({
                                     <option value="">No food selected</option>
                                     {supplies.filter(s => s.category === 'Food').map(s => (
                                         <option key={s._id} value={s._id}>
-                                            {s.name}{s.feederType ? ` (${s.feederType}${s.feederSize ? ` • ${s.feederSize}` : ''})` : ''}{s.currentStock != null ? ` • ${s.currentStock} ${s.unit || 'in stock'}` : ''}
+                                            {s.name}{s.feederType ? ` (${s.feederType}${s.feederSize ? ` · ${s.feederSize}` : ''})` : ''}{s.currentStock != null ? ` · ${s.currentStock} ${s.unit || 'in stock'}` : ''}
                                         </option>
                                     ))}
                                     {supplies.filter(s => s.category === 'Food').length === 0 && (
@@ -30471,7 +30559,7 @@ const AnimalList = ({
                                                     onChange={e => setFeedingForm(f => ({ ...f, qty: e.target.value }))}
                                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary"
                                                 />
-                                                {s && <p className="text-xs text-gray-400">Stock after: {s.currentStock} → <span className={stockAfter < 0 ? 'text-red-500 font-medium' : 'text-gray-600'}>{stockAfter} {s.unit}</span></p>}
+                                                {s && <p className="text-xs text-gray-400">Stock after: {s.currentStock} ? <span className={stockAfter < 0 ? 'text-red-500 font-medium' : 'text-gray-600'}>{stockAfter} {s.unit}</span></p>}
                                             </div>
                                         )}
                                     </div>
@@ -31850,7 +31938,7 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles, authToken, API_BASE_URL
 
 // Notifications Hub — combines Breeding Reminders, Management Alerts, and Broadcasts in one fixed panel
 const NotificationsHub = ({ authToken, API_BASE_URL }) => {
-    // ── Breeding Reminders ──────────────────────────────────────────
+    // -- Breeding Reminders ------------------------------------------
     const [breedingEnabled] = useState(() => {
         try { return localStorage.getItem('ct_urgency_enabled') !== 'false'; } catch { return true; }
     });
@@ -31862,7 +31950,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     });
     const [littersLoading, setLittersLoading] = useState(true);
 
-    // ── Management Alerts ───────────────────────────────────────────
+    // -- Management Alerts -------------------------------------------
     const [mgmtEnabled] = useState(() => {
         try { return localStorage.getItem('ct_mgmt_urgency_enabled') !== 'false'; } catch { return true; }
     });
@@ -31880,7 +31968,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     });
     const [mgmtLoading, setMgmtLoading] = useState(true);
 
-    // ── Broadcasts ──────────────────────────────────────────────────
+    // -- Broadcasts --------------------------------------------------
     const [broadcasts, setBroadcasts] = useState(() => {
         try { return JSON.parse(localStorage.getItem('ct_hub_broadcasts') || '[]'); } catch { return []; }
     });
@@ -31889,7 +31977,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
     });
     const [votingInProgress, setVotingInProgress] = useState({});
 
-    // ── Data Fetching ───────────────────────────────────────────────
+    // -- Data Fetching -----------------------------------------------
     useEffect(() => {
         if (!authToken) return;
         axios.get(`${API_BASE_URL}/litters`, { headers: { Authorization: `Bearer ${authToken}` } })
@@ -31946,7 +32034,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
         return () => clearInterval(interval);
     }, [authToken, API_BASE_URL, dismissedBroadcastIds]);
 
-    // ── Compute breeding items ──────────────────────────────────────
+    // -- Compute breeding items --------------------------------------
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
     const breedingItems = [];
@@ -31996,7 +32084,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
         });
     }
 
-    // ── Compute management items ────────────────────────────────────
+    // -- Compute management items ------------------------------------
     const mgmtItems = [];
     if (mgmtEnabled && !mgmtLoading) {
         const daysSince = (dateStr) => {
@@ -32042,7 +32130,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
         }
     }
 
-    // ── Dismiss handlers ────────────────────────────────────────────
+    // -- Dismiss handlers --------------------------------------------
     const dismissBreeding = (key) => {
         const next = { ...breedingDismissed, [key]: true };
         setBreedingDismissed(next);
@@ -32097,7 +32185,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
         }
     };
 
-    // ── Render ──────────────────────────────────────────────────────
+    // -- Render ------------------------------------------------------
     const [selectedBroadcast, setSelectedBroadcast] = useState(null);
 
     const totalCount = breedingItems.length + mgmtItems.length + broadcasts.length;
@@ -32219,16 +32307,16 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                                             {broadcast.broadcastType === 'poll' && broadcast.pollOptions ? (
                                                 <>
                                                     {broadcast.pollOptions?.[0] && (
-                                                        <p className={`text-xs ${styles.text} opacity-70 line-clamp-1 leading-snug`}>• {broadcast.pollOptions[0].text}</p>
+                                                        <p className={`text-xs ${styles.text} opacity-70 line-clamp-1 leading-snug`}>{"◆"} {broadcast.pollOptions[0].text}</p>
                                                     )}
                                                     {broadcast.pollOptions?.[1] && (
-                                                        <p className={`text-xs ${styles.text} opacity-70 line-clamp-1 leading-snug`}>• {broadcast.pollOptions[1].text}</p>
+                                                        <p className={`text-xs ${styles.text} opacity-70 line-clamp-1 leading-snug`}>{"◆"} {broadcast.pollOptions[1].text}</p>
                                                     )}
                                                     {broadcast.pollOptions?.[2] && (
-                                                        <p className={`text-xs ${styles.text} opacity-70 line-clamp-1 leading-snug`}>• {broadcast.pollOptions[2].text}</p>
+                                                        <p className={`text-xs ${styles.text} opacity-70 line-clamp-1 leading-snug`}>{"◆"} {broadcast.pollOptions[2].text}</p>
                                                     )}
                                                     {broadcast.pollOptions?.[3] && (
-                                                        <p className={`text-xs ${styles.text} opacity-70 line-clamp-1 leading-snug mb-1`}>• {broadcast.pollOptions[3].text}</p>
+                                                        <p className={`text-xs ${styles.text} opacity-70 line-clamp-1 leading-snug mb-1`}>{"◆"} {broadcast.pollOptions[3].text}</p>
                                                     )}
                                                 </>
                                             ) : broadcast.message && (
@@ -32466,7 +32554,7 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
                                 </span>
                                 <div className="flex-1 min-w-0">
                                     <span className="font-semibold text-gray-800 text-sm">{item.pairName}</span>
-                                    <span className="text-gray-400 text-sm mx-1">—</span>
+                                    <span className="text-gray-400 text-sm mx-1">·</span>
                                     <span className="text-gray-600 text-sm truncate">{item.sireDam}</span>
                                     {item.callId && <span className="text-xs text-gray-400 ml-1.5">{item.callId}</span>}
                                 </div>
@@ -33554,13 +33642,14 @@ const App = () => {
     const [publicAnimalViewHistory, setPublicAnimalViewHistory] = useState([]); // Navigation history for public animals
     const [publicAnimalInitialTab, setPublicAnimalInitialTab] = useState(1);
     const [privateAnimalInitialTab, setPrivateAnimalInitialTab] = useState(1);
+    const [privateBetaView, setPrivateBetaView] = useState('vertical');
     const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
     const [animalToView, setAnimalToView] = useState(null);
     const [animalViewHistory, setAnimalViewHistory] = useState([]); // Navigation history stack for animals
     const viewReturnPathRef = React.useRef('/'); // Path to return to when closing /view-animal
     const editReturnPathRef = React.useRef('/view-animal'); // Path to return to when closing /edit-animal
     const [detailViewTab, setDetailViewTab] = useState(1); // Tab for detail view
-    // ── Breeding Lines ────────────────────────────────────────────────────────────
+    // -- Breeding Lines ------------------------------------------------------------
     const BL_PRESETS_APP = ['#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#3b82f6','#6366f1','#a855f7','#ec4899','#64748b'];
     const [breedingLineDefs, setBreedingLineDefs] = useState(() => {
         try { const s = localStorage.getItem('ct_bldefs'); if (s) return JSON.parse(s); } catch {}
@@ -33617,7 +33706,7 @@ const App = () => {
             ).catch(err => console.error('Failed to save breeding line assignment:', err));
         }
     };
-    // ─────────────────────────────────────────────────────────────────────────────
+    // -----------------------------------------------------------------------------
     const [parentCardKey, setParentCardKey] = useState(0); // Force parent cards to refetch when tab opens
     const [showTabs, setShowTabs] = useState(true); // Toggle for collapsible tabs panel
     const [sireData, setSireData] = useState(null);
@@ -34791,7 +34880,7 @@ const App = () => {
         navigate('/edit-animal');
     };
 
-    const handleViewAnimal = async (animal, initialTab = 1) => {
+    const handleViewAnimal = async (animal, initialTab = 1, initialBetaView = 'vertical') => {
         console.log('[handleViewAnimal] Viewing animal:', animal);
         
         // If we're already viewing an animal, push it to history before navigating to new one
@@ -34832,6 +34921,7 @@ const App = () => {
         console.log('[handleViewAnimal] Father ID:', normalizedAnimal.fatherId_public, 'Mother ID:', normalizedAnimal.motherId_public);
         viewReturnPathRef.current = location.pathname;
         setPrivateAnimalInitialTab(initialTab);
+        setPrivateBetaView(initialBetaView);
         setAnimalToView(normalizedAnimal);
         navigate('/view-animal');
         
@@ -35554,7 +35644,7 @@ const App = () => {
                                     </p>
                                     <p className="text-xs text-gray-600 truncate">
                                         {availableAnimals[currentAvailableIndex].species}
-                                        {availableAnimals[currentAvailableIndex].variety && ` • ${availableAnimals[currentAvailableIndex].variety}`}
+                                        {availableAnimals[currentAvailableIndex].variety && ` · ${availableAnimals[currentAvailableIndex].variety}`}
                                     </p>
                                 </div>
                                 {availableAnimals[currentAvailableIndex].ownerCountry && (
@@ -36452,8 +36542,8 @@ const App = () => {
                     <Route path="/view-animal" element={
                         animalToView && (() => {
                             // Ownership logic:
-                            // 1. ownerId_public === my ID → PrivateAnimalDetail (full edit; "Return" button if originalOwnerId is set, meaning it was transferred to me)
-                            // 2. Otherwise → ViewOnlyPrivateAnimalDetail (read-only, no edit/delete/transfer buttons)
+                            // 1. ownerId_public === my ID ? PrivateAnimalDetail (full edit; "Return" button if originalOwnerId is set, meaning it was transferred to me)
+                            // 2. Otherwise ? ViewOnlyPrivateAnimalDetail (read-only, no edit/delete/transfer buttons)
                             
                             const iCurrentlyOwn = animalToView.ownerId_public === userProfile?.id_public;
                             
@@ -36463,6 +36553,7 @@ const App = () => {
                                     <PrivateAnimalDetail
                                         animal={animalToView}
                                         initialTab={privateAnimalInitialTab}
+                                        initialBetaView={privateBetaView}
                                         onClose={handleBackFromAnimal}
                                         onCloseAll={handleCloseAllAnimals}
                                         onEdit={handleEditAnimal}
@@ -36492,6 +36583,7 @@ const App = () => {
                                     <ViewOnlyPrivateAnimalDetail
                                         animal={animalToView}
                                         initialTab={privateAnimalInitialTab}
+                                        initialBetaView={privateBetaView}
                                         onClose={handleBackFromAnimal}
                                         onCloseAll={handleCloseAllAnimals}
                                         API_BASE_URL={API_BASE_URL}
@@ -36742,9 +36834,9 @@ const App = () => {
                                                             {/* Species/Breed/Strain/CTC - At Top */}
                                                             <p className="text-sm text-gray-600">
                                                                 {animalToView.species}
-                                                                {animalToView.breed && ` • ${animalToView.breed}`}
-                                                                {animalToView.strain && ` • ${animalToView.strain}`}
-                                                                {animalToView.id_public && ` • ${animalToView.id_public}`}
+                                                                {animalToView.breed && ` · ${animalToView.breed}`}
+                                                                {animalToView.strain && ` · ${animalToView.strain}`}
+                                                                {animalToView.id_public && ` · ${animalToView.id_public}`}
                                                             </p>
 
                                                             {/* Name */}
@@ -36878,7 +36970,7 @@ const App = () => {
                                                                                 <strong>Weight:</strong> {currentWeight}{animalToView.measurementUnits?.weight || 'g'}
                                                                                 {animalToView.weightTrend && (
                                                                                     <span className={animalToView.weightTrend === 'up' ? 'text-red-600' : animalToView.weightTrend === 'down' ? 'text-green-600' : 'text-gray-600'}>
-                                                                                        {animalToView.weightTrend === 'up' ? ' ↑' : animalToView.weightTrend === 'down' ? ' ↓' : ' →'}
+                                                                                        {animalToView.weightTrend === 'up' ? ' ?' : animalToView.weightTrend === 'down' ? ' ?' : ' ?'}
                                                                                     </span>
                                                                                 )}
                                                                             </div>
@@ -37265,7 +37357,7 @@ const App = () => {
                                                                         return (
                                                                             <g key={`grid-${i}`}>
                                                                                 <line x1={70} y1={y} x2={470} y2={y} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4" />
-                                                                                <text x={58} y={y} textAnchor="end" dy="0.3em" fontSize="11" fill="#999">·</text>
+                                                                                <text x={58} y={y} textAnchor="end" dy="0.3em" fontSize="11" fill="#999">—</text>
                                                                             </g>
                                                                         );
                                                                     })}
@@ -37581,7 +37673,7 @@ const App = () => {
                                                                     record.litterSizeBorn !== null && `${record.litterSizeBorn} born`,
                                                                     record.stillbornCount && `${record.stillbornCount} stillborn`,
                                                                     record.litterSizeWeaned !== null && `${record.litterSizeWeaned} weaned`
-                                                                ].filter(Boolean).join(' • ') || 'No counts';
+                                                                ].filter(Boolean).join(' — ') || 'No counts';
                                                                 return (
                                                                     <div key={idx} className={`bg-white rounded border transition-all ${isExpanded ? 'border-purple-300 shadow-md' : 'border-purple-100'}`}>
                                                                         <div 
@@ -38023,6 +38115,7 @@ const App = () => {
                                             onClose={() => setShowPedigreeChart(false)}
                                             API_BASE_URL={API_BASE_URL}
                                             authToken={authToken}
+                                            onViewAnimal={handleViewAnimal}
                                         />
                                     )}
                                         </div>

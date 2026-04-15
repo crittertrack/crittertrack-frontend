@@ -37,6 +37,13 @@ const AnimalNode = ({ data }) => {
     // Build full name with prefix/suffix
     const fullName = [data.prefix, data.label, data.suffix].filter(Boolean).join(' ');
     
+    // Format dates
+    const formatDateShort = (dateString) => {
+        if (!dateString) return null;
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    };
+    
     // Gender-based border color
     const getBorderColor = () => {
         const gender = data.gender?.toLowerCase() || data.animal?.sex?.toLowerCase() || '';
@@ -100,8 +107,8 @@ const AnimalNode = ({ data }) => {
                     ${isSearchMatch ? 'ring-4 ring-yellow-400 ring-offset-2 animate-pulse' : ''}
                 `}
                 style={{ 
-                    width: '120px', 
-                    height: '120px',
+                    width: '140px', 
+                    height: '140px',
                     opacity: isSearchMatch ? 1 : (isSearchMatch === false ? 0.4 : 1)
                 }}
             >
@@ -128,10 +135,24 @@ const AnimalNode = ({ data }) => {
                     }
                     ${isSearchMatch ? 'ring-2 ring-yellow-400 bg-yellow-100 text-black font-bold' : ''}
                 `}
-                style={{ minWidth: '120px', maxWidth: '180px' }}
+                style={{ minWidth: '140px', maxWidth: '200px' }}
             >
                 <div className="truncate">{fullName}</div>
             </div>
+            
+            {/* Birth Date */}
+            {data.birthDate && (
+                <div className="text-xs text-gray-600 mt-1 px-2 py-0.5 bg-gray-100 rounded whitespace-nowrap">
+                    b: {formatDateShort(data.birthDate)}
+                </div>
+            )}
+            
+            {/* Deceased Date */}
+            {data.deceasedDate && (
+                <div className="text-xs text-red-600 font-semibold mt-0.5 px-2 py-0.5 bg-red-100 rounded whitespace-nowrap">
+                    † {formatDateShort(data.deceasedDate)}
+                </div>
+            )}
             
             {/* Bottom handle for outgoing edges (to children) */}
             <Handle
@@ -368,6 +389,8 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 species: animal.species || 'Unknown',
                 genetics: animal.geneticCode || '',
                 image: animal.imageUrl || animal.photoUrl || null,
+                birthDate: animal.birthDate || null,
+                deceasedDate: animal.deceasedDate || null,
                 isOwned: animal.isOwned,
                 isSelected: selectedAnimal?.id_public === animal.id_public,
                 animal: animal
@@ -389,7 +412,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         
         // Add nodes to dagre graph
         nodeList.forEach(node => {
-            dagreGraph.setNode(node.id, { width: 180, height: 180 });
+            dagreGraph.setNode(node.id, { width: 240, height: 240 });
         });
         
         // Add parent-child edges to dagre for layout calculation (using first parent of each child)
@@ -651,6 +674,8 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 species: animal.species || 'Unknown',
                 genetics: animal.geneticCode || '',
                 image: animal.imageUrl || animal.photoUrl || null,
+                birthDate: animal.birthDate || null,
+                deceasedDate: animal.deceasedDate || null,
                 isOwned: animal.isOwned,
                 isSelected: selectedAnimal?.id_public === animal.id_public,
                 isSearchMatch: animal.isSearchMatch, // Add search match flag for styling
@@ -671,7 +696,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         });
         
         nodeList.forEach(node => {
-            dagreGraph.setNode(node.id, { width: 180, height: 180 });
+            dagreGraph.setNode(node.id, { width: 240, height: 240 });
         });
         
         // Add parent-child edges to dagre for layout calculation

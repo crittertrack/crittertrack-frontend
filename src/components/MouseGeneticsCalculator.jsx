@@ -5,7 +5,7 @@ import { X, Book, User, Search } from 'lucide-react';
 const GENE_LOCI = {
   A: {
     name: 'Agouti',
-
+    description: 'Multiple alleles controlling base color with complex dominance. e.g. Black (a/a), Agouti (A/-), Tan (at/-), Brindle (Avy/-), Dom. Red (Ay/-)',
     combinations: [
       'ae/ae',
       'a/ae', 'a/a',
@@ -17,7 +17,7 @@ const GENE_LOCI = {
   },
   B: {
     name: 'Brown',
-
+    description: 'Recessive. Turns black pigment brown. e.g. Chocolate (b/b), Cinnamon (b/b + Agouti)',
     combinations: [
       'b/b',
       'B/b', 'B/B'
@@ -25,7 +25,7 @@ const GENE_LOCI = {
   },
   C: {
     name: 'Albino',
-
+    description: 'Recessive. Dilutes pigment. e.g. Albino (c/c), Siamese (ch/ch), Burmese (ch/cch), Chinchilla (cch/cch)',
     combinations: [
       'c/c',
       'c/ch', 'ch/ch',
@@ -36,7 +36,7 @@ const GENE_LOCI = {
   },
   D: {
     name: 'Dilution',
-
+    description: 'Recessive. Dilutes pigment. e.g. Blue (d/d on black), Blue Agouti (d/d on agouti)',
     combinations: [
       'd/d',
       'D/d', 'D/D'
@@ -44,7 +44,7 @@ const GENE_LOCI = {
   },
   E: {
     name: 'Extension',
-
+    description: 'Recessive. Controls pigment expression. e.g. Recessive Red (e/e)',
     combinations: [
       'e/e',
       'E/e', 'E/E'
@@ -52,7 +52,7 @@ const GENE_LOCI = {
   },
   P: {
     name: 'Pink-eye',
-
+    description: 'Recessive. Dilutes pigment with pink eyes. e.g. Dove (p/p on black), Argente (p/p on agouti)',
     combinations: [
       'p/p',
       'P/p', 'P/P'
@@ -60,6 +60,7 @@ const GENE_LOCI = {
   },
   S: {
     name: 'Pied',
+    description: 'Recessive. White spotting patterns. e.g. Pied (s/s), Hereford (s/s+), Dutch (s/s+). The + represents polygenic modifiers that affect spotting pattern specifics.',
     combinations: [
       's/s',
       'S/s', 'S/S'
@@ -67,6 +68,7 @@ const GENE_LOCI = {
   },
   W: {
     name: 'Dominant Spotting',
+    description: 'Dominant. White spotting patterns. e.g. Banded (W/w), Variegated (Wsh/-), Rumpwhite (Rw/-)',
     combinations: [
       'w/w',
       'W/w', 'W/W',
@@ -79,6 +81,7 @@ const GENE_LOCI = {
   },
   Spl: {
     name: 'Splashed',
+    description: 'Dominant. White facial/body patches. e.g. Splashed (Spl/-). Tricolor = Splashed + Pied',
     combinations: [
       'spl/spl',
       'Spl/spl', 'Spl/Spl'
@@ -86,6 +89,7 @@ const GENE_LOCI = {
   },
   Rn: {
     name: 'Roan',
+    description: 'Recessive. Intermingled white hairs. e.g. Roan (rn/rn - evenly intermingled white hairs), Merle (rn/rn - intermingled white hairs + solid patches of original color)',
     combinations: [
       'rn/rn',
       'Rn/rn', 'Rn/Rn'
@@ -93,6 +97,7 @@ const GENE_LOCI = {
   },
   Si: {
     name: 'Silver',
+    description: 'Recessive. Silvering/ticking on coat. e.g. Pearl, Silvered',
     combinations: [
       'si/si',
       'Si/si', 'Si/Si'
@@ -100,16 +105,20 @@ const GENE_LOCI = {
   },
   Mobr: {
     name: 'xbrindle',
+    description: 'Sex-linked brindle — X-linked dominant gene. Females (Mobr/mobr) express brindling due to mosaic X-inactivation; males (Mobr/Y) also express it but are born with copper deficiency.',
     combinations: [
       'mobr/mobr',
-      'Mobr/mobr'
+      'Mobr/mobr',
+      'Mobr/Mobr'
     ],
     maleCombinations: [
-      'mobr/mobr'
+      'mobr/Y',
+      'Mobr/Y'
     ]
   },
   U: {
     name: 'Umbrous',
+    description: 'Dominant darkening modifier. Contributes to Sable when combined with Tan (at/-)',
     combinations: [
       'u/u',
       'U/u', 'U/U'
@@ -117,6 +126,7 @@ const GENE_LOCI = {
   },
   Go: {
     name: 'Shorthair',
+    description: 'Controls base coat length. Go/Go (wildtype) is shorthaired; go is the recessive longhair mutation. e.g. Shorthair (Go/-), Longhair (go/go)',
     combinations: [
       'go/go',
       'Go/go', 'Go/Go'
@@ -124,6 +134,7 @@ const GENE_LOCI = {
   },
   Re: {
     name: 'Astrex',
+    description: 'Dominant. Curly coat. e.g. Astrex (Re/-), Texel = Astrex + Longhair (Re/- go/go)',
     combinations: [
       're/re',
       'Re/re', 'Re/Re'
@@ -131,6 +142,7 @@ const GENE_LOCI = {
   },
   Sa: {
     name: 'Satin',
+    description: 'High-sheen silky coat. Satin is recessive; only sa/sa shows the satin phenotype.',
     combinations: [
       'sa/sa',
       'Sa/sa', 'Sa/Sa'
@@ -138,6 +150,7 @@ const GENE_LOCI = {
   },
   Rst: {
     name: 'Rosette',
+    description: 'Whorls/rosettes in coat. Also called Abyssinian. Recessive; rst/rst shows rosette phenotype.',
     combinations: [
       'rst/rst',
       'Rst/rst', 'Rst/Rst'
@@ -145,6 +158,7 @@ const GENE_LOCI = {
   },
   Fz: {
     name: 'Fuzz',
+    description: 'Recessive. Short fuzzy coat (fz/fz). Combined with other coat genes (e.g. Satin, Astrex) it creates unique textures.',
     combinations: [
       'fz/fz',
       'Fz/fz', 'Fz/Fz'
@@ -152,6 +166,7 @@ const GENE_LOCI = {
   },
   Nu: {
     name: 'Nude/Hairless',
+    description: 'Causes hairlessness. Dominant gene; Nu/- removes all coat expression, overriding other coat genes.',
     combinations: [
       'nu/nu',
       'Nu/nu', 'Nu/Nu'
