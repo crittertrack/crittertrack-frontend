@@ -6941,9 +6941,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             </div>
                             <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart. To add or edit manual ancestors, use the Edit button.</p>
 
-                            {betaPedigreeView === 'chart' ? (
+                            <div className={betaPedigreeView === 'chart' ? '' : 'hidden'}>
                                 <PedigreeChart inline animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} />
-                            ) : (
+                            </div>
+                            <div className={betaPedigreeView === 'vertical' ? '' : 'hidden'}>
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
 
                             {(() => {
@@ -7045,7 +7046,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 </div>
                             </div>
                             </div>
-                            )}{/* end layout toggle */}
+                            </div>
                         </div>
                     );
                 })()}
@@ -8927,9 +8928,10 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 </div>
                             </div>
                             <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart.</p>
-                            {betaPedigreeView === 'chart' ? (
+                            <div className={betaPedigreeView === 'chart' ? '' : 'hidden'}>
                                 <PedigreeChart inline animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} />
-                            ) : (
+                            </div>
+                            <div className={betaPedigreeView === 'vertical' ? '' : 'hidden'}>
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
                             {(() => {
                                 const subjectVariety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => animal[k]).filter(Boolean).join(' ');
@@ -9022,7 +9024,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 </div>
                             </div>
                             </div>
-                            )}{/* end layout toggle */}
+                            </div>
                         </div>
                     );
                 })()}
@@ -10936,9 +10938,10 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                 </div>
                             </div>
                             <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart.</p>
-                            {betaPedigreeView === 'chart' ? (
+                            <div className={betaPedigreeView === 'chart' ? '' : 'hidden'}>
                                 <PedigreeChart inline animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} />
-                            ) : (
+                            </div>
+                            <div className={betaPedigreeView === 'vertical' ? '' : 'hidden'}>
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
                                 {(() => {
                                     const subjectVariety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => animal[k]).filter(Boolean).join(' ');
@@ -11031,7 +11034,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     </div>
                                 </div>
                             </div>
-                            )}{/* end layout toggle */}
+                            </div>
                         </div>
                     );
                 })()}
