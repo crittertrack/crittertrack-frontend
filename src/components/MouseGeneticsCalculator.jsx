@@ -60,7 +60,7 @@ const GENE_LOCI = {
   },
   S: {
     name: 'Pied',
-    description: 'White spotting patterns. e.g. Pied (S/s), Hereford (S/S hooded), Dutch (S/S)',
+    description: 'White spotting patterns. e.g. Pied (s/s), Hereford (s/s+), Dutch (s/s+). The + represents polygenic modifiers that affect spotting pattern specifics.',
     combinations: [
       's/s',
       'S/s', 'S/S'
