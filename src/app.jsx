@@ -1413,6 +1413,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     };
 
     if (loading) {
+        if (inline) {
+            return <div className="flex items-center justify-center py-12 gap-2 text-gray-400"><Loader2 size={18} className="animate-spin" /><span className="text-sm">Loading pedigree chart…</span></div>;
+        }
         return (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                 <div className="bg-white rounded-xl p-6 max-w-6xl w-full">
@@ -1479,41 +1482,37 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     if (inline) {
         return (
             <>
-                {loading ? (
-                    <div className="flex items-center justify-center py-12 gap-2 text-gray-400"><Loader2 size={18} className="animate-spin" /><span className="text-sm">Loading pedigree chart…</span></div>
-                ) : (
-                    <div ref={pedigreeRef} className="bg-white rounded-xl border border-gray-200 relative w-full overflow-x-auto">
-                        <div style={{minWidth: '700px'}}>
-                            <div className="flex gap-0.5 sm:gap-2 mb-0.5 sm:mb-2 items-start">
-                                <div className="w-1/3">{pedigreeData && renderMainAnimalCard(pedigreeData)}</div>
-                                <div className="w-1/3 flex items-center justify-center">
-                                    <div className="text-center">
-                                        <h3 className="text-xs sm:text-lg font-bold text-gray-800">{pedigreeData?.species || 'Unknown Species'}</h3>
-                                        {pedigreeData?.species && getSpeciesLatinName(pedigreeData.species) && (
-                                            <p className="text-xs sm:text-sm italic text-gray-600">{getSpeciesLatinName(pedigreeData.species)}</p>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="w-1/3 flex items-center justify-end gap-0.5 sm:gap-3">
-                                    <div className="text-right">
-                                        {(() => {
-                                            const ownerInfo = getOwnerDisplayInfoTopRight();
-                                            return (<>{ownerInfo.lines.map((line, idx) => (<div key={idx} className="text-xs sm:text-base font-semibold text-gray-800 leading-tight">{line}</div>))}{ownerInfo.userId && <div className="text-xs text-gray-600 mt-1">{ownerInfo.userId}</div>}</>);
-                                        })()}
-                                    </div>
-                                    <div className="w-6 h-6 sm:w-16 sm:h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
-                                        {(ownerProfile?.profileImage || ownerProfile?.profileImageUrl) ? <img src={ownerProfile.profileImage || ownerProfile.profileImageUrl} alt="Owner" className="w-full h-full object-cover" /> : <User size={12} className="text-gray-400 sm:w-8 sm:h-8" />}
-                                    </div>
+                <div ref={pedigreeRef} className="bg-white rounded-xl border border-gray-200 relative w-full overflow-x-auto">
+                    <div style={{minWidth: '700px'}}>
+                        <div className="flex gap-0.5 sm:gap-2 mb-0.5 sm:mb-2 items-start">
+                            <div className="w-1/3">{pedigreeData && renderMainAnimalCard(pedigreeData)}</div>
+                            <div className="w-1/3 flex items-center justify-center">
+                                <div className="text-center">
+                                    <h3 className="text-xs sm:text-lg font-bold text-gray-800">{pedigreeData?.species || 'Unknown Species'}</h3>
+                                    {pedigreeData?.species && getSpeciesLatinName(pedigreeData.species) && (
+                                        <p className="text-xs sm:text-sm italic text-gray-600">{getSpeciesLatinName(pedigreeData.species)}</p>
+                                    )}
                                 </div>
                             </div>
-                            <div>{renderPedigreeTree(displayData)}</div>
-                            <div className="mt-4 pt-3 pb-2 border-t border-gray-200 flex justify-between items-center text-xs text-gray-500">
-                                <div>{getOwnerDisplayInfoBottomLeft()}</div>
-                                <div>{formatDate(new Date())}</div>
+                            <div className="w-1/3 flex items-center justify-end gap-0.5 sm:gap-3">
+                                <div className="text-right">
+                                    {(() => {
+                                        const ownerInfo = getOwnerDisplayInfoTopRight();
+                                        return (<>{ownerInfo.lines.map((line, idx) => (<div key={idx} className="text-xs sm:text-base font-semibold text-gray-800 leading-tight">{line}</div>))}{ownerInfo.userId && <div className="text-xs text-gray-600 mt-1">{ownerInfo.userId}</div>}</>);
+                                    })()}
+                                </div>
+                                <div className="w-6 h-6 sm:w-16 sm:h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                                    {(ownerProfile?.profileImage || ownerProfile?.profileImageUrl) ? <img src={ownerProfile.profileImage || ownerProfile.profileImageUrl} alt="Owner" className="w-full h-full object-cover" /> : <User size={12} className="text-gray-400 sm:w-8 sm:h-8" />}
+                                </div>
                             </div>
                         </div>
+                        <div>{renderPedigreeTree(displayData)}</div>
+                        <div className="mt-4 pt-3 pb-2 border-t border-gray-200 flex justify-between items-center text-xs text-gray-500">
+                            <div>{getOwnerDisplayInfoBottomLeft()}</div>
+                            <div>{formatDate(new Date())}</div>
+                        </div>
                     </div>
-                )}
+                </div>
                 {stackedPedigree && (
                     <div className="fixed inset-0 z-[90]">
                         <PedigreeChart animalId={stackedPedigree.id_public} animalData={stackedPedigree} onClose={() => setStackedPedigree(null)} API_BASE_URL={API_BASE_URL} authToken={authToken} />
