@@ -4798,7 +4798,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                     </div>
                                     {/* Right: All info */}
                                     <div className="flex-1 p-4 space-y-2">
-                                        {/* Top row: species/CTC + toggles */
+                                        {/* Top row: species/CTC + toggles */}
                                         <div className="flex items-center justify-between gap-2 flex-wrap">
                                             <p className="text-sm text-gray-500">
                                                 {animal.species || 'Unknown'}
