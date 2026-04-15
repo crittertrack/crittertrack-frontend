@@ -223,9 +223,12 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                       {['A', 'B', 'C', 'D', 'E', 'P', 'S', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'U', 'Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'].map(locus => (
                         <div key={locus} className="bg-white p-3 rounded border border-gray-200">
-                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          <label className="block text-sm font-semibold text-gray-700 mb-1">
                             {GENE_LOCI[locus].name} ({locus})
                           </label>
+                          {GENE_LOCI[locus].description && (
+                            <p className="text-xs text-gray-500 mb-2 leading-snug">{GENE_LOCI[locus].description}</p>
+                          )}
                           <select
                             value={genotype[locus] || ''}
                             onChange={(e) => handleGeneChange(locus, e.target.value)}

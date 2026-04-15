@@ -5,7 +5,7 @@ import { X, Book, User, Search } from 'lucide-react';
 const GENE_LOCI = {
   A: {
     name: 'Agouti',
-
+    description: 'Controls pattern. e.g. Black (a/a), Agouti (A/-), Tan (at/-), Brindle (Avy/-), Dom. Red (Ay/-)',
     combinations: [
       'ae/ae',
       'a/ae', 'a/a',
@@ -17,7 +17,7 @@ const GENE_LOCI = {
   },
   B: {
     name: 'Brown',
-
+    description: 'Turns black pigment brown. e.g. Chocolate (b/b), Cinnamon (b/b + Agouti)',
     combinations: [
       'b/b',
       'B/b', 'B/B'
@@ -25,7 +25,7 @@ const GENE_LOCI = {
   },
   C: {
     name: 'Albino',
-
+    description: 'Dilutes pigment. e.g. Albino (c/c), Siamese (ce/ce), Burmese (ce/ch), Chinchilla (cch/cch)',
     combinations: [
       'c/c',
       'c/ch', 'ch/ch',
@@ -36,7 +36,7 @@ const GENE_LOCI = {
   },
   D: {
     name: 'Dilution',
-
+    description: 'Dilutes colour. e.g. Blue (d/d on black), Blue Agouti (d/d on agouti)',
     combinations: [
       'd/d',
       'D/d', 'D/D'
@@ -44,7 +44,7 @@ const GENE_LOCI = {
   },
   E: {
     name: 'Extension',
-
+    description: 'Controls pigment expression. e.g. Recessive Red (e/e)',
     combinations: [
       'e/e',
       'E/e', 'E/E'
@@ -52,7 +52,7 @@ const GENE_LOCI = {
   },
   P: {
     name: 'Pink-eye',
-
+    description: 'Dilutes colour with pink eyes. e.g. Dove (p/p on black), Argente (p/p on agouti)',
     combinations: [
       'p/p',
       'P/p', 'P/P'
@@ -60,6 +60,7 @@ const GENE_LOCI = {
   },
   S: {
     name: 'Pied',
+    description: 'White spotting patterns. e.g. Pied (S/s), Hereford (S/S hooded), Dutch (S/S)',
     combinations: [
       's/s',
       'S/s', 'S/S'
@@ -67,6 +68,7 @@ const GENE_LOCI = {
   },
   W: {
     name: 'Dominant Spotting',
+    description: 'White spotting alleles. e.g. Banded (W/w), Variegated (Wsh/-), Rumpwhite (Rw/-)',
     combinations: [
       'w/w',
       'W/w', 'W/W',
@@ -79,6 +81,7 @@ const GENE_LOCI = {
   },
   Spl: {
     name: 'Splashed',
+    description: 'White facial/body patches. e.g. Splashed (Spl/-). Tricolor = Splashed + Pied',
     combinations: [
       'spl/spl',
       'Spl/spl', 'Spl/Spl'
@@ -86,6 +89,7 @@ const GENE_LOCI = {
   },
   Rn: {
     name: 'Roan',
+    description: 'Intermingled white hairs. e.g. Roan (Rn/rn), Merle (Rn/Rn)',
     combinations: [
       'rn/rn',
       'Rn/rn', 'Rn/Rn'
@@ -93,6 +97,7 @@ const GENE_LOCI = {
   },
   Si: {
     name: 'Silver',
+    description: 'Silvering/ticking on coat. e.g. Pearl (Si/Si), Silvered (Si/si)',
     combinations: [
       'si/si',
       'Si/si', 'Si/Si'
@@ -100,6 +105,7 @@ const GENE_LOCI = {
   },
   Mobr: {
     name: 'xbrindle',
+    description: 'Sex-linked brindle — females only can express (Mobr/mobr). Males carry but do not show brindle.',
     combinations: [
       'mobr/mobr',
       'Mobr/mobr'
@@ -110,6 +116,7 @@ const GENE_LOCI = {
   },
   U: {
     name: 'Umbrous',
+    description: 'Dominant darkening modifier. Contributes to Sable when combined with Tan (at/-)',
     combinations: [
       'u/u',
       'U/u', 'U/U'
@@ -117,6 +124,7 @@ const GENE_LOCI = {
   },
   Go: {
     name: 'Shorthair',
+    description: 'Coat length. e.g. Shorthair (Go/-), Longhair (go/go)',
     combinations: [
       'go/go',
       'Go/go', 'Go/Go'
@@ -124,6 +132,7 @@ const GENE_LOCI = {
   },
   Re: {
     name: 'Astrex',
+    description: 'Curly coat. e.g. Astrex (Re/-), Texel = Astrex + Longhair (Re/- go/go)',
     combinations: [
       're/re',
       'Re/re', 'Re/Re'
@@ -131,6 +140,7 @@ const GENE_LOCI = {
   },
   Sa: {
     name: 'Satin',
+    description: 'High-sheen silky coat. Heterozygous (Sa/sa) is typical show satin.',
     combinations: [
       'sa/sa',
       'Sa/sa', 'Sa/Sa'
@@ -138,6 +148,7 @@ const GENE_LOCI = {
   },
   Rst: {
     name: 'Rosette',
+    description: 'Whorls/rosettes in coat. Also called Abyssinian. Homozygous (Rst/Rst) intensifies the rosetting.',
     combinations: [
       'rst/rst',
       'Rst/rst', 'Rst/Rst'
@@ -145,6 +156,7 @@ const GENE_LOCI = {
   },
   Fz: {
     name: 'Fuzz',
+    description: 'Short fuzzy coat. Combined with other coat genes (e.g. Satin, Astrex) it creates unique textures.',
     combinations: [
       'fz/fz',
       'Fz/fz', 'Fz/Fz'
@@ -152,6 +164,7 @@ const GENE_LOCI = {
   },
   Nu: {
     name: 'Nude/Hairless',
+    description: 'Causes hairlessness. Homozygous (nu/nu) removes all coat expression, overriding other coat genes.',
     combinations: [
       'nu/nu',
       'Nu/nu', 'Nu/Nu'
