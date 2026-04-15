@@ -4238,7 +4238,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
             const manual = animal?.manualPedigree || {};
             const toSlot = (a) => {
                 const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
-                return { mode: 'ctc', ctcId: a.id_public || '', prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
+                return { mode: 'ctc', ctcId: a.id_public || '', prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', deceasedDate: a.deceasedDate ? String(a.deceasedDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
             };
             const fetchOne = async (id) => {
                 if (!id) return null;
@@ -6872,6 +6872,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                             {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
                                             {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
                                             {d.birthDate && <p className="text-[11px] text-gray-400">{formatDate(d.birthDate)}</p>}
+                                            {d.deceasedDate && <p className="text-[11px] text-red-600 font-semibold">† {formatDate(d.deceasedDate)}</p>}
                                             {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
                                         </div>
                                     </div>
@@ -7064,7 +7065,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
             const manual = animal?.manualPedigree || {};
             const toSlot = (a) => {
                 const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
-                return { mode: 'ctc', ctcId: a.id_public || '', prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
+                return { mode: 'ctc', ctcId: a.id_public || '', prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', deceasedDate: a.deceasedDate ? String(a.deceasedDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
             };
             const fetchOne = async (id) => {
                 if (!id) return null;
@@ -8802,6 +8803,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                             {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
                                             {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
                                             {d.birthDate && <p className="text-[11px] text-gray-400">{formatDate(d.birthDate)}</p>}
+                                            {d.deceasedDate && <p className="text-[11px] text-red-600 font-semibold">† {formatDate(d.deceasedDate)}</p>}
                                             {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
                                         </div>
                                     </div>
@@ -8963,7 +8965,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
             const manual = animal?.manualPedigree || {};
             const toSlot = (a) => {
                 const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
-                return { mode: 'ctc', ctcId: a.id_public || '', prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
+                return { mode: 'ctc', ctcId: a.id_public || '', prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', deceasedDate: a.deceasedDate ? String(a.deceasedDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
             };
             const fetchOne = async (id) => {
                 if (!id) return null;
@@ -10740,6 +10742,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                             {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
                                             {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
                                             {d.birthDate && <p className="text-[11px] text-gray-400">{formatDate(d.birthDate)}</p>}
+                                            {d.deceasedDate && <p className="text-[11px] text-red-600 font-semibold">† {formatDate(d.deceasedDate)}</p>}
                                             {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
                                         </div>
                                     </div>
