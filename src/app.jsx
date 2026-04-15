@@ -1,5 +1,5 @@
 ﻿// CritterTrack Frontend Application
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
 import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, TableOfContents, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2, Hash, Dna, TreeDeciduous, Tag, Egg, Hospital, Brain, Trophy, Scale, FileCheck, Palette, Sprout, Ruler, FolderOpen, Leaf, Microscope, Pill, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Feather, Medal, Target, Key, Dumbbell, Gem, Flame, Baby, PawPrint, ArrowRight, LockOpen, Camera, BarChart2, Bird, Fish, Bug, Worm, Turtle, SlidersHorizontal } from 'lucide-react';
@@ -606,7 +606,7 @@ const LitterSyncConflictModal = ({ items, onResolve, onSkip }) => {
 };
 
 // Pedigree Chart Component
-const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken = null, inline = false, manualData = null, onViewAnimal = null }) => {
+const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BASE_URL, authToken = null, inline = false, manualData = null, onViewAnimal = null }, ref) => {
     const [pedigreeData, setPedigreeData] = useState(null);
     const [displayData, setDisplayData] = useState(null);
     const [ownerProfile, setOwnerProfile] = useState(null);
@@ -992,6 +992,13 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             setIsSaving(false);
         }
     };
+
+    useImperativeHandle(ref, () => ({
+        downloadPDF,
+        downloadImage,
+        get imagesLoaded() { return imagesLoaded; },
+        get isSaving() { return isSaving; },
+    }), [downloadPDF, downloadImage, imagesLoaded, isSaving]);
 
     // Render card for main animal (larger with image)
     const renderMainAnimalCard = (animal) => {
@@ -1598,31 +1605,6 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         <PedigreeChart animalId={stackedPedigree.id_public} animalData={stackedPedigree} onClose={() => setStackedPedigree(null)} API_BASE_URL={API_BASE_URL} authToken={authToken} />
                     </div>
                 )}
-                {/* Inline chart save buttons */}
-                <div className="flex justify-end gap-2 mt-2">
-                    <button
-                        onClick={downloadPDF}
-                        disabled={!imagesLoaded || isSaving}
-                        className={`flex items-center gap-1 px-3 py-1.5 text-sm font-semibold rounded-lg border transition ${
-                            imagesLoaded && !isSaving ? 'bg-primary hover:bg-primary/90 text-black border-primary/40 cursor-pointer' : 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed'
-                        }`}
-                        title={!imagesLoaded ? 'Waiting for images...' : 'Save as PDF (A4 Landscape)'}
-                    >
-                        <Download size={14} />
-                        {isSaving ? 'Saving...' : 'Save PDF'}
-                    </button>
-                    <button
-                        onClick={downloadImage}
-                        disabled={!imagesLoaded || isSaving}
-                        className={`flex items-center gap-1 px-3 py-1.5 text-sm font-semibold rounded-lg border transition ${
-                            imagesLoaded && !isSaving ? 'bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-300 cursor-pointer' : 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed'
-                        }`}
-                        title={!imagesLoaded ? 'Waiting for images...' : 'Save as Image (A4 Landscape)'}
-                    >
-                        <Images size={14} />
-                        {isSaving ? 'Saving...' : 'Save Image'}
-                    </button>
-                </div>
             </>
         );
     }
@@ -1766,7 +1748,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         </div>
         </div>
     );
-};
+});
 
 // (Removed unused `AnimalListItem` component to reduce redundancy)
 
@@ -4336,6 +4318,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
     const [mpDownloading, setMpDownloading] = useState(false);
     const [mpLoading, setMpLoading] = useState(false);
     const mpTreeRef = useRef(null);
+    const chartRef = useRef(null);
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
     const [betaPedigreeView, setBetaPedigreeView] = useState(initialBetaView);
     useEffect(() => {
@@ -7041,12 +7024,24 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                         </button>
                                         </>
                                     )}
+                                    {betaPedigreeView === 'chart' && (
+                                        <>
+                                        <button onClick={() => chartRef.current?.downloadPDF()} disabled={!chartRef.current?.imagesLoaded || chartRef.current?.isSaving}
+                                            className="px-3 py-1.5 text-sm bg-primary hover:bg-primary/90 text-black rounded-lg border border-primary/40 transition flex items-center gap-1.5 disabled:opacity-60 font-semibold">
+                                            <Download size={14} /> Save PDF
+                                        </button>
+                                        <button onClick={() => chartRef.current?.downloadImage()} disabled={!chartRef.current?.imagesLoaded || chartRef.current?.isSaving}
+                                            className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
+                                            <Images size={14} /> Save Image
+                                        </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                             <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart. To add or edit manual ancestors, use the Edit button.</p>
 
                             <div className={betaPedigreeView === 'chart' ? '' : 'hidden'}>
-                                <PedigreeChart inline animalId={animal.id_public} animalData={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />
+                                <PedigreeChart ref={chartRef} inline animalId={animal.id_public} animalData={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />
                             </div>
                             <div className={betaPedigreeView === 'vertical' ? '' : 'hidden'}>
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
@@ -7185,6 +7180,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
     const [mpDownloading, setMpDownloading] = useState(false);
     const [mpLoading, setMpLoading] = useState(false);
     const mpTreeRef = useRef(null);
+    const chartRef = useRef(null);
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
     const [betaPedigreeView, setBetaPedigreeView] = useState(initialBetaView);
     useEffect(() => {
@@ -8994,11 +8990,23 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                         </button>
                                         </>
                                     )}
+                                    {betaPedigreeView === 'chart' && (
+                                        <>
+                                        <button onClick={() => chartRef.current?.downloadPDF()} disabled={!chartRef.current?.imagesLoaded || chartRef.current?.isSaving}
+                                            className="px-3 py-1.5 text-sm bg-primary hover:bg-primary/90 text-black rounded-lg border border-primary/40 transition flex items-center gap-1.5 disabled:opacity-60 font-semibold">
+                                            <Download size={14} /> Save PDF
+                                        </button>
+                                        <button onClick={() => chartRef.current?.downloadImage()} disabled={!chartRef.current?.imagesLoaded || chartRef.current?.isSaving}
+                                            className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
+                                            <Images size={14} /> Save Image
+                                        </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                             <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart.</p>
                             <div className={betaPedigreeView === 'chart' ? '' : 'hidden'}>
-                                <PedigreeChart inline animalId={animal.id_public} animalData={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />
+                                <PedigreeChart ref={chartRef} inline animalId={animal.id_public} animalData={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />
                             </div>
                             <div className={betaPedigreeView === 'vertical' ? '' : 'hidden'}>
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
@@ -9107,6 +9115,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
     const [mpDownloading, setMpDownloading] = useState(false);
     const [mpLoading, setMpLoading] = useState(false);
     const mpTreeRef = useRef(null);
+    const chartRef = useRef(null);
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
     const [betaPedigreeView, setBetaPedigreeView] = useState('vertical');
     useEffect(() => {
@@ -10954,11 +10963,23 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                         </button>
                                         </>
                                     )}
+                                    {betaPedigreeView === 'chart' && (
+                                        <>
+                                        <button onClick={() => chartRef.current?.downloadPDF()} disabled={!chartRef.current?.imagesLoaded || chartRef.current?.isSaving}
+                                            className="px-3 py-1.5 text-sm bg-primary hover:bg-primary/90 text-black rounded-lg border border-primary/40 transition flex items-center gap-1.5 disabled:opacity-60 font-semibold">
+                                            <Download size={14} /> Save PDF
+                                        </button>
+                                        <button onClick={() => chartRef.current?.downloadImage()} disabled={!chartRef.current?.imagesLoaded || chartRef.current?.isSaving}
+                                            className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
+                                            <Images size={14} /> Save Image
+                                        </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                             <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart.</p>
                             <div className={betaPedigreeView === 'chart' ? '' : 'hidden'}>
-                                <PedigreeChart inline animalId={animal.id_public} animalData={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />
+                                <PedigreeChart ref={chartRef} inline animalId={animal.id_public} animalData={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />
                             </div>
                             <div className={betaPedigreeView === 'vertical' ? '' : 'hidden'}>
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
