@@ -978,40 +978,36 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-start gap-2 py-2">
                     {/* Name */}
-                    <div className="text-sm text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        <span className="font-bold">Name: </span>{animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                    <div className="text-sm text-gray-900 font-bold leading-tight" style={{lineHeight: '1.2'}}>
+                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </div>
                     
                     {/* Variety */}
                     <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
                     
                     {/* Genetic Code */}
                     {animal.geneticCode && (
                         <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                            <span className="font-semibold">Code: </span>
                             {animal.geneticCode}
                         </div>
                     )}
                     
                     {/* Birth Date */}
                     <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        <span className="font-semibold">Birthdate: </span>
                         {animal.birthDate ? formatDate(animal.birthDate) : 'N/A'}
                     </div>
                     
                     {/* Deceased Date */}
                     {animal.deceasedDate ? (
                         <div className="text-red-600 leading-tight font-semibold text-xs" style={{lineHeight: '1.2'}}>
-                            <span>† {formatDate(animal.deceasedDate)}</span>
+                            † {formatDate(animal.deceasedDate)}
                         </div>
                     ) : null}
                     
                     {/* Breeder Info */}
-                    <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        <span className="font-semibold">Breeder: </span>
+                    <div className="text-xs text-gray-500 leading-tight italic" style={{lineHeight: '1.2'}}>
                         {animal.breederName || 'N/A'}
                     </div>
                 </div>
@@ -1090,40 +1086,36 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-start gap-1.5 py-1 pointer-events-none">
                     {/* Name */}
-                    <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        <span className="font-semibold">Name: </span>{animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                    <div className="text-xs text-gray-900 font-semibold leading-tight" style={{lineHeight: '1.2'}}>
+                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </div>
                     
                     {/* Variety */}
                     <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
                     
                     {/* Genetic Code */}
                     {animal.geneticCode && (
                         <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                            <span className="font-semibold">Genotype: </span>
                             {animal.geneticCode}
                         </div>
                     )}
                     
                     {/* Birth Date */}
                     <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        <span className="font-semibold">Birthdate: </span>
                         {animal.birthDate ? formatDate(animal.birthDate) : 'N/A'}
                     </div>
                     
                     {/* Deceased Date */}
                     {animal.deceasedDate && (
                         <div className="text-red-600 leading-tight font-semibold text-xs" style={{lineHeight: '1.2'}}>
-                            <span>† {formatDate(animal.deceasedDate)}</span>
+                            † {formatDate(animal.deceasedDate)}
                         </div>
                     )}
                     
                     {/* Breeder */}
-                    <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        <span className="font-semibold">Breeder: </span>
+                    <div className="text-xs text-gray-500 leading-tight italic" style={{lineHeight: '1.2'}}>
                         {animal.breederName || 'N/A'}
                     </div>
                 </div>
@@ -1208,40 +1200,36 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-start gap-1 py-0.5 pointer-events-none">
                     {/* Name */}
-                    <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
-                        <span className="font-semibold">Name: </span>{animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                    <div className="text-gray-900 font-semibold leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
+                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </div>
                     
                     {/* Variety */}
                     <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
-                        <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
                     
                     {/* Genetic Code */}
                     {animal.geneticCode && (
                         <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
-                            <span className="font-semibold">Genotype: </span>
                             {animal.geneticCode}
                         </div>
                     )}
                     
                     {/* Birth Date */}
                     <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
-                        <span className="font-semibold">Birthdate: </span>
                         {animal.birthDate ? formatDate(animal.birthDate) : 'N/A'}
                     </div>
                     
                     {/* Deceased Date */}
                     {animal.deceasedDate ? (
                         <div className="text-red-600 leading-tight font-semibold" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
-                            <span>† {formatDate(animal.deceasedDate)}</span>
+                            † {formatDate(animal.deceasedDate)}
                         </div>
                     ) : null}
                     
                     {/* Breeder */}
-                    <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
-                        <span className="font-semibold">Breeder: </span>
+                    <div className="text-gray-500 leading-tight italic" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
                         {animal.breederName || 'N/A'}
                     </div>
                 </div>
@@ -1318,33 +1306,30 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-start gap-0.5 py-0.5 pointer-events-none">
-                    {/* Name - inline */}
-                    <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
-                        <span className="font-semibold">Name: </span>{animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                    {/* Name */}
+                    <div className="text-gray-900 font-semibold leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
+                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </div>
                 
                     {/* Variety */}
                     <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
-                        <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
                     
                     {/* Birth Date */}
                     <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
-                        <span className="font-semibold">Birthdate: </span>
                         {animal.birthDate ? formatDate(animal.birthDate) : 'N/A'}
                     </div>
                     
                     {/* Deceased Date */}
                     {animal.deceasedDate ? (
                         <div className="text-red-600 leading-tight font-semibold" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
-                            <span>† {formatDate(animal.deceasedDate)}</span>
+                            † {formatDate(animal.deceasedDate)}
                         </div>
                     ) : null}
                     
                     {/* Breeder */}
-                    <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
-                        <span className="font-semibold">Breeder: </span>
+                    <div className="text-gray-500 leading-tight italic" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
                         {animal.breederName || 'N/A'}
                     </div>
                 </div>
