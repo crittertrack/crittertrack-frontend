@@ -669,10 +669,10 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         if (inline && animalData) {
             setPedigreeData(animalData);
             setLoading(false);
-            // Still fetch the owner profile for display purposes
-            const ownerId = animalData.ownerId_public || animalData.breederId_public;
-            if (ownerId) {
-                axios.get(`${API_BASE_URL}/public/profiles/search?query=${ownerId}&limit=1`)
+            // Still fetch the breeder profile for display purposes
+            const breederId = animalData.breederId_public;
+            if (breederId) {
+                axios.get(`${API_BASE_URL}/public/profiles/search?query=${breederId}&limit=1`)
                     .then(r => { if (r.data?.[0]) setOwnerProfile(r.data[0]); })
                     .catch(() => {});
             }
@@ -825,13 +825,13 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 const data = await fetchAnimalWithFamily(animalId || animalData?.id_public);
                 setPedigreeData(data);
 
-                // Fetch owner profile for the main animal
-                if (data?.ownerId_public || data?.breederId_public) {
+                // Fetch breeder profile for the main animal
+                if (data?.breederId_public) {
                     try {
-                        const ownerId = data.ownerId_public || data.breederId_public;
-                        console.log('[PEDIGREE] Fetching owner profile for ID:', ownerId);
+                        const breederId = data.breederId_public;
+                        console.log('[PEDIGREE] Fetching breeder profile for ID:', breederId);
                         const ownerResponse = await axios.get(
-                            `${API_BASE_URL}/public/profiles/search?query=${ownerId}&limit=1`
+                            `${API_BASE_URL}/public/profiles/search?query=${breederId}&limit=1`
                         );
                         console.log('[PEDIGREE] Owner profile response:', ownerResponse.data);
                         if (ownerResponse.data && ownerResponse.data.length > 0) {
@@ -1466,20 +1466,17 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
     // Top right - 3 lines (Personal Name, Breeder Name, CTID)
     const getOwnerDisplayInfoTopRight = () => {
-        if (!ownerProfile) return { lines: ['Unknown Owner'], userId: null };
+        if (!ownerProfile) return null;
         
-        const userId = ownerProfile.id_public || pedigreeData?.ownerId_public || pedigreeData?.breederId_public;
+        const userId = ownerProfile.id_public;
         const lines = [];
         
         const showPersonalName = ownerProfile.showPersonalName ?? false;
         const showBreederName = ownerProfile.showBreederName ?? false;
         
-        // Add personal name if privacy allows and available
         if (showPersonalName && ownerProfile.personalName) {
             lines.push(ownerProfile.personalName);
         }
-        
-        // Add breeder name if it's public and available
         if (showBreederName && ownerProfile.breederName) {
             lines.push(ownerProfile.breederName);
         }
@@ -1492,9 +1489,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     
     // Bottom left - 1 line (CTID - Personal Name - Breeder Name)
     const getOwnerDisplayInfoBottomLeft = () => {
-        if (!ownerProfile) return 'Unknown Owner';
+        if (!ownerProfile) return '';
         
-        const userId = ownerProfile.id_public || pedigreeData?.ownerId_public || pedigreeData?.breederId_public;
+        const userId = ownerProfile.id_public;
         const parts = [];
         
         const showPersonalName = ownerProfile.showPersonalName ?? false;
@@ -1533,17 +1530,20 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                                     )}
                                 </div>
                             </div>
+                            {ownerProfile && (
                             <div className="w-1/3 flex items-center justify-end gap-0.5 sm:gap-3">
                                 <div className="text-right">
                                     {(() => {
                                         const ownerInfo = getOwnerDisplayInfoTopRight();
+                                        if (!ownerInfo) return null;
                                         return (<>{ownerInfo.lines.map((line, idx) => (<div key={idx} className="text-xs sm:text-base font-semibold text-gray-800 leading-tight">{line}</div>))}{ownerInfo.userId && <div className="text-xs text-gray-600 mt-1">{ownerInfo.userId}</div>}</>);
                                     })()}
                                 </div>
                                 <div className="w-6 h-6 sm:w-16 sm:h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
-                                    {(ownerProfile?.profileImage || ownerProfile?.profileImageUrl) ? <img src={ownerProfile.profileImage || ownerProfile.profileImageUrl} alt="Owner" className="w-full h-full object-cover" /> : <User size={12} className="text-gray-400 sm:w-8 sm:h-8" />}
+                                    {(ownerProfile?.profileImage || ownerProfile?.profileImageUrl) ? <img src={ownerProfile.profileImage || ownerProfile.profileImageUrl} alt="Breeder" className="w-full h-full object-cover" /> : <User size={12} className="text-gray-400 sm:w-8 sm:h-8" />}
                                 </div>
                             </div>
+                            )}
                         </div>
                         <div>{renderPedigreeTree(displayData)}</div>
                         <div className="mt-4 pt-3 pb-2 border-t border-gray-200 flex justify-between items-center text-xs text-gray-500">
@@ -1622,31 +1622,34 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                                     </div>
                                 </div>
 
-                                {/* Owner Profile */}
-                                <div className="w-1/3 flex items-center justify-end gap-0.5 sm:gap-3">
-                                    <div className="text-right">
-                                        {(() => {
-                                            const ownerInfo = getOwnerDisplayInfoTopRight();
-                                            return (
-                                                <>
-                                                    {ownerInfo.lines.map((line, idx) => (
-                                                        <div key={idx} className="text-xs sm:text-base font-semibold text-gray-800 leading-tight">{line}</div>
-                                                    ))}
-                                                    {ownerInfo.userId && (
-                                                        <div className="text-xs text-gray-600 mt-1">{ownerInfo.userId}</div>
-                                                    )}
-                                                </>
-                                            );
-                                        })()}
+                                {/* Breeder Profile */}
+                                {ownerProfile && (
+                                    <div className="w-1/3 flex items-center justify-end gap-0.5 sm:gap-3">
+                                        <div className="text-right">
+                                            {(() => {
+                                                const ownerInfo = getOwnerDisplayInfoTopRight();
+                                                if (!ownerInfo) return null;
+                                                return (
+                                                    <>
+                                                        {ownerInfo.lines.map((line, idx) => (
+                                                            <div key={idx} className="text-xs sm:text-base font-semibold text-gray-800 leading-tight">{line}</div>
+                                                        ))}
+                                                        {ownerInfo.userId && (
+                                                            <div className="text-xs text-gray-600 mt-1">{ownerInfo.userId}</div>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
+                                        <div className="hide-for-pdf w-6 h-6 sm:w-16 sm:h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                                            {(ownerProfile?.profileImage || ownerProfile?.profileImageUrl) ? (
+                                                <img src={ownerProfile.profileImage || ownerProfile.profileImageUrl} alt="Breeder" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <User size={12} className="text-gray-400 sm:w-8 sm:h-8" />
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="hide-for-pdf w-6 h-6 sm:w-16 sm:h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
-                                        {(ownerProfile?.profileImage || ownerProfile?.profileImageUrl) ? (
-                                            <img src={ownerProfile.profileImage || ownerProfile.profileImageUrl} alt="Owner" className="w-full h-full object-cover" />
-                                        ) : (
-                                            <User size={12} className="text-gray-400 sm:w-8 sm:h-8" />
-                                        )}
-                                    </div>
-                                </div>
+                                )}
                             </div>
 
                             {/* Pedigree Tree */}
