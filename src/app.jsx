@@ -21832,7 +21832,7 @@ const AnimalForm = ({
                 {/* Tab 5: Beta Pedigree */}
                 {(() => {
                     // Hoisted so the CTC modal (rendered outside the tab guard) can always call linkAnimal
-                    const mpEmptySlot = () => ({ mode: 'manual', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
+                    const mpEmptySlot = () => ({ mode: 'ctc', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
                     const mpToSlot = (a) => {
                         const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
                         return { mode: 'ctc', ctcId: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? a.birthDate.slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
@@ -21894,13 +21894,14 @@ const AnimalForm = ({
                         const d = getSlot(slotKey);
                         const isSire = slotKey === 'sire' || slotKey.endsWith('Sire');
                         const isCTC = d.mode === 'ctc';
+                        const isParent = slotKey === 'sire' || slotKey === 'dam';
                         const bdr = isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40';
                         const lbl = isSire ? 'text-blue-500' : 'text-pink-500';
 
                         return (
-                            <div key={slotKey} className={`rounded-lg border p-3 space-y-2 text-xs ${bdr}`}>
+                            <div key={slotKey} className={`rounded-lg border ${isParent ? 'p-4' : 'p-3'} space-y-2 text-xs ${bdr}`}>
                                 <div className="flex items-center justify-between">
-                                    <p className={`text-[10px] font-bold uppercase tracking-widest ${lbl}`}>{label}</p>
+                                    <p className={`${isParent ? 'text-xs' : 'text-[10px]'} font-bold uppercase tracking-widest ${lbl}`}>{label}</p>
                                     <div className="flex rounded border border-gray-300 overflow-hidden text-[10px]">
                                         <button type="button" onClick={() => setSlotField(slotKey, 'mode', 'manual')}
                                             className={`px-2 py-0.5 transition-colors ${!isCTC ? 'bg-gray-200 font-semibold text-gray-800' : 'text-gray-400 hover:bg-gray-100'}`}>Manual</button>
@@ -21912,26 +21913,26 @@ const AnimalForm = ({
                                 {isCTC ? (
                                     d.ctcId ? (
                                         <div className="space-y-1.5">
-                                            <div className="flex items-center gap-2 p-2 bg-white rounded border border-primary/30">
+                                            <div className={`flex items-center gap-3 ${isParent ? 'p-3' : 'p-2'} bg-white rounded border border-primary/30`}>
                                                 {d.imageUrl
-                                                    ? <img src={d.imageUrl} className="w-10 h-10 rounded-full object-cover flex-shrink-0" alt="" />
-                                                    : <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0"><Cat size={16} className="text-gray-300" /></div>
+                                                    ? <img src={d.imageUrl} className={`${isParent ? 'w-16 h-16' : 'w-10 h-10'} rounded-full object-cover flex-shrink-0`} alt="" />
+                                                    : <div className={`${isParent ? 'w-16 h-16' : 'w-10 h-10'} rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0`}><Cat size={isParent ? 22 : 16} className="text-gray-300" /></div>
                                                 }
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-xs font-semibold text-gray-800 truncate">{[d.prefix,d.name,d.suffix].filter(Boolean).join(' ')}</p>
-                                                    {d.variety && <p className="text-[11px] text-gray-500 truncate">{d.variety}</p>}
-                                                    <p className="text-[10px] font-mono text-gray-800">{d.ctcId}</p>
+                                                    <p className={`${isParent ? 'text-sm' : 'text-xs'} font-semibold text-gray-800 truncate`}>{[d.prefix,d.name,d.suffix].filter(Boolean).join(' ')}</p>
+                                                    {d.variety && <p className={`${isParent ? 'text-xs' : 'text-[11px]'} text-gray-500 truncate`}>{d.variety}</p>}
+                                                    <p className="text-[10px] font-mono text-gray-500">{d.ctcId}</p>
                                                 </div>
                                             </div>
                                             <button type="button"
-                                                onClick={() => setMpEditForm(f => ({ ...f, [slotKey]: { ...f[slotKey], mode: 'manual', ctcId: '' } }))}
+                                                onClick={() => setMpEditForm(f => ({ ...f, [slotKey]: { ...f[slotKey], mode: 'ctc', ctcId: '' } }))}
                                                 className="text-[10px] text-red-400 hover:text-red-600 transition-colors">Unlink</button>
                                         </div>
                                     ) : (
                                         <div className="space-y-1.5">
                                             <button type="button" onClick={() => setMpCTCOpenSlot(slotKey)}
-                                                className="w-full px-2 py-1.5 border border-dashed border-primary/40 rounded text-xs text-primary hover:bg-primary/5 transition flex items-center gap-1.5 justify-center">
-                                                <Search size={12} /> Search CTC Animal…
+                                                className={`w-full px-2 ${isParent ? 'py-4 text-sm' : 'py-1.5 text-xs'} border border-dashed border-primary/40 rounded text-primary hover:bg-primary/5 transition flex items-center gap-1.5 justify-center`}>
+                                                <Search size={isParent ? 15 : 12} /> Search CTC Animal…
                                             </button>
                                         </div>
                                     )
