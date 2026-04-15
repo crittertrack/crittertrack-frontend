@@ -222,17 +222,17 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                     <h3 className="text-lg font-semibold text-gray-800 mb-3">All Genes</h3>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                       {['A', 'B', 'C', 'D', 'E', 'P', 'S', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'U', 'Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'].map(locus => (
-                        <div key={locus} className="bg-white p-3 rounded border border-gray-200">
+                        <div key={locus} className="bg-white p-3 rounded border border-gray-200 h-48 flex flex-col">
                           <label className="block text-sm font-semibold text-gray-700 mb-1">
                             {GENE_LOCI[locus].name} ({locus})
                           </label>
                           {GENE_LOCI[locus].description && (
-                            <p className="text-xs text-gray-500 mb-2 leading-snug">{GENE_LOCI[locus].description}</p>
+                            <p className="text-xs text-gray-500 mb-2 leading-snug flex-1 overflow-hidden">{GENE_LOCI[locus].description}</p>
                           )}
                           <select
                             value={genotype[locus] || ''}
                             onChange={(e) => handleGeneChange(locus, e.target.value)}
-                            className="w-full p-2 border border-gray-300 rounded focus:ring-accent focus:border-accent"
+                            className="w-full p-2 border border-gray-300 rounded focus:ring-accent focus:border-accent mt-auto"
                           >
                             <option value="">-</option>
                             {getValidCombinations(locus).map(combo => (
