@@ -5,7 +5,7 @@ import { X, Book, User, Search } from 'lucide-react';
 const GENE_LOCI = {
   A: {
     name: 'Agouti',
-    description: 'Controls pattern. e.g. Black (a/a), Agouti (A/-), Tan (at/-), Brindle (Avy/-), Dom. Red (Ay/-)',
+    description: 'Controls BASE COLOR. e.g. Black (a/a), Agouti (A/-), Tan (at/-), Brindle (Avy/-), Dom. Red (Ay/-)',
     combinations: [
       'ae/ae',
       'a/ae', 'a/a',
