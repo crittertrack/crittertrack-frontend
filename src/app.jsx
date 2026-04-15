@@ -30540,7 +30540,7 @@ const AnimalList = ({
                         className="bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
                         data-tutorial-target="add-animal-btn"
                     >
-                        <PlusCircle size={14} className="sm:w-4 sm:h-4" /> <span className="hidden sm:inline">Add Animal</span><span className="sm:hidden">Add</span>
+                        <PlusCircle size={14} className="sm:w-4 sm:h-4" /> <span>Add Animal</span>
                     </button>
 
                     </>)}
@@ -30641,7 +30641,7 @@ const AnimalList = ({
             {animalView === 'list' && !showArchiveScreen && (
             <div className="mb-4 sm:mb-6 border rounded-lg bg-gray-50">
                 {/* Ownership filter buttons — always visible, auto-apply */}
-                <div className="flex items-center justify-center gap-2 px-2 sm:px-3 py-2">
+                <div className="flex flex-wrap items-center justify-center gap-2 px-2 sm:px-3 py-2">
                     <button onClick={() => setShowOwned(prev => !prev)}
                         className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
                             showOwned ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -30662,7 +30662,7 @@ const AnimalList = ({
                         <HeartOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         {!allAnimalsFetched ? 'Loading...' : showUnowned ? 'Showing Unowned' : 'Show Unowned'}
                     </button>
-                    <span className="mx-1 text-gray-300">|</span>
+                    <span className="hidden sm:inline mx-1 text-gray-300">|</span>
                     <button
                         onClick={() => toggleAllAnimalsPrivacy(true)}
                         className="text-green-600 hover:text-green-700 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-green-50 text-xs sm:text-sm font-semibold shadow-sm"
