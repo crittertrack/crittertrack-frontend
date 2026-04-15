@@ -912,7 +912,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             Object.assign(el.style, { width: orig.w, height: orig.h, minHeight: orig.mh, overflow: orig.ov, padding: orig.p });
             // Fit into A4 landscape (297 × 210mm) with 10mm padding using mm-based jsPDF
             const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-            const pageW = 297, pageH = 210, pad_mm = 10;
+            const pageW = 297, pageH = 210, pad_mm = 4;
             const maxW = pageW - pad_mm * 2, maxH = pageH - pad_mm * 2;
             const srcRatio = srcCanvas.width / srcCanvas.height;
             const imgW = srcRatio > maxW / maxH ? maxW : maxH * srcRatio;
@@ -947,7 +947,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             });
             Object.assign(el.style, { width: orig.w, height: orig.h, minHeight: orig.mh, overflow: orig.ov, padding: orig.p });
             // Fit into A4 landscape canvas at 200dpi (2339 × 1654) with 80px padding
-            const a4W = 2339, a4H = 1654, pad = 80;
+            const a4W = 2339, a4H = 1654, pad = 30;
             const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
             const srcRatio = srcCanvas.width / srcCanvas.height;
             const dw = srcRatio > maxW / maxH ? maxW : Math.round(maxH * srcRatio);
