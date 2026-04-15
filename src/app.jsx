@@ -606,7 +606,7 @@ const LitterSyncConflictModal = ({ items, onResolve, onSkip }) => {
 };
 
 // Pedigree Chart Component
-const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken = null }) => {
+const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken = null, inline = false }) => {
     const [pedigreeData, setPedigreeData] = useState(null);
     const [ownerProfile, setOwnerProfile] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -1427,6 +1427,53 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         return parts.length > 0 ? parts.join(' - ') : 'Anonymous Breeder';
     };
+
+    if (inline) {
+        return (
+            <>
+                {loading ? (
+                    <div className="flex items-center justify-center py-12 gap-2 text-gray-400"><Loader2 size={18} className="animate-spin" /><span className="text-sm">Loading pedigree chart…</span></div>
+                ) : (
+                    <div ref={pedigreeRef} className="bg-white rounded-xl border border-gray-200 relative w-full overflow-x-auto">
+                        <div style={{minWidth: '700px'}}>
+                            <div className="flex gap-0.5 sm:gap-2 mb-0.5 sm:mb-2 items-start">
+                                <div className="w-1/3">{pedigreeData && renderMainAnimalCard(pedigreeData)}</div>
+                                <div className="w-1/3 flex items-center justify-center">
+                                    <div className="text-center">
+                                        <h3 className="text-xs sm:text-lg font-bold text-gray-800">{pedigreeData?.species || 'Unknown Species'}</h3>
+                                        {pedigreeData?.species && getSpeciesLatinName(pedigreeData.species) && (
+                                            <p className="text-xs sm:text-sm italic text-gray-600">{getSpeciesLatinName(pedigreeData.species)}</p>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="w-1/3 flex items-center justify-end gap-0.5 sm:gap-3">
+                                    <div className="text-right">
+                                        {(() => {
+                                            const ownerInfo = getOwnerDisplayInfoTopRight();
+                                            return (<>{ownerInfo.lines.map((line, idx) => (<div key={idx} className="text-xs sm:text-base font-semibold text-gray-800 leading-tight">{line}</div>))}{ownerInfo.userId && <div className="text-xs text-gray-600 mt-1">{ownerInfo.userId}</div>}</>);
+                                        })()}
+                                    </div>
+                                    <div className="w-6 h-6 sm:w-16 sm:h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                                        {(ownerProfile?.profileImage || ownerProfile?.profileImageUrl) ? <img src={ownerProfile.profileImage || ownerProfile.profileImageUrl} alt="Owner" className="w-full h-full object-cover" /> : <User size={12} className="text-gray-400 sm:w-8 sm:h-8" />}
+                                    </div>
+                                </div>
+                            </div>
+                            <div>{renderPedigreeTree(pedigreeData)}</div>
+                            <div className="mt-4 pt-3 pb-2 border-t border-gray-200 flex justify-between items-center text-xs text-gray-500">
+                                <div>{getOwnerDisplayInfoBottomLeft()}</div>
+                                <div>{formatDate(new Date())}</div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                {stackedPedigree && (
+                    <div className="fixed inset-0 z-[90]">
+                        <PedigreeChart animalId={stackedPedigree.id_public} animalData={stackedPedigree} onClose={() => setStackedPedigree(null)} API_BASE_URL={API_BASE_URL} authToken={authToken} />
+                    </div>
+                )}
+            </>
+        );
+    }
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
@@ -4120,6 +4167,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
     const [mpLoading, setMpLoading] = useState(false);
     const mpTreeRef = useRef(null);
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
+    const [betaPedigreeView, setBetaPedigreeView] = useState('vertical');
     useEffect(() => {
         if (detailViewTab !== 16) return;
         let cancelled = false;
@@ -6879,7 +6927,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                     <h3 className="text-base font-semibold text-gray-700">Beta Pedigree</h3>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    {hasAnyData && (
+                                    <div className="flex rounded border border-gray-300 overflow-hidden text-xs">
+                                        <button onClick={() => setBetaPedigreeView('vertical')} className={`px-2 py-1 transition-colors ${betaPedigreeView === 'vertical' ? 'bg-gray-200 font-semibold text-gray-800' : 'text-gray-400 hover:bg-gray-100'}`}>Vertical</button>
+                                        <button onClick={() => setBetaPedigreeView('chart')} className={`px-2 py-1 transition-colors ${betaPedigreeView === 'chart' ? 'bg-primary font-semibold text-black' : 'text-gray-400 hover:bg-gray-100'}`}>Chart</button>
+                                    </div>
+                                    {hasAnyData && betaPedigreeView === 'vertical' && (
                                         <button onClick={handleDownloadMP} disabled={mpDownloading}
                                             className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
                                             {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save as Image</>}
@@ -6889,6 +6941,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             </div>
                             <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart. To add or edit manual ancestors, use the Edit button.</p>
 
+                            {betaPedigreeView === 'chart' ? (
+                                <PedigreeChart inline animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} />
+                            ) : (
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
 
                             {(() => {
@@ -6989,7 +7044,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                     </div>
                                 </div>
                             </div>
-                            </div>{/* end mpTreeRef */}
+                            </div>
+                            )}{/* end layout toggle */}
                         </div>
                     );
                 })()}
@@ -7030,6 +7086,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
     const [mpLoading, setMpLoading] = useState(false);
     const mpTreeRef = useRef(null);
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
+    const [betaPedigreeView, setBetaPedigreeView] = useState('vertical');
     useEffect(() => {
         if (detailViewTab !== 16) return;
         let cancelled = false;
@@ -8856,14 +8913,23 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                     <Dna size={18} className="text-orange-500" />
                                     <h3 className="text-base font-semibold text-gray-700">Beta Pedigree</h3>
                                 </div>
-                                {hasAnyData && (
-                                    <button onClick={handleDownloadMP} disabled={mpDownloading}
-                                        className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
-                                        {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save as Image</>}
-                                    </button>
-                                )}
+                                <div className="flex items-center gap-2">
+                                    <div className="flex rounded border border-gray-300 overflow-hidden text-xs">
+                                        <button onClick={() => setBetaPedigreeView('vertical')} className={`px-2 py-1 transition-colors ${betaPedigreeView === 'vertical' ? 'bg-gray-200 font-semibold text-gray-800' : 'text-gray-400 hover:bg-gray-100'}`}>Vertical</button>
+                                        <button onClick={() => setBetaPedigreeView('chart')} className={`px-2 py-1 transition-colors ${betaPedigreeView === 'chart' ? 'bg-primary font-semibold text-black' : 'text-gray-400 hover:bg-gray-100'}`}>Chart</button>
+                                    </div>
+                                    {hasAnyData && betaPedigreeView === 'vertical' && (
+                                        <button onClick={handleDownloadMP} disabled={mpDownloading}
+                                            className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
+                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save as Image</>}
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                             <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart.</p>
+                            {betaPedigreeView === 'chart' ? (
+                                <PedigreeChart inline animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} />
+                            ) : (
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
                             {(() => {
                                 const subjectVariety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => animal[k]).filter(Boolean).join(' ');
@@ -8956,6 +9022,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 </div>
                             </div>
                             </div>
+                            )}{/* end layout toggle */}
                         </div>
                     );
                 })()}
@@ -8976,6 +9043,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
     const [mpLoading, setMpLoading] = useState(false);
     const mpTreeRef = useRef(null);
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
+    const [betaPedigreeView, setBetaPedigreeView] = useState('vertical');
     useEffect(() => {
         if (detailViewTab !== 14) return;
         let cancelled = false;
@@ -10854,14 +10922,23 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     <Dna size={18} className="text-orange-500" />
                                     <h3 className="text-base font-semibold text-gray-700">Beta Pedigree</h3>
                                 </div>
-                                {hasAnyData && (
-                                    <button onClick={handleDownloadMP} disabled={mpDownloading}
-                                        className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
-                                        {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save as Image</>}
-                                    </button>
-                                )}
+                                <div className="flex items-center gap-2">
+                                    <div className="flex rounded border border-gray-300 overflow-hidden text-xs">
+                                        <button onClick={() => setBetaPedigreeView('vertical')} className={`px-2 py-1 transition-colors ${betaPedigreeView === 'vertical' ? 'bg-gray-200 font-semibold text-gray-800' : 'text-gray-400 hover:bg-gray-100'}`}>Vertical</button>
+                                        <button onClick={() => setBetaPedigreeView('chart')} className={`px-2 py-1 transition-colors ${betaPedigreeView === 'chart' ? 'bg-primary font-semibold text-black' : 'text-gray-400 hover:bg-gray-100'}`}>Chart</button>
+                                    </div>
+                                    {hasAnyData && betaPedigreeView === 'vertical' && (
+                                        <button onClick={handleDownloadMP} disabled={mpDownloading}
+                                            className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
+                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save as Image</>}
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                             <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart.</p>
+                            {betaPedigreeView === 'chart' ? (
+                                <PedigreeChart inline animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} />
+                            ) : (
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
                                 {(() => {
                                     const subjectVariety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => animal[k]).filter(Boolean).join(' ');
@@ -10954,6 +11031,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     </div>
                                 </div>
                             </div>
+                            )}{/* end layout toggle */}
                         </div>
                     );
                 })()}
