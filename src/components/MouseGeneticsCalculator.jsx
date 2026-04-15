@@ -97,7 +97,7 @@ const GENE_LOCI = {
   },
   Si: {
     name: 'Silver',
-    description: 'Silvering/ticking on coat. e.g. Pearl (Si/Si), Silvered (Si/si)',
+    description: 'Silvering/ticking on coat. e.g. Pearl (si/si), Silvered (si/si)',
     combinations: [
       'si/si',
       'Si/si', 'Si/Si'
