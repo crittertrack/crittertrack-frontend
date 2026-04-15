@@ -17025,7 +17025,9 @@ const AnimalForm = ({
     const [mpSlotUploading, setMpSlotUploading] = useState({});
     const mpAutoFetchedRef = useRef(false);
 
-    // Auto-refresh all CTC-linked slots when Beta Pedigree tab is first opened in edit
+    // Auto-refresh all CTC-linked slots when Beta Pedigree tab is first opened in edit.
+    // Also backfills sire/dam from the animal's existing fatherId/motherId if manualPedigree
+    // doesn't have them yet (migration from old Lineage tab).
     useEffect(() => {
         if (activeTab !== 5 || mpAutoFetchedRef.current || !authToken) return;
         mpAutoFetchedRef.current = true;
@@ -17033,15 +17035,37 @@ const AnimalForm = ({
         const allSlots = ['sire','dam','sireSire','sireDam','damSire','damDam',
             'sireSireSire','sireSireDam','sireDamSire','sireDamDam',
             'damSireSire','damSireDam','damDamSire','damDamDam'];
-        const linked = allSlots.filter(k => pedigree[k]?.mode === 'ctc' && pedigree[k]?.ctcId);
-        if (!linked.length) return;
-        Promise.all(linked.map(async k => {
+
+        // Build fetch jobs: existing CTC-linked slots + backfill sire/dam from lineage fields
+        const jobs = [];
+
+        // Refresh existing CTC-linked slots
+        allSlots.filter(k => pedigree[k]?.mode === 'ctc' && pedigree[k]?.ctcId)
+            .forEach(k => jobs.push({ slotKey: k, ctcId: pedigree[k].ctcId, notes: pedigree[k].notes || '' }));
+
+        // Backfill sire from fatherId_public / sireId_public if slot is empty
+        const sireId = animalToEdit?.fatherId_public || animalToEdit?.sireId_public;
+        if (sireId && !pedigree.sire?.ctcId && !jobs.find(j => j.slotKey === 'sire'))
+            jobs.push({ slotKey: 'sire', ctcId: sireId, notes: '' });
+
+        // Backfill dam from motherId_public / damId_public if slot is empty
+        const damId = animalToEdit?.motherId_public || animalToEdit?.damId_public;
+        if (damId && !pedigree.dam?.ctcId && !jobs.find(j => j.slotKey === 'dam'))
+            jobs.push({ slotKey: 'dam', ctcId: damId, notes: '' });
+
+        if (!jobs.length) return;
+
+        const toSlot = (a, notes) => {
+            const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(f => a[f]).filter(Boolean).join(' ');
+            return { mode: 'ctc', ctcId: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes };
+        };
+
+        Promise.all(jobs.map(async ({ slotKey, ctcId, notes }) => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(pedigree[k].ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } });
                 const a = res.data;
                 if (!a) return null;
-                const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(f => a[f]).filter(Boolean).join(' ');
-                return [k, { mode: 'ctc', ctcId: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: pedigree[k].notes || '' }];
+                return [slotKey, toSlot(a, notes)];
             } catch { return null; }
         })).then(results => {
             const updates = Object.fromEntries(results.filter(Boolean));
