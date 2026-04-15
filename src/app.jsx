@@ -17025,52 +17025,80 @@ const AnimalForm = ({
     const [mpSlotUploading, setMpSlotUploading] = useState({});
     const mpAutoFetchedRef = useRef(false);
 
-    // Auto-refresh all CTC-linked slots when Beta Pedigree tab is first opened in edit.
-    // Also backfills sire/dam from the animal's existing fatherId/motherId if manualPedigree
-    // doesn't have them yet (migration from old Lineage tab).
+    // Auto-fill all generations when Beta Pedigree tab is first opened in edit.
+    // Refreshes existing CTC-linked slots, backfills sire/dam from lineage fields,
+    // and recursively walks up the tree to fill grandparents & great-grandparents.
     useEffect(() => {
         if (activeTab !== 5 || mpAutoFetchedRef.current || !authToken) return;
         mpAutoFetchedRef.current = true;
+
         const pedigree = animalToEdit?.manualPedigree || {};
-        const allSlots = ['sire','dam','sireSire','sireDam','damSire','damDam',
-            'sireSireSire','sireSireDam','sireDamSire','sireDamDam',
-            'damSireSire','damSireDam','damDamSire','damDamDam'];
 
-        // Build fetch jobs: existing CTC-linked slots + backfill sire/dam from lineage fields
-        const jobs = [];
+        const MP_SLOT_CHILDREN = {
+            sire:    { father: 'sireSire',     mother: 'sireDam'     },
+            dam:     { father: 'damSire',      mother: 'damDam'      },
+            sireSire:{ father: 'sireSireSire', mother: 'sireSireDam' },
+            sireDam: { father: 'sireDamSire',  mother: 'sireDamDam'  },
+            damSire: { father: 'damSireSire',  mother: 'damSireDam'  },
+            damDam:  { father: 'damDamSire',   mother: 'damDamDam'   },
+        };
 
-        // Refresh existing CTC-linked slots
-        allSlots.filter(k => pedigree[k]?.mode === 'ctc' && pedigree[k]?.ctcId)
-            .forEach(k => jobs.push({ slotKey: k, ctcId: pedigree[k].ctcId, notes: pedigree[k].notes || '' }));
-
-        // Backfill sire from fatherId_public / sireId_public if slot is empty
-        const sireId = animalToEdit?.fatherId_public || animalToEdit?.sireId_public;
-        if (sireId && !pedigree.sire?.ctcId && !jobs.find(j => j.slotKey === 'sire'))
-            jobs.push({ slotKey: 'sire', ctcId: sireId, notes: '' });
-
-        // Backfill dam from motherId_public / damId_public if slot is empty
-        const damId = animalToEdit?.motherId_public || animalToEdit?.damId_public;
-        if (damId && !pedigree.dam?.ctcId && !jobs.find(j => j.slotKey === 'dam'))
-            jobs.push({ slotKey: 'dam', ctcId: damId, notes: '' });
-
-        if (!jobs.length) return;
-
-        const toSlot = (a, notes) => {
+        const toSlot = (a, notes = '') => {
             const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(f => a[f]).filter(Boolean).join(' ');
             return { mode: 'ctc', ctcId: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes };
         };
 
-        Promise.all(jobs.map(async ({ slotKey, ctcId, notes }) => {
-            try {
-                const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } });
-                const a = res.data;
-                if (!a) return null;
-                return [slotKey, toSlot(a, notes)];
-            } catch { return null; }
-        })).then(results => {
-            const updates = Object.fromEntries(results.filter(Boolean));
+        const fetchAnimal = (ctcId) =>
+            axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } })
+                .then(r => r.data || null).catch(() => null);
+
+        // Seed queue: existing CTC slots + sire/dam from lineage fields if slots empty
+        const updates = {};
+        const queue = []; // { slotKey, ctcId, notes }
+        const queued = new Set();
+
+        const enqueue = (slotKey, ctcId, notes = '') => {
+            if (!ctcId || queued.has(slotKey)) return;
+            queued.add(slotKey);
+            queue.push({ slotKey, ctcId, notes });
+        };
+
+        const allSlots = ['sire','dam','sireSire','sireDam','damSire','damDam',
+            'sireSireSire','sireSireDam','sireDamSire','sireDamDam',
+            'damSireSire','damSireDam','damDamSire','damDamDam'];
+
+        // Existing CTC-linked slots
+        allSlots.forEach(k => { if (pedigree[k]?.mode === 'ctc' && pedigree[k]?.ctcId) enqueue(k, pedigree[k].ctcId, pedigree[k].notes || ''); });
+
+        // Backfill sire/dam from lineage fields if not already in pedigree
+        const sireId = animalToEdit?.fatherId_public || animalToEdit?.sireId_public;
+        const damId  = animalToEdit?.motherId_public || animalToEdit?.damId_public;
+        if (sireId && !pedigree.sire?.ctcId) enqueue('sire', sireId);
+        if (damId  && !pedigree.dam?.ctcId)  enqueue('dam',  damId);
+
+        if (!queue.length) return;
+
+        // Process queue iteratively, expanding children as each ancestor is fetched
+        const processQueue = async () => {
+            while (queue.length) {
+                const batch = queue.splice(0, queue.length);
+                await Promise.all(batch.map(async ({ slotKey, ctcId, notes }) => {
+                    const a = await fetchAnimal(ctcId);
+                    if (!a) return;
+                    updates[slotKey] = toSlot(a, notes);
+                    // Enqueue children if this slot has children defined
+                    const children = MP_SLOT_CHILDREN[slotKey];
+                    if (!children) return;
+                    const fId = a.fatherId_public || a.sireId_public;
+                    const mId = a.motherId_public || a.damId_public;
+                    if (fId && !pedigree[children.father]?.ctcId) enqueue(children.father, fId);
+                    if (mId && !pedigree[children.mother]?.ctcId) enqueue(children.mother, mId);
+                }));
+            }
             if (Object.keys(updates).length) setMpEditForm(f => ({ ...f, ...updates }));
-        });
+        };
+
+        processQueue();
     }, [activeTab, authToken, API_BASE_URL, animalToEdit?.manualPedigree]);
     // Gallery state (edit-only; changes are applied immediately via API)
     const [editGalleryImages, setEditGalleryImages] = useState(animalToEdit?.extraImages || []);
