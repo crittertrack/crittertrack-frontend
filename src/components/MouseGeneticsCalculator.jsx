@@ -126,7 +126,7 @@ const GENE_LOCI = {
   },
   Go: {
     name: 'Shorthair',
-    description: 'Dominant. Coat length. e.g. Shorthair (Go/-), Longhair (go/go)',
+    description: 'Controls base coat length. Go/Go (wildtype) is shorthaired; go is the recessive longhair mutation. e.g. Shorthair (Go/-), Longhair (go/go)',
     combinations: [
       'go/go',
       'Go/go', 'Go/Go'
