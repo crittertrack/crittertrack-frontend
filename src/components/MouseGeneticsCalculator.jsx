@@ -105,13 +105,15 @@ const GENE_LOCI = {
   },
   Mobr: {
     name: 'xbrindle',
-    description: 'Sex-linked brindle — dominant gene. Females can express (Mobr/mobr). Males express when present and suffer copper deficiency; the gene cannot be carried silently.',
+    description: 'Sex-linked brindle — X-linked dominant gene. Females (Mobr/mobr) express brindling due to mosaic X-inactivation; males (Mobr/Y) also express it but are born with copper deficiency.',
     combinations: [
       'mobr/mobr',
-      'Mobr/mobr'
+      'Mobr/mobr',
+      'Mobr/Mobr'
     ],
     maleCombinations: [
-      'mobr/mobr'
+      'mobr/Y',
+      'Mobr/Y'
     ]
   },
   U: {
