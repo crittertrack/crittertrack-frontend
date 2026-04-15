@@ -1,4 +1,4 @@
-// CritterTrack Frontend Application
+﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -4865,11 +4865,14 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                         {animal.carrierTraits && (
                                             <p className="text-sm text-gray-700"><span className="font-semibold">Carrier:</span> {animal.carrierTraits}</p>
                                         )}
+                                        {animal.geneticCode && (
+                                            <p className="text-sm text-gray-700"><span className="font-semibold">Genetic Code:</span> <code className="bg-gray-100 px-1 rounded font-mono">{animal.geneticCode}</code></p>
+                                        )}
                                         {animal.remarks && (
                                             <p className="text-sm text-gray-700 line-clamp-2"><span className="font-semibold">Remarks:</span> {animal.remarks}</p>
                                         )}
-                                        {/* Breeder + IDs inline */}
-                                        <div className="border-t border-gray-200 pt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                                        {/* Breeder + IDs */}
+                                        <div className="border-t border-gray-200 pt-2 space-y-2 text-sm">
                                             <div>
                                                 <span className="text-gray-500">Breeder:</span>{' '}
                                                 {breederInfo ? (() => {
@@ -4888,10 +4891,14 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                     return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-blue-600 hover:underline font-semibold">{bDisplayName}</RouterLink>;
                                                 })() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}
                                             </div>
-                                            <div><span className="text-gray-500">CTC ID:</span> <strong>{animal.id_public}</strong></div>
-                                            {animal.breederAssignedId && <div><span className="text-gray-500">ID:</span> <strong>{animal.breederAssignedId}</strong></div>}
-                                            {animal.microchipNumber && <div><span className="text-gray-500">Microchip:</span> <strong>{animal.microchipNumber}</strong></div>}
-                                            {animal.pedigreeRegistrationId && <div><span className="text-gray-500">Pedigree Reg:</span> <strong>{animal.pedigreeRegistrationId}</strong></div>}
+                                            {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
+                                                <hr className="border-gray-200" />
+                                            )}
+                                            <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                                                {animal.breederAssignedId && <div><span className="text-gray-500">Assigned ID:</span> <strong>{animal.breederAssignedId}</strong></div>}
+                                                {animal.microchipNumber && <div><span className="text-gray-500">Microchip:</span> <strong>{animal.microchipNumber}</strong></div>}
+                                                {animal.pedigreeRegistrationId && <div><span className="text-gray-500">Pedigree Reg:</span> <strong>{animal.pedigreeRegistrationId}</strong></div>}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -7368,11 +7375,14 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                         {animal.carrierTraits && (
                                             <p className="text-sm text-gray-700"><span className="font-semibold">Carrier:</span> {animal.carrierTraits}</p>
                                         )}
+                                        {animal.geneticCode && (
+                                            <p className="text-sm text-gray-700"><span className="font-semibold">Genetic Code:</span> <code className="bg-gray-100 px-1 rounded font-mono">{animal.geneticCode}</code></p>
+                                        )}
                                         {animal.remarks && (
                                             <p className="text-sm text-gray-700 line-clamp-2"><span className="font-semibold">Remarks:</span> {animal.remarks}</p>
                                         )}
-                                        {/* Breeder + IDs inline */}
-                                        <div className="border-t border-gray-200 pt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                                        {/* Breeder + IDs */}
+                                        <div className="border-t border-gray-200 pt-2 space-y-2 text-sm">
                                             <div>
                                                 <span className="text-gray-500">Breeder:</span>{' '}
                                                 {breederInfo ? (() => {
@@ -7391,10 +7401,14 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                     return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-blue-600 hover:underline font-semibold">{bDisplayName}</RouterLink>;
                                                 })() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}
                                             </div>
-                                            <div><span className="text-gray-500">CTC ID:</span> <strong>{animal.id_public}</strong></div>
-                                            {animal.breederAssignedId && <div><span className="text-gray-500">ID:</span> <strong>{animal.breederAssignedId}</strong></div>}
-                                            {animal.microchipNumber && <div><span className="text-gray-500">Microchip:</span> <strong>{animal.microchipNumber}</strong></div>}
-                                            {animal.pedigreeRegistrationId && <div><span className="text-gray-500">Pedigree Reg:</span> <strong>{animal.pedigreeRegistrationId}</strong></div>}
+                                            {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
+                                                <hr className="border-gray-200" />
+                                            )}
+                                            <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                                                {animal.breederAssignedId && <div><span className="text-gray-500">Assigned ID:</span> <strong>{animal.breederAssignedId}</strong></div>}
+                                                {animal.microchipNumber && <div><span className="text-gray-500">Microchip:</span> <strong>{animal.microchipNumber}</strong></div>}
+                                                {animal.pedigreeRegistrationId && <div><span className="text-gray-500">Pedigree Reg:</span> <strong>{animal.pedigreeRegistrationId}</strong></div>}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -9394,12 +9408,15 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                         {animal.carrierTraits && (
                                             <p className="text-sm text-gray-700"><span className="font-semibold">Carrier:</span> {animal.carrierTraits}</p>
                                         )}
+                                        {animal.geneticCode && (
+                                            <p className="text-sm text-gray-700"><span className="font-semibold">Genetic Code:</span> <code className="bg-gray-100 px-1 rounded font-mono">{animal.geneticCode}</code></p>
+                                        )}
                                         {animal.remarks && (
                                             <p className="text-sm text-gray-700 line-clamp-2"><span className="font-semibold">Remarks:</span> {animal.remarks}</p>
                                         )}
-                                        {/* Breeder + IDs inline */}
-                                        <div className="border-t border-gray-200 pt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                                            {animal.breederId_public && (
+                                        {/* Breeder + IDs */}
+                                        {animal.breederId_public && (
+                                            <div className="border-t border-gray-200 pt-2 space-y-2 text-sm">
                                                 <div>
                                                     <span className="text-gray-500">Breeder:</span>{' '}
                                                     {breederInfo ? (
@@ -9425,12 +9442,16 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                         <span className="font-mono text-accent">{animal.breederId_public}</span>
                                                     )}
                                                 </div>
-                                            )}
-                                            <div><span className="text-gray-500">CTC ID:</span> <strong>{animal.id_public}</strong></div>
-                                            {animal.breederAssignedId && <div><span className="text-gray-500">ID:</span> <strong>{animal.breederAssignedId}</strong></div>}
-                                            {animal.microchipNumber && <div><span className="text-gray-500">Microchip:</span> <strong>{animal.microchipNumber}</strong></div>}
-                                            {animal.pedigreeRegistrationId && <div><span className="text-gray-500">Pedigree Reg:</span> <strong>{animal.pedigreeRegistrationId}</strong></div>}
-                                        </div>
+                                                {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
+                                                    <hr className="border-gray-200" />
+                                                )}
+                                                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                                                    {animal.breederAssignedId && <div><span className="text-gray-500">Assigned ID:</span> <strong>{animal.breederAssignedId}</strong></div>}
+                                                    {animal.microchipNumber && <div><span className="text-gray-500">Microchip:</span> <strong>{animal.microchipNumber}</strong></div>}
+                                                    {animal.pedigreeRegistrationId && <div><span className="text-gray-500">Pedigree Reg:</span> <strong>{animal.pedigreeRegistrationId}</strong></div>}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
