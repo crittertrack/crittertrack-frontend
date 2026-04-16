@@ -249,7 +249,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                 </div>
 
                 {/* Tab Content - COPY OF PRIVATE DETAIL (no edit/delete/privacy toggle in Tab 1) */}
-                <div className="bg-white border border-t-0 border-gray-300 rounded-b-lg p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+                <div className="bg-[#f2e4e9] border border-t-0 border-gray-300 rounded-b-lg p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
                     {/* Tab 1: Overview - NO PRIVACY TOGGLE */}
                     {detailViewTab === 1 && (
                         <div className="space-y-3">
