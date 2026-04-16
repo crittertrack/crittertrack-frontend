@@ -398,25 +398,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 <QrCode size={14} />
                                 Share
                             </button>
-                            {onEdit && (
-                                <button
-                                    onClick={() => onEdit(animal)}
-                                    className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
-                                >
-                                    <Edit size={14} />
-                                    Edit
-                                </button>
-                            )}
-                            {onArchive && (
-                                <button
-                                    onClick={() => onArchive(animal)}
-                                    className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
-                                    title={animal.archived ? "Unarchive animal" : "Archive animal"}
-                                >
-                                    <Archive size={14} />
-                                    {animal.archived ? 'Unarchive' : 'Archive'}
-                                </button>
-                            )}
                             {onTransfer && (() => {
                                 const iWasTransferredThisAnimal = animal.originalOwnerId && animal.ownerId_public === userProfile?.id_public;
                                 if (iWasTransferredThisAnimal) {
@@ -447,7 +428,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 return (
                                     <button
                                         onClick={() => onTransfer(animal)}
-                                        className="px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                        className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
                                         title="Transfer"
                                     >
                                         <ArrowLeftRight size={14} />
@@ -455,6 +436,25 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                     </button>
                                 );
                             })()}
+                            {onArchive && (
+                                <button
+                                    onClick={() => onArchive(animal)}
+                                    className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                    title={animal.archived ? "Unarchive animal" : "Archive animal"}
+                                >
+                                    <Archive size={14} />
+                                    {animal.archived ? 'Unarchive' : 'Archive'}
+                                </button>
+                            )}
+                            {onEdit && (
+                                <button
+                                    onClick={() => onEdit(animal)}
+                                    className="px-2 py-1 bg-accent hover:bg-accent/90 text-white font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                >
+                                    <Edit size={14} />
+                                    Edit
+                                </button>
+                            )}
                         </div>
                     </div>
                     
@@ -474,26 +474,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 <QrCode size={16} />
                                 Share
                             </button>
-                            {onEdit && (
-                                <button
-                                    onClick={() => onEdit(animal)}
-                                    data-tutorial-target="edit-animal-btn"
-                                    className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
-                                >
-                                    <Edit size={16} />
-                                    Edit
-                                </button>
-                            )}
-                            {onArchive && (
-                                <button
-                                    onClick={() => onArchive(animal)}
-                                    className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-2"
-                                    title={animal.archived ? "Restore from archive" : "Archive animal"}
-                                >
-                                    <Archive size={16} />
-                                    {animal.archived ? 'Unarchive' : 'Archive'}
-                                </button>
-                            )}
                             {onTransfer && (() => {
                                 const iWasTransferredThisAnimal = animal.originalOwnerId && animal.ownerId_public === userProfile?.id_public;
                                 if (iWasTransferredThisAnimal) {
@@ -524,7 +504,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 return (
                                     <button
                                         onClick={() => onTransfer(animal)}
-                                        className="px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-lg transition flex items-center gap-2"
+                                        className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
                                         title="Transfer this animal"
                                     >
                                         <ArrowLeftRight size={16} />
@@ -532,6 +512,26 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                     </button>
                                 );
                             })()}
+                            {onArchive && (
+                                <button
+                                    onClick={() => onArchive(animal)}
+                                    className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-2"
+                                    title={animal.archived ? "Restore from archive" : "Archive animal"}
+                                >
+                                    <Archive size={16} />
+                                    {animal.archived ? 'Unarchive' : 'Archive'}
+                                </button>
+                            )}
+                            {onEdit && (
+                                <button
+                                    onClick={() => onEdit(animal)}
+                                    data-tutorial-target="edit-animal-btn"
+                                    className="px-3 py-1.5 bg-accent hover:bg-accent/90 text-white font-semibold rounded-lg transition flex items-center gap-2"
+                                >
+                                    <Edit size={16} />
+                                    Edit
+                                </button>
+                            )}
                             <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={28} />
                             </button>
