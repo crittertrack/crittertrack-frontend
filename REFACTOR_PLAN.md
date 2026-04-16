@@ -8,9 +8,9 @@
 
 ## Phase 10 — App Component Decomposition (~5,700 lines)
 
-**Status:** 🚀 IN PROGRESS (10a ✅, 10b ✅, 10c–10g remaining)
+**Status:** 🚀 IN PROGRESS (10a ✅, 10b ✅, 10c ✅, 10d–10g remaining)
 
-The `App` component (lines ~80–5,280, ~5,200 lines remaining) contains top-level state, routing, and event wiring. Break into 5 remaining sub-phases.
+The `App` component (lines ~80–5,180, ~5,100 lines remaining) contains top-level state, routing, and event wiring. Break into 4 remaining sub-phases.
 
 ### 📊 Current State Analysis
 
@@ -71,32 +71,42 @@ The `App` component (lines ~80–5,280, ~5,200 lines remaining) contains top-lev
 
 ---
 
-#### **10c: Extract Animal Navigation** (~200 lines)
-**Files to create:**
-- `src/hooks/useAnimalNavigation.ts` — Private animal viewing + history
-- `src/hooks/usePublicAnimalNavigation.ts` — Public animal viewing + history
+#### **10c: Extract Animal Navigation** (~460 lines)
+**Status:** ✅ COMPLETE (commit 7aeee77b)
 
-**Extract:**
-- `animalToView`, `animalViewHistory`, `handleViewAnimal()`, `handleBackFromAnimal()`, `handleCloseAllAnimals()`
-- `privateAnimalInitialTab`, `privateBetaView`, `detailViewTab`
-- Ref objects: `viewReturnPathRef`, `editReturnPathRef`
-- History clearing useEffect
+**Files created:**
+- `src/hooks/usePrivateAnimalNavigation.ts` (380 lines) — Private animal viewing/editing
+  * States: animalToView, animalToEdit, animalViewHistory, tab management, pedigree data
+  * Handlers: 9 functions for view/edit/save/archive/delete/toggle operations
+  * Pedigree fetching: async from /animals/any/ endpoints (sire, dam, offspring)
+  * Navigation refs: viewReturnPathRef, editReturnPathRef for context routing
+  * Events: Listen for animal-updated and animal-archived for external sync
+  * Effects: Auto-fetch pedigree, history clearing, parent card refresh
 
-**Result:** App loses 180 lines, animal navigation fully encapsulated
+- `src/hooks/usePublicAnimalNavigation.ts` (80 lines) — Public animal viewing
+  * States: viewingPublicAnimal, publicAnimalViewHistory, publicAnimalInitialTab
+  * Handlers: 3 functions for view/back/close navigation
+  * History stack pattern for modal-based navigation
+
+**Result:** App loses 460 lines, full animal navigation encapsulated
+- Build verified: ✅ Zero compilation errors
 
 ---
 
 #### **10d: Extract Transfer Workflow** (~150 lines)
+**Status:** 🚀 IN PROGRESS
+
 **Files to create:**
 - `src/hooks/useTransferWorkflow.ts` — Animal transfer + user search
 
 **Extract:**
-- All transfer-related state (12 variables)
-- `handleSearchTransferUser()`, `handleSubmitTransfer()`
-- User search + selection logic
-- Pre-selected animal shortcuts
+- Transfer modal state: `showTransferModal`, `budgetModalOpen`
+- Transfer animal: `transferAnimal`, `preSelectedTransferAnimal`, `preSelectedTransactionType`
+- User search: `transferUserQuery`, `transferUserResults`, `transferSelectedUser`, `transferSearching`, `transferSearchPerformed`
+- Transaction: `transferPrice`, `transferNotes`
+- Handlers: `handleSearchTransferUser()`, `handleSubmitTransfer()` + related setters
 
-**Result:** App loses 140 lines, clean transfer workflow hook
+**Expected Result:** App loses 150 lines, transfer workflow fully isolated
 
 ---
 
