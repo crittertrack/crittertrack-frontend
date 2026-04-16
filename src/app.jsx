@@ -4333,16 +4333,20 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
     useEffect(() => {
         if (ownedAnimalsLoadedRef.current || !authToken || !animal?.id_public) return;
         ownedAnimalsLoadedRef.current = true;
-        // Fetch all account animals (no ownership filter)
+        // Fetch all account animals and filter to only truly owned ones (My Animals + Archived)
         axios.get(`${API_BASE_URL}/animals`, {
             headers: { Authorization: `Bearer ${authToken}` }
-        }).then(res => setOwnedAnimals(res.data || [])).catch(() => {});
+        }).then(res => {
+            const userAnimalIds = new Set(userAnimals.map(a => a.id_public));
+            const ownedOrArchived = (res.data || []).filter(a => userAnimalIds.has(a.id_public) || a.archived);
+            setOwnedAnimals(ownedOrArchived);
+        }).catch(() => {});
         // Fetch cross-platform relationships from backend
         setGlobalRelsLoading(true);
         axios.get(`${API_BASE_URL}/animals/${animal.id_public}/relationships`, {
             headers: { Authorization: `Bearer ${authToken}` }
         }).then(res => setGlobalRels(res.data || null)).catch(() => setGlobalRels(null)).finally(() => setGlobalRelsLoading(false));
-    }, [authToken, API_BASE_URL, animal?.id_public]);
+    }, [authToken, API_BASE_URL, animal?.id_public, userAnimals];
 
     // Relationship Insights • computed from all account animals (shown in Lineage tab)
     const relationships = useMemo(() => computeRelationships(animal, ownedAnimals), [animal, ownedAnimals]);
