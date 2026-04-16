@@ -2408,8 +2408,7 @@ const App = () => {
                 const iCurrentlyOwn = animalToView.ownerId_public === userProfile?.id_public;
                 if (iCurrentlyOwn) {
                     return (
-                        <div className="fixed inset-0 z-50 overflow-y-auto bg-white">
-                            <PrivateAnimalDetail
+                        <PrivateAnimalDetail
                                 animal={animalToView}
                                 initialTab={privateAnimalInitialTab}
                                 initialBetaView={privateBetaView}
@@ -2432,12 +2431,10 @@ const App = () => {
                                 animalBreedingLines={animalBreedingLines}
                                 toggleAnimalBreedingLine={toggleAnimalBreedingLine}
                             />
-                        </div>
                     );
                 } else {
                     return (
-                        <div className="fixed inset-0 z-50 overflow-y-auto bg-white">
-                            <ViewOnlyPrivateAnimalDetail
+                        <ViewOnlyPrivateAnimalDetail
                                 animal={animalToView}
                                 initialTab={privateAnimalInitialTab}
                                 initialBetaView={privateBetaView}
@@ -2453,7 +2450,6 @@ const App = () => {
                                 animalBreedingLines={animalBreedingLines}
                                 toggleAnimalBreedingLine={toggleAnimalBreedingLine}
                             />
-                        </div>
                     );
                 }
             })()}
