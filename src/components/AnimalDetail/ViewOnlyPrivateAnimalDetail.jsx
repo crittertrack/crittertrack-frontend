@@ -174,7 +174,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
     if (!animal) return null;
 
     return (
-        <div className="fixed inset-0 bg-[#f2e4e9] flex items-center justify-center p-2 sm:p-4 z-[70] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-2 sm:p-4 z-[70] overflow-y-auto">
             <div className="bg-[#f2e4e9] rounded-xl shadow-2xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto overflow-x-hidden">
                 {/* Header */}
                 <div className="bg-[#f2e4e9] rounded-t-lg p-2 sm:p-4 border-b border-gray-300 mt-12 sm:mt-0">
