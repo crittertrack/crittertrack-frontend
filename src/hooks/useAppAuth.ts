@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import axios from 'axios';
 
 /**
@@ -25,6 +25,13 @@ export function useAppAuth(
 
     // User profile state
     const [userProfile, setUserProfile] = useState<any>(null);
+
+    // Stable ref for showModalMessage — avoids making fetchUserProfile a new reference
+    // every render just because the caller passes an inline arrow function
+    const showModalMessageRef = useRef(showModalMessage);
+    useEffect(() => {
+        showModalMessageRef.current = showModalMessage;
+    });
 
     // Fetch user profile from API
     const fetchUserProfile = useCallback(
@@ -62,8 +69,8 @@ export function useAppAuth(
                 // Only log out if it's a 401 or 403 (token expired/invalid/forbidden), not for network errors
                 if (error.response?.status === 401 || error.response?.status === 403) {
                     // Only show error modal if we still have a token (not already logged out)
-                    if (authToken) {
-                        showModalMessage('Session Expired', 'Your session has expired. Please log in again.');
+                    if (token) {
+                        showModalMessageRef.current('Session Expired', 'Your session has expired. Please log in again.');
                         setAuthToken(null);
                         try {
                             localStorage.removeItem('authToken');
@@ -82,7 +89,7 @@ export function useAppAuth(
                 // For network/other errors, don't log out - the periodic refresh will retry
             }
         },
-        [API_BASE_URL, authToken, showModalMessage]
+        [API_BASE_URL]  // No longer depends on authToken or showModalMessage — both accessed via ref/closure
     );
 
     // Periodically refresh user profile to catch warning/suspension changes
