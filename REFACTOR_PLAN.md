@@ -8,9 +8,9 @@
 
 ## Phase 10 — App Component Decomposition (~5,700 lines)
 
-**Status:** 🚀 IN PROGRESS
+**Status:** 🚀 IN PROGRESS (10a ✅, 10b–10g remaining)
 
-The `App` component (lines ~80–5,560, ~5,481 lines) contains all top-level state, routing, and event wiring. Break into 7 sub-phases.
+The `App` component (lines ~80–5,380, ~5,300 lines remaining) contains top-level state, routing, and event wiring. Break into 6 remaining sub-phases.
 
 ### 📊 Current State Analysis
 
@@ -25,19 +25,22 @@ The `App` component (lines ~80–5,560, ~5,481 lines) contains all top-level sta
 ### 🎯 Phase 10 Sub-Phases
 
 #### **10a: Extract Authentication Logic** (~150 lines)
-**Files to create:**
-- `src/hooks/useAppAuth.ts` — Auth state + logout handler + profile fetching
-- `src/hooks/useIdleTimeout.ts` — 30-minute idle timeout + activity reset
+**Status:** ✅ COMPLETE (commit 75fee1b8)
 
-**Extract from App:**
-- `authToken`, `setAuthToken` → custom hook
-- `userProfile`, `setUserProfile` → custom hook
-- `fetchUserProfile()` function
-- `handleLogout()` function
-- Idle timeout effect (lines ~1,000–1,030)
+**Files created:**
+- `src/hooks/useAppAuth.ts` (120 lines) — Auth state + profile fetching + 10-second auto-refresh
+- `src/hooks/useIdleTimeout.ts` (140 lines) — 30-minute idle timeout + activity reset + suspension detection
+
+**Extracted from App:**
+- `authToken`, `setAuthToken` → useAppAuth hook
+- `userProfile`, `setUserProfile` → useAppAuth hook
+- `fetchUserProfile()` function (45 lines)
+- Idle timeout effect (60 lines) + refs
 - Auth interceptor effect
 
-**Result:** App loses 150 lines, gains 2 clean hooks with 95% test coverage
+**Result:** App reduced from 5,560 → 5,380 lines (~180 lines removed)
+- Build tested: ✅ Zero compilation errors
+- Production bundle: Ready to deploy
 
 ---
 

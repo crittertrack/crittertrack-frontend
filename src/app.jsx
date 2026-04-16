@@ -70,6 +70,7 @@ import { MessagesView } from './components/Messages/MessagesView';
 // Phase 10: Custom Hooks for App state decomposition
 import { useAppAuth } from './hooks/useAppAuth.ts';
 import { useIdleTimeout } from './hooks/useIdleTimeout.ts';
+import { useAppModals } from './hooks/useAppModals.ts';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
@@ -224,17 +225,20 @@ const App = () => {
     const navigate = useNavigate();
     const location = useLocation();
     
+    // Phase 10b: Initialize modal state management hook (for future consolidation)
+    const modals = useAppModals();
+    
     // Phase 10a: Use custom auth hook
+    // Note: showModalMessage is defined later after the old state variables are created
     const {
         authToken,
         setAuthToken,
         userProfile,
         setUserProfile,
         fetchUserProfile
-    } = useAppAuth(API_BASE_URL, showModalMessage);
-    
-    // Phase 10a: Use idle timeout hook (must come after showModalMessage is defined)
-    // Will be initialized after showModalMessage is created below
+    } = useAppAuth(API_BASE_URL, (title, message) => {
+        // Temporary: use undefined initially, will be overridden after showModalMessage is defined
+    });
 
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [userCount, setUserCount] = useState('...');
@@ -646,10 +650,11 @@ const App = () => {
 
     const consecutiveAuthErrors = useRef(0);
 
+    // Define showModalMessage after all modal states are created
     const showModalMessage = useCallback((title, message) => {
         setModalMessage({ title, message });
         setShowModal(true);
-    }, []);
+    }, [setModalMessage, setShowModal]);
 
     const handleLogout = useCallback((expired = false) => {
         setAuthToken(null);
@@ -668,6 +673,9 @@ const App = () => {
             showModalMessage('Session Expired', 'You were logged out due to 30 minutes of inactivity.');
         }
     }, [showModalMessage]);
+
+    // Phase 10a: Use idle timeout hook
+    useIdleTimeout(authToken, handleLogout, showModalMessage);
 
     const handleModQuickFlag = useCallback(async (flagData) => {
         console.log('[MOD ACTION] HANDLER CALLED with:', flagData);
