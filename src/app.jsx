@@ -1,4 +1,4 @@
-// CritterTrack Frontend Application
+﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -1915,89 +1915,6 @@ const App = () => {
                 )}
             </div>
             
-            {/* Available Animal Showcase - Top Right */}
-            {currentView === 'list' && !inModeratorMode && availableAnimals.length > 0 && availableAnimals[currentAvailableIndex] && (
-                <div className="hidden lg:block absolute top-20 right-4 z-[60] w-48">
-                    <div 
-                        key={currentAvailableIndex}
-                        onClick={() => navigate('/marketplace')}
-                        className="bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-all hover:scale-[1.02] animate-fadeInScale"
-                        style={{
-                            animation: 'fadeInScale 0.5s ease-in-out'
-                        }}
-                    >
-                        <div className="bg-gradient-to-r from-primary to-accent p-2 relative">
-                            <div className="text-xs font-semibold text-black text-center flex items-center justify-center gap-2 flex-wrap">
-                                {availableAnimals[currentAvailableIndex].isForSale && (
-                                    <><Tag size={14} className="inline-block align-middle mr-1" /> For Sale</>
-                                )}
-                                {availableAnimals[currentAvailableIndex].availableForBreeding && (
-                                    <><Egg size={14} className="inline-block align-middle mr-1" /> For Stud</>
-                                )}
-                                {availableAnimals[currentAvailableIndex].isForSale && availableAnimals[currentAvailableIndex].availableForBreeding && (
-                                    <span className="text-xs">/</span>
-                                )}
-                            </div>
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    window.refreshAvailableAnimals && window.refreshAvailableAnimals();
-                                }}
-                                className="absolute right-1 top-1/2 -translate-y-1/2 p-1 hover:bg-black/10 rounded transition-colors"
-                                title="Refresh available animals"
-                            >
-                                <RefreshCw size={14} className="text-black" />
-                            </button>
-                        </div>
-                        {availableAnimals[currentAvailableIndex].imageUrl && (
-                            <img 
-                                src={availableAnimals[currentAvailableIndex].imageUrl} 
-                                alt={availableAnimals[currentAvailableIndex].name}
-                                className="w-full h-32 object-cover"
-                            />
-                        )}
-                        <div className="p-2">
-                            <div className="flex items-start gap-2">
-                                <div className="flex-1 min-w-0">
-                                    <p className="font-semibold text-sm text-gray-800 truncate">
-                                        {availableAnimals[currentAvailableIndex].prefix && `${availableAnimals[currentAvailableIndex].prefix} `}
-                                        {availableAnimals[currentAvailableIndex].name}
-                                        {availableAnimals[currentAvailableIndex].suffix && ` ${availableAnimals[currentAvailableIndex].suffix}`}
-                                    </p>
-                                    <p className="text-xs text-gray-600 truncate">
-                                        {availableAnimals[currentAvailableIndex].species}
-                                        {availableAnimals[currentAvailableIndex].variety && ` ? ${availableAnimals[currentAvailableIndex].variety}`}
-                                    </p>
-                                </div>
-                                {availableAnimals[currentAvailableIndex].ownerCountry && (
-                                    <span
-                                        className={`${getCountryFlag(availableAnimals[currentAvailableIndex].ownerCountry)} inline-block h-4 w-6 flex-shrink-0 mt-1`}
-                                        title={getCountryName(availableAnimals[currentAvailableIndex].ownerCountry)}
-                                    ></span>
-                                )}
-                            </div>
-                            <div className="mt-1 space-y-1">
-                                {availableAnimals[currentAvailableIndex].isForSale && availableAnimals[currentAvailableIndex].salePriceAmount && (
-                                    <p className="text-xs text-green-600 font-semibold">
-                                        Fee: {availableAnimals[currentAvailableIndex].salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${getCurrencySymbol(availableAnimals[currentAvailableIndex].salePriceCurrency)}${availableAnimals[currentAvailableIndex].salePriceAmount}`}
-                                    </p>
-                                )}
-                                {availableAnimals[currentAvailableIndex].availableForBreeding && availableAnimals[currentAvailableIndex].studFeeAmount && (
-                                    <p className="text-xs text-purple-600 font-semibold">
-                                        Fee: {availableAnimals[currentAvailableIndex].studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${getCurrencySymbol(availableAnimals[currentAvailableIndex].studFeeCurrency)}${availableAnimals[currentAvailableIndex].studFeeAmount}`}
-                                    </p>
-                                )}
-                            </div>
-                            <div className="mt-2 flex items-center justify-between">
-                                <span className="text-xs text-gray-500">
-                                    {availableAnimals[currentAvailableIndex].gender}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {/* Welcome Guide Modal - Shows once to brand new users on first login */}
             {showWelcomeGuide && (
                 <WelcomeGuideModal 
