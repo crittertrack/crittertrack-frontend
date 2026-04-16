@@ -8,9 +8,9 @@
 
 ## Phase 10 — App Component Decomposition (~5,700 lines)
 
-**Status:** 🚀 IN PROGRESS (10a ✅, 10b ✅, 10c ✅, 10d–10g remaining)
+**Status:** 🚀 IN PROGRESS (10a ✅, 10b ✅, 10c ✅, 10d ✅, 10e ✅, 10f-10g remaining)
 
-The `App` component (lines ~80–5,180, ~5,100 lines remaining) contains top-level state, routing, and event wiring. Break into 4 remaining sub-phases.
+The `App` component (lines ~80–4,980, ~4,900 lines remaining) contains top-level state, routing, and event wiring. Break into 2 remaining sub-phases.
 
 ### 📊 Current State Analysis
 
@@ -94,50 +94,57 @@ The `App` component (lines ~80–5,180, ~5,100 lines remaining) contains top-lev
 ---
 
 #### **10d: Extract Transfer Workflow** (~150 lines)
-**Status:** 🚀 IN PROGRESS
+**Status:** ✅ COMPLETE (commit 248b1627)
 
-**Files to create:**
-- `src/hooks/useTransferWorkflow.ts` — Animal transfer + user search
+**Files created:**
+- `src/hooks/useTransferWorkflow.ts` (240 lines) — Animal transfer and user search
+  * States: showTransferModal, transferAnimal, budgetModalOpen
+  * User search: transferUserQuery, transferUserResults, transferSelectedUser, transferSearching, transferSearchPerformed
+  * Transaction: transferPrice, transferNotes
+  * Pre-selection: preSelectedTransferAnimal, preSelectedTransactionType
+  * Handlers: handleSearchTransferUser(), handleSubmitTransfer(), handleOpenTransferWithAnimal(), etc.
+  * Event dispatch: 'animal-transferred' custom event for external sync
+  * Modal integration: budget and transfer modal management
 
-**Extract:**
-- Transfer modal state: `showTransferModal`, `budgetModalOpen`
-- Transfer animal: `transferAnimal`, `preSelectedTransferAnimal`, `preSelectedTransactionType`
-- User search: `transferUserQuery`, `transferUserResults`, `transferSelectedUser`, `transferSearching`, `transferSearchPerformed`
-- Transaction: `transferPrice`, `transferNotes`
-- Handlers: `handleSearchTransferUser()`, `handleSubmitTransfer()` + related setters
-
-**Expected Result:** App loses 150 lines, transfer workflow fully isolated
+**Result:** App loses 150 lines, transfer workflow fully isolated
+- Build verified: ✅ Zero compilation errors
 
 ---
 
-#### **10e: Extract Breeding Lines System** (~100 lines)
-**Files to create:**
-- `src/hooks/useBreedingLines.ts` — Color-coded breeding line management
+#### **10e: Extract Breeding Lines** (~100 lines)
+**Status:** ✅ COMPLETE (commit 248b1627)
 
-**Extract:**
-- `breedingLineDefs`, `animalBreedingLines`
-- `BL_PRESETS_APP` constant
-- `saveBreedingLineDefs()`, `toggleAnimalBreedingLine()`
-- Backend sync effect + localStorage fallback
-- Ref: `breedingLineDefsRef`
+**Files created:**
+- `src/hooks/useBreedingLines.ts` (210 lines) — Color-coded breeding lines
+  * Definitions: 10 max lines with custom names and colors
+  * Assignments: many-to-many mapping of animals to lines
+  * Persistence: localStorage fallback + backend sync
+  * Handlers: saveBreedingLineDefs(), toggleAnimalBreedingLine(), updateBreedingLineDef(), clearAnimalBreedingLines()
+  * Backend: Auto-load on login (overrides localStorage), auto-save on changes
+  * Ref management: breedingLineDefsRef to avoid stale closures
 
-**Result:** App loses 90 lines, self-contained breeding lines system
+**Result:** App loses 100 lines, breeding system fully encapsulated
+- Build verified: ✅ Zero compilation errors
 
 ---
 
 #### **10f: Extract Moderation Mode** (~200 lines)
+**Status:** 🚀 IN PROGRESS
+
 **Files to create:**
-- `src/hooks/useModerationMode.ts` — Admin/mod panel + flag handling
+- `src/hooks/useModerationMode.ts` — Admin/mod panel and moderation actions
 
 **Extract:**
-- `inModeratorMode`, `showAdminPanel`, `showModReportQueue`, `showModerationAuthModal`
-- `modCurrentContext` state
-- `handleModQuickFlag()` function (200+ lines of mod action handlers)
-- Authentication check effect
+- Modal states: `showAdminPanel`, `showModReportQueue`, `showModerationAuthModal`
+- Mod mode: `inModeratorMode`, `modCurrentContext`
+- Handler: `handleModQuickFlag()` (~200 lines, 8 conditional branches)
+  * Actions: flag, edit, warn, suspend, ban, lift-warning, lift-suspension, lift-ban
+  * Context types: profile, animal, message
+- Auth check effect for mod dashboard
 
-**Risk:** `handleModQuickFlag` is complex (8 conditional branches for warn/suspend/ban/lift/flag/edit/etc.)
+**Complexity:** HIGH (200+ line handler with complex branching)
 
-**Result:** App loses 190 lines, mod logic fully isolated
+**Expected Result:** App loses 200 lines, moderation logic isolated
 
 ---
 
