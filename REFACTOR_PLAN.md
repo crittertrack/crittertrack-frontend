@@ -1,8 +1,8 @@
 # CritterTrack Frontend — Full app.jsx Refactor Plan
 
-**Current state (post Phases 1, 3, 4, 5, 6):** `src/app.jsx` = 17,333 lines  
+**Current state (post Phases 1, 3, 4, 5, 6, 8, 9):** `src/app.jsx` = 16,119 lines  
 **Target:** ~500 lines (routing + top-level App state only)  
-**Remaining to extract:** ~22,100 lines across 7 phases
+**Remaining to extract:** ~15,600 lines across 3 phases
 
 ---
 
@@ -12,16 +12,16 @@
 
 | Component | Lines in app.jsx | Est. Size | Notes |
 |---|---|---|---|
-| `useDetailFieldTemplate` | 4113–4126 | ~14 | Custom hook |
-| `parseJsonField` | 4127–4132 | ~6 | Util |
-| `DetailJsonList` | 4133–4148 | ~16 | Small UI |
-| `computeRelationships` | 4149–4244 | ~96 | Pure function |
-| `PrivateAnimalDetail` | 4245–7016 | ~2,772 | Authenticated animal detail |
-| `ViewOnlyPrivateAnimalDetail` | 7017–8936 | ~1,920 | View-only for owned animals |
-| `ViewOnlyAnimalDetail` | 8937–10901 | ~1,965 | Public-facing animal detail |
-| `ViewOnlyParentCard` | 10902–11042 | ~141 | Used inside detail views |
-| `ParentMiniCard` | 11043–11100 | ~58 | Small parent display card |
-| `OffspringSection` | 11101–11308 | ~208 | Offspring listing |
+| `useDetailFieldTemplate` | 2341–2354 | ~14 | Custom hook |
+| `parseJsonField` | 2355–2360 | ~6 | Util |
+| `DetailJsonList` | 2361–2376 | ~16 | Small UI |
+| `computeRelationships` | 2377–2472 | ~96 | Pure function |
+| `PrivateAnimalDetail` | 2473–5244 | ~2,772 | Authenticated animal detail |
+| `ViewOnlyPrivateAnimalDetail` | 5245–7164 | ~1,920 | View-only for owned animals |
+| `ViewOnlyAnimalDetail` | 7165–9129 | ~1,965 | Public-facing animal detail |
+| `ViewOnlyParentCard` | 9130–9270 | ~141 | Used inside detail views |
+| `ParentMiniCard` | 9271–9328 | ~58 | Small parent display card |
+| `OffspringSection` | 9329–9536 | ~208 | Offspring listing |
 
 **Files to create:**
 - `src/components/AnimalDetail/PrivateAnimalDetail.jsx`
@@ -40,73 +40,22 @@
 
 ---
 
-## Phase 3 — Public Profile & Breeder Directory (~3,000 lines)
-
-**Target folder:** `src/components/PublicProfile/`
-
-| Component | Lines in app.jsx | Est. Size | Notes |
-|---|---|---|---|
-| `renderBreederInfoMarkdown` | 2786–2798 | ~13 | Util, used only by PublicProfileView |
-| `RatingStarRow` | 2799–2814 | ~16 | Tiny star rating row |
-| `PublicProfileView` | 2815–4112 | ~1,298 | Full public breeder profile |
-| `BreederDirectorySettings` | 1705–1847 | ~143 | Settings for directory listing |
-| `BreederDirectory` | 15917–16249 | ~333 | Browse all breeders |
-| `GlobalSearchBar` | 2506–2758 | ~253 | Global search for animals/users |
-| `QRModal` | 2759–2785 | ~27 | Simple QR code modal |
-
-**Files to create:**
-- `src/components/PublicProfile/PublicProfileView.jsx`
-- `src/components/PublicProfile/BreederDirectory.jsx`
-- `src/components/PublicProfile/GlobalSearchBar.jsx`
-
-**Key dependencies:**
-- `RatingStarRow`, `renderBreederInfoMarkdown` can be local to `PublicProfileView.jsx`
-- `BreederDirectorySettings` can be local to `BreederDirectory.jsx` or its own file
-- `QRModal` → move to `src/components/Modals/` (see Phase 7)
-
----
-
-## Phase 4 — Profile Edit & Account (~3,200 lines)
-
-**Target folder:** `src/components/Profile/`
-
-| Component | Lines in app.jsx | Est. Size | Notes |
-|---|---|---|---|
-| `ProfileImagePlaceholder` | 1848–1879 | ~32 | Simple image upload placeholder |
-| `UserProfileCard` | 12271–12353 | ~83 | Displays user profile summary |
-| `FormattedTextarea` | 12354–12389 | ~36 | Text input with char counter |
-| `ProfileEditForm` | 12390–15222 | ~2,833 | Full profile editing — large |
-| `ProfileView` | 16250–16478 | ~229 | Profile page container |
-
-**Files to create:**
-- `src/components/Profile/ProfileEditForm.jsx`
-- `src/components/Profile/ProfileView.jsx`
-- `src/components/Profile/ProfileImagePlaceholder.jsx`
-
-**Key dependencies:**
-- `ProfileEditForm` uses `AnimalImageUpload`, `FormattedTextarea`, `ProfileImagePlaceholder`
-- Requires `breedingLineDefs`, `toggleAnimalBreedingLine`, `BL_PRESETS_APP` from App state
-
-**Risk:** Medium — `ProfileEditForm` is large (~2,833 lines) with breeding line management, image upload, public/private settings, and country/state dropdowns.
-
----
-
 ## Phase 7 — Modals & Species (~2,500 lines)
 
 **Target folder:** `src/components/Modals/`
 
 | Component | Lines in app.jsx | Est. Size | Notes |
 |---|---|---|---|
-| `ConflictResolutionModal` | 355–463 | ~109 | Litter sync conflict resolver |
-| `LitterSyncConflictModal` | 464–1704 | ~1,241 | Litter sync conflict list — large |
-| `ParentSearchModal` | 1880–2110 | ~231 | Search for parent animals |
-| `LocalAnimalSearchModal` | 2111–2227 | ~117 | Search local animals |
-| `UserSearchModal` | 2228–2505 | ~278 | Search for users |
-| `SpeciesPickerModal` | 11309–11461 | ~153 | Pick species from grid |
-| `SpeciesManager` | 11462–11734 | ~273 | Add/remove species |
-| `SpeciesSelector` | 11735–11889 | ~155 | Species selector with filter |
-| `CommunityGeneticsModal` | 12114–12270 | ~157 | Community genetics viewer |
-| `MessagesView` | 17382–17824 | ~443 | Direct messaging view |
+| `ConflictResolutionModal` | 365–473 | ~109 | Litter sync conflict resolver |
+| `LitterSyncConflictModal` | 474–1714 | ~1,241 | Litter sync conflict list — large |
+| `ParentSearchModal` | 1715–1945 | ~231 | Search for parent animals |
+| `LocalAnimalSearchModal` | 1946–2062 | ~117 | Search local animals |
+| `UserSearchModal` | 2063–2340 | ~278 | Search for users |
+| `SpeciesPickerModal` | 9537–9689 | ~153 | Pick species from grid |
+| `SpeciesManager` | 9690–9962 | ~273 | Add/remove species |
+| `SpeciesSelector` | 9963–10117 | ~155 | Species selector with filter |
+| `CommunityGeneticsModal` | 10342–10498 | ~157 | Community genetics viewer |
+| `MessagesView` | 11193–11773 | ~581 | Direct messaging view |
 
 **Files to create:**
 - `src/components/Modals/LitterConflictModals.jsx` (ConflictResolutionModal + LitterSyncConflictModal)
@@ -123,15 +72,15 @@
 
 | Component | Lines in app.jsx | Est. Size | Target |
 |---|---|---|---|
-| `ModalMessage` | 289–303 | ~15 | `src/components/shared/` |
-| `CustomAppLogo` | 304–316 | ~13 | `src/components/shared/` |
-| `LoadingSpinner` | 317–324 | ~8 | `src/components/shared/` |
-| `AnimalImage` | 325–354 | ~30 | `src/components/shared/` |
-| `DonationBadge` | 171–191 | ~21 | `src/components/shared/` |
-| `AnimalImageUpload` | 11890–12072 | ~183 | `src/components/AnimalImageUpload/` |
-| `compressImageWithWorker` | 12073–12113 | ~41 | `src/components/AnimalImageUpload/` |
-| `DonationView` | 15223–15425 | ~203 | `src/components/Donation/` |
-| `CommunityPage` | 15426–15916 | ~491 | `src/components/Community/` |
+| `DonationBadge` | 181–298 | ~21 | `src/components/shared/` |
+| `ModalMessage` | 299–313 | ~15 | `src/components/shared/` |
+| `CustomAppLogo` | 314–326 | ~13 | `src/components/shared/` |
+| `LoadingSpinner` | 327–334 | ~8 | `src/components/shared/` |
+| `AnimalImage` | 335–364 | ~30 | `src/components/shared/` |
+| `AnimalImageUpload` | 10118–10300 | ~183 | `src/components/AnimalImageUpload/` |
+| `compressImageWithWorker` | 10301–10341 | ~41 | `src/components/AnimalImageUpload/` |
+| `DonationView` | 10499–10701 | ~203 | `src/components/Donation/` |
+| `CommunityPage` | 10702–11192 | ~491 | `src/components/Community/` |
 
 **Files to create:**
 - `src/components/shared/index.jsx` (ModalMessage, LoadingSpinner, AnimalImage, DonationBadge, CustomAppLogo)
@@ -149,18 +98,18 @@ Move pure utility functions out of app.jsx into `src/utils/`.
 
 | Function(s) | Lines | Target file |
 |---|---|---|
-| `getSpeciesDisplayName`, `getSpeciesLatinName` | 47–79 | `src/utils/speciesUtils.js` |
-| `getCountryFlag`, `getCountryName`, `US_STATES`, `getStateName`, `getCurrencySymbol` | 80–136 | `src/utils/locationUtils.js` |
-| `getDonationBadge` | 137–170 | `src/utils/donationUtils.js` |
-| `formatDateDisplay`, `litterAge`, `formatTimeAgo` | 192–245 | `src/utils/dateUtils.js` (extend existing) |
-| `getActionLabel`, `getActionColor` | 246–288 | `src/utils/activityUtils.js` |
-| `GENDER_OPTIONS`, `STATUS_OPTIONS`, `DEFAULT_SPECIES_OPTIONS` | 42–45 | `src/utils/constants.js` |
+| `GENDER_OPTIONS`, `STATUS_OPTIONS`, `DEFAULT_SPECIES_OPTIONS` | 52–55 | `src/utils/constants.js` |
+| `getSpeciesDisplayName`, `getSpeciesLatinName` | 57–89 | `src/utils/speciesUtils.js` |
+| `getCountryFlag`, `getCountryName`, `US_STATES`, `getStateName`, `getCurrencySymbol` | 90–146 | `src/utils/locationUtils.js` |
+| `getDonationBadge` | 147–180 | `src/utils/donationUtils.js` |
+| `formatDateDisplay`, `litterAge`, `formatTimeAgo` | 202–255 | `src/utils/dateUtils.js` (extend existing) |
+| `getActionLabel`, `getActionColor` | 256–298 | `src/utils/activityUtils.js` |
 
 ---
 
 ## Phase 10 — App Component Decomposition (~4,900 lines)
 
-The `App` component (lines 19675–24593, ~4,919 lines) contains all top-level state, routing, and event wiring. After all other phases are done, break it down:
+The `App` component (lines 11774–17333, ~5,560 lines) contains all top-level state, routing, and event wiring. After all other phases are done, break it down:
 
 **Sub-tasks:**
 1. Extract pedigree/family-tree view into `src/components/Pedigree/`
@@ -184,24 +133,22 @@ The `App` component (lines 19675–24593, ~4,919 lines) contains all top-level s
 | 4 | Profile Edit & Account | ~3,200 | ✅ Done |
 | 2 | Animal Detail Views (3 variants + helpers) | ~7,200 | ⬜ Next |
 | 7 | Modals & Species + Messages | ~2,500 | ⬜ |
-| 8 | Community, Donations & Shared components | ~1,600 | ⬜ |
-| 9 | Utility functions | ~600 | ⬜ |
+| 8 | Community, Donations & Shared components | ~1,600 | ✅ |
+| 9 | Utility functions | ~600 | ✅ |
 | 10 | App component decomposition | ~4,600 | ⬜ |
 | **Total** | | **~39,196** | |
 
-**Final app.jsx target:** ~500 lines (imports + AppRouter only)
+**Current app.jsx:** 16,119 lines | **Final target:** ~500 lines (imports + AppRouter only)
 
 ---
 
 ## Recommended Order
 
-Phases 8 and 9 (shared utilities) unblock later phases because extracted components need to import `AnimalImageUpload`, `LoadingSpinner`, etc. from somewhere. The pragmatic order is:
+Phases 8 and 9 are now complete. Next priorities:
 
-1. **Phase 2** — biggest win, most isolated
-2. **Phase 9** — utilities first so later phases can import cleanly
-3. **Phase 8** — shared components
-4. **Phases 3–7** — in any order (all depend on shared components being extracted)
-5. **Phase 10** — last, once everything else is out
+1. **Phase 2** — Animal Detail Views (~7,200 lines) — biggest win, but HIGH RISK
+2. **Phase 7** — Modals & Species (~2,500 lines) — medium risk
+3. **Phase 10** — App component decomposition (~4,600 lines) — must be last
 
 ---
 
@@ -222,6 +169,20 @@ Phases 8 and 9 (shared utilities) unblock later phases because extracted compone
 | `src/components/Profile/ProfileEditForm.jsx` | 3,133 | Full profile editor |
 | `src/components/Profile/ProfileView.jsx` | — | Profile page container |
 | `src/components/Profile/UserProfileCard.jsx` | — | User profile summary card |
+| `src/components/shared/ModalMessage.jsx` | — | Reusable modal for title + message dialogs |
+| `src/components/shared/CustomAppLogo.jsx` | — | Logo component with BETA badge overlay |
+| `src/components/shared/LoadingSpinner.jsx` | — | Standard loading indicator with animated icon |
+| `src/components/shared/AnimalImage.jsx` | — | Image display with error handling and fallback icon |
+| `src/components/AnimalImageUpload/index.jsx` | — | File upload UI with image preview/deletion |
+| `src/utils/imageCompression.js` | — | Client-side image compression utilities |
+| `src/components/Donation/DonationView.jsx` | — | Donation page with PayPal integration |
+| `src/components/Community/CommunityPage.jsx` | — | Community feed with favorites and activity |
+| `src/utils/constants.js` | — | GENDER_OPTIONS, STATUS_OPTIONS (Phase 9) |
+| `src/utils/speciesUtils.js` | — | getSpeciesDisplayName, getSpeciesLatinName (Phase 9) |
+| `src/utils/dateFormatter.js` | — | formatDate, formatTimeAgo, litterAge, etc. (Phase 9) |
+| `src/utils/locationUtils.js` | — | getCountryFlag, getStateName, getCurrencySymbol (Phase 9) |
+| `src/utils/donationUtils.jsx` | — | getDonationBadge, DonationBadge component (Phase 9) |
+| `src/utils/activityUtils.js` | — | getActionLabel, getActionColor (Phase 9) |
 | `src/components/Marketplace.jsx` | — | Already existed |
 | `src/components/MouseGeneticsCalculator.jsx` | — | Already existed |
 | `src/utils/treeComponentUtils.js` | — | Pedigree tree helpers |
