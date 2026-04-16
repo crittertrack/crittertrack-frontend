@@ -92,10 +92,10 @@ export function useAppAuth(
         // Fetch immediately, then set up periodic refetch
         fetchUserProfile(authToken);
 
-        // Refetch user profile every 10 seconds to catch warning/suspension updates
+        // Refetch user profile every 5 minutes to catch warning/suspension updates
         const interval = setInterval(() => {
             fetchUserProfile(authToken);
-        }, 10000);
+        }, 300000);
 
         return () => clearInterval(interval);
     }, [authToken, fetchUserProfile]);

@@ -668,6 +668,9 @@ const App = () => {
             return; // Don't need to check if staff or not logged in
         }
 
+        // Capture current values in refs so interval callback doesn't re-trigger effect
+        let currentMaintenanceMode = false;
+
         const pollForUpdates = async () => {
             try {
                 const response = await axios.get(`${API_BASE_URL}/admin/maintenance-status`, {
@@ -675,8 +678,9 @@ const App = () => {
                 });
                 const data = response.data;
                 
-                if (data.active && !maintenanceMode) {
+                if (data.active && !currentMaintenanceMode) {
                     // Maintenance mode just activated
+                    currentMaintenanceMode = true;
                     setMaintenanceMode(true);
                     setMaintenanceMessage(data.message || 'System Maintenance in Progress');
                     
@@ -691,8 +695,9 @@ const App = () => {
                     setTimeout(() => {
                         handleLogout();
                     }, 5000);
-                } else if (!data.active && maintenanceMode) {
+                } else if (!data.active && currentMaintenanceMode) {
                     // Maintenance mode just deactivated
+                    currentMaintenanceMode = false;
                     setMaintenanceMode(false);
                     setMaintenanceMessage('');
                     showModalMessage('Notice', 'Maintenance mode has been deactivated. System is back online.');
@@ -706,7 +711,8 @@ const App = () => {
         pollForUpdates(); // Check immediately on mount
 
         return () => clearInterval(pollInterval);
-    }, [authToken, userProfile, maintenanceMode, API_BASE_URL, showModalMessage, handleLogout]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [authToken, API_BASE_URL]);
 
     // Listen for urgent notifications via WebSocket or server-sent events
     useEffect(() => {
@@ -913,73 +919,6 @@ const App = () => {
         fetchAnimalsForCalculator();
     }, [currentView, authToken, API_BASE_URL]);
 
-    // Fetch and cycle through available animals (for sale + for stud mixed)
-    // Only runs on desktop (=1024px) since the showcase widget is hidden on mobile
-    useEffect(() => {
-        const isDesktop = () => window.matchMedia('(min-width: 1024px)').matches;
-
-        const fetchAvailableAnimals = async () => {
-            if (!authToken || !isDesktop()) return;
-            try {
-                const response = await axios.get(`${API_BASE_URL}/public/global/animals`);
-                if (response.data && response.data.length > 0) {
-                    const filtered = response.data.filter(animal =>
-                        animal.isForSale === true || animal.isForSale === 'true' ||
-                        animal.availableForBreeding === true || animal.availableForBreeding === 'true'
-                    );
-
-                    // Enrich with owner country - only fetch profiles not already cached
-                    const ownerIds = [...new Set(filtered.map(a => a.ownerId_public).filter(Boolean))];
-                    const ownerProfiles = await Promise.all(ownerIds.map(async (id_public) => {
-                        try {
-                            const profileResp = await axios.get(`${API_BASE_URL}/public/profile/${id_public}`);
-                            return { id_public, country: profileResp.data?.country || null };
-                        } catch {
-                            return { id_public, country: null };
-                        }
-                    }));
-                    const ownerCountryMap = new Map(ownerProfiles.map(p => [p.id_public, p.country]));
-                    const enriched = filtered.map(animal => ({
-                        ...animal,
-                        ownerCountry: ownerCountryMap.get(animal.ownerId_public) || null,
-                    }));
-
-                    setAvailableAnimals(enriched.sort(() => Math.random() - 0.5));
-                    setCurrentAvailableIndex(0);
-                } else {
-                    setAvailableAnimals([]);
-                }
-            } catch (error) {
-                console.error('[Available Animals] Failed to fetch:', error);
-                setAvailableAnimals([]);
-            }
-        };
-
-        // Store for manual refresh (e.g. after a user lists an animal)
-        window.refreshAvailableAnimals = fetchAvailableAnimals;
-
-        // Only run initial fetch on desktop
-        if (isDesktop()) fetchAvailableAnimals();
-
-        // Refresh every 30 minutes - data changes infrequently and widget is desktop-only
-        const refreshInterval = setInterval(fetchAvailableAnimals, 1800000);
-
-        return () => {
-            clearInterval(refreshInterval);
-            delete window.refreshAvailableAnimals;
-        };
-    }, [authToken, API_BASE_URL]);
-
-    // Auto-cycle through available animals every 30 seconds
-    useEffect(() => {
-        if (availableAnimals.length > 1 && authToken) {
-            const cycleInterval = setInterval(() => {
-                setCurrentAvailableIndex(prev => (prev + 1) % availableAnimals.length);
-            }, 30000);
-            
-            return () => clearInterval(cycleInterval);
-        }
-    }, [availableAnimals.length, authToken]);
 
     // Fetch breeder info when viewing an animal
     useEffect(() => {
@@ -1407,73 +1346,6 @@ const App = () => {
         fetchAnimalsForCalculator();
     }, [currentView, authToken, API_BASE_URL]);
 
-    // Fetch and cycle through available animals (for sale + for stud mixed)
-    // Only runs on desktop (=1024px) since the showcase widget is hidden on mobile
-    useEffect(() => {
-        const isDesktop = () => window.matchMedia('(min-width: 1024px)').matches;
-
-        const fetchAvailableAnimals = async () => {
-            if (!authToken || !isDesktop()) return;
-            try {
-                const response = await axios.get(`${API_BASE_URL}/public/global/animals`);
-                if (response.data && response.data.length > 0) {
-                    const filtered = response.data.filter(animal =>
-                        animal.isForSale === true || animal.isForSale === 'true' ||
-                        animal.availableForBreeding === true || animal.availableForBreeding === 'true'
-                    );
-
-                    // Enrich with owner country - only fetch profiles not already cached
-                    const ownerIds = [...new Set(filtered.map(a => a.ownerId_public).filter(Boolean))];
-                    const ownerProfiles = await Promise.all(ownerIds.map(async (id_public) => {
-                        try {
-                            const profileResp = await axios.get(`${API_BASE_URL}/public/profile/${id_public}`);
-                            return { id_public, country: profileResp.data?.country || null };
-                        } catch {
-                            return { id_public, country: null };
-                        }
-                    }));
-                    const ownerCountryMap = new Map(ownerProfiles.map(p => [p.id_public, p.country]));
-                    const enriched = filtered.map(animal => ({
-                        ...animal,
-                        ownerCountry: ownerCountryMap.get(animal.ownerId_public) || null,
-                    }));
-
-                    setAvailableAnimals(enriched.sort(() => Math.random() - 0.5));
-                    setCurrentAvailableIndex(0);
-                } else {
-                    setAvailableAnimals([]);
-                }
-            } catch (error) {
-                console.error('[Available Animals] Failed to fetch:', error);
-                setAvailableAnimals([]);
-            }
-        };
-
-        // Store for manual refresh (e.g. after a user lists an animal)
-        window.refreshAvailableAnimals = fetchAvailableAnimals;
-
-        // Only run initial fetch on desktop
-        if (isDesktop()) fetchAvailableAnimals();
-
-        // Refresh every 30 minutes - data changes infrequently and widget is desktop-only
-        const refreshInterval = setInterval(fetchAvailableAnimals, 1800000);
-
-        return () => {
-            clearInterval(refreshInterval);
-            delete window.refreshAvailableAnimals;
-        };
-    }, [authToken, API_BASE_URL]);
-
-    // Auto-cycle through available animals every 30 seconds
-    useEffect(() => {
-        if (availableAnimals.length > 1 && authToken) {
-            const cycleInterval = setInterval(() => {
-                setCurrentAvailableIndex(prev => (prev + 1) % availableAnimals.length);
-            }, 30000);
-            
-            return () => clearInterval(cycleInterval);
-        }
-    }, [availableAnimals.length, authToken]);
 
     // Fetch breeder info when viewing an animal
     useEffect(() => {

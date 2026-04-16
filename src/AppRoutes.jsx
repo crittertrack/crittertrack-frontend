@@ -1,22 +1,28 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 
-// Views
-import AnimalList from './components/AnimalList';
-import DonationView from './components/Donation/DonationView';
-import Marketplace from './components/Marketplace';
-import AnimalTree from './components/AnimalTree';
-import ProfileView from './components/Profile/ProfileView';
-import CommunityPage from './components/Community/CommunityPage';
-import BreederDirectory from './components/PublicProfile/BreederDirectory';
-import LitterManagement from './components/LitterManagement';
-import BudgetingTab from './components/BudgetingTab';
-import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
-import { SpeciesSelector } from './components/Modals/SpeciesModals';
-import { SpeciesManager } from './components/Modals/SpeciesModals';
-import AnimalForm from './components/AnimalForm';
-import PrivateAnimalDetail from './components/AnimalDetail/PrivateAnimalDetail';
-import ViewOnlyPrivateAnimalDetail from './components/AnimalDetail/ViewOnlyPrivateAnimalDetail';
+// Lazy-loaded views — each page is only downloaded when first visited
+const AnimalList = lazy(() => import('./components/AnimalList'));
+const DonationView = lazy(() => import('./components/Donation/DonationView'));
+const Marketplace = lazy(() => import('./components/Marketplace'));
+const AnimalTree = lazy(() => import('./components/AnimalTree'));
+const ProfileView = lazy(() => import('./components/Profile/ProfileView'));
+const CommunityPage = lazy(() => import('./components/Community/CommunityPage'));
+const BreederDirectory = lazy(() => import('./components/PublicProfile/BreederDirectory'));
+const LitterManagement = lazy(() => import('./components/LitterManagement'));
+const BudgetingTab = lazy(() => import('./components/BudgetingTab'));
+const MouseGeneticsCalculator = lazy(() => import('./components/MouseGeneticsCalculator'));
+const SpeciesSelector = lazy(() => import('./components/Modals/SpeciesModals').then(m => ({ default: m.SpeciesSelector })));
+const SpeciesManager = lazy(() => import('./components/Modals/SpeciesModals').then(m => ({ default: m.SpeciesManager })));
+const AnimalForm = lazy(() => import('./components/AnimalForm'));
+const PrivateAnimalDetail = lazy(() => import('./components/AnimalDetail/PrivateAnimalDetail'));
+const ViewOnlyPrivateAnimalDetail = lazy(() => import('./components/AnimalDetail/ViewOnlyPrivateAnimalDetail'));
+
+const PageLoader = () => (
+    <div className="w-full flex items-center justify-center py-24">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+    </div>
+);
 
 /**
  * AppRoutes Component
@@ -131,6 +137,7 @@ export function AppRoutes({
   };
 
   return (
+    <Suspense fallback={<PageLoader />}>
     <Routes>
       {/* Home / List */}
       <Route path="/" element={
@@ -434,6 +441,7 @@ export function AppRoutes({
         })()
       } />
     </Routes>
+    </Suspense>
   );
 }
 
