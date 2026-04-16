@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 /**
@@ -37,6 +38,8 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
     const viewReturnPathRef = useRef('/'); // Path to return to when closing /view-animal
     const editReturnPathRef = useRef('/view-animal'); // Path to return to when closing /edit-animal
 
+    const navigate = useNavigate();
+
     // ========== HELPER: Force parent cards to refetch ==========
     const [parentCardKey, setParentCardKey] = useState(0);
 
@@ -61,9 +64,9 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
             setAnimalToEdit(null);
             setViewAnimalBreederInfo(null);
 
-            // Trigger pedigree data fetch (via separate effect)
+            navigate('/view-animal');
         },
-        [animalToView]
+        [animalToView, navigate]
     );
 
     /**
@@ -72,7 +75,8 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
     const handleEditAnimal = useCallback((animal) => {
         setAnimalToEdit(animal);
         setAnimalToView(null);
-    }, []);
+        navigate('/edit-animal');
+    }, [navigate]);
 
     /**
      * Go back to previous animal in view history
@@ -94,8 +98,9 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
             setSireData(null);
             setDamData(null);
             setOffspringData([]);
+            navigate(viewReturnPathRef.current || '/');
         }
-    }, [animalViewHistory]);
+    }, [animalViewHistory, navigate, viewReturnPathRef]);
 
     /**
      * Close all animal views and clear history
@@ -107,7 +112,8 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
         setSireData(null);
         setDamData(null);
         setOffspringData([]);
-    }, []);
+        navigate(viewReturnPathRef.current || '/');
+    }, [navigate, viewReturnPathRef]);
 
     /**
      * Save edited animal
