@@ -28733,12 +28733,14 @@ const AnimalList = ({
                                         )}
                                         {log.details && Object.keys(log.details).filter(k => !['name', 'species', 'status', 'enclosureName'].includes(k)).length > 0 && (
                                             <div className="text-xs text-gray-400 mt-0.5">
-                                                {Object.entries(log.details)
-                                                    .filter(([k]) => !['name', 'species', 'status', 'enclosureName'].includes(k))
-                                                    .slice(0, 3)
-                                                    .map(([k, v]) => `${k}: ${v}`)
-                                                    .join(' • ')
-                                                }
+                                                {(() => {
+                                                    const entries = Object.entries(log.details)
+                                                        .filter(([k]) => !['name', 'species', 'status', 'enclosureName'].includes(k))
+                                                        .slice(0, 3)
+                                                        .map(([k, v]) => `${k}: ${v}`);
+                                                    const hasDeathField = Object.entries(log.details).some(([k]) => k.toLowerCase().includes('decease') || k.toLowerCase().includes('death'));
+                                                    return entries.join(hasDeathField ? ' † ' : ' • ');
+                                                })()}
                                             </div>
                                         )}
                                     </div>
