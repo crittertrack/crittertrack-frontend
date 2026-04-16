@@ -28,6 +28,9 @@ import ModeratorActionSidebar from './components/moderation/ModeratorActionSideb
 import Marketplace from './components/Marketplace';
 import FamilyTree from './components/FamilyTree';
 import AnimalTree from './components/AnimalTree';
+import LitterManagement from './components/LitterManagement';
+import AnimalForm from './components/AnimalForm';
+import AnimalList from './components/AnimalList';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
