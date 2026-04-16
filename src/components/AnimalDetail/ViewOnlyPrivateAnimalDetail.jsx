@@ -218,7 +218,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             { id: 2, label: 'Status & Privacy', icon: Lock, color: 'text-slate-500' },
                             { id: 3, label: 'Identification', icon: Tag, color: 'text-amber-500' },
                             { id: 4, label: 'Appearance', icon: Palette, color: 'text-pink-500' },
-                            { id: 5, label: 'Beta Pedigree', icon: Dna, color: 'text-orange-500' },
+                            { id: 5, label: 'Pedigree', icon: Dna, color: 'text-orange-500' },
                             { id: 6, label: 'Family', icon: TreeDeciduous, color: 'text-green-600' },
                             { id: 7, label: 'Fertility', icon: Egg, color: 'text-yellow-500' },
                             { id: 8, label: 'Health', icon: Hospital, color: 'text-red-500' },
@@ -657,7 +657,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                         <div className="space-y-6">
                             {/* Pedigree link */}
                             <div>
-                                <span className="text-xs text-orange-500 font-medium">&#x1F4CA; Pedigree chart available on the <button onClick={() => setDetailViewTab(5)} className="underline hover:text-orange-600 transition">Beta Pedigree</button> tab</span>
+                                <span className="text-xs text-orange-500 font-medium">&#x1F4CA; COI calculations available on the <button onClick={() => setDetailViewTab(1)} className="underline hover:text-orange-600 transition">Overview</button> tab</span>
                             </div>
 
                             {/* 2nd Section: Keeper History */}
@@ -1695,7 +1695,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                     />
                 )}
 
-                {/* Tab 5: Beta Pedigree */}
+                {/* Tab 5: Pedigree */}
                 {detailViewTab === 5 && (() => {
                     if (mpLoading) return <div className="flex items-center justify-center py-16 gap-2 text-gray-400"><Loader2 size={18} className="animate-spin" /><span className="text-sm">Loading ancestry?</span></div>;
                     const mpData = mpEnrichedData || animal?.manualPedigree || {};
@@ -1795,7 +1795,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             <div className="flex items-center justify-between flex-wrap gap-2">
                                 <div className="flex items-center gap-2">
                                     <Dna size={18} className="text-orange-500" />
-                                    <h3 className="text-base font-semibold text-gray-700">Beta Pedigree</h3>
+                                    <h3 className="text-base font-semibold text-gray-700">Pedigree</h3>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <div className="flex rounded border border-gray-300 overflow-hidden text-xs">
@@ -1828,7 +1828,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                     )}
                                 </div>
                             </div>
-                            <p className="text-xs text-gray-400 -mt-3">This Beta Pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations. Manual entries are for display/reference only and do not affect COI or the main pedigree chart.</p>
+                            <p className="text-xs text-gray-400 -mt-3">This pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations (shown on Overview tab). Manual entries are for display/reference only and do not affect COI.</p>
                             <div className={betaPedigreeView === 'chart' ? '' : 'hidden'}>
                                 <PedigreeChart ref={chartRef} inline animalId={animal.id_public} animalData={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />
                             </div>
