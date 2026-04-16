@@ -162,7 +162,7 @@ export const InfoTab = ({ onClose }) => {
             {/* Right Side - Lesson Details */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-white">
               {selectedLesson ? (
-                <div className="max-w-4xl mx-auto">
+                <div className="max-w-7xl mx-auto">
                   {/* Mobile back button */}
                   <button
                     onClick={() => setIsLeftPanelOpen(true)}

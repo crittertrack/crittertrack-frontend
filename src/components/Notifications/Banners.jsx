@@ -873,7 +873,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
     };
 
     return (
-        <div className="w-full max-w-4xl mx-auto">
+        <div className="w-full max-w-7xl mx-auto">
             {broadcasts.map(broadcast => {
                 const styles = getStyles(broadcast.broadcastType);
                 return (

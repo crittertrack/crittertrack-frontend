@@ -161,7 +161,7 @@ const CommunityPage = ({ authToken, API_BASE_URL, userProfile }) => {
     };
 
     return (
-        <div className="w-full max-w-6xl mx-auto p-4">
+        <div className="w-full max-w-7xl mx-auto p-4">
             <h1 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                 <Users size={32} className="text-primary" />
                 My Feed
