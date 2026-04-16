@@ -370,10 +370,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
     if (!animal) return null;
 
     return (
-        <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-2 sm:p-4 z-[70] overflow-y-auto">
-            <div className="bg-primary rounded-xl shadow-2xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto overflow-x-hidden">
+        <div className="fixed inset-0 bg-[#f2e4e9] flex items-center justify-center p-2 sm:p-4 z-[70] overflow-y-auto">
+            <div className="bg-[#f2e4e9] rounded-xl shadow-2xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto overflow-x-hidden">
                 {/* Header */}
-                <div className="bg-white rounded-t-lg p-2 sm:p-4 border-b border-gray-300 mt-12 sm:mt-0">
+                <div className="bg-[#f2e4e9] rounded-t-lg p-2 sm:p-4 border-b border-gray-300 mt-12 sm:mt-0">
                     {/* Mobile layout: stacked */}
                     <div className="sm:hidden">
                         <div className="flex justify-between items-center mb-2">
@@ -540,7 +540,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                 </div>
 
                 {/* Tabs - ALL 11 TABS */}
-                <div className="bg-white border-b border-gray-300 px-2 sm:px-6 pt-2 sm:pt-4">
+                <div className="bg-[#f2e4e9] border-b border-gray-300 px-2 sm:px-6 pt-2 sm:pt-4">
                     <div className="flex flex-wrap gap-1 sm:gap-1 pb-2 sm:pb-4">
                         {[
                             { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
