@@ -662,25 +662,34 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
                     // Try to fetch from owned animals first if authToken is available
                     if (authToken) {
-                        try {
-                            // First try /animals endpoint for owned animals (includes private)
-                            const response = await axios.get(`${API_BASE_URL}/animals/${id}`, {
-                                headers: { Authorization: `Bearer ${authToken}` }
-                            });
-                            animalInfo = response.data;
-                            foundViaOwned = true; // Only set when truly owned by the user
-                        } catch (error) {
-                            // Not owned, try /animals/any endpoint for related/accessible animals
+                        // Skip the /animals/:id endpoint if id looks like a public ID (CTC format or numeric)
+                        const isPublicId = /^CTC\d+|^\d+$/.test(id);
+                        
+                        if (!isPublicId) {
+                            try {
+                                // Try /animals/:id_backend endpoint for backend ObjectIds (owned animals)
+                                const response = await axios.get(`${API_BASE_URL}/animals/${id}`, {
+                                    headers: { Authorization: `Bearer ${authToken}` }
+                                });
+                                animalInfo = response.data;
+                                foundViaOwned = true; // Only set when truly owned by the user
+                            } catch (error) {
+                                // Not found as backend ID, continue to try other endpoints
+                            }
+                        }
+
+                        // Try /animals/any endpoint for public IDs or related animals
+                        if (!animalInfo) {
                             try {
                                 const response = await axios.get(`${API_BASE_URL}/animals/any/${id}`, {
                                     headers: { Authorization: `Bearer ${authToken}` }
                                 });
                                 animalInfo = response.data;
-                                // Do NOT set foundViaOwned = true here ? animal is accessible but not owned.
+                                // Do NOT set foundViaOwned = true here — animal is accessible but not owned.
                                 // This ensures the showOnPublicProfile check below still applies,
                                 // consistent with how ViewOnlyParentCard handles the same case.
                             } catch (error2) {
-                                console.log(`Animal ${id} not accessible via owned or related endpoints:`, error2.message);
+                                console.log(`Animal ${id} not accessible via any endpoint:`, error2.message);
                             }
                         }
                     }
