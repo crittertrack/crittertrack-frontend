@@ -4343,20 +4343,24 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
     useEffect(() => {
         if (ownedAnimalsLoadedRef.current || !authToken || !animal?.id_public) return;
         ownedAnimalsLoadedRef.current = true;
-        // Fetch all account animals FIRST, then fetch relationships
-        axios.get(`${API_BASE_URL}/animals`, {
-            headers: { Authorization: `Bearer ${authToken}` }
-        }).then(res => {
-            // API returns all user's animals (My Animals + Archived + Sold + Purchased)
-            setOwnedAnimals(res.data || []);
-            setOwnedAnimalsLoaded(true);
-            // NOW fetch cross-platform relationships after we have the account animals
-            setGlobalRelsLoading(true);
+        // Fetch both in PARALLEL instead of sequential for faster load
+        setGlobalRelsLoading(true);
+        Promise.all([
+            axios.get(`${API_BASE_URL}/animals`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            }),
             axios.get(`${API_BASE_URL}/animals/${animal.id_public}/relationships`, {
                 headers: { Authorization: `Bearer ${authToken}` }
-            }).then(res => setGlobalRels(res.data || null)).catch(() => setGlobalRels(null)).finally(() => setGlobalRelsLoading(false));
-        }).catch(() => {
-            setOwnedAnimalsLoaded(true); // Mark as loaded even on error so we don't hang
+            })
+        ]).then(([animalsRes, relsRes]) => {
+            setOwnedAnimals(animalsRes.data || []);
+            setOwnedAnimalsLoaded(true);
+            setGlobalRels(relsRes.data || null);
+            setGlobalRelsLoading(false);
+        }).catch(err => {
+            console.error('Error fetching animals or relationships:', err);
+            setOwnedAnimalsLoaded(true);
+            setGlobalRelsLoading(false);
         });
     }, [authToken, API_BASE_URL, animal?.id_public, userAnimals]);
 
