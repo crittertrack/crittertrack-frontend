@@ -373,7 +373,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                     } else {
                                                         bDisplayName = 'Unknown Breeder';
                                                     }
-                                                    return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-blue-600 hover:underline font-semibold">{bDisplayName}</RouterLink>;
+                                                    return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{bDisplayName}</RouterLink>;
                                                 })() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}
                                             </div>
                                             {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
@@ -427,7 +427,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                     <div className="flex items-center gap-2">
                                         <span className="text-gray-600">Breeder:</span>
                                         {breederInfo
-                                            ? <RouterLink to={`/user/${breederInfo.id_public}`} className="text-blue-600 hover:underline font-semibold">{breederInfo.breederName || breederInfo.personalName || 'Unknown'}</RouterLink>
+                                            ? <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{breederInfo.breederName || breederInfo.personalName || 'Unknown'}</RouterLink>
                                             : <strong>{animal.manualBreederName || animal.breederId_public || ''}</strong>}
                                     </div>
                                 </div>
