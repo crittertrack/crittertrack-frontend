@@ -16361,6 +16361,7 @@ const AnimalForm = ({
             transferHistory: animalToEdit.transferHistory || '',
             breedingRestrictions: animalToEdit.breedingRestrictions || '',
             exportRestrictions: animalToEdit.exportRestrictions || '',
+            legalDocuments: animalToEdit.legalDocuments || [],
         } : {
             species: species, 
             breederAssignedId: '',
@@ -16534,6 +16535,7 @@ const AnimalForm = ({
             transferHistory: '',
             breedingRestrictions: '',
             exportRestrictions: '',
+            legalDocuments: [],
         }
     );
     
@@ -21720,6 +21722,90 @@ const AnimalForm = ({
                             </div>
                         </div>
                         )}
+
+                        {/* Legal Documents */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><FileText size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Legal Documents</h3>
+                            <div className="space-y-3">
+                                {/* Document List */}
+                                {formData.legalDocuments && formData.legalDocuments.length > 0 && (
+                                    <div className="space-y-2">
+                                        {formData.legalDocuments.map((doc, idx) => (
+                                            <div key={doc.id || idx} className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                                                <div className="flex items-center gap-2 min-w-0 flex-1">
+                                                    <FileText size={16} className="text-gray-400 flex-shrink-0" />
+                                                    <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-primary hover:underline truncate">
+                                                        {doc.filename}
+                                                    </a>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setFormData(f => ({
+                                                        ...f,
+                                                        legalDocuments: f.legalDocuments.filter((_, i) => i !== idx)
+                                                    }))}
+                                                    className="text-red-500 hover:text-red-700 p-1 flex-shrink-0"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                {(!formData.legalDocuments || formData.legalDocuments.length === 0) && (
+                                    <p className="text-sm text-gray-400 italic">No documents uploaded yet</p>
+                                )}
+                                {/* Upload Button */}
+                                <label className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition text-sm font-medium text-gray-700">
+                                    <Upload size={14} />
+                                    Upload Document (PDF/DOC/DOCX)
+                                    <input
+                                        type="file"
+                                        accept=".pdf,.doc,.docx,.pages"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (!file) return;
+                                            const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.apple.pages'];
+                                            if (!validTypes.includes(file.type)) {
+                                                showModalMessage('Invalid File Type', 'Please upload a PDF, DOC, DOCX, or PAGES file');
+                                                e.target.value = '';
+                                                return;
+                                            }
+                                            if (file.size > 10 * 1024 * 1024) {
+                                                showModalMessage('File Too Large', 'Maximum file size is 10MB');
+                                                e.target.value = '';
+                                                return;
+                                            }
+                                            // Upload file
+                                            const fd = new FormData();
+                                            fd.append('file', file);
+                                            setLoadingTemplate(true); // Reuse loading state
+                                            axios.post(`${API_BASE_URL}/upload-document`, fd, {
+                                                headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'multipart/form-data' }
+                                            }).then(res => {
+                                                setFormData(f => ({
+                                                    ...f,
+                                                    legalDocuments: [
+                                                        ...(f.legalDocuments || []),
+                                                        {
+                                                            id: Math.random().toString(36).substr(2, 9),
+                                                            filename: file.name,
+                                                            url: res.data.url,
+                                                            uploadedAt: new Date().toISOString()
+                                                        }
+                                                    ]
+                                                }));
+                                                e.target.value = '';
+                                            }).catch(err => {
+                                                showModalMessage('Upload Failed', err.response?.data?.message || 'Failed to upload document');
+                                                e.target.value = '';
+                                            }).finally(() => setLoadingTemplate(false));
+                                        }}
+                                        className="hidden"
+                                    />
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 )}
 
