@@ -8,7 +8,8 @@ import {
 } from 'lucide-react';
 
 const AnimalList = ({ 
-    authToken, 
+    authToken,
+    API_BASE_URL,
     showModalMessage, 
     onEditAnimal, 
     onViewAnimal, 
