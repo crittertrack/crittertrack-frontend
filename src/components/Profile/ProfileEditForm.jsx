@@ -822,7 +822,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     };
 
     return (
-        <div className="w-full max-w-5xl bg-white p-6 rounded-xl shadow-lg">
+        <div className="w-full max-w-7xl bg-white p-6 rounded-xl shadow-lg">
             <div className="flex justify-between items-center mb-6 border-b pb-4">
                 <h2 className="text-3xl font-bold text-gray-800 flex items-center">
                     <Settings size={24} className="mr-3 text-primary-dark" />

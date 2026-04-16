@@ -97,7 +97,7 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
     }
 
     return (
-        <div className="w-full max-w-5xl bg-white p-3 sm:p-6 rounded-xl shadow-lg">
+        <div className="w-full max-w-7xl bg-white p-3 sm:p-6 rounded-xl shadow-lg">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 mb-4 sm:mb-6">
                 <h2 className="text-xl sm:text-3xl font-bold text-gray-800 flex items-center">
                     <Settings className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />

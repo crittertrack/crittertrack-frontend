@@ -3348,7 +3348,7 @@ const AnimalList = ({
     };
 
     return (
-        <div className="w-full max-w-5xl bg-white p-6 rounded-xl shadow-lg">
+        <div className="w-full max-w-7xl bg-white p-6 rounded-xl shadow-lg">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className='flex items-center gap-2'>
                     <ClipboardList size={20} className="sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
@@ -3894,7 +3894,7 @@ const AnimalList = ({
                             </div>
                             {/* Collapsible content */}
                             <div className={isCollapsed ? 'hidden' : 'block'}>
-                                <div className="p-1.5 sm:p-4 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
+                                <div className="p-1.5 sm:p-4 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
                                     {groupedAnimals[species].map(animal => (
                                         <AnimalCard 
                                             key={animal.id_public} 

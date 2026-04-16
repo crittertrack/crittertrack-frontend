@@ -124,7 +124,7 @@ const PublicAnimalPage = () => {
     if (isPrivate) {
         return (
             <div className="min-h-screen bg-page-bg flex flex-col items-center p-6">
-                <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+                <header className="w-full max-w-7xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                     <CustomAppLogo size="w-10 h-10" />
                     <button
                         onClick={handleGoBack}
@@ -160,7 +160,7 @@ const PublicAnimalPage = () => {
 
     return (
         <div className="min-h-screen bg-page-bg flex flex-col items-center p-6">
-            <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+            <header className="w-full max-w-7xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                 <CustomAppLogo size="w-10 h-10" />
                 <button
                     onClick={handleGoBack}
@@ -525,7 +525,7 @@ const PublicProfilePage = () => {
 
     return (
         <div className="min-h-screen bg-page-bg flex flex-col items-center p-6">
-            <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+            <header className="w-full max-w-7xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                 <CustomAppLogo size="w-10 h-10" />
                 <button
                     onClick={() => navigate('/')}

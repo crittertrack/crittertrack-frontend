@@ -1,4 +1,4 @@
-﻿// CritterTrack Frontend Application
+// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -1581,7 +1581,7 @@ const App = () => {
                         />
                     )}
                     
-                    <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6">
+                    <header className="w-full max-w-7xl bg-white p-4 rounded-xl shadow-lg mb-6">
                         <div className="mb-3">
                             <GlobalSearchBar 
                                 API_BASE_URL={API_BASE_URL}
@@ -1651,7 +1651,7 @@ const App = () => {
                 <div className="min-h-screen bg-page-bg flex flex-col items-center p-6 font-sans">
                     {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
                     
-                    <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6">
+                    <header className="w-full max-w-7xl bg-white p-4 rounded-xl shadow-lg mb-6">
                         <div className="mb-3">
                             <GlobalSearchBar 
                                 API_BASE_URL={API_BASE_URL}
@@ -1726,7 +1726,7 @@ const App = () => {
                 {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
                 
                 {/* Public navigation header */}
-                <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+                <header className="w-full max-w-7xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                     <CustomAppLogo size="w-10 h-10" />
                     <button 
                         onClick={() => navigate('/genetics-calculator')}
@@ -1966,7 +1966,7 @@ const App = () => {
                                     </p>
                                     <p className="text-xs text-gray-600 truncate">
                                         {availableAnimals[currentAvailableIndex].species}
-                                        {availableAnimals[currentAvailableIndex].variety && ` � ${availableAnimals[currentAvailableIndex].variety}`}
+                                        {availableAnimals[currentAvailableIndex].variety && ` ? ${availableAnimals[currentAvailableIndex].variety}`}
                                     </p>
                                 </div>
                                 {availableAnimals[currentAvailableIndex].ownerCountry && (
@@ -2032,7 +2032,7 @@ const App = () => {
                 />
             )}
             
-            <header className="w-full bg-white p-3 sm:p-4 rounded-xl shadow-lg mb-6 max-w-5xl overflow-visible">
+            <header className="w-full bg-white p-3 sm:p-4 rounded-xl shadow-lg mb-6 max-w-7xl overflow-visible">
                 {/* Desktop: Two row layout with search bar on top */}
                 <div className="hidden md:block mb-3">
                     <GlobalSearchBar 
@@ -2600,7 +2600,7 @@ const App = () => {
             {/* Profile Card + Banners - shown only on desktop in list view */}
             {currentView === 'list' && currentView !== 'profile' && userProfile && (
                 <>
-                    <div className="w-full max-w-5xl mb-6 hidden sm:flex gap-4 items-stretch">
+                    <div className="w-full max-w-7xl mb-6 hidden sm:flex gap-4 items-stretch">
                         <div className="flex-shrink-0 flex flex-col">
                             <UserProfileCard userProfile={userProfile} API_BASE_URL={API_BASE_URL} />
                         </div>
@@ -2608,13 +2608,13 @@ const App = () => {
                             <NotificationsHub authToken={authToken} API_BASE_URL={API_BASE_URL} />
                         </div>
                     </div>
-                    <div className="w-full max-w-5xl mb-4 sm:hidden">
+                    <div className="w-full max-w-7xl mb-4 sm:hidden">
                         <NotificationsHub authToken={authToken} API_BASE_URL={API_BASE_URL} />
                     </div>
                 </>
             )}
 
-            <main className="w-full flex-grow max-w-5xl">
+            <main className="w-full flex-grow max-w-7xl">
                 <AppRoutes
                   authToken={authToken}
                   userProfile={userProfile}

@@ -486,7 +486,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
     };
     
     return (
-        <div className="w-full max-w-5xl bg-white p-6 rounded-xl shadow-lg" data-tutorial-target="species-selector">
+        <div className="w-full max-w-7xl bg-white p-6 rounded-xl shadow-lg" data-tutorial-target="species-selector">
             <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
                 <Cat size={24} className="mr-3 text-primary-dark" />
                 Select Species for New Animal

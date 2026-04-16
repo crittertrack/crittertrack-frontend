@@ -50,7 +50,7 @@ const WarningBanner = ({ authToken, API_BASE_URL, userProfile }) => {
 
     return (
         <div className="w-full flex justify-center">
-            <div className="w-full max-w-5xl px-6">
+            <div className="w-full max-w-7xl px-6">
                 <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-md mb-3">
                     <div className="flex items-start">
                         <div className="flex-shrink-0">
@@ -126,7 +126,7 @@ const InformBanner = ({ authToken, API_BASE_URL }) => {
 
     return (
         <div className="w-full flex justify-center">
-            <div className="w-full max-w-5xl px-6">
+            <div className="w-full max-w-7xl px-6">
                 {messages.map((msg, index) => (
                     <div key={msg._id} className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg shadow-md mb-3">
                         <div className="flex items-start">
