@@ -1245,7 +1245,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         <div className="space-y-6">
                             {/* Pedigree & Litter links */}
                             <div className="flex items-center justify-between flex-wrap gap-2">
-                                <RouterLink to="/litters" className="text-xs text-purple-600 hover:text-purple-800 font-medium flex items-center gap-1 underline"><BookOpen size={12} className="inline-block align-middle" /> Litter Management</RouterLink>
+                                <button onClick={() => { onClose(); window.location.hash = '#/litters'; }} className="text-xs text-purple-600 hover:text-purple-800 font-medium flex items-center gap-1 underline"><BookOpen size={12} className="inline-block align-middle" /> Litter Management</button>
                             </div>
 
                             {/* Relationship Insights */}
