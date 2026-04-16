@@ -308,9 +308,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
 
     return (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
-            <div className="bg-[#f2e4e9] rounded-xl shadow-2xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto my-2 sm:my-0">
+            <div className="bg-[#E1F2F5] rounded-xl shadow-2xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto my-2 sm:my-0">
                 {/* Header */}
-                <div className="bg-[#f2e4e9] rounded-t-lg p-4 border-b border-gray-300">
+                <div className="bg-[#E1F2F5] rounded-t-lg p-4 border-b border-gray-300">
                     <div className="flex justify-between items-center">
                         <button 
                             onClick={onClose} 
@@ -357,7 +357,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                 </div>
 
                 {/* Tabs - PUBLIC VIEW: 8 tabs (Records + End of Life combined) */}
-                <div className="bg-[#f2e4e9] border-b border-gray-300">
+                <div className="bg-[#E1F2F5] border-b border-gray-300">
                     <div className="flex flex-wrap">
                         {[
                             { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
@@ -392,7 +392,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                 </div>
 
                 {/* Tab Content */}
-                <div className="bg-[#f2e4e9] border border-t-0 border-gray-300 rounded-b-lg p-3 sm:p-6 overflow-y-auto max-h-[calc(95vh-160px)] sm:max-h-[calc(90vh-180px)] pb-8">
+                <div className="bg-[#E1F2F5] border border-t-0 border-gray-300 rounded-b-lg p-3 sm:p-6 overflow-y-auto max-h-[calc(95vh-160px)] sm:max-h-[calc(90vh-180px)] pb-8">
                     {/* Tab 1: Overview */}
                     {detailViewTab === 1 && (
                         <div className="space-y-3">
