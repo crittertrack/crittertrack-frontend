@@ -433,7 +433,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
     }
 
     return (
-        <div className="w-full max-w-6xl mx-auto p-2 sm:p-4">
+        <div className="w-full max-w-7xl mx-auto p-2 sm:p-4">
             {/* Header */}
             <div className="bg-white rounded-xl shadow-lg p-3 sm:p-6 mb-4 sm:mb-6">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4 mb-3 sm:mb-4">

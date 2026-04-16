@@ -609,7 +609,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     });
 
     return (
-        <div className="w-full max-w-6xl bg-white p-6 rounded-xl shadow-lg">
+        <div className="w-full max-w-7xl bg-white p-6 rounded-xl shadow-lg">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-6">
                 <button 
                     onClick={onBack} 
@@ -924,7 +924,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             <h4 className="text-xl font-semibold text-gray-700 mb-3 flex items-center">
                                 <Cat size={20} className="mr-2" /> {getSpeciesDisplayName(species)}
                             </h4>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                                 {groupedAnimals[species].map(animal => {
                                     const birth = animal.birthDate ? formatDate(animal.birthDate) : '';
                                     const imgSrc = animal.imageUrl || animal.photoUrl || null;
@@ -1050,7 +1050,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                     <DollarSign size={16} className="text-green-600" /> For Sale <span className="text-sm font-normal text-gray-400">({forSale.length})</span>
                                 </h3>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                                     {forSale.map(a => <AnimalSaleCard key={a.id_public} animal={a} />)}
                                 </div>
                             </div>
@@ -1060,7 +1060,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                     <Heart size={16} className="text-purple-500" /> Available for Stud <span className="text-sm font-normal text-gray-400">({forStud.length})</span>
                                 </h3>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                                     {forStud.map(a => <AnimalSaleCard key={a.id_public} animal={a} />)}
                                 </div>
                             </div>
