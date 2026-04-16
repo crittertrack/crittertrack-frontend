@@ -325,8 +325,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     disabled={animalFavoritePending}
                                     className={`px-3 py-1.5 font-semibold rounded-lg transition flex items-center gap-2 ${
                                         isAnimalFavorited
-                                            ? 'bg-purple-100 hover:bg-purple-200 text-purple-600'
-                                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                                            ? 'bg-accent/20 hover:bg-accent/30 text-accent'
+                                            : 'bg-accent/10 hover:bg-accent/20 text-accent/60'
                                     } ${animalFavoritePending ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     title={isAnimalFavorited ? 'Remove from favorites' : 'Add to favorites'}
                                 >
