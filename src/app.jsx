@@ -71,6 +71,12 @@ import { MessagesView } from './components/Messages/MessagesView';
 import { useAppAuth } from './hooks/useAppAuth.ts';
 import { useIdleTimeout } from './hooks/useIdleTimeout.ts';
 import { useAppModals } from './hooks/useAppModals.ts';
+import { usePublicAnimalNavigation } from './hooks/usePublicAnimalNavigation.ts';
+import { usePrivateAnimalNavigation } from './hooks/usePrivateAnimalNavigation.ts';
+import { useTransferWorkflow } from './hooks/useTransferWorkflow.ts';
+import { useBreedingLines } from './hooks/useBreedingLines.ts';
+import { useModerationMode } from './hooks/useModerationMode.ts';
+import { AppRoutes } from './AppRoutes';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
@@ -225,26 +231,74 @@ const App = () => {
     const navigate = useNavigate();
     const location = useLocation();
     
-    // Phase 10b: Initialize modal state management hook (for future consolidation)
+    // Phase 10: Initialize custom hooks for state management
+    // Phase 10b: Modal state management
     const modals = useAppModals();
     
-    // Phase 10a: Use custom auth hook
-    // Note: showModalMessage is defined later after the old state variables are created
-    const {
-        authToken,
-        setAuthToken,
-        userProfile,
-        setUserProfile,
-        fetchUserProfile
-    } = useAppAuth(API_BASE_URL, (title, message) => {
-        // Temporary: use undefined initially, will be overridden after showModalMessage is defined
-    });
+    // Phase 10a: Auth & Idle Timeout (will be called later after showModalMessage defined)
+    const [authTokenTemp, setAuthTokenTemp] = useState(null);
+    const [userProfileTemp, setUserProfileTemp] = useState(null);
+    
+    // Phase 10c: Animal Navigation
+    const publicAnimalNav = usePublicAnimalNavigation();
+    const privateAnimalNav = usePrivateAnimalNavigation();
+    
+    // Phase 10d: Transfer Workflow
+    const transferWorkflow = useTransferWorkflow();
+    
+    // Phase 10e: Breeding Lines
+    const breedingLinesState = useBreedingLines(authTokenTemp);
+    
+    // Phase 10f: Moderation Mode
+    const modMode = useModerationMode(authTokenTemp, userProfileTemp);
 
+    // Temporarily store auth for hook setup
+    const [showModalMsg, setShowModalMsg] = useState({ title: '', message: '' });
+    const [showModal, setShowModal] = useState(false);
+    
+    // Now initialize auth hook with showModalMessage callback
+    const {
+        authToken: authTokenAuth,
+        setAuthToken: setAuthTokenAuth,
+        userProfile: userProfileAuth,
+        setUserProfile: setUserProfileAuth,
+        fetchUserProfile: fetchUserProfileAuth
+    } = useAppAuth(API_BASE_URL, (title, message) => {
+        setShowModalMsg({ title, message });
+        setShowModal(true);
+    });
+    
+    // Sync auth from useAppAuth hook into temp storage
+    useEffect(() => {
+        setAuthTokenTemp(authTokenAuth);
+        setUserProfileTemp(userProfileAuth);
+    }, [authTokenAuth, userProfileAuth]);
+    
+    // Use auth values from hook
+    const authToken = authTokenAuth;
+    const setAuthToken = setAuthTokenAuth;
+    const userProfile = userProfileAuth;
+    const setUserProfile = setUserProfileAuth;
+    const fetchUserProfile = fetchUserProfileAuth;
+    
+    // Setup idle timeout with auth
+    useIdleTimeout(authToken, () => handleLogout(), (title, message) => {
+        setShowModalMsg({ title, message });
+        setShowModal(true);
+    });
+    
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [userCount, setUserCount] = useState('...');
     
     // Derive currentView from URL path
     const currentView = location.pathname.split('/')[1] || 'list';
+    
+    // Map hook states to legacy variable names for backward compatibility
+    const { viewingPublicAnimal, publicAnimalViewHistory, handleViewPublicAnimal, handleBackFromPublicAnimal, handleCloseAllPublicAnimals } = publicAnimalNav;
+    const { animalToView, setAnimalToView, animalToEdit, setAnimalToEdit, animalViewHistory, privateAnimalInitialTab, privateBetaView, editReturnPathRef, handleViewAnimal, handleEditAnimal, handleBackFromAnimal, handleCloseAllAnimals, handleSaveAnimal, handleArchiveAnimal, handleDeleteAnimal } = privateAnimalNav;
+    const { showTransferModal, setShowTransferModal, transferAnimal, setTransferAnimal, preSelectedTransferAnimal, preSelectedTransactionType, setPreSelectedTransferAnimal, setPreSelectedTransactionType, handleSearchTransferUser, handleSelectTransferUser, handleSubmitTransfer, handleCloseTransferWorkflow } = transferWorkflow;
+    const { breedingLineDefs, animalBreedingLines, BL_PRESETS_APP, saveBreedingLineDefs, toggleAnimalBreedingLine } = breedingLinesState;
+    const { inModeratorMode, setInModeratorMode, showAdminPanel, setShowAdminPanel, showModReportQueue, setShowModReportQueue, showModerationAuthModal, setShowModerationAuthModal, modCurrentContext, setModCurrentContext, handleToggleModerationMode, handleModerationAuth, handleModQuickFlag } = modMode;
     
     // Detect mobile/app environment
     React.useEffect(() => {
@@ -375,14 +429,8 @@ const App = () => {
     
     // Tutorial context hook
  
-    const [animalToEdit, setAnimalToEdit] = useState(null);
-    const [speciesToAdd, setSpeciesToAdd] = useState(null); 
-    const [speciesOptions, setSpeciesOptions] = useState([]); 
-    const [speciesConfigs, setSpeciesConfigs] = useState({}); // Field replacements per species
-    const [speciesSearchTerm, setSpeciesSearchTerm] = useState('');
-    const [speciesCategoryFilter, setSpeciesCategoryFilter] = useState('All');
-    const [showModal, setShowModal] = useState(false);
-    const [modalMessage, setModalMessage] = useState({ title: '', message: '' });
+    // NOTE: animalToEdit, speciesToAdd, etc. are now handled by custom hooks (usePrivateAnimalNavigation, etc.)
+    // Removed from here to avoid conflicts with hook state
     const [isRegister, setIsRegister] = useState(false); 
     
     const [showNotifications, setShowNotifications] = useState(false);
@@ -399,75 +447,10 @@ const App = () => {
 
     const [showUserSearchModal, setShowUserSearchModal] = useState(false);
     const [viewingPublicProfile, setViewingPublicProfile] = useState(null);
-    const [viewingPublicAnimal, setViewingPublicAnimal] = useState(null);
-    const [publicAnimalViewHistory, setPublicAnimalViewHistory] = useState([]); // Navigation history for public animals
-    const [publicAnimalInitialTab, setPublicAnimalInitialTab] = useState(1);
-    const [privateAnimalInitialTab, setPrivateAnimalInitialTab] = useState(1);
-    const [privateBetaView, setPrivateBetaView] = useState('vertical');
-    const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
-    const [animalToView, setAnimalToView] = useState(null);
-    const [animalViewHistory, setAnimalViewHistory] = useState([]); // Navigation history stack for animals
-    const viewReturnPathRef = React.useRef('/'); // Path to return to when closing /view-animal
-    const editReturnPathRef = React.useRef('/view-animal'); // Path to return to when closing /edit-animal
-    const [detailViewTab, setDetailViewTab] = useState(1); // Tab for detail view
-    // -- Breeding Lines ------------------------------------------------------------
-    const BL_PRESETS_APP = ['#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#3b82f6','#6366f1','#a855f7','#ec4899','#64748b'];
-    const [breedingLineDefs, setBreedingLineDefs] = useState(() => {
-        try { const s = localStorage.getItem('ct_bldefs'); if (s) return JSON.parse(s); } catch {}
-        return Array.from({ length: 10 }, (_, i) => ({ id: i, name: '', color: BL_PRESETS_APP[i] }));
-    });
-    const [animalBreedingLines, setAnimalBreedingLines] = useState(() => {
-        try { const s = localStorage.getItem('ct_blassign'); if (s) return JSON.parse(s); } catch {}
-        return {};
-    });
-    // Ref so toggleAnimalBreedingLine always reads the latest defs without stale closure issues
-    const breedingLineDefsRef = React.useRef(breedingLineDefs);
-    React.useEffect(() => { breedingLineDefsRef.current = breedingLineDefs; }, [breedingLineDefs]);
-    // Load from backend on login (overrides localStorage with server truth)
-    React.useEffect(() => {
-        if (!authToken) return;
-        axios.get(`${API_BASE_URL}/users/breeding-lines`, { headers: { Authorization: `Bearer ${authToken}` } })
-            .then(r => {
-                // Always overwrite from backend ? even empty arrays clear stale data from a previous user
-                const defs = Array.isArray(r.data.breedingLineDefs) && r.data.breedingLineDefs.length > 0
-                    ? r.data.breedingLineDefs
-                    : Array.from({ length: 10 }, (_, i) => ({ id: i, name: '', color: BL_PRESETS_APP[i] }));
-                setBreedingLineDefs(defs);
-                try { localStorage.setItem('ct_bldefs', JSON.stringify(defs)); } catch {}
-
-                const assign = (r.data.animalBreedingLines && typeof r.data.animalBreedingLines === 'object')
-                    ? r.data.animalBreedingLines
-                    : {};
-                setAnimalBreedingLines(assign);
-                try { localStorage.setItem('ct_blassign', JSON.stringify(assign)); } catch {}
-            })
-            .catch(() => {}); // Silent fail ? use localStorage fallback
-    }, [authToken]);
-    const saveBreedingLineDefs = (defs, currentAssignments) => {
-        setBreedingLineDefs(defs);
-        try { localStorage.setItem('ct_bldefs', JSON.stringify(defs)); } catch {}
-        if (authToken) {
-            return axios.put(`${API_BASE_URL}/users/breeding-lines`,
-                { breedingLineDefs: defs, animalBreedingLines: currentAssignments },
-                { headers: { Authorization: `Bearer ${authToken}` } }
-            ).catch(() => {});
-        }
-        return Promise.resolve();
-    };
-    const toggleAnimalBreedingLine = (animalId, lineId) => {
-        const current = animalBreedingLines[animalId] || [];
-        const updated = current.includes(lineId) ? current.filter(id => id !== lineId) : [...current, lineId];
-        const next = { ...animalBreedingLines, [animalId]: updated };
-        setAnimalBreedingLines(next);
-        try { localStorage.setItem('ct_blassign', JSON.stringify(next)); } catch {}
-        if (authToken) {
-            axios.put(`${API_BASE_URL}/users/breeding-lines`,
-                { breedingLineDefs: breedingLineDefsRef.current, animalBreedingLines: next },
-                { headers: { Authorization: `Bearer ${authToken}` } }
-            ).catch(err => console.error('Failed to save breeding line assignment:', err));
-        }
-    };
-    // -----------------------------------------------------------------------------
+    // NOTE: viewingPublicAnimal, publicAnimalViewHistory now handled by usePublicAnimalNavigation hook
+    // NOTE: animalToView, animalToEdit, animalViewHistory now handled by usePrivateAnimalNavigation hook
+    // NOTE: breedingLineDefs, animalBreedingLines now handled by useBreedingLines hook
+    // All breeding line logic consolidated into custom hook for reusability--------------------------------------------------------
     const [parentCardKey, setParentCardKey] = useState(0); // Force parent cards to refetch when tab opens
     const [showTabs, setShowTabs] = useState(true); // Toggle for collapsible tabs panel
     const [sireData, setSireData] = useState(null);
@@ -608,19 +591,8 @@ const App = () => {
     const [availableAnimals, setAvailableAnimals] = useState([]);
     const [currentAvailableIndex, setCurrentAvailableIndex] = useState(0);
     
-    // Transfer modal states
-    const [showTransferModal, setShowTransferModal] = useState(false);
-    const [transferAnimal, setTransferAnimal] = useState(null);
-    const [preSelectedTransferAnimal, setPreSelectedTransferAnimal] = useState(null);
-    const [preSelectedTransactionType, setPreSelectedTransactionType] = useState(null);
-    const [budgetModalOpen, setBudgetModalOpen] = useState(false);
-    const [transferUserQuery, setTransferUserQuery] = useState('');
-    const [transferUserResults, setTransferUserResults] = useState([]);
-    const [transferSelectedUser, setTransferSelectedUser] = useState(null);
-    const [transferSearching, setTransferSearching] = useState(false);
-    const [transferSearchPerformed, setTransferSearchPerformed] = useState(false);
-    const [transferPrice, setTransferPrice] = useState('');
-    const [transferNotes, setTransferNotes] = useState('');
+    // NOTE: Transfer modal states now handled by useTransferWorkflow hook
+    // (showTransferModal, transferAnimal, preSelectedTransferAnimal, etc.)
     
     // Archive states
     const [showArchiveScreen, setShowArchiveScreen] = useState(false);
@@ -630,19 +602,10 @@ const App = () => {
     
     // Tutorial modal states
     const [showInfoTab, setShowInfoTab] = useState(false);
-    const [showAdminPanel, setShowAdminPanel] = useState(false);
+    // NOTE: showAdminPanel, inModeratorMode, showModReportQueue now handled by useModerationMode hook
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const profileMenuDesktopRef = useRef(null);
     const profileMenuMobileRef = useRef(null);
-    const [showModReportQueue, setShowModReportQueue] = useState(false);
-    const [modCurrentContext, setModCurrentContext] = useState(null);
-    const [inModeratorMode, setInModeratorMode] = useState(() => {
-        if (typeof window !== 'undefined') {
-            return localStorage.getItem('moderationAuthenticated') === 'true';
-        }
-        return false;
-    });
-    const [showModerationAuthModal, setShowModerationAuthModal] = useState(false);
     const [maintenanceMode, setMaintenanceMode] = useState(false);
     const [maintenanceMessage, setMaintenanceMessage] = useState('');
     const [showUrgentNotification, setShowUrgentNotification] = useState(false);
@@ -677,320 +640,15 @@ const App = () => {
     // Phase 10a: Use idle timeout hook
     useIdleTimeout(authToken, handleLogout, showModalMessage);
 
-    const handleModQuickFlag = useCallback(async (flagData) => {
-        console.log('[MOD ACTION] HANDLER CALLED with:', flagData);
-        try {
-            console.log('[MOD ACTION] Inside try block');
-            console.log('[MOD ACTION] Starting action:', flagData);
-            console.log('[MOD ACTION] API_BASE_URL:', API_BASE_URL);
-            console.log('[MOD ACTION] authToken:', authToken ? 'present' : 'MISSING');
+    // NOTE: handleModQuickFlag now provided by useModerationMode hook (Phase 10f)
+    // Old implementation removed to avoid conflicts - see useModerationMode.ts for current version
 
-            // Handle different action types
-            if (flagData.action === 'flag') {
-                // Create a report for flagged content
-                const reportType = flagData.context?.type === 'profile' ? 'profile' : 
-                                  flagData.context?.type === 'animal' ? 'animal' : 'message';
-                
-                // Get the correct user ID based on context type
-                const userId = flagData.context?.type === 'profile' 
-                    ? flagData.context?.userId 
-                    : flagData.context?.ownerId;
-                
-                const reportData = {
-                    reason: flagData.reason,
-                    category: flagData.category,
-                    description: `Moderator flag: ${flagData.reason}`,
-                    reportedContentId: flagData.context?.id,
-                    reportedUserId: userId,
-                    isModeratorReport: true
-                };
-
-                console.log('[MOD ACTION FLAG] Submitting flag:', { reportType, reportData });
-
-                const response = await axios.post(
-                    `${API_BASE_URL}/reports/${reportType}`,
-                    reportData,
-                    { headers: { Authorization: `Bearer ${authToken}` } }
-                );
-
-                console.log('[MOD ACTION FLAG] Success:', response.data);
-                showModalMessage('Flag Submitted', 'Content has been flagged and added to the report queue.');
-            } 
-            else if (flagData.action === 'edit') {
-                // Edit/redact content fields
-                const contentType = flagData.context?.type;
-                const contentId = flagData.context?.id;
-                
-                console.log('[MOD ACTION EDIT] Submitting edit:', { contentType, contentId, fieldEdits: flagData.fieldEdits });
-                
-                const response = await axios.patch(
-                    `${API_BASE_URL}/moderation/content/${contentType}/${contentId}/edit`,
-                    {
-                        fieldEdits: flagData.fieldEdits,
-                        reason: flagData.reason
-                    },
-                    { headers: { Authorization: `Bearer ${authToken}` } }
-                );
-
-                console.log('[MOD ACTION EDIT] Success:', response.data);
-                showModalMessage('Content Edited', 'Content has been updated successfully.');
-                // Refresh the current view
-                window.location.reload();
-            }
-            else if (flagData.action === 'warn') {
-                // Warn user - get correct user ID based on context type
-                const userId = flagData.context?.type === 'profile' 
-                    ? flagData.context?.userId 
-                    : flagData.context?.ownerId;
-                
-                console.log('[MOD ACTION WARN] Warning user:', { userId, reason: flagData.reason, category: flagData.category });
-                
-                const response = await axios.post(
-                    `${API_BASE_URL}/moderation/users/${userId}/warn`,
-                    {
-                        reason: flagData.reason,
-                        category: flagData.category
-                    },
-                    { headers: { Authorization: `Bearer ${authToken}` } }
-                );
-
-                console.log('[MOD ACTION WARN] Success:', response.data);
-                showModalMessage('Warning Sent', `User has been warned. Total warnings: ${response.data.warningCount}`);
-            }
-            else if (flagData.action === 'suspend') {
-                // Suspend user - get correct user ID based on context type
-                const userId = flagData.context?.type === 'profile' 
-                    ? flagData.context?.userId 
-                    : flagData.context?.ownerId;
-                
-                console.log('[MOD ACTION SUSPEND] Suspending user:', { userId, reason: flagData.reason, durationDays: flagData.durationDays });
-                
-                const response = await axios.post(
-                    `${API_BASE_URL}/moderation/users/${userId}/status`,
-                    {
-                        status: 'suspended',
-                        reason: flagData.reason,
-                        durationDays: flagData.durationDays
-                    },
-                    { headers: { Authorization: `Bearer ${authToken}` } }
-                );
-
-                console.log('[MOD ACTION SUSPEND] Success:', response.data);
-                
-                // Check if the suspended user is the current logged-in user
-                const isSuspendedUserCurrentUser = userProfile && userProfile.id_public === userId;
-                
-                if (isSuspendedUserCurrentUser) {
-                    // Log out the suspended user
-                    console.log('[MOD ACTION SUSPEND] Suspended user is current user - logging them out');
-                    
-                    // Calculate suspension end time
-                    const suspensionEndTime = new Date().getTime() + (flagData.durationDays * 24 * 60 * 60 * 1000);
-                    
-                    // Store suspension info for display on login screen
-                    localStorage.setItem('suspensionEndTime', suspensionEndTime.toString());
-                    localStorage.setItem('suspensionReason', flagData.reason || 'Your account has been suspended.');
-                    
-                    // Log out
-                    setAuthToken(null);
-                    setUserProfile(null);
-                    try {
-                        localStorage.removeItem('authToken');
-                    } catch (e) {
-                        console.warn('Could not clear authToken from localStorage', e);
-                    }
-                    
-                    // Show suspension message with timer
-                    showModalMessage(
-                        'Account Suspended',
-                        `Your account has been suspended for ${flagData.durationDays} days. Reason: ${flagData.reason || 'No reason provided'}. You will be able to log back in after the suspension period ends.`
-                    );
-                    
-                    // Redirect to login
-                    navigate('/');
-                } else {
-                    showModalMessage('User Suspended', `User has been suspended for ${flagData.durationDays} days.`);
-                }
-            }
-            else if (flagData.action === 'ban') {
-                // Ban user - get correct user ID based on context type
-                const userId = flagData.context?.type === 'profile' 
-                    ? flagData.context?.userId 
-                    : flagData.context?.ownerId;
-                
-                console.log('[MOD ACTION BAN] Banning user:', { userId, reason: flagData.reason, ipBan: flagData.ipBan });
-                
-                const response = await axios.post(
-                    `${API_BASE_URL}/moderation/users/${userId}/status`,
-                    {
-                        status: 'banned',
-                        reason: flagData.reason,
-                        ipBan: flagData.ipBan
-                    },
-                    { headers: { Authorization: `Bearer ${authToken}` } }
-                );
-
-                console.log('[MOD ACTION BAN] Success:', response.data);
-                showModalMessage('User Banned', 'User has been permanently banned.');
-            }
-            else if (flagData.action === 'lift-warning') {
-                // Lift warning from user
-                const userId = flagData.context?.type === 'profile' 
-                    ? flagData.context?.userId 
-                    : flagData.context?.ownerId;
-                
-                console.log('[MOD ACTION LIFT_WARNING] Lifting warning for user:', { userId, reason: flagData.reason, warningIndex: flagData.warningIndex });
-                
-                const response = await axios.post(
-                    `${API_BASE_URL}/moderation/users/${userId}/lift-warning`,
-                    {
-                        reason: flagData.reason,
-                        warningIndex: flagData.warningIndex
-                    },
-                    { headers: { Authorization: `Bearer ${authToken}` } }
-                );
-
-                console.log('[MOD ACTION LIFT_WARNING] Success:', response.data);
-                showModalMessage('Warning Lifted', `User's warning count is now ${response.data.warningCount}.`);
-                
-                // Refetch user profile to update warning banner
-                if (userProfile && userProfile._id === userId) {
-                    try {
-                        const updatedProfile = await axios.get(`${API_BASE_URL}/users/profile`, {
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        });
-                        setUserProfile(updatedProfile.data);
-                    } catch (err) {
-                        console.error('Failed to refresh user profile:', err);
-                    }
-                }
-            }
-            else if (flagData.action === 'lift-suspension') {
-                // Lift suspension from user
-                console.log('[MOD ACTION LIFT_SUSPENSION] Full flagData:', flagData);
-                console.log('[MOD ACTION LIFT_SUSPENSION] Context:', flagData.context);
-                
-                const userId = flagData.context?.type === 'profile' 
-                    ? flagData.context?.userId 
-                    : flagData.context?.ownerId;
-                
-                // Also try id_public as fallback
-                const userIdPublic = flagData.context?.id;
-                
-                console.log('[MOD ACTION LIFT_SUSPENSION] Lifting suspension for user:', { 
-                    userId, 
-                    userIdPublic,
-                    reason: flagData.reason,
-                    contextType: flagData.context?.type
-                });
-                
-                // Use userId if available, otherwise try id_public
-                const finalUserId = userId || userIdPublic;
-                
-                if (!finalUserId) {
-                    throw new Error('User ID not found in context');
-                }
-                
-                const response = await axios.post(
-                    `${API_BASE_URL}/moderation/users/${finalUserId}/status`,
-                    {
-                        status: 'active',
-                        reason: flagData.reason
-                    },
-                    { headers: { Authorization: `Bearer ${authToken}` } }
-                );
-
-                console.log('[MOD ACTION LIFT_SUSPENSION] Success:', response.data);
-                
-                // If the response indicates suspension was lifted, store notification for the user
-                if (response.data.suspensionLifted) {
-                    console.log('[MOD ACTION LIFT_SUSPENSION] Setting notification for user');
-                    // Note: This notification is stored in a shared location. In a real app, 
-                    // this should be sent to the user's device via websocket/notification system
-                    // For now, it will appear when the user logs back in
-                }
-                
-                showModalMessage('Suspension Lifted', 'User account has been reactivated and can now log in.');
-            }
-            else if (flagData.action === 'lift-ban') {
-                // Lift ban from user
-                console.log('[MOD ACTION LIFT_BAN] Full flagData:', flagData);
-                console.log('[MOD ACTION LIFT_BAN] Context:', flagData.context);
-                
-                const userId = flagData.context?.type === 'profile' 
-                    ? flagData.context?.userId 
-                    : flagData.context?.ownerId;
-                
-                // Also try id_public as fallback
-                const userIdPublic = flagData.context?.id;
-                
-                console.log('[MOD ACTION LIFT_BAN] Lifting ban for user:', { 
-                    userId, 
-                    userIdPublic,
-                    reason: flagData.reason,
-                    contextType: flagData.context?.type
-                });
-                
-                // Use userId if available, otherwise try id_public
-                const finalUserId = userId || userIdPublic;
-                
-                if (!finalUserId) {
-                    throw new Error('User ID not found in context');
-                }
-                
-                const response = await axios.post(
-                    `${API_BASE_URL}/moderation/users/${finalUserId}/status`,
-                    {
-                        status: 'active',
-                        reason: flagData.reason
-                    },
-                    { headers: { Authorization: `Bearer ${authToken}` } }
-                );
-
-                console.log('[MOD ACTION LIFT_BAN] Success:', response.data);
-                showModalMessage('Ban Lifted', 'User account has been reactivated and can now log in.');
-            }
-        } catch (error) {
-            console.error('[MOD ACTION] ERROR OCCURRED:', {
-                message: error.message,
-                status: error.response?.status,
-                statusText: error.response?.statusText,
-                errorData: error.response?.data,
-                errorResponse: error.response,
-                fullError: error
-            });
-            
-            // Extract error message for user feedback
-            const errorMsg = error.response?.data?.message 
-                || error.response?.data?.error 
-                || error.message 
-                || 'An error occurred while performing this action.';
-            
-            console.error('[MOD ACTION] Showing error message to user:', errorMsg);
-            showModalMessage('Action Failed', errorMsg);
-        }
-    }, [showModalMessage, authToken, API_BASE_URL, userProfile]);
-
-    const handleImageDownload = async (imageUrl) => {
-        try {
-            const response = await fetch(imageUrl);
-            const blob = await response.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.download = `crittertrack-image-${Date.now()}.jpg`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(blobUrl);
-        } catch (error) {
-            console.error('Failed to download image:', error);
-            showModalMessage('Download Failed', 'Could not download the image. Please try right-clicking and "Save image as..."');
-        }
-    };
-
-    // Phase 10a: Use idle timeout hook
-    useIdleTimeout(authToken, handleLogout, showModalMessage);
+    // Detect mobile/app environment
+    React.useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // Poll for maintenance mode and urgent notifications
     useEffect(() => {
@@ -2947,314 +2605,74 @@ const App = () => {
             )}
 
             <main className="w-full flex-grow max-w-5xl">
-                <Routes>
-                    <Route path="/" element={
-                        <AnimalList 
-                            authToken={authToken}
-                            API_BASE_URL={API_BASE_URL}
-                            showModalMessage={showModalMessage} 
-                            onEditAnimal={handleEditAnimal} 
-                            onViewAnimal={handleViewAnimal}
-                            navigate={navigate}
-                            showArchiveScreen={showArchiveScreen}
-                            setShowArchiveScreen={setShowArchiveScreen}
-                            archivedAnimals={archivedAnimals}
-                            setArchivedAnimals={setArchivedAnimals}
-                            soldTransferredAnimals={soldTransferredAnimals}
-                            setSoldTransferredAnimals={setSoldTransferredAnimals}
-                            archiveLoading={archiveLoading}
-                            setArchiveLoading={setArchiveLoading}
-                            breedingLineDefs={breedingLineDefs}
-                            animalBreedingLines={animalBreedingLines}
-                        />
-                    } />
-                    <Route path="/list" element={
-                        <AnimalList 
-                            authToken={authToken}
-                            API_BASE_URL={API_BASE_URL}
-                            showModalMessage={showModalMessage} 
-                            onEditAnimal={handleEditAnimal} 
-                            onViewAnimal={handleViewAnimal}
-                            navigate={navigate}
-                            showArchiveScreen={showArchiveScreen}
-                            setShowArchiveScreen={setShowArchiveScreen}
-                            archivedAnimals={archivedAnimals}
-                            setArchivedAnimals={setArchivedAnimals}
-                            soldTransferredAnimals={soldTransferredAnimals}
-                            setSoldTransferredAnimals={setSoldTransferredAnimals}
-                            archiveLoading={archiveLoading}
-                            setArchiveLoading={setArchiveLoading}
-                            breedingLineDefs={breedingLineDefs}
-                            animalBreedingLines={animalBreedingLines}
-                        />
-                    } />
-                    <Route path="/donation" element={<DonationView onBack={() => navigate('/')} authToken={authToken} userProfile={userProfile} />} />
-                    <Route path="/marketplace" element={
-                        <Marketplace 
-                            authToken={authToken}
-                            userProfile={userProfile}
-                            showModalMessage={showModalMessage}
-                            onViewAnimal={(animalId) => {
-                                // Navigate to public animal page
-                                window.location.href = `/animal/${animalId}`;
-                            }}
-                            onViewProfile={(userId) => {
-                                // Navigate to public profile page
-                                window.location.href = `/user/${userId}`;
-                            }}
-                            onStartConversation={(conversationData) => {
-                                setSelectedConversation(conversationData);
-                                setShowMessages(true);
-                            }}
-                        />
-                    } />
-                    <Route path="/family-tree" element={
-                        userProfile?.id_public === 'CTU2' ? (
-                            <FamilyTree
-                                authToken={authToken}
-                                userProfile={userProfile}
-                                showModalMessage={showModalMessage}
-                                onViewAnimal={handleViewAnimal}
-                                onBack={() => navigate('/')}
-                            />
-                        ) : (
-                            <div style={{ padding: '20px', textAlign: 'center' }}>
-                                <h2>Access Restricted</h2>
-                                <p>The Family Tree feature is currently in testing and only available to select users.</p>
-                                <button onClick={() => navigate('/')} style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}>
-                                    Back to Home
-                                </button>
-                            </div>
-                        )
-                    } />
-                    <Route path="/family-tree" element={
-                        userProfile?.id_public === 'CTU2' ? (
-                            <FamilyTree
-                                authToken={authToken}
-                                userProfile={userProfile}
-                                showModalMessage={showModalMessage}
-                                onViewAnimal={handleViewAnimal}
-                                onBack={() => navigate('/')}
-                            />
-                        ) : (
-                            <div style={{ padding: '20px', textAlign: 'center' }}>
-                                <h2>Access Restricted</h2>
-                                <p>The Family Tree feature is currently in testing and only available to select users.</p>
-                                <button onClick={() => navigate('/')} style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}>
-                                    Back to Home
-                                </button>
-                            </div>
-                        )
-                    } />
-                    <Route path="/animal-tree/:species" element={
-                        <AnimalTree
-                            authToken={authToken}
-                            userProfile={userProfile}
-                            showModalMessage={showModalMessage}
-                            onViewAnimal={handleViewAnimal}
-                            onBack={() => navigate('/')}
-                        />
-                    } />
-                    <Route path="/profile" element={<ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} saveBreedingLineDefs={saveBreedingLineDefs} toggleAnimalBreedingLine={toggleAnimalBreedingLine} BL_PRESETS_APP={BL_PRESETS_APP} />} />
-                    <Route path="/community" element={
-                        <CommunityPage
-                            authToken={authToken}
-                            API_BASE_URL={API_BASE_URL}
-                            userProfile={userProfile}
-                        />
-                    } />
-                    <Route path="/breeder-directory" element={
-                        <BreederDirectory
-                            authToken={authToken}
-                            API_BASE_URL={API_BASE_URL}
-                            onBack={() => navigate('/')}
-                        />
-                    } />
-                    <Route path="/litters" element={
-                        <LitterManagement
-                            authToken={authToken}
-                            API_BASE_URL={API_BASE_URL}
-                            userProfile={userProfile}
-                            showModalMessage={showModalMessage}
-                            onViewAnimal={handleViewAnimal}
-                            speciesOptions={speciesOptions}
-                        />
-                    } />
-                    <Route path="/budget" element={
-                        <BudgetingTab
-                            authToken={authToken}
-                            API_BASE_URL={API_BASE_URL}
-                            showModalMessage={showModalMessage}
-                            preSelectedAnimal={preSelectedTransferAnimal}
-                            preSelectedType={preSelectedTransactionType}
-                            onAddModalOpen={() => setBudgetModalOpen(true)}
-                        />
-                    } />
-                    <Route path="/genetics-calculator" element={
-                        <MouseGeneticsCalculator
-                            API_BASE_URL={API_BASE_URL}
-                            authToken={authToken}
-                            myAnimals={myAnimalsForCalculator}
-                            userRole={userProfile?.role}
-                        />
-                    } />
-                    <Route path="/select-species" element={
-                        <SpeciesSelector 
-                            speciesOptions={speciesOptions} 
-                            onSelectSpecies={(species) => { 
-                                setSpeciesToAdd(species); 
-                                navigate('/add-animal'); 
-                            }} 
-                            onManageSpecies={() => navigate('/manage-species')}
-                            searchTerm={speciesSearchTerm}
-                            setSearchTerm={setSpeciesSearchTerm}
-                            categoryFilter={speciesCategoryFilter}
-                            setCategoryFilter={setSpeciesCategoryFilter}
-                        />
-                    } />
-                    <Route path="/manage-species" element={
-                        <SpeciesManager 
-                            speciesOptions={speciesOptions} 
-                            setSpeciesOptions={setSpeciesOptions} 
-                            onCancel={() => navigate('/select-species')}
-                            showModalMessage={showModalMessage}
-                            authToken={authToken}
-                            API_BASE_URL={API_BASE_URL}
-                        />
-                    } />
-                    <Route path="/add-animal" element={
-                        !speciesToAdd ? (
-                            <SpeciesSelector
-                                speciesOptions={speciesOptions}
-                                onSelectSpecies={(species) => {
-                                    setSpeciesToAdd(species);
-                                    navigate('/add-animal');
-                                }}
-                                onManageSpecies={() => navigate('/manage-species')}
-                                searchTerm={speciesSearchTerm}
-                                setSearchTerm={setSpeciesSearchTerm}
-                                categoryFilter={speciesCategoryFilter}
-                                setCategoryFilter={setSpeciesCategoryFilter}
-                            />
-                        ) : (
-                            <AnimalForm
-                                formTitle={`Add New ${speciesToAdd}`}
-                                animalToEdit={null}
-                                species={speciesToAdd}
-                                onSave={handleSaveAnimal}
-                                onCancel={() => { navigate('/'); setSpeciesToAdd(null); }}
-                                onDelete={null}
-                                authToken={authToken}
-                                showModalMessage={showModalMessage}
-                                API_BASE_URL={API_BASE_URL}
-                                userProfile={userProfile}
-                                speciesConfigs={speciesConfigs}
-                                X={X}
-                                Search={Search}
-                                Loader2={Loader2}
-                                LoadingSpinner={LoadingSpinner}
-                                PlusCircle={PlusCircle}
-                                ArrowLeft={ArrowLeft}
-                                Save={Save}
-                                Trash2={Trash2}
-                                RotateCcw={RotateCcw}
-                                GENDER_OPTIONS={GENDER_OPTIONS}
-                                STATUS_OPTIONS={STATUS_OPTIONS}
-                                AnimalImageUpload={AnimalImageUpload}
-                            />
-                        )
-                    } />
-                    <Route path="/edit-animal" element={
-                        animalToEdit && (
-                            <AnimalForm 
-                                formTitle={`Edit ${animalToEdit.name}`}
-                                animalToEdit={animalToEdit} 
-                                species={animalToEdit.species} 
-                                onSave={handleSaveAnimal} 
-                                onCancel={() => navigate(editReturnPathRef.current || '/')} 
-                                onDelete={handleDeleteAnimal}
-                                authToken={authToken} 
-                                showModalMessage={showModalMessage}
-                                API_BASE_URL={API_BASE_URL}
-                                userProfile={userProfile}
-                                speciesConfigs={speciesConfigs}
-                                X={X}
-                                Search={Search}
-                                Loader2={Loader2}
-                                LoadingSpinner={LoadingSpinner}
-                                PlusCircle={PlusCircle}
-                                ArrowLeft={ArrowLeft}
-                                Save={Save}
-                                Trash2={Trash2}
-                                RotateCcw={RotateCcw}
-                                GENDER_OPTIONS={GENDER_OPTIONS}
-                                STATUS_OPTIONS={STATUS_OPTIONS}
-                                AnimalImageUpload={AnimalImageUpload}
-                            />
-                        )
-                    } />
-                    <Route path="/view-animal" element={
-                        animalToView && (() => {
-                            // Ownership logic:
-                            // 1. ownerId_public === my ID ? PrivateAnimalDetail (full edit; "Return" button if originalOwnerId is set, meaning it was transferred to me)
-                            // 2. Otherwise ? ViewOnlyPrivateAnimalDetail (read-only, no edit/delete/transfer buttons)
-                            
-                            const iCurrentlyOwn = animalToView.ownerId_public === userProfile?.id_public;
-                            
-                            if (iCurrentlyOwn) {
-                                // I own it - full edit access (with return button instead of delete if transferred to me)
-                                return (
-                                    <PrivateAnimalDetail
-                                        animal={animalToView}
-                                        initialTab={privateAnimalInitialTab}
-                                        initialBetaView={privateBetaView}
-                                        onClose={handleBackFromAnimal}
-                                        onCloseAll={handleCloseAllAnimals}
-                                        onEdit={handleEditAnimal}
-                                        onArchive={handleArchiveAnimal}
-                                        API_BASE_URL={API_BASE_URL}
-                                        authToken={authToken}
-                                        setShowImageModal={setShowImageModal}
-                                        setEnlargedImageUrl={setEnlargedImageUrl}
-                                        onUpdateAnimal={setAnimalToView}
-                                        showModalMessage={showModalMessage}
-                                        onTransfer={(animal) => {
-                                            setTransferAnimal(animal);
-                                            setShowTransferModal(true);
-                                        }}
-                                        onViewAnimal={handleViewAnimal}
-                                        onViewPublicAnimal={handleViewPublicAnimal}
-                                        onToggleOwned={toggleAnimalOwned}
-                                        userProfile={userProfile}
-                                        breedingLineDefs={breedingLineDefs}
-                                        animalBreedingLines={animalBreedingLines}
-                                        toggleAnimalBreedingLine={toggleAnimalBreedingLine}
-                                    />
-                                );
-                            } else {
-                                // Someone else owns it - read-only (or I created it but transferred it away)
-                                return (
-                                    <ViewOnlyPrivateAnimalDetail
-                                        animal={animalToView}
-                                        initialTab={privateAnimalInitialTab}
-                                        initialBetaView={privateBetaView}
-                                        onClose={handleBackFromAnimal}
-                                        onCloseAll={handleCloseAllAnimals}
-                                        API_BASE_URL={API_BASE_URL}
-                                        authToken={authToken}
-                                        setShowImageModal={setShowImageModal}
-                                        setEnlargedImageUrl={setEnlargedImageUrl}
-                                        showModalMessage={showModalMessage}
-                                        onViewAnimal={handleViewAnimal}
-                                        breedingLineDefs={breedingLineDefs}
-                                        animalBreedingLines={animalBreedingLines}
-                                        toggleAnimalBreedingLine={toggleAnimalBreedingLine}
-                                    />
-                                );
-                            }
-                        })()
-                    } />
-                    <Route path="/view-animal-old-backup" element={
+                <AppRoutes
+                  authToken={authToken}
+                  userProfile={userProfile}
+                  fetchUserProfile={fetchUserProfile}
+                  modals={modals}
+                  setShowMessages={() => {}}
+                  setSelectedConversation={() => {}}
+                  setBudgetModalOpen={() => {}}
+                  myAnimalsForCalculator={[]}
+                  animalToView={animalToView}
+                  animalToEdit={animalToEdit}
+                  handleViewAnimal={handleViewAnimal}
+                  handleEditAnimal={handleEditAnimal}
+                  handleSaveAnimal={handleSaveAnimal}
+                  handleDeleteAnimal={handleDeleteAnimal}
+                  handleBackFromAnimal={handleBackFromAnimal}
+                  handleCloseAllAnimals={handleCloseAllAnimals}
+                  handleArchiveAnimal={handleArchiveAnimal}
+                  privateAnimalInitialTab={privateAnimalInitialTab}
+                  privateBetaView={privateBetaView}
+                  editReturnPathRef={editReturnPathRef}
+                  showArchiveScreen={false}
+                  setShowArchiveScreen={() => {}}
+                  archivedAnimals={[]}
+                  setArchivedAnimals={() => {}}
+                  soldTransferredAnimals={[]}
+                  setSoldTransferredAnimals={() => {}}
+                  archiveLoading={false}
+                  setArchiveLoading={() => {}}
+                  breedingLineDefs={breedingLineDefs}
+                  animalBreedingLines={animalBreedingLines}
+                  saveBreedingLineDefs={saveBreedingLineDefs}
+                  toggleAnimalBreedingLine={toggleAnimalBreedingLine}
+                  BL_PRESETS_APP={BL_PRESETS_APP}
+                  preSelectedTransferAnimal={preSelectedTransferAnimal}
+                  preSelectedTransactionType={preSelectedTransactionType}
+                  setPreSelectedTransferAnimal={setPreSelectedTransferAnimal}
+                  setPreSelectedTransactionType={setPreSelectedTransactionType}
+                  setTransferAnimal={setTransferAnimal}
+                  setShowTransferModal={setShowTransferModal}
+                  speciesToAdd={null}
+                  setSpeciesToAdd={() => {}}
+                  speciesOptions={[]}
+                  setSpeciesOptions={() => {}}
+                  speciesConfigs={{}}
+                  speciesSearchTerm=""
+                  setSpeciesSearchTerm={() => {}}
+                  speciesCategoryFilter=""
+                  setSpeciesCategoryFilter={() => {}}
+                  setShowImageModal={setShowImageModal}
+                  setEnlargedImageUrl={setEnlargedImageUrl}
+                  showTransferModal={showTransferModal}
+                  transferAnimal={transferAnimal}
+                  X={X}
+                  Search={Search}
+                  Loader2={Loader2}
+                  LoadingSpinner={LoadingSpinner}
+                  PlusCircle={PlusCircle}
+                  ArrowLeft={ArrowLeft}
+                  Save={Save}
+                  Trash2={Trash2}
+                  RotateCcw={RotateCcw}
+                  GENDER_OPTIONS={GENDER_OPTIONS}
+                  STATUS_OPTIONS={STATUS_OPTIONS}
+                  AnimalImageUpload={AnimalImageUpload}
+                  API_BASE_URL={API_BASE_URL}
+                />
+            </main>
                         animalToView && (
                             (() => {
                                 const parseHealthRecords = (data) => {
