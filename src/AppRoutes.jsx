@@ -3,21 +3,21 @@ import { Route, Routes, useNavigate } from 'react-router-dom';
 
 // Views
 import AnimalList from './components/AnimalList';
-import DonationView from './components/DonationView';
+import DonationView from './components/Donation/DonationView';
 import Marketplace from './components/Marketplace';
 import FamilyTree from './components/FamilyTree';
 import AnimalTree from './components/AnimalTree';
-import ProfileView from './components/ProfileView';
-import CommunityPage from './components/CommunityPage';
-import BreederDirectory from './components/BreederDirectory';
+import ProfileView from './components/Profile/ProfileView';
+import CommunityPage from './components/Community/CommunityPage';
+import BreederDirectory from './components/PublicProfile/BreederDirectory';
 import LitterManagement from './components/LitterManagement';
 import BudgetingTab from './components/BudgetingTab';
 import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
-import SpeciesSelector from './components/SpeciesSelector';
-import SpeciesManager from './components/SpeciesManager';
+import { SpeciesSelector } from './components/Modals/SpeciesModals';
+import { SpeciesManager } from './components/Modals/SpeciesModals';
 import AnimalForm from './components/AnimalForm';
-import PrivateAnimalDetail from './components/PrivateAnimalDetail';
-import ViewOnlyPrivateAnimalDetail from './components/ViewOnlyPrivateAnimalDetail';
+import PrivateAnimalDetail from './components/AnimalDetail/PrivateAnimalDetail';
+import ViewOnlyPrivateAnimalDetail from './components/AnimalDetail/ViewOnlyPrivateAnimalDetail';
 
 /**
  * AppRoutes Component
