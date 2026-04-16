@@ -739,7 +739,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 </div>
                             </div>
                             {/* Parents */}
-                            <div>
+                            <div className="bg-white rounded-lg p-3 border border-gray-200">
                                 <div className="flex items-center justify-between mb-2">
                                     <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Parents</h3>
                                     {animalCOI != null && <span className="text-sm text-gray-700"><span className="font-medium">COI:</span> {animalCOI.toFixed(2)}%</span>}
