@@ -798,11 +798,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                     {/* Tab 6: Family */}
                     {detailViewTab === 6 && (
                         <div className="space-y-6">
-                            {/* Pedigree link */}
-                            <div>
-                                <span className="text-xs text-orange-500 font-medium">&#x1F4CA; COI calculations available on the <button onClick={() => setDetailViewTab(1)} className="underline hover:text-orange-600 transition">Overview</button> tab</span>
-                            </div>
-
                             {/* Offspring & Litters - merged litters + pedigree offspring */}
                             {(animalLitters === null || pedigreeOffspring === null) ? (
                                 <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">

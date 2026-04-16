@@ -655,11 +655,6 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                     {/* Tab 6: Family */}
                     {detailViewTab === 6 && (
                         <div className="space-y-6">
-                            {/* Pedigree link */}
-                            <div>
-                                <span className="text-xs text-orange-500 font-medium">&#x1F4CA; COI calculations available on the <button onClick={() => setDetailViewTab(1)} className="underline hover:text-orange-600 transition">Overview</button> tab</span>
-                            </div>
-
                             {/* 2nd Section: Keeper History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper History</h3>
