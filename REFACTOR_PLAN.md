@@ -6,8 +6,6 @@
 
 ---
 
-## Phase 2 — Animal Detail Views (~7,200 lines)
-
 **Target folder:** `src/components/AnimalDetail/`
 
 | Component | Lines in app.jsx | Est. Size | Notes |
@@ -68,45 +66,6 @@
 
 ---
 
-## Phase 8 — Community, Donations & Shared Components (~1,600 lines)
-
-| Component | Lines in app.jsx | Est. Size | Target |
-|---|---|---|---|
-| `DonationBadge` | 181–298 | ~21 | `src/components/shared/` |
-| `ModalMessage` | 299–313 | ~15 | `src/components/shared/` |
-| `CustomAppLogo` | 314–326 | ~13 | `src/components/shared/` |
-| `LoadingSpinner` | 327–334 | ~8 | `src/components/shared/` |
-| `AnimalImage` | 335–364 | ~30 | `src/components/shared/` |
-| `AnimalImageUpload` | 10118–10300 | ~183 | `src/components/AnimalImageUpload/` |
-| `compressImageWithWorker` | 10301–10341 | ~41 | `src/components/AnimalImageUpload/` |
-| `DonationView` | 10499–10701 | ~203 | `src/components/Donation/` |
-| `CommunityPage` | 10702–11192 | ~491 | `src/components/Community/` |
-
-**Files to create:**
-- `src/components/shared/index.jsx` (ModalMessage, LoadingSpinner, AnimalImage, DonationBadge, CustomAppLogo)
-- `src/components/AnimalImageUpload/index.jsx`
-- `src/components/Donation/DonationView.jsx`
-- `src/components/Community/CommunityPage.jsx`
-
-**Note:** `AnimalImageUpload` is used by both `AnimalForm` and `ProfileEditForm` — must be extracted before those work independently without app.jsx.
-
----
-
-## Phase 9 — Utility Functions (~600 lines)
-
-Move pure utility functions out of app.jsx into `src/utils/`.
-
-| Function(s) | Lines | Target file |
-|---|---|---|
-| `GENDER_OPTIONS`, `STATUS_OPTIONS`, `DEFAULT_SPECIES_OPTIONS` | 52–55 | `src/utils/constants.js` |
-| `getSpeciesDisplayName`, `getSpeciesLatinName` | 57–89 | `src/utils/speciesUtils.js` |
-| `getCountryFlag`, `getCountryName`, `US_STATES`, `getStateName`, `getCurrencySymbol` | 90–146 | `src/utils/locationUtils.js` |
-| `getDonationBadge` | 147–180 | `src/utils/donationUtils.js` |
-| `formatDateDisplay`, `litterAge`, `formatTimeAgo` | 202–255 | `src/utils/dateUtils.js` (extend existing) |
-| `getActionLabel`, `getActionColor` | 256–298 | `src/utils/activityUtils.js` |
-
----
-
 ## Phase 10 — App Component Decomposition (~4,900 lines)
 
 The `App` component (lines 11774–17333, ~5,560 lines) contains all top-level state, routing, and event wiring. After all other phases are done, break it down:
@@ -122,29 +81,29 @@ The `App` component (lines 11774–17333, ~5,560 lines) contains all top-level s
 
 ---
 
-## Summary Table
+## Summary of Progress
 
-| Phase | What | Lines Removed | Status |
+| Phase | What | Lines | Status |
 |---|---|---|---|
-| 1 | LitterManagement, AnimalForm, AnimalList | ~13,746 | ✅ Done |
-| 5 | Auth | ~900 | ✅ Done |
-| 6 | Notifications & Banners | ~1,850 | ✅ Done |
-| 3 | Public Profile & Breeder Directory | ~3,000 | ✅ Done |
-| 4 | Profile Edit & Account | ~3,200 | ✅ Done |
 | 2 | Animal Detail Views (3 variants + helpers) | ~7,200 | ⬜ Next |
 | 7 | Modals & Species + Messages | ~2,500 | ⬜ |
-| 8 | Community, Donations & Shared components | ~1,600 | ✅ |
-| 9 | Utility functions | ~600 | ✅ |
 | 10 | App component decomposition | ~4,600 | ⬜ |
-| **Total** | | **~39,196** | |
+| **Remaining Total** | | **~14,300** | |
+
+**Completed Phases:**
+- Phase 1: LitterManagement, AnimalForm, AnimalList (~13,746 lines) ✅
+- Phase 3: Public Profile & Breeder Directory (~3,000 lines) ✅
+- Phase 4: Profile Edit & Account (~3,200 lines) ✅
+- Phase 5: Auth (~900 lines) ✅
+- Phase 6: Notifications & Banners (~1,850 lines) ✅
+- Phase 8: Community, Donations & Shared components (~1,600 lines) ✅
+- Phase 9: Utility functions (~600 lines) ✅
 
 **Current app.jsx:** 16,119 lines | **Final target:** ~500 lines (imports + AppRouter only)
 
 ---
 
 ## Recommended Order
-
-Phases 8 and 9 are now complete. Next priorities:
 
 1. **Phase 2** — Animal Detail Views (~7,200 lines) — biggest win, but HIGH RISK
 2. **Phase 7** — Modals & Species (~2,500 lines) — medium risk
