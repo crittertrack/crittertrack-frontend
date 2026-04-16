@@ -41,45 +41,6 @@ const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Booked', 'Sold', 'Retire
 
 const DEFAULT_SPECIES_OPTIONS = ['Fancy Mouse', 'Fancy Rat', 'Russian Dwarf Hamster', 'Campbells Dwarf Hamster', 'Chinese Dwarf Hamster', 'Syrian Hamster', 'Guinea Pig'];
 
-// Helper function to get plural/display names for species
-const getSpeciesEmoji = (speciesName) => {
-    const emojiMap = {
-        // Small mammals
-        'Fancy Mouse': '??', 'Mouse': '??',
-        'Fancy Rat': '??', 'Rat': '??',
-        'Syrian Hamster': '??', 'Roborovski Dwarf Hamster': '??',
-        'Russian Dwarf Hamster': '??', 'Campbells Dwarf Hamster': '??', 'Chinese Dwarf Hamster': '??', 'Hamster': '??',
-        'Guinea Pig': '??', 'Gerbil': '??', 'Fat-tailed Gerbil': '??', 'Fat-tailed gerbil': '??',
-        'Degu': '??', 'Chinchilla': '??', 'African Pygmy Mouse': '??', 'African Pygmy Dormouse': '??',
-        // Full mammals
-        'Rabbit': '??', 'Ferret': '??', 'Hedgehog': '??', 'Sugar Glider': '???',
-        'Prairie Dog': '??', 'Cat': '??', 'Dog': '??',
-        // Reptiles
-        'Leopard Gecko': '??', 'Crested Gecko': '??', 'Gargoyle Gecko': '??',
-        'Bearded Dragon': '??', 'Blue-Tongued Skink': '??', 'Chameleon': '??',
-        'Ball Python': '??', 'Corn Snake': '??', 'Cape African House Snake': '??',
-        'Red-Eared Slider': '??', 'Russian Tortoise': '??',
-        // Birds
-        'Budgie': '??', 'Budgerigar': '??', 'Cockatiel': '??', 'Lovebird': '??',
-        'Conure': '??', 'African Grey Parrot': '??', 'Macaw': '??', 'Cockatoo': '??',
-        'Canary': '??', 'Zebra Finch': '??', 'Dove': '???',
-        // Amphibians
-        'Axolotl': '??', 'Pacman Frog': '??', 'Dart Poison Frog': '??',
-        "White's Tree Frog": '??', 'Fire-Bellied Toad': '??', 'Tomato Frog': '??', 'Tiger Salamander': '??',
-        // Fish
-        'Betta Fish': '??', 'Guppy': '??', 'Platy': '??',
-        'Fancy Goldfish': '??', 'Koi': '??', 'Discus': '??', 'Angelfish': '??', 'Corydoras': '??', 'Oscar': '??',
-        // Invertebrates
-        'Tarantula': '???', 'Jumping Spider': '???', 'Scorpion': '??',
-        'Giant African Millipede': '??', 'Praying Mantis': '??', 'Stick Insect': '??',
-        'Hissing Cockroach': '??', 'Hermit Crab': '??', 'Land Snail': '??',
-        'Honey Bee': '??', 'Bumble Bee': '??',
-        // Default
-        'Other': '??',
-    };
-    return emojiMap[speciesName] || '??';
-};
-
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
         'Fancy Mouse': 'Fancy Mice',
@@ -5548,8 +5509,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                                                 {(rel.imageUrl || rel.photoUrl) ? (
                                                                                     <img src={rel.imageUrl || rel.photoUrl} alt={rel.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200" />
                                                                                 ) : (
-                                                                                    <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-base">
-                                                                                        {getSpeciesEmoji(rel.species)}
+                                                                                    <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-sm text-blue-600 font-semibold">
+                                                                                        {rel.species?.charAt(0).toUpperCase()}
                                                                                     </div>
                                                                                 )}
                                                                                 <div className="min-w-0">
@@ -5604,8 +5565,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                                             {(rel.imageUrl || rel.photoUrl) ? (
                                                                                 <img src={rel.imageUrl || rel.photoUrl} alt={rel.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200" />
                                                                             ) : (
-                                                                                <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 text-base">
-                                                                                    {getSpeciesEmoji(rel.species)}
+                                                                                <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 text-sm text-amber-700 font-semibold">
+                                                                                    {rel.species?.charAt(0).toUpperCase()}
                                                                                 </div>
                                                                             )}
                                                                             <div className="min-w-0">
@@ -13186,7 +13147,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         }`}
                                     >
                                         {formData.species ? (
-                                            <span className="font-medium text-gray-800">{getSpeciesEmoji(formData.species) && <span className="mr-1">{getSpeciesEmoji(formData.species)}</span>}{formData.species}</span>
+                                            <span className="font-medium text-gray-800">{formData.species}</span>
                                         ) : (
                                             <span className="text-gray-400">Click to select species...</span>
                                         )}
@@ -13786,7 +13747,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-left hover:bg-gray-50 transition focus:ring-2 focus:ring-primary focus:border-transparent"
                                 >
                                     {matingData.species
-                                        ? <span className="font-medium text-gray-800">{getSpeciesEmoji(matingData.species) && <span className="mr-1">{getSpeciesEmoji(matingData.species)}</span>}{matingData.species}</span>
+                                        ? <span className="font-medium text-gray-800">{matingData.species}</span>
                                         : <span className="text-gray-400">Click to select species...</span>}
                                 </button>
                                 <p className="text-xs text-gray-500 mt-1">Choose species to filter the sire &amp; dam search</p>
