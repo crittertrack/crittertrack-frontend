@@ -2403,6 +2403,92 @@ const App = () => {
                 </>
             )}
 
+            {/* Animal detail overlay - renders on top of whatever route is active */}
+            {animalToView && (() => {
+                const iCurrentlyOwn = animalToView.ownerId_public === userProfile?.id_public;
+                if (iCurrentlyOwn) {
+                    return (
+                        <div className="fixed inset-0 z-50 overflow-y-auto bg-white">
+                            <PrivateAnimalDetail
+                                animal={animalToView}
+                                initialTab={privateAnimalInitialTab}
+                                initialBetaView={privateBetaView}
+                                onClose={handleBackFromAnimal}
+                                onCloseAll={handleCloseAllAnimals}
+                                onEdit={handleEditAnimal}
+                                onArchive={handleArchiveAnimal}
+                                API_BASE_URL={API_BASE_URL}
+                                authToken={authToken}
+                                setShowImageModal={setShowImageModal}
+                                setEnlargedImageUrl={setEnlargedImageUrl}
+                                onUpdateAnimal={() => {}}
+                                showModalMessage={showModalMessage}
+                                onTransfer={(animal) => { setTransferAnimal(animal); setShowTransferModal(true); }}
+                                onViewAnimal={handleViewAnimal}
+                                onViewPublicAnimal={handleViewPublicAnimal}
+                                onToggleOwned={() => {}}
+                                userProfile={userProfile}
+                                breedingLineDefs={breedingLineDefs}
+                                animalBreedingLines={animalBreedingLines}
+                                toggleAnimalBreedingLine={toggleAnimalBreedingLine}
+                            />
+                        </div>
+                    );
+                } else {
+                    return (
+                        <div className="fixed inset-0 z-50 overflow-y-auto bg-white">
+                            <ViewOnlyPrivateAnimalDetail
+                                animal={animalToView}
+                                initialTab={privateAnimalInitialTab}
+                                initialBetaView={privateBetaView}
+                                onClose={handleBackFromAnimal}
+                                onCloseAll={handleCloseAllAnimals}
+                                API_BASE_URL={API_BASE_URL}
+                                authToken={authToken}
+                                setShowImageModal={setShowImageModal}
+                                setEnlargedImageUrl={setEnlargedImageUrl}
+                                showModalMessage={showModalMessage}
+                                onViewAnimal={handleViewAnimal}
+                                breedingLineDefs={breedingLineDefs}
+                                animalBreedingLines={animalBreedingLines}
+                                toggleAnimalBreedingLine={toggleAnimalBreedingLine}
+                            />
+                        </div>
+                    );
+                }
+            })()}
+
+            {/* Animal edit overlay */}
+            {animalToEdit && (
+                <div className="fixed inset-0 z-50 overflow-y-auto bg-white">
+                    <AnimalForm
+                        formTitle={`Edit ${animalToEdit.name}`}
+                        animalToEdit={animalToEdit}
+                        species={animalToEdit.species}
+                        onSave={handleSaveAnimal}
+                        onCancel={handleBackFromAnimal}
+                        onDelete={handleDeleteAnimal}
+                        authToken={authToken}
+                        showModalMessage={showModalMessage}
+                        API_BASE_URL={API_BASE_URL}
+                        userProfile={userProfile}
+                        speciesConfigs={speciesConfigs}
+                        X={X}
+                        Search={Search}
+                        Loader2={Loader2}
+                        LoadingSpinner={LoadingSpinner}
+                        PlusCircle={PlusCircle}
+                        ArrowLeft={ArrowLeft}
+                        Save={Save}
+                        Trash2={Trash2}
+                        RotateCcw={RotateCcw}
+                        GENDER_OPTIONS={GENDER_OPTIONS}
+                        STATUS_OPTIONS={STATUS_OPTIONS}
+                        AnimalImageUpload={AnimalImageUpload}
+                    />
+                </div>
+            )}
+
             <main className="w-full flex-grow max-w-7xl">
                 <AppRoutes
                   authToken={authToken}
