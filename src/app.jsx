@@ -8758,7 +8758,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                             {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
                                             {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
                                             {d.birthDate && <p className="text-[11px] text-gray-400">{formatDate(d.birthDate)}</p>}
-                                            {d.deceasedDate && <p className="text-[11px] text-red-600 font-semibold">? {formatDate(d.deceasedDate)}</p>}
+                                            {d.deceasedDate && <p className="text-[11px] text-red-600 font-semibold">† {formatDate(d.deceasedDate)}</p>}
                                             {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
                                         </div>
                                     </div>
@@ -10712,7 +10712,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                             {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
                                             {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
                                             {d.birthDate && <p className="text-[11px] text-gray-400">{formatDate(d.birthDate)}</p>}
-                                            {d.deceasedDate && <p className="text-[11px] text-red-600 font-semibold">? {formatDate(d.deceasedDate)}</p>}
+                                            {d.deceasedDate && <p className="text-[11px] text-red-600 font-semibold">† {formatDate(d.deceasedDate)}</p>}
                                             {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
                                         </div>
                                     </div>
