@@ -5,7 +5,6 @@ import { Route, Routes, useNavigate } from 'react-router-dom';
 import AnimalList from './components/AnimalList';
 import DonationView from './components/Donation/DonationView';
 import Marketplace from './components/Marketplace';
-import FamilyTree from './components/FamilyTree';
 import AnimalTree from './components/AnimalTree';
 import ProfileView from './components/Profile/ProfileView';
 import CommunityPage from './components/Community/CommunityPage';
@@ -194,27 +193,6 @@ export function AppRoutes({
           }}
           onStartConversation={handleStartConversation}
         />
-      } />
-
-      {/* Family Tree */}
-      <Route path="/family-tree" element={
-        userProfile?.id_public === 'CTU2' ? (
-          <FamilyTree
-            authToken={authToken}
-            userProfile={userProfile}
-            showModalMessage={() => {}}
-            onViewAnimal={handleViewAnimal}
-            onBack={() => navigate('/')}
-          />
-        ) : (
-          <div style={{ padding: '20px', textAlign: 'center' }}>
-            <h2>Access Restricted</h2>
-            <p>The Family Tree feature is currently in testing and only available to select users.</p>
-            <button onClick={() => navigate('/')} style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}>
-              Back to Home
-            </button>
-          </div>
-        )
       } />
 
       {/* Animal Tree */}
