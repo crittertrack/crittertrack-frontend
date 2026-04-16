@@ -38006,7 +38006,7 @@ const App = () => {
                                     <div><span className="text-gray-600">Deceased Date:</span> <strong>{animalToView.deceasedDate ? formatDate(animalToView.deceasedDate) : ''}</strong></div>
                                     <div><span className="text-gray-600">Cause of Death:</span> <strong>{animalToView.causeOfDeath || ''}</strong></div>
                                     <div><span className="text-gray-600">Necropsy Results:</span> <strong>{animalToView.necropsyResults || ''}</strong></div>
-                                    {(animalToView.species === 'Dog' || animalToView.species === 'Cat') && animalToView.endOfLifeCareNotes && (
+                                    {animalToView.endOfLifeCareNotes && (
                                         <div><span className="text-gray-600">End of Life Care Notes:</span> <strong className="whitespace-pre-wrap">{animalToView.endOfLifeCareNotes}</strong></div>
                                     )}
                                 </div>
