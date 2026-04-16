@@ -1,4 +1,4 @@
-// CritterTrack Frontend Application
+﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -3603,7 +3603,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             </div>
                             <div className="p-3 flex flex-col gap-1.5 flex-1">
                                 <p className="text-sm font-semibold text-gray-800 line-clamp-1">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</p>
-                                <p className="text-xs text-gray-500">{animal.species}{ageStr ? ` ? ${ageStr}` : ''}</p>
+                                <p className="text-xs text-gray-500">{animal.species}{ageStr ? ` • ${ageStr}` : ''}</p>
                                 {isSale && priceLabel && (
                                     <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 rounded-full px-2 py-0.5 w-fit">
                                         <DollarSign size={11} /> {priceLabel}
@@ -4847,12 +4847,12 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                         <div className="text-sm font-medium text-gray-700">{animal.status || 'Unknown'}</div>
                                         {animal.isForSale && (
                                             <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
-                                                <Tag size={11} /> For Sale{animal.salePriceCurrency !== 'Negotiable' && animal.salePriceAmount ? ` ? ${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount}` : ''}
+                                                <Tag size={11} /> For Sale{animal.salePriceCurrency !== 'Negotiable' && animal.salePriceAmount ? ` • ${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount}` : ''}
                                             </span>
                                         )}
                                         {animal.availableForBreeding && (
                                             <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
-                                                <Tag size={11} /> Stud{animal.studFeeCurrency !== 'Negotiable' && animal.studFeeAmount ? ` ? ${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount}` : ''}
+                                                <Tag size={11} /> Stud{animal.studFeeCurrency !== 'Negotiable' && animal.studFeeAmount ? ` • ${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount}` : ''}
                                             </span>
                                         )}
                                         {animal.tags && animal.tags.length > 0 && (
@@ -4918,7 +4918,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                     if (months < 0) { years--; months += 12; }
                                                     const ageStr = years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
                                                     if (animal.deceasedDate) {
-                                                        return <span className="text-red-600 font-semibold ml-2">{"?"} {formatDate(animal.deceasedDate)} (Lived {ageStr})</span>;
+                                                        return <span className="text-red-600 font-semibold ml-2">{"†"} {formatDate(animal.deceasedDate)} (Lived {ageStr})</span>;
                                                     } else {
                                                         return <span>(~{ageStr})</span>;
                                                     }
@@ -5554,7 +5554,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                                                 )}
                                                                                 <div className="min-w-0">
                                                                                     <div className="text-sm font-medium text-gray-800 truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}</div>
-                                                                                    <div className="text-xs text-gray-500">{rel.gender}{[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ') ? ` ? ${[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` ? ${formatDate(rel.birthDate)}` : ''}</div>
+                                                                                    <div className="text-xs text-gray-500">{rel.gender}{[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ') ? ` • ${[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` • ${formatDate(rel.birthDate)}` : ''}</div>
                                                                                 </div>
                                                                             </div>
                                                                             <div className="flex items-center gap-2 flex-shrink-0 ml-2">
@@ -5610,7 +5610,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                                             )}
                                                                             <div className="min-w-0">
                                                                                 <div className="text-sm font-medium text-gray-800 truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}{rel.suffix ? ` ${rel.suffix}` : ''}</div>
-                                                                                <div className="text-xs text-gray-500">{rel.gender}{[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ') ? ` ? ${[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` ? ${formatDate(rel.birthDate)}` : ''}</div>
+                                                                                <div className="text-xs text-gray-500">{rel.gender}{[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ') ? ` • ${[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` • ${formatDate(rel.birthDate)}` : ''}</div>
                                                                             </div>
                                                                         </div>
                                                                         <div className="flex items-center gap-2 flex-shrink-0 ml-2">
@@ -7356,7 +7356,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                     if (months < 0) { years--; months += 12; }
                                                     const ageStr = years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
                                                     if (animal.deceasedDate) {
-                                                        return <span className="text-red-600 font-semibold ml-2">{"?"} {formatDate(animal.deceasedDate)} (Lived {ageStr})</span>;
+                                                        return <span className="text-red-600 font-semibold ml-2">{"†"} {formatDate(animal.deceasedDate)} (Lived {ageStr})</span>;
                                                     } else {
                                                         return <span>(~{ageStr})</span>;
                                                     }
@@ -9408,7 +9408,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                     if (months < 0) { years--; months += 12; }
                                                     const ageStr = years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
                                                     if (animal.deceasedDate) {
-                                                        return <span className="text-red-600 font-semibold ml-2">{"?"} {formatDate(animal.deceasedDate)} (Lived {ageStr})</span>;
+                                                        return <span className="text-red-600 font-semibold ml-2">{"†"} {formatDate(animal.deceasedDate)} (Lived {ageStr})</span>;
                                                     } else {
                                                         return <span>(~{ageStr})</span>;
                                                     }
@@ -28776,7 +28776,7 @@ const AnimalList = ({
                                                     .filter(([k]) => !['name', 'species', 'status', 'enclosureName'].includes(k))
                                                     .slice(0, 3)
                                                     .map(([k, v]) => `${k}: ${v}`)
-                                                    .join(' ? ')
+                                                    .join(' • ')
                                                 }
                                             </div>
                                         )}
@@ -29278,7 +29278,7 @@ const AnimalList = ({
                 if (r === 'same_birthdate_species') return 'Same birthdate & species';
                 if (r === 'same_parents') return 'Same parents';
                 return r;
-            }).join(' ? ');
+            }).join(' • ');
         };
 
         return (
@@ -29369,7 +29369,7 @@ const AnimalList = ({
                                                     )}
                                                     {(animal.fatherId_public || animal.sireId_public || animal.motherId_public || animal.damId_public) && (
                                                         <div className="text-xs text-gray-600">
-                                                            <span className="text-gray-400">Parents:</span> {[animal.fatherId_public || animal.sireId_public, animal.motherId_public || animal.damId_public].filter(Boolean).join(' ? ')}
+                                                            <span className="text-gray-400">Parents:</span> {[animal.fatherId_public || animal.sireId_public, animal.motherId_public || animal.damId_public].filter(Boolean).join(' • ')}
                                                         </div>
                                                     )}
                                                     <div className="text-xs"><span className="text-gray-400">Status:</span> <span className={animal.status === 'Deceased' ? 'text-gray-500' : 'text-green-600'}>{animal.status || 'N/A'}</span></div>
@@ -29440,7 +29440,7 @@ const AnimalList = ({
                         const variety = getAnimalVariety(animal);
                         const parts = [animal.status, variety].filter(Boolean);
                         return parts.length > 0 ? (
-                            <div className="text-xs text-gray-400 truncate">{parts.join(' ? ')}</div>
+                            <div className="text-xs text-gray-400 truncate">{parts.join(' • ')}</div>
                         ) : null;
                     })()}
                 </div>
@@ -37641,7 +37641,7 @@ const App = () => {
                                                                     record.litterSizeBorn !== null && `${record.litterSizeBorn} born`,
                                                                     record.stillbornCount && `${record.stillbornCount} stillborn`,
                                                                     record.litterSizeWeaned !== null && `${record.litterSizeWeaned} weaned`
-                                                                ].filter(Boolean).join(' ? ') || 'No counts';
+                                                                ].filter(Boolean).join(' • ') || 'No counts';
                                                                 return (
                                                                     <div key={idx} className={`bg-white rounded border transition-all ${isExpanded ? 'border-purple-300 shadow-md' : 'border-purple-100'}`}>
                                                                         <div 
