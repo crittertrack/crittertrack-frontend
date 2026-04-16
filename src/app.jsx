@@ -4248,6 +4248,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
     const [pedigreeOffspring, setPedigreeOffspring] = useState(null);
     const [expandedPedigreeRecords, setExpandedPedigreeRecords] = useState({});
     const [ownedAnimals, setOwnedAnimals] = useState(userAnimals); // may be pre-seeded from parent or fetched lazily
+    const [ownedAnimalsLoaded, setOwnedAnimalsLoaded] = useState(false); // Track when fetch completes
     const ownedAnimalsLoadedRef = useRef(false); // Always fetch to get complete list
     const [globalRels, setGlobalRels] = useState(null); // null = not yet fetched
     const [globalRelsLoading, setGlobalRelsLoading] = useState(false);
@@ -4333,21 +4334,21 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
     useEffect(() => {
         if (ownedAnimalsLoadedRef.current || !authToken || !animal?.id_public) return;
         ownedAnimalsLoadedRef.current = true;
-        // Fetch all account animals and filter to only truly owned ones (My Animals + Archived)
+        // Fetch all account animals FIRST, then fetch relationships
         axios.get(`${API_BASE_URL}/animals`, {
             headers: { Authorization: `Bearer ${authToken}` }
         }).then(res => {
-            const userAnimalIds = new Set(userAnimals.map(a => a.id_public));
-            const ownedOrArchived = (res.data || []).filter(a => 
-                userAnimalIds.has(a.id_public) || a.archived || a.status === 'Sold'
-            );
-            setOwnedAnimals(ownedOrArchived);
-        }).catch(() => {});
-        // Fetch cross-platform relationships from backend
-        setGlobalRelsLoading(true);
-        axios.get(`${API_BASE_URL}/animals/${animal.id_public}/relationships`, {
-            headers: { Authorization: `Bearer ${authToken}` }
-        }).then(res => setGlobalRels(res.data || null)).catch(() => setGlobalRels(null)).finally(() => setGlobalRelsLoading(false));
+            // API returns all user's animals (My Animals + Archived + Sold + Purchased)
+            setOwnedAnimals(res.data || []);
+            setOwnedAnimalsLoaded(true);
+            // NOW fetch cross-platform relationships after we have the account animals
+            setGlobalRelsLoading(true);
+            axios.get(`${API_BASE_URL}/animals/${animal.id_public}/relationships`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            }).then(res => setGlobalRels(res.data || null)).catch(() => setGlobalRels(null)).finally(() => setGlobalRelsLoading(false));
+        }).catch(() => {
+            setOwnedAnimalsLoaded(true); // Mark as loaded even on error so we don't hang
+        });
     }, [authToken, API_BASE_URL, animal?.id_public, userAnimals]);
 
     // Relationship Insights • computed from all account animals (shown in Lineage tab)
@@ -5451,8 +5452,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             </div>
 
                             {/* Relationship Insights */}
-                            {(relationships.length > 0 || externalRelGroups.length > 0 || globalRelsLoading) && (
-                                <div className="bg-blue-50 rounded-lg border border-blue-200">
+                            <div className="bg-blue-50 rounded-lg border border-blue-200">
                                     <button
                                         type="button"
                                         onClick={() => setRelInsightsOpen(o => !o)}
@@ -5479,8 +5479,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                     {relInsightsOpen && (
                                         <div className="px-4 pb-4 space-y-5">
                                             {/* Own collection */}
-                                            {relationships.length > 0 && (
-                                                <div className="space-y-3">
+                                            <div className="space-y-3">
                                                     <button
                                                         type="button"
                                                         onClick={() => setRelOwnOpen(o => !o)}
@@ -5536,27 +5535,28 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                     })}
                                                     </>)}
                                                 </div>
-                                            )}
 
                                             {/* Other breeders */}
-                                            {globalRelsLoading && (
-                                                <div className="flex items-center gap-2 text-xs text-gray-400 py-1">
+                                            {!ownedAnimalsLoaded || globalRelsLoading ? (
+                                                <div className="flex items-center gap-2 text-xs text-gray-400 py-2">
                                                     <Loader2 size={13} className="animate-spin" />
-                                                    Searching across platform?
+                                                    Loading your collection and cross-breeder relationships...
                                                 </div>
-                                            )}
-                                            {!globalRelsLoading && externalRelGroups.length > 0 && (
-                                                <div className="space-y-3">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setRelExternalOpen(o => !o)}
-                                                        className="w-full flex items-center gap-2 text-left"
-                                                    >
-                                                        <span className="text-xs font-bold text-amber-700 uppercase tracking-wide">From Other Breeders</span>
-                                                        <div className="flex-1 h-px bg-amber-200" />
-                                                        {relExternalOpen ? <ChevronUp size={13} className="text-amber-400 flex-shrink-0" /> : <ChevronDown size={13} className="text-amber-400 flex-shrink-0" />}
-                                                    </button>
-                                                    {relExternalOpen && (<>
+                                            ) : (
+                                            <div className="space-y-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setRelExternalOpen(o => !o)}
+                                                    className="w-full flex items-center gap-2 text-left"
+                                                >
+                                                    <span className="text-xs font-bold text-amber-700 uppercase tracking-wide">From Other Breeders</span>
+                                                    <div className="flex-1 h-px bg-amber-200" />
+                                                    {relExternalOpen ? <ChevronUp size={13} className="text-amber-400 flex-shrink-0" /> : <ChevronDown size={13} className="text-amber-400 flex-shrink-0" />}
+                                                </button>
+                                                {relExternalOpen && (<>
+                                                    {externalRelGroups.length === 0 && (
+                                                        <div className="text-xs text-gray-400 py-1">No external relationships found</div>
+                                                    )}
                                                     {externalRelGroups.map(({ label: groupLabel, animals: groupAnimals }) => (
                                                         <div key={groupLabel}>
                                                             <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{groupLabel}</h4>
@@ -5589,13 +5589,12 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                             </div>
                                                         </div>
                                                     ))}
-                                                    </>)}
-                                                </div>
+                                                </>)}
+                                            </div>
                                             )}
                                         </div>
                                     )}
                                 </div>
-                            )}
 
                             {/* 2nd Section: Offspring & Litters - merged litters + pedigree offspring */}
                             {(animalLitters === null || pedigreeOffspring === null) ? (
