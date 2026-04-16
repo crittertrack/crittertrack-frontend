@@ -8655,3 +8655,4 @@ const AnimalForm = ({
 };
 
 export default AnimalForm;
+export { PedigreeChart };
