@@ -127,6 +127,10 @@ const AnimalList = ({
     breedingLineDefs = [],
     animalBreedingLines = {}
 }) => {
+    // Stable ref so showModalMessage (inline prop) doesn't destabilise useCallbacks
+    const showModalMessageRef = useRef(showModalMessage);
+    useEffect(() => { showModalMessageRef.current = showModalMessage; });
+
     const [animals, setAnimalsRaw] = useState(() => _alCache || []);
     const setAnimals = useCallback((valOrFn) => {
         setAnimalsRaw(prev => {
@@ -296,11 +300,11 @@ const AnimalList = ({
             setSoldTransferredAnimals(res.data.soldTransferred || []);
         } catch (err) {
             console.error('Failed to fetch archive data:', err);
-            showModalMessage('Error', err.response?.data?.message || 'Failed to load archive');
+            showModalMessageRef.current('Error', err.response?.data?.message || 'Failed to load archive');
         } finally {
             setArchiveLoading(false);
         }
-    }, [authToken, API_BASE_URL, showModalMessage]);
+    }, [authToken, API_BASE_URL]);
     
     // Fetch archive data when archive screen is opened
     React.useEffect(() => {
@@ -425,13 +429,13 @@ const AnimalList = ({
             }
         } catch (error) {
             console.error('Fetch animals error:', error);
-            showModalMessage('Error', 'Failed to fetch animal list.');
+            showModalMessageRef.current('Error', 'Failed to fetch animal list.');
             setLoading(false);
         } finally {
             setPendingFilters(false);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [authToken, showModalMessage]);
+    }, [authToken]);
 
     // Apply filters: snapshot current UI filter state into appliedFilters
     const applyFilters = useCallback(() => {
