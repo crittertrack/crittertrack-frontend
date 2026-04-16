@@ -1,83 +1,174 @@
 # CritterTrack Frontend — Full app.jsx Refactor Plan
 
-**Current state (post Phases 1, 3, 4, 5, 6, 8, 9):** `src/app.jsx` = 16,119 lines  
+**Current state (post Phases 1–9):** `src/app.jsx` = 6,221 lines  
 **Target:** ~500 lines (routing + top-level App state only)  
-**Remaining to extract:** ~15,600 lines across 3 phases
+**Remaining to extract:** ~5,700 lines (Phase 10 only)
 
 ---
 
-**Target folder:** `src/components/AnimalDetail/`
+## Phase 10 — App Component Decomposition (~5,700 lines)
 
-| Component | Lines in app.jsx | Est. Size | Notes |
-|---|---|---|---|
-| `useDetailFieldTemplate` | 2341–2354 | ~14 | Custom hook |
-| `parseJsonField` | 2355–2360 | ~6 | Util |
-| `DetailJsonList` | 2361–2376 | ~16 | Small UI |
-| `computeRelationships` | 2377–2472 | ~96 | Pure function |
-| `PrivateAnimalDetail` | 2473–5244 | ~2,772 | Authenticated animal detail |
-| `ViewOnlyPrivateAnimalDetail` | 5245–7164 | ~1,920 | View-only for owned animals |
-| `ViewOnlyAnimalDetail` | 7165–9129 | ~1,965 | Public-facing animal detail |
-| `ViewOnlyParentCard` | 9130–9270 | ~141 | Used inside detail views |
-| `ParentMiniCard` | 9271–9328 | ~58 | Small parent display card |
-| `OffspringSection` | 9329–9536 | ~208 | Offspring listing |
+**Status:** 🚀 IN PROGRESS
 
+The `App` component (lines ~80–5,560, ~5,481 lines) contains all top-level state, routing, and event wiring. Break into 7 sub-phases.
+
+### 📊 Current State Analysis
+
+| Category | Count | Lines |
+|----------|-------|-------|
+| State variables | 70+ | ~1,200 |
+| useEffect hooks | 30+ | ~1,500 |
+| Handler functions | 20+ | ~500 |
+| Route definitions | 13 | ~400 |
+| JSX/UI rendering | — | ~1,800 |
+
+### 🎯 Phase 10 Sub-Phases
+
+#### **10a: Extract Authentication Logic** (~150 lines)
 **Files to create:**
-- `src/components/AnimalDetail/PrivateAnimalDetail.jsx`
-- `src/components/AnimalDetail/ViewOnlyPrivateAnimalDetail.jsx`
-- `src/components/AnimalDetail/ViewOnlyAnimalDetail.jsx`
-- `src/components/AnimalDetail/utils.js` (hook + helpers + small sub-components)
+- `src/hooks/useAppAuth.ts` — Auth state + logout handler + profile fetching
+- `src/hooks/useIdleTimeout.ts` — 30-minute idle timeout + activity reset
 
-**Key dependencies:**
-- `axios`, `lucide-react`
-- `formatDateDisplay`, `formatTimeAgo`, `litterAge` (still in app.jsx — share via import after Phase 9)
-- `AnimalImage`, `LoadingSpinner` (still in app.jsx — share via import after Phase 8)
-- `AnimalImageUpload` (still in app.jsx)
-- The `ParentCard` component (already in app.jsx inside the main `App` render scope at line ~17227)
+**Extract from App:**
+- `authToken`, `setAuthToken` → custom hook
+- `userProfile`, `setUserProfile` → custom hook
+- `fetchUserProfile()` function
+- `handleLogout()` function
+- Idle timeout effect (lines ~1,000–1,030)
+- Auth interceptor effect
 
-**Risk:** High — `PrivateAnimalDetail` is complex with many nested tabs, editing, COI, pedigree tree, and gallery. Test all tabs after extraction.
+**Result:** App loses 150 lines, gains 2 clean hooks with 95% test coverage
 
 ---
 
-## Phase 7 — Modals & Species (~2,500 lines)
-
-**Target folder:** `src/components/Modals/`
-
-| Component | Lines in app.jsx | Est. Size | Notes |
-|---|---|---|---|
-| `ConflictResolutionModal` | 365–473 | ~109 | Litter sync conflict resolver |
-| `LitterSyncConflictModal` | 474–1714 | ~1,241 | Litter sync conflict list — large |
-| `ParentSearchModal` | 1715–1945 | ~231 | Search for parent animals |
-| `LocalAnimalSearchModal` | 1946–2062 | ~117 | Search local animals |
-| `UserSearchModal` | 2063–2340 | ~278 | Search for users |
-| `SpeciesPickerModal` | 9537–9689 | ~153 | Pick species from grid |
-| `SpeciesManager` | 9690–9962 | ~273 | Add/remove species |
-| `SpeciesSelector` | 9963–10117 | ~155 | Species selector with filter |
-| `CommunityGeneticsModal` | 10342–10498 | ~157 | Community genetics viewer |
-| `MessagesView` | 11193–11773 | ~581 | Direct messaging view |
-
+#### **10b: Extract Modal State Management** (~300 lines)
 **Files to create:**
-- `src/components/Modals/LitterConflictModals.jsx` (ConflictResolutionModal + LitterSyncConflictModal)
-- `src/components/Modals/SearchModals.jsx` (ParentSearchModal + LocalAnimalSearchModal + UserSearchModal)
-- `src/components/Modals/SpeciesModals.jsx` (SpeciesPickerModal + SpeciesManager + SpeciesSelector)
-- `src/components/Modals/CommunityGeneticsModal.jsx`
-- `src/components/Messages/MessagesView.jsx`
+- `src/hooks/useAppModals.ts` — Consolidates all 20+ modal visibility states
 
-**Risk:** Medium — `LitterSyncConflictModal` is 1,241 lines and has complex state.
+**Extract from App:**
+- `showModal`, `showNotifications`, `showMessages`, `showBugReportModal`, `showFeedbackModal`
+- `showWelcomeGuide`, `showTermsModal`, `showPrivacyModal`, `showInfoTab`, `showAdminPanel`
+- `showModerationAuthModal`, `showTransferModal`, `showArchiveScreen`, `showImageModal`, `showQRAnimal`
+- `showPedigreeChart`, `showUserSearchModal`, etc.
+- Related setters and handlers
+
+**Create helper functions in hook:**
+- `openModal(name)`, `closeModal(name)`, `toggleModal(name)`
+- Auto-clear closed modal state
+
+**Result:** App loses 250+ lines, useAppModals hook handles all 20+ modals + handlers
 
 ---
 
-## Phase 10 — App Component Decomposition (~4,900 lines)
+#### **10c: Extract Animal Navigation** (~200 lines)
+**Files to create:**
+- `src/hooks/useAnimalNavigation.ts` — Private animal viewing + history
+- `src/hooks/usePublicAnimalNavigation.ts` — Public animal viewing + history
 
-The `App` component (lines 11774–17333, ~5,560 lines) contains all top-level state, routing, and event wiring. After all other phases are done, break it down:
+**Extract:**
+- `animalToView`, `animalViewHistory`, `handleViewAnimal()`, `handleBackFromAnimal()`, `handleCloseAllAnimals()`
+- `privateAnimalInitialTab`, `privateBetaView`, `detailViewTab`
+- Ref objects: `viewReturnPathRef`, `editReturnPathRef`
+- History clearing useEffect
 
-**Sub-tasks:**
-1. Extract pedigree/family-tree view into `src/components/Pedigree/`
-2. Extract all modal state management into a context or reducer
-3. Extract routing into `src/AppRoutes.jsx`
-4. Extract `PrivateAnimalScreen`, `PublicAnimalPage`, `PublicProfilePage` standalone page components
-5. Final `App` should only contain: auth state, global modals, top-level routing
+**Result:** App loses 180 lines, animal navigation fully encapsulated
 
-**Target:** `App` < 300 lines after full decomposition.
+---
+
+#### **10d: Extract Transfer Workflow** (~150 lines)
+**Files to create:**
+- `src/hooks/useTransferWorkflow.ts` — Animal transfer + user search
+
+**Extract:**
+- All transfer-related state (12 variables)
+- `handleSearchTransferUser()`, `handleSubmitTransfer()`
+- User search + selection logic
+- Pre-selected animal shortcuts
+
+**Result:** App loses 140 lines, clean transfer workflow hook
+
+---
+
+#### **10e: Extract Breeding Lines System** (~100 lines)
+**Files to create:**
+- `src/hooks/useBreedingLines.ts` — Color-coded breeding line management
+
+**Extract:**
+- `breedingLineDefs`, `animalBreedingLines`
+- `BL_PRESETS_APP` constant
+- `saveBreedingLineDefs()`, `toggleAnimalBreedingLine()`
+- Backend sync effect + localStorage fallback
+- Ref: `breedingLineDefsRef`
+
+**Result:** App loses 90 lines, self-contained breeding lines system
+
+---
+
+#### **10f: Extract Moderation Mode** (~200 lines)
+**Files to create:**
+- `src/hooks/useModerationMode.ts` — Admin/mod panel + flag handling
+
+**Extract:**
+- `inModeratorMode`, `showAdminPanel`, `showModReportQueue`, `showModerationAuthModal`
+- `modCurrentContext` state
+- `handleModQuickFlag()` function (200+ lines of mod action handlers)
+- Authentication check effect
+
+**Risk:** `handleModQuickFlag` is complex (8 conditional branches for warn/suspend/ban/lift/flag/edit/etc.)
+
+**Result:** App loses 190 lines, mod logic fully isolated
+
+---
+
+#### **10g: Extract Public Pages & Finalize App** (~500 lines)
+**Files to create:**
+- `src/components/Pages/PublicAnimalPage.jsx` — Public animal viewing (not owned)
+- `src/components/Pages/PublicProfilePage.jsx` — Public breeder profile
+- `src/AppRoutes.jsx` — All route definitions (extracted from App return JSX)
+- Remaining App.jsx (~500 lines)
+
+**Extract to AppRoutes:**
+- All 13 `<Route path="...">` definitions
+- Route guards (auth checks, role-based)
+
+**Remaining in App (~500 lines):**
+- Auth wrapper + redirect for not-logged-in
+- Header layout + navigation buttons
+- Global UI: donation button, feedback modals
+- Main `<Routes>` wrapper
+- Error boundary (if added)
+- Modal portal/provider setup
+
+**Result:** App.jsx becomes clean routing + layout orchestrator
+
+---
+
+### 📈 Expected Outcomes
+
+| Metric | Before | After | Reduction |
+|--------|--------|-------|-----------|
+| **app.jsx lines** | 5,560 | 500–700 | **87–91%** |
+| **App state variables** | 70+ | 10–15 | **80%** |
+| **App useEffect hooks** | 30+ | 4–6 | **80%** |
+| **Cyclomatic complexity** | Very High | Medium | ~**60%** |
+| **File understandability** | 2+ hours | 20 min | **83%** |
+| **Test coverage potential** | Very hard | Per-hook easy | **~90%** |
+
+---
+
+### ✅ Recommended Order of Execution
+
+1. **10a** → Authenticate + Idle (foundational, enables 10b–10f)
+2. **10b** → Modal consolidation (used by all pages)
+3. **10c** → Animal navigation (core user workflow)
+4. **10d** → Transfer workflow (relies on 10a, 10b, 10c)
+5. **10e** → Breeding lines (independent, can parallel with 10d)
+6. **10f** → Moderation (uses 10a for auth)
+7. **10g** → Public pages + finalize (last step, integrates all others)
+
+**Estimated total time:** 8–12 hours for full Phase 10 completion
+
+---
 
 ---
 
@@ -85,29 +176,21 @@ The `App` component (lines 11774–17333, ~5,560 lines) contains all top-level s
 
 | Phase | What | Lines | Status |
 |---|---|---|---|
-| 2 | Animal Detail Views (3 variants + helpers) | ~7,200 | ⬜ Next |
-| 7 | Modals & Species + Messages | ~2,500 | ⬜ |
-| 10 | App component decomposition | ~4,600 | ⬜ |
-| **Remaining Total** | | **~14,300** | |
+| 1 | LitterManagement, AnimalForm, AnimalList | 13,746 | ✅ Complete |
+| 2 | Animal Detail Views (3 variants + helpers) | 7,200 | ✅ Complete |
+| 3 | Public Profile & Breeder Directory | 3,000 | ✅ Complete |
+| 4 | Profile Edit & Account | 3,200 | ✅ Complete |
+| 5 | Auth (Login, Register, Forgot Password) | 900 | ✅ Complete |
+| 6 | Notifications & Banners (5 components) | 1,850 | ✅ Complete |
+| 7 | Modals & Messages (5 files, 2,732 lines) | 2,732 | ✅ Complete |
+| 8 | Community, Donations & Shared | 1,600 | ✅ Complete |
+| 9 | Utility functions (formatDate, speciesUtils, etc.) | 600 | ✅ Complete |
+| 10 | App component decomposition | ~5,700 | 🚀 **IN PROGRESS** |
+| **TOTAL EXTRACTED** | | **~34,400+** | |
 
-**Completed Phases:**
-- Phase 1: LitterManagement, AnimalForm, AnimalList (~13,746 lines) ✅
-- Phase 3: Public Profile & Breeder Directory (~3,000 lines) ✅
-- Phase 4: Profile Edit & Account (~3,200 lines) ✅
-- Phase 5: Auth (~900 lines) ✅
-- Phase 6: Notifications & Banners (~1,850 lines) ✅
-- Phase 8: Community, Donations & Shared components (~1,600 lines) ✅
-- Phase 9: Utility functions (~600 lines) ✅
-
-**Current app.jsx:** 16,119 lines | **Final target:** ~500 lines (imports + AppRouter only)
-
----
-
-## Recommended Order
-
-1. **Phase 2** — Animal Detail Views (~7,200 lines) — biggest win, but HIGH RISK
-2. **Phase 7** — Modals & Species (~2,500 lines) — medium risk
-3. **Phase 10** — App component decomposition (~4,600 lines) — must be last
+**Original app.jsx:** 16,119 lines  
+**Current app.jsx:** 6,221 lines (62% extracted)  
+**Final target:** ~500 lines
 
 ---
 

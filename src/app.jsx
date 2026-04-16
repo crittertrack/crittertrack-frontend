@@ -67,6 +67,10 @@ import { SpeciesPickerModal, SpeciesManager, SpeciesSelector } from './component
 import { CommunityGeneticsModal } from './components/Modals/CommunityGeneticsModal';
 import { MessagesView } from './components/Messages/MessagesView';
 
+// Phase 10: Custom Hooks for App state decomposition
+import { useAppAuth } from './hooks/useAppAuth.ts';
+import { useIdleTimeout } from './hooks/useIdleTimeout.ts';
+
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
 const API_BASE_URL = '/api'; // Production via Vercel proxy - v2
@@ -219,15 +223,18 @@ const ParentCard = ({ parentId, parentType, authToken, API_BASE_URL, onViewAnima
 const App = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [authToken, setAuthToken] = useState(() => {
-        try {
-            return localStorage.getItem('authToken') || null;
-        } catch (e) {
-            console.warn('Could not read authToken from localStorage', e);
-            return null;
-        }
-    });
-    const [userProfile, setUserProfile] = useState(null);
+    
+    // Phase 10a: Use custom auth hook
+    const {
+        authToken,
+        setAuthToken,
+        userProfile,
+        setUserProfile,
+        fetchUserProfile
+    } = useAppAuth(API_BASE_URL, showModalMessage);
+    
+    // Phase 10a: Use idle timeout hook (must come after showModalMessage is defined)
+    // Will be initialized after showModalMessage is created below
 
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [userCount, setUserCount] = useState('...');
@@ -637,9 +644,7 @@ const App = () => {
     const [showUrgentNotification, setShowUrgentNotification] = useState(false);
     const [urgentNotificationData, setUrgentNotificationData] = useState({ title: '', content: '' });
 
-    const timeoutRef = useRef(null);
     const consecutiveAuthErrors = useRef(0);
-    const activeEvents = ['mousemove', 'keydown', 'scroll', 'click'];
 
     const showModalMessage = useCallback((title, message) => {
         setModalMessage({ title, message });
@@ -976,62 +981,8 @@ const App = () => {
         }
     };
 
-    const resetIdleTimer = useCallback(() => {
-        if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
-        }
-        timeoutRef.current = setTimeout(() => {
-            if (authToken) {
-                handleLogout(true);
-            }
-        }, IDLE_TIMEOUT_MS);
-    }, [authToken, handleLogout]);
-
-     useEffect(() => {
-        if (authToken) {
-            axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
-            resetIdleTimer();
-
-            activeEvents.forEach(event => window.addEventListener(event, resetIdleTimer));
-            
-            // Add axios response interceptor to catch suspension/ban
-            const interceptor = axios.interceptors.response.use(
-                response => response,
-                error => {
-                    if (error.response?.status === 403 && error.response?.data?.forceLogout) {
-                        const accountStatus = error.response?.data?.accountStatus;
-                        const message = error.response?.data?.message || 'Your account status has changed.';
-                        
-                        console.log('[AUTH] Force logout triggered:', { accountStatus, message });
-                        
-                        // Clear auth and show message
-                        handleLogout();
-                        showModalMessage(
-                            accountStatus === 'suspended' ? 'Account Suspended' : 'Account Status Changed',
-                            message
-                        );
-                    }
-                    return Promise.reject(error);
-                }
-            );
-            
-            return () => {
-                axios.interceptors.response.eject(interceptor);
-            };
-        } else {
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-            }
-            activeEvents.forEach(event => window.removeEventListener(event, resetIdleTimer));
-        }
-
-        return () => {
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-            }
-            activeEvents.forEach(event => window.removeEventListener(event, resetIdleTimer));
-        };
-    }, [authToken, resetIdleTimer, handleLogout, showModalMessage]);
+    // Phase 10a: Use idle timeout hook
+    useIdleTimeout(authToken, handleLogout, showModalMessage);
 
     // Poll for maintenance mode and urgent notifications
     useEffect(() => {
@@ -1208,63 +1159,6 @@ const App = () => {
             }
         }
     }, [authToken, navigate, location.pathname]);
-
-    const fetchUserProfile = useCallback(async (token) => {
-        // Don't fetch if no token (already logged out)
-        if (!token) return;
-        
-        try {
-            const response = await axios.get(`${API_BASE_URL}/users/profile`, { headers: { Authorization: `Bearer ${token}` } });
-            // Normalize profile image keys for UI compatibility and add a cache-busting query
-            const user = response.data || {};
-            const img = user.profileImage || user.profileImageUrl || user.imageUrl || user.avatarUrl || user.avatar || user.profile_image || null;
-            if (img) {
-                const busted = img.includes('?') ? `${img}&t=${Date.now()}` : `${img}?t=${Date.now()}`;
-                // prefer `profileImage` and also set `profileImageUrl` for backwards compatibility
-                user.profileImage = busted;
-                user.profileImageUrl = busted;
-            }
-            setUserProfile(user);
-        } catch (error) {
-            console.error('Failed to fetch user profile:', error);
-            // Only log out if it's a 401 or 403 (token expired/invalid/forbidden), not for network errors
-            if (error.response?.status === 401 || error.response?.status === 403) {
-                // Only show error modal if we still have a token (not already logged out)
-                if (authToken) {
-                    showModalMessage('Session Expired', 'Your session has expired. Please log in again.');
-                    setAuthToken(null);
-                    try {
-                        localStorage.removeItem('authToken');
-                        localStorage.removeItem('userId');
-                    } catch (e) {
-                        console.warn('Could not clear auth from localStorage', e);
-                    }
-                }
-            } else if (error.code === 'ERR_NETWORK' || !error.response) {
-                // Network error - don't log out, just log it
-                console.warn('Network error fetching profile, will retry automatically');
-            } else {
-                // Other unexpected errors - log but don't force logout
-                console.error('Unexpected error fetching profile:', error.response?.status, error.message);
-            }
-            // For network/other errors, don't log out - the periodic refresh will retry
-        }
-    }, [showModalMessage, authToken]);
-
-    // Periodically refresh user profile to catch warning/suspension changes
-    useEffect(() => {
-        if (!authToken) return;
-        
-        // Fetch immediately, then set up periodic refetch
-        fetchUserProfile(authToken);
-        
-        // Refetch user profile every 10 seconds to catch warning/suspension updates
-        const interval = setInterval(() => {
-            fetchUserProfile(authToken);
-        }, 10000);
-        
-        return () => clearInterval(interval);
-    }, [authToken, fetchUserProfile]);
 
     // Handle ?message= query param to open messages with a specific user
     useEffect(() => {
