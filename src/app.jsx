@@ -1758,7 +1758,7 @@ const App = () => {
     }
 
      return (
-        <div className="min-h-screen bg-page-bg flex flex-col items-center font-sans px-6 sm:px-8">
+        <div className="min-h-screen bg-page-bg flex flex-col items-center font-sans px-8 sm:px-10">
             {/* Fixed Donation Button - Top Left */}
             <div className="fixed top-4 left-4 z-[60]">
                 <button
