@@ -1195,7 +1195,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 <span className="font-semibold text-gray-700">{l.litterSizeBorn} born</span>
                                 {(l.maleCount != null || l.femaleCount != null || l.unknownCount != null) && (
                                     <>
-                                        <span className="text-gray-400 mx-2">Â·</span>
+                                        <span className="text-gray-400 mx-2">·</span>
                                         <span>
                                             <span className="text-blue-500 font-semibold">{l.maleCount ?? 0}M</span>
                                             <span className="text-gray-400 mx-0.5">/</span>
