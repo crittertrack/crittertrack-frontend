@@ -400,7 +400,10 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                         : 'bg-white text-gray-600 hover:text-gray-800 border-gray-300'
                                 }`}
                             >
-                                {React.createElement(tab.icon, { size: 14, className: `inline-block align-middle flex-shrink-0 mr-1 ${tab.color || ''}` })}{tab.label}
+                                <span className="flex flex-col items-center gap-0.5 sm:flex-row sm:gap-1">
+                                    {React.createElement(tab.icon, { size: 14, className: `flex-shrink-0 ${tab.color || ''}` })}
+                                    <span>{tab.label}</span>
+                                </span>
                             </button>
                         ))}
                     </div>
