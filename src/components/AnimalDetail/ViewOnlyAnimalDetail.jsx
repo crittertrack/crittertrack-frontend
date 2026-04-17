@@ -407,7 +407,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                 </div>
 
                 {/* Tab Content */}
-                <div className="bg-[#E1F2F5] border border-gray-300 rounded-b-lg p-3 sm:p-6 overflow-y-auto max-h-[calc(95vh-140px)] sm:max-h-[calc(90vh-160px)] pb-8">
+                <div className="bg-[#E1F2F5] border border-gray-300 rounded-b-lg pt-1 px-3 py-3 sm:pt-2 sm:px-6 sm:py-6 overflow-y-auto max-h-[calc(95vh-140px)] sm:max-h-[calc(90vh-160px)] pb-8">
                     {/* Tab 1: Overview */}
                     {detailViewTab === 1 && (
                         <div className="space-y-3">
