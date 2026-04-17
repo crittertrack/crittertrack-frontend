@@ -616,8 +616,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-gray-700">
                                             {new Date(transaction.date).toLocaleDateString('en-GB')}
                                         </td>
-                                        <td className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm whitespace-nowrap">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
+                                        <td className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm">
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                                 (transaction.type === 'animal-sale' || transaction.type === 'sale')
                                                     ? 'bg-green-100 text-green-800' 
                                                     : (transaction.type === 'animal-purchase' || transaction.type === 'purchase')
@@ -635,18 +635,17 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                                     : 'Income'}
                                             </span>
                                         </td>
-                                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-gray-700">
+                                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-gray-700 w-28 sm:w-auto">
                                             {(transaction.type === 'animal-sale' || transaction.type === 'sale' || transaction.type === 'animal-purchase' || transaction.type === 'purchase') ? (
                                                 <>
                                                     <div className="hidden sm:block font-medium truncate">{transaction.animalName || 'N/A'}</div>
-                                                    <div className="truncate">{transaction.animalId}</div>
+                                                    <div className="break-words">{transaction.animalId}</div>
                                                 </>
                                             ) : (
                                                 <>
-                                                    <div className="hidden sm:block font-medium truncate">{transaction.description || 'N/A'}</div>
-                                                    <div className="sm:hidden text-[10px] truncate">{transaction.description || 'N/A'}</div>
+                                                    <div className="font-medium break-words">{transaction.description || 'N/A'}</div>
                                                     {transaction.category && (
-                                                        <div className="hidden sm:block text-[9px] sm:text-xs text-gray-500 truncate">{transaction.category}</div>
+                                                        <div className="text-[9px] text-gray-500 break-words">{transaction.category}</div>
                                                     )}
                                                 </>
                                             )}
