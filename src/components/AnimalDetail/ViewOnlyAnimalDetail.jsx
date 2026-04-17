@@ -4,7 +4,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { QRCodeSVG } from 'qrcode.react';
 import { Link as RouterLink } from 'react-router-dom';
-import { ArrowLeft, X, QrCode, ChevronDown, ChevronUp, ChevronRight, Mars, Venus, VenusAndMars, Circle, Cat, Users, User, Home, Tag, Loader2, Lock, TreeDeciduous, Egg, Pill, Shield, Microscope, Hospital, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Activity, AlertTriangle, FileText, Feather, Medal, Target, Key, ClipboardList, Ban, Images, Camera, Heart, Eye, EyeOff, Sparkles, Dna, Ruler, Palette, Hash, FolderOpen, Globe, Hourglass, Bean, Milk, Sprout, RefreshCw, Leaf, Brain, Trophy, FileCheck, Scale, ScrollText, Check, Users as UsersIcon, TableOfContents, Dumbbell, Download } from 'lucide-react';
+import { ArrowLeft, X, QrCode, ChevronDown, ChevronUp, ChevronRight, Mars, Venus, VenusAndMars, Circle, Cat, Users, User, Home, Tag, Loader2, Lock, TreeDeciduous, Egg, Pill, Shield, Microscope, Hospital, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare, Activity, AlertTriangle, FileText, Feather, Medal, Target, Key, ClipboardList, Ban, Images, Camera, Heart, Eye, EyeOff, Sparkles, Dna, Ruler, Palette, Hash, FolderOpen, Globe, Hourglass, Bean, Milk, Sprout, RefreshCw, Leaf, Brain, Trophy, FileCheck, Scale, ScrollText, Check, Users as UsersIcon, TableOfContents, Dumbbell, Download, Network } from 'lucide-react';
 import { useDetailFieldTemplate, parseJsonField, DetailJsonList, ViewOnlyParentCard, ParentMiniCard } from './utils';
 import { formatDate, formatDateShort, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/locationUtils';
@@ -20,6 +20,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
     const [detailViewTab, setDetailViewTab] = useState(initialTab);
     const [mpDownloading, setMpDownloading] = useState(false);
     const [mpLoading, setMpLoading] = useState(false);
+    const [publicRelationships, setPublicRelationships] = useState(null);
+    const [publicRelLoading, setPublicRelLoading] = useState(false);
     const mpTreeRef = useRef(null);
     const chartRef = useRef(null);
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
@@ -112,6 +114,23 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
             setParentCardKey(k => k + 1);
         }
     }, [detailViewTab]);
+
+    // Fetch public relationships when Family tab opens
+    React.useEffect(() => {
+        if (detailViewTab !== 6 || !animal?.id_public) return;
+        setPublicRelLoading(true);
+        (async () => {
+            try {
+                const res = await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/relationships`);
+                setPublicRelationships(res.data || []);
+            } catch (err) {
+                console.error('Error fetching public relationships:', err);
+                setPublicRelationships([]);
+            } finally {
+                setPublicRelLoading(false);
+            }
+        })();
+    }, [detailViewTab, animal?.id_public, API_BASE_URL]);
 
     // Fetch all litters where this animal is sire or dam
     React.useEffect(() => {
@@ -353,8 +372,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                 </div>
 
                 {/* Tabs - PUBLIC VIEW: 8 tabs (Records + End of Life combined) */}
-                <div className="bg-[#E1F2F5] border-b border-gray-300">
-                    <div className="flex flex-wrap">
+                <div className="bg-[#E1F2F5] border-b border-gray-400">
+                    <div className="flex flex-wrap border border-t-0 border-b-0 border-gray-400">
                         {[
                             { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
                             { id: 2, label: 'Status', icon: Lock, color: 'text-slate-500' },
@@ -375,9 +394,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             <button
                                 key={tab.id}
                                 onClick={() => setDetailViewTab(tab.id)}
-                                className={`flex-1 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 px-3 py-3 text-sm font-medium whitespace-nowrap text-center transition ${
+                                className={`flex-1 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 px-3 py-3 text-sm font-medium whitespace-nowrap text-center transition border-r border-gray-400 last:border-r-0 ${
                                     detailViewTab === tab.id
-                                        ? 'border-b-2 border-primary text-primary'
+                                        ? 'border-b-2 border-primary text-primary bg-white'
                                         : 'text-gray-600 hover:text-gray-800'
                                 }`}
                             >
@@ -794,6 +813,72 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                     {/* Tab 6: Family */}
                     {detailViewTab === 6 && (
                         <div className="space-y-6">
+                            {/* Relationship Insights */}
+                            {publicRelLoading ? (
+                                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                    <div className="text-sm text-gray-500 animate-pulse">Loading relationships...</div>
+                                </div>
+                            ) : publicRelationships && publicRelationships.length > 0 ? (
+                                <div className="bg-blue-50 rounded-lg border border-blue-200">
+                                    <div className="p-4">
+                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center mb-4">
+                                            <Network size={20} className="text-blue-600 mr-2" />
+                                            Relationship Insights
+                                            <span className="ml-2 text-xs font-normal text-gray-500 bg-white border border-blue-200 rounded-full px-2 py-0.5">
+                                                {publicRelationships.length} public relative{publicRelationships.length !== 1 ? 's' : ''}
+                                            </span>
+                                        </h3>
+                                        <div className="space-y-3">
+                                            {[
+                                                ['Parents',            ['Sire (Father)', 'Dam (Mother)']],  
+                                                ['Siblings',           ['Full Sibling', 'Full Brother', 'Full Sister', 'Half-Sibling (via Sire)', 'Half-Brother (via Sire)', 'Half-Sister (via Sire)', 'Half-Sibling (via Dam)', 'Half-Brother (via Dam)', 'Half-Sister (via Dam)']],
+                                                ['Nieces & Nephews',   ['Niece / Nephew', 'Niece', 'Nephew']],
+                                                ['Aunts & Uncles',     ['Aunt / Uncle', 'Aunt', 'Uncle', 'Paternal Aunt / Uncle', 'Paternal Aunt', 'Paternal Uncle', 'Maternal Aunt / Uncle', 'Maternal Aunt', 'Maternal Uncle']],
+                                                ['Grandparents',       ['Paternal Grandparent', 'Paternal Grandfather', 'Paternal Grandmother', 'Maternal Grandparent', 'Maternal Grandfather', 'Maternal Grandmother']],
+                                                ['Great-Grandparents', ['Paternal Great-Grandparent', 'Paternal Great-Grandfather', 'Paternal Great-Grandmother', 'Maternal Great-Grandparent', 'Maternal Great-Grandfather', 'Maternal Great-Grandmother']],
+                                                ['Cousins',           ['Cousin', 'First Cousin', 'First Cousin Once Removed']],
+                                                ['Offspring',         ['Offspring', 'Son', 'Daughter']],
+                                            ].map(([groupLabel, relTypes]) => {
+                                                const group = publicRelationships.filter(r => relTypes.includes(r.rel));
+                                                if (!group.length) return null;
+                                                return (
+                                                    <div key={groupLabel}>
+                                                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{groupLabel}</h4>
+                                                        <div className="space-y-2 pl-2 border-l-2 border-blue-200">
+                                                            {group.map(({ animal: rel, rel: relLabel }) => (
+                                                                <div
+                                                                    key={rel.id_public}
+                                                                    className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-blue-100 hover:border-blue-300 transition-colors cursor-pointer"
+                                                                    onClick={() => onViewAnimal && onViewAnimal(rel)}
+                                                                >
+                                                                    <div className="flex items-center gap-2 min-w-0">
+                                                                        {(rel.imageUrl || rel.photoUrl) ? (
+                                                                            <img src={rel.imageUrl || rel.photoUrl} alt={rel.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200" />
+                                                                        ) : (
+                                                                            <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-sm text-blue-600 font-semibold">
+                                                                                {rel.species?.charAt(0).toUpperCase()}
+                                                                            </div>
+                                                                        )}
+                                                                        <div className="min-w-0">
+                                                                            <div className="text-sm font-medium text-gray-800 truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}</div>
+                                                                            <div className="text-xs text-gray-500">{rel.gender}{[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ') ? ` · ${[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                                                                        <span className="text-xs text-blue-700 bg-blue-100 rounded-full px-2 py-0.5 font-medium whitespace-nowrap">{relLabel}</span>
+                                                                        <ChevronRight size={14} className="text-gray-400" />
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : null}
+
                             {/* Offspring & Litters - merged litters + pedigree offspring */}
                             {(animalLitters === null || pedigreeOffspring === null) ? (
                                 <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
