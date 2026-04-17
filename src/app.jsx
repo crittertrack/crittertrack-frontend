@@ -241,7 +241,7 @@ const App = () => {
     
     // Phase 10c: Animal Navigation
     const publicAnimalNav = usePublicAnimalNavigation();
-    const privateAnimalNav = usePrivateAnimalNavigation();
+    const privateAnimalNav = usePrivateAnimalNavigation(authTokenTemp, API_BASE_URL);
     
     // Phase 10d: Transfer Workflow
     const transferWorkflow = useTransferWorkflow(authTokenTemp, API_BASE_URL, (title, message) => {
