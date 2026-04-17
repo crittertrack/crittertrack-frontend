@@ -566,8 +566,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             { id: 12, label: 'Show', icon: Trophy, color: 'text-yellow-600' },
                             { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' },
                             { id: 14, label: 'End of Life', icon: Scale, color: 'text-gray-500' },
-                            { id: 15, label: 'Gallery', icon: Images, color: 'text-rose-500' },
-                            { id: 16, label: 'Logs', icon: ScrollText, color: 'text-gray-600' }
+                            { id: 15, label: 'Gallery', icon: Images, color: 'text-rose-500' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
