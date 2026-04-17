@@ -327,7 +327,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
 
     return (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
-            <div className="bg-[#E1F2F5] rounded-xl shadow-2xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto my-2 sm:my-0">
+            <div className="bg-[#E1F2F5] rounded-xl shadow-2xl w-full max-w-6xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto my-2 sm:my-0">
                 {/* Header */}
                 <div className="bg-[#E1F2F5] rounded-t-lg p-4 border-b border-gray-300">
                     <div className="flex justify-between items-center">
@@ -394,20 +394,20 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             <button
                                 key={tab.id}
                                 onClick={() => setDetailViewTab(tab.id)}
-                                className={`w-[calc(20%-0.4rem)] px-4 py-3 text-sm font-medium rounded border-2 transition-colors ${
+                                className={`w-[calc(20%-0.4rem)] px-2 py-2 text-xs font-medium rounded border-2 transition-colors ${
                                     detailViewTab === tab.id
-                                        ? 'bg-white text-black border-gray-300'
+                                        ? 'bg-blue-100 text-black border-gray-300'
                                         : 'bg-white text-gray-600 hover:text-gray-800 border-gray-300'
                                 }`}
                             >
-                                {React.createElement(tab.icon, { size: 16, className: `inline-block align-middle flex-shrink-0 mr-2 ${tab.color || ''}` })}{tab.label}
+                                {React.createElement(tab.icon, { size: 14, className: `inline-block align-middle flex-shrink-0 mr-1 ${tab.color || ''}` })}{tab.label}
                             </button>
                         ))}
                     </div>
                 </div>
 
                 {/* Tab Content */}
-                <div className="bg-[#E1F2F5] border border-t-0 border-gray-300 rounded-b-lg p-3 sm:p-6 overflow-y-auto max-h-[calc(95vh-160px)] sm:max-h-[calc(90vh-180px)] pb-8">
+                <div className="bg-[#E1F2F5] border border-t-0 border-gray-300 rounded-b-lg p-3 sm:p-6 overflow-y-auto max-h-[calc(95vh-140px)] sm:max-h-[calc(90vh-160px)] pb-8">
                     {/* Tab 1: Overview */}
                     {detailViewTab === 1 && (
                         <div className="space-y-3">
