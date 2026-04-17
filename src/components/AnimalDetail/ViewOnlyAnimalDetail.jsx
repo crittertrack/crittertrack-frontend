@@ -118,20 +118,20 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
 
     // Fetch public relationships when Family tab opens
     React.useEffect(() => {
-        if (detailViewTab !== 6 || !animal?.id_public) return;
+        if (detailViewTab !== 6 || !animal?.id_public || !authToken) return;
         setPublicRelLoading(true);
         (async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/relationships`);
-                setPublicRelationships(res.data || []);
+                const res = await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/relationships`, { headers: { Authorization: `Bearer ${authToken}` } });
+                setPublicRelationships(res.data || {});
             } catch (err) {
                 console.error('Error fetching public relationships:', err);
-                setPublicRelationships([]);
+                setPublicRelationships({});
             } finally {
                 setPublicRelLoading(false);
             }
         })();
-    }, [detailViewTab, animal?.id_public, API_BASE_URL]);
+    }, [detailViewTab, animal?.id_public, authToken, API_BASE_URL]);
 
     // Fetch all litters where this animal is sire or dam
     React.useEffect(() => {
@@ -930,7 +930,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             {/* Offspring & Litters - merged litters + pedigree offspring */}
                             {(animalLitters === null || pedigreeOffspring === null) ? (
                                 <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                                    <div className="text-sm text-gray-500 animate-pulse">Loading offspring & litters?</div>
+                                    <div className="text-sm text-gray-500 animate-pulse">Loading offspring & litters...</div>
                                 </div>
                             ) : (() => {
                                 const litterItems = (animalLitters || []).map(l => ({ ...l, _recordType: 'litter' }));
