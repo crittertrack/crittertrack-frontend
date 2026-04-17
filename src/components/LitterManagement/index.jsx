@@ -1508,6 +1508,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             // Only bump total born if linked count exceeds stored value ? never touch gender counts
             const newBorn = Math.max(litter.litterSizeBorn || 0, allLinked.length);
 
+            // Update the litter's offspring list
             await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
                 offspringIds_public: updatedOffspringIds,
                 litterSizeBorn: newBorn || null,
@@ -1515,6 +1516,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
+            
+            // Update the animal's parents to match the litter's parents
+            if (addedAnimal) {
+                await axios.put(`${API_BASE_URL}/animals/${addedAnimal.id_public}`, {
+                    sireId_public: litter.sireId_public || null,
+                    damId_public: litter.damId_public || null,
+                }, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+            }
             
             // Optimistically add to offspring list immediately
             if (addedAnimal) {
@@ -1856,6 +1867,20 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
+
+            // Update all linked offspring to have the correct parents
+            const linkedOffspringIds = formData.linkedOffspringIds || [];
+            if (linkedOffspringIds.length > 0) {
+                const updateOffspringPromises = linkedOffspringIds.map(offspringId =>
+                    axios.put(`${API_BASE_URL}/animals/${offspringId}`, {
+                        sireId_public: formData.sireId_public || null,
+                        damId_public: formData.damId_public || null,
+                    }, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    })
+                );
+                await Promise.all(updateOffspringPromises);
+            }
 
             showModalMessage('Success', 'Litter updated successfully!');
             setShowAddForm(false);
@@ -3643,8 +3668,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                 if (isBulkMode) {
                                                                     toggleOffspringSelection(litter._id, animal.id_public);
                                                                 } else {
-                                                                    // If animal is owned by user, open edit view; otherwise open read-only view
-                                                                    if (animal.isOwned || animal.ownerId === userProfile?._id) {
+                                                                    // If animal is on user's account (in myAnimals), open edit view; otherwise open read-only view
+                                                                    const isOnAccount = myAnimals.some(a => a.id_public === animal.id_public);
+                                                                    if (isOnAccount) {
                                                                         handleViewAnimal && handleViewAnimal(animal);
                                                                     } else {
                                                                         onViewAnimal(animal);
