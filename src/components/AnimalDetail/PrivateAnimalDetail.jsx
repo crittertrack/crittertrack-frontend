@@ -374,10 +374,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-2 sm:p-4 z-[70] overflow-y-auto">
             <div className="bg-[#E1F2F5] rounded-xl shadow-2xl w-full max-w-6xl max-h-[95vh] sm:max-h-[90vh] my-2 sm:my-0 flex flex-col">
                 {/* Header */}
-                <div className="bg-[#E1F2F5] rounded-t-lg p-2 sm:p-4 border-b border-gray-300 mt-12 sm:mt-0">
+                <div className="bg-[#E1F2F5] rounded-t-lg p-2 sm:p-4 border-b border-gray-300 mt-4 sm:mt-0">
                     {/* Mobile layout: stacked */}
                     <div className="sm:hidden">
-                        <div className="flex justify-between items-center mb-1">
+                        <div className="flex justify-between items-center mb-2">
                             <button 
                                 onClick={onClose} 
                                 className="flex items-center text-gray-600 hover:text-gray-800 transition text-sm"
