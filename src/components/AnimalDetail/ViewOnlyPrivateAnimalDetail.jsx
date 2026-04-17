@@ -175,7 +175,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
 
     return (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-2 sm:p-4 z-[70] overflow-y-auto">
-            <div className="bg-[#E1F2F5] rounded-xl shadow-2xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto overflow-x-hidden">
+            <div className="bg-[#E1F2F5] rounded-xl shadow-2xl w-full max-w-6xl max-h-[95vh] sm:max-h-[90vh] my-2 sm:my-0 flex flex-col">
                 {/* Header */}
                 <div className="bg-[#E1F2F5] rounded-t-lg p-2 sm:p-4 border-b border-gray-300 mt-12 sm:mt-0">
                     {/* Mobile layout: stacked */}
@@ -211,8 +211,8 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                 </div>
 
                 {/* Tabs - ALL 11 TABS (same as PrivateAnimalDetail) */}
-                <div className="bg-[#E1F2F5] border-b border-gray-300 px-6 pt-4">
-                    <div className="flex flex-wrap gap-1 pb-4">
+                <div className="bg-[#E1F2F5] border-b border-gray-300 px-1 py-2">
+                    <div className="flex flex-wrap gap-2">
                         {[
                             { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
                             { id: 2, label: 'Status & Privacy', icon: Lock, color: 'text-slate-500' },
@@ -234,14 +234,14 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setDetailViewTab(tab.id)}
-                                className={`flex-shrink-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded border transition-colors ${
+                                className={`w-[calc(20%-0.4rem)] px-2 py-2 text-xs font-medium rounded border-2 transition-colors ${
                                     detailViewTab === tab.id 
-                                        ? 'bg-primary text-black border-gray-400' 
-                                        : 'bg-gray-50 text-gray-600 hover:text-gray-800 border-gray-300'
+                                        ? 'bg-[#F2E4E9] text-black border-gray-300' 
+                                        : 'bg-white text-gray-600 hover:text-gray-800 border-gray-300'
                                 }`}
                                 title={tab.label}
                             >
-                                {React.createElement(tab.icon, { size: 14, className: `inline-block align-middle flex-shrink-0 mr-1.5 ${tab.color || ''}` })}
+                                {React.createElement(tab.icon, { size: 14, className: `inline-block align-middle flex-shrink-0 mr-1 ${tab.color || ''}` })}
                                 {tab.label}
                             </button>
                         ))}
@@ -249,7 +249,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                 </div>
 
                 {/* Tab Content - COPY OF PRIVATE DETAIL (no edit/delete/privacy toggle in Tab 1) */}
-                <div className="bg-[#E1F2F5] border border-t-0 border-gray-300 rounded-b-lg p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+                <div className="bg-[#E1F2F5] border border-gray-300 rounded-b-lg pt-1 px-3 py-3 sm:pt-2 sm:px-6 sm:py-6 overflow-y-auto flex-1 pb-8">
                     {/* Tab 1: Overview - NO PRIVACY TOGGLE */}
                     {detailViewTab === 1 && (
                         <div className="space-y-3">
@@ -257,8 +257,8 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden">
                                 <div className="flex flex-col md:flex-row">
                                     {/* Left: Photo + status + badges */}
-                                    <div className="w-full md:w-1/4 p-4 flex flex-col items-center gap-2 border-b md:border-b-0 md:border-r border-gray-300">
-                                        <div className="relative w-full flex justify-center">
+                                    <div className="w-full md:w-1/3 p-4 flex flex-col items-center gap-2 border-b md:border-b-0 md:border-r border-gray-300">
+                                        <div className="relative w-full flex justify-center overflow-hidden rounded-lg">
                                             <div className="absolute top-0 right-0">
                                                 {animal.gender === 'Male' ? <Mars size={16} strokeWidth={2.5} className="text-blue-600" /> : animal.gender === 'Female' ? <Venus size={16} strokeWidth={2.5} className="text-pink-600" /> : animal.gender === 'Intersex' ? <VenusAndMars size={16} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={16} strokeWidth={2.5} className="text-gray-500" />}
                                             </div>
@@ -266,7 +266,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                 <img
                                                     src={animal.imageUrl || animal.photoUrl}
                                                     alt={animal.name}
-                                                    className="w-28 h-28 object-cover rounded-lg cursor-pointer hover:opacity-80 transition"
+                                                    className="w-32 h-32 object-contain cursor-pointer hover:opacity-80 transition"
                                                     onClick={() => {
                                                         if (setEnlargedImageUrl && setShowImageModal) {
                                                             setEnlargedImageUrl(animal.imageUrl || animal.photoUrl);
@@ -275,7 +275,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                                     }}
                                                 />
                                             ) : (
-                                                <div className="w-28 h-28 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                                                <div className="w-32 h-32 bg-gray-100 flex items-center justify-center text-gray-400">
                                                     <Cat size={40} />
                                                 </div>
                                             )}
