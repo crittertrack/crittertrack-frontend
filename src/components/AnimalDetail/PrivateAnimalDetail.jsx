@@ -2623,15 +2623,15 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 {hasData ? (
                                     <div className="flex gap-2.5">
                                         {d.imageUrl && (
-                                            <img src={d.imageUrl} alt={fullName} className="w-16 h-16 rounded-lg object-cover flex-shrink-0 border border-gray-200 self-start" />
+                                            <img src={d.imageUrl} alt={fullName} className="w-10 h-10 sm:w-16 sm:h-16 rounded-lg object-cover flex-shrink-0 border border-gray-200 self-start" />
                                         )}
                                         <div className="flex-1 min-w-0 space-y-0.5 pb-4">
-                                            {fullName && <p className="text-xs font-semibold text-gray-800 leading-tight">{fullName}</p>}
-                                            {d.variety && <p className="text-[11px] text-gray-500">{d.variety}</p>}
-                                            {d.genCode && <p className="text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
-                                            {d.birthDate && <p className="text-[11px] text-gray-400">{formatDate(d.birthDate)}</p>}
-                                            {d.deceasedDate && <p className="text-[11px] text-red-600 font-semibold">† {formatDate(d.deceasedDate)}</p>}
-                                            {d.breederName && <p className="text-[11px] text-gray-500 italic">{d.breederName}</p>}
+                                            {fullName && <p className="text-[10px] sm:text-xs font-semibold text-gray-800 leading-tight">{fullName}</p>}
+                                            {d.variety && <p className="text-[9px] sm:text-[11px] text-gray-500">{d.variety}</p>}
+                                            {d.genCode && <p className="text-[9px] sm:text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
+                                            {d.birthDate && <p className="text-[9px] sm:text-[11px] text-gray-400">{formatDate(d.birthDate)}</p>}
+                                            {d.deceasedDate && <p className="text-[9px] sm:text-[11px] text-red-600 font-semibold">† {formatDate(d.deceasedDate)}</p>}
+                                            {d.breederName && <p className="text-[9px] sm:text-[11px] text-gray-500 italic">{d.breederName}</p>}
                                         </div>
                                     </div>
                                 ) : (

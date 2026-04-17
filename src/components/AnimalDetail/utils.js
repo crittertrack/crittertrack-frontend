@@ -248,10 +248,10 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
                         <p className="font-semibold text-gray-800">
                             {parentData.prefix && `${parentData.prefix} `}{parentData.name}{parentData.suffix && ` ${parentData.suffix}`}
                         </p>
-                        <p className="text-xs text-gray-600 font-mono">{parentData.id_public}</p>
                         {[parentData.color, parentData.coatPattern, parentData.coat, parentData.earset].filter(Boolean).join(' ') && (
-                            <p className="text-xs text-gray-500 mt-1">{[parentData.color, parentData.coatPattern, parentData.coat, parentData.earset].filter(Boolean).join(' ')}</p>
+                            <p className="text-xs text-gray-500 mt-0.5">{[parentData.color, parentData.coatPattern, parentData.coat, parentData.earset].filter(Boolean).join(' ')}</p>
                         )}
+                        <p className="text-xs text-gray-600 font-mono mt-0.5">{parentData.id_public}</p>
                     </div>
                 </div>
             </div>
