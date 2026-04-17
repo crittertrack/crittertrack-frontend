@@ -840,27 +840,42 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
     }, [showAddForm, onFormOpenChange]);
 
-    // Listen for animal updates and refetch litters when pair animals change
+    // Listen for animal updates and refetch litters when pair animals or offspring change
     useEffect(() => {
         const handleAnimalUpdated = (event) => {
             const updatedAnimal = event.detail?.animal;
-            if (!updatedAnimal || !myAnimals.length) return;
+            if (!updatedAnimal || !litters.length) return;
 
-            // Check if updated animal is a potential pair animal in any litter
+            // Check if updated animal is:
+            // 1. A sire/dam (pair animal) in any litter, OR
+            // 2. An offspring linked to any litter
             const isInvolvedInLitter = litters.some(l =>
                 updatedAnimal.id_public === l.sireId_public ||
-                updatedAnimal.id_public === l.damId_public
+                updatedAnimal.id_public === l.damId_public ||
+                (l.offspringIds_public && l.offspringIds_public.includes(updatedAnimal.id_public))
             );
 
             if (isInvolvedInLitter) {
-                // Refetch litters to get updated pair info, breeding records, etc.
-                fetchLitters();
+                // Refetch litters to get updated pair info, offspring info, breeding records, etc.
+                console.log('[LitterManagement] Animal updated - refetching litters:', updatedAnimal.id_public);
+                fetchLitters({ preserveOffspring: false }); // Force full refresh
+                
+                // Also invalidate the specific offspring from cache
+                setLitterOffspringMap(prev => {
+                    const updated = { ...prev };
+                    for (const litterId in updated) {
+                        updated[litterId] = updated[litterId].map(o =>
+                            o.id_public === updatedAnimal.id_public ? updatedAnimal : o
+                        );
+                    }
+                    return updated;
+                });
             }
         };
 
         window.addEventListener('animal-updated', handleAnimalUpdated);
         return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
-    }, [litters]);
+    }, [litters, setLitterOffspringMap]);
 
     // Fallback: fetch offspring for a specific litter if not yet loaded when expanded
     // (normally fetchLitters pre-loads all offspring, this is just a safety net)
@@ -3844,8 +3859,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                         />
                                                     </div>
                                                 </div>
-                                                <div className="text-xs text-gray-500 mb-3">
-                                                    Autofilled: Species ({sire?.species}), Birth Date ({formatDate(litter.birthDate)}), Parents ({litter.sireId_public} ? {litter.damId_public})
+                                                <div className="bg-blue-50 border-l-4 border-blue-400 p-3 mb-4 rounded">
+                                                    <div className="text-sm font-semibold text-blue-900 mb-2">Auto-Assigned Parent Information</div>
+                                                    <div className="text-xs text-blue-800 space-y-1">
+                                                        <div><span className="font-semibold">Species:</span> {sire?.species || addingOffspring.sire?.species || addingOffspring.dam?.species || 'Unknown'}</div>
+                                                        <div><span className="font-semibold">Birth Date:</span> {formatDate(litter.birthDate)}</div>
+                                                        <div><span className="font-semibold">Sire (Father):</span> {litter.sirePrefixName ? `${litter.sirePrefixName}` : litter.sireId_public || 'Not set'}</div>
+                                                        <div><span className="font-semibold">Dam (Mother):</span> {litter.damPrefixName ? `${litter.damPrefixName}` : litter.damId_public || 'Not set'}</div>
+                                                    </div>
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <button
