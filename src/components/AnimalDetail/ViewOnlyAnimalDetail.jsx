@@ -394,13 +394,13 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             <button
                                 key={tab.id}
                                 onClick={() => setDetailViewTab(tab.id)}
-                                className={`flex-shrink-0 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded border-2 transition-colors ${
+                                className={`w-[calc(20%-0.4rem)] px-4 py-3 text-sm font-medium rounded border-2 transition-colors ${
                                     detailViewTab === tab.id
                                         ? 'bg-white text-black border-gray-500'
                                         : 'bg-white text-gray-600 hover:text-gray-800 border-gray-400'
                                 }`}
                             >
-                                {React.createElement(tab.icon, { size: 14, className: `inline-block align-middle flex-shrink-0 mr-1.5 ${tab.color || ''}` })}{tab.label}
+                                {React.createElement(tab.icon, { size: 16, className: `inline-block align-middle flex-shrink-0 mr-2 ${tab.color || ''}` })}{tab.label}
                             </button>
                         ))}
                     </div>
