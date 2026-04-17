@@ -136,6 +136,7 @@ export function useTransferWorkflow(
                         detail: { animalId: transferData.animal.id_public, recipientId: transferData.recipient.id_public }
                     })
                 );
+                window.dispatchEvent(new Event('animals-changed'));
 
                 return response.data;
             } catch (error) {

@@ -37,7 +37,9 @@ export function AppRoutes({
   // Auth
   authToken,
   userProfile,
+  setUserProfile,
   fetchUserProfile,
+  showModalMessage,
   
   // Modals
   modals,
@@ -144,7 +146,7 @@ export function AppRoutes({
         <AnimalList 
           authToken={authToken}
           API_BASE_URL={API_BASE_URL}
-          showModalMessage={() => {}} 
+          showModalMessage={showModalMessage} 
           onEditAnimal={handleEditAnimal} 
           onViewAnimal={handleViewAnimal}
           navigate={navigate}
@@ -166,7 +168,7 @@ export function AppRoutes({
         <AnimalList 
           authToken={authToken}
           API_BASE_URL={API_BASE_URL}
-          showModalMessage={() => {}} 
+          showModalMessage={showModalMessage} 
           onEditAnimal={handleEditAnimal} 
           onViewAnimal={handleViewAnimal}
           navigate={navigate}
@@ -191,7 +193,7 @@ export function AppRoutes({
         <Marketplace 
           authToken={authToken}
           userProfile={userProfile}
-          showModalMessage={() => {}}
+          showModalMessage={showModalMessage}
           onViewAnimal={(animalId) => {
             window.location.href = `/animal/${animalId}`;
           }}
@@ -207,7 +209,7 @@ export function AppRoutes({
         <AnimalTree
           authToken={authToken}
           userProfile={userProfile}
-          showModalMessage={() => {}}
+          showModalMessage={showModalMessage}
           onViewAnimal={handleViewAnimal}
           onBack={() => navigate('/')}
         />
@@ -217,10 +219,15 @@ export function AppRoutes({
       <Route path="/profile" element={
         <ProfileView 
           userProfile={userProfile} 
-          showModalMessage={() => {}} 
+          showModalMessage={showModalMessage} 
           fetchUserProfile={fetchUserProfile} 
           authToken={authToken} 
-          onProfileUpdated={() => {}} 
+          onProfileUpdated={(updatedUser) => {
+            if (updatedUser && setUserProfile) {
+              setUserProfile(updatedUser);
+            }
+            fetchUserProfile(authToken);
+          }} 
           breedingLineDefs={breedingLineDefs} 
           animalBreedingLines={animalBreedingLines} 
           saveBreedingLineDefs={saveBreedingLineDefs} 
@@ -253,7 +260,7 @@ export function AppRoutes({
           authToken={authToken}
           API_BASE_URL={API_BASE_URL}
           userProfile={userProfile}
-          showModalMessage={() => {}}
+          showModalMessage={showModalMessage}
           onViewAnimal={handleViewAnimal}
           handleViewAnimal={handleViewAnimal}
           handleEditAnimal={handleEditAnimal}
@@ -266,7 +273,7 @@ export function AppRoutes({
         <BudgetingTab
           authToken={authToken}
           API_BASE_URL={API_BASE_URL}
-          showModalMessage={() => {}}
+          showModalMessage={showModalMessage}
           preSelectedAnimal={preSelectedTransferAnimal}
           preSelectedType={preSelectedTransactionType}
           onAddModalOpen={() => setBudgetModalOpen(true)}
@@ -305,7 +312,7 @@ export function AppRoutes({
           speciesOptions={speciesOptions} 
           setSpeciesOptions={setSpeciesOptions} 
           onCancel={() => navigate('/select-species')}
-          showModalMessage={() => {}}
+          showModalMessage={showModalMessage}
           authToken={authToken}
           API_BASE_URL={API_BASE_URL}
         />
@@ -335,7 +342,7 @@ export function AppRoutes({
             onCancel={() => { navigate('/'); setSpeciesToAdd(null); }}
             onDelete={null}
             authToken={authToken}
-            showModalMessage={() => {}}
+            showModalMessage={showModalMessage}
             API_BASE_URL={API_BASE_URL}
             userProfile={userProfile}
             speciesConfigs={speciesConfigs}

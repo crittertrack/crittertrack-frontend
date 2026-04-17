@@ -166,6 +166,14 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
                     // Still update view with response data even if refetch fails
                     setAnimalToView(response.data);
                     setAnimalToEdit(null);
+
+                    try {
+                        window.dispatchEvent(new CustomEvent('animal-updated', {
+                            detail: response.data
+                        }));
+                    } catch (e) {
+                        console.warn('Failed to dispatch fallback animal-updated event:', e);
+                    }
                 }
             }
 
@@ -207,6 +215,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
                 window.dispatchEvent(new CustomEvent('animal-archived', {
                     detail: { id_public: animal.id_public, archived: !animal.archived }
                 }));
+                window.dispatchEvent(new Event('animals-changed'));
             } catch (e) {
                 console.warn('Failed to dispatch animal-archived event:', e);
             }
@@ -236,6 +245,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
 
             // Close all animal views
             handleCloseAllAnimals();
+            window.dispatchEvent(new Event('animals-changed'));
 
             // Check if animal was reverted to original owner
             if (response.data?.reverted) {
@@ -267,6 +277,11 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
             if (animalToView && animalToView.id_public === animalId) {
                 setAnimalToView({ ...animalToView, isOwned: newOwnedValue });
             }
+
+            window.dispatchEvent(new CustomEvent('animal-updated', {
+                detail: { id_public: animalId, isOwned: newOwnedValue }
+            }));
+            window.dispatchEvent(new Event('animals-changed'));
         } catch (error) {
             console.error('[toggleAnimalOwned] Error:', error);
             throw error;
@@ -287,6 +302,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
                 { headers: { Authorization: `Bearer ${authToken}` } }
             );
 
+            window.dispatchEvent(new Event('animals-changed'));
             return response.data;
         } catch (error) {
             console.error('[handleRestoreViewOnlyAnimal] Error:', error);

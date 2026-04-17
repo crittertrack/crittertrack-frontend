@@ -250,14 +250,20 @@ const App = () => {
     });
     
     // Phase 10e: Breeding Lines
-    const breedingLinesState = useBreedingLines(authTokenTemp);
+    const breedingLinesState = useBreedingLines(authTokenTemp, API_BASE_URL);
     
-    // Phase 10f: Moderation Mode
-    const modMode = useModerationMode(authTokenTemp, userProfileTemp);
-
     // Temporarily store auth for hook setup
     const [modalMessage, setModalMessage] = useState({ title: '', message: '' });
     const [showModal, setShowModal] = useState(false);
+    
+    // Define showModalMessage function for hooks
+    const showModalMessage = useCallback((title, message) => {
+        setModalMessage({ title, message });
+        setShowModal(true);
+    }, []);
+    
+    // Phase 10f: Moderation Mode
+    const modMode = useModerationMode(authTokenTemp, API_BASE_URL, userProfileTemp, showModalMessage);
     
     // Now initialize auth hook with showModalMessage callback
     const {
@@ -266,10 +272,7 @@ const App = () => {
         userProfile: userProfileAuth,
         setUserProfile: setUserProfileAuth,
         fetchUserProfile: fetchUserProfileAuth
-    } = useAppAuth(API_BASE_URL, (title, message) => {
-        setModalMessage({ title, message });
-        setShowModal(true);
-    });
+    } = useAppAuth(API_BASE_URL, showModalMessage);
     
     // Sync auth from useAppAuth hook into temp storage
     useEffect(() => {
@@ -299,7 +302,7 @@ const App = () => {
     // Map hook states to legacy variable names for backward compatibility
     const { viewingPublicAnimal, setViewingPublicAnimal, publicAnimalViewHistory, setPublicAnimalViewHistory, publicAnimalInitialTab, setPublicAnimalInitialTab, handleViewPublicAnimal, handleBackFromPublicAnimal, handleCloseAllPublicAnimals } = publicAnimalNav;
     const { animalToView, setAnimalToView, animalToEdit, setAnimalToEdit, animalViewHistory, privateAnimalInitialTab, setPrivateAnimalInitialTab, privateBetaView, setPrivateBetaView, speciesToAdd, setSpeciesToAdd, editReturnPathRef, viewReturnPathRef, handleViewAnimal, handleEditAnimal, handleBackFromAnimal, handleCloseAllAnimals, handleSaveAnimal, handleArchiveAnimal, handleDeleteAnimal, toggleAnimalOwned, handleRestoreViewOnlyAnimal } = privateAnimalNav;
-    const { showTransferModal, setShowTransferModal, transferAnimal, setTransferAnimal, preSelectedTransferAnimal, preSelectedTransactionType, setPreSelectedTransferAnimal, setPreSelectedTransactionType, transferUserQuery, setTransferUserQuery, transferUserResults, setTransferUserResults, transferSelectedUser, setTransferSelectedUser, transferSearching, setTransferSearching, transferSearchPerformed, setTransferSearchPerformed, transferPrice, setTransferPrice, transferNotes, setTransferNotes, handleSearchTransferUser, handleSelectTransferUser, handleSubmitTransfer, handleCloseTransferWorkflow } = transferWorkflow;
+    const { showTransferModal, setShowTransferModal, budgetModalOpen, setBudgetModalOpen, transferAnimal, setTransferAnimal, preSelectedTransferAnimal, preSelectedTransactionType, setPreSelectedTransferAnimal, setPreSelectedTransactionType, transferUserQuery, setTransferUserQuery, transferUserResults, setTransferUserResults, transferSelectedUser, setTransferSelectedUser, transferSearching, setTransferSearching, transferSearchPerformed, setTransferSearchPerformed, transferPrice, setTransferPrice, transferNotes, setTransferNotes, handleSearchTransferUser, handleSelectTransferUser, handleSubmitTransfer, handleCloseTransferWorkflow } = transferWorkflow;
     const { breedingLineDefs, setBreedingLineDefs, animalBreedingLines, setAnimalBreedingLines, BL_PRESETS_APP, saveBreedingLineDefs, toggleAnimalBreedingLine } = breedingLinesState;
     const { inModeratorMode, setInModeratorMode, showAdminPanel, setShowAdminPanel, showModReportQueue, setShowModReportQueue, showModerationAuthModal, setShowModerationAuthModal, modCurrentContext, setModCurrentContext, handleToggleModerationMode, handleModerationAuth, handleModQuickFlag } = modMode;
     const { setAnimalViewHistory } = privateAnimalNav;
@@ -309,6 +312,8 @@ const App = () => {
     const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
     const [speciesOptions, setSpeciesOptions] = useState([]);
     const [speciesConfigs, setSpeciesConfigs] = useState({});
+    const [speciesSearchTerm, setSpeciesSearchTerm] = useState('');
+    const [speciesCategoryFilter, setSpeciesCategoryFilter] = useState('');
     
     // Detect mobile/app environment
     React.useEffect(() => {
@@ -622,12 +627,6 @@ const App = () => {
     const [urgentNotificationData, setUrgentNotificationData] = useState({ title: '', content: '' });
 
     const consecutiveAuthErrors = useRef(0);
-
-    // Define showModalMessage after all modal states are created
-    const showModalMessage = useCallback((title, message) => {
-        setModalMessage({ title, message });
-        setShowModal(true);
-    }, []);
 
     const handleLogout = useCallback((expired = false) => {
         setAuthToken(null);
@@ -2474,12 +2473,14 @@ const App = () => {
                 <AppRoutes
                   authToken={authToken}
                   userProfile={userProfile}
+                  setUserProfile={setUserProfile}
                   fetchUserProfile={fetchUserProfile}
+                  showModalMessage={showModalMessage}
                   modals={modals}
-                  setShowMessages={() => {}}
-                  setSelectedConversation={() => {}}
-                  setBudgetModalOpen={() => {}}
-                  myAnimalsForCalculator={[]}
+                  setShowMessages={setShowMessages}
+                  setSelectedConversation={setSelectedConversation}
+                  setBudgetModalOpen={setBudgetModalOpen}
+                  myAnimalsForCalculator={myAnimalsForCalculator}
                   animalToView={animalToView}
                   animalToEdit={animalToEdit}
                   handleViewAnimal={handleViewAnimal}
@@ -2492,14 +2493,14 @@ const App = () => {
                   privateAnimalInitialTab={privateAnimalInitialTab}
                   privateBetaView={privateBetaView}
                   editReturnPathRef={editReturnPathRef}
-                  showArchiveScreen={false}
-                  setShowArchiveScreen={() => {}}
-                  archivedAnimals={[]}
-                  setArchivedAnimals={() => {}}
-                  soldTransferredAnimals={[]}
-                  setSoldTransferredAnimals={() => {}}
-                  archiveLoading={false}
-                  setArchiveLoading={() => {}}
+                  showArchiveScreen={showArchiveScreen}
+                  setShowArchiveScreen={setShowArchiveScreen}
+                  archivedAnimals={archivedAnimals}
+                  setArchivedAnimals={setArchivedAnimals}
+                  soldTransferredAnimals={soldTransferredAnimals}
+                  setSoldTransferredAnimals={setSoldTransferredAnimals}
+                  archiveLoading={archiveLoading}
+                  setArchiveLoading={setArchiveLoading}
                   breedingLineDefs={breedingLineDefs}
                   animalBreedingLines={animalBreedingLines}
                   saveBreedingLineDefs={saveBreedingLineDefs}
@@ -2511,15 +2512,15 @@ const App = () => {
                   setPreSelectedTransactionType={setPreSelectedTransactionType}
                   setTransferAnimal={setTransferAnimal}
                   setShowTransferModal={setShowTransferModal}
-                  speciesToAdd={null}
-                  setSpeciesToAdd={() => {}}
-                  speciesOptions={[]}
-                  setSpeciesOptions={() => {}}
-                  speciesConfigs={{}}
-                  speciesSearchTerm=""
-                  setSpeciesSearchTerm={() => {}}
-                  speciesCategoryFilter=""
-                  setSpeciesCategoryFilter={() => {}}
+                  speciesToAdd={speciesToAdd}
+                  setSpeciesToAdd={setSpeciesToAdd}
+                  speciesOptions={speciesOptions}
+                  setSpeciesOptions={setSpeciesOptions}
+                  speciesConfigs={speciesConfigs}
+                  speciesSearchTerm={speciesSearchTerm}
+                  setSpeciesSearchTerm={setSpeciesSearchTerm}
+                  speciesCategoryFilter={speciesCategoryFilter}
+                  setSpeciesCategoryFilter={setSpeciesCategoryFilter}
                   setShowImageModal={setShowImageModal}
                   setEnlargedImageUrl={setEnlargedImageUrl}
                   showTransferModal={showTransferModal}
