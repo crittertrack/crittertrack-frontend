@@ -4911,7 +4911,7 @@ const AnimalForm = ({
                            ) : null;
 
     return (
-        <div className="w-full max-w-6xl mx-auto bg-[#E1F2F5] p-6 rounded-xl shadow-lg">
+        <div className="w-full max-w-6xl mx-auto bg-[#E1F2F5] p-6 rounded-xl shadow-2xl my-4">
             {/* --- Parent Search Modal --- */}
             {modalTarget && modalTarget !== 'breeder' && modalTarget !== 'other-parent' && modalTarget !== 'mate' && ( 
                 <ParentSearchModal
@@ -5287,8 +5287,8 @@ const AnimalForm = ({
             <form onSubmit={handleSubmit} className="space-y-6">
                 
                 {/* Tab Navigation */}
-                <div className="border border-gray-300 -mx-6 px-6 pt-4">
-                    <div className="flex flex-wrap gap-1 pb-px">
+                <div className="bg-[#E1F2F5] border-b border-gray-300 -mx-6 px-1 py-2">
+                    <div className="flex flex-wrap gap-2">
                         {[
                             { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
                             { id: 2, label: 'Ownership', icon: Lock, color: 'text-slate-500' },
@@ -5311,14 +5311,14 @@ const AnimalForm = ({
                                 type="button"
                                 onClick={() => setActiveTab(tab.id)}
                                 data-tutorial-target={tab.id === 2 ? 'status-privacy-tab' : tab.id === 3 ? 'identification-tab' : tab.id === 4 ? 'appearance-tab' : tab.id === 5 ? 'beta-pedigree-tab' : tab.id === 6 ? 'family-tab' : tab.id === 7 ? 'fertility-tab' : tab.id === 8 ? 'health-tab' : tab.id === 9 ? 'care-tab' : tab.id === 10 ? 'behavior-tab' : tab.id === 11 ? 'notes-tab' : tab.id === 12 ? 'show-tab' : undefined}
-                                className={`flex-shrink-0 px-2 py-2 text-xs font-medium rounded border-2 transition-colors ${
+                                className={`w-[calc(20%-0.4rem)] px-2 py-2 text-xs font-medium rounded border-2 transition-colors ${
                                     activeTab === tab.id 
                                         ? 'bg-[#F2E4E9] text-black border-gray-300' 
                                         : 'bg-white text-gray-600 hover:text-gray-800 border-gray-300'
                                 }`}
                                 title={tab.label}
                             >
-                                {React.createElement(tab.icon, { size: 14, className: `inline-block align-middle flex-shrink-0 mr-1.5 ${tab.color || ''}` })}
+                                {React.createElement(tab.icon, { size: 14, className: `inline-block align-middle flex-shrink-0 mr-1 ${tab.color || ''}` })}
                                 {tab.label}
                             </button>
                         ))}
