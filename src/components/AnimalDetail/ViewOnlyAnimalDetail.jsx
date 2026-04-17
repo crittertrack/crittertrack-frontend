@@ -372,7 +372,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                 </div>
 
                 {/* Tabs - PUBLIC VIEW: 8 tabs (Records + End of Life combined) */}
-                <div className="bg-[#E1F2F5]">
+                <div className="bg-[#E1F2F5] border border-b-0 border-gray-300 rounded-t-lg">
                     <div className="flex flex-wrap gap-2 px-1 py-2">
                         {[
                             { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
@@ -407,7 +407,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                 </div>
 
                 {/* Tab Content */}
-                <div className="bg-[#E1F2F5] border border-t-0 border-gray-300 rounded-b-lg p-3 sm:p-6 overflow-y-auto max-h-[calc(95vh-140px)] sm:max-h-[calc(90vh-160px)] pb-8">
+                <div className="bg-[#E1F2F5] border border-gray-300 rounded-b-lg p-3 sm:p-6 overflow-y-auto max-h-[calc(95vh-140px)] sm:max-h-[calc(90vh-160px)] pb-8">
                     {/* Tab 1: Overview */}
                     {detailViewTab === 1 && (
                         <div className="space-y-3">
