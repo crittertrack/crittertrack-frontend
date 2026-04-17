@@ -4724,9 +4724,10 @@ const AnimalForm = ({
                 }
             }
             
-            // Determine final parent values (pedigreeRef takes precedence if set, otherwise use formData)
-            const finalFatherId = pedigreeRef.current.father !== undefined ? pedigreeRef.current.father : formData.fatherId_public;
-            const finalMotherId = pedigreeRef.current.mother !== undefined ? pedigreeRef.current.mother : formData.motherId_public;
+            // Use formData parent values by default (these are always in sync)
+            // pedigreeRef is only used for backend IDs, not for determining the final public IDs to save
+            const finalFatherId = formData.fatherId_public;
+            const finalMotherId = formData.motherId_public;
             
             console.log('[DEBUG] Parent removal check:', {
                 pedigreeRefFather: pedigreeRef.current.father,
