@@ -15,6 +15,7 @@ import {
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { formatDate, formatDateShort } from '../../utils/dateFormatter';
+import { FamilyTabContent } from '../AnimalDetail/FamilyTabContent';
 import DatePicker from '../DatePicker';
 import GeneticCodeBuilder from '../GeneticCodeBuilder';
 
@@ -5294,7 +5295,7 @@ const AnimalForm = ({
                             { id: 2, label: 'Ownership', icon: Lock, color: 'text-slate-500' },
                             { id: 3, label: 'Identification', icon: Tag, color: 'text-amber-500' },
                             { id: 4, label: 'Appearance', icon: Palette, color: 'text-pink-500' },
-                            { id: 5, label: 'Beta Pedigree', icon: Dna, color: 'text-orange-500' },
+                            { id: 5, label: 'Pedigree', icon: Dna, color: 'text-orange-500' },
                             { id: 6, label: 'Family', icon: TreeDeciduous, color: 'text-green-600' },
                             { id: 7, label: 'Fertility', icon: Egg, color: 'text-yellow-500' },
                             { id: 8, label: 'Health', icon: Hospital, color: 'text-red-500' },
@@ -5311,7 +5312,7 @@ const AnimalForm = ({
                                 type="button"
                                 onClick={() => setActiveTab(tab.id)}
                                 data-tutorial-target={tab.id === 2 ? 'status-privacy-tab' : tab.id === 3 ? 'identification-tab' : tab.id === 4 ? 'appearance-tab' : tab.id === 5 ? 'beta-pedigree-tab' : tab.id === 6 ? 'family-tab' : tab.id === 7 ? 'fertility-tab' : tab.id === 8 ? 'health-tab' : tab.id === 9 ? 'care-tab' : tab.id === 10 ? 'behavior-tab' : tab.id === 11 ? 'notes-tab' : tab.id === 12 ? 'show-tab' : undefined}
-                                className={`flex-shrink-0 px-3 py-2 text-sm font-medium rounded border-2 transition-colors ${
+                                className={`flex-shrink-0 px-5 py-2 text-sm font-medium rounded border-2 transition-colors ${
                                     activeTab === tab.id 
                                         ? 'bg-[#F2E4E9] text-black border-gray-300' 
                                         : 'bg-white text-gray-600 hover:text-gray-800 border-gray-300'
@@ -6591,32 +6592,12 @@ const AnimalForm = ({
                 
                 {/* Tab 6: Family */}
                 {activeTab === 6 && (
-                    <div className="space-y-6">
-                        {/* Parents ? view only; edit via Beta Pedigree tab */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex items-center justify-between flex-wrap gap-2 border-b pb-2">
-                                <h3 className="text-lg font-semibold text-gray-700"><TreeDeciduous size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Parents</h3>
-                                <span className="text-xs text-orange-500 font-medium">?? Edit pedigree on the <button type="button" onClick={() => setActiveTab(5)} className="underline hover:text-orange-600 transition">Beta Pedigree</button> tab</span>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <ViewOnlyParentCard
-                                    parentId={formData.fatherId_public}
-                                    parentType="Sire"
-                                    API_BASE_URL={API_BASE_URL}
-                                    onViewAnimal={null}
-                                    authToken={authToken}
-                                />
-                                <ViewOnlyParentCard
-                                    parentId={formData.motherId_public}
-                                    parentType="Dam"
-                                    API_BASE_URL={API_BASE_URL}
-                                    onViewAnimal={null}
-                                    authToken={authToken}
-                                />
-                            </div>
-                        </div>
-
-                    </div>
+                    <FamilyTabContent
+                        animal={animalToEdit}
+                        API_BASE_URL={API_BASE_URL}
+                        authToken={authToken}
+                        onViewAnimal={null}
+                    />
                 )}
 
                 {/* Tab 7: Fertility */}
@@ -8241,7 +8222,7 @@ const AnimalForm = ({
                     </div>
                 )}
 
-                {/* Tab 5: Beta Pedigree */}
+                {/* Tab 5: Pedigree */}
                 {(() => {
                     // Hoisted so the CTC modal (rendered outside the tab guard) can always call linkAnimal
                     const mpEmptySlot = () => ({ mode: 'ctc', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
