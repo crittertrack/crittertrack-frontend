@@ -650,11 +650,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                             <div className="flex gap-2 shrink-0">
                                                 <button
                                                     onClick={() => { onToggleOwned && onToggleOwned(animal.id_public, !animal.isOwned); }}
-                                                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium text-xs transition ${animal.isOwned ? 'bg-red-100 text-red-800 hover:bg-red-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                                                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg font-medium text-sm transition ${animal.isOwned ? 'bg-red-100 text-red-800 hover:bg-red-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
                                                     title="Toggle owned status"
                                                     data-tutorial-target="detail-owned-toggle"
                                                 >
-                                                    {animal.isOwned ? <Heart size={13} /> : <HeartOff size={13} />}
+                                                    {animal.isOwned ? <Heart size={16} /> : <HeartOff size={16} />}
                                                     <span>{animal.isOwned ? 'Owned' : 'Not Owned'}</span>
                                                 </button>
                                                 <button
@@ -667,10 +667,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                         }).catch(err => console.error('Failed to update isDisplay:', err));
                                                     }}
                                                     data-tutorial-target="detail-private-toggle"
-                                                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium text-xs transition ${animal.isDisplay ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                                                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg font-medium text-sm transition ${animal.isDisplay ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
                                                     title="Toggle public profile visibility"
                                                 >
-                                                    {animal.isDisplay ? <Eye size={13} /> : <EyeOff size={13} />}
+                                                    {animal.isDisplay ? <Eye size={16} /> : <EyeOff size={16} />}
                                                     <span>{animal.isDisplay ? 'Public' : 'Private'}</span>
                                                 </button>
                                             </div>
