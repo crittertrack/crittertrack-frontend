@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Search, X, Filter, ChevronLeft, ChevronRight, DollarSign, Heart, Mail, MapPin, Loader2, ShoppingBag, Tag, MessageSquare, Send } from 'lucide-react';
 import axios from 'axios';
 import 'flag-icons/css/flag-icons.min.css';
+import ViewOnlyAnimalDetail from './AnimalDetail/ViewOnlyAnimalDetail';
 
 const API_BASE_URL = '/api';
 
@@ -71,6 +72,9 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    
+    // Overlay modal state for animal details
+    const [selectedAnimalForModal, setSelectedAnimalForModal] = useState(null);
     
     // Inquiry modal state
     const [showInquiryModal, setShowInquiryModal] = useState(false);
@@ -490,7 +494,7 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                         <AnimalCard 
                             key={animal._id || animal.id_public} 
                             animal={animal}
-                            onViewAnimal={onViewAnimal}
+                            onViewAnimal={(id) => setSelectedAnimalForModal(animals.find(a => a.id_public === id))}
                             onViewProfile={onViewProfile}
                             onContactOwner={() => handleOpenInquiry(animal)}
                             isOwnListing={animal.ownerInfo?.id_public === userProfile?.id_public}
@@ -665,6 +669,19 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Animal Detail Modal Overlay */}
+            {selectedAnimalForModal && (
+                <ViewOnlyAnimalDetail 
+                    animal={selectedAnimalForModal}
+                    onClose={() => setSelectedAnimalForModal(null)}
+                    onCloseAll={() => setSelectedAnimalForModal(null)}
+                    API_BASE_URL={API_BASE_URL}
+                    onViewProfile={onViewProfile}
+                    onViewAnimal={onViewAnimal}
+                    authToken={authToken}
+                />
             )}
         </div>
     );
