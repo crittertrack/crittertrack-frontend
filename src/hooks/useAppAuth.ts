@@ -1,6 +1,35 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import axios from 'axios';
 
+const decodeJwtPayload = (token: string) => {
+    try {
+        const base64Url = token.split('.')[1];
+        if (!base64Url) return null;
+
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+            atob(base64)
+                .split('')
+                .map((char) => `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`)
+                .join('')
+        );
+
+        return JSON.parse(jsonPayload);
+    } catch {
+        return null;
+    }
+};
+
+const isTokenExpired = (token: string | null) => {
+    if (!token) return false;
+
+    const payload = decodeJwtPayload(token);
+    if (!payload?.exp) return false;
+
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+    return payload.exp <= nowInSeconds;
+};
+
 /**
  * useAppAuth - Manages application authentication state and profile fetching
  * 
@@ -16,7 +45,16 @@ export function useAppAuth(
     // Auth token state - initialize from localStorage
     const [authToken, setAuthToken] = useState<string | null>(() => {
         try {
-            return localStorage.getItem('authToken') || null;
+            const storedToken = localStorage.getItem('authToken');
+            if (!storedToken) return null;
+
+            if (isTokenExpired(storedToken)) {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('userId');
+                return null;
+            }
+
+            return storedToken;
         } catch (e) {
             console.warn('Could not read authToken from localStorage', e);
             return null;
@@ -29,9 +67,58 @@ export function useAppAuth(
     // Stable ref for showModalMessage — avoids making fetchUserProfile a new reference
     // every render just because the caller passes an inline arrow function
     const showModalMessageRef = useRef(showModalMessage);
+    const sessionExpiredHandledRef = useRef(false);
+
     useEffect(() => {
         showModalMessageRef.current = showModalMessage;
     });
+
+    const clearAuthState = useCallback((showExpiredMessage = false) => {
+        setAuthToken(null);
+        setUserProfile(null);
+
+        try {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userId');
+        } catch (e) {
+            console.warn('Could not clear auth from localStorage', e);
+        }
+
+        if (showExpiredMessage && !sessionExpiredHandledRef.current) {
+            sessionExpiredHandledRef.current = true;
+            showModalMessageRef.current('Session Expired', 'Your session has expired. Please log in again.');
+        }
+    }, []);
+
+    useEffect(() => {
+        if (authToken) {
+            sessionExpiredHandledRef.current = false;
+        }
+    }, [authToken]);
+
+    useEffect(() => {
+        const interceptor = axios.interceptors.response.use(
+            (response) => response,
+            (error) => {
+                const status = error?.response?.status;
+                const message = String(error?.response?.data?.message || error?.message || '').toLowerCase();
+                const tokenExpired = status === 401 && (
+                    error?.response?.data?.expired === true ||
+                    message.includes('token expired') ||
+                    message.includes('jwt expired') ||
+                    message.includes('session expired')
+                );
+
+                if (tokenExpired) {
+                    clearAuthState(true);
+                }
+
+                return Promise.reject(error);
+            }
+        );
+
+        return () => axios.interceptors.response.eject(interceptor);
+    }, [clearAuthState]);
 
     // Fetch user profile from API
     const fetchUserProfile = useCallback(
@@ -68,16 +155,8 @@ export function useAppAuth(
 
                 // Only log out if it's a 401 or 403 (token expired/invalid/forbidden), not for network errors
                 if (error.response?.status === 401 || error.response?.status === 403) {
-                    // Only show error modal if we still have a token (not already logged out)
                     if (token) {
-                        showModalMessageRef.current('Session Expired', 'Your session has expired. Please log in again.');
-                        setAuthToken(null);
-                        try {
-                            localStorage.removeItem('authToken');
-                            localStorage.removeItem('userId');
-                        } catch (e) {
-                            console.warn('Could not clear auth from localStorage', e);
-                        }
+                        clearAuthState(true);
                     }
                 } else if (error.code === 'ERR_NETWORK' || !error.response) {
                     // Network error - don't log out, just log it
@@ -89,7 +168,7 @@ export function useAppAuth(
                 // For network/other errors, don't log out - the periodic refresh will retry
             }
         },
-        [API_BASE_URL]  // No longer depends on authToken or showModalMessage — both accessed via ref/closure
+        [API_BASE_URL, clearAuthState]  // No longer depends on authToken or showModalMessage — both accessed via ref/closure
     );
 
     // Periodically refresh user profile to catch warning/suspension changes
