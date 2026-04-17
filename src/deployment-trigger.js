@@ -1,5 +1,5 @@
-// Force deployment trigger - Kintraks import dupe detection fix
-// Date: 2026-04-11
-// Purpose: Fix Kintraks dupe logic, litter manual mapping, batch query optimisation
-// Build: v14 - Kintraks import improvements
-export const DEPLOYMENT_TIMESTAMP = '2026-04-11T18:00:00Z';
+// Force deployment trigger - UI styling updates
+// Date: 2026-04-17
+// Purpose: Ownership tab rename, parent card variety fix, edit form bg/width/tab styling
+// Build: v15 - UI unified styling
+export const DEPLOYMENT_TIMESTAMP = '2026-04-17T17:00:00Z';

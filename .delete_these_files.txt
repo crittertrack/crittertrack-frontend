@@ -1,0 +1,12 @@
+main_app.jsx
+_fix-overview.mjs
+fix-tabs.js
+fix-tabs-2.js
+fix-overview.js
+fix-hide-if-empty.js
+fix_chars.py
+fix_broken_chars.py
+simple_fix.py
+check_encoding.py
+compare_branches.sh
+push_fixes.bat

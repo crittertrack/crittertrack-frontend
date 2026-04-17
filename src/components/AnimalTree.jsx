@@ -16,6 +16,7 @@ import 'reactflow/dist/style.css';
 import axios from 'axios';
 import dagre from 'dagre';
 import { formatDate } from '../utils/dateFormatter';
+import { getGenderBorderColor, formatAnimalAge, createNodeData, handleNodeSelection } from '../utils/treeComponentUtils';
 
 const API_BASE_URL = '/api';
 
@@ -30,7 +31,7 @@ const API_BASE_URL = '/api';
  * - Clickable nodes to view animal details
  */
 
-// Custom node component for animals (same as FamilyTree)
+// Custom node component for animals (shared with FamilyTree)
 const AnimalNode = ({ data }) => {
     const isOwned = data.isOwned;
     const isSelected = data.isSelected;
@@ -38,23 +39,6 @@ const AnimalNode = ({ data }) => {
     
     // Build full name with prefix/suffix
     const fullName = [data.prefix, data.label, data.suffix].filter(Boolean).join(' ');
-    
-    // Gender-based border color
-    const getBorderColor = () => {
-        const gender = data.gender?.toLowerCase() || data.animal?.sex?.toLowerCase() || '';
-        switch(gender) {
-            case 'male':
-            case 'm':
-                return 'border-blue-500';
-            case 'female': 
-            case 'f':
-                return 'border-pink-500';
-            case 'intersex':
-                return 'border-purple-500';
-            default:
-                return 'border-gray-400';
-        }
-    };
     
     return (
         <div className="flex flex-col items-center">
@@ -93,7 +77,7 @@ const AnimalNode = ({ data }) => {
             <div
                 className={`
                     rounded-full overflow-hidden border-4 shadow-lg cursor-pointer transition-all
-                    ${getBorderColor()}
+                    ${getGenderBorderColor(data.gender)}
                     ${isSelected ? 'ring-4 ring-blue-500 scale-110' : 'hover:scale-105'}
                     ${isSearchMatch ? 'ring-4 ring-yellow-400 ring-offset-2 animate-pulse' : ''}
                     ${!isOwned ? 'opacity-60' : ''}

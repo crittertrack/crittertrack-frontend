@@ -51,3 +51,57 @@ export const formatDateShort = (date) => {
         day: 'numeric'
     }).format(d);
 };
+
+// Helper function to format date strings for display
+export const formatDateDisplay = (dateString) => {
+    if (!dateString) return '';
+    try {
+        // Pass the raw string to formatDateShort so it can parse as local time
+        return formatDateShort(dateString);
+    } catch (e) {
+        return dateString; // Return as-is if parsing fails
+    }
+};
+
+// Returns a human-friendly age string from a birth date, matching the animal age format (e.g. "9d", "3m 5d", "1y 2m 10d")
+export const litterAge = (birthDate) => {
+    if (!birthDate) return null;
+    const born = new Date(birthDate);
+    const now = new Date();
+    if (isNaN(born.getTime()) || born > now) return null;
+    let years = now.getFullYear() - born.getFullYear();
+    let months = now.getMonth() - born.getMonth();
+    let days = now.getDate() - born.getDate();
+    if (days < 0) {
+        months--;
+        const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+        days += prevMonth.getDate();
+    }
+    if (months < 0) {
+        years--;
+        months += 12;
+    }
+    if (years > 0) return `${years}y ${months}m ${days}d`;
+    if (months > 0) return `${months}m ${days}d`;
+    return `${days}d`;
+};
+
+// Formats a date/ISO string as a relative time phrase (e.g. "2 hours ago")
+export const formatTimeAgo = (dateStr) => {
+    if (!dateStr) return '';
+    const now = new Date();
+    const then = new Date(dateStr);
+    if (isNaN(then.getTime())) return '';
+    const diffMs = now - then;
+    const diffSec = Math.floor(diffMs / 1000);
+    if (diffSec < 60) return 'just now';
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin}m ago`;
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return `${diffHr}h ago`;
+    const diffDays = Math.floor(diffHr / 24);
+    if (diffDays < 30) return `${diffDays}d ago`;
+    const diffMo = Math.floor(diffDays / 30);
+    if (diffMo < 12) return `${diffMo}mo ago`;
+    return `${Math.floor(diffMo / 12)}y ago`;
+};

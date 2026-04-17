@@ -1,0 +1,2756 @@
+﻿import React, { useState, useEffect, useCallback, useRef, useImperativeHandle, useMemo } from 'react';
+import axios from 'axios';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import QRCode from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+
+// Lucide React Icons
+import {
+    Mars, Venus, VenusAndMars, Circle, Cat, QrCode, Edit, Archive, Heart, HeartOff, Eye, EyeOff,
+    ChevronDown, ChevronRight, ChevronUp, ArrowLeft, X, ClipboardList, Lock, Tag, Palette, Dna,
+    TreeDeciduous, Egg, Hospital, Home, Brain, FileText, Trophy, FileCheck, Scale, Images, ScrollText,
+    Shield, Microscope, Pill, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare,
+    Activity, AlertTriangle, Medal, Target, Key, Ban, Check, RefreshCw, Leaf, ArrowRight, Hourglass,
+    Users, FolderOpen, Globe, Sparkles, Sprout, Ruler, Feather, Download, Loader2, Camera, Network,
+    TableOfContents, BookOpen, RotateCcw, ArrowLeftRight, Hash, User
+} from 'lucide-react';
+
+// Utilities
+import { useDetailFieldTemplate, parseJsonField, DetailJsonList, computeRelationships, ViewOnlyParentCard, ParentMiniCard } from './utils';
+import { formatDate, litterAge } from '../../utils/dateFormatter';
+import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/locationUtils';
+import { getSpeciesLatinName } from '../../utils/speciesUtils';
+import { QRModal } from '../PublicProfile/PublicProfileView';
+import { PedigreeChart } from '../AnimalForm';
+const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onViewPublicAnimal, onToggleOwned, userProfile, userAnimals = [], breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, initialTab = 1, initialBetaView = 'vertical' }) => {
+    const navigate = useNavigate();
+    const [breederInfo, setBreederInfo] = useState(null);
+    const [showPedigree, setShowPedigree] = useState(false);
+    const [detailViewTab, setDetailViewTab] = useState(initialTab);
+    const [copySuccess, setCopySuccess] = useState(false);
+    const [showQR, setShowQR] = useState(false);
+    const [enclosureInfo, setEnclosureInfo] = useState(null);
+    const [animalLogs, setAnimalLogs] = useState(null); // null = not yet fetched
+    const [animalLogsLoading, setAnimalLogsLoading] = useState(false);
+    const [animalCOI, setAnimalCOI] = useState(null);
+    const [loadingCOI, setLoadingCOI] = useState(false);
+    const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
+    const [breedingRecordOffspring, setBreedingRecordOffspring] = useState({});
+    const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});
+    const [animalLitters, setAnimalLitters] = useState(null);
+    const [pedigreeOffspring, setPedigreeOffspring] = useState(null);
+    const [expandedPedigreeRecords, setExpandedPedigreeRecords] = useState({});
+    const [ownedAnimals, setOwnedAnimals] = useState(userAnimals); // may be pre-seeded from parent or fetched lazily
+    const [ownedAnimalsLoaded, setOwnedAnimalsLoaded] = useState(false); // Track when fetch completes
+    const ownedAnimalsLoadedRef = useRef(false); // Always fetch to get complete list
+    const [globalRels, setGlobalRels] = useState(null); // null = not yet fetched
+    const [globalRelsLoading, setGlobalRelsLoading] = useState(false);
+    const [parentCardKey, setParentCardKey] = useState(0); // increment to force parent cards to refetch
+    // Manual Pedigree (Beta) • Tab 16
+    const [mpDownloading, setMpDownloading] = useState(false);
+    const [mpLoading, setMpLoading] = useState(false);
+    const mpTreeRef = useRef(null);
+    const chartRef = useRef(null);
+    const [mpEnrichedData, setMpEnrichedData] = useState(null);
+    const [betaPedigreeView, setBetaPedigreeView] = useState(initialBetaView);
+    useEffect(() => {
+        if (detailViewTab !== 5) return;
+        let cancelled = false;
+        setMpLoading(true);
+        (async () => {
+            const manual = animal?.manualPedigree || {};
+            const toSlot = (a) => {
+                const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
+                return { mode: 'ctc', ctcId: a.id_public || '', prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', deceasedDate: a.deceasedDate ? String(a.deceasedDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
+            };
+            const fetchOne = async (id) => {
+                if (!id) return null;
+                try { const r = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${authToken}` } }); return r.data || null; }
+                catch { return null; }
+            };
+            // Level 1: parents
+            const [sire, dam] = await Promise.all([
+                fetchOne(animal?.sireId_public || animal?.fatherId_public),
+                fetchOne(animal?.damId_public  || animal?.motherId_public),
+            ]);
+            if (cancelled) return;
+            // Level 2: grandparents
+            const [ss, sd, ds, dd] = await Promise.all([
+                fetchOne(sire?.sireId_public || sire?.fatherId_public),
+                fetchOne(sire?.damId_public  || sire?.motherId_public),
+                fetchOne(dam?.sireId_public  || dam?.fatherId_public),
+                fetchOne(dam?.damId_public   || dam?.motherId_public),
+            ]);
+            if (cancelled) return;
+            // Level 3: great-grandparents
+            const [sss, ssd, sds, sdd, dss, dsd, dds, ddd] = await Promise.all([
+                fetchOne(ss?.sireId_public || ss?.fatherId_public),
+                fetchOne(ss?.damId_public  || ss?.motherId_public),
+                fetchOne(sd?.sireId_public || sd?.fatherId_public),
+                fetchOne(sd?.damId_public  || sd?.motherId_public),
+                fetchOne(ds?.sireId_public || ds?.fatherId_public),
+                fetchOne(ds?.damId_public  || ds?.motherId_public),
+                fetchOne(dd?.sireId_public || dd?.fatherId_public),
+                fetchOne(dd?.damId_public  || dd?.motherId_public),
+            ]);
+            if (cancelled) return;
+            // Build seeded slots from linked ancestry
+            const seeded = {};
+            if (sire) seeded.sire         = toSlot(sire);
+            if (dam)  seeded.dam          = toSlot(dam);
+            if (ss)   seeded.sireSire     = toSlot(ss);
+            if (sd)   seeded.sireDam      = toSlot(sd);
+            if (ds)   seeded.damSire      = toSlot(ds);
+            if (dd)   seeded.damDam       = toSlot(dd);
+            if (sss)  seeded.sireSireSire = toSlot(sss);
+            if (ssd)  seeded.sireSireDam  = toSlot(ssd);
+            if (sds)  seeded.sireDamSire  = toSlot(sds);
+            if (sdd)  seeded.sireDamDam   = toSlot(sdd);
+            if (dss)  seeded.damSireSire  = toSlot(dss);
+            if (dsd)  seeded.damSireDam   = toSlot(dsd);
+            if (dds)  seeded.damDamSire   = toSlot(dds);
+            if (ddd)  seeded.damDamDam    = toSlot(ddd);
+            // Overlay seeded (real CTC links) on top of manual entries • seed wins
+            const merged = {};
+            Object.entries(manual).forEach(([k, v]) => {
+                if (v && (v.ctcId || v.name || v.prefix || v.suffix)) merged[k] = v;
+            });
+            Object.assign(merged, seeded);
+            if (!cancelled) { setMpEnrichedData(merged); setMpLoading(false); }
+        })();
+        return () => { cancelled = true; };
+    }, [detailViewTab, animal?.id_public]);
+    useEffect(() => { setMpEnrichedData(null); setMpLoading(false); }, [animal?.id_public]);
+    useEffect(() => { setDetailViewTab(initialTab); setBetaPedigreeView(initialBetaView); }, [animal?.id_public, initialTab, initialBetaView]);
+
+    // Fetch ALL animals on the account + global relationships on mount
+    useEffect(() => {
+        if (ownedAnimalsLoadedRef.current || !authToken || !animal?.id_public) return;
+        ownedAnimalsLoadedRef.current = true;
+        // Fetch both in PARALLEL instead of sequential for faster load
+        setGlobalRelsLoading(true);
+        Promise.all([
+            axios.get(`${API_BASE_URL}/animals`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            }),
+            axios.get(`${API_BASE_URL}/animals/${animal.id_public}/relationships`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            })
+        ]).then(([animalsRes, relsRes]) => {
+            setOwnedAnimals(animalsRes.data || []);
+            setOwnedAnimalsLoaded(true);
+            setGlobalRels(relsRes.data || null);
+            setGlobalRelsLoading(false);
+        }).catch(err => {
+            console.error('Error fetching animals or relationships:', err);
+            setOwnedAnimalsLoaded(true);
+            setGlobalRelsLoading(false);
+        });
+    }, [authToken, API_BASE_URL, animal?.id_public, userAnimals]);
+
+    // Relationship Insights • computed from all account animals (shown in Lineage tab)
+    const relationships = useMemo(() => computeRelationships(animal, ownedAnimals), [animal, ownedAnimals]);
+    const getRelLabel = (groupLabel, rel) => {
+        const isMale = rel.gender === 'Male';
+        const isFemale = rel.gender === 'Female';
+        const side = rel._side === 'paternal' ? 'Paternal ' : rel._side === 'maternal' ? 'Maternal ' : '';
+        switch (groupLabel) {
+            case 'Parents':
+                if (rel.id_public === animal?.sireId_public) return 'Sire (Father)';
+                if (rel.id_public === animal?.damId_public) return 'Dam (Mother)';
+                return isMale ? 'Sire (Father)' : isFemale ? 'Dam (Mother)' : 'Parent';
+            case 'Siblings':
+                return isMale ? 'Brother' : isFemale ? 'Sister' : 'Sibling';
+            case 'Nieces & Nephews':
+                return isMale ? 'Nephew' : isFemale ? 'Niece' : 'Niece / Nephew';
+            case 'Aunts & Uncles':
+                return isMale ? `${side}Uncle` : isFemale ? `${side}Aunt` : `${side}Aunt / Uncle`;
+            case 'Grandparents':
+                return isMale ? `${side}Grandfather` : isFemale ? `${side}Grandmother` : `${side}Grandparent`;
+            case 'Great-Grandparents':
+                return isMale ? `${side}Great-Grandfather` : isFemale ? `${side}Great-Grandmother` : `${side}Great-Grandparent`;
+            case 'Cousins': return 'Cousin';
+            default: return groupLabel;
+        }
+    };
+    const allRelGroups = useMemo(() => {
+        const groupDefs = [
+            { key: 'parents',           label: 'Parents',            ownRelTypes: ['Sire (Father)', 'Dam (Mother)'] },
+            { key: 'siblings',          label: 'Siblings',           ownRelTypes: ['Full Sibling', 'Full Brother', 'Full Sister', 'Half-Sibling (via Sire)', 'Half-Brother (via Sire)', 'Half-Sister (via Sire)', 'Half-Sibling (via Dam)', 'Half-Brother (via Dam)', 'Half-Sister (via Dam)'] },
+            { key: 'nephewsNieces',     label: 'Nieces & Nephews',   ownRelTypes: ['Niece / Nephew', 'Niece', 'Nephew'] },
+            { key: 'auntsUncles',       label: 'Aunts & Uncles',     ownRelTypes: ['Aunt / Uncle', 'Aunt', 'Uncle', 'Paternal Aunt / Uncle', 'Paternal Aunt', 'Paternal Uncle', 'Maternal Aunt / Uncle', 'Maternal Aunt', 'Maternal Uncle'] },
+            { key: 'grandparents',      label: 'Grandparents',       ownRelTypes: ['Paternal Grandparent', 'Paternal Grandfather', 'Paternal Grandmother', 'Maternal Grandparent', 'Maternal Grandfather', 'Maternal Grandmother'] },
+            { key: 'greatGrandparents', label: 'Great-Grandparents', ownRelTypes: ['Paternal Great-Grandparent', 'Paternal Great-Grandfather', 'Paternal Great-Grandmother', 'Maternal Great-Grandparent', 'Maternal Great-Grandfather', 'Maternal Great-Grandmother'] },
+            { key: 'cousins',           label: 'Cousins',            ownRelTypes: ['Cousin'] },
+        ];
+        const seenAcrossGroups = new Set();
+        return groupDefs.map(({ key, label, ownRelTypes }) => {
+            const items = [];
+            relationships.filter(r => ownRelTypes.includes(r.rel)).forEach(({ animal: rel, rel: relLabel }) => {
+                if (!seenAcrossGroups.has(rel.id_public)) { seenAcrossGroups.add(rel.id_public); items.push({ rel, relLabel }); }
+            });
+            if (globalRels) {
+                (globalRels[key] || []).filter(a => a.id_public !== animal?.id_public).forEach(rel => {
+                    if (!seenAcrossGroups.has(rel.id_public)) { seenAcrossGroups.add(rel.id_public); items.push({ rel, relLabel: getRelLabel(label, rel) }); }
+                });
+            }
+            return { label, items };
+        }).filter(g => g.items.length > 0);
+    }, [relationships, globalRels, animal?.id_public, animal?.sireId_public, animal?.damId_public]);
+    const [relInsightsOpen, setRelInsightsOpen] = useState(true);
+    const [offspringOpen, setOffspringOpen] = useState(true);
+    const pedigreeIssues = useMemo(() => {
+        const issues = [];
+        const map = {};
+        ownedAnimals.forEach(a => { if (a.id_public) map[a.id_public] = a; });
+        const sireId = animal.fatherId_public || animal.sireId_public;
+        const damId  = animal.motherId_public  || animal.damId_public;
+        const externalParents = globalRels?.parents || [];
+        const sireFull = map[sireId] || (sireId ? externalParents.find(p => p.id_public === sireId) : null);
+        const damFull  = map[damId]  || (damId  ? externalParents.find(p => p.id_public === damId)  : null);
+        const animalBirth = animal.birthDate ? new Date(animal.birthDate) : null;
+        // 1. Self-reference
+        if (sireId && sireId === animal.id_public) issues.push({ severity: 'error', field: 'Sire', message: 'This animal is listed as its own sire — impossible self-reference.' });
+        if (damId  && damId  === animal.id_public) issues.push({ severity: 'error', field: 'Dam',  message: 'This animal is listed as its own dam — impossible self-reference.' });
+        // 2. Broken parent link (only after globalRels has finished loading to avoid false positives)
+        if (sireId && !sireFull && ownedAnimals.length > 0 && !globalRelsLoading) issues.push({ severity: 'warning', field: 'Sire', message: 'Sire is linked but not found in your collection or known platform animals.' });
+        if (damId  && !damFull  && ownedAnimals.length > 0 && !globalRelsLoading) issues.push({ severity: 'warning', field: 'Dam',  message: 'Dam is linked but not found in your collection or known platform animals.' });
+        // 3. Parent born on or after offspring
+        if (animalBirth) {
+            if (sireFull?.birthDate && new Date(sireFull.birthDate) >= animalBirth)
+                issues.push({ severity: 'error', field: 'Sire', message: `Sire "${[sireFull.prefix, sireFull.name].filter(Boolean).join(' ')}" was born on or after this animal — impossible parentage.` });
+            if (damFull?.birthDate && new Date(damFull.birthDate) >= animalBirth)
+                issues.push({ severity: 'error', field: 'Dam',  message: `Dam "${[damFull.prefix, damFull.name].filter(Boolean).join(' ')}" was born on or after this animal — impossible parentage.` });
+        }
+        // 4. Same-sex parents
+        if (sireFull && damFull) {
+            const sg = sireFull.gender; const dg = damFull.gender;
+            if (sg && dg && sg !== 'Unknown' && dg !== 'Unknown' && sg === dg)
+                issues.push({ severity: 'error', field: 'Parents', message: `Both linked parents are ${sg} — a sire/dam pair must be male and female.` });
+        }
+        // 5. Species mismatch
+        if (sireFull?.species && animal.species && sireFull.species !== animal.species)
+            issues.push({ severity: 'warning', field: 'Sire', message: `Sire is ${sireFull.species} but this animal is ${animal.species} — species mismatch.` });
+        if (damFull?.species && animal.species && damFull.species !== animal.species)
+            issues.push({ severity: 'warning', field: 'Dam',  message: `Dam is ${damFull.species} but this animal is ${animal.species} — species mismatch.` });
+        // 6. Circular lineage
+        const seen = new Set();
+        const hasCycle = (pid) => {
+            if (!pid || !map[pid]) return false;
+            if (pid === animal.id_public) return true;
+            if (seen.has(pid)) return false;
+            seen.add(pid);
+            const p = map[pid];
+            return hasCycle(p.fatherId_public || p.sireId_public) || hasCycle(p.motherId_public || p.damId_public);
+        };
+        if (hasCycle(sireId) || hasCycle(damId))
+            issues.push({ severity: 'error', field: 'Lineage', message: 'Circular lineage detected — this animal appears in its own ancestry chain.' });
+        return issues;
+    }, [animal, ownedAnimals, globalRels, globalRelsLoading]);
+    const [pedigreeValidationOpen, setPedigreeValidationOpen] = useState(true);
+
+    // Fetch all litters where this animal is sire or dam
+    React.useEffect(() => {
+        if (!animal?.id_public || !authToken) return;
+        let cancelled = false;
+        axios.get(`${API_BASE_URL}/litters`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(res => {
+                if (cancelled) return;
+                const linked = (res.data || []).filter(l =>
+                    l.sireId_public === animal.id_public || l.damId_public === animal.id_public
+                );
+                setAnimalLitters(linked);
+                linked.forEach(litter => {
+                    const lid = litter.litter_id_public;
+                    if (!lid) return;
+                    if (!litter.offspringIds_public?.length) {
+                        setBreedingRecordOffspring(prev => ({ ...prev, [lid]: [] }));
+                        return;
+                    }
+                    axios.get(`${API_BASE_URL}/litters/${lid}/offspring`, { headers: { Authorization: `Bearer ${authToken}` } })
+                        .then(r => { if (!cancelled) setBreedingRecordOffspring(prev => ({ ...prev, [lid]: r.data })); })
+                        .catch(() => { if (!cancelled) setBreedingRecordOffspring(prev => ({ ...prev, [lid]: [] })); });
+                });
+            })
+            .catch(() => { if (!cancelled) setAnimalLitters([]); });
+        return () => { cancelled = true; };
+    }, [animal?.id_public, authToken, API_BASE_URL]);
+
+    // Fetch pedigree-based offspring groups (not in litter management)
+    React.useEffect(() => {
+        if (!animal?.id_public || !authToken) return;
+        let cancelled = false;
+        axios.get(`${API_BASE_URL}/animals/${animal.id_public}/offspring`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(res => {
+                if (cancelled) return;
+                // Only groups without a formal litter record (no CTL ID)
+                const unmanaged = (res.data || []).filter(l => !l.litter_id_public);
+                setPedigreeOffspring(unmanaged);
+            })
+            .catch(() => { if (!cancelled) setPedigreeOffspring([]); });
+        return () => { cancelled = true; };
+    }, [animal?.id_public, authToken, API_BASE_URL]);
+
+    const { fieldTemplate, getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
+
+    // Fetch assigned enclosure info
+    React.useEffect(() => {
+        if (!animal?.enclosureId || !authToken) { setEnclosureInfo(null); return; }
+        axios.get(`${API_BASE_URL}/enclosures`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(res => setEnclosureInfo(res.data.find(e => e._id === animal.enclosureId) || null))
+            .catch(() => setEnclosureInfo(null));
+    }, [animal?.enclosureId, authToken, API_BASE_URL]);
+
+    // Fetch logs when Logs tab is opened (lazy, once per animal)
+    React.useEffect(() => {
+        if (detailViewTab !== 16 || animalLogs !== null || !animal?.id_public || !authToken) return;
+        setAnimalLogsLoading(true);
+        axios.get(`${API_BASE_URL}/animals/${animal.id_public}/logs`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(res => setAnimalLogs(res.data || []))
+            .catch(() => setAnimalLogs([]))
+            .finally(() => setAnimalLogsLoading(false));
+    }, [detailViewTab, animal?.id_public, authToken, API_BASE_URL, animalLogs]);
+    
+    // Fetch COI when component mounts or animal changes (if animal has both parents)
+    React.useEffect(() => {
+        const fetchCOI = async () => {
+            const sireId = animal?.fatherId_public || animal?.sireId_public;
+            const damId = animal?.motherId_public || animal?.damId_public;
+            
+            if (animal?.id_public && sireId && damId) {
+                setLoadingCOI(true);
+                try {
+                    const response = await axios.get(
+                        `${API_BASE_URL}/animals/${animal.id_public}/inbreeding`,
+                        { headers: { Authorization: `Bearer ${authToken}` } }
+                    );
+                    if (response.data && response.data.inbreedingCoefficient != null) {
+                        setAnimalCOI(response.data.inbreedingCoefficient);
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch COI:', error);
+                    setAnimalCOI(null);
+                } finally {
+                    setLoadingCOI(false);
+                }
+            } else {
+                setAnimalCOI(null);
+            }
+        };
+        fetchCOI();
+    }, [animal?.id_public, animal?.fatherId_public, animal?.sireId_public, animal?.motherId_public, animal?.damId_public, API_BASE_URL, authToken]);
+    
+    const handleShare = () => {
+        const url = `${window.location.origin}/animal/${animal.id_public}`;
+        navigator.clipboard.writeText(url).then(() => {
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000);
+        });
+    };
+    
+    // Fetch breeder info when component mounts or animal changes
+    React.useEffect(() => {
+        const fetchBreeder = async () => {
+            if (animal?.breederId_public) {
+                try {
+                    const response = await axios.get(
+                        `${API_BASE_URL}/public/profiles/search?query=${animal.breederId_public}&limit=1`
+                    );
+                    if (response.data && response.data.length > 0) {
+                        setBreederInfo(response.data[0]);
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch breeder info:', error);
+                    setBreederInfo(null);
+                }
+            } else {
+                setBreederInfo(null);
+            }
+        };
+        fetchBreeder();
+    }, [animal?.breederId_public, API_BASE_URL]);
+    
+    if (!animal) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-2 sm:p-4 z-[70] overflow-y-auto">
+            <div className="bg-[#E1F2F5] rounded-xl shadow-2xl w-full max-w-6xl max-h-[95vh] sm:max-h-[90vh] my-2 sm:my-0 flex flex-col">
+                {/* Header */}
+                <div className="bg-[#E1F2F5] rounded-t-lg p-2 sm:p-4 border-b border-gray-300 mt-4 sm:mt-0">
+                    {/* Mobile layout: stacked */}
+                    <div className="sm:hidden">
+                        <div className="flex justify-between items-center mb-2">
+                            <button 
+                                onClick={onClose} 
+                                className="flex items-center text-gray-600 hover:text-gray-800 transition text-sm"
+                            >
+                                <ArrowLeft size={16} className="mr-1" /> Back
+                            </button>
+                            <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <div className="flex justify-center gap-1.5 flex-wrap">
+                            <button
+                                onClick={() => setShowQR(true)}
+                                className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                            >
+                                <QrCode size={14} />
+                                Share
+                            </button>
+                            {onTransfer && (() => {
+                                const iWasTransferredThisAnimal = animal.originalOwnerId && animal.ownerId_public === userProfile?.id_public;
+                                if (iWasTransferredThisAnimal) {
+                                    return (
+                                        <button
+                                            onClick={async () => {
+                                                if (window.confirm(`Return ${animal.name} to ${animal.breederName || 'the breeder'}? This will remove the animal from your account.`)) {
+                                                    try {
+                                                        await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/return`, {}, {
+                                                            headers: { Authorization: `Bearer ${authToken}` }
+                                                        });
+                                                        onClose();
+                                                        showModalMessage('Success', `Animal has been returned to ${animal.breederName || 'the breeder'}.`);
+                                                    } catch (error) {
+                                                        console.error('Failed to return animal:', error);
+                                                        showModalMessage('Error', `Failed to return animal: ${error.response?.data?.message || error.message}`);
+                                                    }
+                                                }
+                                            }}
+                                            className="px-2 py-1 bg-orange-100 hover:bg-orange-200 text-orange-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                            title="Return to breeder"
+                                        >
+                                            <RotateCcw size={14} />
+                                            Return
+                                        </button>
+                                    );
+                                }
+                                return (
+                                    <button
+                                        onClick={() => onTransfer(animal)}
+                                        className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                        title="Transfer"
+                                    >
+                                        <ArrowLeftRight size={14} />
+                                        Transfer
+                                    </button>
+                                );
+                            })()}
+                            {onArchive && (
+                                <button
+                                    onClick={() => onArchive(animal)}
+                                    className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                    title={animal.archived ? "Unarchive animal" : "Archive animal"}
+                                >
+                                    <Archive size={14} />
+                                    {animal.archived ? 'Unarchive' : 'Archive'}
+                                </button>
+                            )}
+                            {onEdit && (
+                                <button
+                                    onClick={() => setDetailViewTab(16)}
+                                    className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                    title="View activity logs"
+                                >
+                                    <ScrollText size={14} />
+                                    Logs
+                                </button>
+                            )}
+                            {onEdit && (
+                                <button
+                                    onClick={() => onEdit(animal)}
+                                    className="px-2 py-1 bg-accent hover:bg-accent/90 text-white font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                >
+                                    <Edit size={14} />
+                                    Edit
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    
+                    {/* Desktop layout: single row */}
+                    <div className="hidden sm:flex justify-between items-center">
+                        <button 
+                            onClick={onClose} 
+                            className="flex items-center text-gray-600 hover:text-gray-800 transition"
+                        >
+                            <ArrowLeft size={18} className="mr-1" /> Back
+                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setShowQR(true)}
+                                className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
+                            >
+                                <QrCode size={16} />
+                                Share
+                            </button>
+                            {onTransfer && (() => {
+                                const iWasTransferredThisAnimal = animal.originalOwnerId && animal.ownerId_public === userProfile?.id_public;
+                                if (iWasTransferredThisAnimal) {
+                                    return (
+                                        <button
+                                            onClick={async () => {
+                                                if (window.confirm(`Return ${animal.name} to ${animal.breederName || 'the breeder'}? This will remove the animal from your account.`)) {
+                                                    try {
+                                                        await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/return`, {}, {
+                                                            headers: { Authorization: `Bearer ${authToken}` }
+                                                        });
+                                                        onClose();
+                                                        showModalMessage('Success', `Animal has been returned to ${animal.breederName || 'the breeder'}.`);
+                                                    } catch (error) {
+                                                        console.error('Failed to return animal:', error);
+                                                        showModalMessage('Error', `Failed to return animal: ${error.response?.data?.message || error.message}`);
+                                                    }
+                                                }
+                                            }}
+                                            className="px-3 py-1.5 bg-orange-100 hover:bg-orange-200 text-orange-700 font-semibold rounded-lg transition flex items-center gap-2"
+                                            title="Return to breeder"
+                                        >
+                                            <RotateCcw size={16} />
+                                            Return Animal
+                                        </button>
+                                    );
+                                }
+                                return (
+                                    <button
+                                        onClick={() => onTransfer(animal)}
+                                        className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
+                                        title="Transfer this animal"
+                                    >
+                                        <ArrowLeftRight size={16} />
+                                        Transfer
+                                    </button>
+                                );
+                            })()}
+                            {onArchive && (
+                                <button
+                                    onClick={() => onArchive(animal)}
+                                    className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-2"
+                                    title={animal.archived ? "Restore from archive" : "Archive animal"}
+                                >
+                                    <Archive size={16} />
+                                    {animal.archived ? 'Unarchive' : 'Archive'}
+                                </button>
+                            )}
+                            <button
+                                onClick={() => setDetailViewTab(16)}
+                                className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-2"
+                                title="View activity logs"
+                            >
+                                <ScrollText size={16} />
+                                Logs
+                            </button>
+                            {onEdit && (
+                                <button
+                                    onClick={() => onEdit(animal)}
+                                    data-tutorial-target="edit-animal-btn"
+                                    className="px-3 py-1.5 bg-accent hover:bg-accent/90 text-white font-semibold rounded-lg transition flex items-center gap-2"
+                                >
+                                    <Edit size={16} />
+                                    Edit
+                                </button>
+                            )}
+                            <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
+                                <X size={28} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Tabs - ALL 11 TABS */}
+                <div className="bg-[#E1F2F5] border-b border-gray-300 px-0.5 sm:px-4 py-2">
+                    <div className="flex flex-wrap gap-1 sm:gap-2 justify-center">
+                        {[
+                            { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
+                            { id: 2, label: 'Ownership', icon: Lock, color: 'text-slate-500' },
+                            { id: 3, label: 'Identification', icon: Tag, color: 'text-amber-500' },
+                            { id: 4, label: 'Appearance', icon: Palette, color: 'text-pink-500' },
+                            { id: 5, label: 'Pedigree', icon: Dna, color: 'text-orange-500' },
+                            { id: 6, label: 'Family', icon: TreeDeciduous, color: 'text-green-600' },
+                            { id: 7, label: 'Fertility', icon: Egg, color: 'text-yellow-500' },
+                            { id: 8, label: 'Health', icon: Hospital, color: 'text-red-500' },
+                            { id: 9, label: 'Care', icon: Home, color: 'text-teal-500' },
+                            { id: 10, label: 'Behavior', icon: Brain, color: 'text-purple-500' },
+                            { id: 11, label: 'Notes', icon: FileText, color: 'text-indigo-500' },
+                            { id: 12, label: 'Show', icon: Trophy, color: 'text-yellow-600' },
+                            { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' },
+                            { id: 14, label: 'End of Life', icon: Scale, color: 'text-gray-500' },
+                            { id: 15, label: 'Gallery', icon: Images, color: 'text-rose-500' }
+                        ].map(tab => (
+                            <button
+                                key={tab.id}
+                                type="button"
+                                onClick={() => setDetailViewTab(tab.id)}
+                                className={`w-[calc(20%-0.25rem)] sm:w-[calc(20%-1rem)] px-1 py-2 text-[10px] sm:px-2 sm:text-xs font-medium sm:font-semibold rounded border-2 transition-colors ${
+                                    detailViewTab === tab.id 
+                                        ? 'bg-[#F2E4E9] text-black border-gray-300' 
+                                        : 'bg-white text-gray-600 hover:text-gray-800 border-gray-300'
+                                }`}
+                                title={tab.label}
+                            >
+                                <span className="flex flex-col items-center gap-0.5 sm:flex-row sm:gap-1">
+                                    {React.createElement(tab.icon, { size: 14, className: `flex-shrink-0 ${tab.color || ''}` })}
+                                    <span>{tab.label}</span>
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Tab Content */}
+                <div className="bg-[#E1F2F5] border border-gray-300 rounded-b-lg pt-1 px-3 py-3 sm:pt-2 sm:px-6 sm:py-6 overflow-y-auto flex-1 pb-8">
+                    {/* Tab 1: Overview */}
+                    {detailViewTab === 1 && (
+                        <div className="space-y-3">
+                            {/* Main info card */}
+                            <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden">
+                                <div className="flex flex-col md:flex-row">
+                                    {/* Left: Photo + status + badges */}
+                                    <div className="w-full md:w-1/3 p-4 flex flex-col items-center gap-2 border-b md:border-b-0 md:border-r border-gray-300">
+                                        <div className="relative w-full flex justify-center overflow-hidden rounded-lg">
+                                            <div className="absolute top-0 right-0">
+                                                {animal.gender === 'Male' ? <Mars size={16} strokeWidth={2.5} className="text-blue-600" /> : animal.gender === 'Female' ? <Venus size={16} strokeWidth={2.5} className="text-pink-600" /> : animal.gender === 'Intersex' ? <VenusAndMars size={16} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={16} strokeWidth={2.5} className="text-gray-500" />}
+                                            </div>
+                                            {(animal.imageUrl || animal.photoUrl) ? (
+                                                <img
+                                                    src={animal.imageUrl || animal.photoUrl}
+                                                    alt={animal.name}
+                                                    className="w-32 h-32 object-contain cursor-pointer hover:opacity-80 transition"
+                                                    onClick={() => {
+                                                        if (setEnlargedImageUrl && setShowImageModal) {
+                                                            setEnlargedImageUrl(animal.imageUrl || animal.photoUrl);
+                                                            setShowImageModal(true);
+                                                        }
+                                                    }}
+                                                />
+                                            ) : (
+                                                <div className="w-32 h-32 bg-gray-100 flex items-center justify-center text-gray-400">
+                                                    <Cat size={40} />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="text-sm font-medium text-gray-700">{animal.status || 'Unknown'}</div>
+                                        {animal.isForSale && (
+                                            <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                <Tag size={11} /> For Sale{animal.salePriceCurrency !== 'Negotiable' && animal.salePriceAmount ? ` · ${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount}` : ''}
+                                            </span>
+                                        )}
+                                        {animal.availableForBreeding && (
+                                            <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                <Tag size={11} /> Stud{animal.studFeeCurrency !== 'Negotiable' && animal.studFeeAmount ? ` · ${getCurrencySymbol(animal.studFeeCurrency)}${animal.studFeeAmount}` : ''}
+                                            </span>
+                                        )}
+                                        {animal.tags && animal.tags.length > 0 && (
+                                            <div className="flex flex-wrap gap-1 justify-center">
+                                                {animal.tags.map((tag, idx) => (
+                                                    <span key={idx} className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs">{tag}</span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    {/* Right: All info */}
+                                    <div className="flex-1 p-4 space-y-2">
+                                        {/* Top row: species/CTC + toggles */}
+                                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                                            <p className="text-sm text-gray-500">
+                                                {animal.species || 'Unknown'}
+                                                {animal.breed && ` \u2022 ${animal.breed}`}
+                                                {animal.strain && ` \u2022 ${animal.strain}`}
+                                                {animal.id_public && ` \u2022 ${animal.id_public}`}
+                                            </p>
+                                            <div className="flex gap-2 shrink-0">
+                                                <button
+                                                    onClick={() => { onToggleOwned && onToggleOwned(animal.id_public, !animal.isOwned); }}
+                                                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg font-medium text-sm transition ${animal.isOwned ? 'bg-red-100 text-red-800 hover:bg-red-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                                                    title="Toggle owned status"
+                                                    data-tutorial-target="detail-owned-toggle"
+                                                >
+                                                    {animal.isOwned ? <Heart size={16} /> : <HeartOff size={16} />}
+                                                    <span>{animal.isOwned ? 'Owned' : 'Not Owned'}</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        const newIsDisplay = !animal.isDisplay;
+                                                        axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isDisplay: newIsDisplay }, {
+                                                            headers: { Authorization: `Bearer ${authToken}` }
+                                                        }).then(() => {
+                                                            if (onUpdateAnimal) onUpdateAnimal({ ...animal, isDisplay: newIsDisplay });
+                                                        }).catch(err => console.error('Failed to update isDisplay:', err));
+                                                    }}
+                                                    data-tutorial-target="detail-private-toggle"
+                                                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg font-medium text-sm transition ${animal.isDisplay ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                                                    title="Toggle public profile visibility"
+                                                >
+                                                    {animal.isDisplay ? <Eye size={16} /> : <EyeOff size={16} />}
+                                                    <span>{animal.isDisplay ? 'Public' : 'Private'}</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {/* Name */}
+                                        <h2 className="text-xl font-bold text-gray-800 leading-tight">
+                                            {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
+                                        </h2>
+                                        {/* DOB + age */}
+                                        {animal.birthDate && (
+                                            <p className="text-sm text-gray-700">
+                                                <span className="font-semibold">Born:</span> {formatDate(animal.birthDate)} {(() => {
+                                                    const birth = new Date(animal.birthDate);
+                                                    const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
+                                                    let years = endDate.getFullYear() - birth.getFullYear();
+                                                    let months = endDate.getMonth() - birth.getMonth();
+                                                    let days = endDate.getDate() - birth.getDate();
+                                                    if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
+                                                    if (months < 0) { years--; months += 12; }
+                                                    const ageStr = years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
+                                                    if (animal.deceasedDate) {
+                                                        return <span className="text-red-600 font-semibold ml-2">{"†"} {formatDate(animal.deceasedDate)} (Lived {ageStr})</span>;
+                                                    } else {
+                                                        return <span>(~{ageStr})</span>;
+                                                    }
+                                                })()}
+                                            </p>
+                                        )}
+                                        {/* Variety */}
+                                        {[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).length > 0 && (
+                                            <p className="text-sm text-gray-700">
+                                                <span className="font-semibold">Variety:</span> {[animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ')}
+                                            </p>
+                                        )}
+                                        {animal.carrierTraits && (
+                                            <p className="text-sm text-gray-700"><span className="font-semibold">Carrier:</span> {animal.carrierTraits}</p>
+                                        )}
+                                        {animal.geneticCode && (
+                                            <p className="text-sm text-gray-700"><span className="font-semibold">Genetic Code:</span> <code className="bg-gray-100 px-1 rounded font-mono">{animal.geneticCode}</code></p>
+                                        )}
+                                        {animal.remarks && (
+                                            <p className="text-sm text-gray-700 line-clamp-2"><span className="font-semibold">Remarks:</span> {animal.remarks}</p>
+                                        )}
+                                        {/* Breeder + IDs */}
+                                        <div className="border-t border-gray-200 pt-2 space-y-2 text-sm">
+                                            <div>
+                                                <span className="text-gray-500">Breeder:</span>{' '}
+                                                {breederInfo ? (() => {
+                                                    const showPersonal = breederInfo.showPersonalName ?? false;
+                                                    const showBreeder = breederInfo.showBreederName ?? false;
+                                                    let bDisplayName;
+                                                    if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
+                                                        bDisplayName = `${breederInfo.personalName} (${breederInfo.breederName})`;
+                                                    } else if (showBreeder && breederInfo.breederName) {
+                                                        bDisplayName = breederInfo.breederName;
+                                                    } else if (showPersonal && breederInfo.personalName) {
+                                                        bDisplayName = breederInfo.personalName;
+                                                    } else {
+                                                        bDisplayName = 'Unknown Breeder';
+                                                    }
+                                                    return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{bDisplayName}</RouterLink>;
+                                                })() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}
+                                            </div>
+                                            {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
+                                                <hr className="border-gray-200" />
+                                            )}
+                                            <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                                                {animal.breederAssignedId && <div><span className="text-gray-500">Assigned ID:</span> <strong>{animal.breederAssignedId}</strong></div>}
+                                                {animal.microchipNumber && <div><span className="text-gray-500">Microchip:</span> <strong>{animal.microchipNumber}</strong></div>}
+                                                {animal.pedigreeRegistrationId && <div><span className="text-gray-500">Pedigree Reg:</span> <strong>{animal.pedigreeRegistrationId}</strong></div>}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {/* Parents */}
+                            <div className="bg-white rounded-lg p-3 border border-gray-200">
+                                <div className="flex items-center justify-between mb-2">
+                                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Parents</h3>
+                                    {animalCOI != null && <span className="text-sm text-gray-700"><span className="font-medium">COI:</span> {animalCOI.toFixed(2)}%</span>}
+                                    {loadingCOI && <span className="text-xs text-gray-400">Calculating COI...</span>}
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <ViewOnlyParentCard
+                                        parentId={animal.fatherId_public || animal.sireId_public}
+                                        parentType="Sire"
+                                        API_BASE_URL={API_BASE_URL}
+                                        onViewAnimal={onViewAnimal}
+                                        authToken={authToken}
+                                    />
+                                    <ViewOnlyParentCard
+                                        parentId={animal.motherId_public || animal.damId_public}
+                                        parentType="Dam"
+                                        API_BASE_URL={API_BASE_URL}
+                                        onViewAnimal={onViewAnimal}
+                                        authToken={authToken}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tab 2: Ownership */}
+                    {detailViewTab === 2 && (
+                        <div className="space-y-6">
+                            {/* 1st Section: Ownership */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><Users size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Ownership</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-gray-600">Currently Owned:</span>
+                                        <strong>{animal.isOwned ? 'Yes' : 'No'}</strong>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-gray-600">Breeder:</span>
+                                        {breederInfo
+                                            ? <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{breederInfo.breederName || breederInfo.personalName || 'Unknown'}</RouterLink>
+                                            : <strong>{animal.manualBreederName || animal.breederId_public || ''}</strong>}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 2nd Section: Current Owner */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper</h3>
+                                <div className="text-sm space-y-2">
+                                    {(() => {
+                                        const keeperDisplay = animal.isOwned
+                                            ? (userProfile ? (userProfile.breederName || userProfile.personalName || userProfile.id_public) : null)
+                                            : (animal.keeperName || null);
+                                        if (!keeperDisplay) return null;
+                                        return (
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-gray-600">Keeper Name:</span>
+                                                <strong>{keeperDisplay}</strong>
+                                            </div>
+                                        );
+                                    })()}
+                                    {animal.coOwnership && (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-gray-600">Co-Ownership:</span>
+                                            <strong>{animal.coOwnership}</strong>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* 3rd Section: Keeper History */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper History</h3>
+                                {(animal.keeperHistory || []).length === 0 ? (
+                                    <p className="text-sm text-gray-400 italic">No entries yet</p>
+                                ) : (
+                                    <div className="space-y-2">
+                                        {(animal.keeperHistory || []).map((entry, idx) => (
+                                            <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
+                                                <div className="flex-1 min-w-0">
+                                                    {entry.userId_public
+                                                        ? <RouterLink to={`/user/${entry.userId_public}`} className="text-sm font-semibold text-purple-600 hover:underline">{entry.name || 'Unknown'}</RouterLink>
+                                                        : <p className="text-sm font-semibold text-gray-800">{entry.name || 'Unknown'}</p>}
+                                                </div>
+                                                {entry.country && (
+                                                    <div className="flex items-center gap-1 flex-shrink-0">
+                                                        <span className={`${getCountryFlag(entry.country)} inline-block h-4 w-6`}></span>
+                                                        <span className="text-xs text-gray-500">{getCountryName(entry.country)}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 4th Section: Availability for Sale or Stud */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><Tag size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Availability for Sale or Stud</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-gray-600">For Sale:</span>
+                                        <strong>{animal.isForSale ? `Yes - ${getCurrencySymbol(animal.salePriceCurrency)} ${animal.salePriceAmount || 'Negotiable'}`.trim() : 'No'}</strong>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-gray-600">For Stud:</span>
+                                        <strong>{animal.availableForBreeding ? `Yes - ${getCurrencySymbol(animal.studFeeCurrency)} ${animal.studFeeAmount || 'Negotiable'}`.trim() : 'No'}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tab 4: Appearance */}
+                    {detailViewTab === 4 && (
+                        <div className="space-y-6">
+                            {/* Appearance - Always show */}
+                            {(() => {
+                                const fields = [
+                                    { key: 'color', label: 'Color' },
+                                    { key: 'coatPattern', label: 'Pattern' },
+                                    { key: 'coat', label: 'Coat Type' },
+                                    { key: 'earset', label: 'Earset' },
+                                    { key: 'phenotype', label: 'Phenotype' },
+                                    { key: 'morph', label: 'Morph' },
+                                    { key: 'markings', label: 'Markings' },
+                                    { key: 'eyeColor', label: 'Eye Color' },
+                                    { key: 'nailColor', label: 'Nail/Claw Color' },
+                                    { key: 'size', label: 'Size' },
+                                    { key: 'carrierTraits', label: 'Carrier Traits' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                return (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700"><Sparkles size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Appearance</h3>
+                                        {fields.length > 0 ? (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                {fields.map(f => (
+                                                    <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="text-sm text-gray-500">No appearance data recorded yet.</div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
+
+                            {/* Genetic Code - Always show */}
+                            {fieldTemplate?.fields?.geneticCode?.enabled !== false && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Dna size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> {getLabel('geneticCode', 'Genetic Code')}</h3>
+                                    <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || 'Not specified'}</p>
+                                </div>
+                            )}
+
+                            {/* Life Stage - Always show */}
+                            {fieldTemplate?.fields?.lifeStage?.enabled !== false && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Sprout size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> {getLabel('lifeStage', 'Life Stage')}</h3>
+                                    <p className="text-gray-700 text-sm">{animal.lifeStage || 'Not specified'}</p>
+                                </div>
+                            )}
+
+                            {/* Current Measurements & Growth Tracking - Always show */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><Ruler size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Measurements & Growth Tracking</h3>
+                                {(() => {
+                                    let growthRecords = animal.growthRecords;
+                                    if (typeof growthRecords === 'string') {
+                                        try { growthRecords = JSON.parse(growthRecords); } catch (e) { growthRecords = []; }
+                                    }
+                                    if (!Array.isArray(growthRecords)) growthRecords = [];
+                                    
+                                    if (growthRecords.length > 0) {
+                                        const sorted = [...growthRecords].sort((a, b) => new Date(b.date) - new Date(a.date));
+                                        const latest = sorted[0];
+                                        return (
+                                            <div className="text-sm space-y-1">
+                                                <p><span className="text-gray-600">Latest Weight:</span> <strong>{latest.weight} {animal.measurementUnits?.weight || 'g'}</strong></p>
+                                                {latest.length && <p><span className="text-gray-600">Latest Length:</span> <strong>{latest.length} {animal.measurementUnits?.length || 'cm'}</strong></p>}
+                                                {latest.height && <p><span className="text-gray-600">Latest Height:</span> <strong>{latest.height} {animal.measurementUnits?.length || 'cm'}</strong></p>}
+                                                <p className="text-gray-600 text-xs mt-2">Total measurements: {growthRecords.length} entries</p>
+                                            </div>
+                                        );
+                                    }
+                                    
+                                    const mFields = [
+                                        { key: 'bodyWeight', label: 'Weight' },
+                                        { key: 'bodyLength', label: 'Body Length' },
+                                        { key: 'heightAtWithers', label: 'Height at Withers' },
+                                        { key: 'chestGirth', label: 'Chest Girth' },
+                                        { key: 'adultWeight', label: 'Adult Weight' },
+                                        { key: 'bodyConditionScore', label: 'Body Condition Score' },
+                                        { key: 'length', label: 'Length' },
+                                    ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                    
+                                    return mFields.length > 0 ? (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            {mFields.map(f => (
+                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-sm text-gray-500">No measurements recorded yet.</div>
+                                    );
+                                })()}
+                            </div>
+
+                            {/* Growth Curve Charts */}
+                            {(() => {
+                                let growthRecords = animal.growthRecords;
+                                if (typeof growthRecords === 'string') {
+                                    try { growthRecords = JSON.parse(growthRecords); } catch (e) { growthRecords = []; }
+                                }
+                                if (!Array.isArray(growthRecords)) growthRecords = [];
+                                
+                                if (growthRecords.length < 1) return null;
+                                
+                                const sorted = [...growthRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
+                                const weights = sorted.map(r => parseFloat(r.weight) || 0).filter(w => w > 0);
+                                const lengths = sorted
+                                    .filter(record => record.length && !isNaN(parseFloat(record.length)))
+                                    .map(record => parseFloat(record.length));
+                                const heights = sorted
+                                    .filter(record => record.height && !isNaN(parseFloat(record.height)))
+                                    .map(record => parseFloat(record.height));
+                                
+                                if (weights.length < 1) return null;
+                                
+                                const width = 500;
+                                const height = 250;
+                                const margin = { top: 20, right: 30, bottom: 50, left: 70 };
+                                const graphWidth = width - margin.left - margin.right;
+                                const graphHeight = height - margin.top - margin.bottom;
+                                
+                                // Weight chart setup
+                                const minWeight = Math.min(...weights);
+                                const maxWeight = Math.max(...weights);
+                                const weightPadding = (maxWeight - minWeight) * 0.1 || 5;
+                                const weightChartMin = Math.max(0, minWeight - weightPadding);
+                                const weightChartMax = maxWeight + weightPadding;
+                                const weightRange = weightChartMax - weightChartMin;
+                                
+                                // Length chart setup
+                                const hasLengthData = lengths.length >= 1;
+                                let minLength, maxLength, lengthRange, lengthChartMin, lengthChartMax;
+                                if (hasLengthData) {
+                                    minLength = Math.min(...lengths);
+                                    maxLength = Math.max(...lengths);
+                                    const lengthPadding = (maxLength - minLength) * 0.1 || 1;
+                                    lengthChartMin = Math.max(0, minLength - lengthPadding);
+                                    lengthChartMax = maxLength + lengthPadding;
+                                    lengthRange = lengthChartMax - lengthChartMin;
+                                }
+                                
+                                // Height chart setup
+                                const hasHeightData = heights.length >= 1;
+                                let minHeight, maxHeight, heightRange, heightChartMin, heightChartMax;
+                                if (hasHeightData) {
+                                    minHeight = Math.min(...heights);
+                                    maxHeight = Math.max(...heights);
+                                    const heightPadding = (maxHeight - minHeight) * 0.1 || 1;
+                                    heightChartMin = Math.max(0, minHeight - heightPadding);
+                                    heightChartMax = maxHeight + heightPadding;
+                                    heightRange = heightChartMax - heightChartMin;
+                                }
+                                
+                                // Create points for weight
+                                const weightPoints = sorted.map((record, idx) => ({
+                                    x: margin.left + (idx / Math.max(1, sorted.length - 1)) * graphWidth,
+                                    y: margin.top + graphHeight - ((parseFloat(record.weight) - weightChartMin) / weightRange) * graphHeight,
+                                    weight: record.weight,
+                                    length: record.length,
+                                    height: record.height,
+                                    bcs: record.bcs,
+                                    notes: record.notes,
+                                    date: record.date
+                                }));
+                                
+                                // Create points for length
+                                const lengthPoints = hasLengthData ? sorted.filter(r => r.length).map((record, idx) => ({
+                                    x: margin.left + (sorted.indexOf(record) / Math.max(1, sorted.length - 1)) * graphWidth,
+                                    y: margin.top + graphHeight - ((parseFloat(record.length) - lengthChartMin) / lengthRange) * graphHeight,
+                                    weight: record.weight,
+                                    length: record.length,
+                                    height: record.height,
+                                    bcs: record.bcs,
+                                    notes: record.notes,
+                                    date: record.date
+                                })) : [];
+                                
+                                // Create points for height
+                                const heightPoints = hasHeightData ? sorted.filter(r => r.height).map((record, idx) => ({
+                                    x: margin.left + (sorted.indexOf(record) / Math.max(1, sorted.length - 1)) * graphWidth,
+                                    y: margin.top + graphHeight - ((parseFloat(record.height) - heightChartMin) / heightRange) * graphHeight,
+                                    weight: record.weight,
+                                    length: record.length,
+                                    height: record.height,
+                                    bcs: record.bcs,
+                                    notes: record.notes,
+                                    date: record.date
+                                })) : [];
+                                
+                                const weightPathData = weightPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                                const lengthPathData = lengthPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                                const heightPathData = heightPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                                
+                                const renderChart = (points, label, color, pathData, chartMin, chartMax) => {
+                                    const range = chartMax - chartMin;
+                                    return (
+                                        <svg key={`chart-${label}`} width="100%" height="300" viewBox={`0 0 ${width} ${height}`} style={{ maxWidth: '100%' }} preserveAspectRatio="xMidYMid meet">
+                                            {/* Grid lines */}
+                                            {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
+                                                const y = margin.top + graphHeight * (1 - ratio);
+                                                const axisLabel = (chartMin + range * ratio).toFixed(1);
+                                                return (
+                                                    <g key={`grid-${i}`}>
+                                                        <line x1={margin.left} y1={y} x2={width - margin.right} y2={y} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4" />
+                                                        <text x={margin.left - 12} y={y} textAnchor="end" dy="0.3em" fontSize="11" fill="#666">{axisLabel}</text>
+                                                    </g>
+                                                );
+                                            })}
+                                            
+                                            {/* Axes */}
+                                            <line x1={margin.left} y1={margin.top} x2={margin.left} y2={height - margin.bottom} stroke={color} strokeWidth="2" />
+                                            <line x1={margin.left} y1={height - margin.bottom} x2={width - margin.right} y2={height - margin.bottom} stroke="#333" strokeWidth="2" />
+                                            
+                                            {/* Y-axis label */}
+                                            <text x={20} y={margin.top + graphHeight / 2} textAnchor="middle" fontSize="12" fill={color} fontWeight="600" transform={`rotate(-90 20 ${margin.top + graphHeight / 2})`}>
+                                                {label} ({label === 'Weight' ? (animal.measurementUnits?.weight || 'g') : (animal.measurementUnits?.length || 'cm')})
+                                            </text>
+                                            
+                                            {/* X-axis label */}
+                                            <text x={margin.left + graphWidth / 2} y={height - 8} textAnchor="middle" fontSize="12" fill="#333" fontWeight="600">
+                                                Date
+                                            </text>
+                                            
+                                            {/* X-axis date labels */}
+                                            {points.map((p, i) => (
+                                                i % Math.max(1, Math.floor(points.length / 5)) === 0 && (
+                                                    <text key={`date-${i}`} x={p.x} y={height - margin.bottom + 25} textAnchor="middle" fontSize="10" fill="#666">
+                                                        {formatDate(p.date)}
+                                                    </text>
+                                                )
+                                            ))}
+                                            
+                                            {/* Curve */}
+                                            <path d={pathData} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            
+                                            {/* Points */}
+                                            {points.map((p, i) => {
+                                                // Color gradient from green (earliest) to red (latest)
+                                                const colorRatio = points.length > 1 ? i / (points.length - 1) : 0;
+                                                let dotColor;
+                                                if (colorRatio < 0.5) {
+                                                    const t = colorRatio * 2;
+                                                    const r = Math.round(144 + (255 - 144) * t);
+                                                    const g = 191;
+                                                    const b = Math.round(71 + (0 - 71) * t);
+                                                    dotColor = `rgb(${r}, ${g}, ${b})`;
+                                                } else {
+                                                    const t = (colorRatio - 0.5) * 2;
+                                                    const r = 255;
+                                                    const g = Math.round(191 - (191) * t);
+                                                    const b = 0;
+                                                    dotColor = `rgb(${r}, ${g}, ${b})`;
+                                                }
+                                                
+                                                return (
+                                                    <circle key={`point-${i}`} cx={p.x} cy={p.y} r="5" fill={dotColor} stroke="#fff" strokeWidth="2">
+                                                        <title>{`Date: ${formatDate(p.date)}\nWeight: ${p.weight} ${animal.measurementUnits?.weight || 'g'}${p.length ? `\nLength: ${p.length} ${animal.measurementUnits?.length || 'cm'}` : ''}${p.bcs ? `\nBCS: ${p.bcs}` : ''}${p.notes ? `\nNotes: ${p.notes}` : ''}`}</title>
+                                                    </circle>
+                                                );
+                                            })}
+                                        </svg>
+                                    );
+                                };
+                                
+                                return (
+                                    <div className="space-y-4">
+                                        {/* Weight Chart */}
+                                        <div className="bg-white p-4 rounded-lg border border-gray-200">
+                                            <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                                <span className="inline-block w-3 h-1 bg-blue-500 rounded"></span>
+                                                Weight Growth Curve
+                                            </h4>
+                                            {renderChart(weightPoints, 'Weight', '#3b82f6', weightPathData, weightChartMin, weightChartMax)}
+                                            <p className="text-xs text-gray-500 mt-2">Hover over points to see detailed measurements and notes.</p>
+                                        </div>
+                                        
+                                        {/* Length Chart */}
+                                        {hasLengthData && (
+                                            <div className="bg-white p-4 rounded-lg border border-gray-200">
+                                                <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                                    <span className="inline-block w-3 h-1 bg-orange-500 rounded"></span>
+                                                    Body Length Growth Curve
+                                                </h4>
+                                                {renderChart(lengthPoints, 'Length', '#ff8c42', lengthPathData, lengthChartMin, lengthChartMax)}
+                                                <p className="text-xs text-gray-500 mt-2">Hover over points to see detailed measurements and notes.</p>
+                                            </div>
+                                        )}
+                                        
+                                        {/* Height Chart */}
+                                        {hasHeightData && (
+                                            <div className="bg-white p-4 rounded-lg border border-gray-200">
+                                                <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                                    <span className="inline-block w-3 h-1 bg-purple-500 rounded"></span>
+                                                    Height Growth Curve
+                                                </h4>
+                                                {renderChart(heightPoints, 'Height', '#9333ea', heightPathData, heightChartMin, heightChartMax)}
+                                                <p className="text-xs text-gray-500 mt-2">Hover over points to see detailed measurements and notes.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
+                        </div>
+                    )}
+
+                    {/* Tab 3: Identification */}
+                    {detailViewTab === 3 && (
+                        <div className="space-y-6">
+                            {/* Identification Numbers */}
+                            {(() => {
+                                const idFields = [
+                                    { key: 'breederAssignedId', label: 'Identification' },
+                                    { key: 'microchipNumber', label: 'Microchip Number' },
+                                    { key: 'pedigreeRegistrationId', label: 'Pedigree Registration ID' },
+                                    { key: 'colonyId', label: 'Colony ID' },
+                                    { key: 'rabiesTagNumber', label: 'Rabies Tag Number' },
+                                    { key: 'tattooId', label: 'Tattoo ID' },
+                                    { key: 'akcRegistrationNumber', label: 'AKC Registration #' },
+                                    { key: 'fciRegistrationNumber', label: 'FCI Registration #' },
+                                    { key: 'cfaRegistrationNumber', label: 'CFA Registration #' },
+                                    { key: 'workingRegistryIds', label: 'Working Registry IDs' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                return (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700"><Hash size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Identification Numbers</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></div>
+                                            {idFields.map(f => (
+                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+
+                            {/* Classification */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><FolderOpen size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Classification</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">Species:</span> <strong>{animal.species || ''}</strong></div>
+                                    {fieldTemplate?.fields?.breed?.enabled !== false && animal.breed && (
+                                        <div><span className="text-gray-600">{getLabel('breed', 'Breed')}:</span> <strong>{animal.breed}</strong></div>
+                                    )}
+                                    {fieldTemplate?.fields?.strain?.enabled !== false && animal.strain && (
+                                        <div><span className="text-gray-600">{getLabel('strain', 'Strain')}:</span> <strong>{animal.strain}</strong></div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Origin */}
+                            {animal.origin && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><Globe size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Origin</h3>
+                                <p className="text-sm text-gray-700">{animal.origin}</p>
+                            </div>
+                            )}
+                            {/* Tags */}
+                            {animal.tags && animal.tags.length > 0 && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Tag size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Tags</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {animal.tags.map((tag, idx) => (
+                                            <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">{tag}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {/* Breeding Lines */}
+                            {(() => {
+                                const namedLines = breedingLineDefs.filter(l => l.name);
+                                if (namedLines.length === 0 || !toggleAnimalBreedingLine) return null;
+                                const assignedIds = animalBreedingLines[animal.id_public] || [];
+                                return (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3">
+                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-1.5"><TableOfContents size={16} className="flex-shrink-0 text-gray-400" /> Breeding Lines</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {namedLines.map(l => {
+                                                const assigned = assignedIds.includes(l.id);
+                                                return (
+                                                    <button key={l.id} type="button"
+                                                        onClick={() => toggleAnimalBreedingLine(animal.id_public, l.id)}
+                                                        style={{ borderColor: l.color, color: assigned ? '#fff' : l.color, backgroundColor: assigned ? l.color : 'transparent' }}
+                                                        className="flex items-center gap-1.5 px-3 py-1 rounded-full border-2 text-sm font-medium transition"
+                                                    ><span>&#x25C6;</span> {l.name}</button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+                        </div>
+                    )}
+
+                    {/* Tab 6: Family */}
+                    {detailViewTab === 6 && (
+                        <div className="space-y-6">
+                            {/* Pedigree & Litter links */}
+                            <div className="flex items-center justify-between flex-wrap gap-2">
+                                <button onClick={() => { onClose(); navigate('/litters'); }} className="text-xs text-purple-600 hover:text-purple-800 font-medium flex items-center gap-1 underline"><BookOpen size={12} className="inline-block align-middle" /> Litter Management</button>
+                            </div>
+
+                            {/* Relationship Insights */}
+                            <div className="bg-blue-50 rounded-lg border border-blue-200">
+                                <button
+                                    type="button"
+                                    onClick={() => setRelInsightsOpen(o => !o)}
+                                    className="w-full flex items-center justify-between p-4 text-left"
+                                >
+                                    <h3 className="text-lg font-semibold text-gray-700 flex items-center">
+                                        <Network size={20} className="text-blue-600 mr-2" />
+                                        Relationship Insights
+                                        {ownedAnimalsLoaded && allRelGroups.length > 0 && (
+                                            <span className="ml-2 text-xs font-normal text-gray-500 bg-white border border-blue-200 rounded-full px-2 py-0.5">
+                                                {allRelGroups.reduce((s, g) => s + g.items.length, 0)} relatives
+                                            </span>
+                                        )}
+                                        {globalRelsLoading && (
+                                            <Loader2 size={13} className="animate-spin text-blue-400 ml-2" />
+                                        )}
+                                    </h3>
+                                    {relInsightsOpen
+                                        ? <ChevronUp size={18} className="text-blue-400 flex-shrink-0" />
+                                        : <ChevronDown size={18} className="text-blue-400 flex-shrink-0" />}
+                                </button>
+                                {relInsightsOpen && (
+                                    <div className="px-4 pb-4 space-y-3">
+                                        {!ownedAnimalsLoaded ? (
+                                            <div className="flex items-center gap-2 text-xs text-gray-400 py-2">
+                                                <Loader2 size={13} className="animate-spin" />
+                                                Loading relationships...
+                                            </div>
+                                        ) : allRelGroups.length === 0 && !globalRelsLoading ? (
+                                            <div className="text-xs text-gray-400 py-1">No known relatives found</div>
+                                        ) : (
+                                            <>
+                                                {allRelGroups.map(({ label: groupLabel, items }) => (
+                                                    <div key={groupLabel}>
+                                                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{groupLabel}</h4>
+                                                        <div className="space-y-2">
+                                                            {items.map(({ rel, relLabel }) => (
+                                                                <div
+                                                                    key={rel.id_public}
+                                                                    className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-blue-100 hover:border-blue-300 transition-colors cursor-pointer"
+                                                                    onClick={() => onViewAnimal && onViewAnimal(rel)}
+                                                                >
+                                                                    <div className="flex items-center gap-2 min-w-0">
+                                                                        {(rel.imageUrl || rel.photoUrl) ? (
+                                                                            <img src={rel.imageUrl || rel.photoUrl} alt={rel.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200" />
+                                                                        ) : (
+                                                                            <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-sm text-blue-600 font-semibold">
+                                                                                {rel.species?.charAt(0).toUpperCase()}
+                                                                            </div>
+                                                                        )}
+                                                                        <div className="min-w-0">
+                                                                            <div className="text-sm font-medium text-gray-800 truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}{rel.suffix ? ` ${rel.suffix}` : ''}</div>
+                                                                            <div className="text-xs text-gray-500">{rel.gender}{[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ') ? ` · ${[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                                                                        <span className="text-xs text-blue-700 bg-blue-100 rounded-full px-2 py-0.5 font-medium whitespace-nowrap">{relLabel}</span>
+                                                                        <ChevronRight size={14} className="text-gray-400" />
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                {globalRelsLoading && (
+                                                    <div className="flex items-center gap-2 text-xs text-gray-400 py-1">
+                                                        <Loader2 size={13} className="animate-spin" />
+                                                        Loading more...
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 2nd Section: Offspring & Litters - merged litters + pedigree offspring */}
+                            {(animalLitters === null || pedigreeOffspring === null) ? (
+                                <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                                    <div className="text-sm text-gray-500 animate-pulse">Loading offspring & litters</div>
+                                </div>
+                            ) : (() => {
+                                const litterItems = (animalLitters || []).map(l => ({ ...l, _recordType: 'litter' }));
+                                const pedItems = (pedigreeOffspring || []).map(l => ({ ...l, _recordType: 'pedigree' }));
+                                const _offspringToday = new Date();
+                                const allRecords = [...litterItems, ...pedItems].sort((a, b) => {
+                                    const aIsMated = a.isPlanned && a.matingDate && new Date(a.matingDate) <= _offspringToday;
+                                    const bIsMated = b.isPlanned && b.matingDate && new Date(b.matingDate) <= _offspringToday;
+                                    const aRank = aIsMated ? 0 : a.isPlanned ? 1 : 2;
+                                    const bRank = bIsMated ? 0 : b.isPlanned ? 1 : 2;
+                                    if (aRank !== bRank) return aRank - bRank;
+                                    const aDate = a.birthDate || a.matingDate;
+                                    const bDate = b.birthDate || b.matingDate;
+                                    if (!aDate) return 1;
+                                    if (!bDate) return -1;
+                                    return new Date(bDate) - new Date(aDate);
+                                });
+                                if (allRecords.length === 0) return null;
+                                return (
+                                    <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 space-y-3">
+                                        <button type="button" onClick={() => setOffspringOpen(o => !o)} className="w-full flex items-center justify-between text-left">
+                                            <h3 className="text-lg font-semibold text-gray-700 flex items-center"><Users size={20} className="text-purple-600 mr-2" />Offspring & Litters</h3>
+                                            {offspringOpen ? <ChevronUp size={18} className="text-purple-400 flex-shrink-0" /> : <ChevronDown size={18} className="text-purple-400 flex-shrink-0" />}
+                                        </button>
+                                        {offspringOpen && <div className="space-y-2">
+                                            {allRecords.map((litter) => {
+                                                if (litter._recordType === 'litter') {
+                                                    const lid = litter.litter_id_public;
+                                                    const isSire = litter.sireId_public === animal.id_public;
+                                                    const mate = isSire ? litter.dam : litter.sire;
+                                                    const isExpanded = expandedBreedingRecords[lid];
+                                                    const displayName = litter.breedingPairCodeName;
+                                                    const lIsMated = litter.isPlanned && litter.matingDate && new Date(litter.matingDate) <= _offspringToday;
+                                                    const lIsPlannedOnly = litter.isPlanned && !lIsMated;
+                                                    return (
+                                                        <div key={lid} className={`bg-white rounded border transition-all ${isExpanded ? 'border-purple-300 shadow-md' : 'border-purple-100'}`}>
+                                                            <div
+                                                                onClick={() => setExpandedBreedingRecords({...expandedBreedingRecords, [lid]: !isExpanded})}
+                                                                className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50 transition rounded"
+                                                            >
+                                                                {/* Mobile: stacked */}
+                                                                <div className="flex-1 sm:hidden">
+                                                                    <div className="flex justify-between items-start mb-1">
+                                                                        <p className="font-bold text-gray-800 text-sm">{displayName || <span className="text-gray-400 font-normal">Unnamed Litter</span>}</p>
+                                                                        <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                                                                            {lid && <span className="text-xs font-mono bg-purple-100 px-1.5 py-0.5 rounded text-purple-700">{lid}</span>}
+                                                                            {lIsPlannedOnly && <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Planned</span>}
+                                                                            {lIsMated && <span className="text-xs font-semibold text-purple-600 bg-purple-50 border border-purple-200 rounded px-1.5 py-0.5"><Heart size={12} className="inline-block align-middle mr-0.5" /> Mated</span>}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="text-xs text-gray-600 flex gap-2 flex-wrap items-center">
+                                                                        {!litter.isPlanned && litter.birthDate && <span>{formatDate(litter.birthDate)}{litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-green-600">~ {litterAge(litter.birthDate)}</span>}</span>}
+                                                                        {lIsMated && <span className="text-purple-600">{formatDate(litter.matingDate)}</span>}
+                                                                        {lIsPlannedOnly && litter.matingDate && <span className="text-indigo-600">{formatDate(litter.matingDate)}</span>}
+                                                                        {mate?.name && <span className="truncate max-w-[120px]">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
+                                                                        {litter.inbreedingCoefficient != null && <span className="text-gray-500">{litter.inbreedingCoefficient.toFixed(2)}%</span>}
+                                                                        {!litter.isPlanned && (litter.litterSizeBorn != null || litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
+                                                                            <span className="inline-flex items-center gap-1 whitespace-nowrap">
+                                                                                {litter.litterSizeBorn != null && <span className="font-bold text-gray-900">{litter.litterSizeBorn}</span>}
+                                                                                {litter.litterSizeBorn != null && (litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && <span className="text-gray-400">•</span>}
+                                                                                {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
+                                                                                    <span className="inline-flex gap-0.5 font-semibold">
+                                                                                        <span className="text-blue-500">{litter.maleCount ?? 0}M</span>
+                                                                                        <span className="text-gray-400">/</span>
+                                                                                        <span className="text-pink-500">{litter.femaleCount ?? 0}F</span>
+                                                                                        <span className="text-gray-400">/</span>
+                                                                                        <span className="text-purple-500">{litter.unknownCount ?? 0}U</span>
+                                                                                    </span>
+                                                                                )}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                                {/* Desktop: 6-column grid */}
+                                                                <div className="hidden sm:grid flex-1 grid-cols-6 gap-3 items-center min-w-0">
+                                                                    <div className="min-w-0">
+                                                                        <p className="font-bold text-gray-800 text-sm truncate">{displayName || <span className="text-gray-400 font-normal text-xs">Unnamed</span>}</p>
+                                                                        {lIsPlannedOnly && <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5 inline-block mt-0.5"><Hourglass size={12} className="inline-block align-middle mr-0.5" /> Planned</span>}
+                                                                        {lIsMated && <span className="text-xs font-semibold text-purple-600 bg-purple-50 border border-purple-200 rounded px-1.5 py-0.5 inline-block mt-0.5"><Heart size={12} className="inline-block align-middle mr-0.5" /> Mated</span>}
+                                                                    </div>
+                                                                    <div className="min-w-0">
+                                                                        {lid ? <span className="text-xs font-mono bg-purple-100 px-2 py-0.5 rounded text-purple-700 block w-fit">{lid}</span> : <span className="text-xs text-gray-400">•</span>}
+                                                                    </div>
+                                                                    <div>
+                                                                        {lIsPlannedOnly ? (<>
+                                                                            <span className="text-indigo-400 text-[10px] uppercase tracking-wide font-semibold block">Planned</span>
+                                                                            <span className="text-sm font-semibold text-indigo-700">{formatDate(litter.matingDate) || '?'}</span>
+                                                                        </>) : lIsMated ? (<>
+                                                                            <span className="text-purple-400 text-[10px] uppercase tracking-wide font-semibold block">Mated</span>
+                                                                            <span className="text-sm font-semibold text-purple-700">{formatDate(litter.matingDate) || '?'}</span>
+                                                                        </>) : (<>
+                                                                            <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Birth</span>
+                                                                            <span className="text-sm font-semibold text-gray-800">{formatDate(litter.birthDate) || '?'}{litter.birthDate && litterAge(litter.birthDate) && <span className="ml-1 text-xs font-semibold text-green-600">• {litterAge(litter.birthDate)}</span>}</span>
+                                                                        </>)}
+                                                                    </div>
+                                                                    <div className="min-w-0">
+                                                                        <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Mate</span>
+                                                                        <span className="text-sm font-semibold text-gray-800 truncate block">{mate ? [mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ') : '•'}</span>
+                                                                    </div>
+                                                                    <div>
+                                                                        <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">COI</span>
+                                                                        <span className="text-sm font-semibold text-gray-800">{litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : '•'}</span>
+                                                                    </div>
+                                                                    <div>
+                                                                        {lIsPlannedOnly ? (<>
+                                                                            <span className="text-indigo-400 text-[10px] uppercase tracking-wide font-semibold block">Due</span>
+                                                                            <span className="text-sm font-semibold text-indigo-700">{formatDate(litter.expectedDueDate) || '•'}</span>
+                                                                        </>) : lIsMated ? (<>
+                                                                            <span className="text-purple-400 text-[10px] uppercase tracking-wide font-semibold block">Status</span>
+                                                                            <span className="text-xs font-semibold text-purple-500">Awaiting birth</span>
+                                                                        </>) : (<>
+                                                                            <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Born</span>
+                                                                            <div className="flex items-center gap-1.5">
+                                                                                <span className="text-sm font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</span>
+                                                                                {(litter.maleCount != null || litter.femaleCount != null || litter.unknownCount != null) && (
+                                                                                    <span className="text-xs ml-1">
+                                                                                        <span className="text-blue-500 font-semibold">{litter.maleCount ?? 0}M</span>
+                                                                                        <span className="text-gray-400 mx-0.5">/</span>
+                                                                                        <span className="text-pink-500 font-semibold">{litter.femaleCount ?? 0}F</span>
+                                                                                        <span className="text-gray-400 mx-0.5">/</span>
+                                                                                        <span className="text-purple-500 font-semibold">{litter.unknownCount ?? 0}U</span>
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+                                                                        </>)}
+                                                                    </div>
+                                                                </div>
+                                                                <ChevronDown size={18} className={`text-gray-400 transition-transform flex-shrink-0 ml-2 ${isExpanded ? 'rotate-180' : ''}`} />
+                                                            </div>
+                                                            {isExpanded && (
+                                                                <div className="border-t border-purple-100 p-3 bg-purple-50 space-y-3">
+                                                                    {/* -- 1. Name+CTL | COI | Mate ----------------------------- */}
+                                                                    <div className="flex flex-col sm:grid sm:grid-cols-[1fr_auto_1fr] gap-2 items-start sm:items-center">
+                                                                        {/* Left: Litter Name + CTL ID */}
+                                                                        <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm h-full grid grid-cols-2 divide-x divide-gray-200 gap-3">
+                                                                            <div>
+                                                                                <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Litter Name</div>
+                                                                                {displayName
+                                                                                    ? <div className="text-sm font-bold text-gray-800">{displayName}</div>
+                                                                                    : <div className="text-sm text-gray-400 italic">?</div>}
+                                                                            </div>
+                                                                            <div className="pl-3">
+                                                                                <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">CTL ID</div>
+                                                                                {lid
+                                                                                    ? <div className="font-mono text-sm font-bold text-purple-700">{lid}</div>
+                                                                                    : <div className="text-sm text-gray-400 italic">?</div>}
+                                                                            </div>
+                                                                        </div>
+                                                                        {/* Center: COI */}
+                                                                        <div className="flex flex-col items-center px-2">
+                                                                            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">COI</div>
+                                                                            {litter.inbreedingCoefficient != null
+                                                                                ? <div className="text-base font-medium text-gray-800">{litter.inbreedingCoefficient.toFixed(2)}%</div>
+                                                                                : <div className="text-base font-medium text-gray-300">•</div>}
+                                                                        </div>
+                                                                        {/* Right: Mate card */}
+                                                                        {mate ? (
+                                                                            <div onClick={() => onViewAnimal && onViewAnimal(mate)} className="bg-white rounded-xl border border-gray-200 p-3 flex items-center gap-3 cursor-pointer hover:shadow-md transition shadow-sm">
+                                                                                <div className="w-10 h-10 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                                                                    {mate.imageUrl || mate.photoUrl
+                                                                                        ? <img src={mate.imageUrl || mate.photoUrl} alt={mate.name} className="w-full h-full object-cover" />
+                                                                                        : <div className="w-full h-full flex items-center justify-center text-gray-400"><Cat size={18} /></div>}
+                                                                                </div>
+                                                                                <div className="flex-1 min-w-0">
+                                                                                    <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Mate</div>
+                                                                                    <p className="font-bold text-gray-800 truncate text-sm">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</p>
+                                                                                    <p className="text-xs text-gray-500">{mate.species}</p>
+                                                                                    <p className="text-[10px] text-gray-400 font-mono">{mate.id_public}</p>
+                                                                                </div>
+                                                                            </div>
+                                                                        ) : <div />}
+                                                                    </div>
+                                                                    {/* -- 2. Breeding & Birth ---------------------------------- */}
+                                                                    {(litter.matingDate || litter.pairingDate || litter.breedingMethod || litter.breedingConditionAtTime || litter.outcome || litter.birthDate || litter.birthMethod || litter.expectedDueDate || litter.weaningDate) && (
+                                                                        <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">
+                                                                            <h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-2">Breeding &amp; Birth</h4>
+                                                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2 text-sm">
+                                                                                {(litter.matingDate || litter.pairingDate) && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Mating Date</div><div className="font-semibold text-gray-800">{formatDate(litter.matingDate || litter.pairingDate)}</div></div>}
+                                                                                {litter.expectedDueDate && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Expected Due Date</div><div className="font-semibold text-gray-800">{formatDate(litter.expectedDueDate)}</div></div>}
+                                                                                {litter.breedingMethod && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Breeding Method</div><div className="font-semibold text-gray-800">{litter.breedingMethod}</div></div>}
+                                                                                {litter.breedingConditionAtTime && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Breeding Condition</div><div className="font-semibold text-gray-800">{litter.breedingConditionAtTime}</div></div>}
+                                                                                {litter.outcome && !(litter.isPlanned && litter.outcome === 'Unknown') && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Outcome</div><div className={`font-semibold ${litter.outcome === 'Successful' ? 'text-green-600' : litter.outcome === 'Unsuccessful' ? 'text-red-500' : 'text-gray-800'}`}>{litter.outcome}</div></div>}
+                                                                                {!litter.isPlanned && litter.birthMethod && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Birth Method</div><div className="font-semibold text-gray-800">{litter.birthMethod}</div></div>}
+                                                                                {!litter.isPlanned && litter.birthDate && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Birth Date</div><div className="font-semibold text-gray-800">{formatDate(litter.birthDate)}{litterAge(litter.birthDate) && <span className="ml-2 text-xs font-semibold text-green-600">{litterAge(litter.birthDate)}</span>}</div></div>}
+                                                                                {!litter.isPlanned && litter.weaningDate && <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaning Date</div><div className="font-semibold text-gray-800">{formatDate(litter.weaningDate)}</div></div>}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                    {/* -- 3. Stats bar ----------------------------------------- */}
+                                                                    {!litter.isPlanned && <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">
+                                                                        <div className="grid grid-cols-2 divide-x divide-gray-200">
+                                                                            <div className="grid grid-cols-3 pr-3">
+                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Born</div><div className="text-lg font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</div></div>
+                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Stillborn</div><div className="text-lg font-bold text-gray-400">{litter.stillbornCount ?? litter.stillborn ?? 0}</div></div>
+                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaned</div><div className="text-lg font-bold text-green-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? 0}</div></div>
+                                                                            </div>
+                                                                            <div className="grid grid-cols-3 pl-3">
+                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Males</div><div className="text-lg font-bold text-blue-500">{litter.maleCount ?? 0}</div></div>
+                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Females</div><div className="text-lg font-bold text-pink-500">{litter.femaleCount ?? 0}</div></div>
+                                                                                <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Unknown</div><div className="text-lg font-bold text-purple-500">{litter.unknownCount ?? 0}</div></div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>}
+                                                                    {/* -- 4. Notes --------------------------------------------- */}
+                                                                    {litter.notes && <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm"><h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1">Notes</h4><p className="text-sm text-gray-700 italic leading-relaxed">{litter.notes}</p></div>}
+                                                                    {/* -- 4b. Photos ----------------------------------------- */}
+                                                                    {!litter.isPlanned && litter.images && litter.images.length > 0 && (
+                                                                        <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">
+                                                                            <h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-2">Photos</h4>
+                                                                            <div className="flex flex-wrap gap-2">
+                                                                                {litter.images.map((img, idx) => (
+                                                                                    <div key={img.r2Key || idx} className="w-20 h-20 rounded-lg overflow-hidden border border-gray-200">
+                                                                                        <img src={img.url} alt={"Gallery " + (idx + 1)} className="w-full h-full object-cover cursor-pointer" onClick={() => window.open(img.url, '_blank')} />
+                                                                                    </div>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                    {/* -- 5. Linked Offspring ---------------------------------- */}
+                                                                    {lid && breedingRecordOffspring[lid] === undefined && (
+                                                                        <div className="bg-white p-3 rounded border border-purple-100">
+                                                                            <div className="text-sm font-semibold text-gray-700 mb-3">Offspring</div>
+                                                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                                                                {[...Array(3)].map((_, i) => (
+                                                                                    <div key={i} className="rounded-lg border-2 border-gray-200 h-52 animate-pulse bg-gray-50 flex flex-col items-center pt-2">
+                                                                                        <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
+                                                                                            <div className="w-20 h-20 bg-gray-200 rounded-md" />
+                                                                                        </div>
+                                                                                        <div className="w-full px-2 pb-2">
+                                                                                            <div className="h-3 bg-gray-200 rounded w-3/4 mx-auto mb-1" />
+                                                                                            <div className="h-2 bg-gray-200 rounded w-1/2 mx-auto" />
+                                                                                        </div>
+                                                                                        <div className="w-full bg-gray-100 py-1 border-t border-gray-200 mt-auto" />
+                                                                                    </div>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                    {lid && breedingRecordOffspring[lid] && breedingRecordOffspring[lid].length > 0 && (
+                                                                        <div className="bg-white p-3 rounded border border-purple-100">
+                                                                            <div className="text-sm font-semibold text-gray-700 mb-3">Offspring ({breedingRecordOffspring[lid].length})</div>
+                                                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                                                                {breedingRecordOffspring[lid].map(offspring => (
+                                                                                    offspring.isPrivate ? (
+                                                                                        <div key={offspring.id_public} className="relative bg-gray-50 rounded-lg border-2 border-gray-200 h-52 flex flex-col items-center overflow-hidden pt-2">
+                                                                                            <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
+                                                                                                <div className="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center text-2xl">•</div>
+                                                                                            </div>
+                                                                                            <div className="w-full text-center px-2 pb-1">
+                                                                                                <div className="text-sm font-semibold text-gray-500 truncate">Private Animal</div>
+                                                                                            </div>
+                                                                                            <div className="w-full px-2 pb-2 flex justify-end">
+                                                                                                <div className="text-xs text-gray-400 font-mono">{offspring.id_public}</div>
+                                                                                            </div>
+                                                                                            <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300 mt-auto">
+                                                                                                <div className="text-xs font-medium text-gray-500">{offspring.gender || '•'}</div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    ) : (
+                                                                                        <div key={offspring.id_public} onClick={() => onViewAnimal && onViewAnimal(offspring)} className="relative bg-white rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-200 pt-2">
+                                                                                            {offspring.gender && (
+                                                                                                <div className="absolute top-1.5 right-1.5">
+                                                                                                    {offspring.gender === 'Male'
+                                                                                                        ? <Mars size={14} strokeWidth={2.5} className="text-primary" />
+                                                                                                        : <Venus size={14} strokeWidth={2.5} className="text-accent" />
+                                                                                                    }
+                                                                                                </div>
+                                                                                            )}
+                                                                                            <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
+                                                                                                {offspring.imageUrl || offspring.photoUrl ? (
+                                                                                                    <img src={offspring.imageUrl || offspring.photoUrl} alt={offspring.name} className="w-20 h-20 object-cover rounded-md" />
+                                                                                                ) : (
+                                                                                                    <div className="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                                                                                                        <Cat size={32} />
+                                                                                                    </div>
+                                                                                                )}
+                                                                                            </div>
+                                                                                            <div className="w-full text-center px-2 pb-1">
+                                                                                                <div className="text-sm font-semibold text-gray-800 truncate">
+                                                                                                    {[offspring.prefix, offspring.name, offspring.suffix].filter(Boolean).join(' ')}
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div className="w-full px-2 pb-2 flex justify-end">
+                                                                                                <div className="text-xs text-gray-500">{offspring.id_public}</div>
+                                                                                            </div>
+                                                                                            <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300 mt-auto">
+                                                                                                <div className="text-xs font-medium text-gray-700">{offspring.status || offspring.gender || 'Unknown'}</div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    )
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                } else {
+                                                    // Pedigree-only record (no CTL/litter management entry)
+                                                    const recKey = `${litter.birthDate || 'unknown'}_${litter.otherParent?.id_public || 'none'}`;
+                                                    const mate = litter.otherParent;
+                                                    const isExpanded = expandedPedigreeRecords[recKey];
+                                                    const offspringList = litter.offspring || [];
+                                                    const maleCount = offspringList.filter(o => o.gender === 'Male').length;
+                                                    const femaleCount = offspringList.filter(o => o.gender === 'Female').length;
+                                                    const unknownCount = offspringList.filter(o => o.gender !== 'Male' && o.gender !== 'Female').length;
+                                                    const coi = offspringList.find(o => o.inbreedingCoefficient != null)?.inbreedingCoefficient ?? null;
+                                                    return (
+                                                        <div key={recKey} className={`bg-white rounded border transition-all ${isExpanded ? 'border-purple-300 shadow-md' : 'border-purple-100'}`}>
+                                                            <div
+                                                                onClick={() => setExpandedPedigreeRecords({...expandedPedigreeRecords, [recKey]: !isExpanded})}
+                                                                className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50 transition rounded"
+                                                            >
+                                                                {/* Mobile: stacked */}
+                                                                <div className="flex-1 sm:hidden">
+                                                                    <div className="text-xs text-gray-600 flex gap-2 flex-wrap items-center">
+                                                                        {litter.birthDate && <span>{formatDate(litter.birthDate)}</span>}
+                                                                        {mate?.name && <span className="truncate max-w-[120px]">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
+                                                                        <span>{offspringList.length} born</span>
+                                                                        {coi != null && <span className="text-gray-500">COI {coi.toFixed(2)}%</span>}
+                                                                        {offspringList.length > 0 && (
+                                                                            <span className="inline-flex gap-0.5 font-semibold">
+                                                                                    <span className="text-blue-500">{maleCount}M</span>
+                                                                                    <span className="text-gray-400">/</span>
+                                                                                    <span className="text-pink-500">{femaleCount}F</span>
+                                                                                    <span className="text-gray-400">/</span>
+                                                                                    <span className="text-purple-500">{unknownCount}U</span>
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                                {/* Desktop: 4-column grid */}
+                                                                <div className="hidden sm:grid flex-1 grid-cols-4 gap-3 items-center min-w-0">
+                                                                    <div>
+                                                                        <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Birth</span>
+                                                                        <span className="text-sm font-semibold text-gray-800">{formatDate(litter.birthDate) || '•'}</span>
+                                                                    </div>
+                                                                    <div className="min-w-0">
+                                                                        <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Mate</span>
+                                                                        <span className="text-sm font-semibold text-gray-800 truncate block">{mate ? [mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ') : '•'}</span>
+                                                                    </div>
+                                                                    <div>
+                                                                        <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">COI</span>
+                                                                        <span className="text-sm font-semibold text-gray-800">{coi != null ? `${coi.toFixed(2)}%` : '•'}</span>
+                                                                    </div>
+                                                                    <div>
+                                                                        <span className="text-gray-500 text-[10px] uppercase tracking-wide font-semibold block">Born</span>
+                                                                        <div className="flex items-center gap-1.5">
+                                                                            <span className="text-sm font-bold text-gray-800">{offspringList.length}</span>
+                                                                            {offspringList.length > 0 && (
+                                                                                <span className="text-xs ml-1">
+                                                                                    <span className="text-blue-500 font-semibold">{maleCount}M</span>
+                                                                                    <span className="text-gray-400 mx-0.5">/</span>
+                                                                                    <span className="text-pink-500 font-semibold">{femaleCount}F</span>
+                                                                                    <span className="text-gray-400 mx-0.5">/</span>
+                                                                                    <span className="text-purple-500 font-semibold">{unknownCount}U</span>
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <ChevronDown size={18} className={`text-gray-400 transition-transform flex-shrink-0 ml-2 ${isExpanded ? 'rotate-180' : ''}`} />
+                                                            </div>
+                                                            {isExpanded && (
+                                                                <div className="border-t border-purple-100 p-3 bg-purple-50 space-y-3">
+                                                                    {/* -- 1. Birthdate | COI | Mate ----------------------------- */}
+                                                                    <div className="flex flex-col sm:grid sm:grid-cols-[1fr_auto_1fr] gap-2 items-start sm:items-center">
+                                                                        <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm h-full">
+                                                                            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Birth Date</div>
+                                                                            {litter.birthDate
+                                                                                ? <div className="text-sm font-bold text-gray-800">{formatDate(litter.birthDate)}</div>
+                                                                                : <div className="text-sm text-gray-400 italic">•</div>}
+                                                                        </div>
+                                                                        <div className="flex flex-col items-center px-2">
+                                                                            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">COI</div>
+                                                                            {coi != null ? <div className="text-base font-medium text-gray-800">{coi.toFixed(2)}%</div> : <div className="text-base font-medium text-gray-300">•</div>}
+                                                                        </div>
+                                                                        {mate ? (
+                                                                            <div onClick={() => onViewAnimal && onViewAnimal(mate)} className="bg-white rounded-xl border border-gray-200 p-3 flex items-center gap-3 cursor-pointer hover:shadow-md transition shadow-sm">
+                                                                                <div className="w-10 h-10 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                                                                    {mate.imageUrl || mate.photoUrl
+                                                                                        ? <img src={mate.imageUrl || mate.photoUrl} alt={mate.name} className="w-full h-full object-cover" />
+                                                                                        : <div className="w-full h-full flex items-center justify-center text-gray-400"><Cat size={18} /></div>}
+                                                                                </div>
+                                                                                <div className="flex-1 min-w-0">
+                                                                                    <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Mate</div>
+                                                                                    <p className="font-bold text-gray-800 truncate text-sm">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</p>
+                                                                                    <p className="text-xs text-gray-500">{mate.species}</p>
+                                                                                    <p className="text-[10px] text-gray-400 font-mono">{mate.id_public}</p>
+                                                                                </div>
+                                                                            </div>
+                                                                        ) : <div className="text-base font-medium text-gray-300">•</div>}
+                                                                    </div>
+                                                                    {/* -- 2. Slim stats ---------------------------------------- */}
+                                                                    <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">
+                                                                        <div className="grid grid-cols-4 gap-3">
+                                                                            <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Born</div><div className="text-lg font-bold text-gray-800">{offspringList.length}</div></div>
+                                                                            <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Males</div><div className="text-lg font-bold text-blue-500">{maleCount}</div></div>
+                                                                            <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Females</div><div className="text-lg font-bold text-pink-500">{femaleCount}</div></div>
+                                                                            <div><div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Unknown</div><div className="text-lg font-bold text-purple-500">{unknownCount}</div></div>
+                                                                        </div>
+                                                                    </div>
+                                                                    {/* -- 3. Offspring cards ----------------------------------- */}
+                                                                    {offspringList.length > 0 && (
+                                                                        <div className="bg-white p-3 rounded border border-purple-100">
+                                                                            <div className="text-sm font-semibold text-gray-700 mb-3">Offspring ({offspringList.length})</div>
+                                                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                                                                {offspringList.map(offspring => (
+                                                                                    <div key={offspring.id_public || offspring._id} onClick={() => onViewAnimal && onViewAnimal(offspring)} className="relative bg-white rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-200 pt-2">
+                                                                                        {offspring.gender && (
+                                                                                            <div className="absolute top-1.5 right-1.5">
+                                                                                                {offspring.gender === 'Male'
+                                                                                                    ? <Mars size={14} strokeWidth={2.5} className="text-primary" />
+                                                                                                    : <Venus size={14} strokeWidth={2.5} className="text-accent" />
+                                                                                                }
+                                                                                            </div>
+                                                                                        )}
+                                                                                        <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
+                                                                                            {offspring.imageUrl || offspring.photoUrl ? (
+                                                                                                <img src={offspring.imageUrl || offspring.photoUrl} alt={offspring.name} className="w-20 h-20 object-cover rounded-md" />
+                                                                                            ) : (
+                                                                                                <div className="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                                                                                                    <Cat size={32} />
+                                                                                                </div>
+                                                                                            )}
+                                                                                        </div>
+                                                                                        <div className="w-full text-center px-2 pb-1">
+                                                                                            <div className="text-sm font-semibold text-gray-800 truncate">
+                                                                                                {[offspring.prefix, offspring.name, offspring.suffix].filter(Boolean).join(' ')}
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div className="w-full px-2 pb-2 flex justify-end">
+                                                                                            <div className="text-xs text-gray-500">{offspring.id_public}</div>
+                                                                                        </div>
+                                                                                        <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300 mt-auto">
+                                                                                            <div className="text-xs font-medium text-gray-700">{offspring.status || offspring.gender || 'Unknown'}</div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                }
+                                            })}
+                                        </div>}
+                                    </div>
+                                );
+                            })()}
+
+                        </div>
+                    )}
+
+                    {/* Tab 7: Fertility */}
+                    {detailViewTab === 7 && (
+                        <div className="space-y-6">
+                            {/* 1st Section: Reproductive Status */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><Leaf size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Reproductive Status</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animal.isNeutered ? 'Yes' : 'No'}</strong></div>
+                                    <div><span className="text-gray-600">Infertile:</span> <strong>{animal.isInfertile ? 'Yes' : 'No'}</strong></div>
+                                    {!animal.isNeutered && !animal.isInfertile && (
+                                        <div><span className="text-gray-600">In Mating:</span> <strong>{animal.isInMating ? 'Yes' : 'No'}</strong></div>
+                                    )}
+                                    {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && (
+                                        <>
+                                            <div><span className="text-gray-600">{getLabel('isPregnant', 'Pregnant')}:</span> <strong>{animal.isPregnant ? 'Yes' : 'No'}</strong></div>
+                                            <div><span className="text-gray-600">{getLabel('isNursing', 'Nursing')}:</span> <strong>{animal.isNursing ? 'Yes' : 'No'}</strong></div>
+                                        </>
+                                    )}
+                                    {animal.gender === 'Male' && !animal.isNeutered && !animal.isInfertile && (
+                                        <div><span className="text-gray-600">Stud Animal:</span> <strong>{animal.isStudAnimal ? 'Yes' : 'No'}</strong></div>
+                                    )}
+                                    {animal.gender === 'Female' && !animal.isNeutered && !animal.isInfertile && (
+                                        <div><span className="text-gray-600">Breeding Dam:</span> <strong>{animal.isDamAnimal ? 'Yes' : 'No'}</strong></div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* 2nd Section: Estrus/Cycle (Female/Intersex/Unknown only) */}
+                            {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700"><RefreshCw size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Estrus/Cycle</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div><span className="text-gray-600">Heat Status:</span> <strong>{animal.heatStatus || ''}</strong></div>
+                                        <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animal.lastHeatDate ? formatDate(animal.lastHeatDate) : ''}</strong></div>
+                                        <div><span className="text-gray-600">{getLabel('ovulationDate', 'Ovulation Date')}:</span> <strong>{animal.ovulationDate ? formatDate(animal.ovulationDate) : ''}</strong></div>
+                                        {animal.estrusCycleLength && (
+                                            <div><span className="text-gray-600">Estrus Cycle Length:</span> <strong>{`${animal.estrusCycleLength} days`}</strong></div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 4th Section: Stud Information */}
+                            {!animal.isNeutered && !animal.isInfertile && (animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Mars size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Sire Information</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div><span className="text-gray-600">Fertility Status:</span> <strong>{animal.fertilityStatus || ''}</strong></div>
+                                    </div>
+                                    {animal.fertilityNotes && (
+                                        <div className="text-sm"><span className="text-gray-600">Notes:</span> <strong className="whitespace-pre-wrap">{animal.fertilityNotes}</strong></div>
+                                    )}
+                                    {animal.reproductiveClearances && (
+                                        <div className="text-sm"><span className="text-gray-600">Reproductive Clearances:</span> <strong className="whitespace-pre-wrap">{animal.reproductiveClearances}</strong></div>
+                                    )}
+                                    {animal.reproductiveComplications && (
+                                        <div className="text-sm"><span className="text-gray-600">Reproductive Complications:</span> <strong className="whitespace-pre-wrap">{animal.reproductiveComplications}</strong></div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* 5th Section: Dam Information */}
+                            {!animal.isNeutered && !animal.isInfertile && (animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Venus size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Dam Information</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div><span className="text-gray-600">{getLabel('damFertilityStatus', 'Dam Fertility Status')}:</span> <strong>{animal.damFertilityStatus || animal.fertilityStatus || ''}</strong></div>
+                                        {animal.gestationLength && (
+                                            <div><span className="text-gray-600">{getLabel('gestationLength', 'Gestation Length')}:</span> <strong>{`${animal.gestationLength} days`}</strong></div>
+                                        )}
+                                        {animal.deliveryMethod && (
+                                            <div><span className="text-gray-600">{getLabel('deliveryMethod', 'Delivery Method')}:</span> <strong>{animal.deliveryMethod}</strong></div>
+                                        )}
+                                        {animal.whelpingDate && (
+                                            <div><span className="text-gray-600">{getLabel('whelpingDate', 'Whelping Date')}:</span> <strong>{formatDate(animal.whelpingDate)}</strong></div>
+                                        )}
+                                        {animal.queeningDate && (
+                                            <div><span className="text-gray-600">{getLabel('queeningDate', 'Queening Date')}:</span> <strong>{formatDate(animal.queeningDate)}</strong></div>
+                                        )}
+                                    </div>
+                                    {animal.damFertilityNotes && (
+                                        <div className="text-sm"><span className="text-gray-600">Notes:</span> <strong className="whitespace-pre-wrap">{animal.damFertilityNotes}</strong></div>
+                                    )}
+                                    {animal.reproductiveClearances && (
+                                        <div className="text-sm"><span className="text-gray-600">Reproductive Clearances:</span> <strong className="whitespace-pre-wrap">{animal.reproductiveClearances}</strong></div>
+                                    )}
+                                    {animal.reproductiveComplications && (
+                                        <div className="text-sm"><span className="text-gray-600">Reproductive Complications:</span> <strong className="whitespace-pre-wrap">{animal.reproductiveComplications}</strong></div>
+                                    )}
+                                </div>
+                            )}
+
+                        </div>
+                    )}
+
+                    {/* Tab 8: Health */}
+                    {detailViewTab === 8 && (
+                        <div className="space-y-6">
+                            {/* 1st Section: Preventive Care */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, preventiveCare: !p.preventiveCare}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Shield size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Preventive Care</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.preventiveCare ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                </button>
+                                {!collapsedHealthSections.preventiveCare && (<div className="space-y-4 mt-4">
+                                    {animal.vaccinations && (
+                                        <DetailJsonList
+                                            label={getLabel('vaccinations', 'Vaccinations')}
+                                            data={animal.vaccinations}
+                                            renderItem={v => <>{v.name} {v.date && `(${formatDate(v.date)})`}{v.notes && <span className="text-gray-600"> - {v.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {animal.dewormingRecords && (
+                                        <DetailJsonList
+                                            label="Deworming Records"
+                                            data={animal.dewormingRecords}
+                                            renderItem={r => <>{r.medication} {r.date && `(${formatDate(r.date)})`}{r.notes && <span className="text-gray-600"> - {r.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {animal.parasiteControl && (
+                                        <DetailJsonList
+                                            label="Parasite Control"
+                                            data={animal.parasiteControl}
+                                            renderItem={r => <>{r.treatment} {r.date && `(${formatDate(r.date)})`}{r.notes && <span className="text-gray-600"> - {r.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {fieldTemplate?.fields?.parasitePreventionSchedule?.enabled !== false && animal.parasitePreventionSchedule && (
+                                        <div className="text-sm">
+                                            <span className="text-gray-600">{getLabel('parasitePreventionSchedule', 'Parasite Prevention Schedule')}:</span>
+                                            <strong className="whitespace-pre-wrap">{animal.parasitePreventionSchedule}</strong>
+                                        </div>
+                                    )}
+                                </div>)}
+                            </div>
+
+                            {/* 2nd Section: Procedures & Diagnostics */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, proceduresDiagnostics: !p.proceduresDiagnostics}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Microscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Procedures & Diagnostics</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.proceduresDiagnostics ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                </button>
+                                {!collapsedHealthSections.proceduresDiagnostics && (<div className="space-y-4 mt-4">
+                                    {animal.medicalProcedures && (
+                                        <DetailJsonList
+                                            label="Medical Procedures"
+                                            data={animal.medicalProcedures}
+                                            renderItem={p => <>{p.name} {p.date && `(${formatDate(p.date)})`}{p.notes && <span className="text-gray-600"> - {p.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {(animal.labResults || animal.laboratoryResults) && (
+                                        <DetailJsonList
+                                            label="Laboratory Results"
+                                            data={animal.labResults || animal.laboratoryResults}
+                                            renderItem={r => <>{r.testName} - {r.result} {r.date && `(${formatDate(r.date)})`}{r.notes && <span className="text-gray-600"> - {r.notes}</span>}</>}
+                                        />
+                                    )}
+                                </div>)}
+                            </div>
+
+                            {/* 3rd Section: Active Medical Records */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, activeMedical: !p.activeMedical}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Pill size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Active Medical Records</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.activeMedical ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                </button>
+                                {!collapsedHealthSections.activeMedical && (<div className="space-y-3 mt-4">
+                                    {animal.medicalConditions && (() => {
+                                        const d = animal.medicalConditions;
+                                        const parsed = typeof d === 'string' ? (() => { try { return JSON.parse(d); } catch { return null; } })() : Array.isArray(d) ? d : null;
+                                        return parsed && parsed.length > 0 ? (
+                                            <div>
+                                                <span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parsed.map((item, i) => (
+                                                        <li key={i} className="text-gray-700">
+                                                            {item.condition || item.name}
+                                                            {item.notes && <span className="text-gray-500"> • {item.notes}</span>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        ) : <div><span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span><strong className="text-sm whitespace-pre-wrap">{d}</strong></div>;
+                                    })()}
+                                    {animal.allergies && (() => {
+                                        const d = animal.allergies;
+                                        const parsed = typeof d === 'string' ? (() => { try { return JSON.parse(d); } catch { return null; } })() : Array.isArray(d) ? d : null;
+                                        return parsed && parsed.length > 0 ? (
+                                            <div>
+                                                <span className="text-gray-600 text-sm font-semibold">Allergies:</span>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parsed.map((item, i) => (
+                                                        <li key={i} className="text-gray-700">
+                                                            {item.allergen || item.name}
+                                                            {item.notes && <span className="text-gray-500"> ? {item.notes}</span>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        ) : <div><span className="text-gray-600 text-sm font-semibold">Allergies:</span><strong className="text-sm whitespace-pre-wrap">{d}</strong></div>;
+                                    })()}
+                                    {animal.medications && (() => {
+                                        const d = animal.medications;
+                                        const parsed = typeof d === 'string' ? (() => { try { return JSON.parse(d); } catch { return null; } })() : Array.isArray(d) ? d : null;
+                                        return parsed && parsed.length > 0 ? (
+                                            <div>
+                                                <span className="text-gray-600 text-sm font-semibold">Current Medications:</span>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parsed.map((item, i) => (
+                                                        <li key={i} className="text-gray-700">
+                                                            {item.medication || item.name}
+                                                            {item.notes && <span className="text-gray-500"> • {item.notes}</span>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        ) : <div><span className="text-gray-600 text-sm font-semibold">Current Medications:</span><strong className="text-sm whitespace-pre-wrap">{d}</strong></div>;
+                                    })()}
+                                </div>)}
+                            </div>
+
+                            {/* 4th Section: Health Clearances & Screening */}
+                            {(() => {
+                                const clearanceFields = [
+                                    { key: 'heartwormStatus', label: 'Heartworm Status' },
+                                    { key: 'hipElbowScores', label: 'Hip/Elbow Scores' },
+                                    { key: 'eyeClearance', label: 'Eye Clearance' },
+                                    { key: 'cardiacClearance', label: 'Cardiac Clearance' },
+                                    { key: 'dentalRecords', label: 'Dental Records' },
+                                    { key: 'geneticTestResults', label: 'Genetic Test Results' },
+                                    { key: 'chronicConditions', label: 'Chronic Conditions' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                const spayDate = fieldTemplate?.fields?.spayNeuterDate?.enabled !== false && animal.spayNeuterDate;
+                                return (clearanceFields.length > 0 || spayDate) && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, healthClearances: !p.healthClearances}))} className="w-full flex items-center justify-between text-left group">
+                                            <h3 className="text-lg font-semibold text-gray-700"><Hospital size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Health Clearances & Screening</h3>
+                                            <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.healthClearances ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                        </button>
+                                        {!collapsedHealthSections.healthClearances && (<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
+                                            {spayDate && <div><span className="text-gray-600">{getLabel('spayNeuterDate', 'Spay/Neuter Date')}:</span> <strong>{formatDate(animal.spayNeuterDate)}</strong></div>}
+                                            {clearanceFields.map(f => (
+                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                            ))}
+                                        </div>)}
+                                    </div>
+                                );
+                            })()}
+
+                            {/* 5th Section: Veterinary Care */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <button type="button" onClick={() => setCollapsedHealthSections(p => ({...p, vetCare: !p.vetCare}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Stethoscope size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Veterinary Care</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedHealthSections.vetCare ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                </button>
+                                {!collapsedHealthSections.vetCare && (<div className="space-y-4 text-sm mt-4">
+                                    {animal.primaryVet && <div><span className="text-gray-600">Primary Veterinarian:</span> <strong>{animal.primaryVet}</strong></div>}
+                                    {animal.vetVisits && (
+                                        <DetailJsonList
+                                            label="Veterinary Visits"
+                                            data={animal.vetVisits}
+                                            renderItem={v => <>{v.reason} {v.date && `(${formatDate(v.date)})`}{v.notes && <span className="text-gray-600"> - {v.notes}</span>}</>}
+                                        />
+                                    )}
+                                </div>)}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tab 9: Care */}
+                    {detailViewTab === 9 && (
+                        <div className="space-y-6">
+                            {/* 1st Section: Nutrition */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><UtensilsCrossed size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Nutrition</h3>
+                                <div className="space-y-3 text-sm">
+                                    {animal.dietType && <div><span className="text-gray-600">Diet Type:</span> <strong>{animal.dietType}</strong></div>}
+                                    {animal.feedingSchedule && <div><span className="text-gray-600">Feeding Schedule:</span> <strong>{animal.feedingSchedule}</strong></div>}
+                                    {animal.supplements && <div><span className="text-gray-600">Supplements:</span> <strong>{animal.supplements}</strong></div>}
+                                </div>
+                            </div>
+
+                            {/* 2nd Section: Housing & Enclosure */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Housing & Enclosure</h3>
+                                <div className="space-y-3 text-sm">
+                                    {enclosureInfo && (<div><span className="text-gray-600">Enclosure:</span> <strong>{enclosureInfo.name}</strong></div>)}
+                                    {fieldTemplate?.fields?.housingType?.enabled !== false && animal.housingType && <div><span className="text-gray-600">{getLabel('housingType', 'Housing Type')}:</span> <strong>{animal.housingType}</strong></div>}
+                                    {fieldTemplate?.fields?.bedding?.enabled !== false && animal.bedding && <div><span className="text-gray-600">{getLabel('bedding', 'Bedding')}:</span> <strong>{animal.bedding}</strong></div>}
+                                    {animal.enrichment && <div><span className="text-gray-600">Enrichment:</span> <strong>{animal.enrichment}</strong></div>}
+                                </div>
+                                {animal.careTasks && animal.careTasks.length > 0 && (
+                                    <div className="mt-3 pt-3 border-t border-gray-200">
+                                        <div className="text-sm font-semibold text-gray-700 mb-2">Enclosure Care Tasks</div>
+                                        <div className="space-y-1">
+                                            {animal.careTasks.map((task, idx) => (
+                                                <div key={idx} className="flex items-center justify-between text-xs bg-white px-2 py-1.5 rounded border border-gray-200">
+                                                    <span className="font-medium text-gray-700">{task.taskName}</span>
+                                                    <div className="flex items-center gap-3 text-gray-500">
+                                                        {task.frequencyDays && <span>Every {task.frequencyDays}d</span>}
+                                                        {task.lastDoneDate && <span>Last: {formatDate(task.lastDoneDate)}</span>}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 3rd Section: Animal Care */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><Droplets size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Animal Care</h3>
+                                <div className="space-y-3 text-sm">
+                                    {animal.animalCareTasks && animal.animalCareTasks.length > 0 && (
+                                        <div>
+                                            <div className="text-sm font-semibold text-gray-700 mb-2">Animal Care Tasks</div>
+                                            <div className="space-y-1">
+                                                {animal.animalCareTasks.map((task, idx) => (
+                                                    <div key={idx} className="flex items-center justify-between text-xs bg-white px-2 py-1.5 rounded border border-gray-200">
+                                                        <span className="font-medium text-gray-700">{task.taskName}</span>
+                                                        <div className="flex items-center gap-3 text-gray-500">
+                                                            {task.frequencyDays && <span>Every {task.frequencyDays}d</span>}
+                                                            {task.lastDoneDate && <span>Last: {formatDate(task.lastDoneDate)}</span>}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {animal.handlingNotes && <div className="flex items-baseline gap-1"><span className="text-gray-600 font-semibold shrink-0">Handling Notes:</span><strong className="whitespace-pre-wrap">{animal.handlingNotes}</strong></div>}
+                                    {animal.socializationNotes && <div className="flex items-baseline gap-1"><span className="text-gray-600 font-semibold shrink-0">Socialization Notes:</span><strong className="whitespace-pre-wrap">{animal.socializationNotes}</strong></div>}
+                                    {animal.specialCareRequirements && <div className="flex items-baseline gap-1"><span className="text-gray-600 font-semibold shrink-0">Special Care Requirements:</span><strong className="whitespace-pre-wrap">{animal.specialCareRequirements}</strong></div>}
+                                </div>
+                            </div>
+
+                            {/* 3rd Section: Environment */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><Thermometer size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Environment</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    {animal.temperatureRange && <div><span className="text-gray-600">Temperature Range:</span> <strong>{animal.temperatureRange}</strong></div>}
+                                    {fieldTemplate?.fields?.humidity?.enabled !== false && animal.humidity && <div><span className="text-gray-600">{getLabel('humidity', 'Humidity')}:</span> <strong>{animal.humidity}</strong></div>}
+                                    {animal.lighting && <div><span className="text-gray-600">Lighting:</span> <strong>{animal.lighting}</strong></div>}
+                                    {fieldTemplate?.fields?.noise?.enabled !== false && animal.noise && <div><span className="text-gray-600">{getLabel('noise', 'Noise Level')}:</span> <strong>{animal.noise}</strong></div>}
+                                </div>
+                            </div>
+
+                            {/* 4th Section: Exercise & Grooming */}
+                            {(() => {
+                                const egFields = [
+                                    { key: 'exerciseRequirements', label: 'Exercise Requirements' },
+                                    { key: 'dailyExerciseMinutes', label: 'Daily Exercise (min)' },
+                                    { key: 'groomingNeeds', label: 'Grooming Needs' },
+                                    { key: 'sheddingLevel', label: 'Shedding Level' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                const trainFlags = [
+                                    { key: 'crateTrained', label: 'Crate Trained' },
+                                    { key: 'litterTrained', label: 'Litter Trained' },
+                                    { key: 'leashTrained', label: 'Leash Trained' },
+                                    { key: 'freeFlightTrained', label: 'Free Flight Trained' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                return (egFields.length > 0 || trainFlags.length > 0) && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700"><Scissors size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Grooming</h3>
+                                        {egFields.length > 0 && (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                {egFields.map(f => (
+                                                    <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {trainFlags.length > 0 && (
+                                            <div className="flex flex-wrap gap-3 text-sm">
+                                                {trainFlags.map(f => (
+                                                    <span key={f.key} className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">&#x2713; {getLabel(f.key, f.label)}</span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
+                        </div>
+                    )}
+
+                    {/* Tab 10: Behavior */}
+                    {detailViewTab === 10 && (
+                        <div className="space-y-6">
+                            {/* 1st Section: Behavior */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><MessageSquare size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Behavior</h3>
+                                <div className="space-y-3 text-sm">
+                                    {animal.temperament && <div><span className="text-gray-600">Temperament:</span> <strong>{animal.temperament}</strong></div>}
+                                    {fieldTemplate?.fields?.handlingTolerance?.enabled !== false && animal.handlingTolerance && <div><span className="text-gray-600">{getLabel('handlingTolerance', 'Handling Tolerance')}:</span> <strong>{animal.handlingTolerance}</strong></div>}
+                                    {animal.socialStructure && <div><span className="text-gray-600">Social Structure:</span> <strong>{animal.socialStructure}</strong></div>}
+                                </div>
+                            </div>
+
+                            {/* 2nd Section: Activity */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><Activity size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Activity</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    {animal.activityCycle && <div><span className="text-gray-600">Activity Cycle:</span> <strong>{animal.activityCycle}</strong></div>}
+                                    {fieldTemplate?.fields?.exerciseRequirements?.enabled !== false && animal.exerciseRequirements && <div><span className="text-gray-600">{getLabel('exerciseRequirements', 'Exercise Requirements')}:</span> <strong>{animal.exerciseRequirements}</strong></div>}
+                                    {fieldTemplate?.fields?.dailyExerciseMinutes?.enabled !== false && animal.dailyExerciseMinutes && <div><span className="text-gray-600">{getLabel('dailyExerciseMinutes', 'Daily Exercise (min)')}:</span> <strong>{animal.dailyExerciseMinutes}</strong></div>}
+                                    {fieldTemplate?.fields?.trainingLevel?.enabled !== false && animal.trainingLevel && <div><span className="text-gray-600">{getLabel('trainingLevel', 'Training Level')}:</span> <strong>{animal.trainingLevel}</strong></div>}
+                                    {fieldTemplate?.fields?.trainingDisciplines?.enabled !== false && animal.trainingDisciplines && <div><span className="text-gray-600">{getLabel('trainingDisciplines', 'Training Disciplines')}:</span> <strong>{animal.trainingDisciplines}</strong></div>}
+                                    {fieldTemplate?.fields?.workingRole?.enabled !== false && animal.workingRole && <div><span className="text-gray-600">{getLabel('workingRole', 'Working Role')}:</span> <strong>{animal.workingRole}</strong></div>}
+                                    {fieldTemplate?.fields?.certifications?.enabled !== false && animal.certifications && <div className="col-span-2"><span className="text-gray-600">{getLabel('certifications', 'Certifications')}:</span> <strong>{animal.certifications}</strong></div>}
+                                </div>
+                                {(animal.crateTrained || animal.litterTrained || animal.leashTrained || animal.freeFlightTrained) && (
+                                    <div className="flex flex-wrap gap-3 text-sm pt-2">
+                                        {fieldTemplate?.fields?.crateTrained?.enabled !== false && animal.crateTrained && <span className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold"><Check size={12} className="inline-block align-middle mr-0.5" /> {getLabel('crateTrained', 'Crate Trained')}</span>}
+                                        {fieldTemplate?.fields?.litterTrained?.enabled !== false && animal.litterTrained && <span className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold"><Check size={12} className="inline-block align-middle mr-0.5" /> {getLabel('litterTrained', 'Litter Trained')}</span>}
+                                        {fieldTemplate?.fields?.leashTrained?.enabled !== false && animal.leashTrained && <span className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold"><Check size={12} className="inline-block align-middle mr-0.5" /> {getLabel('leashTrained', 'Leash Trained')}</span>}
+                                        {fieldTemplate?.fields?.freeFlightTrained?.enabled !== false && animal.freeFlightTrained && <span className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold"><Check size={12} className="inline-block align-middle mr-0.5" /> {getLabel('freeFlightTrained', 'Free Flight Trained')}</span>}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 3rd Section: Known Issues */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><AlertTriangle size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Known Issues</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    {fieldTemplate?.fields?.behavioralIssues?.enabled !== false && animal.behavioralIssues && <div className="flex items-baseline gap-1"><span className="text-gray-600 shrink-0">{getLabel('behavioralIssues', 'Behavioral Issues')}:</span><strong className="whitespace-pre-wrap">{animal.behavioralIssues}</strong></div>}
+                                    {fieldTemplate?.fields?.biteHistory?.enabled !== false && animal.biteHistory && <div className="flex items-baseline gap-1"><span className="text-gray-600 shrink-0">{getLabel('biteHistory', 'Bite History')}:</span><strong className="whitespace-pre-wrap">{animal.biteHistory}</strong></div>}
+                                    {fieldTemplate?.fields?.reactivityNotes?.enabled !== false && animal.reactivityNotes && <div className="col-span-2 flex items-baseline gap-1"><span className="text-gray-600 shrink-0">{getLabel('reactivityNotes', 'Reactivity Notes')}:</span><strong className="whitespace-pre-wrap">{animal.reactivityNotes}</strong></div>}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tab 11: Notes */}
+                    {detailViewTab === 11 && (
+                        <div className="space-y-6">
+                            {/* 1st Section: Remarks & Notes */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><FileText size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Remarks & Notes</h3>
+                                <strong className="block text-sm text-gray-700 whitespace-pre-wrap">{animal.remarks || ''}</strong>
+                            </div>
+                        </div>
+                    )}                    {/* Tab 14: End of Life */}
+                    {detailViewTab === 14 && (
+                        <div className="space-y-6">
+                            {/* End of Life */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><Feather size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Information</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div><span className="text-gray-600">Deceased Date:</span> <strong>{animal.deceasedDate ? formatDate(animal.deceasedDate) : ''}</strong></div>
+                                    <div><span className="text-gray-600">Cause of Death:</span> <strong>{animal.causeOfDeath || ''}</strong></div>
+                                    <div><span className="text-gray-600">Necropsy Results:</span> <strong>{animal.necropsyResults || ''}</strong></div>
+                                    {animal.endOfLifeCareNotes && (
+                                        <div><span className="text-gray-600">{getLabel('endOfLifeCareNotes', 'End of Life Care Notes')}:</span> <strong className="whitespace-pre-wrap">{animal.endOfLifeCareNotes}</strong></div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tab 12: Show */}
+                    {detailViewTab === 12 && (
+                        <div className="space-y-6">
+                            {/* Show Titles & Ratings */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><Medal size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Show Titles & Ratings</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div><span className="text-gray-600">Titles:</span> <strong>{animal.showTitles || ''}</strong></div>
+                                    <div><span className="text-gray-600">Ratings:</span> <strong>{animal.showRatings || ''}</strong></div>
+                                    <div><span className="text-gray-600">Judge Comments:</span> <strong className="whitespace-pre-wrap">{animal.judgeComments || ''}</strong></div>
+                                </div>
+                            </div>
+
+                            {/* Working Titles & Performance */}
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Target size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Working & Performance</h3>
+                                    <div className="space-y-3 text-sm">
+                                        <div><span className="text-gray-600">Working Titles:</span> <strong>{animal.workingTitles || ''}</strong></div>
+                                        <div><span className="text-gray-600">Performance Scores:</span> <strong>{animal.performanceScores || ''}</strong></div>
+                                    </div>
+                                </div>
+                        </div>
+                    )}
+
+                    {/* Tab 13: Legal & Documentation */}
+                    {detailViewTab === 13 && (
+                        <div className="space-y-6">
+                            {/* Licensing & Permits */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><Key size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Licensing & Permits</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    {fieldTemplate?.fields?.licenseNumber?.enabled !== false && animal.licenseNumber && (
+                                        <div><span className="text-gray-600">{getLabel('licenseNumber', 'License Number')}:</span> <strong>{animal.licenseNumber}</strong></div>
+                                    )}
+                                    {fieldTemplate?.fields?.licenseJurisdiction?.enabled !== false && animal.licenseJurisdiction && (
+                                        <div><span className="text-gray-600">{getLabel('licenseJurisdiction', 'License Jurisdiction')}:</span> <strong>{animal.licenseJurisdiction}</strong></div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Legal / Administrative */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><ClipboardList size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Legal / Administrative</h3>
+                                <div className="space-y-3 text-sm">
+                                    {fieldTemplate?.fields?.insurance?.enabled !== false && animal.insurance && (
+                                        <div><span className="text-gray-600">{getLabel('insurance', 'Insurance')}:</span> <strong className="whitespace-pre-wrap">{animal.insurance}</strong></div>
+                                    )}
+                                    {fieldTemplate?.fields?.legalStatus?.enabled !== false && animal.legalStatus && (
+                                        <div><span className="text-gray-600">{getLabel('legalStatus', 'Legal Status')}:</span> <strong className="whitespace-pre-wrap">{animal.legalStatus}</strong></div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Restrictions */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><Ban size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Restrictions</h3>
+                                <div className="space-y-3 text-sm">
+                                    {animal.breedingRestrictions && (
+                                        <div><span className="text-gray-600">{getLabel('breedingRestrictions', 'Breeding Restrictions')}:</span> <strong className="whitespace-pre-wrap">{animal.breedingRestrictions}</strong></div>
+                                    )}
+                                    {animal.exportRestrictions && (
+                                        <div><span className="text-gray-600">{getLabel('exportRestrictions', 'Export Restrictions')}:</span> <strong className="whitespace-pre-wrap">{animal.exportRestrictions}</strong></div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* No data fallback */}
+                            {!animal.licenseNumber && !animal.licenseJurisdiction && !animal.insurance && !animal.legalStatus && !animal.breedingRestrictions && !animal.exportRestrictions && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center text-gray-500">
+                                    <p>No legal or documentation records</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                {/* -- TAB 15 : Gallery (read-only • manage photos in Edit) --- */}
+                {detailViewTab === 15 && (
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-700"><Images size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Photo Gallery</h3>
+                                <p className="text-xs text-gray-400 mt-0.5">{(animal.extraImages || []).length} / 20 photos • manage in <strong>Edit</strong></p>
+                            </div>
+                        </div>
+
+                        {(animal.extraImages || []).length === 0 ? (
+                            <div className="text-center py-16 text-gray-400">
+                                <Camera size={48} className="text-gray-300 mx-auto mb-3" />
+                                <p className="text-sm font-medium">No extra photos yet</p>
+                                <p className="text-xs mt-1">Add photos from the Edit screen.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                {(animal.extraImages || []).map((url, idx) => (
+                                    <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                                        <img
+                                            src={url}
+                                            alt={`Gallery photo ${idx + 1}`}
+                                            className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                            onClick={() => { setEnlargedImageUrl(url); setShowImageModal(true); }}
+                                        />
+                                        <span className="absolute bottom-1 left-1 bg-black/50 text-white text-[10px] rounded px-1 py-0.5">#{idx + 1}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* -- TAB 16 : Logs -------------------------------------------------- */}
+                {detailViewTab === 16 && (
+                    <div className="space-y-6 p-1">
+                        {animalLogsLoading ? (
+                            <div className="flex items-center justify-center py-12 text-gray-400 gap-2">
+                                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                                Loading logs...
+                            </div>
+                        ) : !animalLogs || animalLogs.length === 0 ? (
+                            <div className="text-center py-12 text-gray-400 text-sm">No changes recorded yet. Logs are created when you edit or feed this animal.</div>
+                        ) : (() => {
+                            const feedingLogs = animalLogs.filter(l => l.category === 'feeding');
+                            const careLogs    = animalLogs.filter(l => l.category === 'care');
+                            const fieldLogs   = animalLogs.filter(l => l.category === 'field');
+                            const fmtVal = v => v === null || v === undefined ? '?' : typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v).slice(0, 80);
+                            return (
+                                <>
+                                    {/* Feeding History */}
+                                    {feedingLogs.length > 0 && (
+                                        <div className="space-y-3">
+                                            <div className="flex items-center gap-2 pb-1 border-b border-green-200">
+                                                <Edit size={16} className="inline-block align-middle" />
+                                                <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">Feeding History</h3>
+                                                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{feedingLogs.length}</span>
+                                            </div>
+                                            {feedingLogs.map(log => {
+                                                const ev = log.changes?.[0]?.newValue || {};
+                                                const foodLabel = ev.supplyName
+                                                    ? `${ev.supplyName}${ev.feederType ? ` (${ev.feederType}${ev.feederSize ? ` · ${ev.feederSize}` : ''})` : ''}`
+                                                    : null;
+                                                const qtyLabel = ev.quantity != null ? `${ev.quantity}${ev.unit ? ` ${ev.unit}` : ''}` : null;
+                                                return (
+                                                    <div key={log._id} className="bg-green-50 border border-green-100 rounded-lg p-3">
+                                                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                                                            <div className="flex items-center gap-2 flex-wrap">
+                                                                <span className="text-green-600 font-medium text-sm flex items-center gap-0.5"><Check size={12} className="flex-shrink-0" /> Fed</span>
+                                                                {foodLabel && <span className="text-gray-700 text-sm font-medium">{foodLabel}</span>}
+                                                                {qtyLabel && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">• {qtyLabel}</span>}
+                                                            </div>
+                                                            <span className="text-xs text-gray-400">{new Date(log.createdAt).toLocaleString()}</span>
+                                                        </div>
+                                                        {!foodLabel && <p className="text-xs text-gray-400 mt-1">No food recorded</p>}
+                                                        {ev.notes && <p className="text-xs text-gray-500 mt-1 italic">"{ev.notes}"</p>}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+
+                                    {/* Care Schedule Updates */}
+                                    {careLogs.length > 0 && (
+                                        <div className="space-y-3">
+                                            <div className="flex items-center gap-2 pb-1 border-b border-blue-200">
+                                                <Edit size={16} className="inline-block align-middle" />
+                                                <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">Care Schedule Updates</h3>
+                                                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{careLogs.length}</span>
+                                            </div>
+                                            {careLogs.map(log => (
+                                                <div key={log._id} className="bg-blue-50 border border-blue-100 rounded-lg p-3 space-y-1.5">
+                                                    <span className="text-xs font-medium text-blue-500">{new Date(log.createdAt).toLocaleString()}</span>
+                                                    {log.changes.map((c, i) => (
+                                                        <div key={i} className="text-sm">
+                                                            <span className="font-medium text-gray-700">{c.label}:</span>{' '}
+                                                            {c.field === 'careTasks' ? (
+                                                                <span className="text-gray-500">Task list updated</span>
+                                                            ) : c.field === 'careTaskDone' ? (
+                                                                <span className="text-green-600 flex items-center gap-0.5"><Check size={12} className="flex-shrink-0" /> Completed: {c.newValue}</span>
+                                                            ) : (
+                                                                <span className="text-gray-500">
+                                                                    {c.oldValue != null ? <span className="line-through text-red-400 mr-1">{fmtVal(c.oldValue)}</span> : <span className="text-gray-400 mr-1">none</span>}
+                                                                    <ArrowRight size={14} className="inline-block align-middle mr-0.5" /> <span className="text-green-600">{fmtVal(c.newValue)}</span>
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Field Edits */}
+                                    {fieldLogs.length > 0 && (
+                                        <div className="space-y-3">
+                                            <div className="flex items-center gap-2 pb-1 border-b border-gray-200">
+                                                <Edit size={16} className="inline-block align-middle" />
+                                                <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">Field Edits</h3>
+                                                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{fieldLogs.length}</span>
+                                            </div>
+                                            {fieldLogs.map(log => (
+                                                <div key={log._id} className="bg-gray-50 border border-gray-200 rounded-lg p-3 space-y-1.5">
+                                                    <span className="text-xs font-medium text-gray-500">{new Date(log.createdAt).toLocaleString()}</span>
+                                                    {log.changes.map((c, i) => (
+                                                        <div key={i} className="text-sm flex items-start gap-1.5 flex-wrap">
+                                                            <span className="font-medium text-gray-700 shrink-0">{c.label}:</span>
+                                                            <span className="text-gray-500">
+                                                                {c.oldValue != null ? <span className="line-through text-red-400 mr-1">{fmtVal(c.oldValue)}</span> : <span className="text-gray-400 mr-1">•</span>}
+                                                                <ArrowRight size={14} className="inline-block align-middle mr-0.5" /> <span className="text-green-600">{fmtVal(c.newValue)}</span>
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </>
+                            );
+                        })()}
+                    </div>
+                )}
+
+                {/* -- TAB 5: Pedigree -- */}
+                {detailViewTab === 5 && (() => {
+                    if (mpLoading) return <div className="flex items-center justify-center py-16 gap-2 text-gray-400"><Loader2 size={18} className="animate-spin" /><span className="text-sm">Loading ancestry</span></div>;
+                    const mpData = mpEnrichedData || animal?.manualPedigree || {};
+                    const emptySlot = () => ({ mode: 'manual', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
+                    const getSlot = (key) => mpData[key] || emptySlot();
+                    const hasAnyData = ['sire','dam','sireSire','sireDam','damSire','damDam',
+                        'sireSireSire','sireSireDam','sireDamSire','sireDamDam',
+                        'damSireSire','damSireDam','damDamSire','damDamDam'].some(k => {
+                        const d = mpData[k];
+                        return d && (d.ctcId || Object.entries(d).some(([fk,v]) => fk !== 'mode' && v && String(v).trim()));
+                    });
+                    const handleDownloadMP = async () => {
+                        if (!mpTreeRef.current) return;
+                        setMpDownloading(true);
+                        try {
+                            const srcCanvas = await html2canvas(mpTreeRef.current, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            const a4W = 1654, a4H = 2339, pad = 80;
+                            const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
+                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height);
+                            const dw = Math.round(srcCanvas.width * ratio), dh = Math.round(srcCanvas.height * ratio);
+                            const out = document.createElement('canvas');
+                            out.width = a4W; out.height = a4H;
+                            const ctx = out.getContext('2d');
+                            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
+                            ctx.drawImage(srcCanvas, Math.round((a4W - dw) / 2), Math.round((a4H - dh) / 2), dw, dh);
+                            const link = document.createElement('a');
+                            link.download = `manual-pedigree-${animal.name || animal.id_public}.png`;
+                            link.href = out.toDataURL('image/png');
+                            link.click();
+                        } catch(e) { console.error('Manual pedigree download failed', e); }
+                        finally { setMpDownloading(false); }
+                    };
+                    const handleDownloadMPPDF = async () => {
+                        if (!mpTreeRef.current) return;
+                        setMpDownloading(true);
+                        try {
+                            const srcCanvas = await html2canvas(mpTreeRef.current, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                            const a4W = 1654, a4H = 2339, pad = 80;
+                            const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
+                            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height);
+                            const dw = Math.round(srcCanvas.width * ratio), dh = Math.round(srcCanvas.height * ratio);
+                            const out = document.createElement('canvas');
+                            out.width = a4W; out.height = a4H;
+                            const ctx = out.getContext('2d');
+                            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
+                            ctx.drawImage(srcCanvas, Math.round((a4W - dw) / 2), Math.round((a4H - dh) / 2), dw, dh);
+                            const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [a4W, a4H] });
+                            pdf.addImage(out.toDataURL('image/png'), 'PNG', 0, 0, a4W, a4H);
+                            pdf.save(`pedigree-${animal.name || animal.id_public}.pdf`);
+                        } catch(e) { console.error('Pedigree PDF failed', e); }
+                        finally { setMpDownloading(false); }
+                    };
+
+                    const renderSlot = (slotKey, label, sideColor) => {
+                        const d = getSlot(slotKey);
+                        const hasData = d && (d.ctcId || Object.entries(d).some(([fk,v]) => fk !== 'mode' && v && String(v).trim()));
+                        const fullName = [d.prefix, d.name, d.suffix].filter(Boolean).join(' ');
+                        const slotGender = (slotKey === 'sire' || slotKey.endsWith('Sire')) ? 'Male' : 'Female';
+                        const isSire = slotGender === 'Male';
+                        const GIcon = isSire ? Mars : Venus;
+                        const gColor = isSire ? 'text-blue-400' : 'text-pink-400';
+                        const handleSlotClick = d.ctcId && onViewAnimal ? async () => {
+                            try {
+                                const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(d.ctcId)}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                                if (res.data) onViewAnimal(res.data, 16);
+                            } catch { /* not accessible */ }
+                        } : undefined;
+                        return (
+                            <div key={slotKey} onClick={handleSlotClick} className={`rounded-lg border-2 p-3 h-full relative ${handleSlotClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${hasData ? (isSire ? 'border-blue-200 bg-blue-50/40' : 'border-pink-200 bg-pink-50/40') : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                                <div className={`flex items-center gap-1 mb-1.5 ${isSire ? 'text-blue-400' : 'text-pink-400'}`}>
+                                    <GIcon size={11} className={`flex-shrink-0 ${gColor}`} />
+                                    <p className="text-[10px] font-bold uppercase tracking-widest">{label}</p>
+                                </div>
+                                {hasData ? (
+                                    <div className="flex gap-2.5">
+                                        {d.imageUrl && (
+                                            <img src={d.imageUrl} alt={fullName} className="w-10 h-10 sm:w-16 sm:h-16 rounded-lg object-cover flex-shrink-0 border border-gray-200 self-start" />
+                                        )}
+                                        <div className="flex-1 min-w-0 space-y-0.5 pb-4">
+                                            {fullName && <p className="text-[10px] sm:text-xs font-semibold text-gray-800 leading-tight">{fullName}</p>}
+                                            {d.variety && <p className="text-[9px] sm:text-[11px] text-gray-500">{d.variety}</p>}
+                                            {d.genCode && <p className="text-[9px] sm:text-[11px] font-mono text-indigo-600">{d.genCode}</p>}
+                                            {d.birthDate && <p className="text-[9px] sm:text-[11px] text-gray-400">{formatDate(d.birthDate)}</p>}
+                                            {d.deceasedDate && <p className="text-[9px] sm:text-[11px] text-red-600 font-semibold">† {formatDate(d.deceasedDate)}</p>}
+                                            {d.breederName && <p className="text-[9px] sm:text-[11px] text-gray-500 italic">{d.breederName}</p>}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex gap-2.5">
+                                        <div className="flex-1 min-w-0 space-y-0.5 pb-4">
+                                            <p className="text-[11px] text-gray-300 italic">•</p>
+                                        </div>
+                                    </div>
+                                )}
+                                {d.ctcId && <p className="absolute bottom-1.5 right-2 text-[10px] font-mono text-gray-800">{d.ctcId}</p>}
+                            </div>
+                        );
+                    };
+
+                    return (
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-between flex-wrap gap-2">
+                                <div className="flex items-center gap-2">
+                                    <Dna size={18} className="text-orange-500" />
+                                    <h3 className="text-base font-semibold text-gray-700">Pedigree</h3>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="flex rounded border border-gray-300 overflow-hidden text-xs">
+                                        <button onClick={() => setBetaPedigreeView('vertical')} className={`px-2 py-1 transition-colors ${betaPedigreeView === 'vertical' ? 'bg-gray-200 font-semibold text-gray-800' : 'text-gray-400 hover:bg-gray-100'}`}>Vertical</button>
+                                        <button onClick={() => setBetaPedigreeView('chart')} className={`px-2 py-1 transition-colors ${betaPedigreeView === 'chart' ? 'bg-primary font-semibold text-black' : 'text-gray-400 hover:bg-gray-100'}`}>Horizontal</button>
+                                    </div>
+                                    {hasAnyData && betaPedigreeView === 'vertical' && (
+                                        <>
+                                        <button onClick={handleDownloadMPPDF} disabled={mpDownloading}
+                                            className="px-3 py-1.5 text-sm bg-primary hover:bg-primary/90 text-black rounded-lg border border-primary/40 transition flex items-center gap-1.5 disabled:opacity-60 font-semibold">
+                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save PDF</>}
+                                        </button>
+                                        <button onClick={handleDownloadMP} disabled={mpDownloading}
+                                            className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
+                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Images size={14} /> Save Image</>}
+                                        </button>
+                                        </>
+                                    )}
+                                    {betaPedigreeView === 'chart' && (
+                                        <>
+                                        <button onClick={() => chartRef.current?.downloadPDF()} disabled={!chartRef.current?.imagesLoaded || chartRef.current?.isSaving}
+                                            className="px-3 py-1.5 text-sm bg-primary hover:bg-primary/90 text-black rounded-lg border border-primary/40 transition flex items-center gap-1.5 disabled:opacity-60 font-semibold">
+                                            <Download size={14} /> Save PDF
+                                        </button>
+                                        <button onClick={() => chartRef.current?.downloadImage()} disabled={!chartRef.current?.imagesLoaded || chartRef.current?.isSaving}
+                                            className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
+                                            <Images size={14} /> Save Image
+                                        </button>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                            <p className="text-xs text-gray-400 -mt-3">This pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations (shown on Overview tab). Manual entries are for display/reference only and do not affect COI. To add or edit manual ancestors, use the Edit button.</p>
+
+                            <div className={betaPedigreeView === 'chart' ? '' : 'hidden'}>
+                                <PedigreeChart ref={chartRef} inline animalId={animal.id_public} animalData={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />
+                            </div>
+                            <div className={betaPedigreeView === 'vertical' ? '' : 'hidden'}>
+                            <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
+
+                            {(() => {
+                                const subjectVariety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => animal[k]).filter(Boolean).join(' ');
+                                const subjectImgUrl = animal.imageUrl || animal.photoUrl || null;
+                                const subjectName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+                                const isMale = animal.gender === 'Male';
+                                const SubjectGenderIcon = isMale ? Mars : Venus;
+                                const subjectGColor = isMale ? 'text-blue-500' : 'text-pink-500';
+                                const ownerImgUrl = breederInfo?.profileImage || breederInfo?.profileImageUrl || null;
+                                const ownerShowPersonal = breederInfo?.showPersonalName ?? true;
+                                const ownerShowBreeder = breederInfo?.showBreederName ?? true;
+                                const ownerLines = [];
+                                if (ownerShowPersonal && breederInfo?.personalName) ownerLines.push(breederInfo.personalName);
+                                if (ownerShowBreeder && breederInfo?.breederName) ownerLines.push(breederInfo.breederName);
+                                const ownerUserId = breederInfo?.id_public || null;
+                                const ownerQrUrl = ownerUserId ? `${window.location.origin}/user/${ownerUserId}` : null;
+                                return (
+                                    <div className="rounded-xl border-2 border-primary bg-primary/10 overflow-hidden relative">
+                                        {/* Owner/breeder • top-right corner */}
+                                        {breederInfo && (
+                                        <div className="absolute top-2 right-2 flex flex-col items-center gap-1 text-center z-10">
+                                            <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border-2 border-primary/20 flex items-center justify-center flex-shrink-0">
+                                                {ownerImgUrl ? <img src={ownerImgUrl} alt="Breeder" className="w-full h-full object-cover" /> : <User size={18} className="text-gray-400" />}
+                                            </div>
+                                            <div className="space-y-0">
+                                                {ownerLines.length > 0 ? ownerLines.map((l,i) => <p key={i} className="text-xs font-semibold text-gray-700 leading-tight">{l}</p>) : null}
+                                                {ownerUserId && <p className="text-[10px] font-mono text-gray-400">{ownerUserId}</p>}
+                                            </div>
+                                            {ownerQrUrl && <QRCodeSVG value={ownerQrUrl} size={52} bgColor="transparent" fgColor="#374151" level="M" />}
+                                        </div>
+                                        )}
+                                        {/* Animal info • centered */}
+                                        <div className="flex flex-col items-center gap-2 text-center p-4 relative">
+                                            {animal.species && <div className="absolute top-2 left-2 text-left"><p className="text-xs font-semibold text-gray-600 leading-tight">{animal.species}</p>{getSpeciesLatinName(animal.species) && <p className="text-[10px] italic text-gray-400 leading-tight">{getSpeciesLatinName(animal.species)}</p>}</div>}
+                                            {subjectImgUrl ? (
+                                                <img src={subjectImgUrl} alt={subjectName} className="w-20 h-20 rounded-full object-cover border-2 border-primary/30" />
+                                            ) : (
+                                                <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-gray-300"><Cat size={32} /></div>
+                                            )}
+                                            <div className="flex items-center gap-1 justify-center">
+                                                <SubjectGenderIcon size={14} className={`flex-shrink-0 ${subjectGColor}`} />
+                                                <p className="text-base font-bold text-gray-800 leading-tight">{subjectName}</p>
+                                            </div>
+                                            {subjectVariety && <p className="text-xs text-gray-500 -mt-1">{subjectVariety}</p>}
+                                            {animal.geneticCode && <p className="text-xs font-mono text-indigo-600">{animal.geneticCode}</p>}
+                                            {animal.birthDate && <p className="text-xs text-gray-400">{formatDate(animal.birthDate)}</p>}
+                                            {(animal.manualBreederName || (breederInfo && (breederInfo.breederName || breederInfo.personalName))) && <p className="text-xs text-gray-500 italic">{animal.manualBreederName || breederInfo.breederName || breederInfo.personalName}</p>}
+                                            {animal.remarks && <p className="text-xs text-gray-400 border-t border-primary/20 pt-1 mt-1 max-w-xs">{animal.remarks}</p>}
+                                            {animal.id_public && <p className="text-xs font-mono text-gray-400">{animal.id_public}</p>}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 1 — Parents</p>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {renderSlot('sire', 'Sire', 'sire')}
+                                    {renderSlot('dam', 'Dam', 'dam')}
+                                </div>
+                            </div>
+
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 2 — Grandparents</p>
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                    <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                    <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                    {renderSlot('sireSire', 'Grandsire', 'sire')}
+                                    {renderSlot('damSire', 'Grandsire', 'dam')}
+                                    {renderSlot('sireDam', 'Granddam', 'sire')}
+                                    {renderSlot('damDam', 'Granddam', 'dam')}
+                                </div>
+                            </div>
+
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 3 — Great-Grandparents</p>
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                    <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
+                                    <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
+                                    <p className="text-[10px] text-gray-400 mb-0.5">via Grandsire</p>
+                                    <p className="text-[10px] text-gray-400 mb-0.5">via Grandsire</p>
+                                    {renderSlot('sireSireSire', 'Great-Grandsire', 'sire')}
+                                    {renderSlot('damSireSire', 'Great-Grandsire', 'dam')}
+                                    {renderSlot('sireSireDam', 'Great-Granddam', 'sire')}
+                                    {renderSlot('damSireDam', 'Great-Granddam', 'dam')}
+                                    <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                    <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
+                                    {renderSlot('sireDamSire', 'Great-Grandsire', 'sire')}
+                                    {renderSlot('damDamSire', 'Great-Grandsire', 'dam')}
+                                    {renderSlot('sireDamDam', 'Great-Granddam', 'sire')}
+                                    {renderSlot('damDamDam', 'Great-Granddam', 'dam')}
+                                </div>
+                            </div>
+                            </div>
+                            </div>
+                        </div>
+                    );
+                })()}
+
+                {/* QR Share Modal */}
+                {showQR && <QRModal url={`${window.location.origin}/animal/${animal.id_public}`} title={animal.name} onClose={() => setShowQR(false)} />}
+
+                {/* Pedigree Chart Modal */}
+                {showPedigree && (
+                    <PedigreeChart
+                        animalId={animal.id_public}
+                        API_BASE_URL={API_BASE_URL}
+                        authToken={authToken}
+                        onClose={() => setShowPedigree(false)}
+                        onViewAnimal={onViewAnimal}
+                    />
+                )}
+            </div>
+        </div>
+    </div>
+    );
+};
+
+export default PrivateAnimalDetail;
