@@ -323,11 +323,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                 <button
                                     onClick={toggleAnimalFavorite}
                                     disabled={animalFavoritePending}
-                                    className={`px-3 py-1.5 font-semibold rounded-lg transition flex items-center gap-2 ${
-                                        isAnimalFavorited
-                                            ? 'bg-accent/20 hover:bg-accent/30 text-accent'
-                                            : 'bg-accent/10 hover:bg-accent/20 text-accent/60'
-                                    } ${animalFavoritePending ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className={`px-3 py-1.5 font-semibold rounded-lg transition flex items-center gap-2 bg-accent hover:bg-accent/90 text-white ${animalFavoritePending ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     title={isAnimalFavorited ? 'Remove from favorites' : 'Add to favorites'}
                                 >
                                     <Heart size={16} fill={isAnimalFavorited ? 'currentColor' : 'none'} />
