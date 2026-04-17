@@ -300,7 +300,7 @@ export const FamilyTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal
                         </div>
                         ))}
                         </div>
-                    </div>
+
                 )}
             </div>
 
