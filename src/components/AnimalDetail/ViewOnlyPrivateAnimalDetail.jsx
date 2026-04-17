@@ -235,7 +235,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                 </div>
 
                 {/* Tabs - ALL 11 TABS (same as PrivateAnimalDetail) */}
-                <div className="bg-[#E1F2F5] border-b border-gray-300 px-1 py-2">
+                <div className="bg-[#E1F2F5] border-b border-gray-300 px-4 py-2">
                     <div className="flex flex-wrap gap-2">
                         {[
                             { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
@@ -258,7 +258,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setDetailViewTab(tab.id)}
-                                className={`w-[calc(20%-0.4rem)] px-1 py-2 text-[10px] sm:px-2 sm:text-xs font-medium rounded border-2 transition-colors ${
+                                className={`w-[calc(20%-1rem)] px-1 py-2 text-[10px] sm:px-2 sm:text-xs font-medium rounded border-2 transition-colors ${
                                     detailViewTab === tab.id 
                                         ? 'bg-[#F2E4E9] text-black border-gray-300' 
                                         : 'bg-white text-gray-600 hover:text-gray-800 border-gray-300'
