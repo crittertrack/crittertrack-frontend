@@ -69,8 +69,12 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
      */
     const handleEditAnimal = useCallback((animal) => {
         if (!animal) return;
-        setAnimalToView(animal);
+
+        // When editing from a nested detail context (for example offspring cards),
+        // close the view overlay and leave only the edit modal visible.
+        setAnimalToView(null);
         setAnimalToEdit(animal);
+        setViewAnimalBreederInfo(null);
     }, []);
 
     /**
