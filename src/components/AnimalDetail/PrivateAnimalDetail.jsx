@@ -553,7 +553,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                     <div className="flex flex-wrap gap-2">
                         {[
                             { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
-                            { id: 2, label: 'Status & Privacy', icon: Lock, color: 'text-slate-500' },
+                            { id: 2, label: 'Ownership', icon: Lock, color: 'text-slate-500' },
                             { id: 3, label: 'Identification', icon: Tag, color: 'text-amber-500' },
                             { id: 4, label: 'Appearance', icon: Palette, color: 'text-pink-500' },
                             { id: 5, label: 'Pedigree', icon: Dna, color: 'text-orange-500' },
@@ -773,7 +773,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                         </div>
                     )}
 
-                    {/* Tab 2: Status & Privacy */}
+                    {/* Tab 2: Ownership */}
                     {detailViewTab === 2 && (
                         <div className="space-y-6">
                             {/* 1st Section: Ownership */}

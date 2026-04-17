@@ -2456,7 +2456,7 @@ const App = () => {
 
             {/* Animal edit overlay */}
             {animalToEdit && (
-                <div className="fixed inset-0 z-50 overflow-y-auto bg-white">
+                <div className="fixed inset-0 z-50 overflow-y-auto bg-[#E1F2F5]">
                     <AnimalForm
                         formTitle={`Edit ${animalToEdit.name}`}
                         animalToEdit={animalToEdit}

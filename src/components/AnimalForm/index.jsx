@@ -4911,7 +4911,7 @@ const AnimalForm = ({
                            ) : null;
 
     return (
-        <div className="w-full max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+        <div className="w-full max-w-6xl mx-auto bg-[#E1F2F5] p-6 rounded-xl shadow-lg">
             {/* --- Parent Search Modal --- */}
             {modalTarget && modalTarget !== 'breeder' && modalTarget !== 'other-parent' && modalTarget !== 'mate' && ( 
                 <ParentSearchModal
@@ -5291,7 +5291,7 @@ const AnimalForm = ({
                     <div className="flex flex-wrap gap-1 pb-px">
                         {[
                             { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
-                            { id: 2, label: 'Status & Privacy', icon: Lock, color: 'text-slate-500' },
+                            { id: 2, label: 'Ownership', icon: Lock, color: 'text-slate-500' },
                             { id: 3, label: 'Identification', icon: Tag, color: 'text-amber-500' },
                             { id: 4, label: 'Appearance', icon: Palette, color: 'text-pink-500' },
                             { id: 5, label: 'Beta Pedigree', icon: Dna, color: 'text-orange-500' },
@@ -5311,10 +5311,10 @@ const AnimalForm = ({
                                 type="button"
                                 onClick={() => setActiveTab(tab.id)}
                                 data-tutorial-target={tab.id === 2 ? 'status-privacy-tab' : tab.id === 3 ? 'identification-tab' : tab.id === 4 ? 'appearance-tab' : tab.id === 5 ? 'beta-pedigree-tab' : tab.id === 6 ? 'family-tab' : tab.id === 7 ? 'fertility-tab' : tab.id === 8 ? 'health-tab' : tab.id === 9 ? 'care-tab' : tab.id === 10 ? 'behavior-tab' : tab.id === 11 ? 'notes-tab' : tab.id === 12 ? 'show-tab' : undefined}
-                                className={`flex-shrink-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded border transition-colors ${
+                                className={`flex-shrink-0 px-2 py-2 text-xs font-medium rounded border-2 transition-colors ${
                                     activeTab === tab.id 
-                                        ? 'bg-primary text-black border-gray-400' 
-                                        : 'bg-gray-50 text-gray-600 hover:text-gray-800 border-gray-300'
+                                        ? 'bg-[#F2E4E9] text-black border-gray-300' 
+                                        : 'bg-white text-gray-600 hover:text-gray-800 border-gray-300'
                                 }`}
                                 title={tab.label}
                             >
@@ -5481,7 +5481,7 @@ const AnimalForm = ({
                     </div>
                 )}
                 
-                {/* Tab 2: Status & Privacy */}
+                {/* Tab 2: Ownership */}
                 {activeTab === 2 && (
                     <div className="space-y-6">
                         {/* Ownership */}
