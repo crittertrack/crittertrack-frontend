@@ -12,6 +12,7 @@ import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { PedigreeChart } from '../AnimalForm';
 const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, showModalMessage, onViewAnimal, breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, initialTab = 1, initialBetaView = 'vertical' }) => {
     const [breederInfo, setBreederInfo] = useState(null);
+    const [ownerInfo, setOwnerInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(initialTab);
     const [enclosureInfo, setEnclosureInfo] = useState(null);
@@ -170,6 +171,29 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
         };
         fetchBreeder();
     }, [animal?.breederId_public, API_BASE_URL]);
+
+    // Fetch owner info when animal is owned (ownerId_public differs from breederId_public)
+    React.useEffect(() => {
+        const fetchOwner = async () => {
+            if (animal?.isOwned && animal?.ownerId_public) {
+                try {
+                    const response = await axios.get(
+                        `${API_BASE_URL}/public/profiles/search?query=${animal.ownerId_public}&limit=1`
+                    );
+                    if (response.data && response.data.length > 0) {
+                        setOwnerInfo(response.data[0]);
+                    } else {
+                        setOwnerInfo(null);
+                    }
+                } catch {
+                    setOwnerInfo(null);
+                }
+            } else {
+                setOwnerInfo(null);
+            }
+        };
+        fetchOwner();
+    }, [animal?.isOwned, animal?.ownerId_public, API_BASE_URL]);
     
     if (!animal) return null;
 
@@ -439,12 +463,18 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper</h3>
                                 <div className="text-sm space-y-2">
-                                    {(animal.keeperName || animal.isOwned) && (
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-gray-600">Keeper Name:</span>
-                                        <strong>{animal.keeperName || (animal.isOwned ? 'Me' : '')}</strong>
-                                    </div>
-                                    )}
+                                    {(() => {
+                                        const keeperDisplay = animal.isOwned
+                                            ? (ownerInfo ? (ownerInfo.breederName || ownerInfo.personalName || ownerInfo.id_public) : animal.ownerId_public) || null
+                                            : (animal.keeperName || null);
+                                        if (!keeperDisplay) return null;
+                                        return (
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-gray-600">Keeper Name:</span>
+                                                <strong>{keeperDisplay}</strong>
+                                            </div>
+                                        );
+                                    })()}
                                     {animal.coOwnership && (
                                         <div className="flex items-center gap-2">
                                             <span className="text-gray-600">Co-Ownership:</span>

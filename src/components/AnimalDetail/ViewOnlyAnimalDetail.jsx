@@ -14,6 +14,7 @@ import { QRModal } from '../PublicProfile/PublicProfileView';
 import ReportButton from '../ReportButton';
 const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onViewProfile, onViewAnimal, authToken, setModCurrentContext, setShowImageModal, setEnlargedImageUrl, initialTab = 1 }) => {
     const [breederInfo, setBreederInfo] = useState(null);
+    const [ownerInfo, setOwnerInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
     const [showQR, setShowQR] = useState(false);
@@ -283,6 +284,29 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
         };
         fetchBreeder();
     }, [animal?.breederId_public, API_BASE_URL]);
+
+    // Fetch owner info when animal is owned
+    React.useEffect(() => {
+        const fetchOwner = async () => {
+            if (animal?.isOwned && animal?.ownerId_public) {
+                try {
+                    const response = await axios.get(
+                        `${API_BASE_URL}/public/profiles/search?query=${animal.ownerId_public}&limit=1`
+                    );
+                    if (response.data && response.data.length > 0) {
+                        setOwnerInfo(response.data[0]);
+                    } else {
+                        setOwnerInfo(null);
+                    }
+                } catch {
+                    setOwnerInfo(null);
+                }
+            } else {
+                setOwnerInfo(null);
+            }
+        };
+        fetchOwner();
+    }, [animal?.isOwned, animal?.ownerId_public, API_BASE_URL]);
     
     // Fetch COI when component mounts or animal changes (if animal has both parents)
     React.useEffect(() => {
@@ -621,12 +645,18 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper</h3>
                                 <div className="text-sm space-y-2">
-                                    {(animal.keeperName || animal.isOwned) && (
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-gray-600">Keeper Name:</span>
-                                        <strong>{animal.keeperName || (animal.isOwned ? 'Me' : '')}</strong>
-                                    </div>
-                                    )}
+                                    {(() => {
+                                        const keeperDisplay = animal.isOwned
+                                            ? (ownerInfo ? (ownerInfo.breederName || ownerInfo.personalName || ownerInfo.id_public) : animal.ownerId_public) || null
+                                            : (animal.keeperName || null);
+                                        if (!keeperDisplay) return null;
+                                        return (
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-gray-600">Keeper Name:</span>
+                                                <strong>{keeperDisplay}</strong>
+                                            </div>
+                                        );
+                                    })()}
                                     {animal.coOwnership && (
                                         <div className="flex items-center gap-2">
                                             <span className="text-gray-600">Co-Ownership:</span>

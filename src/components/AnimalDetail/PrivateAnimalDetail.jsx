@@ -806,12 +806,18 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper</h3>
                                 <div className="text-sm space-y-2">
-                                    {(animal.keeperName || animal.isOwned) && (
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-gray-600">Keeper Name:</span>
-                                        <strong>{animal.keeperName || (animal.isOwned ? 'Me' : '')}</strong>
-                                    </div>
-                                    )}
+                                    {(() => {
+                                        const keeperDisplay = animal.isOwned
+                                            ? (userProfile ? (userProfile.breederName || userProfile.personalName || userProfile.id_public) : null)
+                                            : (animal.keeperName || null);
+                                        if (!keeperDisplay) return null;
+                                        return (
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-gray-600">Keeper Name:</span>
+                                                <strong>{keeperDisplay}</strong>
+                                            </div>
+                                        );
+                                    })()}
                                     {animal.coOwnership && (
                                         <div className="flex items-center gap-2">
                                             <span className="text-gray-600">Co-Ownership:</span>
