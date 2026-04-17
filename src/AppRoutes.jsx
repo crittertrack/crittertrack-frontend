@@ -255,6 +255,8 @@ export function AppRoutes({
           userProfile={userProfile}
           showModalMessage={() => {}}
           onViewAnimal={handleViewAnimal}
+          handleViewAnimal={handleViewAnimal}
+          handleEditAnimal={handleEditAnimal}
           speciesOptions={speciesOptions}
         />
       } />
