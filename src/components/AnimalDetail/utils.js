@@ -236,7 +236,7 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
                 <p className="text-xs font-semibold text-gray-600">{parentType}</p>
             </div>
             <div className="p-4">
-                <div className="flex items-start space-x-3">
+                <div className="flex items-center space-x-3">
                     {imgSrc ? (
                         <img src={imgSrc} alt={parentData.name} className="w-16 h-16 rounded-lg object-cover" />
                     ) : (
