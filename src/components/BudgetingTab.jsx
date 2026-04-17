@@ -603,20 +603,20 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                 <tr>
                                     <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Date</th>
                                     <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Type</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Animal</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Notes</th>
-                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Animal</th>
+                                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Price</th>
+                                    <th className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Contact</th>
+                                    <th className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Notes</th>
+                                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
                                 {filteredTransactions.map((transaction) => (
                                     <tr key={transaction._id} className="hover:bg-gray-50">
-                                        <td className="px-4 py-3 text-sm text-gray-700">
+                                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-gray-700">
                                             {new Date(transaction.date).toLocaleDateString('en-GB')}
                                         </td>
-                                        <td className="px-4 py-3 text-sm">
+                                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm">
                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                                 (transaction.type === 'animal-sale' || transaction.type === 'sale')
                                                     ? 'bg-green-100 text-green-800' 
@@ -635,33 +635,33 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                                     : 'Income'}
                                             </span>
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-700">
+                                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-gray-700">
                                             {(transaction.type === 'animal-sale' || transaction.type === 'sale' || transaction.type === 'animal-purchase' || transaction.type === 'purchase') ? (
                                                 <>
-                                                    <div className="font-medium">{transaction.animalName || 'N/A'}</div>
+                                                    <div className="font-medium truncate">{transaction.animalName || 'N/A'}</div>
                                                     {transaction.animalId && (
-                                                        <div className="text-xs text-gray-500">{transaction.animalId}</div>
+                                                        <div className="text-[9px] sm:text-xs text-gray-500 truncate">{transaction.animalId}</div>
                                                     )}
                                                 </>
                                             ) : (
                                                 <>
-                                                    <div className="font-medium">{transaction.description || 'N/A'}</div>
+                                                    <div className="font-medium truncate">{transaction.description || 'N/A'}</div>
                                                     {transaction.category && (
-                                                        <div className="text-xs text-gray-500">{transaction.category}</div>
+                                                        <div className="text-[9px] sm:text-xs text-gray-500 truncate">{transaction.category}</div>
                                                     )}
                                                 </>
                                             )}
                                         </td>
-                                        <td className="px-4 py-3 text-sm font-semibold text-gray-900">
+                                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm font-semibold text-gray-900 whitespace-nowrap">
                                             {getCurrencySymbol()}{transaction.price.toFixed(2)}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-700">
+                                        <td className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-gray-700">
                                             {(transaction.type === 'animal-sale' || transaction.type === 'sale') ? transaction.buyer : (transaction.type === 'animal-purchase' || transaction.type === 'purchase') ? transaction.seller : '-'}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-500 max-w-xs truncate">
+                                        <td className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-gray-500 max-w-xs truncate">
                                             {transaction.notes || '-'}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-right">
+                                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-right">
                                             <button
                                                 onClick={() => handleEditTransaction(transaction)}
                                                 className="text-blue-600 hover:text-blue-800 mr-3"
