@@ -327,7 +327,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
 
     return (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
-            <div className="bg-[#E1F2F5] rounded-xl shadow-2xl w-full max-w-6xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto my-2 sm:my-0">
+            <div className="bg-[#E1F2F5] rounded-xl shadow-2xl w-full max-w-6xl max-h-[95vh] sm:max-h-[90vh] my-2 sm:my-0 flex flex-col">
                 {/* Header */}
                 <div className="bg-[#E1F2F5] rounded-t-lg p-4 border-b border-gray-300">
                     <div className="flex justify-between items-center">
@@ -407,7 +407,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                 </div>
 
                 {/* Tab Content */}
-                <div className="bg-[#E1F2F5] border border-gray-300 rounded-b-lg pt-1 px-3 py-3 sm:pt-2 sm:px-6 sm:py-6 overflow-y-auto max-h-[calc(95vh-140px)] sm:max-h-[calc(90vh-160px)] pb-8">
+                <div className="bg-[#E1F2F5] border border-gray-300 rounded-b-lg pt-1 px-3 py-3 sm:pt-2 sm:px-6 sm:py-6 overflow-y-auto flex-1 pb-8">
                     {/* Tab 1: Overview */}
                     {detailViewTab === 1 && (
                         <div className="space-y-3">
