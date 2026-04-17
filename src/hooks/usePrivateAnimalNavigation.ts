@@ -68,9 +68,21 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
      * Edit an animal
      */
     const handleEditAnimal = useCallback((animal) => {
+        if (!animal) return;
+        setAnimalToView(animal);
         setAnimalToEdit(animal);
-        setAnimalToView(null);
     }, []);
+
+    /**
+     * Close the edit overlay and return to the currently edited animal
+     * without popping the animal history stack.
+     */
+    const handleCancelEditAnimal = useCallback(() => {
+        if (animalToEdit) {
+            setAnimalToView(prev => prev || animalToEdit);
+        }
+        setAnimalToEdit(null);
+    }, [animalToEdit]);
 
     /**
      * Go back to previous animal in view history
@@ -158,6 +170,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
                         window.dispatchEvent(new CustomEvent('animal-updated', { 
                             detail: updatedAnimal 
                         }));
+                        window.dispatchEvent(new Event('animals-changed'));
                     } catch (e) {
                         console.warn('Failed to dispatch animal-updated event:', e);
                     }
@@ -171,6 +184,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
                         window.dispatchEvent(new CustomEvent('animal-updated', {
                             detail: response.data
                         }));
+                        window.dispatchEvent(new Event('animals-changed'));
                     } catch (e) {
                         console.warn('Failed to dispatch fallback animal-updated event:', e);
                     }
@@ -477,6 +491,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
         // Handlers
         handleViewAnimal,
         handleEditAnimal,
+        handleCancelEditAnimal,
         handleBackFromAnimal,
         handleCloseAllAnimals,
         handleSaveAnimal,
