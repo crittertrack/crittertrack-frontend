@@ -15,6 +15,7 @@ export const FamilyTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal
     const [breedingRecordOffspring, setBreedingRecordOffspring] = useState({});
     const [ownedAnimals, setOwnedAnimals] = useState([]);
     const [ownedAnimalsLoaded, setOwnedAnimalsLoaded] = useState(false);
+    const [ownedAnimalsLoading, setOwnedAnimalsLoading] = useState(true);
     const [globalRels, setGlobalRels] = useState(null);
     const [globalRelsLoading, setGlobalRelsLoading] = useState(false);
     const [relInsightsOpen, setRelInsightsOpen] = useState(true);
@@ -23,23 +24,39 @@ export const FamilyTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal
     const [offspringOpen, setOffspringOpen] = useState(true);
     const ownedAnimalsLoadedRef = React.useRef(false);
 
-    // Fetch all owned animals + global relationships in parallel
+    // Fetch own collection first, then global relationships sequentially
     React.useEffect(() => {
-        if (ownedAnimalsLoadedRef.current || !authToken || !animal?.id_public) return;
+        if (!authToken || !animal?.id_public) {
+            setOwnedAnimalsLoading(false);
+            return;
+        }
+        if (ownedAnimalsLoadedRef.current) return;
         ownedAnimalsLoadedRef.current = true;
-        setGlobalRelsLoading(true);
-        Promise.all([
-            axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` } }),
-            axios.get(`${API_BASE_URL}/animals/${animal.id_public}/relationships`, { headers: { Authorization: `Bearer ${authToken}` } })
-        ]).then(([animalsRes, relsRes]) => {
-            setOwnedAnimals(animalsRes.data || []);
-            setOwnedAnimalsLoaded(true);
-            setGlobalRels(relsRes.data || null);
-            setGlobalRelsLoading(false);
-        }).catch(() => {
-            setOwnedAnimalsLoaded(true);
-            setGlobalRelsLoading(false);
-        });
+
+        const run = async () => {
+            // Step 1: load own collection and display it
+            setOwnedAnimalsLoading(true);
+            try {
+                const animalsRes = await axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` } });
+                setOwnedAnimals(animalsRes.data || []);
+                setOwnedAnimalsLoaded(true);
+            } catch {
+                setOwnedAnimalsLoaded(true);
+            } finally {
+                setOwnedAnimalsLoading(false);
+            }
+
+            // Step 2: once own collection is shown, fetch cross-breeder relationships
+            setGlobalRelsLoading(true);
+            try {
+                const relsRes = await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/relationships`, { headers: { Authorization: `Bearer ${authToken}` } });
+                setGlobalRels(relsRes.data || null);
+            } catch { /* no-op */ } finally {
+                setGlobalRelsLoading(false);
+            }
+        };
+
+        run();
     }, [authToken, API_BASE_URL, animal?.id_public]);
 
     // Fetch litters where this animal is sire or dam
@@ -166,15 +183,26 @@ export const FamilyTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal
                                 <div className="flex-1 h-px bg-blue-200" />
                                 {relOwnOpen ? <ChevronUp size={13} className="text-blue-400 flex-shrink-0" /> : <ChevronDown size={13} className="text-blue-400 flex-shrink-0" />}
                             </button>
-                            {relOwnOpen && (<>
+                            {relOwnOpen && (
+                            ownedAnimalsLoading ? (
+                                <div className="flex items-center gap-2 text-xs text-gray-400 py-2">
+                                    <Loader2 size={13} className="animate-spin" />
+                                    Loading your collection...
+                                </div>
+                            ) : (<>
                             {[
                                 ['Parents',            ['Sire (Father)', 'Dam (Mother)']],
+                                ['No relatives',       []],
                                 ['Siblings',           ['Full Sibling', 'Full Brother', 'Full Sister', 'Half-Sibling (via Sire)', 'Half-Brother (via Sire)', 'Half-Sister (via Sire)', 'Half-Sibling (via Dam)', 'Half-Brother (via Dam)', 'Half-Sister (via Dam)']],
                                 ['Nieces & Nephews',   ['Niece / Nephew', 'Niece', 'Nephew']],
                                 ['Aunts & Uncles',     ['Aunt / Uncle', 'Aunt', 'Uncle', 'Paternal Aunt / Uncle', 'Paternal Aunt', 'Paternal Uncle', 'Maternal Aunt / Uncle', 'Maternal Aunt', 'Maternal Uncle']],
                                 ['Grandparents',       ['Paternal Grandparent', 'Paternal Grandfather', 'Paternal Grandmother', 'Maternal Grandparent', 'Maternal Grandfather', 'Maternal Grandmother']],
                                 ['Great-Grandparents', ['Paternal Great-Grandparent', 'Paternal Great-Grandfather', 'Paternal Great-Grandmother', 'Maternal Great-Grandparent', 'Maternal Great-Grandfather', 'Maternal Great-Grandmother']],
                             ].map(([groupLabel, relTypes]) => {
+                                if (groupLabel === 'No relatives') {
+                                    if (relationships.length > 0) return null;
+                                    return <div key="no-rels" className="text-xs text-gray-400 py-1">No relatives found in your collection</div>;
+                                }
                                 const group = relationships.filter(r => relTypes.includes(r.rel));
                                 if (!group.length) return null;
                                 return (
@@ -210,14 +238,16 @@ export const FamilyTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal
                                     </div>
                                 );
                             })}
-                            </>)}
+                            </>)
+                            )}
                         </div>
 
-                        {/* Other breeders */}
-                        {!ownedAnimalsLoaded || globalRelsLoading ? (
+                        {/* Other breeders — only shown after own collection is loaded */}
+                        {ownedAnimalsLoaded && (
+                        globalRelsLoading ? (
                             <div className="flex items-center gap-2 text-xs text-gray-400 py-2">
                                 <Loader2 size={13} className="animate-spin" />
-                                Loading your collection and cross-breeder relationships...
+                                Loading relationships from other breeders...
                             </div>
                         ) : (
                         <div className="space-y-3">
@@ -268,7 +298,8 @@ export const FamilyTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal
                                 ))}
                             </>)}
                         </div>
-                        )}
+                        ))}
+                        </div>
                     </div>
                 )}
             </div>
