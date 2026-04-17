@@ -415,7 +415,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden">
                                 <div className="flex flex-col md:flex-row">
                                     {/* Left: Photo + status + badges */}
-                                    <div className="w-full md:w-1/4 p-4 flex flex-col items-center gap-2 border-b md:border-b-0 md:border-r border-gray-300">
+                                    <div className="w-full md:w-1/3 p-4 flex flex-col items-center gap-2 border-b md:border-b-0 md:border-r border-gray-300">
                                         <div className="relative w-full flex justify-center">
                                             <div className="absolute top-0 right-0">
                                                 {animal.gender === 'Male' ? <Mars size={16} strokeWidth={2.5} className="text-blue-600" /> : animal.gender === 'Female' ? <Venus size={16} strokeWidth={2.5} className="text-pink-600" /> : animal.gender === 'Intersex' ? <VenusAndMars size={16} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={16} strokeWidth={2.5} className="text-gray-500" />}
@@ -424,7 +424,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                 <img
                                                     src={animal.imageUrl || animal.photoUrl}
                                                     alt={animal.name}
-                                                    className="w-28 h-28 object-cover rounded-lg cursor-pointer hover:opacity-80 transition"
+                                                    className="w-32 h-32 object-contain rounded-lg cursor-pointer hover:opacity-80 transition"
                                                     onClick={() => {
                                                         if (setEnlargedImageUrl && setShowImageModal) {
                                                             setEnlargedImageUrl(animal.imageUrl || animal.photoUrl);
@@ -433,7 +433,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                     }}
                                                 />
                                             ) : (
-                                                <div className="w-28 h-28 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                                                <div className="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
                                                     <Cat size={40} />
                                                 </div>
                                             )}
