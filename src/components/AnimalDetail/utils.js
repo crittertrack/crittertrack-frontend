@@ -249,8 +249,8 @@ export const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewA
                             {parentData.prefix && `${parentData.prefix} `}{parentData.name}
                         </p>
                         <p className="text-xs text-gray-600 font-mono">{parentData.id_public}</p>
-                        {parentData.status && (
-                            <p className="text-xs text-gray-500 mt-1">{parentData.status}</p>
+                        {parentData.variety && (
+                            <p className="text-xs text-gray-500 mt-1">{parentData.variety}</p>
                         )}
                     </div>
                 </div>
