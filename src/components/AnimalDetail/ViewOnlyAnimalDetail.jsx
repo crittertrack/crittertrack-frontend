@@ -23,6 +23,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
     const [mpLoading, setMpLoading] = useState(false);
     const [publicRelationships, setPublicRelationships] = useState(null);
     const [publicRelLoading, setPublicRelLoading] = useState(false);
+    const [relInsightsOpen, setRelInsightsOpen] = useState(true);
     const mpTreeRef = useRef(null);
     const chartRef = useRef(null);
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
@@ -853,15 +854,24 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                 </div>
                             ) : publicRelationships && Object.values(publicRelationships).some(arr => Array.isArray(arr) && arr.length > 0) ? (
                                 <div className="bg-blue-50 rounded-lg border border-blue-200">
-                                    <div className="p-4">
-                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center mb-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setRelInsightsOpen(o => !o)}
+                                        className="w-full flex items-center justify-between p-4 text-left"
+                                    >
+                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center">
                                             <Network size={20} className="text-blue-600 mr-2" />
                                             Relationship Insights
                                             <span className="ml-2 text-xs font-normal text-gray-500 bg-white border border-blue-200 rounded-full px-2 py-0.5">
                                                 {Object.values(publicRelationships).reduce((s, arr) => s + (Array.isArray(arr) ? arr.length : 0), 0)} relatives
                                             </span>
                                         </h3>
-                                        <div className="space-y-3">
+                                        {relInsightsOpen
+                                            ? <ChevronUp size={18} className="text-blue-400 flex-shrink-0" />
+                                            : <ChevronDown size={18} className="text-blue-400 flex-shrink-0" />}
+                                    </button>
+                                    {relInsightsOpen && (
+                                    <div className="px-4 pb-4 space-y-3">
                                             {[
                                                 { key: 'parents',           label: 'Parents' },
                                                 { key: 'siblings',          label: 'Siblings' },
@@ -922,8 +932,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                     </div>
                                                 );
                                             })}
-                                        </div>
                                     </div>
+                                    )}
                                 </div>
                             ) : null}
 
