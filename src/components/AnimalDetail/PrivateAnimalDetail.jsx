@@ -550,7 +550,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 
                 {/* Tabs - ALL 11 TABS */}
                 <div className="bg-[#E1F2F5] border-b border-gray-300 px-2 sm:px-6 pt-2 sm:pt-4">
-                    <div className="flex flex-wrap gap-2 pb-2 sm:pb-4">
+                    <div className="flex flex-wrap gap-1 sm:gap-1 pb-2 sm:pb-4">
                         {[
                             { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
                             { id: 2, label: 'Status & Privacy', icon: Lock, color: 'text-slate-500' },
@@ -566,16 +566,17 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                             { id: 12, label: 'Show', icon: Trophy, color: 'text-yellow-600' },
                             { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' },
                             { id: 14, label: 'End of Life', icon: Scale, color: 'text-gray-500' },
-                            { id: 15, label: 'Gallery', icon: Images, color: 'text-rose-500' }
+                            { id: 15, label: 'Gallery', icon: Images, color: 'text-rose-500' },
+                            { id: 16, label: 'Logs', icon: ScrollText, color: 'text-gray-600' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setDetailViewTab(tab.id)}
-                                className={`flex-shrink-0 px-3 sm:px-4 py-2 sm:py-2 text-xs sm:text-sm font-medium rounded border-2 transition-colors ${
+                                className={`flex-shrink-0 px-2.5 sm:px-3 py-2 sm:py-2 text-xs sm:text-sm font-medium rounded border transition-colors ${
                                     detailViewTab === tab.id 
-                                        ? 'bg-white text-black border-gray-500' 
-                                        : 'bg-white text-gray-600 hover:text-gray-800 border-gray-400'
+                                        ? 'bg-primary text-black border-gray-400' 
+                                        : 'bg-gray-50 text-gray-600 hover:text-gray-800 border-gray-300'
                                 }`}
                                 title={tab.label}
                             >

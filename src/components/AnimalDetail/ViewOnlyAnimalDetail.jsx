@@ -372,8 +372,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                 </div>
 
                 {/* Tabs - PUBLIC VIEW: 8 tabs (Records + End of Life combined) */}
-                <div className="bg-[#E1F2F5] border-b border-gray-300">
-                    <div className="flex flex-wrap">
+                <div className="bg-[#E1F2F5]">
+                    <div className="flex flex-wrap gap-2 px-3 py-3">
                         {[
                             { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
                             { id: 2, label: 'Status', icon: Lock, color: 'text-slate-500' },
@@ -394,10 +394,10 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             <button
                                 key={tab.id}
                                 onClick={() => setDetailViewTab(tab.id)}
-                                className={`flex-1 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 px-3 py-3 text-sm font-medium whitespace-nowrap text-center transition ${
+                                className={`flex-shrink-0 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded border-2 transition-colors ${
                                     detailViewTab === tab.id
-                                        ? 'border-b-2 border-primary text-primary'
-                                        : 'text-gray-600 hover:text-gray-800'
+                                        ? 'bg-white text-black border-gray-500'
+                                        : 'bg-white text-gray-600 hover:text-gray-800 border-gray-400'
                                 }`}
                             >
                                 {React.createElement(tab.icon, { size: 14, className: `inline-block align-middle flex-shrink-0 mr-1.5 ${tab.color || ''}` })}{tab.label}
