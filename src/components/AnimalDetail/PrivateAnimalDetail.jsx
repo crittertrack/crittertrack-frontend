@@ -152,25 +152,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 
     // Relationship Insights • computed from all account animals (shown in Lineage tab)
     const relationships = useMemo(() => computeRelationships(animal, ownedAnimals), [animal, ownedAnimals]);
-    const ownedIds = useMemo(() => new Set(ownedAnimals.map(a => a.id_public)), [ownedAnimals]);
-    // Flatten global relationships from backend, exclude own-collection animals, add group label
-    const externalRelGroups = useMemo(() => {
-        if (!globalRels) return [];
-        const groupDefs = [
-            { key: 'parents',           label: 'Parents' },
-            { key: 'siblings',          label: 'Siblings' },
-            { key: 'nephewsNieces',     label: 'Nieces & Nephews' },
-            { key: 'auntsUncles',       label: 'Aunts & Uncles' },
-            { key: 'grandparents',      label: 'Grandparents' },
-            { key: 'greatGrandparents', label: 'Great-Grandparents' },
-            { key: 'cousins',           label: 'Cousins' },
-        ];
-        return groupDefs.map(({ key, label }) => ({
-            label,
-            animals: (globalRels[key] || []).filter(a => !ownedIds.has(a.id_public) && a.id_public !== animal.id_public),
-        })).filter(g => g.animals.length > 0);
-    }, [globalRels, ownedIds, animal?.id_public]);
-    const getExternalRelLabel = (groupLabel, rel) => {
+    const getRelLabel = (groupLabel, rel) => {
         const isMale = rel.gender === 'Male';
         const isFemale = rel.gender === 'Female';
         const side = rel._side === 'paternal' ? 'Paternal ' : rel._side === 'maternal' ? 'Maternal ' : '';
@@ -193,9 +175,31 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
             default: return groupLabel;
         }
     };
+    const allRelGroups = useMemo(() => {
+        const groupDefs = [
+            { key: 'parents',           label: 'Parents',            ownRelTypes: ['Sire (Father)', 'Dam (Mother)'] },
+            { key: 'siblings',          label: 'Siblings',           ownRelTypes: ['Full Sibling', 'Full Brother', 'Full Sister', 'Half-Sibling (via Sire)', 'Half-Brother (via Sire)', 'Half-Sister (via Sire)', 'Half-Sibling (via Dam)', 'Half-Brother (via Dam)', 'Half-Sister (via Dam)'] },
+            { key: 'nephewsNieces',     label: 'Nieces & Nephews',   ownRelTypes: ['Niece / Nephew', 'Niece', 'Nephew'] },
+            { key: 'auntsUncles',       label: 'Aunts & Uncles',     ownRelTypes: ['Aunt / Uncle', 'Aunt', 'Uncle', 'Paternal Aunt / Uncle', 'Paternal Aunt', 'Paternal Uncle', 'Maternal Aunt / Uncle', 'Maternal Aunt', 'Maternal Uncle'] },
+            { key: 'grandparents',      label: 'Grandparents',       ownRelTypes: ['Paternal Grandparent', 'Paternal Grandfather', 'Paternal Grandmother', 'Maternal Grandparent', 'Maternal Grandfather', 'Maternal Grandmother'] },
+            { key: 'greatGrandparents', label: 'Great-Grandparents', ownRelTypes: ['Paternal Great-Grandparent', 'Paternal Great-Grandfather', 'Paternal Great-Grandmother', 'Maternal Great-Grandparent', 'Maternal Great-Grandfather', 'Maternal Great-Grandmother'] },
+            { key: 'cousins',           label: 'Cousins',            ownRelTypes: ['Cousin'] },
+        ];
+        return groupDefs.map(({ key, label, ownRelTypes }) => {
+            const seen = new Set();
+            const items = [];
+            relationships.filter(r => ownRelTypes.includes(r.rel)).forEach(({ animal: rel, rel: relLabel }) => {
+                if (!seen.has(rel.id_public)) { seen.add(rel.id_public); items.push({ rel, relLabel }); }
+            });
+            if (globalRels) {
+                (globalRels[key] || []).filter(a => a.id_public !== animal?.id_public).forEach(rel => {
+                    if (!seen.has(rel.id_public)) { seen.add(rel.id_public); items.push({ rel, relLabel: getRelLabel(label, rel) }); }
+                });
+            }
+            return { label, items };
+        }).filter(g => g.items.length > 0);
+    }, [relationships, globalRels, animal?.id_public, animal?.sireId_public, animal?.damId_public]);
     const [relInsightsOpen, setRelInsightsOpen] = useState(true);
-    const [relOwnOpen, setRelOwnOpen] = useState(true);
-    const [relExternalOpen, setRelExternalOpen] = useState(false);
     const [offspringOpen, setOffspringOpen] = useState(true);
     const pedigreeIssues = useMemo(() => {
         const issues = [];
@@ -1273,148 +1277,81 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 
                             {/* Relationship Insights */}
                             <div className="bg-blue-50 rounded-lg border border-blue-200">
-                                    <button
-                                        type="button"
-                                        onClick={() => setRelInsightsOpen(o => !o)}
-                                        className="w-full flex items-center justify-between p-4 text-left"
-                                    >
-                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center">
-                                            <Network size={20} className="text-blue-600 mr-2" />
-                                            Relationship Insights
-                                            {relationships.length > 0 && (
-                                                <span className="ml-2 text-xs font-normal text-gray-500 bg-white border border-blue-200 rounded-full px-2 py-0.5">
-                                                    {relationships.length} in your collection
-                                                </span>
-                                            )}
-                                            {externalRelGroups.length > 0 && (
-                                                <span className="ml-1 text-xs font-normal text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
-                                                    +{externalRelGroups.reduce((s, g) => s + g.animals.length, 0)} from other breeders
-                                                </span>
-                                            )}
-                                        </h3>
-                                        {relInsightsOpen
-                                            ? <ChevronUp size={18} className="text-blue-400 flex-shrink-0" />
-                                            : <ChevronDown size={18} className="text-blue-400 flex-shrink-0" />}
-                                    </button>
-                                    {relInsightsOpen && (
-                                        <div className="px-4 pb-4 space-y-5">
-                                            {/* Own collection */}
-                                            <div className="space-y-3">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setRelOwnOpen(o => !o)}
-                                                        className="w-full flex items-center gap-2 text-left"
-                                                    >
-                                                        <span className="text-xs font-bold text-blue-700 uppercase tracking-wide">Your Collection</span>
-                                                        <div className="flex-1 h-px bg-blue-200" />
-                                                        {relOwnOpen ? <ChevronUp size={13} className="text-blue-400 flex-shrink-0" /> : <ChevronDown size={13} className="text-blue-400 flex-shrink-0" />}
-                                                    </button>
-                                                    {relOwnOpen && (<>
-                                                    {[
-                                                        ['Parents',            ['Sire (Father)', 'Dam (Mother)']],  
-                                                        ['Siblings',           ['Full Sibling', 'Full Brother', 'Full Sister', 'Half-Sibling (via Sire)', 'Half-Brother (via Sire)', 'Half-Sister (via Sire)', 'Half-Sibling (via Dam)', 'Half-Brother (via Dam)', 'Half-Sister (via Dam)']],
-                                                        ['Nieces & Nephews',   ['Niece / Nephew', 'Niece', 'Nephew']],
-                                                        ['Aunts & Uncles',     ['Aunt / Uncle', 'Aunt', 'Uncle', 'Paternal Aunt / Uncle', 'Paternal Aunt', 'Paternal Uncle', 'Maternal Aunt / Uncle', 'Maternal Aunt', 'Maternal Uncle']],
-                                                        ['Grandparents',       ['Paternal Grandparent', 'Paternal Grandfather', 'Paternal Grandmother', 'Maternal Grandparent', 'Maternal Grandfather', 'Maternal Grandmother']],
-                                                        ['Great-Grandparents', ['Paternal Great-Grandparent', 'Paternal Great-Grandfather', 'Paternal Great-Grandmother', 'Maternal Great-Grandparent', 'Maternal Great-Grandfather', 'Maternal Great-Grandmother']],
-                                                    ].map(([groupLabel, relTypes]) => {
-                                                        const group = relationships.filter(r => relTypes.includes(r.rel));
-                                                        if (!group.length) return null;
-                                                        return (
-                                                            <div key={groupLabel}>
-                                                                <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{groupLabel}</h4>
-                                                                <div className="space-y-2">
-                                                                    {group.map(({ animal: rel, rel: relLabel }) => (
-                                                                        <div
-                                                                            key={rel.id_public}
-                                                                            className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-blue-100 hover:border-blue-300 transition-colors cursor-pointer"
-                                                                            onClick={() => onViewAnimal && onViewAnimal(rel)}
-                                                                        >
-                                                                            <div className="flex items-center gap-2 min-w-0">
-                                                                                {(rel.imageUrl || rel.photoUrl) ? (
-                                                                                    <img src={rel.imageUrl || rel.photoUrl} alt={rel.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200" />
-                                                                                ) : (
-                                                                                    <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-sm text-blue-600 font-semibold">
-                                                                                        {rel.species?.charAt(0).toUpperCase()}
-                                                                                    </div>
-                                                                                )}
-                                                                                <div className="min-w-0">
-                                                                                    <div className="text-sm font-medium text-gray-800 truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}</div>
-                                                                                    <div className="text-xs text-gray-500">{rel.gender}{[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ') ? ` · ${[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
-                                                                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setRelInsightsOpen(o => !o)}
+                                    className="w-full flex items-center justify-between p-4 text-left"
+                                >
+                                    <h3 className="text-lg font-semibold text-gray-700 flex items-center">
+                                        <Network size={20} className="text-blue-600 mr-2" />
+                                        Relationship Insights
+                                        {ownedAnimalsLoaded && allRelGroups.length > 0 && (
+                                            <span className="ml-2 text-xs font-normal text-gray-500 bg-white border border-blue-200 rounded-full px-2 py-0.5">
+                                                {allRelGroups.reduce((s, g) => s + g.items.length, 0)} relatives
+                                            </span>
+                                        )}
+                                        {globalRelsLoading && (
+                                            <Loader2 size={13} className="animate-spin text-blue-400 ml-2" />
+                                        )}
+                                    </h3>
+                                    {relInsightsOpen
+                                        ? <ChevronUp size={18} className="text-blue-400 flex-shrink-0" />
+                                        : <ChevronDown size={18} className="text-blue-400 flex-shrink-0" />}
+                                </button>
+                                {relInsightsOpen && (
+                                    <div className="px-4 pb-4 space-y-3">
+                                        {!ownedAnimalsLoaded ? (
+                                            <div className="flex items-center gap-2 text-xs text-gray-400 py-2">
+                                                <Loader2 size={13} className="animate-spin" />
+                                                Loading relationships...
+                                            </div>
+                                        ) : allRelGroups.length === 0 && !globalRelsLoading ? (
+                                            <div className="text-xs text-gray-400 py-1">No known relatives found</div>
+                                        ) : (
+                                            <>
+                                                {allRelGroups.map(({ label: groupLabel, items }) => (
+                                                    <div key={groupLabel}>
+                                                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{groupLabel}</h4>
+                                                        <div className="space-y-2">
+                                                            {items.map(({ rel, relLabel }) => (
+                                                                <div
+                                                                    key={rel.id_public}
+                                                                    className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-blue-100 hover:border-blue-300 transition-colors cursor-pointer"
+                                                                    onClick={() => onViewAnimal && onViewAnimal(rel)}
+                                                                >
+                                                                    <div className="flex items-center gap-2 min-w-0">
+                                                                        {(rel.imageUrl || rel.photoUrl) ? (
+                                                                            <img src={rel.imageUrl || rel.photoUrl} alt={rel.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200" />
+                                                                        ) : (
+                                                                            <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-sm text-blue-600 font-semibold">
+                                                                                {rel.species?.charAt(0).toUpperCase()}
                                                                             </div>
-                                                                            <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                                                                                <span className="text-xs text-blue-700 bg-blue-100 rounded-full px-2 py-0.5 font-medium whitespace-nowrap">{relLabel}</span>
-                                                                                <ChevronRight size={14} className="text-gray-400" />
-                                                                            </div>
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                    </>)}
-                                                </div>
-
-                                            {/* Other breeders */}
-                                            {!ownedAnimalsLoaded || globalRelsLoading ? (
-                                                <div className="flex items-center gap-2 text-xs text-gray-400 py-2">
-                                                    <Loader2 size={13} className="animate-spin" />
-                                                    Loading your collection and cross-breeder relationships...
-                                                </div>
-                                            ) : (
-                                            <div className="space-y-3">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setRelExternalOpen(o => !o)}
-                                                    className="w-full flex items-center gap-2 text-left"
-                                                >
-                                                    <span className="text-xs font-bold text-amber-700 uppercase tracking-wide">From Other Breeders</span>
-                                                    <div className="flex-1 h-px bg-amber-200" />
-                                                    {relExternalOpen ? <ChevronUp size={13} className="text-amber-400 flex-shrink-0" /> : <ChevronDown size={13} className="text-amber-400 flex-shrink-0" />}
-                                                </button>
-                                                {relExternalOpen && (<>
-                                                    {externalRelGroups.length === 0 && (
-                                                        <div className="text-xs text-gray-400 py-1">No external relationships found</div>
-                                                    )}
-                                                    {externalRelGroups.map(({ label: groupLabel, animals: groupAnimals }) => (
-                                                        <div key={groupLabel}>
-                                                            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{groupLabel}</h4>
-                                                            <div className="space-y-2">
-                                                                {groupAnimals.map(rel => (
-                                                                    <div
-                                                                        key={rel.id_public}
-                                                                        className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-amber-100 hover:border-amber-300 transition-colors cursor-pointer"
-                                                                        onClick={() => onViewAnimal && onViewAnimal(rel)}
-                                                                    >
-                                                                        <div className="flex items-center gap-2 min-w-0">
-                                                                            {(rel.imageUrl || rel.photoUrl) ? (
-                                                                                <img src={rel.imageUrl || rel.photoUrl} alt={rel.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200" />
-                                                                            ) : (
-                                                                                <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 text-sm text-amber-700 font-semibold">
-                                                                                    {rel.species?.charAt(0).toUpperCase()}
-                                                                                </div>
-                                                                            )}
-                                                                            <div className="min-w-0">
-                                                                                <div className="text-sm font-medium text-gray-800 truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}{rel.suffix ? ` ${rel.suffix}` : ''}</div>
-                                                                                <div className="text-xs text-gray-500">{rel.gender}{[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ') ? ` · ${[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                                                                            <span className="text-xs text-amber-700 bg-amber-100 rounded-full px-2 py-0.5 font-medium whitespace-nowrap">{getExternalRelLabel(groupLabel, rel)}</span>
-                                                                            <Globe size={13} className="text-amber-400" />
+                                                                        )}
+                                                                        <div className="min-w-0">
+                                                                            <div className="text-sm font-medium text-gray-800 truncate">{rel.prefix ? `${rel.prefix} ` : ''}{rel.name}{rel.suffix ? ` ${rel.suffix}` : ''}</div>
+                                                                            <div className="text-xs text-gray-500">{rel.gender}{[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ') ? ` · ${[rel.color, rel.coatPattern, rel.coat].filter(Boolean).join(' ')}` : ''}{rel.birthDate ? ` · ${formatDate(rel.birthDate)}` : ''}</div>
                                                                         </div>
                                                                     </div>
-                                                                ))}
-                                                            </div>
+                                                                    <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                                                                        <span className="text-xs text-blue-700 bg-blue-100 rounded-full px-2 py-0.5 font-medium whitespace-nowrap">{relLabel}</span>
+                                                                        <ChevronRight size={14} className="text-gray-400" />
+                                                                    </div>
+                                                                </div>
+                                                            ))}
                                                         </div>
-                                                    ))}
-                                                </>)}
-                                            </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
+                                                    </div>
+                                                ))}
+                                                {globalRelsLoading && (
+                                                    <div className="flex items-center gap-2 text-xs text-gray-400 py-1">
+                                                        <Loader2 size={13} className="animate-spin" />
+                                                        Loading more...
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
 
                             {/* 2nd Section: Offspring & Litters - merged litters + pedigree offspring */}
                             {(animalLitters === null || pedigreeOffspring === null) ? (
