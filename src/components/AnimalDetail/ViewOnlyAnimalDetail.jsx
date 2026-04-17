@@ -539,9 +539,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                 <div>
                                                     <span className="text-gray-500">Breeder:</span>{' '}
                                                     {breederInfo ? (
-                                                        <button
-                                                            onClick={() => onViewProfile && onViewProfile(breederInfo)}
-                                                            className="text-primary hover:underline font-medium"
+                                                        <RouterLink
+                                                            to={`/user/${breederInfo.id_public}`}
+                                                            className="text-purple-600 hover:underline font-medium"
                                                         >
                                                             {(() => {
                                                                 const showPersonal = breederInfo.showPersonalName ?? false;
@@ -556,7 +556,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                                     return 'Unknown Breeder';
                                                                 }
                                                             })()}
-                                                        </button>
+                                                        </RouterLink>
                                                     ) : (
                                                         <span className="font-mono text-accent">{animal.breederId_public}</span>
                                                     )}
@@ -680,8 +680,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                         {(animal.keeperHistory || []).map((entry, idx) => (
                                             <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-semibold text-gray-800">{entry.name || 'Unknown'}</p>
-                                                    {entry.userId_public && <p className="text-xs text-gray-400 font-mono">{entry.userId_public}</p>}
+                                                    {entry.userId_public
+                                                        ? <RouterLink to={`/user/${entry.userId_public}`} className="text-sm font-semibold text-purple-600 hover:underline">{entry.name || 'Unknown'}</RouterLink>
+                                                        : <p className="text-sm font-semibold text-gray-800">{entry.name || 'Unknown'}</p>}
                                                 </div>
                                                 {entry.country && (
                                                     <div className="flex items-center gap-1 flex-shrink-0">
