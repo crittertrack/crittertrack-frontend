@@ -550,7 +550,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
 
                 {/* Tabs - ALL 11 TABS */}
                 <div className="bg-[#E1F2F5] border-b border-gray-300 px-2 sm:px-6 pt-2 sm:pt-4">
-                    <div className="flex flex-wrap border border-b-0 border-gray-400">
+                    <div className="flex flex-wrap gap-2 pb-2 sm:pb-4">
                         {[
                             { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
                             { id: 2, label: 'Status & Privacy', icon: Lock, color: 'text-slate-500' },
@@ -572,10 +572,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setDetailViewTab(tab.id)}
-                                className={`flex-1 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 px-3 py-3 text-sm font-medium whitespace-nowrap text-center transition border-r border-gray-400 last:border-r-0 ${
+                                className={`flex-shrink-0 px-3 sm:px-4 py-2 sm:py-2 text-xs sm:text-sm font-medium rounded border-2 transition-colors ${
                                     detailViewTab === tab.id 
-                                        ? 'border-b-2 border-primary text-primary bg-white' 
-                                        : 'text-gray-600 hover:text-gray-800'
+                                        ? 'bg-white text-black border-gray-500' 
+                                        : 'bg-white text-gray-600 hover:text-gray-800 border-gray-400'
                                 }`}
                                 title={tab.label}
                             >
