@@ -602,10 +602,10 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                             <thead className="bg-gray-50 border-b border-gray-200">
                                 <tr>
                                     <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Date</th>
-                                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Type</th>
+                                    <th className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Type</th>
                                     <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Animal</th>
                                     <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Price</th>
-                                    <th className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Contact</th>
+                                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Contact</th>
                                     <th className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Notes</th>
                                     <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Actions</th>
                                 </tr>
@@ -616,8 +616,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-gray-700">
                                             {new Date(transaction.date).toLocaleDateString('en-GB')}
                                         </td>
-                                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                        <td className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm whitespace-nowrap">
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
                                                 (transaction.type === 'animal-sale' || transaction.type === 'sale')
                                                     ? 'bg-green-100 text-green-800' 
                                                     : (transaction.type === 'animal-purchase' || transaction.type === 'purchase')
@@ -638,16 +638,15 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-gray-700">
                                             {(transaction.type === 'animal-sale' || transaction.type === 'sale' || transaction.type === 'animal-purchase' || transaction.type === 'purchase') ? (
                                                 <>
-                                                    <div className="font-medium truncate">{transaction.animalName || 'N/A'}</div>
-                                                    {transaction.animalId && (
-                                                        <div className="text-[9px] sm:text-xs text-gray-500 truncate">{transaction.animalId}</div>
-                                                    )}
+                                                    <div className="hidden sm:block font-medium truncate">{transaction.animalName || 'N/A'}</div>
+                                                    <div className="truncate">{transaction.animalId}</div>
                                                 </>
                                             ) : (
                                                 <>
-                                                    <div className="font-medium truncate">{transaction.description || 'N/A'}</div>
+                                                    <div className="hidden sm:block font-medium truncate">{transaction.description || 'N/A'}</div>
+                                                    <div className="sm:hidden text-[10px] truncate">{transaction.description || 'N/A'}</div>
                                                     {transaction.category && (
-                                                        <div className="text-[9px] sm:text-xs text-gray-500 truncate">{transaction.category}</div>
+                                                        <div className="hidden sm:block text-[9px] sm:text-xs text-gray-500 truncate">{transaction.category}</div>
                                                     )}
                                                 </>
                                             )}
@@ -655,7 +654,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm font-semibold text-gray-900 whitespace-nowrap">
                                             {getCurrencySymbol()}{transaction.price.toFixed(2)}
                                         </td>
-                                        <td className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-gray-700">
+                                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-gray-700">
                                             {(transaction.type === 'animal-sale' || transaction.type === 'sale') ? transaction.buyer : (transaction.type === 'animal-purchase' || transaction.type === 'purchase') ? transaction.seller : '-'}
                                         </td>
                                         <td className="hidden sm:table-cell px-2 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm text-gray-500 max-w-xs truncate">
