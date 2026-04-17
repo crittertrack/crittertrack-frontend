@@ -5311,7 +5311,7 @@ const AnimalForm = ({
                                 type="button"
                                 onClick={() => setActiveTab(tab.id)}
                                 data-tutorial-target={tab.id === 2 ? 'status-privacy-tab' : tab.id === 3 ? 'identification-tab' : tab.id === 4 ? 'appearance-tab' : tab.id === 5 ? 'beta-pedigree-tab' : tab.id === 6 ? 'family-tab' : tab.id === 7 ? 'fertility-tab' : tab.id === 8 ? 'health-tab' : tab.id === 9 ? 'care-tab' : tab.id === 10 ? 'behavior-tab' : tab.id === 11 ? 'notes-tab' : tab.id === 12 ? 'show-tab' : undefined}
-                                className={`w-[calc(20%-0.4rem)] px-2 py-2 text-xs font-medium rounded border-2 transition-colors ${
+                                className={`flex-shrink-0 px-1.5 py-1.5 text-[10px] font-medium rounded border-2 transition-colors ${
                                     activeTab === tab.id 
                                         ? 'bg-[#F2E4E9] text-black border-gray-300' 
                                         : 'bg-white text-gray-600 hover:text-gray-800 border-gray-300'
