@@ -115,8 +115,12 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
      */
     const handleSaveAnimal = useCallback(async (method: string, url: string, data: any) => {
         try {
-            console.log('[handleSaveAnimal] Saving animal:', { method, url });
+            console.log('[handleSaveAnimal] Saving animal:', { method, url, authToken: authToken ? 'present' : 'MISSING' });
             
+            if (!authToken) {
+                throw new Error('Authentication token is missing. Please log in again.');
+            }
+
             // Add ownerId_public if not present (for new animals)
             if (!data.ownerId_public) {
                 // Note: userProfile should be passed as parameter or accessed from context
@@ -129,8 +133,8 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
                 url,
                 data,
                 headers: {
-                    Authorization: `Bearer ${authToken}`,
-                    'Content-Type': 'application/json'
+                    Authorization: `Bearer ${authToken}`
+                    // Don't set Content-Type - let axios handle it automatically for JSON
                 }
             });
 
