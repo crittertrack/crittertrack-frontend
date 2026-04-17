@@ -285,7 +285,7 @@ export const FamilyTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal
                                                         </div>
                                                     </div>
                                                     <div className="text-xs text-gray-600 flex gap-2 flex-wrap items-center">
-                                                        {!litter.isPlanned && litter.birthDate && <span>{formatDate(litter.birthDate)}{litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-green-600">• {litterAge(litter.birthDate)}</span>}</span>}
+                                                        {!litter.isPlanned && litter.birthDate && <span>{formatDate(litter.birthDate)}{litterAge(litter.birthDate) && <span className="ml-1 font-semibold text-green-600">~ {litterAge(litter.birthDate)}</span>}</span>}
                                                         {lIsMated && <span className="text-purple-600">{formatDate(litter.matingDate)}</span>}
                                                         {lIsPlannedOnly && litter.matingDate && <span className="text-indigo-600">{formatDate(litter.matingDate)}</span>}
                                                         {mate?.name && <span className="truncate max-w-[120px]">{[mate.prefix, mate.name, mate.suffix].filter(Boolean).join(' ')}</span>}
