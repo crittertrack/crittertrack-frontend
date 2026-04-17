@@ -77,6 +77,8 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
      * Pops from history or closes view if no history
      */
     const handleBackFromAnimal = useCallback(() => {
+        // Always close edit mode first
+        setAnimalToEdit(null);
         if (animalViewHistory.length > 0) {
             // Pop from history
             const newHistory = [...animalViewHistory];
