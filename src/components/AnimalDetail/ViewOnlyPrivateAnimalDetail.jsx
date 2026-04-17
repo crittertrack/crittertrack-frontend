@@ -468,10 +468,13 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                             ? (ownerInfo ? (ownerInfo.breederName || ownerInfo.personalName || ownerInfo.id_public) : animal.ownerId_public) || null
                                             : (animal.keeperName || null);
                                         if (!keeperDisplay) return null;
+                                        const keeperLink = animal.isOwned && ownerInfo?.id_public ? `/user/${ownerInfo.id_public}` : null;
                                         return (
                                             <div className="flex items-center gap-2">
                                                 <span className="text-gray-600">Keeper Name:</span>
-                                                <strong>{keeperDisplay}</strong>
+                                                {keeperLink
+                                                    ? <RouterLink to={keeperLink} className="text-purple-600 hover:underline font-semibold">{keeperDisplay}</RouterLink>
+                                                    : <strong>{keeperDisplay}</strong>}
                                             </div>
                                         );
                                     })()}
