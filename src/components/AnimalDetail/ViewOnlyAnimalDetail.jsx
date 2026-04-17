@@ -97,6 +97,38 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
     }, [detailViewTab, animal?.id_public]);
     // Reset tab when navigating to a different animal
     React.useEffect(() => { setDetailViewTab(initialTab); setMpEnrichedData(null); setMpLoading(false); }, [animal?.id_public, initialTab]);
+    
+    // Listen for animal updates and refresh displayed data
+    useEffect(() => {
+        const handleAnimalUpdated = (event) => {
+            const updatedAnimal = event.detail?.animal;
+            if (!updatedAnimal || !animal) return;
+
+            // Refetch if this animal or parents were updated
+            const shouldRefetch = 
+                updatedAnimal.id_public === animal.id_public ||
+                updatedAnimal.id_public === animal.sireId_public ||
+                updatedAnimal.id_public === animal.damId_public ||
+                updatedAnimal.id_public === animal.fatherId_public ||
+                updatedAnimal.id_public === animal.motherId_public;
+
+            if (shouldRefetch) {
+                // Reset breeding records and cached data
+                setAnimalCOI(null);
+                setAnimalLitters(null);
+                setBreedingRecordOffspring({});
+                setExpandedBreedingRecords({});
+                setPedigreeOffspring(null);
+                setMpEnrichedData(null);
+                setPublicRelationships(null);
+                setParentCardKey(prev => prev + 1);
+            }
+        };
+
+        window.addEventListener('animal-updated', handleAnimalUpdated);
+        return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
+    }, [animal]);
+
     const [animalCOI, setAnimalCOI] = useState(null);
     const [loadingCOI, setLoadingCOI] = useState(false);
     const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});

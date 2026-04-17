@@ -150,6 +150,40 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
         });
     }, [authToken, API_BASE_URL, animal?.id_public, userAnimals]);
 
+    // Listen for animal updates and refetch data when this animal or related animals are updated
+    useEffect(() => {
+        const handleAnimalUpdated = (event) => {
+            const updatedAnimal = event.detail?.animal;
+            
+            // Refetch if:
+            // 1. This animal was updated
+            // 2. A parent animal was updated
+            // 3. An offspring was updated (affects breeding records)
+            if (!updatedAnimal || !animal) return;
+            
+            const shouldRefetch = 
+                updatedAnimal.id_public === animal.id_public ||
+                updatedAnimal.id_public === animal.sireId_public ||
+                updatedAnimal.id_public === animal.damId_public ||
+                updatedAnimal.id_public === animal.fatherId_public ||
+                updatedAnimal.id_public === animal.motherId_public;
+            
+            if (shouldRefetch) {
+                // Force component to refetch by updating parentCardKey
+                // This triggers re-computation of parent cards and relationships
+                setParentCardKey(prev => prev + 1);
+                
+                // If this animal itself was updated, update the displayed animal
+                if (updatedAnimal.id_public === animal.id_public) {
+                    onUpdateAnimal && onUpdateAnimal(updatedAnimal);
+                }
+            }
+        };
+
+        window.addEventListener('animal-updated', handleAnimalUpdated);
+        return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
+    }, [animal, onUpdateAnimal]);
+
     // Relationship Insights • computed from all account animals (shown in Lineage tab)
     const relationships = useMemo(() => computeRelationships(animal, ownedAnimals), [animal, ownedAnimals]);
     const getRelLabel = (groupLabel, rel) => {

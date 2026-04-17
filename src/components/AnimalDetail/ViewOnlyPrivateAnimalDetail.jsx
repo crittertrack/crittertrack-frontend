@@ -98,6 +98,34 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
     useEffect(() => { setMpEnrichedData(null); setMpLoading(false); }, [animal?.id_public]);
     useEffect(() => { setDetailViewTab(initialTab); setBetaPedigreeView(initialBetaView); }, [animal?.id_public, initialTab, initialBetaView]);
 
+    // Listen for animal updates and force refresh when this animal or relatives are updated
+    useEffect(() => {
+        const handleAnimalUpdated = (event) => {
+            const updatedAnimal = event.detail?.animal;
+            if (!updatedAnimal || !animal) return;
+
+            // Refetch if this animal, a parent, or offspring was updated
+            const shouldRefetch = 
+                updatedAnimal.id_public === animal.id_public ||
+                updatedAnimal.id_public === animal.sireId_public ||
+                updatedAnimal.id_public === animal.damId_public ||
+                updatedAnimal.id_public === animal.fatherId_public ||
+                updatedAnimal.id_public === animal.motherId_public;
+
+            if (shouldRefetch) {
+                // Force refresh of litters and breeding records
+                setAnimalLitters(null);
+                setBreedingRecordOffspring({});
+                setExpandedBreedingRecords({});
+                setPedigreeOffspring(null);
+                setMpEnrichedData(null);
+            }
+        };
+
+        window.addEventListener('animal-updated', handleAnimalUpdated);
+        return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
+    }, [animal]);
+
     // Fetch all litters where this animal is sire or dam
     React.useEffect(() => {
         if (!animal?.id_public || !authToken) return;

@@ -840,6 +840,28 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
     }, [showAddForm, onFormOpenChange]);
 
+    // Listen for animal updates and refetch litters when pair animals change
+    useEffect(() => {
+        const handleAnimalUpdated = (event) => {
+            const updatedAnimal = event.detail?.animal;
+            if (!updatedAnimal || !myAnimals.length) return;
+
+            // Check if updated animal is a potential pair animal in any litter
+            const isInvolvedInLitter = litters.some(l =>
+                updatedAnimal.id_public === l.sireId_public ||
+                updatedAnimal.id_public === l.damId_public
+            );
+
+            if (isInvolvedInLitter) {
+                // Refetch litters to get updated pair info, breeding records, etc.
+                fetchLitters();
+            }
+        };
+
+        window.addEventListener('animal-updated', handleAnimalUpdated);
+        return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
+    }, [litters]);
+
     // Fallback: fetch offspring for a specific litter if not yet loaded when expanded
     // (normally fetchLitters pre-loads all offspring, this is just a safety net)
     useEffect(() => {

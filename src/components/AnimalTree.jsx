@@ -528,6 +528,25 @@ const AnimalTreeContent = ({ authToken, userProfile, showModalMessage, onViewAni
         return filtered;
     }, [nodes, searchQuery, decodedSpecies, fitView]);
 
+    // Listen for animal updates and refetch tree when relevant animals change
+    useEffect(() => {
+        const handleAnimalUpdated = (event) => {
+            const updatedAnimal = event.detail?.animal;
+            if (!updatedAnimal || !allAnimals.length) return;
+
+            // Refetch if any displayed animal was updated (name, image, genetics, etc.)
+            const isInTree = allAnimals.some(a => a.id_public === updatedAnimal.id_public);
+            if (isInTree) {
+                console.log('[AnimalTree] Animal updated, rebuilding tree:', updatedAnimal.id_public);
+                // Trigger tree rebuild by re-running the fetch
+                fetchAnimalsAndBuildGraph();
+            }
+        };
+
+        window.addEventListener('animal-updated', handleAnimalUpdated);
+        return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
+    }, [allAnimals, fetchAnimalsAndBuildGraph]);
+
     const clearSearch = () => {
         setSearchQuery('');
     };

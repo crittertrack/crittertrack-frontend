@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import axios from 'axios';
 import {
     Network, Users, ChevronDown, ChevronUp, ChevronRight,
@@ -97,6 +97,33 @@ export const FamilyTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal
             .catch(() => { if (!cancelled) setPedigreeOffspring([]); });
         return () => { cancelled = true; };
     }, [animal?.id_public, authToken, API_BASE_URL]);
+
+    // Listen for animal updates and refetch litters and pedigree data
+    useEffect(() => {
+        const handleAnimalUpdated = (event) => {
+            const updatedAnimal = event.detail?.animal;
+            if (!updatedAnimal || !animal) return;
+
+            // Refetch if this animal or a parent was updated
+            const shouldRefetch = 
+                updatedAnimal.id_public === animal.id_public ||
+                updatedAnimal.id_public === animal.sireId_public ||
+                updatedAnimal.id_public === animal.damId_public ||
+                updatedAnimal.id_public === animal.fatherId_public ||
+                updatedAnimal.id_public === animal.motherId_public;
+
+            if (shouldRefetch) {
+                // Refetch litters and offspring
+                setAnimalLitters(null);
+                setPedigreeOffspring(null);
+                setBreedingRecordOffspring({});
+                setGlobalRels(null);
+            }
+        };
+
+        window.addEventListener('animal-updated', handleAnimalUpdated);
+        return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
+    }, [animal]);
 
     const relationships = useMemo(() => computeRelationships(animal, ownedAnimals), [animal, ownedAnimals]);
 
