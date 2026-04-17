@@ -3668,9 +3668,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                 if (isBulkMode) {
                                                                     toggleOffspringSelection(litter._id, animal.id_public);
                                                                 } else {
-                                                                    // If animal is on user's account (in myAnimals), open edit view; otherwise open read-only view
-                                                                    const isOnAccount = myAnimals.some(a => a.id_public === animal.id_public);
-                                                                    if (isOnAccount) {
+                                                                    // If animal is owned by current user, open edit view; otherwise open read-only view
+                                                                    const isOwnedByUser = animal.ownerId_public === userProfile?.id_public;
+                                                                    if (isOwnedByUser) {
                                                                         handleViewAnimal && handleViewAnimal(animal);
                                                                     } else {
                                                                         onViewAnimal(animal);
