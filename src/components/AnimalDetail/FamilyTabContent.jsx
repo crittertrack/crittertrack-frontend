@@ -135,15 +135,15 @@ export const FamilyTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal
             { key: 'greatGrandparents', label: 'Great-Grandparents', ownRelTypes: ['Paternal Great-Grandparent', 'Paternal Great-Grandfather', 'Paternal Great-Grandmother', 'Maternal Great-Grandparent', 'Maternal Great-Grandfather', 'Maternal Great-Grandmother'] },
             { key: 'cousins',           label: 'Cousins',            ownRelTypes: ['Cousin'] },
         ];
+        const seenAcrossGroups = new Set();
         return groupDefs.map(({ key, label, ownRelTypes }) => {
-            const seen = new Set();
             const items = [];
             relationships.filter(r => ownRelTypes.includes(r.rel)).forEach(({ animal: rel, rel: relLabel }) => {
-                if (!seen.has(rel.id_public)) { seen.add(rel.id_public); items.push({ rel, relLabel }); }
+                if (!seenAcrossGroups.has(rel.id_public)) { seenAcrossGroups.add(rel.id_public); items.push({ rel, relLabel }); }
             });
             if (globalRels) {
                 (globalRels[key] || []).filter(a => a.id_public !== animal?.id_public).forEach(rel => {
-                    if (!seen.has(rel.id_public)) { seen.add(rel.id_public); items.push({ rel, relLabel: getRelLabel(label, rel) }); }
+                    if (!seenAcrossGroups.has(rel.id_public)) { seenAcrossGroups.add(rel.id_public); items.push({ rel, relLabel: getRelLabel(label, rel) }); }
                 });
             }
             return { label, items };

@@ -872,7 +872,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     </button>
                                     {relInsightsOpen && (
                                     <div className="px-4 pb-4 space-y-3">
-                                            {[
+                                            {(() => {
+                                                const _seenRel = new Set();
+                                                return [
                                                 { key: 'parents',           label: 'Parents' },
                                                 { key: 'siblings',          label: 'Siblings' },
                                                 { key: 'nephewsNieces',     label: 'Nieces & Nephews' },
@@ -881,7 +883,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                 { key: 'greatGrandparents', label: 'Great-Grandparents' },
                                                 { key: 'cousins',           label: 'Cousins' },
                                             ].map(({ key, label }) => {
-                                                const group = (publicRelationships[key] || []).filter(a => a.id_public !== animal?.id_public);
+                                                const group = (publicRelationships[key] || []).filter(a => a.id_public !== animal?.id_public && !_seenRel.has(a.id_public));
+                                                group.forEach(a => _seenRel.add(a.id_public));
                                                 if (!group.length) return null;
                                                 return (
                                                     <div key={key}>
@@ -931,7 +934,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                         </div>
                                                     </div>
                                                 );
-                                            })}
+                                            });})()}
                                     </div>
                                     )}
                                 </div>
