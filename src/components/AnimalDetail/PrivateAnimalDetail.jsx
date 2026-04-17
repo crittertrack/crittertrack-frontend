@@ -523,6 +523,14 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                     {animal.archived ? 'Unarchive' : 'Archive'}
                                 </button>
                             )}
+                            <button
+                                onClick={() => setDetailViewTab(16)}
+                                className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-2"
+                                title="View activity logs"
+                            >
+                                <ScrollText size={16} />
+                                Logs
+                            </button>
                             {onEdit && (
                                 <button
                                     onClick={() => onEdit(animal)}
@@ -533,14 +541,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                     Edit
                                 </button>
                             )}
-                            <button
-                                onClick={() => setDetailViewTab(16)}
-                                className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-2"
-                                title="View activity logs"
-                            >
-                                <ScrollText size={16} />
-                                Logs
-                            </button>
                             <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={28} />
                             </button>
