@@ -323,55 +323,69 @@ export const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onV
     const [loading, setLoading] = useState(true);
     const [currentAnimal, setCurrentAnimal] = useState(null);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            if (!animalId) return;
+    // Fetch offspring data
+    const fetchOffspringData = useCallback(async () => {
+        if (!animalId) return;
+        
+        setLoading(true);
+        try {
+            const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
             
-            setLoading(true);
-            try {
-                const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+            // Fetch offspring - only available for authenticated users
+            if (authToken) {
+                const offspringEndpoint = `${API_BASE_URL}/animals/${animalId}/offspring`;
+                const offspringResponse = await axios.get(offspringEndpoint, { headers });
+                setOffspring(offspringResponse.data || []);
                 
-                // Fetch offspring - only available for authenticated users
-                if (authToken) {
-                    const offspringEndpoint = `${API_BASE_URL}/animals/${animalId}/offspring`;
-                    const offspringResponse = await axios.get(offspringEndpoint, { headers });
-                    setOffspring(offspringResponse.data || []);
-                    
-                    // Fetch current animal to know which parent we are
-                    try {
-                        const animalResponse = await axios.get(
-                            `${API_BASE_URL}/animals/any/${animalId}`,
-                            { headers }
-                        );
-                        setCurrentAnimal(animalResponse.data);
-                    } catch (err) {
-                        console.error('Error fetching current animal:', err);
-                    }
-                } else {
-                    // For unauthenticated users, offspring data is not available via API
-                    // The backend doesn't expose a public offspring endpoint for privacy reasons
-                    setOffspring([]);
-                    
-                    // Still fetch the current animal for display
-                    try {
-                        const publicResponse = await axios.get(
-                            `${API_BASE_URL}/public/global/animals?id_public=${animalId}`
-                        );
-                        setCurrentAnimal(publicResponse.data?.[0] || null);
-                    } catch (err) {
-                        console.error('Error fetching current animal:', err);
-                    }
+                // Fetch current animal to know which parent we are
+                try {
+                    const animalResponse = await axios.get(
+                        `${API_BASE_URL}/animals/any/${animalId}`,
+                        { headers }
+                    );
+                    setCurrentAnimal(animalResponse.data);
+                } catch (err) {
+                    console.error('Error fetching current animal:', err);
                 }
-            } catch (error) {
-                console.error('Error fetching offspring:', error);
+            } else {
+                // For unauthenticated users, offspring data is not available via API
+                // The backend doesn't expose a public offspring endpoint for privacy reasons
                 setOffspring([]);
-            } finally {
-                setLoading(false);
+                
+                // Still fetch the current animal for display
+                try {
+                    const publicResponse = await axios.get(
+                        `${API_BASE_URL}/public/global/animals?id_public=${animalId}`
+                    );
+                    setCurrentAnimal(publicResponse.data?.[0] || null);
+                } catch (err) {
+                    console.error('Error fetching current animal:', err);
+                }
             }
+        } catch (error) {
+            console.error('Error fetching offspring:', error);
+            setOffspring([]);
+        } finally {
+            setLoading(false);
+        }
+    }, [animalId, API_BASE_URL, authToken]);
+
+    // Initial fetch on mount
+    useEffect(() => {
+        fetchOffspringData();
+    }, [fetchOffspringData]);
+
+    // Listen for animal updates and refetch offspring
+    useEffect(() => {
+        const handleAnimalUpdated = (event) => {
+            // Refetch offspring when any animal is updated
+            // This ensures offspring cards reflect changes to names, images, etc.
+            fetchOffspringData();
         };
 
-        fetchData();
-    }, [animalId, API_BASE_URL, authToken]);
+        window.addEventListener('animal-updated', handleAnimalUpdated);
+        return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
+    }, [fetchOffspringData]);
 
     return (
         <div className="bg-white border-2 border-gray-300 rounded-lg p-6">
