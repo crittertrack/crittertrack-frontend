@@ -652,7 +652,7 @@ const ParentSearchModal = ({
 
 
 ﻿// Litter Management Component
-const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, formDataRef, onFormOpenChange, speciesOptions = [] }) => {
+const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [] }) => {
     const [litters, setLitters] = useState([]);
     const [myAnimals, setMyAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -3643,7 +3643,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                 if (isBulkMode) {
                                                                     toggleOffspringSelection(litter._id, animal.id_public);
                                                                 } else {
-                                                                    onViewAnimal(animal);
+                                                                    // If animal is owned by user, open edit view; otherwise open read-only view
+                                                                    if (animal.isOwned || animal.ownerId === userProfile?._id) {
+                                                                        handleViewAnimal && handleViewAnimal(animal);
+                                                                    } else {
+                                                                        onViewAnimal(animal);
+                                                                    }
                                                                 }
                                                             }}
                                                             className={`relative bg-white rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden transition border-2 pt-2 ${
