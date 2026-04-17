@@ -397,7 +397,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
 
                 {/* Tabs - PUBLIC VIEW: 8 tabs (Records + End of Life combined) */}
                 <div className="bg-[#E1F2F5] border border-b-0 border-gray-300 rounded-t-lg">
-                    <div className="flex flex-wrap gap-2 px-4 py-2">
+                    <div className="flex flex-wrap gap-2 px-1 sm:px-4 py-2">
                         {[
                             { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
                             { id: 2, label: 'Status', icon: Lock, color: 'text-slate-500' },

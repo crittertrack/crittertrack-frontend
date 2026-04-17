@@ -235,7 +235,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                 </div>
 
                 {/* Tabs - ALL 11 TABS (same as PrivateAnimalDetail) */}
-                <div className="bg-[#E1F2F5] border-b border-gray-300 px-4 py-2">
+                <div className="bg-[#E1F2F5] border-b border-gray-300 px-1 sm:px-4 py-2">
                     <div className="flex flex-wrap gap-2">
                         {[
                             { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
