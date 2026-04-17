@@ -3498,7 +3498,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     {litter.birthDate && (
                                                         <div>
                                                             <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Birth Date</div>
-                                                            <div className="font-semibold text-gray-800">{formatDate(litter.birthDate)}{litterAge(litter.birthDate) && <span className="ml-2 text-xs font-semibold text-green-600">{litterAge(litter.birthDate)}</span>}</div>
+                                                            <div className="font-semibold text-gray-800">{formatDate(litter.birthDate)}{litterAge(litter.birthDate) && <span className="ml-2 text-xs font-semibold text-green-600">~ {litterAge(litter.birthDate)}</span>}</div>
                                                         </div>
                                                     )}
                                                     {litter.weaningDate && (
