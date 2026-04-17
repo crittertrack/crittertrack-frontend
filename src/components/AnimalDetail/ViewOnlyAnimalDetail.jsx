@@ -396,7 +396,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                 onClick={() => setDetailViewTab(tab.id)}
                                 className={`w-[calc(20%-0.4rem)] px-2 py-2 text-xs font-medium rounded border-2 transition-colors ${
                                     detailViewTab === tab.id
-                                        ? 'bg-blue-100 text-black border-gray-300'
+                                        ? 'bg-[#F2E4E9] text-black border-gray-300'
                                         : 'bg-white text-gray-600 hover:text-gray-800 border-gray-300'
                                 }`}
                             >
