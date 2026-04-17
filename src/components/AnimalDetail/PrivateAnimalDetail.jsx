@@ -377,16 +377,13 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                 <div className="bg-[#E1F2F5] rounded-t-lg p-2 sm:p-4 border-b border-gray-300 mt-12 sm:mt-0">
                     {/* Mobile layout: stacked */}
                     <div className="sm:hidden">
-                        <div className="flex justify-between items-center mb-2">
+                        <div className="flex justify-between items-center mb-1">
                             <button 
                                 onClick={onClose} 
                                 className="flex items-center text-gray-600 hover:text-gray-800 transition text-sm"
                             >
                                 <ArrowLeft size={16} className="mr-1" /> Back
                             </button>
-                            <span className="text-[10px] bg-green-100 text-green-800 px-1.5 py-0.5 rounded font-medium">
-                                 OWNER
-                            </span>
                             <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={24} />
                             </button>
@@ -445,6 +442,16 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 >
                                     <Archive size={14} />
                                     {animal.archived ? 'Unarchive' : 'Archive'}
+                                </button>
+                            )}
+                            {onEdit && (
+                                <button
+                                    onClick={() => setDetailViewTab(16)}
+                                    className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                    title="View activity logs"
+                                >
+                                    <ScrollText size={14} />
+                                    Logs
                                 </button>
                             )}
                             {onEdit && (
