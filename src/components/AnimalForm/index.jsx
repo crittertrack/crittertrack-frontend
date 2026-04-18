@@ -2637,8 +2637,8 @@ const AnimalForm = ({
             remarks: animalToEdit.remarks || '',
             tags: animalToEdit.tags || [],
             geneticCode: animalToEdit.geneticCode || '',
-            fatherId_public: animalToEdit.fatherId_public || null,
-            motherId_public: animalToEdit.motherId_public || null,
+            fatherId_public: animalToEdit.fatherId_public || animalToEdit.sireId_public || null,
+            motherId_public: animalToEdit.motherId_public || animalToEdit.damId_public || null,
             breederId_public: animalToEdit.breederId_public || null,
             keeperName: animalToEdit.keeperName || animalToEdit.ownerName || animalToEdit.currentOwner || animalToEdit.currentOwnerDisplay || '',
             groupRole: animalToEdit.groupRole || '',
@@ -3269,7 +3269,7 @@ const AnimalForm = ({
     });
     
     // Keep a ref for immediate pedigree selection (avoids lost state if user selects then immediately saves)
-    const pedigreeRef = useRef({ father: (animalToEdit && animalToEdit.fatherId_public) || null, mother: (animalToEdit && animalToEdit.motherId_public) || null });
+    const pedigreeRef = useRef({ father: (animalToEdit && (animalToEdit.fatherId_public || animalToEdit.sireId_public)) || null, mother: (animalToEdit && (animalToEdit.motherId_public || animalToEdit.damId_public)) || null });
     // Small cached info for selected parents so we can show name/prefix next to CTID
     const [fatherInfo, setFatherInfo] = useState(null); // { id_public, prefix, name }
     const [motherInfo, setMotherInfo] = useState(null);
@@ -3622,8 +3622,8 @@ const AnimalForm = ({
         let mounted = true;
         (async () => {
             if (animalToEdit) {
-                const fId = animalToEdit.fatherId_public || null;
-                const mId = animalToEdit.motherId_public || null;
+                const fId = animalToEdit.fatherId_public || animalToEdit.sireId_public || null;
+                const mId = animalToEdit.motherId_public || animalToEdit.damId_public || null;
                 const bId = animalToEdit.breederId_public || null;
                 console.log('Loading parent info for animal:', animalToEdit.id_public, 'fatherId:', fId, 'motherId:', mId, 'breederId:', bId);
                 if (fId) {
