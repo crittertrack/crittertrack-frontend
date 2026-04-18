@@ -607,6 +607,22 @@ const App = () => {
     const [showQRAnimal, setShowQRAnimal] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
     const [enlargedImageUrl, setEnlargedImageUrl] = useState(null);
+    const handleImageDownload = async (imageUrl) => {
+        try {
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = `crittertrack-image-${Date.now()}.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+            console.error('Failed to download image:', error);
+        }
+    };
     const [breedingRecordLitters, setBreedingRecordLitters] = useState({});
     const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});
     const [showCreateLitterModal, setShowCreateLitterModal] = useState(false);
@@ -2329,6 +2345,36 @@ const App = () => {
                   API_BASE_URL={API_BASE_URL}
                 />
             </main>
+
+            {/* Image Enlarge Modal */}
+            {showImageModal && enlargedImageUrl && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[9999] p-4"
+                    onClick={() => setShowImageModal(false)}
+                >
+                    <div className="relative max-w-7xl max-h-full flex flex-col items-center gap-4">
+                        <button
+                            onClick={(e) => { e.stopPropagation(); setShowImageModal(false); }}
+                            className="self-end text-white hover:text-gray-300 transition"
+                        >
+                            <X size={32} />
+                        </button>
+                        <img
+                            src={enlargedImageUrl}
+                            alt="Enlarged view"
+                            className="max-w-full max-h-[75vh] object-contain"
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                        <button
+                            onClick={(e) => { e.stopPropagation(); handleImageDownload(enlargedImageUrl); }}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition"
+                        >
+                            <Download size={20} />
+                            Download Image
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
