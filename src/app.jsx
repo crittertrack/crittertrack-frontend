@@ -83,7 +83,7 @@ import { PublicAnimalPage, PublicProfilePage } from './PublicPages';
 const API_BASE_URL = '/api'; // Production via Vercel proxy - v2
 
 // App version for cache invalidation - increment to force cache clear
-const APP_VERSION = '7.0.5';
+const APP_VERSION = '7.0.6';
 
 const IDLE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes in milliseconds
 
