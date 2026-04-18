@@ -1028,15 +1028,15 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             </div>
                             <div className="p-3 flex flex-col gap-1.5 flex-1">
                                 <p className="text-sm font-semibold text-gray-800 line-clamp-1">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</p>
-                                <p className="text-xs text-gray-500">{animal.species}{ageStr ? ` Â· ${ageStr}` : ''}</p>
+                                <p className="text-xs text-gray-500">{animal.species}{ageStr ? ` · ${ageStr}` : ''}</p>
                                 {isSale && priceLabel && (
                                     <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 rounded-full px-2 py-0.5 w-fit">
-                                        <DollarSign size={11} /> {priceLabel}
+                                        {priceLabel}
                                     </span>
                                 )}
                                 {isStud && studLabel && (
                                     <span className="inline-flex items-center gap-1 text-xs font-semibold text-purple-700 bg-purple-50 border border-purple-200 rounded-full px-2 py-0.5 w-fit">
-                                        <Heart size={11} /> Stud â€” {studLabel}
+                                        <Heart size={11} /> Stud – {studLabel}
                                     </span>
                                 )}
                             </div>
