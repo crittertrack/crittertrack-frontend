@@ -3663,12 +3663,19 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                 if (isBulkMode) {
                                                                     toggleOffspringSelection(litter._id, animal.id_public);
                                                                 } else {
+                                                                    // Inject litter's parent IDs as fallback so animals whose DB links
+                                                                    // were wiped still display (and re-save) the correct parents
+                                                                    const animalWithParents = {
+                                                                        ...animal,
+                                                                        sireId_public: animal.sireId_public || litter.sireId_public || null,
+                                                                        damId_public: animal.damId_public || litter.damId_public || null,
+                                                                    };
                                                                     // If animal is owned by current user, open edit view; otherwise open read-only view
                                                                     const isOwnedByUser = animal.ownerId_public === userProfile?.id_public;
                                                                     if (isOwnedByUser) {
-                                                                        handleViewAnimal && handleViewAnimal(animal);
+                                                                        handleViewAnimal && handleViewAnimal(animalWithParents);
                                                                     } else {
-                                                                        onViewAnimal(animal);
+                                                                        onViewAnimal(animalWithParents);
                                                                     }
                                                                 }
                                                             }}
