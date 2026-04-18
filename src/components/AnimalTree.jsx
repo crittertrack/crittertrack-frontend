@@ -532,8 +532,8 @@ const AnimalTreeContent = ({ authToken, userProfile, showModalMessage, onViewAni
     // Listen for animal updates and refetch tree when relevant animals change
     useEffect(() => {
         const handleAnimalUpdated = (event) => {
-            const updatedAnimal = event.detail?.animal;
-            if (!updatedAnimal || !allAnimals.length) return;
+            const updatedAnimal = event.detail; // detail IS the animal object
+            if (!updatedAnimal?.id_public || !allAnimals.length) return;
 
             // Refetch if any displayed animal was updated (name, image, genetics, etc.)
             const isInTree = allAnimals.some(a => a.id_public === updatedAnimal.id_public);

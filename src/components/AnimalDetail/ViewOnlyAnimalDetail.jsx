@@ -101,8 +101,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
     // Listen for animal updates and refresh displayed data
     useEffect(() => {
         const handleAnimalUpdated = (event) => {
-            const updatedAnimal = event.detail?.animal;
-            if (!updatedAnimal || !animal) return;
+            const updatedAnimal = event.detail; // detail IS the animal object
+            if (!updatedAnimal?.id_public || !animal) return;
 
             // Refetch if this animal or parents were updated
             const shouldRefetch = 

@@ -101,8 +101,8 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
     // Listen for animal updates and force refresh when this animal or relatives are updated
     useEffect(() => {
         const handleAnimalUpdated = (event) => {
-            const updatedAnimal = event.detail?.animal;
-            if (!updatedAnimal || !animal) return;
+            const updatedAnimal = event.detail; // detail IS the animal object
+            if (!updatedAnimal?.id_public || !animal) return;
 
             // Refetch if this animal, a parent, or offspring was updated
             const shouldRefetch = 

@@ -158,13 +158,13 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
     // Listen for animal updates and refetch data when this animal or related animals are updated
     useEffect(() => {
         const handleAnimalUpdated = (event) => {
-            const updatedAnimal = event.detail?.animal;
+            const updatedAnimal = event.detail; // detail IS the animal object
             
             // Refetch if:
             // 1. This animal was updated
             // 2. A parent animal was updated
             // 3. An offspring was updated (affects breeding records)
-            if (!updatedAnimal || !animal) return;
+            if (!updatedAnimal?.id_public || !animal) return;
             
             const shouldRefetch = 
                 updatedAnimal.id_public === animal.id_public ||

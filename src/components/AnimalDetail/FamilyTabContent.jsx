@@ -101,8 +101,8 @@ export const FamilyTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal
     // Listen for animal updates and refetch litters and pedigree data
     useEffect(() => {
         const handleAnimalUpdated = (event) => {
-            const updatedAnimal = event.detail?.animal;
-            if (!updatedAnimal || !animal) return;
+            const updatedAnimal = event.detail; // detail IS the animal object
+            if (!updatedAnimal?.id_public || !animal) return;
 
             // Refetch if this animal or a parent was updated
             const shouldRefetch = 
