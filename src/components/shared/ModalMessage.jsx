@@ -1,5 +1,5 @@
 const ModalMessage = ({ title, message, onClose }) => (
-  <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+  <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-[200]">
     <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm">
       <h3 className="text-xl font-bold text-gray-800 mb-3">{title}</h3>
       <p className="text-gray-600 mb-6">{message}</p>

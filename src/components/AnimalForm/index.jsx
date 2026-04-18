@@ -4891,7 +4891,10 @@ const AnimalForm = ({
             }
 
             console.log('[SAVE] Showing success message and closing form');
-            showModalMessage('Success', `Animal ${formData.name} successfully ${animalToEdit ? 'updated' : 'added'}!`);
+            // Only show success modal for new animals; edits open the view modal which makes it redundant
+            if (!animalToEdit) {
+                showModalMessage('Success', `Animal ${formData.name} successfully added!`);
+            }
             onCancel(); 
         } catch (error) {
             console.error('Animal Save Error:', error.response?.data || error.message);
