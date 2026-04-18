@@ -8262,6 +8262,16 @@ const AnimalForm = ({
                             if (motherId) { const m = await mpFetchByCtc(motherId); if (m) { updates[children.mother] = mpToSlot(m); queue.push({ animal: m, slot: children.mother }); } }
                         }
                         setMpEditForm(f => ({ ...f, ...updates }));
+                        // Sync canonical parent fields so the overview shows the linked parent after save
+                        if (slotKey === 'sire') {
+                            setFormData(prev => ({ ...prev, fatherId_public: a.id_public }));
+                            pedigreeRef.current.father = a.id_public;
+                            pedigreeRef.current.fatherBackendId = a._id || null;
+                        } else if (slotKey === 'dam') {
+                            setFormData(prev => ({ ...prev, motherId_public: a.id_public }));
+                            pedigreeRef.current.mother = a.id_public;
+                            pedigreeRef.current.motherBackendId = a._id || null;
+                        }
                     };
 
                     // CTC selector modal ? always rendered so it works regardless of activeTab
@@ -8323,7 +8333,18 @@ const AnimalForm = ({
                                                 </div>
                                             </div>
                                             <button type="button"
-                                                onClick={() => setMpEditForm(f => ({ ...f, [slotKey]: { ...f[slotKey], mode: 'ctc', ctcId: '' } }))}
+                                                onClick={() => {
+                                                    setMpEditForm(f => ({ ...f, [slotKey]: { ...f[slotKey], mode: 'ctc', ctcId: '' } }));
+                                                    if (slotKey === 'sire') {
+                                                        setFormData(prev => ({ ...prev, fatherId_public: null }));
+                                                        pedigreeRef.current.father = null;
+                                                        pedigreeRef.current.fatherBackendId = null;
+                                                    } else if (slotKey === 'dam') {
+                                                        setFormData(prev => ({ ...prev, motherId_public: null }));
+                                                        pedigreeRef.current.mother = null;
+                                                        pedigreeRef.current.motherBackendId = null;
+                                                    }
+                                                }}
                                                 className="text-[10px] text-red-400 hover:text-red-600 transition-colors">Unlink</button>
                                         </div>
                                     ) : (
