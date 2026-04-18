@@ -829,32 +829,26 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     // Listen for animal updates and refetch litters when pair animals or offspring change
     useEffect(() => {
         const handleAnimalUpdated = (event) => {
-            const updatedAnimal = event.detail?.animal;
-            if (!updatedAnimal || !litters.length) return;
+            const updatedAnimal = event.detail; // detail IS the animal object
+            if (!updatedAnimal?.id_public || !litters.length) return;
 
-            // Check if updated animal is:
-            // 1. A sire/dam (pair animal) in any litter, OR
-            // 2. An offspring linked to any litter
-            const isInvolvedInLitter = litters.some(l =>
-                updatedAnimal.id_public === l.sireId_public ||
-                updatedAnimal.id_public === l.damId_public ||
-                (l.offspringIds_public && l.offspringIds_public.includes(updatedAnimal.id_public))
-            );
-
-            if (isInvolvedInLitter) {
-                fetchLitters({ preserveOffspring: false }); // Force full refresh
-                
-                // Also invalidate the specific offspring from cache
-                setLitterOffspringMap(prev => {
-                    const updated = { ...prev };
-                    for (const litterId in updated) {
-                        updated[litterId] = updated[litterId].map(o =>
-                            o.id_public === updatedAnimal.id_public ? updatedAnimal : o
+            // Patch offspring map in-place so cards reflect changes immediately
+            setLitterOffspringMap(prev => {
+                let changed = false;
+                const updated = { ...prev };
+                for (const litterId in updated) {
+                    const list = updated[litterId];
+                    if (!Array.isArray(list)) continue;
+                    const idx = list.findIndex(o => o.id_public === updatedAnimal.id_public);
+                    if (idx !== -1) {
+                        updated[litterId] = list.map((o, i) =>
+                            i === idx ? { ...o, ...updatedAnimal } : o
                         );
+                        changed = true;
                     }
-                    return updated;
-                });
-            }
+                }
+                return changed ? updated : prev;
+            });
         };
 
         window.addEventListener('animal-updated', handleAnimalUpdated);
