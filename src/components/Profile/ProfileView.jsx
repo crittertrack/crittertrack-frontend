@@ -200,7 +200,7 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
             <button 
                 onClick={() => {
                     setIsEditing(true);
-                    onProfileEditButtonClicked(true);
+                    if (typeof onProfileEditButtonClicked === 'function') onProfileEditButtonClicked(true);
                 }}
                 data-tutorial-target="profile-edit-btn"
                 className="mt-6 bg-accent hover:bg-accent/90 text-white font-semibold py-3 px-6 rounded-lg transition duration-150 shadow-md flex items-center"
