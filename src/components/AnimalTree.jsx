@@ -182,8 +182,10 @@ const AnimalTreeContent = ({ authToken, userProfile, showModalMessage, onViewAni
                 // Collect all parent IDs
                 const parentIds = new Set();
                 ownedAnimals.forEach(animal => {
-                    if (animal.sireId_public) parentIds.add(animal.sireId_public);
-                    if (animal.damId_public) parentIds.add(animal.damId_public);
+                    const sId = animal.sireId_public || animal.fatherId_public;
+                    const dId = animal.damId_public || animal.motherId_public;
+                    if (sId) parentIds.add(sId);
+                    if (dId) parentIds.add(dId);
                 });
                 
                 console.log(`[AnimalTree] Found ${parentIds.size} unique parent references`);
@@ -284,14 +286,14 @@ const AnimalTreeContent = ({ authToken, userProfile, showModalMessage, onViewAni
         // Track mating pairs
         const matingPairData = new Map();
         allUniqueAnimals.forEach(animal => {
-            if (animal.sireId_public && animal.damId_public && 
-                allUniqueAnimals.has(animal.sireId_public) && 
-                allUniqueAnimals.has(animal.damId_public)) {
-                const pairKey = [animal.sireId_public, animal.damId_public].sort().join('-');
+            const sId = animal.sireId_public || animal.fatherId_public;
+            const dId = animal.damId_public || animal.motherId_public;
+            if (sId && dId && allUniqueAnimals.has(sId) && allUniqueAnimals.has(dId)) {
+                const pairKey = [sId, dId].sort().join('-');
                 if (!matingPairData.has(pairKey)) {
                     matingPairData.set(pairKey, {
-                        sire: animal.sireId_public,
-                        dam: animal.damId_public,
+                        sire: sId,
+                        dam: dId,
                         children: []
                     });
                 }
@@ -336,11 +338,12 @@ const AnimalTreeContent = ({ authToken, userProfile, showModalMessage, onViewAni
         
         // Add parent-child edges
         allUniqueAnimals.forEach(animal => {
-            if (animal.sireId_public && allUniqueAnimals.has(animal.sireId_public)) {
-                dagreGraph.setEdge(animal.sireId_public, animal.id_public);
-            }
-            else if (animal.damId_public && allUniqueAnimals.has(animal.damId_public)) {
-                dagreGraph.setEdge(animal.damId_public, animal.id_public);
+            const sId = animal.sireId_public || animal.fatherId_public;
+            const dId = animal.damId_public || animal.motherId_public;
+            if (sId && allUniqueAnimals.has(sId)) {
+                dagreGraph.setEdge(sId, animal.id_public);
+            } else if (dId && allUniqueAnimals.has(dId)) {
+                dagreGraph.setEdge(dId, animal.id_public);
             }
         });
         
@@ -743,7 +746,7 @@ const AnimalTreeContent = ({ authToken, userProfile, showModalMessage, onViewAni
                             {/* Sire Info Column */}
                             <div>
                                 {(() => {
-                                    const sire = allAnimals?.find(a => a.id_public === selectedAnimal.sireId_public);
+const sire = allAnimals?.find(a => a.id_public === (selectedAnimal.sireId_public || selectedAnimal.fatherId_public));
                                     if (!sire) return <div className="text-gray-400 text-xs">Not available</div>;
                                     
                                     return (
@@ -761,7 +764,7 @@ const AnimalTreeContent = ({ authToken, userProfile, showModalMessage, onViewAni
                             {/* Dam Info Column */}
                             <div>
                                 {(() => {
-                                    const dam = allAnimals?.find(a => a.id_public === selectedAnimal.damId_public);
+const dam = allAnimals?.find(a => a.id_public === (selectedAnimal.damId_public || selectedAnimal.motherId_public));
                                     if (!dam) return <div className="text-gray-400 text-xs">Not available</div>;
                                     
                                     return (
@@ -780,17 +783,17 @@ const AnimalTreeContent = ({ authToken, userProfile, showModalMessage, onViewAni
                         {/* Children Section */}
                         {(() => {
                             const children = allAnimals?.filter(a => 
-                                a.sireId_public === selectedAnimal.id_public || 
-                                a.damId_public === selectedAnimal.id_public
+                                (a.sireId_public || a.fatherId_public) === selectedAnimal.id_public || 
+                                (a.damId_public || a.motherId_public) === selectedAnimal.id_public
                             );
                             return children && children.length > 0 ? (
                                 <div className="border-t pt-3 mt-3">
                                     <div className="font-semibold text-purple-600 mb-2 text-sm">Children:</div>
                                     <div className="space-y-1 text-sm max-h-32 overflow-y-auto pr-2">
                                         {children.map(child => {
-                                            const partner = child.sireId_public === selectedAnimal.id_public
-                                                ? allAnimals?.find(a => a.id_public === child.damId_public)
-                                                : allAnimals?.find(a => a.id_public === child.sireId_public);
+                                            const partner = (child.sireId_public || child.fatherId_public) === selectedAnimal.id_public
+                                                ? allAnimals?.find(a => a.id_public === (child.damId_public || child.motherId_public))
+                                                : allAnimals?.find(a => a.id_public === (child.sireId_public || child.fatherId_public));
                                             
                                             return (
                                                 <div key={child.id_public} className="text-gray-700">
