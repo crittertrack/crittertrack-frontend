@@ -2131,7 +2131,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], user
   return (
     <>
       {showExamples ? (
-        <div className="w-full max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6">
+        <div className="w-full max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-6">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold text-gray-800">Mouse Genetics Examples</h1>
             <button
@@ -2215,7 +2215,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], user
           </div>
         </div>
       ) : (
-        <div className="w-full max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-3 sm:p-6">
+        <div className="w-full max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-3 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 mb-4 sm:mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Genetics Calculator</h1>
