@@ -135,6 +135,7 @@ const AnimalTreeContent = ({ authToken, userProfile, showModalMessage, onViewAni
     const [allAnimals, setAllAnimals] = useState([]);
     const [selectedAnimal, setSelectedAnimal] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [treeRefreshKey, setTreeRefreshKey] = useState(0);
     
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -263,7 +264,7 @@ const AnimalTreeContent = ({ authToken, userProfile, showModalMessage, onViewAni
         };
         
         fetchAnimalsAndBuildGraph();
-    }, [authToken]);
+    }, [authToken, treeRefreshKey]);
 
     // Build graph from animals data
     const buildGraph = (allAnimals, ownedAnimals) => {
@@ -537,15 +538,13 @@ const AnimalTreeContent = ({ authToken, userProfile, showModalMessage, onViewAni
             // Refetch if any displayed animal was updated (name, image, genetics, etc.)
             const isInTree = allAnimals.some(a => a.id_public === updatedAnimal.id_public);
             if (isInTree) {
-                console.log('[AnimalTree] Animal updated, rebuilding tree:', updatedAnimal.id_public);
-                // Trigger tree rebuild by re-running the fetch
-                fetchAnimalsAndBuildGraph();
+                setTreeRefreshKey(prev => prev + 1);
             }
         };
 
         window.addEventListener('animal-updated', handleAnimalUpdated);
         return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
-    }, [allAnimals, fetchAnimalsAndBuildGraph]);
+    }, [allAnimals]);
 
     const clearSearch = () => {
         setSearchQuery('');

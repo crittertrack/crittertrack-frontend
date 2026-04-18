@@ -224,7 +224,6 @@ const PublicAnimalPage = () => {
                     isActive={true}
                     onOpenReportQueue={() => navigate('/')}
                     onQuickFlag={(flagData) => {
-                        console.log('Quick flag from animal page:', flagData);
                     }}
                     onExitModeration={() => {
                         localStorage.removeItem('moderationAuthenticated');
@@ -260,12 +259,7 @@ const PublicProfilePage = () => {
     };
 
     const handleModQuickFlag = useCallback(async (flagData) => {
-        console.log('[MOD ACTION] HANDLER CALLED with:', flagData);
         try {
-            console.log('[MOD ACTION] Inside try block');
-            console.log('[MOD ACTION] Starting action:', flagData);
-            console.log('[MOD ACTION] API_BASE_URL:', API_BASE_URL);
-            console.log('[MOD ACTION] authToken:', authToken ? 'present' : 'MISSING');
 
             // Handle different action types
             if (flagData.action === 'flag') {
@@ -287,15 +281,12 @@ const PublicProfilePage = () => {
                     isModeratorReport: true
                 };
 
-                console.log('[MOD ACTION FLAG] Submitting flag:', { reportType, reportData });
-
-                const response = await axios.post(
+                await axios.post(
                     `${API_BASE_URL}/reports/${reportType}`,
                     reportData,
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
 
-                console.log('[MOD ACTION FLAG] Success:', response.data);
                 showModalMessage('Flag Submitted', 'Content has been flagged and added to the report queue.');
             } 
             else if (flagData.action === 'edit') {
@@ -303,9 +294,7 @@ const PublicProfilePage = () => {
                 const contentType = flagData.context?.type;
                 const contentId = flagData.context?.id;
                 
-                console.log('[MOD ACTION EDIT] Submitting edit:', { contentType, contentId, fieldEdits: flagData.fieldEdits });
-                
-                const response = await axios.patch(
+                await axios.patch(
                     `${API_BASE_URL}/moderation/content/${contentType}/${contentId}/edit`,
                     {
                         fieldEdits: flagData.fieldEdits,
@@ -314,7 +303,6 @@ const PublicProfilePage = () => {
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
 
-                console.log('[MOD ACTION EDIT] Success:', response.data);
                 showModalMessage('Content Edited', 'Content has been updated successfully.');
                 // Refresh the current view
                 window.location.reload();
@@ -325,8 +313,6 @@ const PublicProfilePage = () => {
                     ? flagData.context?.userId 
                     : flagData.context?.ownerId;
                 
-                console.log('[MOD ACTION WARN] Warning user:', { userId, reason: flagData.reason, category: flagData.category });
-                
                 const response = await axios.post(
                     `${API_BASE_URL}/moderation/users/${userId}/warn`,
                     {
@@ -336,7 +322,6 @@ const PublicProfilePage = () => {
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
 
-                console.log('[MOD ACTION WARN] Success:', response.data);
                 showModalMessage('Warning Sent', `User has been warned. Total warnings: ${response.data.warningCount}`);
             }
             else if (flagData.action === 'suspend') {
@@ -345,9 +330,7 @@ const PublicProfilePage = () => {
                     ? flagData.context?.userId 
                     : flagData.context?.ownerId;
                 
-                console.log('[MOD ACTION SUSPEND] Suspending user:', { userId, reason: flagData.reason, durationDays: flagData.durationDays });
-                
-                const response = await axios.post(
+                await axios.post(
                     `${API_BASE_URL}/moderation/users/${userId}/status`,
                     {
                         status: 'suspended',
@@ -357,7 +340,6 @@ const PublicProfilePage = () => {
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
 
-                console.log('[MOD ACTION SUSPEND] Success:', response.data);
                 showModalMessage('User Suspended', `User has been suspended for ${flagData.durationDays} days.`);
             }
             else if (flagData.action === 'ban') {
@@ -366,9 +348,7 @@ const PublicProfilePage = () => {
                     ? flagData.context?.userId 
                     : flagData.context?.ownerId;
                 
-                console.log('[MOD ACTION BAN] Banning user:', { userId, reason: flagData.reason, ipBan: flagData.ipBan });
-                
-                const response = await axios.post(
+                await axios.post(
                     `${API_BASE_URL}/moderation/users/${userId}/status`,
                     {
                         status: 'banned',
@@ -378,7 +358,6 @@ const PublicProfilePage = () => {
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
 
-                console.log('[MOD ACTION BAN] Success:', response.data);
                 showModalMessage('User Banned', 'User has been permanently banned.');
             }
             else if (flagData.action === 'lift-warning') {
@@ -386,8 +365,6 @@ const PublicProfilePage = () => {
                 const userId = flagData.context?.type === 'profile' 
                     ? flagData.context?.userId 
                     : flagData.context?.ownerId;
-                
-                console.log('[MOD ACTION LIFT_WARNING] Lifting warning for user:', { userId, reason: flagData.reason, warningIndex: flagData.warningIndex });
                 
                 const response = await axios.post(
                     `${API_BASE_URL}/moderation/users/${userId}/lift-warning`,
@@ -398,7 +375,6 @@ const PublicProfilePage = () => {
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
 
-                console.log('[MOD ACTION LIFT_WARNING] Success:', response.data);
                 showModalMessage('Warning Lifted', `User's warning count is now ${response.data.warningCount}.`);
             }
             else if (flagData.action === 'lift-suspension') {
@@ -407,9 +383,7 @@ const PublicProfilePage = () => {
                     ? flagData.context?.userId 
                     : flagData.context?.ownerId;
                 
-                console.log('[MOD ACTION LIFT_SUSPENSION] Lifting suspension for user:', { userId, reason: flagData.reason });
-                
-                const response = await axios.post(
+                await axios.post(
                     `${API_BASE_URL}/moderation/users/${userId}/status`,
                     {
                         status: 'active',
@@ -418,7 +392,6 @@ const PublicProfilePage = () => {
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
 
-                console.log('[MOD ACTION LIFT_SUSPENSION] Success:', response.data);
                 showModalMessage('Suspension Lifted', 'User account has been reactivated and can now log in.');
             }
             else if (flagData.action === 'lift-ban') {
@@ -427,9 +400,7 @@ const PublicProfilePage = () => {
                     ? flagData.context?.userId 
                     : flagData.context?.ownerId;
                 
-                console.log('[MOD ACTION LIFT_BAN] Lifting ban for user:', { userId, reason: flagData.reason });
-                
-                const response = await axios.post(
+                await axios.post(
                     `${API_BASE_URL}/moderation/users/${userId}/status`,
                     {
                         status: 'active',
@@ -438,7 +409,6 @@ const PublicProfilePage = () => {
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
 
-                console.log('[MOD ACTION LIFT_BAN] Success:', response.data);
                 showModalMessage('Ban Lifted', 'User account has been unbanned and can now log in.');
             }
         } catch (error) {
@@ -555,7 +525,6 @@ const PublicProfilePage = () => {
                     isActive={true}
                     onOpenReportQueue={() => navigate('/')}
                     onQuickFlag={(flagData) => {
-                        console.log('Quick flag from public route:', flagData);
                         handleModQuickFlag(flagData);
                     }}
                     onExitModeration={() => {

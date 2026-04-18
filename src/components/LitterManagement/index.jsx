@@ -122,13 +122,6 @@ async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
     // Reject GIFs (animations not allowed) ? the server accepts PNG/JPEG only
     if (file.type === 'image/gif') throw new Error('GIF_NOT_ALLOWED');
 
-    console.log('[COMPRESSION DEBUG] Starting compression:', {
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: file.type,
-        targetMaxBytes: maxBytes
-    });
-
     // Start with original dimensions limits from opts or defaults
     let { maxWidth = 1200, maxHeight = 1200, startQuality = 0.85, minQuality = 0.35, qualityStep = 0.05, minDimension = 200 } = opts;
 
@@ -139,12 +132,6 @@ async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
         img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
         img.onerror = (e) => { URL.revokeObjectURL(url); reject(new Error('Failed to load image for compression')); };
         img.src = url;
-    });
-
-    console.log('[COMPRESSION DEBUG] Original image dimensions:', {
-        width: image.width,
-        height: image.height,
-        aspectRatio: (image.width / image.height).toFixed(3)
     });
 
     let targetW = Math.min(image.width, maxWidth);
@@ -169,9 +156,7 @@ async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
     while (quality >= minQuality) {
         const blob = await tryCompress(targetW, targetH, quality);
         if (!blob) break;
-        console.log('[COMPRESSION DEBUG] Quality pass:', { quality: quality.toFixed(2), blobSize: blob.size, targetW, targetH });
         if (blob.size <= maxBytes) {
-            console.log('[COMPRESSION DEBUG] ? Success with quality reduction. Final:', { width: targetW, height: targetH, size: blob.size, quality: quality.toFixed(2) });
             return blob;
         }
         quality -= qualityStep;
@@ -179,14 +164,11 @@ async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
 
     // Second pass: gradually reduce dimensions while preserving aspect ratio
     const aspectRatio = image.width / image.height;
-    console.log('[COMPRESSION DEBUG] Entering dimension reduction loop. AspectRatio:', aspectRatio.toFixed(3));
     while (Math.max(targetW, targetH) > minDimension) {
         // Reduce dimensions proportionally to maintain aspect ratio
         const scale = 0.8;
         targetW = Math.round(targetW * scale);
         targetH = Math.round(targetH * scale);
-        
-        console.log('[COMPRESSION DEBUG] Scaled down to:', { targetW, targetH });
         
         // Ensure neither dimension goes below minDimension while preserving aspect ratio
         if (Math.max(targetW, targetH) < minDimension) {
@@ -197,7 +179,6 @@ async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
                 targetH = minDimension;
                 targetW = Math.round(minDimension * aspectRatio);
             }
-            console.log('[COMPRESSION DEBUG] Hit minimum, adjusted to:', { targetW, targetH });
         }
         
         quality = startQuality;
@@ -205,7 +186,6 @@ async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
             const blob = await tryCompress(targetW, targetH, quality);
             if (!blob) break;
             if (blob.size <= maxBytes) {
-                console.log('[COMPRESSION DEBUG] ? Success with dimension reduction. Final:', { width: targetW, height: targetH, size: blob.size, quality: quality.toFixed(2) });
                 return blob;
             }
             quality -= qualityStep;
@@ -215,9 +195,7 @@ async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
     // As a last resort, return the smallest we could create (use minQuality and minimum dimensions while preserving aspect ratio)
     const finalW = aspectRatio >= 1 ? minDimension : Math.round(minDimension * aspectRatio);
     const finalH = aspectRatio <= 1 ? minDimension : Math.round(minDimension / aspectRatio);
-    console.log('[COMPRESSION DEBUG] ? Using fallback dimensions:', { finalW, finalH, aspectRatio: aspectRatio.toFixed(3) });
     const finalBlob = await tryCompress(finalW, finalH, minQuality);
-    console.log('[COMPRESSION DEBUG] Final result:', { width: finalW, height: finalH, size: finalBlob?.size });
     return finalBlob || file;
 }
 
@@ -856,8 +834,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             );
 
             if (isInvolvedInLitter) {
-                // Refetch litters to get updated pair info, offspring info, breeding records, etc.
-                console.log('[LitterManagement] Animal updated - refetching litters:', updatedAnimal.id_public);
                 fetchLitters({ preserveOffspring: false }); // Force full refresh
                 
                 // Also invalidate the specific offspring from cache
@@ -1037,19 +1013,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             });
             const animalsData = response.data || [];
             
-            console.log('[fetchMyAnimals] Raw response:', animalsData.length, 'animals');
-            
-            // Debug: Log health records for animals that have them
-            animalsData.forEach((animal, idx) => {
-                if (animal.vaccinations || animal.dewormingRecords || animal.parasiteControl) {
-                    console.log(`[fetchMyAnimals] Animal ${animal.id_public} has health records:`, {
-                        vaccinations: animal.vaccinations ? `${animal.vaccinations.length} bytes` : 'null',
-                        dewormingRecords: animal.dewormingRecords ? `${animal.dewormingRecords.length} bytes` : 'null',
-                        parasiteControl: animal.parasiteControl ? `${animal.parasiteControl.length} bytes` : 'null'
-                    });
-                }
-            });
-            
             // Set animals immediately so UI can render
             setMyAnimals(animalsData);
             setMyAnimalsLoaded(true);
@@ -1065,7 +1028,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             });
                             animal.inbreedingCoefficient = coiResponse.data.inbreedingCoefficient;
                         } catch (error) {
-                            console.log(`Could not update COI for animal ${animal.id_public}:`, error);
+                            // COI calculation failed silently - non-critical
                         }
                     } else {
                         animal.inbreedingCoefficient = 0;
@@ -2045,15 +2008,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
     };
 
-    // Debug logging for animal filtering
-    console.log('[LitterManagement] Total myAnimals:', myAnimals.length);
-    console.log('[LitterManagement] Animals data:', myAnimals.map(a => ({ 
-        id: a.id_public, 
-        name: a.name, 
-        gender: a.gender,
-        species: a.species 
-    })));
-    
     const maleAnimals = myAnimals.filter(a => a.gender === 'Male');
     const femaleAnimals = myAnimals.filter(a => a.gender === 'Female');
     const availableYears = useMemo(() => {
@@ -2075,9 +2029,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     // Get unique species from all animals (currently for debugging)
     // const allSpecies = [...new Set(myAnimals.map(a => a.species).filter(Boolean))].sort();
     
-    console.log('[LitterManagement] Male animals:', maleAnimals.length);
-    console.log('[LitterManagement] Female animals:', femaleAnimals.length);
-
     // Filter litters based on search query and species
     const filteredLitters = litters.filter(litter => {
         // Use populated parent data first (covers transferred/hidden animals), fall back to myAnimals

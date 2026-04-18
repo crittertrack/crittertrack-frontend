@@ -104,27 +104,23 @@ const ParentCard = ({ parentId, parentType, authToken, API_BASE_URL, onViewAnima
             setLoading(true);
             setNotFound(false);
             try {
-                console.log(`[ParentCard] Fetching parent ${parentId} of type ${parentType}`);
                 // Try to fetch from authenticated endpoint (can access any animal globally)
                 try {
                     const response = await axios.get(`${API_BASE_URL}/animals/any/${parentId}`, {
                         headers: { Authorization: `Bearer ${authToken}` }
                     });
                     if (response.data) {
-                        console.log(`[ParentCard] Found parent ${parentId} via /animals/any:`, response.data);
                         setParentData(response.data);
                         setLoading(false);
                         return;
                     }
                 } catch (authError) {
                     // If authenticated endpoint fails, try public
-                    console.log(`[ParentCard] Parent ${parentId} not found in /animals/any, trying public. Error:`, authError.response?.status, authError.response?.data);
                 }
 
                 // Try fetching from global public animals database
                 const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${parentId}`);
                 if (publicResponse.data && publicResponse.data.length > 0) {
-                    console.log(`[ParentCard] Found parent ${parentId} via public endpoint`);
                     setParentData(publicResponse.data[0]);
                 } else {
                     // Animal not found in either collection - treat as if no parent recorded
@@ -326,8 +322,6 @@ const App = () => {
     React.useEffect(() => {
         const storedVersion = localStorage.getItem('appVersion');
         if (storedVersion !== APP_VERSION) {
-            console.log(`[Cache Clear] App version changed from ${storedVersion} to ${APP_VERSION}`);
-            
             // Clear all filter-related localStorage items
             const filterKeys = [
                 'animalList_statusFilter',
@@ -346,12 +340,10 @@ const App = () => {
             
             filterKeys.forEach(key => {
                 localStorage.removeItem(key);
-                console.log(`[Cache Clear] Removed ${key}`);
             });
             
             // Update stored version
             localStorage.setItem('appVersion', APP_VERSION);
-            console.log('[Cache Clear] Cache cleared successfully');
         }
     }, []);
     
@@ -385,8 +377,6 @@ const App = () => {
                 
                 // Update localStorage with merged favorites
                 localStorage.setItem('speciesFavorites', JSON.stringify(mergedFavorites));
-                
-                console.log('[SPECIES FAVORITES] Synced:', mergedFavorites.length, 'favorites');
             } catch (error) {
                 console.error('[SPECIES FAVORITES] Sync error:', error);
                 // Silently fail - user can still use localStorage
@@ -407,7 +397,6 @@ const App = () => {
                     { speciesFavorites: favorites },
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
-                console.log('[SPECIES FAVORITES] Synced to backend after change');
             } catch (error) {
                 console.error('[SPECIES FAVORITES] Failed to sync to backend:', error);
             }
@@ -421,18 +410,12 @@ const App = () => {
     useEffect(() => {
         const fetchUserCount = async () => {
             try {
-                console.log('Fetching user count from:', `${API_BASE_URL}/public/users/count`);
                 const response = await fetch(`${API_BASE_URL}/public/users/count`);
-                console.log('User count response status:', response.status);
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('User count data:', data);
                     const count = data.totalUsers || 'many';
                     const formattedCount = typeof count === 'number' ? count.toLocaleString() : count;
-                    console.log('Setting user count to:', formattedCount);
                     setUserCount(formattedCount);
-                } else {
-                    console.log('User count response not ok:', await response.text());
                 }
             } catch (err) {
                 console.error('Failed to fetch user count:', err);
@@ -537,10 +520,8 @@ const App = () => {
                         }
                     });
                     
-                    console.log('Fetched offspring from API:', allOffspring);
                     setOffspringData(allOffspring);
                 } catch (e) {
-                    console.log('No offspring endpoint available or no offspring found:', e.message);
                     setOffspringData([]);
                 }
             } catch (error) {
@@ -1093,16 +1074,12 @@ const App = () => {
     
     const handleDismissWelcomeGuide = async () => {
         try {
-            console.log('[WELCOME GUIDE] Dismissing...');
-            
             // Save to database
             await axios.post(
                 `${API_BASE_URL}/users/dismiss-profile-setup-guide`,
                 {},
                 { headers: { Authorization: `Bearer ${authToken}` } }
             );
-            
-            console.log('[WELCOME GUIDE] Saved to database');
             
             // Update state
             setHasSeenWelcomeGuide(true);
@@ -1111,7 +1088,6 @@ const App = () => {
             // Save to localStorage as backup
             if (userProfile?._id) {
                 localStorage.setItem(`${userProfile._id}_hasSeenWelcomeGuide`, 'true');
-                console.log('[WELCOME GUIDE] Saved to localStorage');
             }
         } catch (error) {
             console.error('[WELCOME GUIDE] Failed to dismiss:', error);
@@ -1140,272 +1116,6 @@ const App = () => {
             delete window.handleViewPublicAnimal;
         };
     }, [publicAnimalNav]);
-
-    useEffect(() => {
-        if (!authToken) {
-            return;
-        }
-
-        // TODO: Implement urgent notifications when backend EventSource endpoint is available
-        // EventSource doesn't support custom headers, so auth needs to be handled via query params
-        // For now, urgent notifications are disabled to prevent 401 errors
-        
-        return () => {
-            // Cleanup if needed
-        };
-    }, [authToken, userProfile, maintenanceMode, API_BASE_URL, showModalMessage, handleLogout]);
-
-    // Poll for user account status changes (suspension/ban)
-    useEffect(() => {
-        if (!authToken) {
-            return;
-        }
-
-        const pollUserStatus = async () => {
-            try {
-                const response = await axios.get(`${API_BASE_URL}/auth/status`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
-                consecutiveAuthErrors.current = 0; // reset on successful response
-                const data = response.data;
-                
-                // Check if suspension was recently lifted (within 24 hours)
-                if (data.suspensionLifted) {
-                    const savedNotification = localStorage.getItem('suspensionLiftedNotification');
-                    if (!savedNotification) {
-                        console.log('[AUTH] Suspension has been lifted for user');
-                        // Clear the suspension info from localStorage
-                        localStorage.removeItem('suspensionEndTime');
-                        localStorage.removeItem('suspensionReason');
-                        // Store notification with 24-hour expiry
-                        const expiresAt = new Date().getTime() + (24 * 60 * 60 * 1000);
-                        localStorage.setItem('suspensionLiftedNotification', JSON.stringify({ expiresAt }));
-                        // Force a page reload to update the UI
-                        window.location.reload();
-                    }
-                }
-                
-                // Check if user status has changed to suspended or banned
-                if (data.accountStatus === 'suspended' || data.accountStatus === 'banned') {
-                    console.log('[AUTH] User account status changed:', data.accountStatus);
-                    
-                    // Logout user and show message
-                    handleLogout();
-                    
-                    const title = data.accountStatus === 'suspended' ? 'Account Suspended' : 'Account Banned';
-                    const message = data.accountStatus === 'suspended' 
-                        ? (data.suspensionReason || 'Your account has been suspended.')
-                        : (data.banReason || 'Your account has been banned.');
-                    
-                    showModalMessage(title, message);
-                }
-            } catch (error) {
-                // If we get a 403 with forceLogout flag, handle it immediately
-                if (error.response?.status === 403 && error.response?.data?.forceLogout) {
-                    consecutiveAuthErrors.current = 0;
-                    const accountStatus = error.response?.data?.accountStatus;
-                    const message = error.response?.data?.message || 'Your account status has changed.';
-                    
-                    console.log('[AUTH] Force logout on status check:', { accountStatus, message });
-                    handleLogout();
-                    showModalMessage(
-                        accountStatus === 'suspended' ? 'Account Suspended' : 'Account Status Changed',
-                        message
-                    );
-                } else if (error.response?.status === 401) {
-                    // Token may appear invalid transiently on network reconnection.
-                    // Only logout after 3 consecutive 401s to avoid spurious sign-outs.
-                    consecutiveAuthErrors.current += 1;
-                    console.log(`[AUTH] Status check 401 (${consecutiveAuthErrors.current}/3)`);
-                    if (consecutiveAuthErrors.current >= 3) {
-                        console.log('[AUTH] Persistent 401 ? logging out');
-                        consecutiveAuthErrors.current = 0;
-                        handleLogout();
-                    }
-                } else {
-                    // Network error or 5xx ? transient, reset counter and stay silent
-                    consecutiveAuthErrors.current = 0;
-                }
-                // Other errors are non-critical (network, server errors) - don't logout
-            }
-        };
-
-        // Poll every 2 minutes for user status changes
-        const statusPollInterval = setInterval(pollUserStatus, 120000);
-        
-        // Also check immediately on mount
-        pollUserStatus();
-
-        return () => clearInterval(statusPollInterval);
-    }, [authToken, API_BASE_URL, handleLogout, showModalMessage]);
-
-    // Note: Onboarding tutorial is no longer auto-triggered for new users
-    // Instead, users see a one-time WelcomeGuideModal that explains profile setup
-    // Tutorials are available manually via the Help button (?) in the header
-
-    // Clear pre-selected transfer data when leaving budget view
-    useEffect(() => {
-        if (currentView !== 'budget') {
-            setPreSelectedTransferAnimal(null);
-            setPreSelectedTransactionType(null);
-        }
-    }, [currentView]);
-
-    // Auth token effect - set up axios defaults
-    useEffect(() => {
-        if (authToken) {
-            axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
-        } else {
-            delete axios.defaults.headers.common['Authorization'];
-            localStorage.removeItem('authToken');
-            setUserProfile(null);
-            // Only redirect to home if not on a public route
-            const publicRoutes = ['donation', 'genetics-calculator', 'breeder', 'animal'];
-            const currentPath = location.pathname.split('/')[1] || '';
-            if (!publicRoutes.includes(currentPath)) {
-                navigate('/');
-            }
-        }
-    }, [authToken, navigate, location.pathname]);
-
-    // Handle ?message= query param to open messages with a specific user
-    useEffect(() => {
-        if (!authToken || !userProfile) return;
-        
-        const params = new URLSearchParams(window.location.search);
-        const messageUserId = params.get('message');
-        
-        if (messageUserId) {
-            // Clear the query param from URL
-            window.history.replaceState({}, '', window.location.pathname);
-            
-            // Fetch the user's profile to get their name
-            axios.get(`${API_BASE_URL}/public/profile/${messageUserId}`)
-                .then(res => {
-                    const targetProfile = res.data;
-                    setSelectedConversation({
-                        otherUserId: targetProfile.userId_backend || messageUserId,
-                        otherUser: {
-                            id_public: targetProfile.id_public || messageUserId,
-                            personalName: targetProfile.personalName,
-                            breederName: targetProfile.breederName,
-                            showPersonalName: targetProfile.showPersonalName,
-                            showBreederName: targetProfile.showBreederName,
-                            profileImage: targetProfile.profileImage
-                        }
-                    });
-                    setShowMessages(true);
-                })
-                .catch(err => {
-                    console.error('Failed to load user for messaging:', err);
-                    showModalMessage('Error', 'Could not start conversation with this user.');
-                });
-        }
-    }, [authToken, userProfile, showModalMessage]);
-
-    // Check if user has seen welcome guide ? backend flag is authoritative, localStorage is a fast-path cache
-    useEffect(() => {
-        if (!authToken || !userProfile) return;
-        
-        const storageKey = `${userProfile._id}_hasSeenWelcomeGuide`;
-
-        // Backend flag (survives cache clears)
-        if (userProfile.hasSeenProfileSetupGuide) {
-            localStorage.setItem(storageKey, 'true'); // sync cache
-            setHasSeenWelcomeGuide(true);
-            return;
-        }
-
-        // Fall back to localStorage
-        const hasSeen = localStorage.getItem(storageKey) === 'true';
-        setHasSeenWelcomeGuide(hasSeen);
-        
-        // Show modal if they haven't seen it
-        if (!hasSeen) {
-            setShowWelcomeGuide(true);
-        }
-    }, [authToken, userProfile]);
-
-    // Fetch animals for genetics calculator when needed
-    useEffect(() => {
-        const fetchAnimalsForCalculator = async () => {
-            if (currentView === 'genetics-calculator' && authToken) {
-                try {
-                    const response = await axios.get(`${API_BASE_URL}/animals?isOwned=true`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
-                    setMyAnimalsForCalculator(response.data || []);
-
-                } catch (error) {
-                    console.error('Failed to fetch animals for calculator:', error);
-                    setMyAnimalsForCalculator([]);
-                }
-            }
-        };
-        fetchAnimalsForCalculator();
-    }, [currentView, authToken, API_BASE_URL]);
-
-
-    // Fetch breeder info when viewing an animal
-    useEffect(() => {
-        const fetchViewBreederInfo = async () => {
-            if (animalToView?.breederId_public && currentView === 'view-animal') {
-                try {
-                    const response = await axios.get(
-                        `${API_BASE_URL}/public/profiles/search?query=${animalToView.breederId_public}&limit=1`
-                    );
-                    if (response.data && response.data.length > 0) {
-                        setViewAnimalBreederInfo(response.data[0]);
-                    }
-                } catch (error) {
-                    console.error('Failed to fetch breeder info for view:', error);
-                    setViewAnimalBreederInfo(null);
-                }
-            } else {
-                setViewAnimalBreederInfo(null);
-            }
-        };
-        fetchViewBreederInfo();
-    }, [animalToView, currentView, API_BASE_URL]);
-
-    // Close profile dropdown when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            const inDesktop = profileMenuDesktopRef.current?.contains(e.target);
-            const inMobile = profileMenuMobileRef.current?.contains(e.target);
-            if (!inDesktop && !inMobile) setShowProfileMenu(false);
-        };
-        if (showProfileMenu) document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [showProfileMenu]);
-	
-    // Fetch global species list and configs
-    useEffect(() => {
-        const fetchSpeciesAndConfigs = async () => {
-            try {
-                const [speciesResponse, configsResponse] = await Promise.all([
-                    axios.get(`${API_BASE_URL}/species`),
-                    axios.get(`${API_BASE_URL}/species/configs`)
-                ]);
-                setSpeciesOptions(speciesResponse.data);
-                setSpeciesConfigs(configsResponse.data || {});
-            } catch (error) {
-                console.error('Failed to fetch species:', error);
-                // Fallback to defaults if API fails
-                setSpeciesOptions([
-                    { name: 'Fancy Mouse', category: 'Mammal', isDefault: true },
-                    { name: 'Fancy Rat', category: 'Mammal', isDefault: true },
-                    { name: 'Russian Dwarf Hamster', category: 'Mammal', isDefault: true },
-                    { name: 'Campbells Dwarf Hamster', category: 'Mammal', isDefault: true },
-                    { name: 'Chinese Dwarf Hamster', category: 'Mammal', isDefault: true },
-                    { name: 'Syrian Hamster', category: 'Mammal', isDefault: true },
-                    { name: 'Guinea Pig', category: 'Mammal', isDefault: true }
-                ]);
-                setSpeciesConfigs({});
-            }
-        };
-        fetchSpeciesAndConfigs();
-    }, [API_BASE_URL]);
 
     if (!authToken) {
         // Allow unauthenticated users to access search and genetics calculator
