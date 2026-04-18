@@ -211,6 +211,38 @@ export function useBreedingLines(authToken: string | null, API_BASE_URL: string)
         [animalBreedingLines, authToken, API_BASE_URL]
     );
 
+    /**
+     * Directly set all breeding line IDs for an animal (bulk replace, not toggle)
+     * Used for parent inheritance
+     */
+    const setAnimalBreedingLinesDirect = useCallback(
+        (animalId: string, lineIds: number[]) => {
+            const next = { ...animalBreedingLines, [animalId]: lineIds };
+            setAnimalBreedingLines(next);
+            try {
+                localStorage.setItem('ct_blassign', JSON.stringify(next));
+            } catch (e) {
+                console.warn('[BREEDING LINES] Failed to save direct assignment to localStorage:', e);
+            }
+
+            if (authToken) {
+                axios
+                    .put(
+                        `${API_BASE_URL}/users/breeding-lines`,
+                        {
+                            breedingLineDefs: breedingLineDefsRef.current,
+                            animalBreedingLines: next
+                        },
+                        {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        }
+                    )
+                    .catch(err => console.error('[BREEDING LINES] Failed to save direct assignment:', err));
+            }
+        },
+        [animalBreedingLines, authToken, API_BASE_URL]
+    );
+
     // ========== RETURN ALL STATE & HANDLERS ==========
     return {
         // Definitions and Assignments
@@ -227,6 +259,7 @@ export function useBreedingLines(authToken: string | null, API_BASE_URL: string)
         toggleAnimalBreedingLine,
         updateBreedingLineDef,
         clearAnimalBreedingLines,
+        setAnimalBreedingLinesDirect,
 
         // Ref
         breedingLineDefsRef,

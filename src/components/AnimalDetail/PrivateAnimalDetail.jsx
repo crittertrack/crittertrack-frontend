@@ -24,7 +24,7 @@ import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/l
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { QRModal } from '../PublicProfile/PublicProfileView';
 import { PedigreeChart } from '../AnimalForm';
-const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onViewPublicAnimal, onToggleOwned, userProfile, userAnimals = [], breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, initialTab = 1, initialBetaView = 'vertical' }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onViewPublicAnimal, onToggleOwned, userProfile, userAnimals = [], breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, setAnimalBreedingLinesDirect, initialTab = 1, initialBetaView = 'vertical' }) => {
     const navigate = useNavigate();
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
@@ -1281,9 +1281,38 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 const namedLines = breedingLineDefs.filter(l => l.name);
                                 if (namedLines.length === 0 || !toggleAnimalBreedingLine) return null;
                                 const assignedIds = animalBreedingLines[animal.id_public] || [];
+
+                                // Compute lines inherited from parents (union of sire + dam assignments)
+                                const sireId = animal.sireId_public || animal.fatherId_public;
+                                const damId = animal.damId_public || animal.motherId_public;
+                                const parentLineIds = [...new Set([
+                                    ...(sireId ? (animalBreedingLines[sireId] || []) : []),
+                                    ...(damId ? (animalBreedingLines[damId] || []) : []),
+                                ])];
+                                // Only show button if there are parent lines not yet assigned
+                                const uninheritedParentLines = parentLineIds.filter(id => !assignedIds.includes(id));
+                                const inheritedLineNames = uninheritedParentLines
+                                    .map(id => breedingLineDefs.find(l => l.id === id)?.name)
+                                    .filter(Boolean);
+
                                 return (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3">
-                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-1.5"><TableOfContents size={16} className="flex-shrink-0 text-gray-400" /> Breeding Lines</h3>
+                                        <div className="flex items-center justify-between flex-wrap gap-2">
+                                            <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-1.5"><TableOfContents size={16} className="flex-shrink-0 text-gray-400" /> Breeding Lines</h3>
+                                            {uninheritedParentLines.length > 0 && setAnimalBreedingLinesDirect && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const merged = [...new Set([...assignedIds, ...parentLineIds])];
+                                                        setAnimalBreedingLinesDirect(animal.id_public, merged);
+                                                    }}
+                                                    className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-purple-400 text-purple-700 bg-purple-50 hover:bg-purple-100 text-xs font-medium transition"
+                                                    title={`Inherit: ${inheritedLineNames.join(', ')}`}
+                                                >
+                                                    <span>↑</span> Inherit from parents
+                                                </button>
+                                            )}
+                                        </div>
                                         <div className="flex flex-wrap gap-2">
                                             {namedLines.map(l => {
                                                 const assigned = assignedIds.includes(l.id);
