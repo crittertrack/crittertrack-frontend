@@ -61,6 +61,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
         setMpLoading(true);
         (async () => {
             const manual = animal?.manualPedigree || {};
+            // Prefer manual pedigree CTC IDs, fall back to linked parent IDs
+            const getSireId = () => manual.sire?.ctcId || animal?.sireId_public || animal?.fatherId_public;
+            const getDamId = () => manual.dam?.ctcId || animal?.damId_public || animal?.motherId_public;
+            
             const toSlot = (a) => {
                 const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
                 return { mode: 'ctc', ctcId: a.id_public || '', prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? String(a.birthDate).slice(0,10) : '', deceasedDate: a.deceasedDate ? String(a.deceasedDate).slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
@@ -72,8 +76,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
             };
             // Level 1: parents
             const [sire, dam] = await Promise.all([
-                fetchOne(animal?.sireId_public || animal?.fatherId_public),
-                fetchOne(animal?.damId_public  || animal?.motherId_public),
+                fetchOne(getSireId()),
+                fetchOne(getDamId()),
             ]);
             if (cancelled) return;
             // Level 2: grandparents
