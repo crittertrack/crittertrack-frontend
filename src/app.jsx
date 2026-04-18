@@ -450,11 +450,18 @@ const App = () => {
     // NOTE: breedingLineDefs, animalBreedingLines now handled by useBreedingLines hook
     // All breeding line logic consolidated into custom hook for reusability--------------------------------------------------------
     const [parentCardKey, setParentCardKey] = useState(0); // Force parent cards to refetch when tab opens
-    const [offspringRefreshTrigger, setOffspringRefreshTrigger] = useState(0); // Force offspring to refetch after edit
+    const [animalDataRefreshTrigger, setAnimalDataRefreshTrigger] = useState(0); // Force entire animal data refresh after ANY edit
     const [showTabs, setShowTabs] = useState(true); // Toggle for collapsible tabs panel
     const [sireData, setSireData] = useState(null);
     const [damData, setDamData] = useState(null);
     const [offspringData, setOffspringData] = useState([]);
+    
+    // Wrapper around handleSaveAnimal to trigger data refresh on any save
+    const handleSaveAnimalWithRefresh = async (...args) => {
+        await handleSaveAnimal(...args);
+        // Trigger full refresh of animal data after save
+        setAnimalDataRefreshTrigger(t => t + 1);
+    };
     
     // Clear history when animal view is completely closed
     React.useEffect(() => {
@@ -531,7 +538,26 @@ const App = () => {
         };
         
         fetchPedigreeData();
-    }, [animalToView, authToken, offspringRefreshTrigger]);
+    }, [animalToView, authToken, animalDataRefreshTrigger]);
+    
+    // Re-fetch the current animal from server when data is saved/updated
+    React.useEffect(() => {
+        if (!animalToView?.id_public || animalDataRefreshTrigger === 0 || !authToken) return;
+        
+        const refetchCurrentAnimal = async () => {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/animals/${animalToView.id_public}`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                // Update the animal state with fresh data from server
+                setAnimalToView(response.data);
+            } catch (error) {
+                console.error('Error refetching animal data:', error);
+            }
+        };
+        
+        refetchCurrentAnimal();
+    }, [animalDataRefreshTrigger, animalToView?.id_public, authToken, API_BASE_URL]);
     
     const [showPedigreeChart, setShowPedigreeChart] = useState(false);
     const [copySuccessAnimal, setCopySuccessAnimal] = useState(false);
@@ -2157,7 +2183,7 @@ const App = () => {
                         formTitle={`Edit ${animalToEdit.name}`}
                         animalToEdit={animalToEdit}
                         species={animalToEdit.species}
-                        onSave={handleSaveAnimal}
+                        onSave={handleSaveAnimalWithRefresh}
                         onCancel={handleCancelEditAnimal}
                         onDelete={handleDeleteAnimal}
                         authToken={authToken}
@@ -2197,7 +2223,7 @@ const App = () => {
                   animalToEdit={animalToEdit}
                   handleViewAnimal={handleViewAnimal}
                   handleEditAnimal={handleEditAnimal}
-                  handleSaveAnimal={handleSaveAnimal}
+                  handleSaveAnimal={handleSaveAnimalWithRefresh}
                   handleDeleteAnimal={handleDeleteAnimal}
                   handleBackFromAnimal={handleBackFromAnimal}
                   handleCloseAllAnimals={handleCloseAllAnimals}
