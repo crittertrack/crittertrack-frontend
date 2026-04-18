@@ -49,6 +49,10 @@ export function AppRoutes({
   
   // Animal Management
   myAnimalsForCalculator,
+  cachedLitters,
+  setCachedLitters,
+  litterCacheTimestamp,
+  setLitterCacheTimestamp,
   animalToView,
   animalToEdit,
   handleViewAnimal,
@@ -265,6 +269,10 @@ export function AppRoutes({
           handleViewAnimal={handleViewAnimal}
           handleEditAnimal={handleEditAnimal}
           speciesOptions={speciesOptions}
+          cachedLitters={cachedLitters}
+          setCachedLitters={setCachedLitters}
+          litterCacheTimestamp={litterCacheTimestamp}
+          setLitterCacheTimestamp={setLitterCacheTimestamp}
         />
       } />
 

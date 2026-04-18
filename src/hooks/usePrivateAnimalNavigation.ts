@@ -143,6 +143,15 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
                 // For now, relying on backend to set it from auth token
             }
 
+            // Optimistic update: if editing (PUT) with plain-object data, reflect changes immediately
+            if (method.toLowerCase() === 'put' && animalToEdit && !(data instanceof FormData)) {
+                const optimistic = { ...animalToEdit, ...data };
+                setAnimalToView(optimistic);
+                try {
+                    window.dispatchEvent(new CustomEvent('animal-updated', { detail: optimistic }));
+                } catch (e) { /* ignore */ }
+            }
+
             // Make the API request
             const response = await axios({
                 method,

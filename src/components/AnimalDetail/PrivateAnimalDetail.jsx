@@ -538,6 +538,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                         await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/return`, {}, {
                                                             headers: { Authorization: `Bearer ${authToken}` }
                                                         });
+                                                        window.dispatchEvent(new Event('animals-changed'));
                                                         onClose();
                                                         showModalMessage('Success', `Animal has been returned to ${animal.breederName || 'the breeder'}.`);
                                                     } catch (error) {
@@ -714,11 +715,15 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                                 <button
                                                     onClick={() => {
                                                         const newIsDisplay = !animal.isDisplay;
-                                                        axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isDisplay: newIsDisplay }, {
+                                                        // Optimistic update immediately
+                                                        if (onUpdateAnimal) onUpdateAnimal({ ...animal, isDisplay: newIsDisplay, showOnPublicProfile: newIsDisplay });
+                                                        axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isDisplay: newIsDisplay, showOnPublicProfile: newIsDisplay }, {
                                                             headers: { Authorization: `Bearer ${authToken}` }
-                                                        }).then(() => {
-                                                            if (onUpdateAnimal) onUpdateAnimal({ ...animal, isDisplay: newIsDisplay });
-                                                        }).catch(err => console.error('Failed to update isDisplay:', err));
+                                                        }).catch(err => {
+                                                            // Revert on failure
+                                                            if (onUpdateAnimal) onUpdateAnimal({ ...animal, isDisplay: !newIsDisplay, showOnPublicProfile: !newIsDisplay });
+                                                            console.error('Failed to update isDisplay:', err);
+                                                        });
                                                     }}
                                                     data-tutorial-target="detail-private-toggle"
                                                     className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg font-medium text-sm transition ${animal.isDisplay ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}

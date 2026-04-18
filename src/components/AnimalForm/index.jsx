@@ -3924,6 +3924,7 @@ const AnimalForm = ({
         await axios.put(`${API_BASE_URL}/animals/${mateInfo.backendId}`, updatedMateData, {
             headers: { Authorization: `Bearer ${authToken}` }
         });
+        window.dispatchEvent(new CustomEvent('animal-updated', { detail: updatedMateData }));
         
         console.log('[BIDIRECTIONAL] Created reciprocal breeding record on mate account');
     };

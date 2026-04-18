@@ -630,7 +630,7 @@ const ParentSearchModal = ({
 
 
 ﻿// Litter Management Component
-const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [] }) => {
+const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp }) => {
     const [litters, setLitters] = useState([]);
     const [myAnimals, setMyAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -791,14 +791,22 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         const loadData = async () => {
             setLoading(true);
             try {
-                // Load litters first so cards appear immediately; animals fetch silently in background
-                await fetchLitters();
+                // Check if we have cached litters
+                if (cachedLitters && cachedLitters.length > 0) {
+                    setLitters(cachedLitters);
+                    setLoading(false);
+                    // Still fetch fresh data in background
+                    await fetchLitters();
+                } else {
+                    // Load litters first so cards appear immediately; animals fetch silently in background
+                    await fetchLitters();
+                }
             } catch (error) {
                 console.error('Error loading litters:', error);
             } finally {
                 setLoading(false);
             }
-            // Background ? populates offspring cards as soon as it resolves
+            // Background – populates offspring cards as soon as it resolves
             fetchMyAnimals().catch(err => console.error('Error loading animals:', err));
         };
         loadData();
@@ -929,6 +937,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             
             // Set litters immediately so UI can render
             setLitters(littersData);
+            
+            // Cache the litters at parent level to prevent re-fetching on navigation
+            if (setCachedLitters) {
+                setCachedLitters(littersData);
+                if (setLitterCacheTimestamp) {
+                    setLitterCacheTimestamp(Date.now());
+                }
+            }
             
             // Calculate COI for each litter that doesn't have it yet.
             // Each litter updates independently so cards pop in as they resolve.
@@ -1519,12 +1535,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             
             // Update the animal's parents to match the litter's parents
             if (addedAnimal) {
-                await axios.put(`${API_BASE_URL}/animals/${addedAnimal.id_public}`, {
-                    sireId_public: litter.sireId_public || null,
-                    damId_public: litter.damId_public || null,
-                }, {
+                const parentPatch = { sireId_public: litter.sireId_public || null, damId_public: litter.damId_public || null };
+                await axios.put(`${API_BASE_URL}/animals/${addedAnimal.id_public}`, parentPatch, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
+                window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: addedAnimal.id_public, ...parentPatch } }));
             }
             
             // Optimistically add to offspring list immediately
@@ -1871,13 +1886,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             // Update all linked offspring to have the correct parents
             const linkedOffspringIds = formData.linkedOffspringIds || [];
             if (linkedOffspringIds.length > 0) {
+                const parentPatch = { sireId_public: formData.sireId_public || null, damId_public: formData.damId_public || null };
                 const updateOffspringPromises = linkedOffspringIds.map(offspringId =>
-                    axios.put(`${API_BASE_URL}/animals/${offspringId}`, {
-                        sireId_public: formData.sireId_public || null,
-                        damId_public: formData.damId_public || null,
-                    }, {
+                    axios.put(`${API_BASE_URL}/animals/${offspringId}`, parentPatch, {
                         headers: { Authorization: `Bearer ${authToken}` }
-                    })
+                    }).then(() => window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: offspringId, ...parentPatch } })))
                 );
                 await Promise.all(updateOffspringPromises);
             }

@@ -917,6 +917,7 @@ const AnimalList = ({
                 : animal
         );
         setAnimals(updatedAnimals);
+        window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animalId, showOnPublicProfile: newPrivacyValue, isDisplay: newPrivacyValue } }));
 
         // Update database in the background
         try {
@@ -963,6 +964,7 @@ const AnimalList = ({
                 : animal
         );
         setAnimals(updatedAnimals);
+        window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animalId, isOwned: newOwnedValue } }));
 
         // Update database in the background
         try {
@@ -2372,6 +2374,7 @@ const AnimalList = ({
             setFeedingModal(null);
             // Optimistic: update lastFedDate immediately
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastFedDate: now } : a));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, lastFedDate: now } }));
             try {
                 const body = {};
                 if (feedingForm.supplyId) {
@@ -2400,6 +2403,7 @@ const AnimalList = ({
             const now = new Date().toISOString();
             // Optimistic: advance lastFedDate so it clears the overdue state
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastFedDate: now } : a));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, lastFedDate: now } }));
             try {
                 await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/feeding`,
                     { skipped: true },
@@ -2415,6 +2419,7 @@ const AnimalList = ({
             e.stopPropagation();
             const now = new Date().toISOString();
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastMaintenanceDate: now } : a));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, lastMaintenanceDate: now } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`,
                 { lastMaintenanceDate: now },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
@@ -2487,6 +2492,7 @@ const AnimalList = ({
             // Optimistic update
             setAvailableAnimalsRaw(prev => prev.filter(a => a.id_public !== animal.id_public));
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, status: 'Rehomed' } : a));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, status: 'Rehomed' } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { status: 'Rehomed' },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
                 .then(() => logManagementActivity('status_change', animal.id_public, { name: animal.name, species: animal.species, status: 'Rehomed' }))
@@ -2532,6 +2538,7 @@ const AnimalList = ({
             updated[taskIdx] = { ...updated[taskIdx], lastDoneDate: new Date().toISOString() };
             // Optimistic update
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: updated } : a));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: updated } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: updated },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
                 .then(() => logManagementActivity('care_task_done', animal.id_public, { name: animal.name, taskName: updated[taskIdx]?.taskName || 'Care task' }))
@@ -2546,6 +2553,7 @@ const AnimalList = ({
             updated[taskIdx] = { ...updated[taskIdx], lastDoneDate: new Date().toISOString(), lastSkipped: true };
             // Optimistic update
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: updated } : a));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: updated } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: updated },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
                 .then(() => logManagementActivity('care_task_skipped', animal.id_public, { name: animal.name, taskName }))
@@ -2557,6 +2565,7 @@ const AnimalList = ({
             if (!window.confirm(`Release ${animal.name || 'this animal'} from quarantine?`)) return;
             // Optimistic update
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, isQuarantine: false } : a));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, isQuarantine: false } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isQuarantine: false },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
                 .then(() => logManagementActivity('quarantine_released', animal.id_public, { name: animal.name, species: animal.species }))
@@ -2567,6 +2576,7 @@ const AnimalList = ({
             e.stopPropagation();
             // Optimistic update
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, ...patch } : a));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, ...patch } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, patch,
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
                 .then(() => {

@@ -462,6 +462,33 @@ const App = () => {
         // Trigger full refresh of animal data after save
         setAnimalDataRefreshTrigger(t => t + 1);
     };
+
+    // Immediately apply a partial/full animal update to animalToView and broadcast to all listeners
+    const handleAnimalFieldUpdate = React.useCallback((updatedAnimal) => {
+        if (!updatedAnimal?.id_public) return;
+        setAnimalToView(prev => prev ? { ...prev, ...updatedAnimal } : updatedAnimal);
+        window.dispatchEvent(new CustomEvent('animal-updated', { detail: updatedAnimal }));
+    }, []);
+
+    // Toggle owned status with optimistic update + API sync
+    const handleToggleAnimalOwned = React.useCallback(async (animalId, newOwnedValue) => {
+        // Optimistic update
+        const patch = { id_public: animalId, isOwned: newOwnedValue };
+        setAnimalToView(prev => prev?.id_public === animalId ? { ...prev, isOwned: newOwnedValue } : prev);
+        window.dispatchEvent(new CustomEvent('animal-updated', { detail: patch }));
+        // Persist
+        try {
+            await axios.put(`${API_BASE_URL}/animals/${animalId}`, { isOwned: newOwnedValue }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+        } catch (err) {
+            // Revert
+            const revert = { id_public: animalId, isOwned: !newOwnedValue };
+            setAnimalToView(prev => prev?.id_public === animalId ? { ...prev, isOwned: !newOwnedValue } : prev);
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: revert }));
+            console.error('Failed to update owned status:', err);
+        }
+    }, [API_BASE_URL, authToken]);
     
     // Clear history when animal view is completely closed
     React.useEffect(() => {
@@ -551,6 +578,8 @@ const App = () => {
                 });
                 // Update the animal state with fresh data from server
                 setAnimalToView(response.data);
+                // Broadcast settled server state to all components
+                window.dispatchEvent(new CustomEvent('animal-updated', { detail: response.data }));
             } catch (error) {
                 console.error('Error refetching animal data:', error);
             }
@@ -558,6 +587,20 @@ const App = () => {
         
         refetchCurrentAnimal();
     }, [animalDataRefreshTrigger, animalToView?.id_public, authToken, API_BASE_URL]);
+
+    // Global: keep animalToView in sync with any animal-updated event from anywhere in the app
+    React.useEffect(() => {
+        const handleGlobalAnimalUpdate = (e) => {
+            const updated = e.detail;
+            if (!updated?.id_public) return;
+            setAnimalToView(prev => {
+                if (!prev || prev.id_public !== updated.id_public) return prev;
+                return { ...prev, ...updated };
+            });
+        };
+        window.addEventListener('animal-updated', handleGlobalAnimalUpdate);
+        return () => window.removeEventListener('animal-updated', handleGlobalAnimalUpdate);
+    }, []);
     
     const [showPedigreeChart, setShowPedigreeChart] = useState(false);
     const [copySuccessAnimal, setCopySuccessAnimal] = useState(false);
@@ -609,6 +652,10 @@ const App = () => {
     
     // Animals for genetics calculator
     const [myAnimalsForCalculator, setMyAnimalsForCalculator] = useState([]);
+    
+    // Cached litters to prevent re-fetching on navigation
+    const [cachedLitters, setCachedLitters] = useState(null);
+    const [litterCacheTimestamp, setLitterCacheTimestamp] = useState(0);
     
     // Available animals showcase (mixed: for sale + for stud)
     const [availableAnimals, setAvailableAnimals] = useState([]);
@@ -2141,12 +2188,12 @@ const App = () => {
                                 authToken={authToken}
                                 setShowImageModal={setShowImageModal}
                                 setEnlargedImageUrl={setEnlargedImageUrl}
-                                onUpdateAnimal={() => setOffspringRefreshTrigger(t => t + 1)}
+                                onUpdateAnimal={handleAnimalFieldUpdate}
                                 showModalMessage={showModalMessage}
                                 onTransfer={(animal) => { setTransferAnimal(animal); setShowTransferModal(true); }}
                                 onViewAnimal={handleViewAnimal}
                                 onViewPublicAnimal={handleViewPublicAnimal}
-                                onToggleOwned={() => {}}
+                                onToggleOwned={handleToggleAnimalOwned}
                                 userProfile={userProfile}
                                 breedingLineDefs={breedingLineDefs}
                                 animalBreedingLines={animalBreedingLines}
@@ -2219,6 +2266,10 @@ const App = () => {
                   setSelectedConversation={setSelectedConversation}
                   setBudgetModalOpen={setBudgetModalOpen}
                   myAnimalsForCalculator={myAnimalsForCalculator}
+                  cachedLitters={cachedLitters}
+                  setCachedLitters={setCachedLitters}
+                  litterCacheTimestamp={litterCacheTimestamp}
+                  setLitterCacheTimestamp={setLitterCacheTimestamp}
                   animalToView={animalToView}
                   animalToEdit={animalToEdit}
                   handleViewAnimal={handleViewAnimal}
