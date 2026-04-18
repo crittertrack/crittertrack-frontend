@@ -48,6 +48,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
     const [globalRels, setGlobalRels] = useState(null); // null = not yet fetched
     const [globalRelsLoading, setGlobalRelsLoading] = useState(false);
     const [parentCardKey, setParentCardKey] = useState(0); // increment to force parent cards to refetch
+    const [offspringRefreshKey, setOffspringRefreshKey] = useState(0); // increment to force offspring fetches to refetch
     // Manual Pedigree (Beta) • Tab 16
     const [mpDownloading, setMpDownloading] = useState(false);
     const [mpLoading, setMpLoading] = useState(false);
@@ -180,6 +181,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                 // If this animal itself was updated, update the displayed animal
                 if (updatedAnimal.id_public === animal.id_public) {
                     onUpdateAnimal && onUpdateAnimal(updatedAnimal);
+                    // Also refresh offspring since they might have been modified
+                    setOffspringRefreshKey(prev => prev + 1);
                 }
             }
         };
@@ -314,7 +317,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
             })
             .catch(() => { if (!cancelled) setAnimalLitters([]); });
         return () => { cancelled = true; };
-    }, [animal?.id_public, authToken, API_BASE_URL]);
+    }, [animal?.id_public, authToken, API_BASE_URL, offspringRefreshKey]);
 
     // Fetch pedigree-based offspring groups (not in litter management)
     React.useEffect(() => {
@@ -329,7 +332,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
             })
             .catch(() => { if (!cancelled) setPedigreeOffspring([]); });
         return () => { cancelled = true; };
-    }, [animal?.id_public, authToken, API_BASE_URL]);
+    }, [animal?.id_public, authToken, API_BASE_URL, offspringRefreshKey]);
 
     const { fieldTemplate, getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
 

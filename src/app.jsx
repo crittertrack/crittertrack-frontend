@@ -450,6 +450,7 @@ const App = () => {
     // NOTE: breedingLineDefs, animalBreedingLines now handled by useBreedingLines hook
     // All breeding line logic consolidated into custom hook for reusability--------------------------------------------------------
     const [parentCardKey, setParentCardKey] = useState(0); // Force parent cards to refetch when tab opens
+    const [offspringRefreshTrigger, setOffspringRefreshTrigger] = useState(0); // Force offspring to refetch after edit
     const [showTabs, setShowTabs] = useState(true); // Toggle for collapsible tabs panel
     const [sireData, setSireData] = useState(null);
     const [damData, setDamData] = useState(null);
@@ -530,7 +531,7 @@ const App = () => {
         };
         
         fetchPedigreeData();
-    }, [animalToView, authToken]);
+    }, [animalToView, authToken, offspringRefreshTrigger]);
     
     const [showPedigreeChart, setShowPedigreeChart] = useState(false);
     const [copySuccessAnimal, setCopySuccessAnimal] = useState(false);
@@ -2114,7 +2115,7 @@ const App = () => {
                                 authToken={authToken}
                                 setShowImageModal={setShowImageModal}
                                 setEnlargedImageUrl={setEnlargedImageUrl}
-                                onUpdateAnimal={() => {}}
+                                onUpdateAnimal={() => setOffspringRefreshTrigger(t => t + 1)}
                                 showModalMessage={showModalMessage}
                                 onTransfer={(animal) => { setTransferAnimal(animal); setShowTransferModal(true); }}
                                 onViewAnimal={handleViewAnimal}
