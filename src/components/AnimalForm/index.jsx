@@ -8562,64 +8562,64 @@ const AnimalForm = ({
                             <ArrowLeft size={18} />
                             <span>Back to Profile</span>
                         </button>
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                data-tutorial-target="save-animal-btn"
-                                onClick={(e) => {
-                                    try {
-                                        console.log('Save button clicked (frontend debug)');
-                                        const form = e.target && e.target.closest ? e.target.closest('form') : document.querySelector('form');
-                                        if (form) {
-                                            console.log('form.checkValidity():', form.checkValidity());
-                                            Array.from(form.elements).forEach(el => {
-                                                if (el.willValidate && !el.checkValidity()) {
-                                                    console.warn('INVALID FIELD:', el.name || el.id || el.placeholder, el.validity, el.value);
-                                                }
-                                            });
-                                        }
-                                    } catch (err) {
-                                        console.error('Save-button debug failed', err);
-                                    }
-                                }}
-                                className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2 disabled:opacity-50"
-                            >
-                                {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                                <span>{loading ? 'Saving...' : 'Save Animal'}</span>
+                        {animalToEdit && onDelete && (
+                            <button 
+                                type="button"
+                                data-tutorial-target="delete-animal-btn"
+                                onClick={() => { 
+                                    // Ownership logic:
+                                    // - If I created it and still own it ? Can delete it
+                                    // - If I created it but transferred it away ? Someone else owns it (I'd be in ViewOnly)
+                                    // - If it was transferred TO me ? I own it but can only return it (not delete)
+                                    
+                                    // Check if this animal was transferred TO the current user
+                                    const iWasTransferredThisAnimal = animalToEdit.originalOwnerId && animalToEdit.ownerId_public === userProfile?.id_public;
+                                    
+                                    const confirmMessage = iWasTransferredThisAnimal 
+                                        ? `Return ${animalToEdit.name} to ${animalToEdit.breederName || 'the original breeder'}? This will remove the animal from your account.`
+                                        : `Are you sure you want to delete ${animalToEdit.name}? This action cannot be undone.`;
+                                    if(window.confirm(confirmMessage)) { 
+                                        onDelete(animalToEdit.id_public, animalToEdit); 
+                                    } 
+                                }} 
+                                className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2"
+                            > 
+                                {(() => {
+                                    const iWasTransferredThisAnimal = animalToEdit.originalOwnerId && animalToEdit.ownerId_public === userProfile?.id_public;
+                                    return iWasTransferredThisAnimal ? <RotateCcw size={18} /> : <Trash2 size={18} />;
+                                })()}
+                                <span>{(() => {
+                                    const iWasTransferredThisAnimal = animalToEdit.originalOwnerId && animalToEdit.ownerId_public === userProfile?.id_public;
+                                    return iWasTransferredThisAnimal ? 'Return Animal' : 'Delete';
+                                })()}</span> 
                             </button>
+                        )}
                     </div>
-                    {animalToEdit && onDelete && (
-                        <button 
-                            type="button"
-                            data-tutorial-target="delete-animal-btn"
-                            onClick={() => { 
-                                // Ownership logic:
-                                // - If I created it and still own it ? Can delete it
-                                // - If I created it but transferred it away ? Someone else owns it (I'd be in ViewOnly)
-                                // - If it was transferred TO me ? I own it but can only return it (not delete)
-                                
-                                // Check if this animal was transferred TO the current user
-                                const iWasTransferredThisAnimal = animalToEdit.originalOwnerId && animalToEdit.ownerId_public === userProfile?.id_public;
-                                
-                                const confirmMessage = iWasTransferredThisAnimal 
-                                    ? `Return ${animalToEdit.name} to ${animalToEdit.breederName || 'the original breeder'}? This will remove the animal from your account.`
-                                    : `Are you sure you want to delete ${animalToEdit.name}? This action cannot be undone.`;
-                                if(window.confirm(confirmMessage)) { 
-                                    onDelete(animalToEdit.id_public, animalToEdit); 
-                                } 
-                            }} 
-                            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2"
-                        > 
-                            {(() => {
-                                const iWasTransferredThisAnimal = animalToEdit.originalOwnerId && animalToEdit.ownerId_public === userProfile?.id_public;
-                                return iWasTransferredThisAnimal ? <RotateCcw size={18} /> : <Trash2 size={18} />;
-                            })()}
-                            <span>{(() => {
-                                const iWasTransferredThisAnimal = animalToEdit.originalOwnerId && animalToEdit.ownerId_public === userProfile?.id_public;
-                                return iWasTransferredThisAnimal ? 'Return Animal' : 'Delete';
-                            })()}</span> 
-                        </button>
-                    )}
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        data-tutorial-target="save-animal-btn"
+                        onClick={(e) => {
+                            try {
+                                console.log('Save button clicked (frontend debug)');
+                                const form = e.target && e.target.closest ? e.target.closest('form') : document.querySelector('form');
+                                if (form) {
+                                    console.log('form.checkValidity():', form.checkValidity());
+                                    Array.from(form.elements).forEach(el => {
+                                        if (el.willValidate && !el.checkValidity()) {
+                                            console.warn('INVALID FIELD:', el.name || el.id || el.placeholder, el.validity, el.value);
+                                        }
+                                    });
+                                }
+                            } catch (err) {
+                                console.error('Save-button debug failed', err);
+                            }
+                        }}
+                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2 disabled:opacity-50"
+                    >
+                        {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                        <span>{loading ? 'Saving...' : 'Save Animal'}</span>
+                    </button>
                 </div>
             </form>
             
