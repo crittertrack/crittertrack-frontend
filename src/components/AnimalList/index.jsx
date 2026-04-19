@@ -3384,6 +3384,14 @@ const AnimalList = ({
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2 flex-wrap" data-tutorial-target="bulk-privacy-controls">
                     {animalView === 'list' && (<>
+                    <button
+                        onClick={() => setShowArchiveScreen(true)}
+                        className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-purple-600 hover:text-purple-800 hover:bg-purple-50 border border-purple-200 rounded-lg transition font-medium"
+                        title="Archive"
+                    >
+                        <Archive size={14} className="sm:w-4 sm:h-4" />
+                        <span className="font-medium">Archive</span>
+                    </button>
                     <button 
                         onClick={() => navigate('/select-species')} 
                         className="bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
