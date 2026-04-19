@@ -174,6 +174,30 @@ const GENE_LOCI = {
   }
 };
 
+// Calculate phenotype for dynamically loaded species (non-Fancy Mouse) using DB-stored phenotype data
+const calculatePhenotypeDynamic = (genotype, geneLociData) => {
+  const phenotypeParts = [];
+  const carriers = [];
+  let isLethal = false;
+
+  for (const [locus, notation] of Object.entries(genotype)) {
+    if (!notation || !geneLociData[locus]?.phenotypeMap) continue;
+    const info = geneLociData[locus].phenotypeMap[notation];
+    if (!info) continue;
+    if (info.isLethal) isLethal = true;
+    if (info.phenotype) phenotypeParts.push(info.phenotype);
+    if (info.carrier) carriers.push(info.carrier);
+  }
+
+  const displayPhenotype = phenotypeParts.length > 0 ? phenotypeParts.join(' ') : 'Standard';
+  return {
+    phenotype: isLethal ? `LETHAL (double dominant): ${displayPhenotype}` : displayPhenotype,
+    carriers,
+    hidden: [],
+    notes: []
+  };
+};
+
 // Calculate phenotype from genotype
 const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Parse allele combinations
@@ -1705,9 +1729,9 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], user
 
   // Function to calculate offspring outcomes
   const calculateOffspring = () => {
-    // Apply defaults to both parents before calculating
-    const p1 = applyDefaults(parent1);
-    const p2 = applyDefaults(parent2);
+    // Apply defaults to both parents before calculating (mouse only — other species use genotype as-is)
+    const p1 = selectedSpecies === 'Fancy Mouse' ? applyDefaults(parent1) : parent1;
+    const p2 = selectedSpecies === 'Fancy Mouse' ? applyDefaults(parent2) : parent2;
     
     // Only calculate for loci where at least one parent has a selection
     const selectedLoci = Object.keys(geneLoci).filter(locus => 
@@ -1719,16 +1743,16 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], user
       return;
     }
 
-    // Check if only incomplete color genes are selected (without full color gene set)
-    const colorGenes = ['A', 'B', 'C', 'D', 'E', 'P'];
-    const markingGenes = ['W', 'Wsh', 'Rw', 'S', 'Mi', 'Rb'];
-    const selectedColorGenes = selectedLoci.filter(locus => colorGenes.includes(locus));
-    const selectedMarkingGenes = selectedLoci.filter(locus => markingGenes.includes(locus));
-    
-    // If only one color gene selected (excluding A-locus which can stand alone) and no marking genes, prevent calculation
-    if (selectedColorGenes.length === 1 && !selectedColorGenes.includes('A') && selectedMarkingGenes.length === 0) {
-      alert('Additional color loci are needed for full phenotype calculation. Please select A-locus along with other color genes (B, C, D, E, P) for complete results.');
-      return;
+    // Mouse-only guard: incomplete color gene selection check
+    if (selectedSpecies === 'Fancy Mouse') {
+      const colorGenes = ['A', 'B', 'C', 'D', 'E', 'P'];
+      const markingGenes = ['W', 'Wsh', 'Rw', 'S', 'Mi', 'Rb'];
+      const selectedColorGenes = selectedLoci.filter(locus => colorGenes.includes(locus));
+      const selectedMarkingGenes = selectedLoci.filter(locus => markingGenes.includes(locus));
+      if (selectedColorGenes.length === 1 && !selectedColorGenes.includes('A') && selectedMarkingGenes.length === 0) {
+        alert('Additional color loci are needed for full phenotype calculation. Please select A-locus along with other color genes (B, C, D, E, P) for complete results.');
+        return;
+      }
     }
     
     // Create selectedGenotype that includes ALL genes selected by either parent
@@ -1783,8 +1807,10 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], user
     let totalWeight = 0;
 
     for (const { genotype: partialGenotype, weight } of Object.values(weightedMap)) {
-      const completeGenotype = applyDefaults(partialGenotype);
-      const result = calculatePhenotype(completeGenotype, selectedGenotype);
+      const completeGenotype = selectedSpecies === 'Fancy Mouse' ? applyDefaults(partialGenotype) : partialGenotype;
+      const result = selectedSpecies === 'Fancy Mouse'
+        ? calculatePhenotype(completeGenotype, selectedGenotype)
+        : calculatePhenotypeDynamic(partialGenotype, geneLoci);
       const phenotype = result.phenotype;
       totalWeight += weight;
 
@@ -1834,8 +1860,12 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], user
     return Object.values(parent).some(value => value !== '');
   };
 
-  const parent1Result = hasAnySelection(parent1) ? calculatePhenotype(applyDefaults(parent1), parent1) : { phenotype: '', carriers: [], hidden: [] };
-  const parent2Result = hasAnySelection(parent2) ? calculatePhenotype(applyDefaults(parent2), parent2) : { phenotype: '', carriers: [], hidden: [] };
+  const parent1Result = hasAnySelection(parent1)
+    ? (selectedSpecies === 'Fancy Mouse' ? calculatePhenotype(applyDefaults(parent1), parent1) : calculatePhenotypeDynamic(parent1, geneLoci))
+    : { phenotype: '', carriers: [], hidden: [] };
+  const parent2Result = hasAnySelection(parent2)
+    ? (selectedSpecies === 'Fancy Mouse' ? calculatePhenotype(applyDefaults(parent2), parent2) : calculatePhenotypeDynamic(parent2, geneLoci))
+    : { phenotype: '', carriers: [], hidden: [] };
 
   // Mapping of phenotype names to their defining loci (can be array for multiple)
   // For genotypes array phenotypes, use genotype index as key: "PhenotypeName:0", "PhenotypeName:1"
@@ -2293,7 +2323,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], user
                   <option value="">{locus} - {data.name}</option>
                   {validCombinations.map((combo) => (
                     <option key={combo} value={combo}>
-                      {combo}
+                      {combo}{data.phenotypeMap?.[combo]?.phenotype ? ` – ${data.phenotypeMap[combo].phenotype}` : ''}
                     </option>
                   ))}
                 </select>
@@ -2360,7 +2390,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], user
                   <option value="">{locus} - {data.name}</option>
                   {data.combinations.map((combo) => (
                     <option key={combo} value={combo}>
-                      {combo}
+                      {combo}{data.phenotypeMap?.[combo]?.phenotype ? ` – ${data.phenotypeMap[combo].phenotype}` : ''}
                     </option>
                   ))}
                 </select>
