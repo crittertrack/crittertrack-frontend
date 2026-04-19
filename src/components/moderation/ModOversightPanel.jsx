@@ -684,16 +684,9 @@ export default function ModOversightPanel({
             // Determine the actual report type from the report itself
             let actualType = reportType;
             if (reportType === 'all') {
-                // Infer type from the report content
-                if (selectedReport.ratingId) {
-                    actualType = 'rating';
-                } else if (selectedReport.reportedAnimalId) {
-                    actualType = 'animal';
-                } else if (selectedReport.messageId || selectedReport.conversationMessages?.length > 0) {
-                    actualType = 'message';
-                } else {
-                    actualType = 'profile';
-                }
+                // Use _reportType first (reliably set by backend when fetching all types),
+                // then fall back to field inspection via the shared getReportType helper.
+                actualType = getReportType(selectedReport);
             }
 
             const requestBody = {

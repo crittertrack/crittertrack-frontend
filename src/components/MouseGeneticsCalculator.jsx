@@ -2220,7 +2220,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], user
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Genetics Calculator</h1>
               
-              {/* Species Selector - Only show other species to admins/mods */}
+              {/* Species Selector */}
               <select
                 value={selectedSpecies}
                 onChange={(e) => setSelectedSpecies(e.target.value)}
@@ -2228,7 +2228,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], user
                 disabled={loadingGenetics}
               >
                 <option value="Fancy Mouse">Fancy Mouse</option>
-                {isAdminOrMod && availableSpecies.filter(s => s !== 'Fancy Mouse').map(species => (
+                {availableSpecies.filter(s => s !== 'Fancy Mouse').map(species => (
                   <option key={species} value={species}>{species}</option>
                 ))}
               </select>
