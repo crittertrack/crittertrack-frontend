@@ -1370,7 +1370,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], user
   React.useEffect(() => {
     const fetchAvailableSpecies = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/public/genetics/available`);
+        const response = await fetch(`${API_BASE_URL}/public/genetics/available`);
         if (response.ok) {
           const species = await response.json();
           setAvailableSpecies(species);
@@ -1399,7 +1399,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], user
       // For other species, fetch from database
       setLoadingGenetics(true);
       try {
-        const response = await fetch(`${API_BASE_URL}/api/public/genetics/${encodeURIComponent(selectedSpecies)}`);
+        const response = await fetch(`${API_BASE_URL}/public/genetics/${encodeURIComponent(selectedSpecies)}`);
         if (response.ok) {
           const data = await response.json();
           setGeneLoci(data.geneLoci);
