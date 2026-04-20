@@ -1,5 +1,5 @@
 // Service Worker for CritterTrack PWA
-const CACHE_NAME = 'crittertrack-v22'; // Increment version to force cache update
+const CACHE_NAME = 'crittertrack-v23'; // Increment version to force cache update
 const urlsToCache = [
   '/',
   '/index.html',
@@ -68,11 +68,14 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch((err) => {
-          console.log('[SW] HTML fetch failed:', url.pathname, err);
-          // Fallback to basic offline message - don't serve stale HTML
-          return new Response('Offline - Please check your connection', { 
-            status: 503,
-            headers: { 'Content-Type': 'text/html' }
+          console.log('[SW] HTML fetch failed, falling back to cached index.html:', url.pathname, err);
+          // For SPA routes, serve cached index.html so React Router can handle the route
+          return caches.match('/index.html').then(cached => {
+            if (cached) return cached;
+            return new Response('Offline - Please check your connection', { 
+              status: 503,
+              headers: { 'Content-Type': 'text/html' }
+            });
           });
         })
     );
