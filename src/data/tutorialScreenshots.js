@@ -14,18 +14,20 @@ export const TUTORIAL_SCREENSHOTS = {
     1: 'welcome-to-species-selection.png', // Step 1: Welcome to Species Selection
     2: 'default-species.png', // Step 2: Default Species
     3: 'species-search-bar.png', // Step 3: Species Search Bar
-    4: 'add-new-species-button.png', // Step 4: Add New Species Button
-    5: 'species-name.png', // Step 5: Species Name
-    6: 'category-selection.png', // Step 6: Category Selection
-    7: 'latinscientific-name.png', // Step 7: Latin/Scientific Name
-    8: 'return-to-species-selector.png', // Step 8: Return to Species Selector
-    9: 'select-fancy-mouse.png', // Step 9: Select Fancy Mouse
+    4: 'favorite-species-star-icons.png', // Step 4: Favorite Species (Star Icons)
+    5: 'category-icons-on-species-cards.png', // Step 5: Category Icons on Species Cards
+    6: 'add-new-species-button.png', // Step 6: Add New Species Button
+    7: 'species-name.png', // Step 7: Species Name
+    8: 'category-selection.png', // Step 8: Category Selection
+    9: 'latin-scientific-name.png', // Step 9: Latin/Scientific Name
+    10: 'return-to-species-selector.png', // Step 10: Return to Species Selector
+    11: 'select-fancy-mouse.png', // Step 11: Select Fancy Mouse
   },
   
   'gs-animal-overview': {
     1: 'welcome-to-animal-overview.png', // Step 1: Welcome to Animal Overview
     2: 'animal-image.png', // Step 2: Animal Image
-    3: 'name-with-prefixsuffix.png', // Step 3: Name with Prefix/Suffix
+    3: 'name-with-prefix-suffix.png', // Step 3: Name with Prefix/Suffix
     4: 'gender-selection.png', // Step 4: Gender Selection
     5: 'date-of-birth.png', // Step 5: Date of Birth
     6: 'status-selection.png', // Step 6: Status Selection
@@ -33,7 +35,7 @@ export const TUTORIAL_SCREENSHOTS = {
   },
   
   'gs-status-privacy': {
-    1: 'welcome-to-status-and-privacy.png', // Step 1: Welcome to Status & Privacy
+    1: 'welcome-to-ownership.png', // Step 1: Welcome to Ownership
     2: 'breeder-assignment.png', // Step 2: Breeder Assignment
     3: 'keeper-section.png', // Step 3: Keeper Section
     4: 'keeper-history.png', // Step 4: Keeper History
@@ -110,12 +112,25 @@ export const TUTORIAL_SCREENSHOTS = {
   },
   
   'gs-records-eol': {
-    1: 'records-tab.png', // Step 1: Records Tab
+    1: 'notes-tab.png', // Step 1: Notes Tab
     2: 'remarks-and-notes.png', // Step 2: Remarks & Notes
-    3: 'move-to-end-of-life-tab.png', // Step 3: Move to End of Life Tab
-    4: 'date-of-death.png', // Step 4: Date of Death
-    5: 'cause-of-death.png', // Step 5: Cause of Death
-    6: 'necropsy-results.png', // Step 6: Necropsy Results
+  },
+  
+  'gs-show': {
+    1: 'show-tab.png', // Step 1: Show Tab
+    2: 'show-titles-and-ratings.png', // Step 2: Show Titles & Ratings
+    3: 'judge-comments.png', // Step 3: Judge Comments
+  },
+  
+  'gs-legal': {
+    1: 'legal-tab.png', // Step 1: Legal Tab
+    2: 'licensing-and-permits.png', // Step 2: Licensing & Permits
+    3: 'legal-administrative.png', // Step 3: Legal / Administrative
+    4: 'restrictions.png', // Step 4: Restrictions
+    5: 'end-of-life-tab.png', // Step 5: End of Life Tab
+    6: 'date-of-death.png', // Step 6: Date of Death
+    7: 'cause-of-death.png', // Step 7: Cause of Death
+    8: 'necropsy-results.png', // Step 8: Necropsy Results
   },
   
   'gs-show': {
