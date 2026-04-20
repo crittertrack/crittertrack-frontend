@@ -16,7 +16,7 @@ const WelcomeBanner = ({ onStartTutorial, onDismiss, isMobile }) => {
                             </h3>
                             {isMobile ? (
                                 <p className="text-xs text-gray-600">
-                                    Interactive tutorials are available on the desktop version. Visit crittertrack.net on your computer for a guided tour.
+                                    Help guides are available — tap the Help button at any time to browse lessons and learn how to use CritterTrack.
                                 </p>
                             ) : (
                                 <p className="text-xs text-gray-600">

@@ -18,8 +18,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 1,
         title: 'Add Animal Button',
         content: 'Click the "Add Animal" button to start creating your first animal record. This is the primary way to add new animals to your collection.',
-        highlightElement: '[data-tutorial-target="add-animal-btn"]',
-        actionType: 'click',
         tips: [
           'You can add multiple animals at once by creating them sequentially',
           'All information can be edited later',
@@ -50,7 +48,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 2,
         title: 'Default Species',
         content: 'These are the pre-loaded species available to all CritterTrack users. They include common small animals like Fancy Mice, Fancy Rats, and various Hamster species. We\'ll use Fancy Mouse later on. First, let me show you a few other parts of this page.',
-        highlightElement: '[data-tutorial-target="default-species-section"]',
         tips: [
           'Default species cannot be deleted',
           'They are available to all users on the platform',
@@ -61,7 +58,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 3,
         title: 'Species Search Bar',
         content: 'Use the search bar to find species by name. You can also filter by category (Mammal, Reptile, Bird, etc.) to narrow down your options.',
-        highlightElement: '[data-tutorial-target="species-search-section"]',
         tips: [
           'Search is case-insensitive',
           'Category filter helps organize species',
@@ -95,8 +91,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 6,
         title: 'Add New Species Button',
         content: 'In the bottom right corner is the "Add New Species" button. Click it to create a custom species for your collection.',
-        highlightElement: '[data-tutorial-target="add-species-btn"]',
-        actionType: 'click',
         tips: [
           'Custom species are visible only to you',
           'You can add them to any category',
@@ -107,7 +101,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 7,
         title: 'Species Name',
         content: 'Enter the name of your custom species here. This is the display name that will appear throughout your collection.',
-        highlightElement: '[data-tutorial-target="species-name-input"]',
         tips: [
           'Use clear, descriptive names',
           'Can be specific or general',
@@ -118,8 +111,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 8,
         title: 'Category Selection',
         content: 'Select a category that best fits your species. This helps organize your species list and makes searching easier. Categories include Mammal, Reptile, Bird, Amphibian, Fish, Invertebrate, and Other.',
-        highlightElement: '[data-tutorial-target="species-category-dropdown"]',
-        actionType: 'click',
         tips: [
           'Choose the most specific category available',
           'You can change this later',
@@ -130,7 +121,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 9,
         title: 'Latin/Scientific Name',
         content: 'Enter the scientific name of your species here. This is optional but highly recommended for clarity and accuracy. For example, a Fancy Mouse\'s scientific name is "Mus musculus".',
-        highlightElement: '[data-tutorial-target="species-latin-input"]',
         tips: [
           'Scientific names follow Latin nomenclature',
           'Format: Genus species',
@@ -141,8 +131,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 10,
         title: 'Return to Species Selector',
         content: 'Use the "Back" button to return to the species list and select a default species.',
-        highlightElement: '[data-tutorial-target="back-to-selector-btn"]',
-        actionType: 'click',
         tips: [
           'You can create more custom species anytime',
           'For this tutorial, we\'ll use a default species',
@@ -153,8 +141,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 11,
         title: 'Select Fancy Mouse',
         content: 'For this tutorial, select "Fancy Mouse" from the species list. This will give us access to all the advanced features like the genetic code builder.',
-        highlightElement: '[data-tutorial-target="species-fancy-mouse"]',
-        actionType: 'click',
         tips: [
           'Fancy Mouse is recommended for new users',
           'It has access to genetic code features',
@@ -184,9 +170,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 2,
         title: 'Animal Image',
-        content: 'Click here to upload a photo of your animal. A clear, front-facing photo works best. You can update this anytime.',
-        highlightElement: '[data-tutorial-target="animal-image-upload"]',
-        actionType: 'click',
+        content: 'Use the image upload area to add a photo of your animal. A clear, front-facing photo works best. You can update this anytime.',
         tips: [
           'Recommended size: 400x400 pixels or larger',
           'Formats: JPG, PNG, WebP',
@@ -197,8 +181,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 3,
         title: 'Name with Prefix/Suffix',
         content: 'Enter your animal\'s name here. You can also add a Prefix and Suffix. Prefixes and Suffixes are usually abbreviated versions of your breeder "watermark" or affixes - for example, if your breeder prefix is "Starlight Stables", you might use "SS" as a prefix.',
-        highlightElement: '[data-tutorial-target="animal-name-section"]',
-        actionType: 'click',
         tips: [
           'Prefix example: "SS" for "Starlight Stables"',
           'Name example: "Luna" or "Max"',
@@ -210,8 +192,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 4,
         title: 'Gender Selection',
         content: 'Select your animal\'s gender. Options include Male, Female, Intersex, and Unknown. For this tutorial, leave it as Unknown for now.',
-        highlightElement: '[data-tutorial-target="animal-gender-select"]',
-        actionType: 'click',
         tips: [
           'Intersex and Unknown are available for intersex/unknown animals',
           'Gender affects breeding features',
@@ -222,8 +202,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 5,
         title: 'Date of Birth',
         content: 'Enter when your animal was born. This is important for tracking age and health records. If unknown, you can enter an approximate date.',
-        highlightElement: '[data-tutorial-target="animal-birthdate-input"]',
-        actionType: 'click',
         tips: [
           'Format: DD/MM/YYYY (displayed)',
           'Use your best estimate if exact date unknown',
@@ -234,8 +212,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 6,
         title: 'Status Selection',
         content: 'Select the current status of your animal. Options include: Pet (living animal in your collection), Breeder (breeding animal), Available (for sale), Booked (reserved/spoken for), Retired (no longer breeding), Deceased (passed away), Rehomed (given to another home), or Unknown. Choose what best describes your animal\'s current situation. Note: The "Sold" status is automatically assigned by the system when a transfer is completed.',
-        highlightElement: '[data-tutorial-target="animal-status-select"]',
-        actionType: 'click',
         tips: [
           'Status affects visibility and features available',
           'Can be changed as your animal\'s situation changes',
@@ -245,9 +221,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 7,
         title: 'Save vs Continue',
-        content: 'Notice the Save button at the bottom. All information in the form is held temporarily until you click Save. For now, DON\'T click Save yet - let\'s explore the other tabs first. Click the "Status & Privacy" tab to continue.',
-        highlightElement: '[data-tutorial-target="status-privacy-tab"]',
-        actionType: 'click',
+        content: 'The Save button at the bottom saves all tabs at once. All information in the form is held temporarily until you click Save. You can navigate freely between tabs before saving - none of the data is committed until you hit Save.',
         tips: [
           'All tabs\' data is saved together when you hit Save',
           'You can navigate between tabs freely',
@@ -259,16 +233,15 @@ const GETTING_STARTED_LESSONS = [
 
   {
     id: 'gs-status-privacy',
-    title: '4. Status & Privacy Settings',
+    title: '4. Ownership Settings',
     description: 'Configure ownership and visibility settings',
     tour: 'getting-started',
     tourOrder: 4,
     steps: [
       {
         stepNumber: 1,
-        title: 'Welcome to Status & Privacy',
+        title: 'Welcome to Ownership',
         content: 'This tab controls who owns, manages, and can see your animal. Let\'s walk through each setting.',
-        highlightElement: '[data-tutorial-target="status-privacy-tab"]',
         tips: [
           'These settings are crucial for record-keeping',
           'They affect who can see your animal publicly',
@@ -279,7 +252,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 2,
         title: 'Breeder Assignment',
         content: 'The Breeder section lets you specify who bred this animal. You can either select a registered CritterTrack user as the breeder, or enter a manual name if they\'re not a registered user. Click the field to search for users.',
-        highlightElement: '[data-tutorial-target="ownership-section"]',
         tips: [
           'Click to search for registered breeders',
           'Search by name or ID across the platform',
@@ -291,7 +263,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 3,
         title: 'Keeper Section',
         content: 'The "🏠 Keeper" section tracks who is currently caring for this animal. Check "Currently Owned by Me" to mark yourself as the current keeper. The Keeper Name field records the name of whoever is keeping the animal right now. The optional Co-Ownership field lets you note shared ownership arrangements.',
-        highlightElement: '[data-tutorial-target="current-owner-field"]',
         tips: [
           'Checkbox: marks you as the current keeper',
           'Keeper Name: person currently caring for the animal',
@@ -314,7 +285,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 5,
         title: 'Availability for Sale or Stud',
         content: 'Use this section to make your animal available in the public Marketplace. When you enable "Available for Sale" or "Available for Stud", the price/fee fields will appear inline below the checkbox. Set your desired currency and amount (or select Negotiable). Only public animals marked for sale or stud will appear in the Marketplace.',
-        highlightElement: '[data-tutorial-target="availability-for-sale-stud"]',
         tips: [
           'Enable "Available for Sale" to list with a price',
           'Enable "Available for Stud" to offer breeding services',
@@ -329,16 +299,15 @@ const GETTING_STARTED_LESSONS = [
 
   {
     id: 'gs-physical',
-    title: '5. Physical Characteristics & Genetic Code',
+    title: '5. Appearance & Genetic Code',
     description: 'Document color, coat, genetics, and measurements',
     tour: 'getting-started',
     tourOrder: 5,
     steps: [
       {
         stepNumber: 1,
-        title: 'Physical Characteristics',
-        content: 'This tab is where you record detailed physical information about your animal, including appearance and genetic information.',
-        highlightElement: '[data-tutorial-target="physical-tab"]',
+        title: 'Appearance Tab',
+        content: 'This is the Appearance tab where you record detailed physical information about your animal, including appearance and genetic information.',
         tips: [
           'All information here is optional',
           'It helps with breeding decisions',
@@ -349,8 +318,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 2,
         title: 'Template-Based Physical Fields',
         content: 'The Physical tab displays fields specific to your species based on field templates. For example, Fancy Mouse shows Color, Pattern, Coat Type, and Size fields. Other species may show different fields like Eye Color, Nail Color, Wing Span, Scale Type, and more. Each species template is customized to show only the relevant physical characteristics for that animal type.',
-        highlightElement: '[data-tutorial-target="appearance-section"]',
-        actionType: 'click',
         tips: [
           'Fields vary by species - each template is unique',
           'Fancy Mouse: Color, Pattern, Coat Type, Size',
@@ -363,8 +330,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 3,
         title: 'Filling Out Physical Fields',
         content: 'Fill in the physical characteristic fields that appear for your species. You can be as specific or general as you like. Examples: "Black" for color, "Standard" for coat type, "Marked" for pattern, "Large" for size. These fields help identify your animal and track genetic traits.',
-        highlightElement: '[data-tutorial-target="appearance-section"]',
-        actionType: 'click',
         tips: [
           'Use consistent terminology across your animals',
           'These fields help with breeding decisions',
@@ -376,7 +341,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 4,
         title: 'Carrier Traits',
         content: 'The Carrier Traits field lets you record genetic traits that this animal carries but does not visually express. A carrier animal has one copy of a recessive gene — it looks normal but can pass the trait on to offspring. For example, a "Black Eyed White" mouse may carry "Recessive Yellow" without showing it. Documenting carrier status here helps you make informed breeding decisions and predict offspring outcomes.',
-        highlightElement: '[data-tutorial-target="appearance-section"]',
         tips: [
           'Carrier = one copy of a recessive gene, not visually expressed',
           'Important for predicting offspring genetics',
@@ -389,8 +353,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 5,
         title: 'Genetic Code',
         content: 'The Genetic Code field lets you record the genetic notation for your animal. For Fancy Mouse, an ADD button appears next to the field — click it to open the interactive Genetic Builder which guides you through selecting genes with dropdowns. For all other species, only a plain text field is shown with no builder or modal.',
-        highlightElement: '[data-tutorial-target="genetic-code-add-btn"]',
-        actionType: 'click',
         tips: [
           'Fancy Mouse only: ADD button opens the interactive Genetic Builder',
           'All other species: plain text field, no builder or modal',
@@ -402,7 +364,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 6,
         title: 'Genetic Builder Overview',
         content: 'Welcome to the Genetic Code Builder! This tool helps you document the genetic traits of your animal. You can select genes using dropdown menus (available for Fancy Mouse) or switch to manual mode to enter genetics for any species.',
-        actionType: 'click',
         tips: [
           'Dropdown mode available for Fancy Mouse',
           'Manual mode available for all species',
@@ -414,7 +375,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 7,
         title: 'Close Genetic Builder',
         content: 'Let\'s go back to the Physical tab. Click the Cancel button to close this builder.',
-        actionType: 'click',
         tips: [
           'You can always come back to add genetic info',
           'Nothing is saved until you click Save on the main form',
@@ -425,7 +385,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 8,
         title: 'Life Stage',
         content: 'Select the current life stage of your animal from the dropdown. Available options vary by species and may include: Newborn (just born), Juvenile (young), Adult (mature), Senior (elderly), or Unknown. This is a manual selection field.',
-        highlightElement: '[data-tutorial-target="life-stage-select"]',
         tips: [
           'Life stage options are species-specific',
           'Manually selected from dropdown',
@@ -437,7 +396,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 9,
         title: 'Measurements & Growth Tracking',
         content: 'This section tracks your animal\'s physical measurements over time. This is particularly useful for monitoring growth, health, and development. Let\'s add some sample measurements.',
-        highlightElement: '[data-tutorial-target="measurements-growth-section"]',
         tips: [
           'Track weight and length over time',
           'Helps monitor health trends',
@@ -448,7 +406,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 10,
         title: 'Measurement Units',
         content: 'First, select your preferred units: Metric (kg, cm) or Imperial (lbs, inches). Choose whichever you\'re most comfortable with.',
-        highlightElement: '[data-tutorial-target="measurement-units-select"]',
         tips: [
           'You can change this anytime',
           'Affects all measurements for this animal',
@@ -459,7 +416,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 11,
         title: 'Add First Measurement',
         content: 'Now let\'s add a tutorial measurement. Enter the date 01/01/2026, weight 450, and length 20. Then click Add Measurement.',
-        highlightElement: '[data-tutorial-target="add-measurement-btn"]',
         tips: [
           'Date: Use recent or estimated date',
           'Weight: In your selected units',
@@ -471,7 +427,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 12,
         title: 'Add Second Measurement',
         content: 'Let\'s add another measurement with today\'s date, weight 500, and length 30. This shows growth over time.',
-        highlightElement: '[data-tutorial-target="add-measurement-btn"]',
         tips: [
           'Multiple measurements show trends',
           'The system calculates growth rate',
@@ -482,7 +437,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 13,
         title: 'View Growth Chart',
         content: 'Notice the "Current Measurements" section shows your latest measurement, and the "Growth Curve" chart visualizes how your animal has grown over the dates you entered. This helps you monitor development.',
-        highlightElement: '[data-tutorial-target="current-measurements-growth-chart"]',
         tips: [
           'Chart updates automatically with new measurements',
           'Shows growth trajectory',
@@ -503,7 +457,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 1,
         title: 'Identification Tab',
         content: 'This tab helps you uniquely identify your animal using multiple identification systems and classification information.',
-        highlightElement: '[data-tutorial-target="identification-tab"]',
         tips: [
           'Multiple ID systems ensure uniqueness',
           'Important for record-keeping',
@@ -514,7 +467,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 2,
         title: 'Identification (Breeder ID)',
         content: 'Enter any custom identification number for your animal. This might be your personal breeder ID, a tattoo number, or any system you use. This field is separate from the microchip number and pedigree registration ID - each serves a different purpose.',
-        highlightElement: '[data-tutorial-target="identification-breeder-id"]',
         tips: [
           'Optional but recommended',
           'Use your own numbering system',
@@ -525,7 +477,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 3,
         title: 'Microchip Number',
         content: 'If your animal has been microchipped (common for larger animals or identification purposes), enter the microchip number here.',
-        highlightElement: '[data-tutorial-target="microchip-input"]',
         tips: [
           'Optional for most small animals',
           'Common for lost pet recovery',
@@ -536,7 +487,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 4,
         title: 'Pedigree Registration ID',
         content: 'If your animal is registered with a pedigree or breed registry (like AFRMA for fancy mice), enter that registration ID here.',
-        highlightElement: '[data-tutorial-target="registration-id-input"]',
         tips: [
           'Important if your animal is registered',
           'Proves pedigree and lineage',
@@ -547,7 +497,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 5,
         title: 'Classification Section',
         content: 'The Classification section shows your selected species (Fancy Mouse) and lets you specify the breed. The species cannot be changed after creation - this ensures consistency in your records.',
-        highlightElement: '[data-tutorial-target="classification-section"]',
         tips: [
           'Species is permanent',
           'Set correctly during creation',
@@ -558,7 +507,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 6,
         title: 'Breed Selection',
         content: 'Fill in the breed of your animal if applicable.',
-        highlightElement: '[data-tutorial-target="breed-select"]',
         tips: [
           'Breeds are species-specific',
           'Only applicable for certain species',
@@ -569,7 +517,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 7,
         title: 'Strain',
         content: 'Enter the strain or genetic line if your animal is part of a specific breeding program. Strains are often named and maintained over generations.',
-        highlightElement: '[data-tutorial-target="strain-input"]',
         tips: [
           'Optional but valuable for breeders',
           'Tracks genetic lines',
@@ -580,7 +527,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 8,
         title: 'Origin',
         content: 'Select where your animal came from using the Origin dropdown. Options are Captive-bred (born in captivity), Wild-caught (collected from the wild), or Rescue (rehomed from another owner or shelter). This is useful for record-keeping and transparency with buyers.',
-        highlightElement: null,
         tips: [
           'Captive-bred is the most common for breeders',
           'Wild-caught is relevant for reptiles and fish',
@@ -591,8 +537,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 9,
         title: 'Tags Feature',
         content: 'Tags allow you to categorize and organize your animals. You can create custom tags like "Show Animal", "Breeding Stock", "Pet", "For Sale", etc. Add tags by typing and pressing Enter.',
-        highlightElement: '[data-tutorial-target="tags-section"]',
-        actionType: 'click',
         tips: [
           'Tags help organize your collection',
           'Create your own tag system',
@@ -605,16 +549,15 @@ const GETTING_STARTED_LESSONS = [
 
   {
     id: 'gs-lineage',
-    title: '7. Lineage & Pedigree',
+    title: '7. Pedigree — Parent Selection',
     description: 'Set up parent information and view pedigree',
     tour: 'getting-started',
     tourOrder: 7,
     steps: [
       {
         stepNumber: 1,
-        title: 'Lineage Tab',
-        content: 'This tab tracks your animal\'s parents and allows viewing of the pedigree chart. This is crucial for understanding genetics and calculating inbreeding coefficients.',
-        highlightElement: '[data-tutorial-target="lineage-tab"]',
+        title: 'Pedigree Tab',
+        content: 'The Pedigree tab is where you set your animal\'s parents (Sire and Dam) and view the pedigree chart. This is crucial for understanding genetics and calculating inbreeding coefficients.',
         tips: [
           'Essential for breeding programs',
           'Enables genetic tracking',
@@ -625,8 +568,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 2,
         title: 'Select Sire (Father)',
         content: 'Click the "Select Sire" button to choose the father of your animal. This will open a search modal.',
-        highlightElement: '[data-tutorial-target="select-sire-btn"]',
-        actionType: 'click',
         tips: [
           'Sire must be the same species',
           'Sire is typically male (but not always)',
@@ -637,8 +578,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 3,
         title: 'Parent Search System',
         content: 'This modal lets you search for the sire. Notice the buttons for "Local" (your animals), "Global" (community animals), and "Both". You can also search by name or ID. The system only shows animals that match your current animal\'s species and the correct gender. Note: Global search only shows public community animals that other users have made publicly visible.',
-        highlightElement: '[data-tutorial-target="parent-search-modal"]',
-        hideHighlightPrompt: true,
         tips: [
           'Local Animals: Your collection only',
           'Global Animals: Public community animals only',
@@ -650,9 +589,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 4,
         title: 'Close Sire Selector',
         content: 'For now, let\'s close this selector without selecting a parent. Click the X button in the top right corner of the modal to close it.',
-        highlightElement: '[data-tutorial-target="modal-close-btn"]',
-        hideHighlightPrompt: true,
-        actionType: 'close',
         tips: [
           'Click the X button to close the modal',
           'Parents are optional for tutorial',
@@ -664,7 +600,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 5,
         title: 'Other Parent Selector',
         content: 'This selector is for animals with Intersex or Unknown gender. It works the same way as the Sire and Dam selectors but allows selection of any gender. This is important for inclusive genetics tracking.',
-        highlightElement: '[data-tutorial-target="select-other-parent-btn"]',
         tips: [
           'Allows selection of Intersex/Unknown genders',
           'Same search functionality as Sire/Dam',
@@ -676,16 +611,15 @@ const GETTING_STARTED_LESSONS = [
 
   {
     id: 'gs-breeding',
-    title: '8. Breeding Information',
+    title: '9. Fertility Information',
     description: 'Track reproductive status and breeding history',
     tour: 'getting-started',
-    tourOrder: 8,
+    tourOrder: 9,
     steps: [
       {
         stepNumber: 1,
-        title: 'Breeding Tab',
-        content: 'This tab contains all reproductive information for your animal. It\'s optional for pets but important for breeding animals.',
-        highlightElement: '[data-tutorial-target="breeding-tab"]',
+        title: 'Fertility Tab',
+        content: 'The Fertility tab contains all reproductive information for your animal. It\'s optional for pets but important for breeding animals.',
         tips: [
           'Skip if not planning to breed',
           'Complete if breeding animal',
@@ -696,7 +630,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 2,
         title: 'Reproductive Status',
         content: 'This section contains checkboxes for tracking your animal\'s current reproductive status (In Mating, Pregnant, Nursing). These help you monitor active breeding cycles.',
-        highlightElement: '[data-tutorial-target="reproductive-status-section"]',
         tips: [
           'Temporary status indicators',
           'Update as status changes',
@@ -707,7 +640,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 3,
         title: 'Estrus & Cycle Information',
         content: 'For females, you can track estrus cycle information. This includes the cycle length and timing, helping you plan breeding.',
-        highlightElement: '[data-tutorial-target="estrus-cycle-section"]',
         tips: [
           'Important for breeding scheduling',
           'Species-specific cycles',
@@ -718,7 +650,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 4,
         title: 'Stud Information',
         content: 'This section is available for all male animals to track fertility status and genetics information. To make your animal available for breeding in the showcase, go to the Status & Privacy tab and enable "Available for Stud" with a fee.',
-        highlightElement: '[data-tutorial-target="stud-info-section"]',
         tips: [
           'Available for all males by default',
           'Track fertility status and genetics',
@@ -730,7 +661,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 5,
         title: 'Dam Information',
         content: 'This section is available for all female animals to track fertility status and genetics information. You can fill in fertility status and any genetics or fertility-related notes.',
-        highlightElement: '[data-tutorial-target="dam-info-section"]',
         tips: [
           'Available for all females by default',
           'Track fertility status and genetics',
@@ -742,16 +672,15 @@ const GETTING_STARTED_LESSONS = [
 
   {
     id: 'gs-health',
-    title: '9. Health & Medical Records',
+    title: '10. Health & Medical Records',
     description: 'Track preventive care and medical history',
     tour: 'getting-started',
-    tourOrder: 9,
+    tourOrder: 10,
     steps: [
       {
         stepNumber: 1,
         title: 'Health Tab',
         content: 'This tab tracks all health-related information for your animal, including preventive care, procedures, medical history, and veterinary visits.',
-        highlightElement: '[data-tutorial-target="health-tab"]',
         tips: [
           'Important for all animals',
           'Track ongoing care',
@@ -762,7 +691,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 2,
         title: 'Preventive Care',
         content: 'This section tracks routine preventive care like vaccinations, parasite prevention, and checkups. You can log the date, type, and notes for each preventive treatment.',
-        highlightElement: '[data-tutorial-target="preventive-care-section"]',
         tips: [
           'Regular preventive care extends lifespan',
           'Important for breeding animals',
@@ -773,7 +701,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 3,
         title: 'Procedures & Diagnostics',
         content: 'Log any medical procedures or diagnostic tests performed on your animal. This includes surgeries, x-rays, blood tests, etc.',
-        highlightElement: '[data-tutorial-target="procedures-section"]',
         tips: [
           'Important for health tracking',
           'Helps identify patterns',
@@ -784,7 +711,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 4,
         title: 'Active Medical Records',
         content: 'Track current medical conditions, allergies, and medications. This section helps you monitor ongoing health issues and treatments.',
-        highlightElement: '[data-tutorial-target="medical-history-section"]',
         tips: [
           'Complete medical records are valuable',
           'Track chronic conditions',
@@ -795,7 +721,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 5,
         title: 'Health Clearances & Screening',
         content: 'This collapsible section stores formal health screening results. Fields include Spay/Neuter Date, Heartworm Status, Hip/Elbow Scores, Eye Clearance, Cardiac Clearance, Dental Records, Genetic Test Results, and Chronic Conditions. Most fields are free-text so you can paste in lab results or certification details.',
-        highlightElement: null,
         tips: [
           'Expand the section to fill in screening results',
           'Genetic test results can include DNA panel summaries',
@@ -806,7 +731,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 6,
         title: 'Veterinary Care',
         content: 'Keep information about your veterinarian and record of visits, including dates, reasons for visit, and treatment provided.',
-        highlightElement: '[data-tutorial-target="vet-care-section"]',
         tips: [
           'Helps track veterinary history',
           'Important for continuity of care',
@@ -818,16 +742,15 @@ const GETTING_STARTED_LESSONS = [
 
   {
     id: 'gs-husbandry',
-    title: '10. Animal Care Tab — Feeding & Daily Care',
+    title: '11. Care Tab — Feeding & Daily Care',
     description: 'Set up feeding schedules, care tasks, and housing details for your animal',
     tour: 'getting-started',
-    tourOrder: 10,
+    tourOrder: 11,
     steps: [
       {
         stepNumber: 1,
-        title: 'Animal Care Tab',
-        content: 'This tab is your hub for daily care — feeding schedules, routine care tasks, housing & environment details. Setting these up here is what powers the Management View\'s automated due-date tracking.',
-        highlightElement: '[data-tutorial-target="husbandry-tab"]',
+        title: 'Care Tab',
+        content: 'The Care tab is your hub for daily care — feeding schedules, routine care tasks, housing & environment details. Setting these up here is what powers the Management View\'s automated due-date tracking.',
         tips: [
           'Feeding & care schedules set here drive Management View alerts',
           'Helps if you ever need to rehome',
@@ -838,7 +761,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 2,
         title: 'Feeding Schedule',
         content: 'Set your animal\'s diet type, feeding frequency (in days), and last fed date. Once set, the Management View will automatically flag this animal as "Due" or "Overdue" when feeding time arrives.',
-        highlightElement: '[data-tutorial-target="nutrition-section"]',
         tips: [
           'Feeding frequency drives Management View alerts',
           'Set last fed date to start tracking from today',
@@ -849,7 +771,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 3,
         title: 'Housing & Enclosure',
         content: 'Assign your animal to an enclosure and document housing details including type, bedding, enrichment, and enclosure maintenance schedule. Add enclosure care tasks like "Deep clean" or "Water change" with frequencies.',
-        highlightElement: '[data-tutorial-target="housing-section"]',
         tips: [
           'Enclosure assignment helps organize animals',
           'Maintenance tracking powers Management View',
@@ -860,7 +781,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 4,
         title: 'Animal Care',
         content: 'Track recurring care tasks specific to this animal like weighing, nail trims, health checks, and handling routines. Add notes about handling preferences, socialization, and special care requirements.',
-        highlightElement: '[data-tutorial-target="animal-care-section"]',
         tips: [
           'Each task tracked independently',
           'Mark done from Management View',
@@ -871,7 +791,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 5,
         title: 'Environment',
         content: 'Document environmental conditions including temperature range, humidity levels, lighting schedule, and noise levels. Proper environment is crucial for health and breeding success.',
-        highlightElement: '[data-tutorial-target="environment-section"]',
         tips: [
           'Environment affects behavior and health',
           'Important for breeding success',
@@ -882,7 +801,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 6,
         title: 'Grooming',
         content: 'Document grooming needs and shedding level for your animal. This section is especially relevant for dogs and cats but applies to any species with regular grooming requirements. Use the Grooming Needs field to note frequency and type (e.g., "Weekly brushing, monthly bath") and the Shedding Level dropdown to indicate how much your animal sheds.',
-        highlightElement: '[data-tutorial-target="exercise-grooming-section"]',
         tips: [
           'Grooming Needs is a free-text field',
           'Shedding Level helps future owners plan',
@@ -894,16 +812,15 @@ const GETTING_STARTED_LESSONS = [
 
   {
     id: 'gs-behavior',
-    title: '11. Behavior & Personality',
+    title: '12. Behavior & Personality',
     description: 'Track behavior, temperament, and activity patterns',
     tour: 'getting-started',
-    tourOrder: 11,
+    tourOrder: 12,
     steps: [
       {
         stepNumber: 1,
         title: 'Behavior Tab',
         content: 'This tab documents your animal\'s personality, behavior traits, and activity patterns. These observations are valuable for understanding your animal and for breeding decisions.',
-        highlightElement: '[data-tutorial-target="behavior-tab"]',
         tips: [
           'Behavior can be hereditary',
           'Important for breeding decisions',
@@ -914,7 +831,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 2,
         title: 'Behavior Items',
         content: 'Record specific behaviors you observe: friendly, aggressive, shy, active, calm, curious, destructive, etc. Add dates and notes about when and how often you see these behaviors.',
-        highlightElement: '[data-tutorial-target="behavior-items-section"]',
         tips: [
           'Detailed observations are valuable',
           'Behavioral traits can be heritable',
@@ -925,7 +841,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 3,
         title: 'Activity',
         content: 'The Activity section covers your animal\'s schedule and physical needs. Set the Activity Cycle (Nocturnal, Diurnal, or Crepuscular), Exercise Requirements (Low to Very High), and Daily Exercise in minutes. If your species template includes training fields, you\'ll also see Training Level, Training Disciplines, Working Role, Certifications, and training checkboxes (Crate Trained, Litter Trained, Leash Trained, Free Flight Trained) within this same section.',
-        highlightElement: '[data-tutorial-target="activity-pattern-select"]',
         tips: [
           'Activity Cycle is mostly species-determined',
           'Exercise fields most relevant for dogs',
@@ -937,7 +852,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 4,
         title: 'Known Issues',
         content: 'This section records any behavioural challenges or safety considerations. Behavioral Issues captures recurring problems (e.g., resource guarding, separation anxiety), Bite History logs any bite incidents with context, and Reactivity Notes describes triggers, thresholds, and management strategies. These fields are template-controlled and may not appear for all species.',
-        highlightElement: null,
         tips: [
           'Be honest — this helps future owners',
           'Important for safety and rehoming transparency',
@@ -949,16 +863,15 @@ const GETTING_STARTED_LESSONS = [
 
   {
     id: 'gs-records-eol',
-    title: '12. Records & End of Life',
+    title: '13. Notes & End of Life',
     description: 'Add notes and document end-of-life information',
     tour: 'getting-started',
-    tourOrder: 12,
+    tourOrder: 13,
     steps: [
       {
         stepNumber: 1,
-        title: 'Records Tab',
-        content: 'This tab is for general notes, remarks, and any additional information about your animal.',
-        highlightElement: '[data-tutorial-target="records-tab"]',
+        title: 'Notes Tab',
+        content: 'The Notes tab is for general remarks and any additional information about your animal.',
         tips: [
           'Catch-all for additional info',
           'Good for observations',
@@ -969,7 +882,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 2,
         title: 'Remarks & Notes',
         content: 'Add any observations or notes about your animal that don\'t fit in other sections. This might include personality quirks, notable achievements, breeding notes, or any other relevant information.',
-        highlightElement: '[data-tutorial-target="remarks-section"]',
         tips: [
           'Free-form text field',
           'Great for detailed observations',
@@ -980,8 +892,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 3,
         title: 'Move to End of Life Tab',
         content: 'Now let\'s look at the End of Life tab where you document end-of-life information. Click the "End of Life" tab.',
-        highlightElement: '[data-tutorial-target="end-of-life-tab"]',
-        actionType: 'click',
         tips: [
           'Optional for living animals',
           'Important when animal passes',
@@ -992,7 +902,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 4,
         title: 'Date of Death',
         content: 'When your animal passes away, enter the date of death here. This automatically updates the animal\'s status to "Deceased".',
-        highlightElement: '[data-tutorial-target="date-of-death-input"]',
         tips: [
           'Marks end of active record',
           'Status changes to Deceased',
@@ -1003,7 +912,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 5,
         title: 'Cause of Death',
         content: 'Document what caused your animal\'s death: natural causes, illness, predation, accident, etc. This helps with understanding health patterns.',
-        highlightElement: '[data-tutorial-target="cause-of-death-input"]',
         tips: [
           'Helps track health issues',
           'Useful for breeding decisions',
@@ -1014,7 +922,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 6,
         title: 'Necropsy Results',
         content: 'If a necropsy (animal autopsy) was performed, document the findings here. This is valuable medical information.',
-        highlightElement: '[data-tutorial-target="necropsy-results-textarea"]',
         tips: [
           'Professional necropsy provides details',
           'Helps understand health issues',
@@ -1026,16 +933,15 @@ const GETTING_STARTED_LESSONS = [
 
   {
     id: 'gs-show',
-    title: '13. Show Titles & Accomplishments',
+    title: '14. Show Titles & Accomplishments',
     description: 'Document show titles, ratings, and achievements',
     tour: 'getting-started',
-    tourOrder: 13,
+    tourOrder: 14,
     steps: [
       {
         stepNumber: 1,
         title: 'Show Tab',
         content: 'This tab is where you document your animal\'s show titles, ratings, judge comments, and any accomplishments from competitions or events.',
-        highlightElement: '[data-tutorial-target="show-tab"]',
         tips: [
           'Important for competitive animals',
           'Track progression over time',
@@ -1046,7 +952,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 2,
         title: 'Show Titles & Ratings',
         content: 'Document any official titles your animal has earned at shows or competitions. Show Titles might include "Champion (CH)", "Grand Champion (GCH)", or "Best in Show". Show Ratings include scores and ratings like "Excellent" or "Very Good".',
-        highlightElement: '[data-tutorial-target="show-titles-section"]',
         tips: [
           'List all titles earned',
           'Include abbreviations and full names',
@@ -1058,7 +963,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 3,
         title: 'Judge Comments',
         content: 'Record any notable feedback or comments from judges at shows or competitions. This can help you understand your animal\'s strengths and areas for improvement.',
-        highlightElement: '[data-tutorial-target="judge-comments-textarea"]',
         tips: [
           'Valuable feedback for breeders',
           'Helps identify strengths',
@@ -1071,10 +975,10 @@ const GETTING_STARTED_LESSONS = [
 
   {
     id: 'gs-legal',
-    title: '14. Legal & Documentation',
+    title: '15. Legal & Documentation',
     description: 'Manage legal status, insurance, and documentation',
     tour: 'getting-started',
-    tourOrder: 14,
+    tourOrder: 15,
     steps: [
       {
         stepNumber: 1,
@@ -1100,7 +1004,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 3,
         title: 'Legal / Administrative',
         content: 'Document insurance details (pet insurance policy, provider, coverage) and legal status (ownership documents, permits, CITES registration for regulated species).',
-        highlightElement: '[data-tutorial-target="legal-admin-section"]',
         tips: [
           'Some species require permits',
           'Insurance protects your investment',
@@ -1137,9 +1040,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 1,
         title: 'Click on an Existing Animal',
         content: 'To view an animal\'s full details, click on any animal card in your My Animals list. This opens the detailed view with all tabs and information.',
-        highlightElement: '[data-tutorial-target="animal-card"]',
-        hideHighlightPrompt: true,
-        actionType: 'click',
         tips: [
           'Each animal has a complete record',
           'Shows all tabs of information',
@@ -1150,7 +1050,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 2,
         title: 'Owned Toggle',
         content: 'The owned toggle lets you mark whether you currently own this animal. When set to owned (red Heart icon), the animal appears under your "Owned" filter and, if also set to public, on your PUBLIC profile. When not owned (gray Heart-Off icon), it only appears in your private "All" filter. This is useful for tracking sold or rehomed animals while keeping their records. You can find this toggle at the top right of the detail overview screen. Changes apply instantly!',
-        highlightElement: '[data-tutorial-target="detail-owned-toggle"]',
         tips: [
           'Located at top right of detail view',
           'Red Heart = Owned, Gray Heart-Off = Not Owned',
@@ -1164,7 +1063,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 3,
         title: 'Private Toggle',
         content: 'The private/public toggle controls global web visibility of this animal. When set to public (green Eye icon), others can view it via search, as a parent/offspring in pedigrees, and on your PUBLIC profile (if also owned). When private (gray Eye-Off icon), only you can see the full record — other users will see a "Hidden / Private Profile" placeholder in pedigree charts where this animal appears, so lineage is indicated but the animal\'s details remain hidden. Exception: users who received or sent this animal via a transfer can still see it. You can find this toggle at the top right of the detail overview screen. Changes apply instantly!',
-        highlightElement: '[data-tutorial-target="detail-private-toggle"]',
         tips: [
           'Located at top right of detail view',
           'Green Eye = Public, Gray Eye-Off = Private',
@@ -1179,7 +1077,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 4,
         title: 'Pedigree Chart Button',
         content: 'On the Lineage tab, you can click the "View Pedigree" button to see a detailed family tree chart of your animal. This shows parents, grandparents, and further back generations. When you\'re done viewing, close this pedigree screen by clicking the X or close button.',
-        highlightElement: '[data-tutorial-target="pedigree-btn"]',
         tips: [
           'Visual representation of pedigree',
           'Requires parent data to be useful',
@@ -1191,8 +1088,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 5,
         title: 'Edit Button',
         content: 'Click the "Edit" button in the top right corner to enter edit mode. This allows you to modify any information in the animal record.',
-        highlightElement: '[data-tutorial-target="edit-animal-btn"]',
-        actionType: 'click',
         tips: [
           'Edit view is almost identical to create view',
           'All tabs available for editing',
@@ -1203,8 +1098,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 6,
         title: 'Edit View Overview',
         content: 'You\'re now in the edit view. Notice it works exactly like the create form - same tabs, same fields, same Save button. You can edit any information here.',
-        highlightElement: '[data-tutorial-target="edit-form"]',
-        hideHighlightPrompt: true,
         tips: [
           'Familiar interface from Getting Started',
           'All previous data is pre-filled',
@@ -1215,7 +1108,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 7,
         title: 'Delete Button',
         content: 'When you\'re in edit mode, you can find the Delete button (usually in red) at the bottom of the form. This allows you to remove an animal from your collection entirely. Warning: This action cannot be undone, so use with caution.',
-        highlightElement: '[data-tutorial-target="delete-animal-btn"]',
         tips: [
           'Located in edit mode at the bottom',
           'Permanent action - cannot undo',
@@ -1227,9 +1119,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 8,
         title: 'Close Edit Without Saving',
         content: 'For now, let\'s go back to the main animal list without making changes. Click the back arrow at the top right to close edit mode and return to your list. You can always reopen an existing animal to view or edit it again.',
-        highlightElement: '[data-tutorial-target="close-edit-btn"]',
-        hideHighlightPrompt: true,
-        actionType: 'click',
         tips: [
           'Back arrow closes edit mode without saving',
           'Returns you to the main animal list',
@@ -1251,8 +1140,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 1,
         title: 'Move to Litters',
         content: 'Now let\'s explore the Litters feature. Click the "Litters" button in the header to navigate to the litter management section.',
-        highlightElement: '[data-tutorial-target="litters-btn"]',
-        actionType: 'click',
         tips: [
           'Litters are where you track breeding',
           'Where offspring are recorded',
@@ -1263,8 +1150,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 2,
         title: 'Litter Management',
         content: 'You\'re now in the Litters section. This is where you track breeding litters and manage offspring. Click the "New Litter" button to create a new litter.',
-        highlightElement: '[data-tutorial-target="new-litter-btn"]',
-        actionType: 'click',
         tips: [
           'Litters organize offspring by breeding',
           'Each litter has parents and offspring',
@@ -1275,7 +1160,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 3,
         title: 'Sire & Dam Selection',
         content: 'Select both a Sire (father) and Dam (mother) for the litter. Note: Intersex and Unknown gender animals can be selected on both Sire and Dam selectors, allowing inclusive representation of intersex/unknown animals.',
-        highlightElement: '[data-tutorial-target="sire-dam-section"]',
         tips: [
           'Both parents are mandatory',
           'Can use same species animals',
@@ -1286,7 +1170,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 4,
         title: 'Birth Date & Offspring Count',
         content: 'Enter the birth date of the litter (optional but recommended). The male and female count fields are simple text fields for administrative tracking. There is a separate feature for direct offspring creation that relies on the birth date.',
-        highlightElement: '[data-tutorial-target="litter-dates-counts"]',
         tips: [
           'Birth date needed to create offspring directly',
           'Male/female counts are optional text fields',
@@ -1297,8 +1180,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 5,
         title: 'Link Existing Animals',
         content: 'You can link existing animals as offspring during litter creation. Select animals with matching parents to link them to this litter. If you have no birth date filled, it will auto-fill from the existing offspring when you click them.',
-        highlightElement: '[data-tutorial-target="link-animals-btn"]',
-        hideHighlightPrompt: true,
         tips: [
           'Only requires parents to be filled',
           'Shows animals matching those parents',
@@ -1310,8 +1191,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 6,
         title: 'Create New Offspring Animals',
         content: 'In the "New Offspring Animals" section (separate from the male/female count fields), you can directly create new offspring animals. With a birth date filled in, click "Create Offspring" to add new animals and automatically set them as children of this litter with the sire and dam already assigned.',
-        highlightElement: '[data-tutorial-target="create-offspring-btn"]',
-        hideHighlightPrompt: true,
         tips: [
           'Different from male/female count fields',
           'Found in "New Offspring Animals" section',
@@ -1323,7 +1202,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 7,
         title: 'Litter Card Details',
         content: 'Once you\'ve created a litter, click on a litter card to view its details. Here you can see the parents, offspring, and manage the litter from an expanded view.',
-        highlightElement: '[data-tutorial-target="litter-card"]',
         tips: [
           'Requires a litter to be created first',
           'Shows complete litter information',
@@ -1335,8 +1213,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 8,
         title: 'Litter Actions',
         content: 'On the expanded litter view, you\'ll see buttons to: Edit the litter, Link animals to it, Add new offspring, and Delete the litter. These give you full control over litter management.',
-        highlightElement: '[data-tutorial-target="litter-actions"]',
-        hideHighlightPrompt: true,
         tips: [
           'Edit changes parent or dates',
           'Link connects existing animals',
@@ -1348,7 +1224,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 9,
         title: 'Show a Litter on Your Public Profile',
         content: 'Each litter card has an Eye / EyeOff icon at the very left of the compact header, before the litter name. Click it to toggle public visibility: green Eye = this litter is shown on your public breeder profile, grey EyeOff = hidden. A "Litters" tab automatically appears on your public profile once at least one litter is marked public. The public card shows the pairing name, litter ID badge, sire × dam, status badge (Planned / Born), dates, a photo thumbnail strip, and any notes.',
-        highlightElement: '[data-tutorial-target="litter-card"]',
         tips: [
           'Eye/EyeOff icon is the first element on each litter card',
           'Green Eye = shown publicly, Grey EyeOff = hidden from profile',
@@ -1372,8 +1247,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 1,
         title: 'Move to Profile',
         content: 'Let\'s now explore your profile settings. Click the "Profile" button in the header.',
-        highlightElement: '[data-tutorial-target="profile-btn"]',
-        actionType: 'click',
         tips: [
           'Profile shows your public identity',
           'Settings affect sharing and visibility',
@@ -1384,7 +1257,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 2,
         title: 'Profile Summary',
         content: 'Your profile page shows a summary of your settings and information. You can see your Personal ID here - this is a unique identifier in CritterTrack. Your Personal ID is used by other users to find and contact you.',
-        highlightElement: '[data-tutorial-target="personal-id-section"]',
         tips: [
           'Personal ID is unique to you',
           'Shown to other users',
@@ -1396,7 +1268,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 3,
         title: 'Edit Profile Button',
         content: 'Click "Edit Profile" to modify your profile information including name, image, and public settings.',
-        highlightElement: '[data-tutorial-target="profile-edit-btn"]',
         tips: [
           'Opens edit mode for profile',
           'Can change all public info',
@@ -1407,7 +1278,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 4,
         title: 'Profile Image',
         content: 'Upload a profile picture. This image represents you to other users. Click the image area to upload.',
-        highlightElement: '[data-tutorial-target="profile-image-upload"]',
         tips: [
           'Shows to other users',
           'Professional photo recommended',
@@ -1418,7 +1288,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 5,
         title: 'Personal Name & Breeder Name',
         content: 'Enter your Personal Name (your real name) and Breeder Name (your breeder affixes/kennel name). These are separate so you can maintain privacy if desired. Each has a visibility toggle.',
-        highlightElement: '[data-tutorial-target="name-fields"]',
         tips: [
           'Personal Name: Your real identity',
           'Breeder Name: Your breeding prefix/affixes',
@@ -1429,7 +1298,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 6,
         title: 'Website & Country',
         content: 'Add your website (if you have a breeding website), select your country, and write a bio. The bio helps tell other breeders about yourself and your breeding program. These help other users find and learn about you.',
-        highlightElement: '[data-tutorial-target="website-country-fields"]',
         tips: [
           'Website links to your info',
           'Country helps with shipping/contact',
@@ -1440,8 +1308,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 7,
         title: 'Public Profile Visibility',
         content: 'These checkboxes control what information is visible on your public profile. Check which aspects you want to share: Personal Name, Breeder Name, website, etc. If private, only you see that info.',
-        highlightElement: '[data-tutorial-target="public-visibility-checkboxes"]',
-        hideHighlightPrompt: true,
         tips: [
           'Strategic visibility increases interest',
           'Can be very selective',
@@ -1452,7 +1318,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 8,
         title: 'Messaging Preferences',
         content: 'Configure how other users can contact you. You can allow messages, emails, or both. This controls your preferred method of communication.',
-        highlightElement: '[data-tutorial-target="messaging-preferences"]',
         tips: [
           'Controls how users reach you',
           'Choose your preferred method',
@@ -1463,7 +1328,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 9,
         title: 'Email Notifications',
         content: 'Set up email notifications for important events like messages, transfer requests, or system updates. Choose which notifications you want to receive.',
-        highlightElement: '[data-tutorial-target="email-notifications"]',
         tips: [
           'Stay informed about important events',
           'Customizable preferences',
@@ -1474,7 +1338,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 10,
         title: 'Breeding Status',
         content: 'Set your breeding status for each species you work with. Choose Owner (not breeding), Active Breeder, or Retired Breeder. Active and Retired breeders are visible in the public Breeders Registry.',
-        highlightElement: '[data-tutorial-target="breeding-status-section"]',
         tips: [
           'Owner: You have animals but don\'t breed',
           'Active Breeder: Currently breeding this species',
@@ -1499,7 +1362,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 12,
         title: 'Save or Cancel',
         content: 'Use the Save button to keep your changes or Cancel to discard them. Changes are applied immediately upon save.',
-        highlightElement: '[data-tutorial-target="profile-save-cancel"]',
         tips: [
           'Save makes changes permanent',
           'Cancel discards edits',
@@ -1510,8 +1372,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 13,
         title: 'Move to Budget',
         content: 'Now let\'s explore the Budget section to understand financial tracking. Click the "Budget" button in the header.',
-        highlightElement: '[data-tutorial-target="budget-btn"]',
-        actionType: 'click',
         tips: [
           'Budget tracks breeding finances',
           'Shows profitability',
@@ -1532,7 +1392,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 1,
         title: 'Budget Overview',
         content: 'The Budget section shows your financial overview: Total Sales, Total Purchases, Net Profit/Loss, and Average Sale Price. This helps you understand the financial side of your breeding program.',
-        highlightElement: '[data-tutorial-target="budget-overview"]',
         tips: [
           'Shows financial summary',
           'Helps plan breeding',
@@ -1543,8 +1402,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 2,
         title: 'Add Transaction - Expense',
         content: 'Click the "Add Transaction" button and select "Expense". This records costs like food, bedding, veterinary care, equipment, etc.',
-        highlightElement: '[data-tutorial-target="add-transaction-btn"]',
-        actionType: 'click',
         tips: [
           'Expenses reduce net profit',
           'Important for accurate tracking',
@@ -1555,8 +1412,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 3,
         title: 'Expense Fields',
         content: 'On the Expense form, fill in: Date, Category (food, housing, medical, equipment, other), Description, Amount, and optional notes. This creates a detailed expense record.',
-        highlightElement: '[data-tutorial-target="expense-form"]',
-        hideHighlightPrompt: true,
         tips: [
           'Categorize for better tracking',
           'Be specific in description',
@@ -1577,9 +1432,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 5,
         title: 'Animal Sale - Manual Entry',
         content: 'Select "Animal Sale" then "Manual Entry". This records a sale without using the transfer system - you just record the basic sale details manually.',
-        highlightElement: '[data-tutorial-target="animal-sale-manual"]',
-        hideHighlightPrompt: true,
-        actionType: 'click',
         tips: [
           'Manual entry is simple',
           'Good for external sales',
@@ -1590,8 +1442,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 6,
         title: 'Manual Sale Fields',
         content: 'Enter: Date, Animal (if you want to link it), Buyer, Sale Price, and Notes. This creates a record of the transaction.',
-        highlightElement: '[data-tutorial-target="manual-sale-form"]',
-        hideHighlightPrompt: true,
         tips: [
           'Simple transaction entry',
           'Works for any animal',
@@ -1602,8 +1452,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 7,
         title: 'Close & Reopen - Transfer Ownership',
         content: 'Let\'s look at Transfer Ownership, which is more sophisticated. Close this, reopen Add Transaction, select "Animal Sale", then "Transfer Ownership".',
-        highlightElement: '[data-tutorial-target="animal-sale-transfer"]',
-        hideHighlightPrompt: true,
         tips: [
           'Transfer creates relationships',
           'Both users stay connected',
@@ -1614,8 +1462,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 8,
         title: 'Transfer Ownership Features',
         content: 'Transfer Ownership initiates an animal transfer between CritterTrack users. The key features are: The animal gets a "Sold" status in your collection, you retain a view-only copy of the animal\'s record, the new owner gains full editing rights, and you can see all future changes they make. Neither party can delete the animal. Privacy note: transferred animals are treated like your own animals for visibility purposes — both parties can always view the full record and its ancestors in pedigrees, even if those ancestors are set to private by their owners.',
-        highlightElement: '[data-tutorial-target="transfer-ownership-form"]',
-        hideHighlightPrompt: true,
         tips: [
           'Maintains breeding history',
           'Both parties keep records',
@@ -1628,8 +1474,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 9,
         title: 'Close & Reopen - Animal Purchase',
         content: 'Now let\'s look at purchases. Close this, reopen Add Transaction, and select "Animal Purchase". Since manual entry is the same as sales, we\'ll focus on the "Notify Seller" option.',
-        highlightElement: '[data-tutorial-target="animal-purchase-notify"]',
-        hideHighlightPrompt: true,
         tips: [
           'Purchase is the other side of sale',
           'Notify Seller is special feature',
@@ -1640,8 +1484,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 10,
         title: 'Notify Seller Feature',
         content: 'The "Notify Seller" feature sends a notification to the original breeder that you\'ve acquired their animal. You enter their Personal ID, and they receive a notification. The seller gets a view-only copy showing that you now own the animal and any information you\'ve added.',
-        highlightElement: '[data-tutorial-target="notify-seller-form"]',
-        hideHighlightPrompt: true,
         tips: [
           'Keeps breeding community connected',
           'Seller gets updates on animal',
@@ -1663,7 +1505,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 1,
         title: 'Global Search Bar in Header',
         content: 'At the top of every screen there is an inline search bar — no button to click, just type! It searches the entire CritterTrack community simultaneously: type a name, species, or ID and results for both users and animals drop down instantly. Animals appear at the top of the results, users appear below.',
-        highlightElement: '[data-tutorial-target="global-search-btn"]',
         tips: [
           'Start typing after 2 characters — results appear automatically',
           'Use CTU followed by numbers to search users (e.g. CTU1234)',
@@ -1688,7 +1529,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 3,
         title: 'My Animals Search Bar',
         content: 'In your "My Animals" section, you\'ll find a separate search bar that lets you search within your own collection by animal name. This is local to your animals only.',
-        highlightElement: '[data-tutorial-target="my-animals-search"]',
         tips: [
           'Search only your animals',
           'Quick filtering of your collection',
@@ -1700,7 +1540,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 4,
         title: 'Species Filter',
         content: 'In your "My Animals" section, use the Species dropdown to filter your collection by animal type. Combine this with the search bar for quick access to specific animals.',
-        highlightElement: '[data-tutorial-target="species-filter"]',
         tips: [
           'Filter your collection by type',
           'Narrows down results quickly',
@@ -1712,7 +1551,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 5,
         title: 'Gender Filter',
         content: 'Use the Gender filter to find males, females, or other genders in your collection. This is helpful when planning breeding pairs.',
-        highlightElement: '[data-tutorial-target="gender-filter"]',
         tips: [
           'Find breeding prospects',
           'Organize by reproductive role',
@@ -1724,7 +1562,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 6,
         title: 'Status Filter',
         content: 'Filter by status (Pet, Breeder, Available, Sold, etc.) to quickly find animals in specific situations within your collection.',
-        highlightElement: '[data-tutorial-target="status-filter"]',
         tips: [
           'Find breeding stock',
           'See available for sale animals',
@@ -1736,8 +1573,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 7,
         title: 'Combined Filtering',
         content: 'Use multiple filters together: search by name, filter by species and gender, then by status. This gives you powerful tools to find exactly what you\'re looking for in your collection.',
-        highlightElement: '[data-tutorial-target="my-animals-section"]',
-        hideHighlightPrompt: true,
         tips: [
           'Layer multiple filters',
           'Quick specific searches',
@@ -1759,7 +1594,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 1,
         title: 'Notifications Overview',
         content: 'Notifications alert you to important events: messages from other users, animal transfer requests, breeding inquiries, and system updates. Click the bell icon in the header to access your notification center.',
-        highlightElement: '[data-tutorial-target="notification-bell"]',
         tips: [
           'Stay connected to community',
           'Never miss important info',
@@ -1770,8 +1604,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 2,
         title: 'Transfer Request Notifications',
         content: 'When someone initiates an animal transfer with you (either to buy or to receive your animal), you\'ll be notified.',
-        highlightElement: '[data-tutorial-target="transfer-notifications"]',
-        hideHighlightPrompt: true,
         tips: [
           'Don\'t miss sale opportunities',
           'Stay on top of incoming animals',
@@ -1782,8 +1614,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 3,
         title: 'System Notifications',
         content: 'Receive alerts about important system events, updates, or maintenance. These are typically low-priority but keep you informed.',
-        highlightElement: '[data-tutorial-target="system-notifications"]',
-        hideHighlightPrompt: true,
         tips: [
           'Stay aware of platform changes',
           'Know about new features',
@@ -1794,7 +1624,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 4,
         title: 'Message Notifications',
         content: 'Receive alerts when other CritterTrack users send you messages. Click the Messages button in the header to view your conversations with other breeders.',
-        highlightElement: '[data-tutorial-target="messages-btn"]',
         tips: [
           'Community communication',
           'Stay in touch with breeders',
@@ -1815,8 +1644,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 1,
         title: 'Messaging Overview',
         content: 'Send messages to other CritterTrack users. This is how you inquire about animals, discuss breeding, coordinate transfers, or build relationships in the breeding community.',
-        highlightElement: '[data-tutorial-target="messaging-section"]',
-        hideHighlightPrompt: true,
         tips: [
           'Direct communication tool',
           'Build breeding connections',
@@ -1827,8 +1654,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 2,
         title: 'Send Message from Profile',
         content: 'To message another breeder, first find their profile (you can search for them using the global search). Once on their profile, click the "Message" button to start a conversation. This lets you reach out about their animals, ask breeding questions, or coordinate transfers.',
-        highlightElement: '[data-tutorial-target="profile-message-btn"]',
-        hideHighlightPrompt: true,
         tips: [
           'Find breeders through global search',
           'View their public profile',
@@ -1840,8 +1665,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 3,
         title: 'Message Conversations',
         content: 'Messages are organized in conversations. Each conversation shows the history of messages between you and another user.',
-        highlightElement: '[data-tutorial-target="message-conversations"]',
-        hideHighlightPrompt: true,
         tips: [
           'See full conversation history',
           'Know what was discussed',
@@ -1852,8 +1675,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 4,
         title: 'Privacy in Messaging',
         content: 'Messages are private between you and the recipient. Neither party can force messages onto non-responders - messaging requires mutual agreement if messaging preferences are restricted.',
-        highlightElement: '[data-tutorial-target="messaging-privacy"]',
-        hideHighlightPrompt: true,
         tips: [
           'Secure communication',
           'Respect privacy settings',
@@ -1864,8 +1685,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 5,
         title: 'Next: Advanced Features Tour',
         content: 'Congratulations on completing the Key Features tour! You now understand how to view and edit animals, manage litters, configure your profile, handle breeding finances, search and filter, receive notifications, and communicate with other breeders. The "My Feed" tab is your personalized community hub — check it regularly to stay up to date with your favorited animals and breeders. Would you like to start the "Advanced Features" tour? This will teach you about tags, genetics, COI calculations, and more advanced community features.',
-        actionType: 'startNextTour',
-        actionData: { nextTour: 'advanced' },
         tips: [
           'Advanced Features builds on Key Features',
           'Covers tags, genetics, and advanced search',
@@ -1889,8 +1708,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 1,
         title: 'Tags Overview',
         content: 'Tags are labels you create to organize your collection. Common tags: "Show Animals", "Breeding Stock", "Pets", "For Sale", "Problem Behaviors", etc.',
-        highlightElement: '[data-tutorial-target="tags-explanation"]',
-        hideHighlightPrompt: true,
         tips: [
           'Flexible organization system',
           'Create your own tags',
@@ -1901,8 +1718,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 2,
         title: 'Adding Tags',
         content: 'In the animal form, find the Tags field. Type a tag name and press Enter to add it. Tags can be new or existing from your tag list.',
-        highlightElement: '[data-tutorial-target="add-tags-field"]',
-        hideHighlightPrompt: true,
         tips: [
           'Create tags on the fly',
           'Tag suggestions appear',
@@ -1913,8 +1728,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 3,
         title: 'Filtering by Tags',
         content: 'You can search for animals by their tags using the "Search by animal name" field. For example, typing "LineB" will show all animals with that tag. The search works for both animal names and tags.',
-        highlightElement: '[data-tutorial-target="tag-filter"]',
-        hideHighlightPrompt: true,
         tips: [
           'Search field finds tag names',
           'Works for both names and tags',
@@ -1926,8 +1739,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 4,
         title: 'Bulk Privacy Controls',
         content: 'At the top of the My Animals page, you\'ll see "All Public" and "All Private" buttons. These let you instantly change the visibility of ALL your animals at once. The UI updates immediately, and changes sync with the database in the background.',
-        highlightElement: '[data-tutorial-target="bulk-privacy-controls"]',
-        hideHighlightPrompt: true,
         tips: [
           'Green Eye icon = Make All Public',
           'Gray Eye-Off icon = Make All Private',
@@ -1940,7 +1751,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 5,
         title: 'Mass Delete',
         content: 'Click the trash icon to enter mass delete mode. Select multiple animals using checkboxes, then click "Delete Selected" to remove them all at once.',
-        highlightElement: '[data-tutorial-target="bulk-delete-btn"]',
         tips: [
           'Efficient for large collections',
           'Delete multiple animals at once',
@@ -1961,8 +1771,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 1,
         title: 'Public Profile Overview',
         content: 'Your public profile is how other breeders find and learn about you. It is organised into up to four tabs that appear automatically once you have content: Animals (always visible), For Sale / Stud (appears when you have animals marked for sale or stud), Info & Adoption (appears when you have breeder info filled in Settings), and Litters (appears when you have at least one litter toggled public in Litter Management).',
-        highlightElement: '[data-tutorial-target="public-profile-section"]',
-        hideHighlightPrompt: true,
         tips: [
           'Tabs appear automatically — no manual setup needed',
           'Animals tab is always shown',
@@ -1975,7 +1783,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 2,
         title: 'For Sale / Stud Tab',
         content: 'The "For Sale / Stud" tab shows two sections: animals you have listed for sale (with price) and animals available for stud services (with fee). Animals appear here when they are both set to Public AND have "Available for Sale" or "Available for Stud" enabled in their Status & Privacy tab. Visitors can see the price/fee, gender, species, and photo at a glance.',
-        hideHighlightPrompt: true,
         tips: [
           'Animal must be Public AND marked For Sale or For Stud',
           'Set price/fee or mark as Negotiable',
@@ -1987,7 +1794,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 3,
         title: 'Info & Adoption Tab',
         content: 'The "Info & Adoption" tab shows your breeding program information as collapsible accordions: About My Program, Adoption Rules, Care Requirements, Health Guarantee, Waitlist Info, Pricing Notes, Contact Preferences, and any custom fields you have added. Fill these fields in Settings → Info & Adoption tab. The tab is hidden if none of the fields are filled.',
-        hideHighlightPrompt: true,
         tips: [
           'Fill fields in Settings → Info & Adoption tab',
           'Only filled sections are shown publicly',
@@ -2000,7 +1806,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 4,
         title: 'Litters Tab',
         content: 'The "Litters" tab shows litters you have chosen to share publicly. Toggle any litter public using the Eye / EyeOff icon on each litter card in Litter Management. Public litter cards display the pair name and ID, sire × dam names, a status badge (Planned or Born), relevant dates, a photo strip (if you have uploaded litter photos), and your notes. Litters are grouped into Planned and Past (born).',
-        hideHighlightPrompt: true,
         tips: [
           'Toggle per-litter from Litter Management (Eye icon at start of card)',
           'Planned and born litters appear in separate groups',
@@ -2012,8 +1817,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 5,
         title: 'Profile Visibility Control',
         content: 'Use visibility toggles to control what appears on your public profile. You can be selective about what you share while maintaining community connections.',
-        highlightElement: '[data-tutorial-target="profile-visibility"]',
-        hideHighlightPrompt: true,
         tips: [
           'Strategic sharing',
           'Balance openness and privacy',
@@ -2024,7 +1827,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 6,
         title: 'Sharing Animals',
         content: 'First, open an existing animal from your collection to view its details. Then, click the "Share" button to copy the unique link to your clipboard. You can share this link with other breeders so they can view the full pedigree and contact you about the animal.',
-        highlightElement: '[data-tutorial-target="share-animal-btn"]',
         tips: [
           'Direct promotion',
           'Easy distribution',
@@ -2045,8 +1847,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 1,
         title: 'What is COI?',
         content: 'The Coefficient of Inbreeding (COI) is a mathematical measure of genetic diversity. It ranges from 0% (no common ancestors) to 100% (completely inbred).',
-        highlightElement: '[data-tutorial-target="coi-explanation"]',
-        hideHighlightPrompt: true,
         tips: [
           '0% = maximum diversity',
           '100% = completely inbred',
@@ -2057,8 +1857,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 2,
         title: 'Why COI Matters',
         content: 'COI helps breeders understand the genetic relationship between ancestors in a pedigree. Monitoring COI allows breeders to make informed decisions about their breeding programs.',
-        highlightElement: '[data-tutorial-target="why-coi-matters"]',
-        hideHighlightPrompt: true,
         tips: [
           'Genetics matter',
           'Track genetic relationships',
@@ -2069,8 +1867,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 3,
         title: 'Viewing COI',
         content: 'When viewing an animal, the COI percentage is shown on the Overview tab in the Parents section (top right of the Parents header). It reflects that animal\'s genetic diversity based on all known ancestors in the pedigree. The COI is visible to anyone who can view the animal — including the public view.',
-        highlightElement: '[data-tutorial-target="coi-display"]',
-        hideHighlightPrompt: true,
         tips: [
           'Found on the Overview tab, Parents section (top right)',
           'Visible in both private and public views',
@@ -2083,8 +1879,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 4,
         title: 'Predicted COI for Pairings',
         content: 'When selecting potential breeding pairs, the system can predict the COI of offspring. This helps you understand the genetic relationship before making breeding decisions.',
-        highlightElement: '[data-tutorial-target="predicted-coi"]',
-        hideHighlightPrompt: true,
         tips: [
           'Plan ahead',
           'Compare different pairings',
@@ -2095,8 +1889,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 5,
         title: 'Using COI in Your Program',
         content: 'COI is one of many tools breeders use to make informed decisions. Consider COI alongside other factors like temperament, conformation, and health testing when planning your breeding program.',
-        highlightElement: '[data-tutorial-target="ethical-breeding"]',
-        hideHighlightPrompt: true,
         tips: [
           'One factor among many',
           'Consider COI in every decision',
@@ -2117,7 +1909,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 1,
         title: 'Marketplace Overview',
         content: 'The Marketplace lets you browse animals that breeders have marked as "Available for Sale" or "Available for Stud". Only animals that are both marked as available AND have their public profile enabled will appear here.',
-        highlightElement: '[data-tutorial-target="marketplace-btn"]',
         tips: [
           'Find animals for sale',
           'Discover stud services',
@@ -2172,7 +1963,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 1,
         title: 'Breeders Registry Overview',
         content: 'The Breeders Registry helps you find active breeders of specific species. Click the star/moon icon in the header to access it. Breeders can mark themselves as "Active Breeder" or "Retired Breeder" for each species in their settings.',
-        highlightElement: '[data-tutorial-target="breeders-btn"]',
         tips: [
           'Find breeders by species',
           'Connect with the community',
@@ -2227,7 +2017,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 1,
         title: 'Animal Tree Overview',
         content: 'The Animal Tree provides a visual family tree for each species, showing all your owned animals and their immediate parents. Click the Network icon next to a species name on your My Animals page to view the tree for that species.',
-        highlightElement: '[data-tutorial-target="animal-tree-btn"]',
         tips: [
           'Visual family tree per species',
           'Shows owned animals + parents',
@@ -2282,7 +2071,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 1,
         title: 'Genetics Calculator Overview',
         content: 'Click the "Genetics" button in the header to access the Genetics Calculator - a tool for predicting offspring genetic traits. It works with species like Fancy Mice that have defined genetic loci.',
-        highlightElement: '[data-tutorial-target="genetics-btn"]',
         tips: [
           'Predict offspring appearance',
           'Understand inheritance',
@@ -2293,7 +2081,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 2,
         title: 'Selecting Animals',
         content: 'Click the "Select Animal" button to choose parents from your collection. Their genetic codes are automatically filled in when you select them.',
-        highlightElement: '[data-tutorial-target="select-animal-btn"]',
         tips: [
           'Use your animals',
           'Genetic code auto-fills',
@@ -2304,7 +2091,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 3,
         title: 'Genetic Loci',
         content: 'Each genetic locus represents a trait. Select the combination for each parent using the dropdowns. The Sire (father) section is blue and the Dam (mother) section is pink.',
-        highlightElement: '[data-tutorial-target="parent-selectors"]',
         tips: [
           'One row per genetic trait',
           'Select parent genotypes',
@@ -2315,7 +2101,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 4,
         title: 'Calculate Offspring',
         content: 'First, select genetic combinations for both parents (or input "a/a" for both as a test). Then click "Calculate Offspring" to see all possible outcomes.',
-        highlightElement: '[data-tutorial-target="calculate-offspring-btn"]',
         tips: [
           'Both parents must have selections',
           'Button activates when ready',
@@ -2326,7 +2111,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 5,
         title: 'Predicted Offspring',
         content: 'The "Possible Offspring Outcomes" section shows all possible combinations and their probabilities. Click on combinations to see phenotypes (appearance) and any special notes.',
-        highlightElement: '[data-tutorial-target="offspring-results"]',
         tips: [
           'See all possibilities',
           'Probabilities shown',
@@ -2347,7 +2131,6 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 7,
         title: 'Tutorial Complete!',
         content: 'Congratulations! You\'ve completed all CritterTrack tutorials. You now know how to manage your entire breeding program — from adding animals to tracking genetics and finances, daily feeding management in the Management View, Supplies & Inventory, and per-animal Logs. You can always revisit these tutorials from the Help section in the header. Thank you for taking the time to learn all that CritterTrack has to offer!',
-        highlightElement: '[data-tutorial-target="help-btn"]',
         tips: [
           'Access tutorials anytime from Help',
           'Check Management View for daily operations',
