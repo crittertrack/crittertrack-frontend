@@ -1878,7 +1878,7 @@ const App = () => {
                     >
                         <Shield size={15} className="text-red-600 flex-shrink-0" />
                         <span className="text-sm text-red-700 font-medium flex-1">
-                            You have {unreadAdminMessageCount} unread message{unreadAdminMessageCount > 1 ? 's' : ''} from CritterTrack ? please respond
+                            You have {unreadAdminMessageCount} unread message{unreadAdminMessageCount > 1 ? 's' : ''} from CritterTrack — please respond
                         </span>
                         <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded-full font-semibold flex-shrink-0">View</span>
                     </div>
