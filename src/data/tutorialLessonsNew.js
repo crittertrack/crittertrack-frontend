@@ -262,11 +262,11 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 3,
         title: 'Keeper Section',
-        content: 'The "🏠 Keeper" section tracks who is currently caring for this animal. Check "Currently Owned by Me" to mark yourself as the current keeper. The Keeper Name field records the name of whoever is keeping the animal right now. The optional Co-Ownership field lets you note shared ownership arrangements.',
+        content: 'The "🏠 Keeper" section tracks who is currently caring for this animal. Check "Currently Owned by Me" to mark yourself as the current keeper. The Keeper Name field records the name of whoever is keeping the animal right now. The optional Co-Ownership field lets you note shared ownership arrangements. Note: the Co-Ownership field is not available for Fancy Mice.',
         tips: [
           'Checkbox: marks you as the current keeper',
           'Keeper Name: person currently caring for the animal',
-          'Co-Ownership: note breeding rights or shared arrangements'
+          'Co-Ownership: note breeding rights or shared arrangements (not available for Fancy Mice)'
         ]
       },
       {
@@ -299,10 +299,10 @@ const GETTING_STARTED_LESSONS = [
 
   {
     id: 'gs-physical',
-    title: '5. Appearance & Genetic Code',
+    title: '6. Appearance & Genetic Code',
     description: 'Document color, coat, genetics, and measurements',
     tour: 'getting-started',
-    tourOrder: 5,
+    tourOrder: 6,
     steps: [
       {
         stepNumber: 1,
@@ -448,10 +448,10 @@ const GETTING_STARTED_LESSONS = [
 
   {
     id: 'gs-identification',
-    title: '6. Identification & Classification',
+    title: '5. Identification & Classification',
     description: 'Set up identification numbers, breeds, and tags',
     tour: 'getting-started',
-    tourOrder: 6,
+    tourOrder: 5,
     steps: [
       {
         stepNumber: 1,
@@ -863,8 +863,8 @@ const GETTING_STARTED_LESSONS = [
 
   {
     id: 'gs-records-eol',
-    title: '13. Notes & End of Life',
-    description: 'Add notes and document end-of-life information',
+    title: '13. Notes',
+    description: 'Add notes and additional information about your animal',
     tour: 'getting-started',
     tourOrder: 13,
     steps: [
@@ -886,46 +886,6 @@ const GETTING_STARTED_LESSONS = [
           'Free-form text field',
           'Great for detailed observations',
           'Useful for future reference'
-        ]
-      },
-      {
-        stepNumber: 3,
-        title: 'Move to End of Life Tab',
-        content: 'Now let\'s look at the End of Life tab where you document end-of-life information. Click the "End of Life" tab.',
-        tips: [
-          'Optional for living animals',
-          'Important when animal passes',
-          'Completes the record'
-        ]
-      },
-      {
-        stepNumber: 4,
-        title: 'Date of Death',
-        content: 'When your animal passes away, enter the date of death here. This automatically updates the animal\'s status to "Deceased".',
-        tips: [
-          'Marks end of active record',
-          'Status changes to Deceased',
-          'Important for complete records'
-        ]
-      },
-      {
-        stepNumber: 5,
-        title: 'Cause of Death',
-        content: 'Document what caused your animal\'s death: natural causes, illness, predation, accident, etc. This helps with understanding health patterns.',
-        tips: [
-          'Helps track health issues',
-          'Useful for breeding decisions',
-          'Important for complete records'
-        ]
-      },
-      {
-        stepNumber: 6,
-        title: 'Necropsy Results',
-        content: 'If a necropsy (animal autopsy) was performed, document the findings here. This is valuable medical information.',
-        tips: [
-          'Professional necropsy provides details',
-          'Helps understand health issues',
-          'Valuable for genetics research'
         ]
       }
     ]
@@ -975,8 +935,8 @@ const GETTING_STARTED_LESSONS = [
 
   {
     id: 'gs-legal',
-    title: '15. Legal & Documentation',
-    description: 'Manage legal status, insurance, and documentation',
+    title: '15. Legal & End of Life',
+    description: 'Manage legal documentation and end-of-life records',
     tour: 'getting-started',
     tourOrder: 15,
     steps: [
@@ -1018,6 +978,46 @@ const GETTING_STARTED_LESSONS = [
           'Important for contract compliance',
           'Export restrictions vary by country',
           'Breeding restrictions protect genetics'
+        ]
+      },
+      {
+        stepNumber: 5,
+        title: 'End of Life Tab',
+        content: 'The End of Life tab (tab 14) is where you document end-of-life information for your animal. This is optional for living animals but important to complete when an animal passes away.',
+        tips: [
+          'Optional for living animals',
+          'Important when animal passes',
+          'Completes the full record'
+        ]
+      },
+      {
+        stepNumber: 6,
+        title: 'Date of Death',
+        content: 'When your animal passes away, enter the date of death here. This automatically updates the animal\'s status to "Deceased".',
+        tips: [
+          'Marks end of active record',
+          'Status changes to Deceased',
+          'Important for complete records'
+        ]
+      },
+      {
+        stepNumber: 7,
+        title: 'Cause of Death',
+        content: 'Document what caused your animal\'s death: natural causes, illness, predation, accident, etc. This helps with understanding health patterns.',
+        tips: [
+          'Helps track health issues',
+          'Useful for breeding decisions',
+          'Important for complete records'
+        ]
+      },
+      {
+        stepNumber: 8,
+        title: 'Necropsy Results',
+        content: 'If a necropsy (animal autopsy) was performed, document the findings here. This is valuable medical information.',
+        tips: [
+          'Professional necropsy provides details',
+          'Helps understand health issues',
+          'Valuable for genetics research'
         ]
       }
     ]
