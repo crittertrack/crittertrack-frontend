@@ -298,6 +298,107 @@ const GETTING_STARTED_LESSONS = [
   },
 
   {
+    id: 'gs-identification',
+    title: '5. Identification & Classification',
+    description: 'Set up identification numbers, breeds, and tags',
+    tour: 'getting-started',
+    tourOrder: 5,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Identification Tab',
+        content: 'This tab helps you uniquely identify your animal using multiple identification systems and classification information.',
+        tips: [
+          'Multiple ID systems ensure uniqueness',
+          'Important for record-keeping',
+          'Helps prevent accidental duplicates'
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'Identification (Breeder ID)',
+        content: 'Enter any custom identification number for your animal. This might be your personal breeder ID, a tattoo number, or any system you use. This field is separate from the microchip number and pedigree registration ID - each serves a different purpose.',
+        tips: [
+          'Optional but recommended',
+          'Use your own numbering system',
+          'Examples: "BRD-001", tattoo numbers, cage numbers'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Microchip Number',
+        content: 'If your animal has been microchipped (common for larger animals or identification purposes), enter the microchip number here.',
+        tips: [
+          'Optional for most small animals',
+          'Common for lost pet recovery',
+          'More common in larger animals'
+        ]
+      },
+      {
+        stepNumber: 4,
+        title: 'Pedigree Registration ID',
+        content: 'If your animal is registered with a pedigree or breed registry (like AFRMA for fancy mice), enter that registration ID here.',
+        tips: [
+          'Important if your animal is registered',
+          'Proves pedigree and lineage',
+          'Valuable for show animals'
+        ]
+      },
+      {
+        stepNumber: 5,
+        title: 'Classification Section',
+        content: 'The Classification section shows your selected species (Fancy Mouse) and lets you specify the breed. The species cannot be changed after creation - this ensures consistency in your records.',
+        tips: [
+          'Species is permanent',
+          'Set correctly during creation',
+          'If wrong, must create a new record'
+        ]
+      },
+      {
+        stepNumber: 6,
+        title: 'Breed Selection',
+        content: 'Fill in the breed of your animal if applicable.',
+        tips: [
+          'Breeds are species-specific',
+          'Only applicable for certain species',
+          'Example: Species Mouse > Breed Fancy Mouse'
+        ]
+      },
+      {
+        stepNumber: 7,
+        title: 'Strain',
+        content: 'Enter the strain or genetic line if your animal is part of a specific breeding program. Strains are often named and maintained over generations.',
+        tips: [
+          'Optional but valuable for breeders',
+          'Tracks genetic lines',
+          'Examples: "Jackson Black Line", "Siamese Point Strain"'
+        ]
+      },
+      {
+        stepNumber: 8,
+        title: 'Origin',
+        content: 'Select where your animal came from using the Origin dropdown. Options are Captive-bred (born in captivity), Wild-caught (collected from the wild), or Rescue (rehomed from another owner or shelter). This is useful for record-keeping and transparency with buyers.',
+        tips: [
+          'Captive-bred is the most common for breeders',
+          'Wild-caught is relevant for reptiles and fish',
+          'Rescue helps track rehomed animals'
+        ]
+      },
+      {
+        stepNumber: 9,
+        title: 'Tags Feature',
+        content: 'Tags allow you to categorize and organize your animals. You can create custom tags like "Show Animal", "Breeding Stock", "Pet", "For Sale", etc. Add tags by typing and pressing Enter.',
+        tips: [
+          'Tags help organize your collection',
+          'Create your own tag system',
+          'Can search and filter by tags',
+          'One animal can have multiple tags'
+        ]
+      }
+    ]
+  },
+
+  {
     id: 'gs-physical',
     title: '6. Appearance & Genetic Code',
     description: 'Document color, coat, genetics, and measurements',
@@ -441,107 +542,6 @@ const GETTING_STARTED_LESSONS = [
           'Chart updates automatically with new measurements',
           'Shows growth trajectory',
           'Helps identify health concerns'
-        ]
-      }
-    ]
-  },
-
-  {
-    id: 'gs-identification',
-    title: '5. Identification & Classification',
-    description: 'Set up identification numbers, breeds, and tags',
-    tour: 'getting-started',
-    tourOrder: 5,
-    steps: [
-      {
-        stepNumber: 1,
-        title: 'Identification Tab',
-        content: 'This tab helps you uniquely identify your animal using multiple identification systems and classification information.',
-        tips: [
-          'Multiple ID systems ensure uniqueness',
-          'Important for record-keeping',
-          'Helps prevent accidental duplicates'
-        ]
-      },
-      {
-        stepNumber: 2,
-        title: 'Identification (Breeder ID)',
-        content: 'Enter any custom identification number for your animal. This might be your personal breeder ID, a tattoo number, or any system you use. This field is separate from the microchip number and pedigree registration ID - each serves a different purpose.',
-        tips: [
-          'Optional but recommended',
-          'Use your own numbering system',
-          'Examples: "BRD-001", tattoo numbers, cage numbers'
-        ]
-      },
-      {
-        stepNumber: 3,
-        title: 'Microchip Number',
-        content: 'If your animal has been microchipped (common for larger animals or identification purposes), enter the microchip number here.',
-        tips: [
-          'Optional for most small animals',
-          'Common for lost pet recovery',
-          'More common in larger animals'
-        ]
-      },
-      {
-        stepNumber: 4,
-        title: 'Pedigree Registration ID',
-        content: 'If your animal is registered with a pedigree or breed registry (like AFRMA for fancy mice), enter that registration ID here.',
-        tips: [
-          'Important if your animal is registered',
-          'Proves pedigree and lineage',
-          'Valuable for show animals'
-        ]
-      },
-      {
-        stepNumber: 5,
-        title: 'Classification Section',
-        content: 'The Classification section shows your selected species (Fancy Mouse) and lets you specify the breed. The species cannot be changed after creation - this ensures consistency in your records.',
-        tips: [
-          'Species is permanent',
-          'Set correctly during creation',
-          'If wrong, must create a new record'
-        ]
-      },
-      {
-        stepNumber: 6,
-        title: 'Breed Selection',
-        content: 'Fill in the breed of your animal if applicable.',
-        tips: [
-          'Breeds are species-specific',
-          'Only applicable for certain species',
-          'Example: Species Mouse > Breed Fancy Mouse'
-        ]
-      },
-      {
-        stepNumber: 7,
-        title: 'Strain',
-        content: 'Enter the strain or genetic line if your animal is part of a specific breeding program. Strains are often named and maintained over generations.',
-        tips: [
-          'Optional but valuable for breeders',
-          'Tracks genetic lines',
-          'Examples: "Jackson Black Line", "Siamese Point Strain"'
-        ]
-      },
-      {
-        stepNumber: 8,
-        title: 'Origin',
-        content: 'Select where your animal came from using the Origin dropdown. Options are Captive-bred (born in captivity), Wild-caught (collected from the wild), or Rescue (rehomed from another owner or shelter). This is useful for record-keeping and transparency with buyers.',
-        tips: [
-          'Captive-bred is the most common for breeders',
-          'Wild-caught is relevant for reptiles and fish',
-          'Rescue helps track rehomed animals'
-        ]
-      },
-      {
-        stepNumber: 9,
-        title: 'Tags Feature',
-        content: 'Tags allow you to categorize and organize your animals. You can create custom tags like "Show Animal", "Breeding Stock", "Pet", "For Sale", etc. Add tags by typing and pressing Enter.',
-        tips: [
-          'Tags help organize your collection',
-          'Create your own tag system',
-          'Can search and filter by tags',
-          'One animal can have multiple tags'
         ]
       }
     ]
