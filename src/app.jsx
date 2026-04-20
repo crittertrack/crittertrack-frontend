@@ -309,7 +309,7 @@ const App = () => {
     const [speciesOptions, setSpeciesOptions] = useState([]);
     const [speciesConfigs, setSpeciesConfigs] = useState({});
     const [speciesSearchTerm, setSpeciesSearchTerm] = useState('');
-    const [speciesCategoryFilter, setSpeciesCategoryFilter] = useState('');
+    const [speciesCategoryFilter, setSpeciesCategoryFilter] = useState('All');
     
     // Detect mobile/app environment
     React.useEffect(() => {
