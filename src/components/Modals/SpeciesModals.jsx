@@ -247,7 +247,7 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
     };
 
     return (
-        <div className="w-full max-w-3xl bg-white p-6 rounded-xl shadow-lg">
+        <div className="w-full max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-lg">
             <div className="flex justify-between items-start mb-6">
                 <h2 className="text-2xl font-bold text-gray-800 flex items-center">
                     <Settings size={20} className="mr-2 text-primary-dark" />
