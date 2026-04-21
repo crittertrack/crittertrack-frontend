@@ -1734,6 +1734,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         };
 
         setEditingLitter(litter._id);
+        setCreateOffspringCounts({ males: 0, females: 0, unknown: 0 });
         setLitterImages(litter.images || []);
         // Restore cached parent animal objects for display (supports global animals)
         setSelectedSireAnimal(litter.sire || null);
@@ -2159,7 +2160,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         {/* Mating button */}
                         <button
                             onClick={() => {
-                                if (!showAddMatingForm) { setShowAddForm(false); setEditingLitter(null); }
+                                if (!showAddMatingForm) { setShowAddForm(false); setEditingLitter(null); setCreateOffspringCounts({ males: 0, females: 0, unknown: 0 }); }
                                 setShowAddMatingForm(!showAddMatingForm);
                                 if (showAddMatingForm) resetMatingForm();
                             }}
@@ -2174,6 +2175,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             onClick={() => {
                                 if (showAddForm) {
                                     setEditingLitter(null);
+                                    setCreateOffspringCounts({ males: 0, females: 0, unknown: 0 });
                                     setPredictedCOI(null);
                                     setFormData({
                                         breedingPairCodeName: '',
@@ -2243,6 +2245,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 onClick={() => {
                                     setShowAddForm(false);
                                     setEditingLitter(null);
+                                    setCreateOffspringCounts({ males: 0, females: 0, unknown: 0 });
                                     setSelectedSireAnimal(null);
                                     setSelectedDamAnimal(null);
                                     setShowSpeciesPicker(false);
@@ -2939,6 +2942,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             onClick={() => {
                                 setShowAddForm(false);
                                 setEditingLitter(null);
+                                setCreateOffspringCounts({ males: 0, females: 0, unknown: 0 });
                                 setLitterImages([]);
                                 pendingLitterImages.forEach(item => URL.revokeObjectURL(item.previewUrl));
                                 setPendingLitterImages([]);

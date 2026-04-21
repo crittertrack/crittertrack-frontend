@@ -463,6 +463,22 @@ const App = () => {
         setAnimalDataRefreshTrigger(t => t + 1);
     };
 
+    // Add Sibling: open blank form pre-filled with same species/birthdate/parents
+    const [siblingTemplate, setSiblingTemplate] = React.useState(null);
+    const handleAddSibling = React.useCallback((sourceAnimal) => {
+        if (!sourceAnimal) return;
+        const birthDate = sourceAnimal.birthDate
+            ? new Date(sourceAnimal.birthDate).toISOString().substring(0, 10)
+            : '';
+        setSiblingTemplate({
+            species: sourceAnimal.species,
+            birthDate,
+            fatherId_public: sourceAnimal.fatherId_public || sourceAnimal.sireId_public || null,
+            motherId_public: sourceAnimal.motherId_public || sourceAnimal.damId_public || null,
+        });
+        setAnimalToView(null);
+    }, [setAnimalToView]);
+
     // Immediately apply a partial/full animal update to animalToView and broadcast to all listeners
     const handleAnimalFieldUpdate = React.useCallback((updatedAnimal) => {
         if (!updatedAnimal?.id_public) return;
@@ -2215,6 +2231,7 @@ const App = () => {
                                 animalBreedingLines={animalBreedingLines}
                                 toggleAnimalBreedingLine={toggleAnimalBreedingLine}
                                 setAnimalBreedingLinesDirect={setAnimalBreedingLinesDirect}
+                                onAddSibling={handleAddSibling}
                             />
                     );
                 } else {
@@ -2249,6 +2266,41 @@ const App = () => {
                         onSave={handleSaveAnimalWithRefresh}
                         onCancel={handleCancelEditAnimal}
                         onDelete={handleDeleteAnimal}
+                        authToken={authToken}
+                        showModalMessage={showModalMessage}
+                        API_BASE_URL={API_BASE_URL}
+                        userProfile={userProfile}
+                        speciesConfigs={speciesConfigs}
+                        X={X}
+                        Search={Search}
+                        Loader2={Loader2}
+                        LoadingSpinner={LoadingSpinner}
+                        PlusCircle={PlusCircle}
+                        ArrowLeft={ArrowLeft}
+                        Save={Save}
+                        Trash2={Trash2}
+                        RotateCcw={RotateCcw}
+                        GENDER_OPTIONS={GENDER_OPTIONS}
+                        STATUS_OPTIONS={STATUS_OPTIONS}
+                        AnimalImageUpload={AnimalImageUpload}
+                    />
+                </div>
+            )}
+
+            {/* Add Sibling overlay */}
+            {siblingTemplate && (
+                <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30 flex items-start justify-center p-4">
+                    <AnimalForm
+                        formTitle={`Add Sibling (${siblingTemplate.species})`}
+                        animalToEdit={null}
+                        species={siblingTemplate.species}
+                        initialValues={siblingTemplate}
+                        onSave={async (...args) => {
+                            await handleSaveAnimalWithRefresh(...args);
+                            setSiblingTemplate(null);
+                        }}
+                        onCancel={() => setSiblingTemplate(null)}
+                        onDelete={null}
                         authToken={authToken}
                         showModalMessage={showModalMessage}
                         API_BASE_URL={API_BASE_URL}

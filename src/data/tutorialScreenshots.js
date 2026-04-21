@@ -45,17 +45,16 @@ export const TUTORIAL_SCREENSHOTS = {
   'gs-physical': {
     1: 'physical-characteristics.png', // Step 1: Physical Characteristics
     2: 'template-based-physical-fields.png', // Step 2: Template-Based Physical Fields
-    3: 'filling-out-physical-fields.png', // Step 3: Filling Out Physical Fields
-    4: 'carrier-traits.png', // Step 4: Carrier Traits
-    5: 'genetic-code-the-add-button.png', // Step 5: Genetic Code
-    6: 'genetic-builder-overview.png', // Step 6: Genetic Builder Overview
-    7: 'close-genetic-builder.png', // Step 7: Close Genetic Builder
-    8: 'life-stage.png', // Step 8: Life Stage
-    9: 'measurements-and-growth-tracking.png', // Step 9: Measurements & Growth Tracking
-    10: 'measurement-units.png', // Step 10: Measurement Units
-    11: 'add-first-measurement.png', // Step 11: Add First Measurement
-    12: 'add-second-measurement.png', // Step 12: Add Second Measurement
-    13: 'view-growth-chart.png', // Step 13: View Growth Chart
+    3: 'carrier-traits.png', // Step 3: Carrier Traits
+    4: 'genetic-code-the-add-button.png', // Step 4: Genetic Code
+    5: 'genetic-builder-overview.png', // Step 5: Genetic Builder Overview
+    6: 'close-genetic-builder.png', // Step 6: Close Genetic Builder
+    7: 'life-stage.png', // Step 7: Life Stage
+    8: 'measurements-and-growth-tracking.png', // Step 8: Measurements & Growth Tracking
+    9: 'measurement-units.png', // Step 9: Measurement Units
+    10: 'add-first-measurement.png', // Step 10: Add First Measurement
+    11: 'add-second-measurement.png', // Step 11: Add Second Measurement
+    12: 'view-growth-chart.png', // Step 12: View Growth Chart
   },
   
   'gs-identification': {

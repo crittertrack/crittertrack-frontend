@@ -429,17 +429,6 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 3,
-        title: 'Filling Out Physical Fields',
-        content: 'Fill in the physical characteristic fields that appear for your species. You can be as specific or general as you like. Examples: "Black" for color, "Standard" for coat type, "Marked" for pattern, "Large" for size. These fields help identify your animal and track genetic traits.',
-        tips: [
-          'Use consistent terminology across your animals',
-          'These fields help with breeding decisions',
-          'All fields are optional - fill what\'s relevant',
-          'You can always edit these later'
-        ]
-      },
-      {
-        stepNumber: 4,
         title: 'Carrier Traits',
         content: 'The Carrier Traits field lets you record genetic traits that this animal carries but does not visually express. A carrier animal has one copy of a recessive gene — it looks normal but can pass the trait on to offspring. For example, a "Black Eyed White" mouse may carry "Recessive Yellow" without showing it. Documenting carrier status here helps you make informed breeding decisions and predict offspring outcomes.',
         tips: [
@@ -451,7 +440,7 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 5,
+        stepNumber: 4,
         title: 'Genetic Code',
         content: 'The Genetic Code field lets you record the genetic notation for your animal. For Fancy Mouse, an ADD button appears next to the field — click it to open the interactive Genetic Builder which guides you through selecting genes with dropdowns. For all other species, only a plain text field is shown with no builder or modal.',
         tips: [
@@ -462,7 +451,7 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 6,
+        stepNumber: 5,
         title: 'Genetic Builder Overview',
         content: 'Welcome to the Genetic Code Builder! This tool helps you document the genetic traits of your animal. You can select genes using dropdown menus (available for Fancy Mouse) or switch to manual mode to enter genetics for any species.',
         tips: [
@@ -473,7 +462,7 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 7,
+        stepNumber: 6,
         title: 'Close Genetic Builder',
         content: 'Let\'s go back to the Physical tab. Click the Cancel button to close this builder.',
         tips: [
@@ -483,7 +472,7 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 8,
+        stepNumber: 7,
         title: 'Life Stage',
         content: 'Select the current life stage of your animal from the dropdown. Available options vary by species and may include: Newborn (just born), Juvenile (young), Adult (mature), Senior (elderly), or Unknown. This is a manual selection field.',
         tips: [
@@ -494,7 +483,7 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 9,
+        stepNumber: 8,
         title: 'Measurements & Growth Tracking',
         content: 'This section tracks your animal\'s physical measurements over time. This is particularly useful for monitoring growth, health, and development. Let\'s add some sample measurements.',
         tips: [
@@ -504,7 +493,7 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 10,
+        stepNumber: 9,
         title: 'Measurement Units',
         content: 'First, select your preferred units: Metric (kg, cm) or Imperial (lbs, inches). Choose whichever you\'re most comfortable with.',
         tips: [
@@ -514,7 +503,7 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 11,
+        stepNumber: 10,
         title: 'Add First Measurement',
         content: 'Now let\'s add a tutorial measurement. Enter the date 01/01/2026, weight 450, and length 20. Then click Add Measurement.',
         tips: [
@@ -525,7 +514,7 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 12,
+        stepNumber: 11,
         title: 'Add Second Measurement',
         content: 'Let\'s add another measurement with today\'s date, weight 500, and length 30. This shows growth over time.',
         tips: [
@@ -535,7 +524,7 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 13,
+        stepNumber: 12,
         title: 'View Growth Chart',
         content: 'Notice the "Current Measurements" section shows your latest measurement, and the "Growth Curve" chart visualizes how your animal has grown over the dates you entered. This helps you monitor development.',
         tips: [

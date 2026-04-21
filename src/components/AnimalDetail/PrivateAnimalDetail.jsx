@@ -24,7 +24,7 @@ import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/l
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { QRModal } from '../PublicProfile/PublicProfileView';
 import { PedigreeChart } from '../AnimalForm';
-const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onViewPublicAnimal, onToggleOwned, userProfile, userAnimals = [], breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, setAnimalBreedingLinesDirect, initialTab = 1, initialBetaView = 'vertical' }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, onAddSibling, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onViewPublicAnimal, onToggleOwned, userProfile, userAnimals = [], breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, setAnimalBreedingLinesDirect, initialTab = 1, initialBetaView = 'vertical' }) => {
     const navigate = useNavigate();
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
@@ -508,6 +508,16 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                     Edit
                                 </button>
                             )}
+                            {onAddSibling && (
+                                <button
+                                    onClick={() => onAddSibling(animal)}
+                                    className="px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                    title="Add a sibling"
+                                >
+                                    <Users size={14} />
+                                    Add Sibling
+                                </button>
+                            )}
                         </div>
                     </div>
                     
@@ -592,6 +602,16 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, A
                                 >
                                     <Edit size={16} />
                                     Edit
+                                </button>
+                            )}
+                            {onAddSibling && (
+                                <button
+                                    onClick={() => onAddSibling(animal)}
+                                    className="px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 font-semibold rounded-lg transition flex items-center gap-2"
+                                    title="Add a sibling"
+                                >
+                                    <Users size={16} />
+                                    Add Sibling
                                 </button>
                             )}
                             <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">

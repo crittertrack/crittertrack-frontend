@@ -2515,6 +2515,7 @@ const AnimalForm = ({
     API_BASE_URL,          // Ensure these are passed from the parent component (App)
     userProfile,           // Current user profile for default breeder
     speciesConfigs,        // Field replacements per species (legacy - to be phased out)
+    initialValues,         // Optional: pre-fill defaults for new animal (e.g. Add Sibling)
     X, 
     Search, 
     Loader2, 
@@ -2814,6 +2815,8 @@ const AnimalForm = ({
             fatherId_public: null,
             motherId_public: null,
             breederId_public: null,
+            // Apply any sibling/template pre-fills (spread last so they override defaults)
+            ...(initialValues || {}),
             keeperName: '',
             groupRole: '',
             isPregnant: false,
