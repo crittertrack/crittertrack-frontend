@@ -2170,7 +2170,7 @@ const AnimalList = ({
                         className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-800 transition"
                     >
                         <ChevronLeft size={16} />
-                        Back to Management
+                        {animalView === 'list' ? 'Back to My Animals' : 'Back to Management'}
                     </button>
                     <button
                         onClick={fetchDuplicates}
@@ -3720,6 +3720,16 @@ const AnimalList = ({
                     </button>
 
                     </>)}
+                    {animalView === 'list' && !showDuplicatesScreen && (
+                        <button
+                            onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(true); }}
+                            className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-amber-600 hover:text-amber-800 hover:bg-amber-50 border border-amber-200 rounded-lg transition font-medium"
+                            title="Find Duplicate Animals"
+                        >
+                            <Search size={14} className="sm:w-4 sm:h-4" />
+                            <span className="font-medium">Find Duplicates</span>
+                        </button>
+                    )}
                     {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
                         <button
                             onClick={() => {
@@ -4112,8 +4122,8 @@ const AnimalList = ({
             </div>
             )}
 
-            {showArchiveScreen ? renderArchiveScreen() : animalView === 'management' ? (
-                showActivityLogScreen ? renderActivityLogScreen() : showSuppliesScreen ? renderSuppliesScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : renderManagementView()
+            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : animalView === 'management' ? (
+                showActivityLogScreen ? renderActivityLogScreen() : showSuppliesScreen ? renderSuppliesScreen() : renderManagementView()
             ) : animalView === 'collections' ? renderCollectionsView() : (loading && animals.length === 0) ? (
                 /* Skeleton grid ? only on very first load before any animals arrive */
                 <div className="space-y-3 sm:space-y-4">
