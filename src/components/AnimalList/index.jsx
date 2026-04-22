@@ -2651,19 +2651,28 @@ const AnimalList = ({
             }
         };
 
-        const handleAssignAnimalToEnclosure = async (animalIdPublic, enclosureId) => {
-            try {
-                await axios.put(`${API_BASE_URL}/animals/${animalIdPublic}`,
-                    { enclosureId: enclosureId || null },
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
-                const encName = enclosureId ? (enclosures.find(e => e._id === enclosureId)?.name || enclosureId) : null;
-                logManagementActivity(
-                    enclosureId ? 'enclosure_assign' : 'enclosure_unassign',
-                    animalIdPublic,
-                    enclosureId ? { enclosureName: encName } : {}
-                );
-                fetchAnimals();
-            } catch (err) { console.error('Assign enclosure failed:', err); }
+        const handleAssignAnimalToEnclosure = (animalIdPublic, enclosureId) => {
+            const newEnclosureId = enclosureId || null;
+            // Capture old value for rollback
+            const prevRaw = allAnimalsRaw;
+            // Optimistic update
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animalIdPublic ? { ...a, enclosureId: newEnclosureId } : a));
+            setAssigningAnimalId(null);
+            axios.put(`${API_BASE_URL}/animals/${animalIdPublic}`,
+                { enclosureId: newEnclosureId },
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => {
+                    const encName = newEnclosureId ? (enclosures.find(e => e._id === newEnclosureId)?.name || newEnclosureId) : null;
+                    logManagementActivity(
+                        newEnclosureId ? 'enclosure_assign' : 'enclosure_unassign',
+                        animalIdPublic,
+                        newEnclosureId ? { enclosureName: encName } : {}
+                    );
+                })
+                .catch(err => {
+                    console.error('Assign enclosure failed:', err);
+                    setAllAnimalsRaw(prevRaw);
+                });
         };
 
         const handleMarkFed = (e, animal) => {
