@@ -3518,44 +3518,53 @@ const AnimalList = ({
                         icon={<Activity size={18} className="text-red-600" />}
                         title="Medical / Quarantine" count={quarantineList.length + treatmentList.length} bgClass="bg-red-50" />
                     {!collapsedMgmtSections['medical'] && (
-                        <div className="p-3 space-y-2">
+                        <div className="p-3 space-y-4">
                             {quarantineList.length === 0 && treatmentList.length === 0
                                 ? <div className="text-sm text-gray-400 text-center py-4">No animals in quarantine or under treatment.</div>
                                 : <>
                                     {quarantineList.length > 0 && (
-                                        <MgmtGroup groupKey="med_quarantine" label="Quarantine / Isolation"
-                                            groupAnimals={quarantineList} headerClass="bg-orange-50"
-                                            renderExtras={(a) => {
-                                                const conds = parseArrayField(a.medicalConditions);
-                                                return (
-                                                    <div className="flex items-center gap-1.5 shrink-0">
-                                                        {conds.length > 0
-                                                            ? <div className="text-xs text-orange-600 max-w-[100px] truncate">{conds.map(c => c.name || c).join(', ')}</div>
-                                                            : <span className="text-xs text-orange-400">Quarantine</span>}
-                                                        <button
-                                                            onClick={(e) => handleUnquarantine(e, a)}
-                                                            className="text-xs px-2 py-0.5 rounded font-medium border bg-green-500 text-white hover:bg-green-600 border-green-500 whitespace-nowrap"
-                                                            title="Release from quarantine"
-                                                        >
-                                                            <LockOpen size={14} className="inline-block align-middle mr-1" /> Release
-                                                        </button>
-                                                    </div>
-                                                );
-                                            }} />
+                                        <div>
+                                            <div className="flex items-center gap-2 px-1 pb-2">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-orange-400 inline-block" />
+                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Quarantine / Isolation ({quarantineList.length})</span>
+                                            </div>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                                {quarantineList.map(a => (
+                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                        hideControls hideBreedingLines
+                                                        cardActions={
+                                                            <button onClick={(e) => handleUnquarantine(e, a)}
+                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5">
+                                                                <LockOpen size={9} /> Release
+                                                            </button>
+                                                        }
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
                                     )}
                                     {treatmentList.length > 0 && (
-                                        <MgmtGroup groupKey="med_treatment" label="Under Treatment"
-                                            groupAnimals={treatmentList} headerClass="bg-red-50"
-                                            renderExtras={(a) => {
-                                                const conds = parseArrayField(a.medicalConditions);
-                                                const meds = parseArrayField(a.medications);
-                                                return (
-                                                    <div className="text-xs text-right shrink-0 max-w-[140px]">
-                                                        {conds.length > 0 && <div className="text-gray-500 truncate">{conds.map(c => c.name || c).join(', ')}</div>}
-                                                        {meds.length > 0 && <div className="text-blue-500 truncate">{meds.map(m => m.name || m).join(', ')}</div>}
-                                                    </div>
-                                                );
-                                            }} />
+                                        <div>
+                                            <div className="flex items-center gap-2 px-1 pb-2">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-red-400 inline-block" />
+                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Under Treatment ({treatmentList.length})</span>
+                                            </div>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                                {treatmentList.map(a => {
+                                                    const conds = parseArrayField(a.medicalConditions);
+                                                    const meds = parseArrayField(a.medications);
+                                                    return (
+                                                        <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                            hideControls hideBreedingLines
+                                                            cardActions={<>
+                                                                {conds.length > 0 && <div className="text-[10px] text-gray-500 truncate w-full text-center">{conds.map(c => c.name || c).join(', ')}</div>}
+                                                                {meds.length > 0 && <div className="text-[10px] text-blue-500 truncate w-full text-center">{meds.map(m => m.name || m).join(', ')}</div>}
+                                                            </>}
+                                                        />
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
                                     )}
                                 </>
                             }
@@ -3569,27 +3578,27 @@ const AnimalList = ({
                         icon={<ShoppingBag size={18} className="text-purple-600" />}
                         title="For Sale / Available" count={availableList.length} bgClass="bg-purple-50" />
                     {!collapsedMgmtSections['available'] && (
-                        <div className="p-3 space-y-1.5">
+                        <div className="p-3">
                             {availableList.length === 0
                                 ? <div className="text-sm text-gray-400 text-center py-4">No animals currently marked as Available.</div>
-                                : availableList.map(a => (
-                                    <MgmtAnimalCard key={a._id || a.id_public} animal={a} extras={
-                                        <div className="flex items-center gap-1.5 shrink-0">
-                                            {a.isForSale && a.salePriceAmount && (
-                                                <span className="text-xs text-purple-600 font-medium whitespace-nowrap">
-                                                    {a.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${a.salePriceCurrency || ''} ${a.salePriceAmount}`.trim()}
-                                                </span>
-                                            )}
-                                            <button
-                                                onClick={(e) => handleMarkRehomed(e, a)}
-                                                className="text-xs px-2 py-0.5 rounded font-medium border bg-indigo-500 text-white hover:bg-indigo-600 border-indigo-500 whitespace-nowrap"
-                                                title="Mark as Rehomed / Sold"
-                                            >
-                                                <Check size={14} className="inline-block align-middle mr-0.5" /> Rehomed
-                                            </button>
-                                        </div>
-                                    } />
-                                ))
+                                : <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                    {availableList.map(a => (
+                                        <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                            hideControls hideBreedingLines
+                                            cardActions={<>
+                                                {a.isForSale && a.salePriceAmount && (
+                                                    <div className="text-[10px] text-purple-600 font-medium truncate w-full text-center">
+                                                        {a.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${a.salePriceCurrency || ''} ${a.salePriceAmount}`.trim()}
+                                                    </div>
+                                                )}
+                                                <button onClick={(e) => handleMarkRehomed(e, a)}
+                                                    className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500 text-white hover:bg-indigo-600 w-full flex items-center justify-center gap-0.5">
+                                                    <Check size={9} /> Rehomed
+                                                </button>
+                                            </>}
+                                        />
+                                    ))}
+                                </div>
                             }
                         </div>
                     )}
