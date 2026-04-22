@@ -651,10 +651,15 @@ const AnimalList = ({
     useEffect(() => { fetchAvailableAnimals(); }, [fetchAvailableAnimals]);
     useEffect(() => { fetchSoldTransferred(); }, [fetchSoldTransferred]);
 
-    // Close fixed collection dropdown on scroll
+    // Close fixed collection dropdown on scroll (but not when scrolling inside the dropdown itself)
+    const collectionDropdownRef = useRef(null);
     useEffect(() => {
         if (!collectionDropdownPos) return;
-        const close = () => { setAssigningCollectionAnimalId(null); setCollectionDropdownPos(null); };
+        const close = (e) => {
+            if (collectionDropdownRef.current && collectionDropdownRef.current.contains(e.target)) return;
+            setAssigningCollectionAnimalId(null);
+            setCollectionDropdownPos(null);
+        };
         window.addEventListener('scroll', close, true);
         return () => window.removeEventListener('scroll', close, true);
     }, [collectionDropdownPos]);
@@ -2557,6 +2562,7 @@ const AnimalList = ({
                                                         <div className="absolute top-2 left-2 z-20">
                                                             {assigningCollectionAnimalId === animal.id_public && collectionDropdownPos && (
                                                                 <div
+                                                                    ref={collectionDropdownRef}
                                                                     style={{ position: 'fixed', top: collectionDropdownPos.top, bottom: collectionDropdownPos.bottom, left: collectionDropdownPos.left, zIndex: 9999 }}
                                                                     className="bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[160px] max-h-52 overflow-y-auto"
                                                                     onClick={e => e.stopPropagation()}
