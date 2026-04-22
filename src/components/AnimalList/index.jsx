@@ -1274,7 +1274,7 @@ const AnimalList = ({
         }
     };
 
-    const AnimalCard = ({ animal, onEditAnimal, species, isSelectable, isSelected, onToggleSelect, onTogglePrivacy, onToggleOwned }) => {
+    const AnimalCard = ({ animal, onEditAnimal, species, isSelectable, isSelected, onToggleSelect, onTogglePrivacy, onToggleOwned, hideControls, hideBreedingLines, cardActions }) => {
         const birth = animal.birthDate ? formatDate(animal.birthDate) : '';
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
 
@@ -1350,10 +1350,10 @@ const AnimalList = ({
 
                     {/* Edit is available when viewing full card; remove inline edit icon from dashboard cards */}
 
-                    {/* ID bottom-right */}
+                    {/* ID + controls row */}
                     <div className="w-full px-1 sm:px-2 pb-1 sm:pb-2 flex justify-between items-center mt-auto">
                         {/* Privacy and Owned toggles bottom-left */}
-                        {!isSelectable && (
+                        {!isSelectable && !hideControls && (
                             <div className="flex items-center gap-1">
                                 {/* Owned toggle */}
                                 <button
@@ -1399,12 +1399,12 @@ const AnimalList = ({
                                 </button>
                             </div>
                         )}
-                        {/* Spacer if no toggles (in selection mode) */}
-                        {isSelectable && <div></div>}
+                        {/* Spacer if no toggles */}
+                        {(isSelectable || hideControls) && <div></div>}
                         <div className="text-[9px] sm:text-[10px] md:text-xs text-gray-500">{animal.id_public}</div>
                     </div>
                     {/* Breeding line diamonds */}
-                    {(() => {
+                    {!hideBreedingLines && (() => {
                         const assignedIds = animalBreedingLines[animal.id_public] || [];
                         const activeLines = breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name);
                         if (activeLines.length === 0) return null;
@@ -1416,6 +1416,12 @@ const AnimalList = ({
                             </div>
                         );
                     })()}
+                    {/* Management action buttons slot */}
+                    {cardActions && (
+                        <div className="w-full px-1 pb-1 flex flex-wrap gap-1 justify-center" onClick={e => e.stopPropagation()}>
+                            {cardActions}
+                        </div>
+                    )}
                     {/* Status bar at bottom */}
                     <div className={`w-full py-0.5 sm:py-1 text-center border-t border-gray-300 mt-auto ${
                         animal.isViewOnly ? 'bg-orange-100' : 'bg-gray-100'
@@ -3033,19 +3039,24 @@ const AnimalList = ({
                                                     <div className="px-3 py-1.5 bg-gray-50 text-xs text-gray-500 border-b border-gray-100">{enc.notes}</div>
                                                 )}
                                                 {!isGrpCollapsed && (
-                                                    <div className="p-2 space-y-1.5 bg-white">
+                                                    <div>
                                                         {occupants.length === 0
                                                             ? <div className="text-xs text-gray-400 text-center py-2">No animals assigned yet</div>
-                                                            : occupants.map(a => (
-                                                                <MgmtAnimalCard key={a._id || a.id_public} animal={a}
-                                                                    extras={
-                                                                        <button onClick={(e) => { e.stopPropagation(); handleAssignAnimalToEnclosure(a.id_public, ''); }}
-                                                                            className="text-xs text-gray-400 hover:text-red-500 border border-gray-200 hover:border-red-200 rounded px-1.5 py-0.5 shrink-0">
-                                                                            Remove
-                                                                        </button>
-                                                                    }
-                                                                />
-                                                            ))
+                                                            : (
+                                                                <div className="p-1.5 sm:p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                                                    {occupants.map(a => (
+                                                                        <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                                            hideControls hideBreedingLines
+                                                                            cardActions={
+                                                                                <button onClick={(e) => { e.stopPropagation(); handleAssignAnimalToEnclosure(a.id_public, ''); }}
+                                                                                    className="text-[10px] text-gray-400 hover:text-red-500 border border-gray-200 hover:border-red-200 rounded px-1.5 py-0.5 w-full">
+                                                                                    Remove
+                                                                                </button>
+                                                                            }
+                                                                        />
+                                                                    ))}
+                                                                </div>
+                                                            )
                                                         }
                                                     </div>
                                                 )}
@@ -3068,24 +3079,23 @@ const AnimalList = ({
                                                 <span className="text-xs text-gray-400 bg-white/70 px-2 py-0.5 rounded-full">{unassignedAnimals.length}</span>
                                             </div>
                                             {!collapsedMgmtGroups['enc_unassigned'] && (
-                                                <div className="p-2 space-y-1.5 bg-white">
+                                                <div className="p-1.5 sm:p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3 bg-white">
                                                     {unassignedAnimals.map(a => (
-                                                        <MgmtAnimalCard key={a._id || a.id_public} animal={a}
-                                                            extras={
+                                                        <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                            hideControls hideBreedingLines
+                                                            cardActions={
                                                                 enclosures.length > 0 ? (
                                                                     assigningAnimalId === a.id_public ? (
-                                                                        <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                                                                            <select autoFocus defaultValue=""
-                                                                                onChange={e => { if (e.target.value) { handleAssignAnimalToEnclosure(a.id_public, e.target.value); } setAssigningAnimalId(null); }}
-                                                                                onBlur={() => setAssigningAnimalId(null)}
-                                                                                className="text-xs border border-blue-300 rounded p-1 max-w-[130px]">
-                                                                                <option value="" disabled>Select enclosure...</option>
-                                                                                {enclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}
-                                                                            </select>
-                                                                        </div>
+                                                                        <select autoFocus defaultValue=""
+                                                                            onChange={e => { if (e.target.value) { handleAssignAnimalToEnclosure(a.id_public, e.target.value); } setAssigningAnimalId(null); }}
+                                                                            onBlur={() => setAssigningAnimalId(null)}
+                                                                            className="text-[10px] border border-blue-300 rounded p-1 w-full">
+                                                                            <option value="" disabled>Select enclosure...</option>
+                                                                            {enclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}
+                                                                        </select>
                                                                     ) : (
                                                                         <button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }}
-                                                                            className="text-xs text-blue-500 hover:text-blue-700 border border-blue-200 rounded px-1.5 py-0.5 shrink-0 whitespace-nowrap">
+                                                                            className="text-[10px] text-blue-500 hover:text-blue-700 border border-blue-200 rounded px-1.5 py-0.5 w-full whitespace-nowrap">
                                                                             Assign
                                                                         </button>
                                                                     )
@@ -3109,45 +3119,70 @@ const AnimalList = ({
                         icon={<Bean size={18} className="text-pink-600" />}
                         title="Reproduction" count={reproTotal} bgClass="bg-pink-50" />
                     {!collapsedMgmtSections['reproduction'] && (
-                        <div className="p-3 space-y-2">
+                        <div className="p-3 space-y-4">
                             {reproTotal === 0
                                 ? <div className="text-sm text-gray-400 text-center py-4">No animals currently in a reproductive state.</div>
                                 : <>
                                     {matingList.length > 0 && (
-                                        <MgmtGroup groupKey="repro_mating" label="In Mating"
-                                            groupAnimals={matingList} headerClass="bg-purple-50"
-                                            renderExtras={(a) => (
-                                                <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                                                    {a.matingDate && <div className="text-xs text-gray-400 hidden sm:block">Since {formatDateShort(a.matingDate)}</div>}
-                                                    {a.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: true })}
-                                                        className="text-xs px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 whitespace-nowrap flex items-center gap-0.5"><Bean size={10} className="flex-shrink-0" /> Set as Pregnant</button>}
-                                                    <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false })}
-                                                        className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200">Clear</button>
-                                                </div>
-                                            )} />
+                                        <div>
+                                            <div className="flex items-center gap-2 px-1 pb-2">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-purple-400 inline-block" />
+                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">In Mating ({matingList.length})</span>
+                                            </div>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                                {matingList.map(a => (
+                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                        hideControls hideBreedingLines
+                                                        cardActions={<>
+                                                            {a.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: true })}
+                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 w-full flex items-center justify-center gap-0.5"><Bean size={9} /> Pregnant</button>}
+                                                            <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false })}
+                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
+                                                        </>}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
                                     )}
                                     {pregnantList.length > 0 && (
-                                        <MgmtGroup groupKey="repro_pregnant" label="Pregnant / Gravid"
-                                            groupAnimals={pregnantList} headerClass="bg-pink-50"
-                                            renderExtras={(a) => (
-                                                <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                                                    {a.expectedDueDate && <div className="text-xs text-gray-400 hidden sm:block">Due {formatDateShort(a.expectedDueDate)}</div>}
-                                                    {a.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false, isNursing: true })}
-                                                        className="text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 whitespace-nowrap flex items-center gap-0.5"><Milk size={10} className="flex-shrink-0" /> Set as Nursing</button>}
-                                                    <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false })}
-                                                        className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200">Clear</button>
-                                                </div>
-                                            )} />
+                                        <div>
+                                            <div className="flex items-center gap-2 px-1 pb-2">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-pink-400 inline-block" />
+                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Pregnant / Gravid ({pregnantList.length})</span>
+                                            </div>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                                {pregnantList.map(a => (
+                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                        hideControls hideBreedingLines
+                                                        cardActions={<>
+                                                            {a.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false, isNursing: true })}
+                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 w-full flex items-center justify-center gap-0.5"><Milk size={9} /> Nursing</button>}
+                                                            <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false })}
+                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
+                                                        </>}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
                                     )}
                                     {nursingList.length > 0 && (
-                                        <MgmtGroup groupKey="repro_nursing" label="Nursing / Brooding"
-                                            groupAnimals={nursingList} headerClass="bg-blue-50"
-                                            renderExtras={(a) => (
-                                                <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                                                    <button onClick={(e) => handleReproStatusUpdate(e, a, { isNursing: false })}
-                                                        className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 flex items-center gap-0.5"><Check size={10} className="flex-shrink-0" /> Done</button>
-                                                </div>
-                                            )} />
+                                        <div>
+                                            <div className="flex items-center gap-2 px-1 pb-2">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block" />
+                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Nursing / Brooding ({nursingList.length})</span>
+                                            </div>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                                {nursingList.map(a => (
+                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                        hideControls hideBreedingLines
+                                                        cardActions={
+                                                            <button onClick={(e) => handleReproStatusUpdate(e, a, { isNursing: false })}
+                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 w-full flex items-center justify-center gap-0.5"><Check size={9} /> Done</button>
+                                                        }
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
                                     )}
                                 </>
                             }
@@ -3806,6 +3841,23 @@ const AnimalList = ({
                     >
                         <Search size={16} />
                         <span className="hidden sm:inline">Search</span>
+                    </button>
+                    <span className="hidden sm:inline mx-1 text-gray-300">|</span>
+                    <button
+                        onClick={() => toggleAllAnimalsPrivacy(true)}
+                        className="text-green-600 hover:text-green-700 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-green-50 text-xs sm:text-sm font-semibold shadow-sm shrink-0"
+                        title="Make All Animals Public"
+                    >
+                        <Eye size={14} className="sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">Set All Public</span>
+                    </button>
+                    <button
+                        onClick={() => toggleAllAnimalsPrivacy(false)}
+                        className="text-gray-600 hover:text-gray-800 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-semibold shadow-sm shrink-0"
+                        title="Make All Animals Private"
+                    >
+                        <EyeOff size={14} className="sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">Set All Private</span>
                     </button>
                 </div>
             </div>
