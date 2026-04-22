@@ -257,13 +257,22 @@ const AnimalList = ({
     };
 
     // ---- Collection CRUD helpers ----
-    const _saveCollections = (cols) => {
+    const _syncToApi = (cols, map) => {
+        if (!authToken) return;
+        axios.put(`${API_BASE_URL}/collections`, { collections: cols, animalMap: map }, {
+            headers: { Authorization: `Bearer ${authToken}` }
+        }).catch(err => console.warn('[collections sync]', err));
+    };
+    const _saveCollections = (cols, mapOverride) => {
+        const map = mapOverride !== undefined ? mapOverride : animalCollections;
         setUserCollections(cols);
         try { localStorage.setItem('ct_collections', JSON.stringify(cols)); } catch {}
+        _syncToApi(cols, map);
     };
     const _saveAnimalCollections = (map) => {
         setAnimalCollections(map);
         try { localStorage.setItem('ct_animal_collections', JSON.stringify(map)); } catch {}
+        _syncToApi(userCollections, map);
     };
     const createCollection = (name) => {
         if (!name.trim()) return;
@@ -271,10 +280,14 @@ const AnimalList = ({
         _saveCollections([...userCollections, { id, name: name.trim() }]);
     };
     const deleteCollection = (id) => {
-        _saveCollections(userCollections.filter(c => c.id !== id));
+        const newCols = userCollections.filter(c => c.id !== id);
         const next = { ...animalCollections };
         Object.keys(next).forEach(aid => { next[aid] = next[aid].filter(cid => cid !== id); });
-        _saveAnimalCollections(next);
+        setUserCollections(newCols);
+        setAnimalCollections(next);
+        try { localStorage.setItem('ct_collections', JSON.stringify(newCols)); } catch {}
+        try { localStorage.setItem('ct_animal_collections', JSON.stringify(next)); } catch {}
+        _syncToApi(newCols, next);
     };
     const renameCollection = (id, name) => {
         if (!name.trim()) return;
@@ -614,6 +627,25 @@ const AnimalList = ({
     useEffect(() => { fetchAllAnimals(); }, [fetchAllAnimals]);
     useEffect(() => { fetchAvailableAnimals(); }, [fetchAvailableAnimals]);
     useEffect(() => { fetchSoldTransferred(); }, [fetchSoldTransferred]);
+
+    // Load collections from API on mount; fall back to localStorage cache already in state
+    useEffect(() => {
+        if (!authToken) return;
+        axios.get(`${API_BASE_URL}/collections`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(res => {
+                const { collections, animalMap } = res.data || {};
+                if (Array.isArray(collections) && collections.length > 0) {
+                    setUserCollections(collections);
+                    try { localStorage.setItem('ct_collections', JSON.stringify(collections)); } catch {}
+                }
+                if (animalMap && typeof animalMap === 'object' && Object.keys(animalMap).length > 0) {
+                    setAnimalCollections(animalMap);
+                    try { localStorage.setItem('ct_animal_collections', JSON.stringify(animalMap)); } catch {}
+                }
+            })
+            .catch(err => console.warn('[collections load]', err));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [authToken]);
 
     // Fetch the current user's activity log (lazy ? only when log screen opens)
     const fetchActivityLogs = useCallback(async (page = 1, filters = {}) => {
