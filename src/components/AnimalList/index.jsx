@@ -3873,30 +3873,30 @@ const AnimalList = ({
             <div className="flex border border-gray-200 rounded-xl overflow-hidden shadow-sm mb-4">
                 <button
                     onClick={() => setAnimalView('list')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 text-sm font-semibold transition ${
+                    className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 px-2 sm:px-4 text-xs sm:text-sm font-semibold transition ${
                         animalView === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'
                     }`}
                 >
-                    <ClipboardList size={15} />
-                    <span>My Animals</span>
+                    <ClipboardList size={15} className="shrink-0" />
+                    <span className="hidden sm:inline">My Animals</span>
                 </button>
                 <button
                     onClick={() => setAnimalView('collections')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 text-sm font-semibold transition ${
+                    className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 px-2 sm:px-4 text-xs sm:text-sm font-semibold transition ${
                         animalView === 'collections' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'
                     }`}
                 >
-                    <FolderOpen size={15} />
-                    <span>Collections</span>
+                    <FolderOpen size={15} className="shrink-0" />
+                    <span className="hidden sm:inline">Collections</span>
                 </button>
                 <button
                     onClick={() => setAnimalView('management')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 text-sm font-semibold transition ${
+                    className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 px-2 sm:px-4 text-xs sm:text-sm font-semibold transition ${
                         animalView === 'management' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'
                     }`}
                 >
-                    <LayoutGrid size={15} />
-                    <span>Management</span>
+                    <LayoutGrid size={15} className="shrink-0" />
+                    <span className="hidden sm:inline">Management</span>
                 </button>
             </div>
             )}
