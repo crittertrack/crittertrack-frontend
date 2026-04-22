@@ -1821,6 +1821,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                                 <select value={editForm.status || ''} onChange={(e) => setEditForm({...editForm, status: e.target.value})}>
                                                     <option value="">Select...</option>
                                                     <option value="Pet">Pet</option>
+                                                    <option value="Growout">Growout</option>
                                                     <option value="Breeder">Breeder</option>
                                                     <option value="Available">Available</option>
                                                     <option value="Booked">Booked</option>

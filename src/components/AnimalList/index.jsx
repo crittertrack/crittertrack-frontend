@@ -15,7 +15,7 @@ import { formatDate, formatDateShort } from '../../utils/dateFormatter';
 const API_BASE_URL = '/api';
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'];
-const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
+const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
 const normalizeAnimalView = (value) => (
     value === 'management' || value === 'collections' ? value : 'list'
 );
