@@ -2737,8 +2737,8 @@ const AnimalList = ({
         };
 
         // -- Section data ---------------------------------------------------------
-        // Exclude deceased animals from all management sections
-        const allAnimals = allAnimalsRaw.filter(a => a.status !== 'Deceased');
+        // Exclude deceased and view-only (transferred/sold) animals from all management sections
+        const allAnimals = allAnimalsRaw.filter(a => a.status !== 'Deceased' && !a.isViewOnly);
         // 1. Enclosures ? grouped by named enclosure (enclosureId)
         const enclosureAnimalMap = {}; // { enclosureId: [animals] }
         const unassignedAnimals = [];
