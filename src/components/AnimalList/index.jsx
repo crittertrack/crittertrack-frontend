@@ -3895,7 +3895,7 @@ const AnimalList = ({
                             onClick={e => { e.stopPropagation(); const next = tab.key; setDefaultAnimalView(next); try { localStorage.setItem('ct_default_animal_view', next); } catch {} }}
                             title={defaultAnimalView === tab.key ? 'Default view' : 'Set as default'}
                             className={`absolute top-1 right-1.5 transition-colors ${
-                                defaultAnimalView === tab.key ? 'text-amber-500' : 'text-gray-300 hover:text-gray-500'
+                                defaultAnimalView === tab.key ? 'text-red-500' : 'text-gray-300 hover:text-gray-500'
                             }`}
                         >
                             <Pin size={13} fill={defaultAnimalView === tab.key ? 'currentColor' : 'none'} strokeWidth={2} />
