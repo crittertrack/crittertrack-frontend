@@ -3122,7 +3122,90 @@ const AnimalList = ({
                     )}
                 </div>
 
-                {/* -- 2. REPRODUCTION ---------------------------------------- */}
+                {/* -- 2. FEEDING -------------------------------------------- */}
+                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <SectionHeader sectionKey="feeding"
+                        icon={<Utensils size={18} className="text-green-600" />}
+                        title="Feeding" count={animalCareDue > 0 ? `${animalCareDue} due` : animals.length} bgClass="bg-green-50" />
+                    {!collapsedMgmtSections['feeding'] && (
+                        <div className="p-3 space-y-4">
+                            {feedDue.length > 0 && (
+                                <div>
+                                    <div className="flex items-center gap-2 px-1 pb-2">
+                                        <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" />
+                                        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Due Today / Overdue ({feedDue.length})</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                        {feedDue.map(a => (
+                                            <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                hideControls hideBreedingLines
+                                                cardActions={<>
+                                                    {a.lastFedDate
+                                                        ? <div className="text-[10px] text-gray-400 w-full text-center">Last: {formatDateShort(a.lastFedDate)}</div>
+                                                        : <div className="text-[10px] text-orange-500 w-full text-center">Never fed</div>}
+                                                    <button onClick={(e) => handleMarkFed(e, a)}
+                                                        className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5">
+                                                        🍽 Fed
+                                                    </button>
+                                                    <button onClick={(e) => handleSkipFeeding(e, a)}
+                                                        className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200 w-full flex items-center justify-center gap-0.5">
+                                                        ⏭ Skip
+                                                    </button>
+                                                </>}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {feedOk.length > 0 && (
+                                <div>
+                                    <div className="flex items-center gap-2 px-1 pb-2">
+                                        <span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" />
+                                        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Up to Date ({feedOk.length})</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                        {feedOk.map(a => (
+                                            <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                hideControls hideBreedingLines
+                                                cardActions={<>
+                                                    {a.lastFedDate && <div className="text-[10px] text-gray-400 w-full text-center">Last: {formatDateShort(a.lastFedDate)}</div>}
+                                                    {a.feedingFrequencyDays && <div className="text-[10px] text-gray-400 w-full text-center">Every {a.feedingFrequencyDays}d</div>}
+                                                    <button onClick={(e) => handleMarkFed(e, a)}
+                                                        className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-green-100 hover:text-green-700 border border-gray-200 w-full flex items-center justify-center gap-0.5">
+                                                        🍽 Fed
+                                                    </button>
+                                                </>}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {feedNone.length > 0 && (
+                                <div>
+                                    <div className="flex items-center gap-2 px-1 pb-2">
+                                        <span className="w-2.5 h-2.5 rounded-full bg-gray-300 inline-block" />
+                                        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">No Schedule Set ({feedNone.length})</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                        {feedNone.map(a => (
+                                            <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                hideControls hideBreedingLines
+                                                cardActions={a.dietType
+                                                    ? <div className="text-[10px] text-gray-400 w-full text-center truncate">{a.dietType}</div>
+                                                    : undefined}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {feedDue.length === 0 && feedOk.length === 0 && feedNone.length === 0 && (
+                                <div className="text-sm text-gray-400 text-center py-4">No animals with a feeding schedule.</div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* -- 3. REPRODUCTION ---------------------------------------- */}
                 <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="reproduction"
                         icon={<Bean size={18} className="text-pink-600" />}
@@ -3199,155 +3282,165 @@ const AnimalList = ({
                     )}
                 </div>
 
-                {/* -- 3. ANIMAL CARE ----------------------------------------- */}
+                {/* -- 4. MEDICAL / QUARANTINE -------------------------------- */}
                 <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <SectionHeader sectionKey="feeding"
-                        icon={<Utensils size={18} className="text-green-600" />}
-                        title="Animal Care" count={animalCareDue > 0 ? `${animalCareDue} due` : animals.length} bgClass="bg-green-50" />
-                    {!collapsedMgmtSections['feeding'] && (
-                        <div className="divide-y divide-gray-100">
-                            {/* -- Daily / Routine -- */}
-                            <div>
-                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide">Daily / Routine</div>
-                                <div className="p-3 space-y-4">
-                                    {feedDue.length > 0 && (
+                    <SectionHeader sectionKey="medical"
+                        icon={<Activity size={18} className="text-red-600" />}
+                        title="Medical / Quarantine" count={quarantineList.length + treatmentList.length} bgClass="bg-red-50" />
+                    {!collapsedMgmtSections['medical'] && (
+                        <div className="p-3 space-y-4">
+                            {quarantineList.length === 0 && treatmentList.length === 0
+                                ? <div className="text-sm text-gray-400 text-center py-4">No animals in quarantine or under treatment.</div>
+                                : <>
+                                    {quarantineList.length > 0 && (
                                         <div>
                                             <div className="flex items-center gap-2 px-1 pb-2">
-                                                <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" />
-                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Due Today / Overdue ({feedDue.length})</span>
+                                                <span className="w-2.5 h-2.5 rounded-full bg-orange-400 inline-block" />
+                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Quarantine / Isolation ({quarantineList.length})</span>
                                             </div>
                                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                                {feedDue.map(a => (
+                                                {quarantineList.map(a => (
                                                     <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                         hideControls hideBreedingLines
-                                                        cardActions={<>
-                                                            {a.lastFedDate
-                                                                ? <div className="text-[10px] text-gray-400 w-full text-center">Last: {formatDateShort(a.lastFedDate)}</div>
-                                                                : <div className="text-[10px] text-orange-500 w-full text-center">Never fed</div>}
-                                                            <button onClick={(e) => handleMarkFed(e, a)}
+                                                        cardActions={
+                                                            <button onClick={(e) => handleUnquarantine(e, a)}
                                                                 className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5">
-                                                                🍽 Fed
+                                                                <LockOpen size={9} /> Release
                                                             </button>
-                                                            <button onClick={(e) => handleSkipFeeding(e, a)}
-                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200 w-full flex items-center justify-center gap-0.5">
-                                                                ⏭ Skip
-                                                            </button>
-                                                        </>}
+                                                        }
                                                     />
                                                 ))}
                                             </div>
                                         </div>
                                     )}
-                                    {feedOk.length > 0 && (
+                                    {treatmentList.length > 0 && (
                                         <div>
                                             <div className="flex items-center gap-2 px-1 pb-2">
-                                                <span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" />
-                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Up to Date ({feedOk.length})</span>
+                                                <span className="w-2.5 h-2.5 rounded-full bg-red-400 inline-block" />
+                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Under Treatment ({treatmentList.length})</span>
                                             </div>
                                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                                {feedOk.map(a => (
-                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
-                                                        hideControls hideBreedingLines
-                                                        cardActions={<>
-                                                            {a.lastFedDate && <div className="text-[10px] text-gray-400 w-full text-center">Last: {formatDateShort(a.lastFedDate)}</div>}
-                                                            {a.feedingFrequencyDays && <div className="text-[10px] text-gray-400 w-full text-center">Every {a.feedingFrequencyDays}d</div>}
-                                                            <button onClick={(e) => handleMarkFed(e, a)}
-                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-green-100 hover:text-green-700 border border-gray-200 w-full flex items-center justify-center gap-0.5">
-                                                                🍽 Fed
-                                                            </button>
-                                                        </>}
-                                                    />
-                                                ))}
+                                                {treatmentList.map(a => {
+                                                    const conds = parseArrayField(a.medicalConditions);
+                                                    const meds = parseArrayField(a.medications);
+                                                    return (
+                                                        <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                            hideControls hideBreedingLines
+                                                            cardActions={<>
+                                                                {conds.length > 0 && <div className="text-[10px] text-gray-500 truncate w-full text-center">{conds.map(c => c.name || c).join(', ')}</div>}
+                                                                {meds.length > 0 && <div className="text-[10px] text-blue-500 truncate w-full text-center">{meds.map(m => m.name || m).join(', ')}</div>}
+                                                            </>}
+                                                        />
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                     )}
-                                    {feedNone.length > 0 && (
-                                        <div>
-                                            <div className="flex items-center gap-2 px-1 pb-2">
-                                                <span className="w-2.5 h-2.5 rounded-full bg-gray-300 inline-block" />
-                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">No Schedule Set ({feedNone.length})</span>
-                                            </div>
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                                {feedNone.map(a => (
-                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
-                                                        hideControls hideBreedingLines
-                                                        cardActions={a.dietType
-                                                            ? <div className="text-[10px] text-gray-400 w-full text-center truncate">{a.dietType}</div>
-                                                            : undefined}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                    {feedDue.length === 0 && feedOk.length === 0 && feedNone.length === 0 && (
-                                        <div className="text-sm text-gray-400 text-center py-4">No animals with a feeding schedule.</div>
-                                    )}
-                                </div>
-                            </div>
-                            {/* -- Scheduled Care (Animal Care Tasks only) -- */}
-                            <div>
-                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide">Scheduled Care</div>
-                                {animalsWithAnimalTasks.length === 0 ? (
-                                    <div className="px-3 py-4 text-xs text-gray-400 text-center">No animal care tasks. Edit an animal and add tasks in the Animal Care tab.</div>
-                                ) : animalsWithAnimalTasks.map(a => {
-                                    const grpKey = `animalcare_${a.id_public}`;
-                                    const isGrpCollapsed = collapsedMgmtGroups[grpKey] || false;
-                                    const tasks = (a.animalCareTasks || []);
-                                    const dueTasks = tasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays));
-                                    return (
-                                        <div key={a.id_public} className="border-b border-gray-100 last:border-0">
-                                            <div className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50" onClick={() => toggleGroup(grpKey)}>
-                                                <div className="flex items-center gap-2 min-w-0">
-                                                    {isGrpCollapsed ? <ChevronDown size={14} className="text-gray-400" /> : <ChevronUp size={14} className="text-gray-400" />}
-                                                    {a.imageUrl
-                                                        ? <img src={a.imageUrl} alt={a.name} className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
-                                                        : <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0"><Cat size={11} className="text-gray-400" /></div>}
-                                                    <span className="text-sm font-medium text-gray-800 truncate">{[a.prefix, a.name || 'Unnamed', a.suffix].filter(Boolean).join(' ')}</span>
-                                                    <span className="text-xs text-gray-400 hidden sm:block">{getSpeciesDisplayName(a.species)}</span>
-                                                </div>
-                                                {dueTasks.length > 0 && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium shrink-0">{dueTasks.length} due</span>}
-                                            </div>
-                                            {!isGrpCollapsed && (
-                                                <div className="px-4 py-2 space-y-1">
-                                                    {tasks.map((task, idx) => {
-                                                        const due = isDue(task.lastDoneDate, task.frequencyDays);
-                                                        const daysAgo = task.lastDoneDate ? daysSince(task.lastDoneDate) : null;
-                                                        const daysLeft = task.frequencyDays && daysAgo !== null ? task.frequencyDays - daysAgo : null;
-                                                        const soon = !due && daysLeft !== null && daysLeft <= 2;
-                                                        return (
-                                                            <div key={idx} className="flex flex-col gap-1 text-sm py-1 border-b border-gray-50 last:border-0" onClick={e => e.stopPropagation()}>
-                                                                <div className="flex items-center gap-2 min-w-0">
-                                                                    <span className={`w-2 h-2 rounded-full flex-shrink-0 ${due ? 'bg-red-500' : soon ? 'bg-orange-400' : task.frequencyDays ? 'bg-green-500' : 'bg-gray-300'}`} />
-                                                                    <span className="text-gray-700 font-medium truncate">{task.taskName}</span>
-                                                                </div>
-                                                                <div className="flex items-center flex-wrap gap-x-2 gap-y-1 pl-4 text-xs text-gray-400">
-                                                                    {task.frequencyDays && <span className="flex items-center gap-0.5"><RefreshCw size={11} /> Every {task.frequencyDays}d</span>}
-                                                                    {task.lastDoneDate
-                                                                        ? <span className="flex items-center gap-0.5 text-green-600"><Check size={10} /> Last: {formatDateShort(task.lastDoneDate)}</span>
-                                                                        : <span className="flex items-center gap-0.5 text-orange-500"><X size={10} /> Never done</span>}
-                                                                    <button onClick={(e) => handleMarkAnimalCareTaskDone(e, a, idx, 'animal')}
-                                                                        className={`text-xs px-2 py-0.5 rounded font-medium border flex items-center gap-0.5 ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
-                                                                        <Check size={10} /> Done
-                                                                    </button>
-                                                                    <button onClick={(e) => handleSkipAnimalCareTask(e, a, idx, 'animal')}
-                                                                        className="text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200 flex items-center gap-0.5">
-                                                                        <ChevronRight size={10} /> Skip
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                                </>
+                            }
                         </div>
                     )}
                 </div>
 
-                {/* -- 4. MAINTENANCE ----------------------------------------- */}
+                {/* -- 5. FOR SALE / AVAILABLE -------------------------------- */}
+                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <SectionHeader sectionKey="available"
+                        icon={<ShoppingBag size={18} className="text-purple-600" />}
+                        title="For Sale / Available" count={availableList.length} bgClass="bg-purple-50" />
+                    {!collapsedMgmtSections['available'] && (
+                        <div className="p-3">
+                            {availableList.length === 0
+                                ? <div className="text-sm text-gray-400 text-center py-4">No animals currently marked as Available.</div>
+                                : <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                    {availableList.map(a => (
+                                        <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                            hideControls hideBreedingLines
+                                            cardActions={<>
+                                                {a.isForSale && a.salePriceAmount && (
+                                                    <div className="text-[10px] text-purple-600 font-medium truncate w-full text-center">
+                                                        {a.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${a.salePriceCurrency || ''} ${a.salePriceAmount}`.trim()}
+                                                    </div>
+                                                )}
+                                                <button onClick={(e) => handleMarkRehomed(e, a)}
+                                                    className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500 text-white hover:bg-indigo-600 w-full flex items-center justify-center gap-0.5">
+                                                    <Check size={9} /> Rehomed
+                                                </button>
+                                            </>}
+                                        />
+                                    ))}
+                                </div>
+                            }
+                        </div>
+                    )}
+                </div>
+
+                {/* -- 6. SCHEDULED CARE ------------------------------------- */}
+                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <SectionHeader sectionKey="scheduledcare"
+                        icon={<ClipboardList size={18} className="text-teal-600" />}
+                        title="Scheduled Care" count={animalsWithAnimalTasks.reduce((s, a) => s + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0) > 0 ? `${animalsWithAnimalTasks.reduce((s, a) => s + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0)} due` : animalsWithAnimalTasks.length} bgClass="bg-teal-50" />
+                    {!collapsedMgmtSections['scheduledcare'] && (
+                        <div className="divide-y divide-gray-100">
+                            {animalsWithAnimalTasks.length === 0 ? (
+                                <div className="px-3 py-4 text-xs text-gray-400 text-center">No animal care tasks. Edit an animal and add tasks in the Animal Care tab.</div>
+                            ) : animalsWithAnimalTasks.map(a => {
+                                const grpKey = `animalcare_${a.id_public}`;
+                                const isGrpCollapsed = collapsedMgmtGroups[grpKey] || false;
+                                const tasks = (a.animalCareTasks || []);
+                                const dueTasks = tasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays));
+                                return (
+                                    <div key={a.id_public} className="border-b border-gray-100 last:border-0">
+                                        <div className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50" onClick={() => toggleGroup(grpKey)}>
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                {isGrpCollapsed ? <ChevronDown size={14} className="text-gray-400" /> : <ChevronUp size={14} className="text-gray-400" />}
+                                                {a.imageUrl
+                                                    ? <img src={a.imageUrl} alt={a.name} className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
+                                                    : <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0"><Cat size={11} className="text-gray-400" /></div>}
+                                                <span className="text-sm font-medium text-gray-800 truncate">{[a.prefix, a.name || 'Unnamed', a.suffix].filter(Boolean).join(' ')}</span>
+                                                <span className="text-xs text-gray-400 hidden sm:block">{getSpeciesDisplayName(a.species)}</span>
+                                            </div>
+                                            {dueTasks.length > 0 && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium shrink-0">{dueTasks.length} due</span>}
+                                        </div>
+                                        {!isGrpCollapsed && (
+                                            <div className="px-4 py-2 space-y-1">
+                                                {tasks.map((task, idx) => {
+                                                    const due = isDue(task.lastDoneDate, task.frequencyDays);
+                                                    const daysAgo = task.lastDoneDate ? daysSince(task.lastDoneDate) : null;
+                                                    const daysLeft = task.frequencyDays && daysAgo !== null ? task.frequencyDays - daysAgo : null;
+                                                    const soon = !due && daysLeft !== null && daysLeft <= 2;
+                                                    return (
+                                                        <div key={idx} className="flex flex-col gap-1 text-sm py-1 border-b border-gray-50 last:border-0" onClick={e => e.stopPropagation()}>
+                                                            <div className="flex items-center gap-2 min-w-0">
+                                                                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${due ? 'bg-red-500' : soon ? 'bg-orange-400' : task.frequencyDays ? 'bg-green-500' : 'bg-gray-300'}`} />
+                                                                <span className="text-gray-700 font-medium truncate">{task.taskName}</span>
+                                                            </div>
+                                                            <div className="flex items-center flex-wrap gap-x-2 gap-y-1 pl-4 text-xs text-gray-400">
+                                                                {task.frequencyDays && <span className="flex items-center gap-0.5"><RefreshCw size={11} /> Every {task.frequencyDays}d</span>}
+                                                                {task.lastDoneDate
+                                                                    ? <span className="flex items-center gap-0.5 text-green-600"><Check size={10} /> Last: {formatDateShort(task.lastDoneDate)}</span>
+                                                                    : <span className="flex items-center gap-0.5 text-orange-500"><X size={10} /> Never done</span>}
+                                                                <button onClick={(e) => handleMarkAnimalCareTaskDone(e, a, idx, 'animal')}
+                                                                    className={`text-xs px-2 py-0.5 rounded font-medium border flex items-center gap-0.5 ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
+                                                                    <Check size={10} /> Done
+                                                                </button>
+                                                                <button onClick={(e) => handleSkipAnimalCareTask(e, a, idx, 'animal')}
+                                                                    className="text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200 flex items-center gap-0.5">
+                                                                    <ChevronRight size={10} /> Skip
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+
+                {/* -- 7. MAINTENANCE ----------------------------------------- */}
                 <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="maintenance"
                         icon={<Wrench size={18} className="text-amber-600" />}
@@ -3537,98 +3630,6 @@ const AnimalList = ({
                                     </div>
                                 )}
                             </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* -- 5. MEDICAL / QUARANTINE -------------------------------- */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <SectionHeader sectionKey="medical"
-                        icon={<Activity size={18} className="text-red-600" />}
-                        title="Medical / Quarantine" count={quarantineList.length + treatmentList.length} bgClass="bg-red-50" />
-                    {!collapsedMgmtSections['medical'] && (
-                        <div className="p-3 space-y-4">
-                            {quarantineList.length === 0 && treatmentList.length === 0
-                                ? <div className="text-sm text-gray-400 text-center py-4">No animals in quarantine or under treatment.</div>
-                                : <>
-                                    {quarantineList.length > 0 && (
-                                        <div>
-                                            <div className="flex items-center gap-2 px-1 pb-2">
-                                                <span className="w-2.5 h-2.5 rounded-full bg-orange-400 inline-block" />
-                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Quarantine / Isolation ({quarantineList.length})</span>
-                                            </div>
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                                {quarantineList.map(a => (
-                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
-                                                        hideControls hideBreedingLines
-                                                        cardActions={
-                                                            <button onClick={(e) => handleUnquarantine(e, a)}
-                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5">
-                                                                <LockOpen size={9} /> Release
-                                                            </button>
-                                                        }
-                                                    />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                    {treatmentList.length > 0 && (
-                                        <div>
-                                            <div className="flex items-center gap-2 px-1 pb-2">
-                                                <span className="w-2.5 h-2.5 rounded-full bg-red-400 inline-block" />
-                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Under Treatment ({treatmentList.length})</span>
-                                            </div>
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                                {treatmentList.map(a => {
-                                                    const conds = parseArrayField(a.medicalConditions);
-                                                    const meds = parseArrayField(a.medications);
-                                                    return (
-                                                        <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
-                                                            hideControls hideBreedingLines
-                                                            cardActions={<>
-                                                                {conds.length > 0 && <div className="text-[10px] text-gray-500 truncate w-full text-center">{conds.map(c => c.name || c).join(', ')}</div>}
-                                                                {meds.length > 0 && <div className="text-[10px] text-blue-500 truncate w-full text-center">{meds.map(m => m.name || m).join(', ')}</div>}
-                                                            </>}
-                                                        />
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    )}
-                                </>
-                            }
-                        </div>
-                    )}
-                </div>
-
-                {/* -- 6. FOR SALE / AVAILABLE -------------------------------- */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <SectionHeader sectionKey="available"
-                        icon={<ShoppingBag size={18} className="text-purple-600" />}
-                        title="For Sale / Available" count={availableList.length} bgClass="bg-purple-50" />
-                    {!collapsedMgmtSections['available'] && (
-                        <div className="p-3">
-                            {availableList.length === 0
-                                ? <div className="text-sm text-gray-400 text-center py-4">No animals currently marked as Available.</div>
-                                : <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                    {availableList.map(a => (
-                                        <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
-                                            hideControls hideBreedingLines
-                                            cardActions={<>
-                                                {a.isForSale && a.salePriceAmount && (
-                                                    <div className="text-[10px] text-purple-600 font-medium truncate w-full text-center">
-                                                        {a.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${a.salePriceCurrency || ''} ${a.salePriceAmount}`.trim()}
-                                                    </div>
-                                                )}
-                                                <button onClick={(e) => handleMarkRehomed(e, a)}
-                                                    className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500 text-white hover:bg-indigo-600 w-full flex items-center justify-center gap-0.5">
-                                                    <Check size={9} /> Rehomed
-                                                </button>
-                                            </>}
-                                        />
-                                    ))}
-                                </div>
-                            }
                         </div>
                     )}
                 </div>
