@@ -546,7 +546,7 @@ const AnimalList = ({
                 headers: { Authorization: `Bearer ${authToken}` },
                 params: { status: 'Available' }
             });
-            setAvailableAnimalsRaw(res.data || []);
+            setAvailableAnimalsRaw((res.data || []).filter(a => !a.isViewOnly));
         } catch (err) { console.error('[fetchAvailableAnimals]', err); }
     }, [authToken, API_BASE_URL]);
 
@@ -2793,7 +2793,7 @@ const AnimalList = ({
         ));
 
         // 6. Available for sale/rehoming ? all user-created animals with status=Available (no ownership filter)
-        const availableList = availableAnimalsRaw.filter(a => a.status === 'Available');
+        const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly);
 
         // 7. Sold / Transferred ? view-only animals (transferred through the system, original owner retains view access)
         const soldList = soldTransferredRaw.filter(a => a.isViewOnly);
