@@ -149,6 +149,7 @@ export function AppRoutes({
       <Route path="/" element={
         <AnimalList 
           authToken={authToken}
+          userProfile={userProfile}
           API_BASE_URL={API_BASE_URL}
           showModalMessage={showModalMessage} 
           onEditAnimal={handleEditAnimal} 
@@ -171,6 +172,7 @@ export function AppRoutes({
       <Route path="/list" element={
         <AnimalList 
           authToken={authToken}
+          userProfile={userProfile}
           API_BASE_URL={API_BASE_URL}
           showModalMessage={showModalMessage} 
           onEditAnimal={handleEditAnimal} 

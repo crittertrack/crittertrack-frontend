@@ -112,7 +112,8 @@ if (!window.__alCacheListenerAttached) {
 }
 
 const AnimalList = ({ 
-    authToken, 
+    authToken,
+    userProfile,
     showModalMessage, 
     onEditAnimal, 
     onViewAnimal, 
@@ -250,6 +251,15 @@ const AnimalList = ({
             return normalizeAnimalView(saved || initialAnimalView);
         } catch { return normalizeAnimalView(initialAnimalView); }
     }); // 'list' | 'collections' | 'management'
+    // Sync default view from backend profile (cross-device / cache-cleared sync)
+    useEffect(() => {
+        const backendPref = userProfile?.uiPreferences?.defaultAnimalView;
+        if (backendPref && ['list', 'collections', 'management'].includes(backendPref)) {
+            setDefaultAnimalView(backendPref);
+            setAnimalView(backendPref);
+            try { localStorage.setItem('ct_default_animal_view', backendPref); } catch {}
+        }
+    }, [userProfile?.uiPreferences?.defaultAnimalView]);
     const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({ enclosures: true }); // { sectionKey: bool }
     const [collapsedMgmtGroups, setCollapsedMgmtGroups] = useState({}); // { groupKey: bool }
     const [mgmtAlertsEnabled, setMgmtAlertsEnabled] = useState(() => {
@@ -3896,7 +3906,7 @@ const AnimalList = ({
                         {tab.icon}
                         <span>{tab.label}</span>
                         <span
-                            onClick={e => { e.stopPropagation(); const next = tab.key; setDefaultAnimalView(next); try { localStorage.setItem('ct_default_animal_view', next); } catch {} }}
+                            onClick={e => { e.stopPropagation(); const next = tab.key; setDefaultAnimalView(next); try { localStorage.setItem('ct_default_animal_view', next); } catch {} if (authToken) { axios.patch(`${API_BASE_URL}/users/preferences`, { defaultAnimalView: next }, { headers: { Authorization: `Bearer ${authToken}` } }).catch(err => console.warn('[prefs]', err)); } }}
                             title={defaultAnimalView === tab.key ? 'Default view' : 'Set as default'}
                             className={`absolute top-1 right-1.5 transition-colors ${
                                 defaultAnimalView === tab.key ? 'text-red-500' : 'text-gray-300 hover:text-gray-500'
