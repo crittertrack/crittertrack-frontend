@@ -566,7 +566,7 @@ const ParentSearchModal = ({
                     <div className="flex items-center space-x-2 mb-2">
                         <span className="text-sm font-medium text-gray-600">Search Scope:</span>
                         {['local','global','both'].map(s => (
-                            <button key={s} onClick={() => setScope(s)}
+                            <button key={s} type="button" onClick={() => setScope(s)}
                                 className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
                                 {s === 'both' ? 'Local + Global' : (s === 'local' ? 'Local' : 'Global')}
                             </button>
