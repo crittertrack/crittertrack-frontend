@@ -356,7 +356,11 @@ const AnimalList = ({
     const isListLikeView = animalView === 'list' || isCollectionsView;
 
     useEffect(() => {
-        setAnimalView(normalizeAnimalView(initialAnimalView));
+        // Only override if the caller explicitly passed a non-default view (e.g. deep-link)
+        // Otherwise respect the user's pinned default from localStorage
+        if (initialAnimalView && initialAnimalView !== 'list') {
+            setAnimalView(normalizeAnimalView(initialAnimalView));
+        }
     }, [initialAnimalView]);
     const [feedingModal, setFeedingModal] = useState(null); // { animal } when open
     const [feedingForm, setFeedingForm] = useState({ supplyId: '', qty: '1', notes: '', updateStock: true });
