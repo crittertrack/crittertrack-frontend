@@ -3769,7 +3769,7 @@ const AnimalList = ({
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2 flex-wrap" data-tutorial-target="bulk-privacy-controls">
                     {isListLikeView && (<>
-                    {animalView === 'list' && !showDuplicatesScreen && (
+                    {isListLikeView && !showDuplicatesScreen && (
                         <button
                             onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(true); }}
                             className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-amber-600 hover:text-amber-800 hover:bg-amber-50 border border-amber-200 rounded-lg transition font-medium"
@@ -3779,7 +3779,7 @@ const AnimalList = ({
                             <span className="font-medium">Find Duplicates</span>
                         </button>
                     )}
-                    {animalView === 'list' && (
+                    {isListLikeView && (
                     <button
                         onClick={() => setShowArchiveScreen(true)}
                         className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-purple-600 hover:text-purple-800 hover:bg-purple-50 border border-purple-200 rounded-lg transition font-medium"
