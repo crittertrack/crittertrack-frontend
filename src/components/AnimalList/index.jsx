@@ -3209,46 +3209,75 @@ const AnimalList = ({
                             {/* -- Daily / Routine -- */}
                             <div>
                                 <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide">Daily / Routine</div>
-                                <div className="p-3 space-y-2">
+                                <div className="p-3 space-y-4">
                                     {feedDue.length > 0 && (
-                                        <MgmtGroup groupKey="feed_due" label="Due Today / Overdue"
-                                            groupAnimals={feedDue} headerClass="bg-red-50"
-                                            renderExtras={(a) => (
-                                                <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
-                                                    <div className="text-xs text-gray-400 text-right whitespace-nowrap hidden sm:block">
-                                                        {a.dietType && <div>{a.dietType}</div>}
-                                                        {a.lastFedDate
-                                                            ? <div>Last: {formatDateShort(a.lastFedDate)}</div>
-                                                            : <div className="text-orange-500">Never fed</div>}
-                                                        {a.feedingFrequencyDays && <div>Every {a.feedingFrequencyDays}d</div>}
-                                                    </div>
-                                                    <button onClick={(e) => handleMarkFed(e, a)}
-                                                        className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap">
-                                                        ? Fed
-                                                    </button>
-                                                    <button onClick={(e) => handleSkipFeeding(e, a)}
-                                                        className="bg-gray-100 hover:bg-gray-200 text-gray-500 text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap border border-gray-200">
-                                                        ?? Skip
-                                                    </button>
-                                                </div>
-                                            )} />
+                                        <div>
+                                            <div className="flex items-center gap-2 px-1 pb-2">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" />
+                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Due Today / Overdue ({feedDue.length})</span>
+                                            </div>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                                {feedDue.map(a => (
+                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                        hideControls hideBreedingLines
+                                                        cardActions={<>
+                                                            {a.lastFedDate
+                                                                ? <div className="text-[10px] text-gray-400 w-full text-center">Last: {formatDateShort(a.lastFedDate)}</div>
+                                                                : <div className="text-[10px] text-orange-500 w-full text-center">Never fed</div>}
+                                                            <button onClick={(e) => handleMarkFed(e, a)}
+                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5">
+                                                                🍽 Fed
+                                                            </button>
+                                                            <button onClick={(e) => handleSkipFeeding(e, a)}
+                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200 w-full flex items-center justify-center gap-0.5">
+                                                                ⏭ Skip
+                                                            </button>
+                                                        </>}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
                                     )}
                                     {feedOk.length > 0 && (
-                                        <MgmtGroup groupKey="feed_ok" label="Up to Date"
-                                            groupAnimals={feedOk} headerClass="bg-green-50"
-                                            renderExtras={(a) => (
-                                                <div className="text-xs text-gray-400 text-right whitespace-nowrap shrink-0">
-                                                    {a.lastFedDate && <div>Last: {formatDateShort(a.lastFedDate)}</div>}
-                                                    {a.feedingFrequencyDays && <div> <RefreshCw size={12} className="inline-block align-middle mr-0.5" /> Every {a.feedingFrequencyDays}d</div>}
-                                                </div>
-                                            )} />
+                                        <div>
+                                            <div className="flex items-center gap-2 px-1 pb-2">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" />
+                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Up to Date ({feedOk.length})</span>
+                                            </div>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                                {feedOk.map(a => (
+                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                        hideControls hideBreedingLines
+                                                        cardActions={<>
+                                                            {a.lastFedDate && <div className="text-[10px] text-gray-400 w-full text-center">Last: {formatDateShort(a.lastFedDate)}</div>}
+                                                            {a.feedingFrequencyDays && <div className="text-[10px] text-gray-400 w-full text-center">Every {a.feedingFrequencyDays}d</div>}
+                                                            <button onClick={(e) => handleMarkFed(e, a)}
+                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-green-100 hover:text-green-700 border border-gray-200 w-full flex items-center justify-center gap-0.5">
+                                                                🍽 Fed
+                                                            </button>
+                                                        </>}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
                                     )}
                                     {feedNone.length > 0 && (
-                                        <MgmtGroup groupKey="feed_none" label="No Schedule Set"
-                                            groupAnimals={feedNone} headerClass="bg-gray-100"
-                                            renderExtras={(a) => a.dietType
-                                                ? <div className="text-xs text-gray-400 shrink-0 truncate max-w-[100px]">{a.dietType}</div>
-                                                : null} />
+                                        <div>
+                                            <div className="flex items-center gap-2 px-1 pb-2">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-gray-300 inline-block" />
+                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">No Schedule Set ({feedNone.length})</span>
+                                            </div>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                                {feedNone.map(a => (
+                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                        hideControls hideBreedingLines
+                                                        cardActions={a.dietType
+                                                            ? <div className="text-[10px] text-gray-400 w-full text-center truncate">{a.dietType}</div>
+                                                            : undefined}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
                                     )}
                                     {feedDue.length === 0 && feedOk.length === 0 && feedNone.length === 0 && (
                                         <div className="text-sm text-gray-400 text-center py-4">No animals with a feeding schedule.</div>
