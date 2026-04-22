@@ -5,7 +5,7 @@ import {
     Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight,
     Ban, Bean, Bell, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
     Circle, ClipboardList, Edit, Eye, EyeOff, Flag, FolderOpen, Heart, HeartOff,
-    Home, Hourglass, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Milk,
+    Home, Hourglass, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Milk, Pin,
     Network, Package, Plus, PlusCircle, RefreshCw, Save, ScrollText,
     Search, ShoppingBag, SlidersHorizontal, Sparkles, Trash2, Utensils,
     Venus, VenusAndMars, Wrench, X
@@ -241,7 +241,15 @@ const AnimalList = ({
     const [collapsedSpecies, setCollapsedSpecies] = useState({}); // { species: true/false } - for mobile collapse
     const [userSpeciesOrder, setUserSpeciesOrder] = useState([]); // User's custom species order
     const [filtersExpanded, setFiltersExpanded] = useState(false); // toggle filter panel visibility
-    const [animalView, setAnimalView] = useState(() => normalizeAnimalView(initialAnimalView)); // 'list' | 'collections' | 'management'
+    const [defaultAnimalView, setDefaultAnimalView] = useState(() => {
+        try { return localStorage.getItem('ct_default_animal_view') || 'list'; } catch { return 'list'; }
+    });
+    const [animalView, setAnimalView] = useState(() => {
+        try {
+            const saved = localStorage.getItem('ct_default_animal_view');
+            return normalizeAnimalView(saved || initialAnimalView);
+        } catch { return normalizeAnimalView(initialAnimalView); }
+    }); // 'list' | 'collections' | 'management'
     const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({ enclosures: true }); // { sectionKey: bool }
     const [collapsedMgmtGroups, setCollapsedMgmtGroups] = useState({}); // { groupKey: bool }
     const [mgmtAlertsEnabled, setMgmtAlertsEnabled] = useState(() => {
@@ -3871,33 +3879,29 @@ const AnimalList = ({
             {/* View Toggle: My Animals / Collections / Management */}
             {!showArchiveScreen && (
             <div className="flex border border-gray-200 rounded-xl overflow-hidden shadow-sm mb-4">
-                <button
-                    onClick={() => setAnimalView('list')}
-                    className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 sm:py-2 px-2 sm:px-4 text-[10px] sm:text-sm font-semibold transition ${
-                        animalView === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'
-                    }`}
-                >
-                    <ClipboardList size={16} className="shrink-0" />
-                    <span>My Animals</span>
-                </button>
-                <button
-                    onClick={() => setAnimalView('collections')}
-                    className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 sm:py-2 px-2 sm:px-4 text-[10px] sm:text-sm font-semibold transition ${
-                        animalView === 'collections' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'
-                    }`}
-                >
-                    <FolderOpen size={16} className="shrink-0" />
-                    <span>Collections</span>
-                </button>
-                <button
-                    onClick={() => setAnimalView('management')}
-                    className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 sm:py-2 px-2 sm:px-4 text-[10px] sm:text-sm font-semibold transition ${
-                        animalView === 'management' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'
-                    }`}
-                >
-                    <LayoutGrid size={16} className="shrink-0" />
-                    <span>Management</span>
-                </button>
+                {[{key:'list', icon:<ClipboardList size={16} className="shrink-0" />, label:'My Animals'},
+                  {key:'collections', icon:<FolderOpen size={16} className="shrink-0" />, label:'Collections'},
+                  {key:'management', icon:<LayoutGrid size={16} className="shrink-0" />, label:'Management'}
+                ].map(tab => (
+                    <button key={tab.key}
+                        onClick={() => setAnimalView(tab.key)}
+                        className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 sm:py-2 px-2 sm:px-4 text-[10px] sm:text-sm font-semibold transition ${
+                            animalView === tab.key ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'
+                        }`}
+                    >
+                        {tab.icon}
+                        <span>{tab.label}</span>
+                        <span
+                            onClick={e => { e.stopPropagation(); const next = tab.key; setDefaultAnimalView(next); try { localStorage.setItem('ct_default_animal_view', next); } catch {} }}
+                            title={defaultAnimalView === tab.key ? 'Default view' : 'Set as default'}
+                            className={`absolute top-0.5 right-1 transition ${
+                                defaultAnimalView === tab.key ? 'text-amber-500 opacity-100' : 'text-gray-300 opacity-0 group-hover:opacity-100 hover:!opacity-100'
+                            }`}
+                        >
+                            <Pin size={9} fill={defaultAnimalView === tab.key ? 'currentColor' : 'none'} />
+                        </span>
+                    </button>
+                ))}
             </div>
             )}
 
