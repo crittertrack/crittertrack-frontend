@@ -513,13 +513,13 @@ const AnimalList = ({
         // Kept for compatibility with the animals-changed event handler
     }, []);
 
-    // Fetch ALL user animals (no client-side filters) ? used by Management View
+    // Fetch ALL user animals (no client-side filters) ? used by Management View and Collections
     const fetchAllAnimals = useCallback(async () => {
         if (!authToken) return;
         try {
             const res = await axios.get(`${API_BASE_URL}/animals`, {
                 headers: { Authorization: `Bearer ${authToken}` },
-                params: { isOwned: 'true' }
+                params: { slim: 'true' }
             });
             setAllAnimalsRaw(res.data || []);
         } catch (err) { console.error('[fetchAllAnimals]', err); }
