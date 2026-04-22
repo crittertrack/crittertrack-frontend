@@ -2316,8 +2316,12 @@ const AnimalList = ({
 
     // -- Collections View ----------------------------------------------------------
     const renderCollectionsView = () => {
+        const searchTerm = searchInput.trim().toLowerCase();
         const allOwnedAnimals = (allAnimalsRaw.length > 0 ? allAnimalsRaw : animals)
-            .filter(a => a.status !== 'Sold' && a.soldStatus !== true);
+            .filter(a => a.status !== 'Sold' && a.soldStatus !== true)
+            .filter(a => !searchTerm || [
+                a.name, a.prefix, a.suffix, a.id_public, a.breederAssignedId
+            ].some(v => v && v.toString().toLowerCase().includes(searchTerm)));
         return (
             <div className="space-y-4">
                 {/* Collections Manager Header */}
@@ -3749,6 +3753,29 @@ const AnimalList = ({
                     <LayoutGrid size={15} />
                     <span>Management</span>
                 </button>
+            </div>
+            )}
+
+            {isCollectionsView && !showArchiveScreen && (
+            <div className="mb-4 sm:mb-6 border rounded-lg bg-gray-50">
+                <div className="flex items-center gap-2 p-2 sm:p-3">
+                    <input
+                        type="text"
+                        placeholder="Search by name..."
+                        value={searchInput}
+                        onChange={handleSearchInputChange}
+                        onKeyPress={(e) => { if (e.key === 'Enter') triggerSearch(); }}
+                        className="flex-grow p-2 text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-0"
+                    />
+                    <button
+                        onClick={triggerSearch}
+                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 text-sm shrink-0"
+                        title="Search"
+                    >
+                        <Search size={16} />
+                        <span className="hidden sm:inline">Search</span>
+                    </button>
+                </div>
             </div>
             )}
 
