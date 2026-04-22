@@ -6,7 +6,7 @@ import {
     Ban, Bean, Bell, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
     Circle, ClipboardList, Edit, Eye, EyeOff, Flag, FolderOpen, Heart, HeartOff,
     Home, Hourglass, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Milk, Pin,
-    Network, Package, Plus, PlusCircle, RefreshCw, Save, ScrollText,
+    Minus, Network, Package, Plus, PlusCircle, RefreshCw, Save, ScrollText,
     Search, ShoppingBag, SlidersHorizontal, Sparkles, Trash2, Utensils,
     Venus, VenusAndMars, Wrench, X
 } from 'lucide-react';
@@ -2501,10 +2501,10 @@ const AnimalList = ({
                                                             <AnimalCard animal={animal} onEditAnimal={onEditAnimal} species={animal.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned} />
                                                             <button
                                                                 onClick={e => { e.stopPropagation(); removeAnimalFromCollection(animal.id_public, col.id); }}
-                                                                className="absolute top-1 right-1 z-20 bg-white/90 hover:bg-red-50 text-red-400 hover:text-red-600 rounded-full p-0.5 shadow-sm border border-gray-200"
+                                                                className="absolute top-2 left-2 z-20 bg-white/90 hover:bg-red-50 text-red-400 hover:text-red-600 rounded-full p-1 shadow-sm border border-gray-200"
                                                                 title="Remove from this collection"
                                                             >
-                                                                <X size={11} />
+                                                                <Minus size={16} />
                                                             </button>
                                                         </div>
                                                     ))}
@@ -2548,7 +2548,7 @@ const AnimalList = ({
                                                         <div className="absolute top-2 left-2 z-20">
                                                             {assigningCollectionAnimalId === animal.id_public && (
                                                                 <div
-                                                                    className="absolute left-0 top-9 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[150px] z-30"
+                                                                    className="absolute left-0 bottom-full mb-1 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[150px] z-30 max-h-48 overflow-y-auto"
                                                                     onClick={e => e.stopPropagation()}
                                                                 >
                                                                     <p className="text-xs font-semibold text-gray-600 mb-1.5">Add to collection:</p>
