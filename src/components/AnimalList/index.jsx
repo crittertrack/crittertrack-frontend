@@ -3898,7 +3898,8 @@ const AnimalList = ({
                                 defaultAnimalView === tab.key ? 'text-red-500' : 'text-gray-300 hover:text-gray-500'
                             }`}
                         >
-                            <Pin size={13} fill={defaultAnimalView === tab.key ? 'currentColor' : 'none'} strokeWidth={2} />
+                            <Pin size={13} className="sm:hidden" fill={defaultAnimalView === tab.key ? 'currentColor' : 'none'} strokeWidth={2} />
+                            <Pin size={18} className="hidden sm:block" fill={defaultAnimalView === tab.key ? 'currentColor' : 'none'} strokeWidth={2} />
                         </span>
                     </button>
                 ))}
