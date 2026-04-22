@@ -4,7 +4,7 @@ import ArchiveScreen from '../ArchiveScreen';
 import {
     Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight,
     Ban, Bean, Bell, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
-    Circle, ClipboardList, Edit, Eye, EyeOff, Flag, Heart, HeartOff,
+    Circle, ClipboardList, Edit, Eye, EyeOff, Flag, FolderOpen, Heart, HeartOff,
     Home, Hourglass, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Milk,
     Network, Package, Plus, PlusCircle, RefreshCw, Save, ScrollText,
     Search, ShoppingBag, SlidersHorizontal, Sparkles, Trash2, Utensils,
@@ -16,6 +16,9 @@ const API_BASE_URL = '/api';
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'];
 const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
+const normalizeAnimalView = (value) => (
+    value === 'management' || value === 'collections' ? value : 'list'
+);
 
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
@@ -114,6 +117,7 @@ const AnimalList = ({
     onEditAnimal, 
     onViewAnimal, 
     navigate,
+    initialAnimalView = 'list',
     // Archive props
     showArchiveScreen,
     setShowArchiveScreen,
@@ -237,7 +241,7 @@ const AnimalList = ({
     const [collapsedSpecies, setCollapsedSpecies] = useState({}); // { species: true/false } - for mobile collapse
     const [userSpeciesOrder, setUserSpeciesOrder] = useState([]); // User's custom species order
     const [filtersExpanded, setFiltersExpanded] = useState(false); // toggle filter panel visibility
-    const [animalView, setAnimalView] = useState('list'); // 'list' | 'management'
+    const [animalView, setAnimalView] = useState(() => normalizeAnimalView(initialAnimalView)); // 'list' | 'collections' | 'management'
     const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({ enclosures: true }); // { sectionKey: bool }
     const [collapsedMgmtGroups, setCollapsedMgmtGroups] = useState({}); // { groupKey: bool }
     const [mgmtAlertsEnabled, setMgmtAlertsEnabled] = useState(() => {
@@ -250,6 +254,53 @@ const AnimalList = ({
             localStorage.setItem('ct_mgmt_urgency_enabled', next ? 'true' : 'false');
             window.dispatchEvent(new StorageEvent('storage', { key: 'ct_mgmt_urgency_enabled' }));
         } catch {}
+    };
+
+    // ---- Collection CRUD helpers ----
+    const _syncToApi = (cols, map) => {
+        if (!authToken) return;
+        axios.put(`${API_BASE_URL}/collections`, { collections: cols, animalMap: map }, {
+            headers: { Authorization: `Bearer ${authToken}` }
+        }).catch(err => console.warn('[collections sync]', err));
+    };
+    const _saveCollections = (cols, mapOverride) => {
+        const map = mapOverride !== undefined ? mapOverride : animalCollections;
+        setUserCollections(cols);
+        try { localStorage.setItem('ct_collections', JSON.stringify(cols)); } catch {}
+        _syncToApi(cols, map);
+    };
+    const _saveAnimalCollections = (map) => {
+        setAnimalCollections(map);
+        try { localStorage.setItem('ct_animal_collections', JSON.stringify(map)); } catch {}
+        _syncToApi(userCollections, map);
+    };
+    const createCollection = (name) => {
+        if (!name.trim()) return;
+        const id = `col_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+        _saveCollections([...userCollections, { id, name: name.trim() }]);
+    };
+    const deleteCollection = (id) => {
+        const newCols = userCollections.filter(c => c.id !== id);
+        const next = { ...animalCollections };
+        Object.keys(next).forEach(aid => { next[aid] = next[aid].filter(cid => cid !== id); });
+        setUserCollections(newCols);
+        setAnimalCollections(next);
+        try { localStorage.setItem('ct_collections', JSON.stringify(newCols)); } catch {}
+        try { localStorage.setItem('ct_animal_collections', JSON.stringify(next)); } catch {}
+        _syncToApi(newCols, next);
+    };
+    const renameCollection = (id, name) => {
+        if (!name.trim()) return;
+        _saveCollections(userCollections.map(c => c.id === id ? { ...c, name: name.trim() } : c));
+    };
+    const assignAnimalToCollection = (animalId, collectionId) => {
+        const current = animalCollections[animalId] || [];
+        if (current.includes(collectionId)) return;
+        _saveAnimalCollections({ ...animalCollections, [animalId]: [...current, collectionId] });
+    };
+    const removeAnimalFromCollection = (animalId, collectionId) => {
+        const current = animalCollections[animalId] || [];
+        _saveAnimalCollections({ ...animalCollections, [animalId]: current.filter(cid => cid !== collectionId) });
     };
 
     // Activity Log state
@@ -278,6 +329,27 @@ const AnimalList = ({
     const [restockingSupplyId, setRestockingSupplyId] = useState(null);
     const [restockForm, setRestockForm] = useState({ qty: '', cost: '', date: new Date().toISOString().slice(0, 10), notes: '' });
     const [restockSaving, setRestockSaving] = useState(false);
+
+    // ---- Collections state (localStorage-backed; backend sync TBD) ----
+    const [userCollections, setUserCollections] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('ct_collections') || '[]'); } catch { return []; }
+    });
+    const [animalCollections, setAnimalCollections] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('ct_animal_collections') || '{}'); } catch { return {}; }
+    });
+    const [showCollectionManager, setShowCollectionManager] = useState(false);
+    const [newCollectionName, setNewCollectionName] = useState('');
+    const [renamingCollectionId, setRenamingCollectionId] = useState(null);
+    const [renamingCollectionName, setRenamingCollectionName] = useState('');
+    const [collapsedCollections, setCollapsedCollections] = useState({});
+    const [assigningCollectionAnimalId, setAssigningCollectionAnimalId] = useState(null);
+
+    const isCollectionsView = animalView === 'collections';
+    const isListLikeView = animalView === 'list' || isCollectionsView;
+
+    useEffect(() => {
+        setAnimalView(normalizeAnimalView(initialAnimalView));
+    }, [initialAnimalView]);
     const [feedingModal, setFeedingModal] = useState(null); // { animal } when open
     const [feedingForm, setFeedingForm] = useState({ supplyId: '', qty: '1', notes: '', updateStock: true });
     const [enclosures, setEnclosures] = useState([]);
@@ -410,8 +482,9 @@ const AnimalList = ({
             setLoading(false);
 
             // Phase 2: background-fetch ALL animals so unowned toggle works instantly
+            // slim=true strips heavy fields (breedingRecords, health, etc.) — list cards don't need them
             try {
-                const allRes = await axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` } });
+                const allRes = await axios.get(`${API_BASE_URL}/animals?slim=true`, { headers: { Authorization: `Bearer ${authToken}` } });
                 let allData = (allRes.data || []).filter(a => !a.isViewOnly);
                 // Preserve cache-busted image URLs from phase 1
                 const ownedMap = new Map(ownedData.map(a => [a.id_public || a._id, a]));
@@ -453,13 +526,13 @@ const AnimalList = ({
         // Kept for compatibility with the animals-changed event handler
     }, []);
 
-    // Fetch ALL user animals (no client-side filters) ? used by Management View
+    // Fetch ALL user animals (no client-side filters) ? used by Management View and Collections
     const fetchAllAnimals = useCallback(async () => {
         if (!authToken) return;
         try {
             const res = await axios.get(`${API_BASE_URL}/animals`, {
                 headers: { Authorization: `Bearer ${authToken}` },
-                params: { isOwned: 'true' }
+                params: { slim: 'true' }
             });
             setAllAnimalsRaw(res.data || []);
         } catch (err) { console.error('[fetchAllAnimals]', err); }
@@ -473,7 +546,7 @@ const AnimalList = ({
                 headers: { Authorization: `Bearer ${authToken}` },
                 params: { status: 'Available' }
             });
-            setAvailableAnimalsRaw(res.data || []);
+            setAvailableAnimalsRaw((res.data || []).filter(a => !a.isViewOnly));
         } catch (err) { console.error('[fetchAvailableAnimals]', err); }
     }, [authToken, API_BASE_URL]);
 
@@ -554,6 +627,25 @@ const AnimalList = ({
     useEffect(() => { fetchAllAnimals(); }, [fetchAllAnimals]);
     useEffect(() => { fetchAvailableAnimals(); }, [fetchAvailableAnimals]);
     useEffect(() => { fetchSoldTransferred(); }, [fetchSoldTransferred]);
+
+    // Load collections from API on mount; fall back to localStorage cache already in state
+    useEffect(() => {
+        if (!authToken) return;
+        axios.get(`${API_BASE_URL}/collections`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(res => {
+                const { collections, animalMap } = res.data || {};
+                if (Array.isArray(collections) && collections.length > 0) {
+                    setUserCollections(collections);
+                    try { localStorage.setItem('ct_collections', JSON.stringify(collections)); } catch {}
+                }
+                if (animalMap && typeof animalMap === 'object' && Object.keys(animalMap).length > 0) {
+                    setAnimalCollections(animalMap);
+                    try { localStorage.setItem('ct_animal_collections', JSON.stringify(animalMap)); } catch {}
+                }
+            })
+            .catch(err => console.warn('[collections load]', err));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [authToken]);
 
     // Fetch the current user's activity log (lazy ? only when log screen opens)
     const fetchActivityLogs = useCallback(async (page = 1, filters = {}) => {
@@ -1184,7 +1276,7 @@ const AnimalList = ({
         }
     };
 
-    const AnimalCard = ({ animal, onEditAnimal, species, isSelectable, isSelected, onToggleSelect, onTogglePrivacy, onToggleOwned }) => {
+    const AnimalCard = ({ animal, onEditAnimal, species, isSelectable, isSelected, onToggleSelect, onTogglePrivacy, onToggleOwned, hideControls, hideBreedingLines, cardActions }) => {
         const birth = animal.birthDate ? formatDate(animal.birthDate) : '';
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
 
@@ -1260,10 +1352,10 @@ const AnimalList = ({
 
                     {/* Edit is available when viewing full card; remove inline edit icon from dashboard cards */}
 
-                    {/* ID bottom-right */}
+                    {/* ID + controls row */}
                     <div className="w-full px-1 sm:px-2 pb-1 sm:pb-2 flex justify-between items-center mt-auto">
                         {/* Privacy and Owned toggles bottom-left */}
-                        {!isSelectable && (
+                        {!isSelectable && !hideControls && (
                             <div className="flex items-center gap-1">
                                 {/* Owned toggle */}
                                 <button
@@ -1309,12 +1401,12 @@ const AnimalList = ({
                                 </button>
                             </div>
                         )}
-                        {/* Spacer if no toggles (in selection mode) */}
-                        {isSelectable && <div></div>}
+                        {/* Spacer if no toggles */}
+                        {(isSelectable || hideControls) && <div></div>}
                         <div className="text-[9px] sm:text-[10px] md:text-xs text-gray-500">{animal.id_public}</div>
                     </div>
                     {/* Breeding line diamonds */}
-                    {(() => {
+                    {!hideBreedingLines && (() => {
                         const assignedIds = animalBreedingLines[animal.id_public] || [];
                         const activeLines = breedingLineDefs.filter(l => assignedIds.includes(l.id) && l.name);
                         if (activeLines.length === 0) return null;
@@ -1326,6 +1418,12 @@ const AnimalList = ({
                             </div>
                         );
                     })()}
+                    {/* Management action buttons slot */}
+                    {cardActions && (
+                        <div className="w-full px-1 pb-1 flex flex-wrap gap-1 justify-center" onClick={e => e.stopPropagation()}>
+                            {cardActions}
+                        </div>
+                    )}
                     {/* Status bar at bottom */}
                     <div className={`w-full py-0.5 sm:py-1 text-center border-t border-gray-300 mt-auto ${
                         animal.isViewOnly ? 'bg-orange-100' : 'bg-gray-100'
@@ -2074,7 +2172,7 @@ const AnimalList = ({
                         className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-800 transition"
                     >
                         <ChevronLeft size={16} />
-                        Back to Management
+                        {animalView === 'list' ? 'Back to My Animals' : 'Back to Management'}
                     </button>
                     <button
                         onClick={fetchDuplicates}
@@ -2256,6 +2354,216 @@ const AnimalList = ({
         );
     };
 
+    // -- Collections View ----------------------------------------------------------
+    const renderCollectionsView = () => {
+        const searchTerm = searchInput.trim().toLowerCase();
+        const allOwnedAnimals = (allAnimalsRaw.length > 0 ? allAnimalsRaw : animals)
+            .filter(a => !a.isViewOnly)
+            .filter(a => !searchTerm || [
+                a.name, a.prefix, a.suffix, a.id_public, a.breederAssignedId
+            ].some(v => v && v.toString().toLowerCase().includes(searchTerm)));
+        return (
+            <div className="space-y-4">
+                {/* Collections Manager Header */}
+                <div className="flex items-center gap-2 mb-1">
+                    <button
+                        onClick={() => setShowCollectionManager(prev => !prev)}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-lg transition ${
+                            showCollectionManager ? 'bg-gray-200 hover:bg-gray-300 text-gray-700' : 'bg-primary hover:bg-primary/90 text-black'
+                        }`}
+                    >
+                        <FolderOpen size={14} />
+                        {showCollectionManager ? 'Close Manager' : 'Manage Collections'}
+                    </button>
+                </div>
+
+                {/* Collection Manager Panel */}
+                {showCollectionManager && (
+                    <div className="border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-3">
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                placeholder="New collection name…"
+                                value={newCollectionName}
+                                onChange={e => setNewCollectionName(e.target.value)}
+                                onKeyPress={e => { if (e.key === 'Enter' && newCollectionName.trim()) { createCollection(newCollectionName); setNewCollectionName(''); } }}
+                                className="flex-grow p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                            />
+                            <button
+                                onClick={() => { createCollection(newCollectionName); setNewCollectionName(''); }}
+                                disabled={!newCollectionName.trim()}
+                                className="px-3 py-2 bg-accent hover:bg-accent/90 text-white text-sm font-semibold rounded-lg transition disabled:opacity-50"
+                            >
+                                Create
+                            </button>
+                        </div>
+                        {userCollections.length > 0 ? (
+                            <ul className="space-y-1.5">
+                                {userCollections.map(col => (
+                                    <li key={col.id} className="flex items-center gap-2">
+                                        {renamingCollectionId === col.id ? (
+                                            <>
+                                                <input
+                                                    type="text"
+                                                    value={renamingCollectionName}
+                                                    onChange={e => setRenamingCollectionName(e.target.value)}
+                                                    onKeyPress={e => { if (e.key === 'Enter') { renameCollection(col.id, renamingCollectionName); setRenamingCollectionId(null); } }}
+                                                    className="flex-grow p-1.5 text-sm border border-gray-300 rounded-lg"
+                                                    autoFocus
+                                                />
+                                                <button onClick={() => { renameCollection(col.id, renamingCollectionName); setRenamingCollectionId(null); }} className="text-xs px-2 py-1 bg-primary text-black rounded-lg">Save</button>
+                                                <button onClick={() => setRenamingCollectionId(null)} className="text-xs px-2 py-1 bg-gray-200 text-gray-700 rounded-lg">Cancel</button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="flex-grow text-sm font-medium text-gray-700">{col.name}</span>
+                                                <span className="text-xs text-gray-400">{Object.values(animalCollections).filter(ids => Array.isArray(ids) && ids.includes(col.id)).length} animals</span>
+                                                <button onClick={() => { setRenamingCollectionId(col.id); setRenamingCollectionName(col.name); }} className="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg">Rename</button>
+                                                <button onClick={() => deleteCollection(col.id)} className="text-xs px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg">Delete</button>
+                                            </>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-sm text-gray-500 text-center py-2">No collections yet. Create one above.</p>
+                        )}
+                    </div>
+                )}
+
+                {loading && allOwnedAnimals.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                        <Loader2 size={24} className="animate-spin mx-auto mb-2" />
+                        Loading animals…
+                    </div>
+                )}
+
+                {/* Empty state: no collections created yet */}
+                {!loading && userCollections.length === 0 && (
+                    <div className="text-center p-10 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                        <FolderOpen size={40} className="text-gray-300 mx-auto mb-3" />
+                        <p className="text-lg font-semibold text-gray-600 mb-1">No collections yet</p>
+                        <p className="text-sm text-gray-500 mb-4">Create collections to organise your animals into custom folders.</p>
+                        <button onClick={() => setShowCollectionManager(true)} className="px-4 py-2 bg-accent hover:bg-accent/90 text-white text-sm font-semibold rounded-lg transition">
+                            Create First Collection
+                        </button>
+                    </div>
+                )}
+
+                {/* Collection sections */}
+                {userCollections.length > 0 && (
+                    <>
+                        {userCollections.map(col => {
+                            const colAnimals = allOwnedAnimals.filter(a => (animalCollections[a.id_public] || []).includes(col.id));
+                            const isColCollapsed = collapsedCollections[col.id] || false;
+                            return (
+                                <div key={col.id} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                                    <div
+                                        className="flex items-center justify-between bg-gray-100 px-4 py-2.5 border-b cursor-pointer"
+                                        onClick={() => setCollapsedCollections(prev => ({ ...prev, [col.id]: !prev[col.id] }))}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <FolderOpen size={16} className="text-amber-500" />
+                                            <span className="font-bold text-gray-700">{col.name} ({colAnimals.length})</span>
+                                        </div>
+                                        {isColCollapsed ? <ChevronDown size={16} className="text-gray-400" /> : <ChevronUp size={16} className="text-gray-400" />}
+                                    </div>
+                                    {!isColCollapsed && (
+                                        <div className="p-1.5 sm:p-4">
+                                            {colAnimals.length === 0 ? (
+                                                <p className="text-sm text-gray-400 text-center py-4">No animals yet. Assign animals from the Uncategorized section below.</p>
+                                            ) : (
+                                                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
+                                                    {colAnimals.map(animal => (
+                                                        <div key={animal.id_public} className="relative">
+                                                            <AnimalCard animal={animal} onEditAnimal={onEditAnimal} species={animal.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned} />
+                                                            <button
+                                                                onClick={e => { e.stopPropagation(); removeAnimalFromCollection(animal.id_public, col.id); }}
+                                                                className="absolute top-1 right-1 z-20 bg-white/90 hover:bg-red-50 text-red-400 hover:text-red-600 rounded-full p-0.5 shadow-sm border border-gray-200"
+                                                                title="Remove from this collection"
+                                                            >
+                                                                <X size={11} />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+
+                        {/* Uncategorized section */}
+                        {(() => {
+                            const validCollectionIds = new Set(userCollections.map(c => c.id));
+                            const uncategorized = allOwnedAnimals.filter(a => {
+                                const assigned = (animalCollections[a.id_public] || []).filter(cid => validCollectionIds.has(cid));
+                                return assigned.length === 0;
+                            });
+                            if (uncategorized.length === 0) return null;
+                            const isUncatCollapsed = collapsedCollections['__uncategorized'] || false;
+                            return (
+                                <div className="border border-dashed border-gray-300 rounded-xl overflow-hidden">
+                                    <div
+                                        className="flex items-center justify-between bg-gray-50 px-4 py-2.5 border-b cursor-pointer"
+                                        onClick={() => setCollapsedCollections(prev => ({ ...prev, __uncategorized: !prev.__uncategorized }))}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <FolderOpen size={16} className="text-gray-400" />
+                                            <span className="font-semibold text-gray-500">Uncategorized ({uncategorized.length})</span>
+                                        </div>
+                                        {isUncatCollapsed ? <ChevronDown size={16} className="text-gray-400" /> : <ChevronUp size={16} className="text-gray-400" />}
+                                    </div>
+                                    {!isUncatCollapsed && (
+                                        <div className="p-1.5 sm:p-4">
+                                            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
+                                                {uncategorized.map(animal => (
+                                                    <div key={animal.id_public} className="relative" onClick={e => { if (assigningCollectionAnimalId === animal.id_public) e.stopPropagation(); }}>
+                                                        {/* grey overlay */}
+                                                        <div className="absolute inset-0 bg-gray-400/20 rounded-xl z-10 pointer-events-none" />
+                                                        <AnimalCard animal={animal} onEditAnimal={onEditAnimal} species={animal.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned} />
+                                                        <div className="absolute top-2 left-2 z-20">
+                                                            {assigningCollectionAnimalId === animal.id_public && (
+                                                                <div
+                                                                    className="absolute left-0 top-9 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[150px] z-30"
+                                                                    onClick={e => e.stopPropagation()}
+                                                                >
+                                                                    <p className="text-xs font-semibold text-gray-600 mb-1.5">Add to collection:</p>
+                                                                    {userCollections.map(col => (
+                                                                        <button
+                                                                            key={col.id}
+                                                                            onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }}
+                                                                            className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 rounded flex items-center gap-1.5 text-gray-700"
+                                                                        >
+                                                                            <FolderOpen size={11} className="text-amber-500" /> {col.name}
+                                                                        </button>
+                                                                    ))}
+                                                                    <button onClick={() => setAssigningCollectionAnimalId(null)} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 rounded text-gray-400 mt-1">Cancel</button>
+                                                                </div>
+                                                            )}
+                                                            <button
+                                                                onClick={e => { e.stopPropagation(); setAssigningCollectionAnimalId(prev => prev === animal.id_public ? null : animal.id_public); }}
+                                                                className="bg-white/90 hover:bg-amber-50 text-amber-500 hover:text-amber-700 rounded-full p-1 shadow-sm border border-gray-200"
+                                                                title="Add to a collection"
+                                                            >
+                                                                <Plus size={16} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })()}
+                    </>
+                )}
+            </div>
+        );
+    };
+
     // -- Management View ----------------------------------------------------------
     const renderManagementView = () => {
         const today = new Date();
@@ -2345,19 +2653,28 @@ const AnimalList = ({
             }
         };
 
-        const handleAssignAnimalToEnclosure = async (animalIdPublic, enclosureId) => {
-            try {
-                await axios.put(`${API_BASE_URL}/animals/${animalIdPublic}`,
-                    { enclosureId: enclosureId || null },
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
-                const encName = enclosureId ? (enclosures.find(e => e._id === enclosureId)?.name || enclosureId) : null;
-                logManagementActivity(
-                    enclosureId ? 'enclosure_assign' : 'enclosure_unassign',
-                    animalIdPublic,
-                    enclosureId ? { enclosureName: encName } : {}
-                );
-                fetchAnimals();
-            } catch (err) { console.error('Assign enclosure failed:', err); }
+        const handleAssignAnimalToEnclosure = (animalIdPublic, enclosureId) => {
+            const newEnclosureId = enclosureId || null;
+            // Capture old value for rollback
+            const prevRaw = allAnimalsRaw;
+            // Optimistic update
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animalIdPublic ? { ...a, enclosureId: newEnclosureId } : a));
+            setAssigningAnimalId(null);
+            axios.patch(`${API_BASE_URL}/enclosures/assign-animal`,
+                { animalId_public: animalIdPublic, enclosureId: newEnclosureId },
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => {
+                    const encName = newEnclosureId ? (enclosures.find(e => e._id === newEnclosureId)?.name || newEnclosureId) : null;
+                    logManagementActivity(
+                        newEnclosureId ? 'enclosure_assign' : 'enclosure_unassign',
+                        animalIdPublic,
+                        newEnclosureId ? { enclosureName: encName } : {}
+                    );
+                })
+                .catch(err => {
+                    console.error('Assign enclosure failed:', err);
+                    setAllAnimalsRaw(prevRaw);
+                });
         };
 
         const handleMarkFed = (e, animal) => {
@@ -2434,8 +2751,8 @@ const AnimalList = ({
         };
 
         // -- Section data ---------------------------------------------------------
-        // Exclude deceased animals from all management sections
-        const allAnimals = allAnimalsRaw.filter(a => a.status !== 'Deceased');
+        // Exclude deceased and view-only (transferred/sold) animals from all management sections
+        const allAnimals = allAnimalsRaw.filter(a => a.status !== 'Deceased' && !a.isViewOnly);
         // 1. Enclosures ? grouped by named enclosure (enclosureId)
         const enclosureAnimalMap = {}; // { enclosureId: [animals] }
         const unassignedAnimals = [];
@@ -2481,7 +2798,7 @@ const AnimalList = ({
         ));
 
         // 6. Available for sale/rehoming ? all user-created animals with status=Available (no ownership filter)
-        const availableList = availableAnimalsRaw.filter(a => a.status === 'Available');
+        const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly);
 
         // 7. Sold / Transferred ? view-only animals (transferred through the system, original owner retains view access)
         const soldList = soldTransferredRaw.filter(a => a.isViewOnly);
@@ -2741,19 +3058,24 @@ const AnimalList = ({
                                                     <div className="px-3 py-1.5 bg-gray-50 text-xs text-gray-500 border-b border-gray-100">{enc.notes}</div>
                                                 )}
                                                 {!isGrpCollapsed && (
-                                                    <div className="p-2 space-y-1.5 bg-white">
+                                                    <div>
                                                         {occupants.length === 0
                                                             ? <div className="text-xs text-gray-400 text-center py-2">No animals assigned yet</div>
-                                                            : occupants.map(a => (
-                                                                <MgmtAnimalCard key={a._id || a.id_public} animal={a}
-                                                                    extras={
-                                                                        <button onClick={(e) => { e.stopPropagation(); handleAssignAnimalToEnclosure(a.id_public, ''); }}
-                                                                            className="text-xs text-gray-400 hover:text-red-500 border border-gray-200 hover:border-red-200 rounded px-1.5 py-0.5 shrink-0">
-                                                                            Remove
-                                                                        </button>
-                                                                    }
-                                                                />
-                                                            ))
+                                                            : (
+                                                                <div className="p-1.5 sm:p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                                                    {occupants.map(a => (
+                                                                        <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                                            hideControls hideBreedingLines
+                                                                            cardActions={
+                                                                                <button onClick={(e) => { e.stopPropagation(); handleAssignAnimalToEnclosure(a.id_public, ''); }}
+                                                                                    className="text-[10px] text-gray-400 hover:text-red-500 border border-gray-200 hover:border-red-200 rounded px-1.5 py-0.5 w-full">
+                                                                                    Remove
+                                                                                </button>
+                                                                            }
+                                                                        />
+                                                                    ))}
+                                                                </div>
+                                                            )
                                                         }
                                                     </div>
                                                 )}
@@ -2776,24 +3098,23 @@ const AnimalList = ({
                                                 <span className="text-xs text-gray-400 bg-white/70 px-2 py-0.5 rounded-full">{unassignedAnimals.length}</span>
                                             </div>
                                             {!collapsedMgmtGroups['enc_unassigned'] && (
-                                                <div className="p-2 space-y-1.5 bg-white">
+                                                <div className="p-1.5 sm:p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3 bg-white">
                                                     {unassignedAnimals.map(a => (
-                                                        <MgmtAnimalCard key={a._id || a.id_public} animal={a}
-                                                            extras={
+                                                        <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                            hideControls hideBreedingLines
+                                                            cardActions={
                                                                 enclosures.length > 0 ? (
                                                                     assigningAnimalId === a.id_public ? (
-                                                                        <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                                                                            <select autoFocus defaultValue=""
-                                                                                onChange={e => { if (e.target.value) { handleAssignAnimalToEnclosure(a.id_public, e.target.value); } setAssigningAnimalId(null); }}
-                                                                                onBlur={() => setAssigningAnimalId(null)}
-                                                                                className="text-xs border border-blue-300 rounded p-1 max-w-[130px]">
-                                                                                <option value="" disabled>Select enclosure...</option>
-                                                                                {enclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}
-                                                                            </select>
-                                                                        </div>
+                                                                        <select autoFocus defaultValue=""
+                                                                            onChange={e => { if (e.target.value) { handleAssignAnimalToEnclosure(a.id_public, e.target.value); } setAssigningAnimalId(null); }}
+                                                                            onBlur={() => setAssigningAnimalId(null)}
+                                                                            className="text-[10px] border border-blue-300 rounded p-1 w-full">
+                                                                            <option value="" disabled>Select enclosure...</option>
+                                                                            {enclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}
+                                                                        </select>
                                                                     ) : (
                                                                         <button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }}
-                                                                            className="text-xs text-blue-500 hover:text-blue-700 border border-blue-200 rounded px-1.5 py-0.5 shrink-0 whitespace-nowrap">
+                                                                            className="text-[10px] text-blue-500 hover:text-blue-700 border border-blue-200 rounded px-1.5 py-0.5 w-full whitespace-nowrap">
                                                                             Assign
                                                                         </button>
                                                                     )
@@ -2811,51 +3132,159 @@ const AnimalList = ({
                     )}
                 </div>
 
-                {/* -- 2. REPRODUCTION ---------------------------------------- */}
+                {/* -- 2. FEEDING -------------------------------------------- */}
+                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <SectionHeader sectionKey="feeding"
+                        icon={<Utensils size={18} className="text-green-600" />}
+                        title="Feeding" count={animalCareDue > 0 ? `${animalCareDue} due` : animals.length} bgClass="bg-green-50" />
+                    {!collapsedMgmtSections['feeding'] && (
+                        <div className="p-3 space-y-4">
+                            {feedDue.length > 0 && (
+                                <div>
+                                    <div className="flex items-center gap-2 px-1 pb-2">
+                                        <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" />
+                                        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Due Today / Overdue ({feedDue.length})</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                        {feedDue.map(a => (
+                                            <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                hideControls hideBreedingLines
+                                                cardActions={<>
+                                                    {a.lastFedDate
+                                                        ? <div className="text-[10px] text-gray-400 w-full text-center">Last: {formatDateShort(a.lastFedDate)}</div>
+                                                        : <div className="text-[10px] text-orange-500 w-full text-center">Never fed</div>}
+                                                    <button onClick={(e) => handleMarkFed(e, a)}
+                                                        className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5">
+                                                        🍽 Fed
+                                                    </button>
+                                                    <button onClick={(e) => handleSkipFeeding(e, a)}
+                                                        className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200 w-full flex items-center justify-center gap-0.5">
+                                                        ⏭ Skip
+                                                    </button>
+                                                </>}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {feedOk.length > 0 && (
+                                <div>
+                                    <div className="flex items-center gap-2 px-1 pb-2">
+                                        <span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" />
+                                        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Up to Date ({feedOk.length})</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                        {feedOk.map(a => (
+                                            <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                hideControls hideBreedingLines
+                                                cardActions={<>
+                                                    {a.lastFedDate && <div className="text-[10px] text-gray-400 w-full text-center">Last: {formatDateShort(a.lastFedDate)}</div>}
+                                                    {a.feedingFrequencyDays && <div className="text-[10px] text-gray-400 w-full text-center">Every {a.feedingFrequencyDays}d</div>}
+                                                    <button onClick={(e) => handleMarkFed(e, a)}
+                                                        className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-green-100 hover:text-green-700 border border-gray-200 w-full flex items-center justify-center gap-0.5">
+                                                        🍽 Fed
+                                                    </button>
+                                                </>}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {feedNone.length > 0 && (
+                                <div>
+                                    <div className="flex items-center gap-2 px-1 pb-2">
+                                        <span className="w-2.5 h-2.5 rounded-full bg-gray-300 inline-block" />
+                                        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">No Schedule Set ({feedNone.length})</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                        {feedNone.map(a => (
+                                            <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                hideControls hideBreedingLines
+                                                cardActions={a.dietType
+                                                    ? <div className="text-[10px] text-gray-400 w-full text-center truncate">{a.dietType}</div>
+                                                    : undefined}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {feedDue.length === 0 && feedOk.length === 0 && feedNone.length === 0 && (
+                                <div className="text-sm text-gray-400 text-center py-4">No animals with a feeding schedule.</div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* -- 3. REPRODUCTION ---------------------------------------- */}
                 <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="reproduction"
                         icon={<Bean size={18} className="text-pink-600" />}
                         title="Reproduction" count={reproTotal} bgClass="bg-pink-50" />
                     {!collapsedMgmtSections['reproduction'] && (
-                        <div className="p-3 space-y-2">
+                        <div className="p-3 space-y-4">
                             {reproTotal === 0
                                 ? <div className="text-sm text-gray-400 text-center py-4">No animals currently in a reproductive state.</div>
                                 : <>
                                     {matingList.length > 0 && (
-                                        <MgmtGroup groupKey="repro_mating" label="In Mating"
-                                            groupAnimals={matingList} headerClass="bg-purple-50"
-                                            renderExtras={(a) => (
-                                                <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                                                    {a.matingDate && <div className="text-xs text-gray-400 hidden sm:block">Since {formatDateShort(a.matingDate)}</div>}
-                                                    {a.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: true })}
-                                                        className="text-xs px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 whitespace-nowrap flex items-center gap-0.5"><Bean size={10} className="flex-shrink-0" /> Set as Pregnant</button>}
-                                                    <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false })}
-                                                        className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200">Clear</button>
-                                                </div>
-                                            )} />
+                                        <div>
+                                            <div className="flex items-center gap-2 px-1 pb-2">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-purple-400 inline-block" />
+                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">In Mating ({matingList.length})</span>
+                                            </div>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                                {matingList.map(a => (
+                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                        hideControls hideBreedingLines
+                                                        cardActions={<>
+                                                            {a.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: true })}
+                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 w-full flex items-center justify-center gap-0.5"><Bean size={9} /> Pregnant</button>}
+                                                            <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false })}
+                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
+                                                        </>}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
                                     )}
                                     {pregnantList.length > 0 && (
-                                        <MgmtGroup groupKey="repro_pregnant" label="Pregnant / Gravid"
-                                            groupAnimals={pregnantList} headerClass="bg-pink-50"
-                                            renderExtras={(a) => (
-                                                <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                                                    {a.expectedDueDate && <div className="text-xs text-gray-400 hidden sm:block">Due {formatDateShort(a.expectedDueDate)}</div>}
-                                                    {a.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false, isNursing: true })}
-                                                        className="text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 whitespace-nowrap flex items-center gap-0.5"><Milk size={10} className="flex-shrink-0" /> Set as Nursing</button>}
-                                                    <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false })}
-                                                        className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200">Clear</button>
-                                                </div>
-                                            )} />
+                                        <div>
+                                            <div className="flex items-center gap-2 px-1 pb-2">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-pink-400 inline-block" />
+                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Pregnant / Gravid ({pregnantList.length})</span>
+                                            </div>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                                {pregnantList.map(a => (
+                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                        hideControls hideBreedingLines
+                                                        cardActions={<>
+                                                            {a.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false, isNursing: true })}
+                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 w-full flex items-center justify-center gap-0.5"><Milk size={9} /> Nursing</button>}
+                                                            <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false })}
+                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
+                                                        </>}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
                                     )}
                                     {nursingList.length > 0 && (
-                                        <MgmtGroup groupKey="repro_nursing" label="Nursing / Brooding"
-                                            groupAnimals={nursingList} headerClass="bg-blue-50"
-                                            renderExtras={(a) => (
-                                                <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                                                    <button onClick={(e) => handleReproStatusUpdate(e, a, { isNursing: false })}
-                                                        className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 flex items-center gap-0.5"><Check size={10} className="flex-shrink-0" /> Done</button>
-                                                </div>
-                                            )} />
+                                        <div>
+                                            <div className="flex items-center gap-2 px-1 pb-2">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block" />
+                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Nursing / Brooding ({nursingList.length})</span>
+                                            </div>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                                {nursingList.map(a => (
+                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                        hideControls hideBreedingLines
+                                                        cardActions={
+                                                            <button onClick={(e) => handleReproStatusUpdate(e, a, { isNursing: false })}
+                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 w-full flex items-center justify-center gap-0.5"><Check size={9} /> Done</button>
+                                                        }
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
                                     )}
                                 </>
                             }
@@ -2863,126 +3292,165 @@ const AnimalList = ({
                     )}
                 </div>
 
-                {/* -- 3. ANIMAL CARE ----------------------------------------- */}
+                {/* -- 4. MEDICAL / QUARANTINE -------------------------------- */}
                 <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <SectionHeader sectionKey="feeding"
-                        icon={<Utensils size={18} className="text-green-600" />}
-                        title="Animal Care" count={animalCareDue > 0 ? `${animalCareDue} due` : animals.length} bgClass="bg-green-50" />
-                    {!collapsedMgmtSections['feeding'] && (
-                        <div className="divide-y divide-gray-100">
-                            {/* -- Daily / Routine -- */}
-                            <div>
-                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide">Daily / Routine</div>
-                                <div className="p-3 space-y-2">
-                                    {feedDue.length > 0 && (
-                                        <MgmtGroup groupKey="feed_due" label="Due Today / Overdue"
-                                            groupAnimals={feedDue} headerClass="bg-red-50"
-                                            renderExtras={(a) => (
-                                                <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
-                                                    <div className="text-xs text-gray-400 text-right whitespace-nowrap hidden sm:block">
-                                                        {a.dietType && <div>{a.dietType}</div>}
-                                                        {a.lastFedDate
-                                                            ? <div>Last: {formatDateShort(a.lastFedDate)}</div>
-                                                            : <div className="text-orange-500">Never fed</div>}
-                                                        {a.feedingFrequencyDays && <div>Every {a.feedingFrequencyDays}d</div>}
-                                                    </div>
-                                                    <button onClick={(e) => handleMarkFed(e, a)}
-                                                        className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap">
-                                                        ? Fed
-                                                    </button>
-                                                    <button onClick={(e) => handleSkipFeeding(e, a)}
-                                                        className="bg-gray-100 hover:bg-gray-200 text-gray-500 text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap border border-gray-200">
-                                                        ?? Skip
-                                                    </button>
-                                                </div>
-                                            )} />
-                                    )}
-                                    {feedOk.length > 0 && (
-                                        <MgmtGroup groupKey="feed_ok" label="Up to Date"
-                                            groupAnimals={feedOk} headerClass="bg-green-50"
-                                            renderExtras={(a) => (
-                                                <div className="text-xs text-gray-400 text-right whitespace-nowrap shrink-0">
-                                                    {a.lastFedDate && <div>Last: {formatDateShort(a.lastFedDate)}</div>}
-                                                    {a.feedingFrequencyDays && <div> <RefreshCw size={12} className="inline-block align-middle mr-0.5" /> Every {a.feedingFrequencyDays}d</div>}
-                                                </div>
-                                            )} />
-                                    )}
-                                    {feedNone.length > 0 && (
-                                        <MgmtGroup groupKey="feed_none" label="No Schedule Set"
-                                            groupAnimals={feedNone} headerClass="bg-gray-100"
-                                            renderExtras={(a) => a.dietType
-                                                ? <div className="text-xs text-gray-400 shrink-0 truncate max-w-[100px]">{a.dietType}</div>
-                                                : null} />
-                                    )}
-                                    {feedDue.length === 0 && feedOk.length === 0 && feedNone.length === 0 && (
-                                        <div className="text-sm text-gray-400 text-center py-4">No animals with a feeding schedule.</div>
-                                    )}
-                                </div>
-                            </div>
-                            {/* -- Scheduled Care (Animal Care Tasks only) -- */}
-                            <div>
-                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide">Scheduled Care</div>
-                                {animalsWithAnimalTasks.length === 0 ? (
-                                    <div className="px-3 py-4 text-xs text-gray-400 text-center">No animal care tasks. Edit an animal and add tasks in the Animal Care tab.</div>
-                                ) : animalsWithAnimalTasks.map(a => {
-                                    const grpKey = `animalcare_${a.id_public}`;
-                                    const isGrpCollapsed = collapsedMgmtGroups[grpKey] || false;
-                                    const tasks = (a.animalCareTasks || []);
-                                    const dueTasks = tasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays));
-                                    return (
-                                        <div key={a.id_public} className="border-b border-gray-100 last:border-0">
-                                            <div className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50" onClick={() => toggleGroup(grpKey)}>
-                                                <div className="flex items-center gap-2 min-w-0">
-                                                    {isGrpCollapsed ? <ChevronDown size={14} className="text-gray-400" /> : <ChevronUp size={14} className="text-gray-400" />}
-                                                    {a.imageUrl
-                                                        ? <img src={a.imageUrl} alt={a.name} className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
-                                                        : <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0"><Cat size={11} className="text-gray-400" /></div>}
-                                                    <span className="text-sm font-medium text-gray-800 truncate">{[a.prefix, a.name || 'Unnamed', a.suffix].filter(Boolean).join(' ')}</span>
-                                                    <span className="text-xs text-gray-400 hidden sm:block">{getSpeciesDisplayName(a.species)}</span>
-                                                </div>
-                                                {dueTasks.length > 0 && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium shrink-0">{dueTasks.length} due</span>}
+                    <SectionHeader sectionKey="medical"
+                        icon={<Activity size={18} className="text-red-600" />}
+                        title="Medical / Quarantine" count={quarantineList.length + treatmentList.length} bgClass="bg-red-50" />
+                    {!collapsedMgmtSections['medical'] && (
+                        <div className="p-3 space-y-4">
+                            {quarantineList.length === 0 && treatmentList.length === 0
+                                ? <div className="text-sm text-gray-400 text-center py-4">No animals in quarantine or under treatment.</div>
+                                : <>
+                                    {quarantineList.length > 0 && (
+                                        <div>
+                                            <div className="flex items-center gap-2 px-1 pb-2">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-orange-400 inline-block" />
+                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Quarantine / Isolation ({quarantineList.length})</span>
                                             </div>
-                                            {!isGrpCollapsed && (
-                                                <div className="px-4 py-2 space-y-1">
-                                                    {tasks.map((task, idx) => {
-                                                        const due = isDue(task.lastDoneDate, task.frequencyDays);
-                                                        const daysAgo = task.lastDoneDate ? daysSince(task.lastDoneDate) : null;
-                                                        const daysLeft = task.frequencyDays && daysAgo !== null ? task.frequencyDays - daysAgo : null;
-                                                        const soon = !due && daysLeft !== null && daysLeft <= 2;
-                                                        return (
-                                                            <div key={idx} className="flex flex-col gap-1 text-sm py-1 border-b border-gray-50 last:border-0" onClick={e => e.stopPropagation()}>
-                                                                <div className="flex items-center gap-2 min-w-0">
-                                                                    <span className={`w-2 h-2 rounded-full flex-shrink-0 ${due ? 'bg-red-500' : soon ? 'bg-orange-400' : task.frequencyDays ? 'bg-green-500' : 'bg-gray-300'}`} />
-                                                                    <span className="text-gray-700 font-medium truncate">{task.taskName}</span>
-                                                                </div>
-                                                                <div className="flex items-center flex-wrap gap-x-2 gap-y-1 pl-4 text-xs text-gray-400">
-                                                                    {task.frequencyDays && <span className="flex items-center gap-0.5"><RefreshCw size={11} /> Every {task.frequencyDays}d</span>}
-                                                                    {task.lastDoneDate
-                                                                        ? <span className="flex items-center gap-0.5 text-green-600"><Check size={10} /> Last: {formatDateShort(task.lastDoneDate)}</span>
-                                                                        : <span className="flex items-center gap-0.5 text-orange-500"><X size={10} /> Never done</span>}
-                                                                    <button onClick={(e) => handleMarkAnimalCareTaskDone(e, a, idx, 'animal')}
-                                                                        className={`text-xs px-2 py-0.5 rounded font-medium border flex items-center gap-0.5 ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
-                                                                        <Check size={10} /> Done
-                                                                    </button>
-                                                                    <button onClick={(e) => handleSkipAnimalCareTask(e, a, idx, 'animal')}
-                                                                        className="text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200 flex items-center gap-0.5">
-                                                                        <ChevronRight size={10} /> Skip
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            )}
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                                {quarantineList.map(a => (
+                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                        hideControls hideBreedingLines
+                                                        cardActions={
+                                                            <button onClick={(e) => handleUnquarantine(e, a)}
+                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5">
+                                                                <LockOpen size={9} /> Release
+                                                            </button>
+                                                        }
+                                                    />
+                                                ))}
+                                            </div>
                                         </div>
-                                    );
-                                })}
-                            </div>
+                                    )}
+                                    {treatmentList.length > 0 && (
+                                        <div>
+                                            <div className="flex items-center gap-2 px-1 pb-2">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-red-400 inline-block" />
+                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Under Treatment ({treatmentList.length})</span>
+                                            </div>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                                {treatmentList.map(a => {
+                                                    const conds = parseArrayField(a.medicalConditions);
+                                                    const meds = parseArrayField(a.medications);
+                                                    return (
+                                                        <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                            hideControls hideBreedingLines
+                                                            cardActions={<>
+                                                                {conds.length > 0 && <div className="text-[10px] text-gray-500 truncate w-full text-center">{conds.map(c => c.name || c).join(', ')}</div>}
+                                                                {meds.length > 0 && <div className="text-[10px] text-blue-500 truncate w-full text-center">{meds.map(m => m.name || m).join(', ')}</div>}
+                                                            </>}
+                                                        />
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            }
                         </div>
                     )}
                 </div>
 
-                {/* -- 4. MAINTENANCE ----------------------------------------- */}
+                {/* -- 5. FOR SALE / AVAILABLE -------------------------------- */}
+                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <SectionHeader sectionKey="available"
+                        icon={<ShoppingBag size={18} className="text-purple-600" />}
+                        title="For Sale / Available" count={availableList.length} bgClass="bg-purple-50" />
+                    {!collapsedMgmtSections['available'] && (
+                        <div className="p-3">
+                            {availableList.length === 0
+                                ? <div className="text-sm text-gray-400 text-center py-4">No animals currently marked as Available.</div>
+                                : <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                    {availableList.map(a => (
+                                        <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                            hideControls hideBreedingLines
+                                            cardActions={<>
+                                                {a.isForSale && a.salePriceAmount && (
+                                                    <div className="text-[10px] text-purple-600 font-medium truncate w-full text-center">
+                                                        {a.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${a.salePriceCurrency || ''} ${a.salePriceAmount}`.trim()}
+                                                    </div>
+                                                )}
+                                                <button onClick={(e) => handleMarkRehomed(e, a)}
+                                                    className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500 text-white hover:bg-indigo-600 w-full flex items-center justify-center gap-0.5">
+                                                    <Check size={9} /> Rehomed
+                                                </button>
+                                            </>}
+                                        />
+                                    ))}
+                                </div>
+                            }
+                        </div>
+                    )}
+                </div>
+
+                {/* -- 6. SCHEDULED CARE ------------------------------------- */}
+                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <SectionHeader sectionKey="scheduledcare"
+                        icon={<ClipboardList size={18} className="text-teal-600" />}
+                        title="Scheduled Care" count={animalsWithAnimalTasks.reduce((s, a) => s + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0) > 0 ? `${animalsWithAnimalTasks.reduce((s, a) => s + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0)} due` : animalsWithAnimalTasks.length} bgClass="bg-teal-50" />
+                    {!collapsedMgmtSections['scheduledcare'] && (
+                        <div className="divide-y divide-gray-100">
+                            {animalsWithAnimalTasks.length === 0 ? (
+                                <div className="px-3 py-4 text-xs text-gray-400 text-center">No animal care tasks. Edit an animal and add tasks in the Animal Care tab.</div>
+                            ) : animalsWithAnimalTasks.map(a => {
+                                const grpKey = `animalcare_${a.id_public}`;
+                                const isGrpCollapsed = collapsedMgmtGroups[grpKey] || false;
+                                const tasks = (a.animalCareTasks || []);
+                                const dueTasks = tasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays));
+                                return (
+                                    <div key={a.id_public} className="border-b border-gray-100 last:border-0">
+                                        <div className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50" onClick={() => toggleGroup(grpKey)}>
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                {isGrpCollapsed ? <ChevronDown size={14} className="text-gray-400" /> : <ChevronUp size={14} className="text-gray-400" />}
+                                                {a.imageUrl
+                                                    ? <img src={a.imageUrl} alt={a.name} className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
+                                                    : <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0"><Cat size={11} className="text-gray-400" /></div>}
+                                                <span className="text-sm font-medium text-gray-800 truncate">{[a.prefix, a.name || 'Unnamed', a.suffix].filter(Boolean).join(' ')}</span>
+                                                <span className="text-xs text-gray-400 hidden sm:block">{getSpeciesDisplayName(a.species)}</span>
+                                            </div>
+                                            {dueTasks.length > 0 && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium shrink-0">{dueTasks.length} due</span>}
+                                        </div>
+                                        {!isGrpCollapsed && (
+                                            <div className="px-4 py-2 space-y-1">
+                                                {tasks.map((task, idx) => {
+                                                    const due = isDue(task.lastDoneDate, task.frequencyDays);
+                                                    const daysAgo = task.lastDoneDate ? daysSince(task.lastDoneDate) : null;
+                                                    const daysLeft = task.frequencyDays && daysAgo !== null ? task.frequencyDays - daysAgo : null;
+                                                    const soon = !due && daysLeft !== null && daysLeft <= 2;
+                                                    return (
+                                                        <div key={idx} className="flex flex-col gap-1 text-sm py-1 border-b border-gray-50 last:border-0" onClick={e => e.stopPropagation()}>
+                                                            <div className="flex items-center gap-2 min-w-0">
+                                                                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${due ? 'bg-red-500' : soon ? 'bg-orange-400' : task.frequencyDays ? 'bg-green-500' : 'bg-gray-300'}`} />
+                                                                <span className="text-gray-700 font-medium truncate">{task.taskName}</span>
+                                                            </div>
+                                                            <div className="flex items-center flex-wrap gap-x-2 gap-y-1 pl-4 text-xs text-gray-400">
+                                                                {task.frequencyDays && <span className="flex items-center gap-0.5"><RefreshCw size={11} /> Every {task.frequencyDays}d</span>}
+                                                                {task.lastDoneDate
+                                                                    ? <span className="flex items-center gap-0.5 text-green-600"><Check size={10} /> Last: {formatDateShort(task.lastDoneDate)}</span>
+                                                                    : <span className="flex items-center gap-0.5 text-orange-500"><X size={10} /> Never done</span>}
+                                                                <button onClick={(e) => handleMarkAnimalCareTaskDone(e, a, idx, 'animal')}
+                                                                    className={`text-xs px-2 py-0.5 rounded font-medium border flex items-center gap-0.5 ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
+                                                                    <Check size={10} /> Done
+                                                                </button>
+                                                                <button onClick={(e) => handleSkipAnimalCareTask(e, a, idx, 'animal')}
+                                                                    className="text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200 flex items-center gap-0.5">
+                                                                    <ChevronRight size={10} /> Skip
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+
+                {/* -- 7. MAINTENANCE ----------------------------------------- */}
                 <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="maintenance"
                         icon={<Wrench size={18} className="text-amber-600" />}
@@ -3176,89 +3644,6 @@ const AnimalList = ({
                     )}
                 </div>
 
-                {/* -- 5. MEDICAL / QUARANTINE -------------------------------- */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <SectionHeader sectionKey="medical"
-                        icon={<Activity size={18} className="text-red-600" />}
-                        title="Medical / Quarantine" count={quarantineList.length + treatmentList.length} bgClass="bg-red-50" />
-                    {!collapsedMgmtSections['medical'] && (
-                        <div className="p-3 space-y-2">
-                            {quarantineList.length === 0 && treatmentList.length === 0
-                                ? <div className="text-sm text-gray-400 text-center py-4">No animals in quarantine or under treatment.</div>
-                                : <>
-                                    {quarantineList.length > 0 && (
-                                        <MgmtGroup groupKey="med_quarantine" label="Quarantine / Isolation"
-                                            groupAnimals={quarantineList} headerClass="bg-orange-50"
-                                            renderExtras={(a) => {
-                                                const conds = parseArrayField(a.medicalConditions);
-                                                return (
-                                                    <div className="flex items-center gap-1.5 shrink-0">
-                                                        {conds.length > 0
-                                                            ? <div className="text-xs text-orange-600 max-w-[100px] truncate">{conds.map(c => c.name || c).join(', ')}</div>
-                                                            : <span className="text-xs text-orange-400">Quarantine</span>}
-                                                        <button
-                                                            onClick={(e) => handleUnquarantine(e, a)}
-                                                            className="text-xs px-2 py-0.5 rounded font-medium border bg-green-500 text-white hover:bg-green-600 border-green-500 whitespace-nowrap"
-                                                            title="Release from quarantine"
-                                                        >
-                                                            <LockOpen size={14} className="inline-block align-middle mr-1" /> Release
-                                                        </button>
-                                                    </div>
-                                                );
-                                            }} />
-                                    )}
-                                    {treatmentList.length > 0 && (
-                                        <MgmtGroup groupKey="med_treatment" label="Under Treatment"
-                                            groupAnimals={treatmentList} headerClass="bg-red-50"
-                                            renderExtras={(a) => {
-                                                const conds = parseArrayField(a.medicalConditions);
-                                                const meds = parseArrayField(a.medications);
-                                                return (
-                                                    <div className="text-xs text-right shrink-0 max-w-[140px]">
-                                                        {conds.length > 0 && <div className="text-gray-500 truncate">{conds.map(c => c.name || c).join(', ')}</div>}
-                                                        {meds.length > 0 && <div className="text-blue-500 truncate">{meds.map(m => m.name || m).join(', ')}</div>}
-                                                    </div>
-                                                );
-                                            }} />
-                                    )}
-                                </>
-                            }
-                        </div>
-                    )}
-                </div>
-
-                {/* -- 6. FOR SALE / AVAILABLE -------------------------------- */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <SectionHeader sectionKey="available"
-                        icon={<ShoppingBag size={18} className="text-purple-600" />}
-                        title="For Sale / Available" count={availableList.length} bgClass="bg-purple-50" />
-                    {!collapsedMgmtSections['available'] && (
-                        <div className="p-3 space-y-1.5">
-                            {availableList.length === 0
-                                ? <div className="text-sm text-gray-400 text-center py-4">No animals currently marked as Available.</div>
-                                : availableList.map(a => (
-                                    <MgmtAnimalCard key={a._id || a.id_public} animal={a} extras={
-                                        <div className="flex items-center gap-1.5 shrink-0">
-                                            {a.isForSale && a.salePriceAmount && (
-                                                <span className="text-xs text-purple-600 font-medium whitespace-nowrap">
-                                                    {a.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${a.salePriceCurrency || ''} ${a.salePriceAmount}`.trim()}
-                                                </span>
-                                            )}
-                                            <button
-                                                onClick={(e) => handleMarkRehomed(e, a)}
-                                                className="text-xs px-2 py-0.5 rounded font-medium border bg-indigo-500 text-white hover:bg-indigo-600 border-indigo-500 whitespace-nowrap"
-                                                title="Mark as Rehomed / Sold"
-                                            >
-                                                <Check size={14} className="inline-block align-middle mr-0.5" /> Rehomed
-                                            </button>
-                                        </div>
-                                    } />
-                                ))
-                            }
-                        </div>
-                    )}
-                </div>
-
                 {/* -- 8. ACTIVITY LOG ? now a separate screen, accessed via button in header -- */}
 
                 {/* -- Feeding Modal ------------------------------------------------------- */}
@@ -3366,8 +3751,8 @@ const AnimalList = ({
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className='flex items-center gap-2'>
                     <ClipboardList size={20} className="sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
-                    {animalView === 'list' ? `My Animals (${displayedAnimalCount})` : showActivityLogScreen ? 'Activity Log' : showSuppliesScreen ? 'Supplies & Inventory' : 'Management View'}
-                    {animalView === 'list' && hasActiveFilters && (
+                    {animalView === 'list' ? `My Animals (${displayedAnimalCount})` : animalView === 'collections' ? 'Collections' : showActivityLogScreen ? 'Activity Log' : showSuppliesScreen ? 'Supplies & Inventory' : 'Management View'}
+                    {isListLikeView && hasActiveFilters && (
                         <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
                             Filtered
                         </span>
@@ -3383,7 +3768,18 @@ const AnimalList = ({
                     </button>
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2 flex-wrap" data-tutorial-target="bulk-privacy-controls">
-                    {animalView === 'list' && (<>
+                    {isListLikeView && (<>
+                    {animalView === 'list' && !showDuplicatesScreen && (
+                        <button
+                            onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(true); }}
+                            className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-amber-600 hover:text-amber-800 hover:bg-amber-50 border border-amber-200 rounded-lg transition font-medium"
+                            title="Find Duplicate Animals"
+                        >
+                            <Search size={14} className="sm:w-4 sm:h-4" />
+                            <span className="font-medium">Find Duplicates</span>
+                        </button>
+                    )}
+                    {animalView === 'list' && (
                     <button
                         onClick={() => setShowArchiveScreen(true)}
                         className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-purple-600 hover:text-purple-800 hover:bg-purple-50 border border-purple-200 rounded-lg transition font-medium"
@@ -3392,6 +3788,7 @@ const AnimalList = ({
                         <Archive size={14} className="sm:w-4 sm:h-4" />
                         <span className="font-medium">Archive</span>
                     </button>
+                    )}
                     <button 
                         onClick={() => navigate('/select-species')} 
                         className="bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
@@ -3457,7 +3854,7 @@ const AnimalList = ({
                             <span className="font-medium hidden sm:inline">Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
                         </button>
                     )}
-                    {animalView !== 'list' && (
+                    {animalView === 'management' && (
                     <button 
                         onClick={handleRefresh} 
                         disabled={loading}
@@ -3471,7 +3868,7 @@ const AnimalList = ({
                 </div>
             </h2>
 
-            {/* View Toggle: My Animals / Management */}
+            {/* View Toggle: My Animals / Collections / Management */}
             {!showArchiveScreen && (
             <div className="flex border border-gray-200 rounded-xl overflow-hidden shadow-sm mb-4">
                 <button
@@ -3482,6 +3879,15 @@ const AnimalList = ({
                 >
                     <ClipboardList size={15} />
                     <span>My Animals</span>
+                </button>
+                <button
+                    onClick={() => setAnimalView('collections')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 text-sm font-semibold transition ${
+                        animalView === 'collections' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'
+                    }`}
+                >
+                    <FolderOpen size={15} />
+                    <span>Collections</span>
                 </button>
                 <button
                     onClick={() => setAnimalView('management')}
@@ -3495,7 +3901,47 @@ const AnimalList = ({
             </div>
             )}
 
-            {animalView === 'list' && !showArchiveScreen && (
+            {isCollectionsView && !showArchiveScreen && (
+            <div className="mb-4 sm:mb-6 border rounded-lg bg-gray-50">
+                <div className="flex items-center gap-2 p-2 sm:p-3">
+                    <input
+                        type="text"
+                        placeholder="Search by name..."
+                        value={searchInput}
+                        onChange={handleSearchInputChange}
+                        onKeyPress={(e) => { if (e.key === 'Enter') triggerSearch(); }}
+                        className="flex-grow p-2 text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-0"
+                    />
+                    <button
+                        onClick={triggerSearch}
+                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 text-sm shrink-0"
+                        title="Search"
+                    >
+                        <Search size={16} />
+                        <span className="hidden sm:inline">Search</span>
+                    </button>
+                    <span className="hidden sm:inline mx-1 text-gray-300">|</span>
+                    <button
+                        onClick={() => toggleAllAnimalsPrivacy(true)}
+                        className="text-green-600 hover:text-green-700 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-green-50 text-xs sm:text-sm font-semibold shadow-sm shrink-0"
+                        title="Make All Animals Public"
+                    >
+                        <Eye size={14} className="sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">Set All Public</span>
+                    </button>
+                    <button
+                        onClick={() => toggleAllAnimalsPrivacy(false)}
+                        className="text-gray-600 hover:text-gray-800 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-semibold shadow-sm shrink-0"
+                        title="Make All Animals Private"
+                    >
+                        <EyeOff size={14} className="sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">Set All Private</span>
+                    </button>
+                </div>
+            </div>
+            )}
+
+            {isListLikeView && !isCollectionsView && !showArchiveScreen && (
             <div className="mb-4 sm:mb-6 border rounded-lg bg-gray-50">
                 {/* Ownership filter buttons ? always visible, auto-apply */}
                 <div className="flex flex-wrap items-center justify-center gap-2 px-2 sm:px-3 py-2">
@@ -3744,9 +4190,9 @@ const AnimalList = ({
             </div>
             )}
 
-            {showArchiveScreen ? renderArchiveScreen() : animalView === 'management' ? (
-                showActivityLogScreen ? renderActivityLogScreen() : showSuppliesScreen ? renderSuppliesScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : renderManagementView()
-            ) : (loading && animals.length === 0) ? (
+            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : animalView === 'management' ? (
+                showActivityLogScreen ? renderActivityLogScreen() : showSuppliesScreen ? renderSuppliesScreen() : renderManagementView()
+            ) : animalView === 'collections' ? renderCollectionsView() : (loading && animals.length === 0) ? (
                 /* Skeleton grid ? only on very first load before any animals arrive */
                 <div className="space-y-3 sm:space-y-4">
                     {[0,1,2].map(gi => (
