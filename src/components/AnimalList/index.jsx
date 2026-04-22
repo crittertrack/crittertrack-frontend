@@ -2316,7 +2316,7 @@ const AnimalList = ({
 
     // -- Collections View ----------------------------------------------------------
     const renderCollectionsView = () => {
-        const allOwnedAnimals = animals.filter(a => a.isOwned !== false);
+        const allOwnedAnimals = allAnimalsRaw.length > 0 ? allAnimalsRaw : animals;
         return (
             <div className="space-y-4">
                 {/* Collections Manager Header */}
