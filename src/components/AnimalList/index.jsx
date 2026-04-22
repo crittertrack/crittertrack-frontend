@@ -361,6 +361,7 @@ const AnimalList = ({
     const [renamingCollectionName, setRenamingCollectionName] = useState('');
     const [collapsedCollections, setCollapsedCollections] = useState({});
     const [assigningCollectionAnimalId, setAssigningCollectionAnimalId] = useState(null);
+    const [collectionDropdownPos, setCollectionDropdownPos] = useState(null);
 
     const isCollectionsView = animalView === 'collections';
     const isListLikeView = animalView === 'list' || isCollectionsView;
@@ -649,6 +650,14 @@ const AnimalList = ({
     useEffect(() => { fetchAllAnimals(); }, [fetchAllAnimals]);
     useEffect(() => { fetchAvailableAnimals(); }, [fetchAvailableAnimals]);
     useEffect(() => { fetchSoldTransferred(); }, [fetchSoldTransferred]);
+
+    // Close fixed collection dropdown on scroll
+    useEffect(() => {
+        if (!collectionDropdownPos) return;
+        const close = () => { setAssigningCollectionAnimalId(null); setCollectionDropdownPos(null); };
+        window.addEventListener('scroll', close, true);
+        return () => window.removeEventListener('scroll', close, true);
+    }, [collectionDropdownPos]);
 
     // Load collections from API on mount; fall back to localStorage cache already in state
     useEffect(() => {
@@ -2546,26 +2555,41 @@ const AnimalList = ({
                                                         <div className="absolute inset-0 bg-gray-400/20 rounded-xl z-10 pointer-events-none" />
                                                         <AnimalCard animal={animal} onEditAnimal={onEditAnimal} species={animal.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned} />
                                                         <div className="absolute top-2 left-2 z-20">
-                                                            {assigningCollectionAnimalId === animal.id_public && (
+                                                            {assigningCollectionAnimalId === animal.id_public && collectionDropdownPos && (
                                                                 <div
-                                                                    className="absolute left-0 bottom-full mb-1 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[150px] z-30 max-h-48 overflow-y-auto"
+                                                                    style={{ position: 'fixed', top: collectionDropdownPos.top, bottom: collectionDropdownPos.bottom, left: collectionDropdownPos.left, zIndex: 9999 }}
+                                                                    className="bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[160px] max-h-52 overflow-y-auto"
                                                                     onClick={e => e.stopPropagation()}
                                                                 >
                                                                     <p className="text-xs font-semibold text-gray-600 mb-1.5">Add to collection:</p>
                                                                     {userCollections.map(col => (
                                                                         <button
                                                                             key={col.id}
-                                                                            onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }}
+                                                                            onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); setCollectionDropdownPos(null); }}
                                                                             className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 rounded flex items-center gap-1.5 text-gray-700"
                                                                         >
                                                                             <FolderOpen size={11} className="text-amber-500" /> {col.name}
                                                                         </button>
                                                                     ))}
-                                                                    <button onClick={() => setAssigningCollectionAnimalId(null)} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 rounded text-gray-400 mt-1">Cancel</button>
+                                                                    <button onClick={() => { setAssigningCollectionAnimalId(null); setCollectionDropdownPos(null); }} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 rounded text-gray-400 mt-1">Cancel</button>
                                                                 </div>
                                                             )}
                                                             <button
-                                                                onClick={e => { e.stopPropagation(); setAssigningCollectionAnimalId(prev => prev === animal.id_public ? null : animal.id_public); }}
+                                                                onClick={e => {
+                                                                    e.stopPropagation();
+                                                                    if (assigningCollectionAnimalId === animal.id_public) {
+                                                                        setAssigningCollectionAnimalId(null);
+                                                                        setCollectionDropdownPos(null);
+                                                                    } else {
+                                                                        const rect = e.currentTarget.getBoundingClientRect();
+                                                                        const spaceBelow = window.innerHeight - rect.bottom;
+                                                                        setCollectionDropdownPos(spaceBelow < 220
+                                                                            ? { bottom: window.innerHeight - rect.top + 4, top: undefined, left: rect.left }
+                                                                            : { top: rect.bottom + 4, bottom: undefined, left: rect.left }
+                                                                        );
+                                                                        setAssigningCollectionAnimalId(animal.id_public);
+                                                                    }
+                                                                }}
                                                                 className="bg-white/90 hover:bg-amber-50 text-amber-500 hover:text-amber-700 rounded-full p-1 shadow-sm border border-gray-200"
                                                                 title="Add to a collection"
                                                             >
