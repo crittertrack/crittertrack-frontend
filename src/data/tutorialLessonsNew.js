@@ -1114,6 +1114,17 @@ const KEY_FEATURES_LESSONS = [
           'Your data remains unchanged',
           'You can reopen any animal anytime to view or edit'
         ]
+      },
+      {
+        stepNumber: 9,
+        title: 'Add Sibling Button',
+        content: 'When viewing an animal that has at least one parent assigned, you\'ll see a green "Add Sibling" button next to the Edit button at the top of the detail view. Clicking it opens a blank animal creation form pre-filled with the same species, birth date, sire, and dam — saving you time when adding littermates or siblings from the same parents.',
+        tips: [
+          'Only appears when the animal has at least one parent set',
+          'Pre-fills species, birth date, sire, and dam',
+          'Great for quickly adding multiple animals from the same litter',
+          'You can still adjust any pre-filled field before saving'
+        ]
       }
     ]
   },
@@ -2139,19 +2150,53 @@ const ADVANCED_FEATURES_LESSONS = [
     steps: [
       {
         stepNumber: 1,
-        title: 'What Is the Management View?',
-        content: 'The Management View is a separate mode in My Animals designed for daily operations. Switch to it using the grid/management icon at the top of your My Animals page. Instead of browsing individual records, it gives you a live dashboard of everything that needs attention today.',
+        title: 'Three Views: My Animals, Collections & Management',
+        content: 'At the top of your animal section you\'ll find three view tabs: My Animals (list), Collections, and Management. Each opens a different way to work with your records. On mobile the tabs show icons only to save space; on larger screens the full labels are shown.',
         tips: [
-          'Switch between List view and Management view at the top of My Animals',
-          'Deceased animals are automatically excluded',
-          'Sections collapse/expand to reduce clutter',
-          'All actions update instantly with no page reload'
+          'My Animals: the main list view with search, filters, and species groups',
+          'Collections: group your animals into custom sets (e.g. "Breeders", "For Sale")',
+          'Management: a live dashboard for daily care, feeding, enclosures, and more',
+          'Tap any tab to switch — your last-used data is retained'
         ]
       },
       {
         stepNumber: 2,
+        title: 'Collections Tab',
+        content: 'The Collections tab lets you create named groups of animals that cut across species and ownership. Add animals to a collection, mark the collection public or private, and use the search bar to filter animals within it. Great for organising show animals, animals available for rehoming, or any custom grouping you need.',
+        tips: [
+          'Click the + button on any collection card to add animals',
+          'Collections can be made public (visible on your profile) or private',
+          '"Set All Public" / "Set All Private" buttons let you bulk-toggle visibility',
+          'Uncategorised animals appear in a special grey Uncategorised card',
+          'Use the search bar at the top to filter animals across all collections'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Pin Your Default View',
+        content: 'Each view tab has a small pin icon in its top-right corner. Click the pin on any tab to make it your default — the next time you open the app it will land on that tab automatically. The active default pin is shown in amber; tap another tab\'s pin to change it.',
+        tips: [
+          'Default view is saved to your browser (localStorage)',
+          'Amber filled pin = currently pinned as default',
+          'Faint pin = hover over the tab to reveal it, then click to pin',
+          'Useful if you live in Collections or Management View'
+        ]
+      },
+      {
+        stepNumber: 4,
+        title: 'What Is the Management View?',
+        content: 'The Management View is designed for daily operations. Instead of browsing individual records, it gives you a live dashboard of everything that needs attention today — feeding, care tasks, enclosures, reproduction, medical, and more.',
+        tips: [
+          'Deceased and view-only animals are automatically excluded',
+          'Sections collapse/expand to reduce clutter',
+          'All actions update instantly with no page reload',
+          'Sections are ordered by priority: Enclosures → Feeding → Reproduction → Medical → For Sale → Scheduled Care → Maintenance'
+        ]
+      },
+      {
+        stepNumber: 5,
         title: 'Feeding Section — Due & Overdue',
-        content: 'The Animal Care section shows three groups: Due Today / Overdue (red), Up to Date (green), and No Schedule Set. Animals appear here based on the feeding frequency you set in their Animal Care tab. The badge in the section header counts how many animals need attention.',
+        content: 'The Feeding section shows three groups: Due Today / Overdue (red), Up to Date (green), and No Schedule Set. Animals appear here based on the feeding frequency you set in their Animal Care tab. The badge in the section header counts how many animals need attention.',
         tips: [
           'Set feeding frequency on the animal\'s Animal Care tab',
           'Animals move groups automatically as dates change',
@@ -2159,7 +2204,7 @@ const ADVANCED_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 3,
+        stepNumber: 6,
         title: 'Recording a Feeding',
         content: 'Click the green "✓ Fed" button next to any animal to record a feeding. A modal opens where you can optionally select which food item from your Supplies was used, enter the quantity fed (which automatically deducts from your stock), and add notes. You can also skip food selection and just mark the animal as fed.',
         tips: [
@@ -2170,9 +2215,9 @@ const ADVANCED_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 4,
+        stepNumber: 7,
         title: 'Scheduled Care Tasks',
-        content: 'Below feeding, you\'ll see Scheduled Care Tasks — custom recurring tasks you\'ve set on individual animals (like weighing or nail trims). Each has its own due date. Click "✓ Done" to mark a task complete; it resets the countdown based on the task\'s frequency.',
+        content: 'The Scheduled Care section lists custom recurring tasks you\'ve set on individual animals (like weighing or nail trims). Each has its own due date. Click "✓ Done" to mark a task complete; it resets the countdown based on the task\'s frequency.',
         tips: [
           'Tasks are set per-animal in the Animal Care tab',
           'Each task tracks independently',
@@ -2180,7 +2225,7 @@ const ADVANCED_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 5,
+        stepNumber: 8,
         title: 'Enclosures Section',
         content: 'The Enclosures section shows all your enclosures with their assigned animals and any cleaning tasks that are due. You can see which animals are in which enclosure, and mark cleaning tasks done directly from Management View. Create enclosures and assign animals to them from within this section.',
         tips: [
@@ -2190,9 +2235,9 @@ const ADVANCED_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 6,
+        stepNumber: 9,
         title: 'Quarantine & Reproduction Tracking',
-        content: 'The Health & Reproduction section shows animals in quarantine (with a "✓ Release" button to un-quarantine directly), and animals with active reproductive statuses. Reproductive statuses (In Mating → Pregnant → Nursing → Done) can be advanced inline without opening the full edit form.',
+        content: 'The Medical / Quarantine section shows animals in quarantine (with a "✓ Release" button to un-quarantine directly) and animals under treatment. The Reproduction section tracks animals In Mating → Pregnant → Nursing; statuses can be advanced inline without opening the full edit form.',
         tips: [
           'Set quarantine on an animal via their Status & Privacy tab',
           'Release button instantly removes quarantine status',
@@ -2200,7 +2245,7 @@ const ADVANCED_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 7,
+        stepNumber: 10,
         title: 'Activity Log',
         content: 'Every action you take in Management View — feeding, care tasks, enclosure tasks, quarantine releases, repro changes — is recorded in the Activity Log. Access it via the log button in the Management View header. You can filter by action type, animal, or date range to review what was done and when.',
         tips: [
