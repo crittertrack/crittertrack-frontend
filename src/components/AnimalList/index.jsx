@@ -469,8 +469,9 @@ const AnimalList = ({
             setLoading(false);
 
             // Phase 2: background-fetch ALL animals so unowned toggle works instantly
+            // slim=true strips heavy fields (breedingRecords, health, etc.) — list cards don't need them
             try {
-                const allRes = await axios.get(`${API_BASE_URL}/animals`, { headers: { Authorization: `Bearer ${authToken}` } });
+                const allRes = await axios.get(`${API_BASE_URL}/animals?slim=true`, { headers: { Authorization: `Bearer ${authToken}` } });
                 let allData = (allRes.data || []).filter(a => !a.isViewOnly);
                 // Preserve cache-busted image URLs from phase 1
                 const ownedMap = new Map(ownedData.map(a => [a.id_public || a._id, a]));
