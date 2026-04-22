@@ -3711,15 +3711,6 @@ const AnimalList = ({
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2 flex-wrap" data-tutorial-target="bulk-privacy-controls">
                     {isListLikeView && (<>
-                    <button 
-                        onClick={() => navigate('/select-species')} 
-                        className="bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
-                        data-tutorial-target="add-animal-btn"
-                    >
-                        <PlusCircle size={14} className="sm:w-4 sm:h-4" /> <span>Add Animal</span>
-                    </button>
-
-                    </>)}
                     {animalView === 'list' && !showDuplicatesScreen && (
                         <button
                             onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(true); }}
@@ -3730,6 +3721,15 @@ const AnimalList = ({
                             <span className="font-medium">Find Duplicates</span>
                         </button>
                     )}
+                    <button 
+                        onClick={() => navigate('/select-species')} 
+                        className="bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
+                        data-tutorial-target="add-animal-btn"
+                    >
+                        <PlusCircle size={14} className="sm:w-4 sm:h-4" /> <span>Add Animal</span>
+                    </button>
+
+                    </>)}
                     {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
                         <button
                             onClick={() => {
