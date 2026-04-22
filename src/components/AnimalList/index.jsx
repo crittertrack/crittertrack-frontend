@@ -2478,10 +2478,10 @@ const AnimalList = ({
                                                         {/* grey overlay */}
                                                         <div className="absolute inset-0 bg-gray-400/20 rounded-xl z-10 pointer-events-none" />
                                                         <AnimalCard animal={animal} onEditAnimal={onEditAnimal} species={animal.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned} />
-                                                        <div className="absolute top-1 right-1 z-20">
+                                                        <div className="absolute top-2 right-2 z-20">
                                                             {assigningCollectionAnimalId === animal.id_public && (
                                                                 <div
-                                                                    className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[150px] z-30"
+                                                                    className="absolute right-0 top-9 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[150px] z-30"
                                                                     onClick={e => e.stopPropagation()}
                                                                 >
                                                                     <p className="text-xs font-semibold text-gray-600 mb-1.5">Add to collection:</p>
