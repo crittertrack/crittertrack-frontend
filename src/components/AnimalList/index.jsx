@@ -2658,8 +2658,8 @@ const AnimalList = ({
             // Optimistic update
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animalIdPublic ? { ...a, enclosureId: newEnclosureId } : a));
             setAssigningAnimalId(null);
-            axios.put(`${API_BASE_URL}/animals/${animalIdPublic}`,
-                { enclosureId: newEnclosureId },
+            axios.patch(`${API_BASE_URL}/enclosures/assign-animal`,
+                { animalId_public: animalIdPublic, enclosureId: newEnclosureId },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
                 .then(() => {
                     const encName = newEnclosureId ? (enclosures.find(e => e._id === newEnclosureId)?.name || newEnclosureId) : null;
