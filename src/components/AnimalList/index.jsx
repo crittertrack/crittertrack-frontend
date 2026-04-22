@@ -3751,7 +3751,7 @@ const AnimalList = ({
             </div>
             )}
 
-            {isListLikeView && !showArchiveScreen && (
+            {isListLikeView && !isCollectionsView && !showArchiveScreen && (
             <div className="mb-4 sm:mb-6 border rounded-lg bg-gray-50">
                 {/* Ownership filter buttons ? always visible, auto-apply */}
                 <div className="flex flex-wrap items-center justify-center gap-2 px-2 sm:px-3 py-2">
