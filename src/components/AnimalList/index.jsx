@@ -4,7 +4,7 @@ import ArchiveScreen from '../ArchiveScreen';
 import {
     Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight,
     Ban, Bean, Bell, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
-    Circle, ClipboardList, Edit, Eye, EyeOff, Flag, Heart, HeartOff,
+    Circle, ClipboardList, Edit, Eye, EyeOff, Flag, FolderOpen, Heart, HeartOff,
     Home, Hourglass, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Milk,
     Network, Package, Plus, PlusCircle, RefreshCw, Save, ScrollText,
     Search, ShoppingBag, SlidersHorizontal, Sparkles, Trash2, Utensils,
@@ -16,6 +16,9 @@ const API_BASE_URL = '/api';
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'];
 const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
+const normalizeAnimalView = (value) => (
+    value === 'management' || value === 'collections' ? value : 'list'
+);
 
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
@@ -114,6 +117,7 @@ const AnimalList = ({
     onEditAnimal, 
     onViewAnimal, 
     navigate,
+    initialAnimalView = 'list',
     // Archive props
     showArchiveScreen,
     setShowArchiveScreen,
@@ -237,7 +241,7 @@ const AnimalList = ({
     const [collapsedSpecies, setCollapsedSpecies] = useState({}); // { species: true/false } - for mobile collapse
     const [userSpeciesOrder, setUserSpeciesOrder] = useState([]); // User's custom species order
     const [filtersExpanded, setFiltersExpanded] = useState(false); // toggle filter panel visibility
-    const [animalView, setAnimalView] = useState('list'); // 'list' | 'management'
+    const [animalView, setAnimalView] = useState(() => normalizeAnimalView(initialAnimalView)); // 'list' | 'collections' | 'management'
     const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({ enclosures: true }); // { sectionKey: bool }
     const [collapsedMgmtGroups, setCollapsedMgmtGroups] = useState({}); // { groupKey: bool }
     const [mgmtAlertsEnabled, setMgmtAlertsEnabled] = useState(() => {
@@ -250,6 +254,40 @@ const AnimalList = ({
             localStorage.setItem('ct_mgmt_urgency_enabled', next ? 'true' : 'false');
             window.dispatchEvent(new StorageEvent('storage', { key: 'ct_mgmt_urgency_enabled' }));
         } catch {}
+    };
+
+    // ---- Collection CRUD helpers ----
+    const _saveCollections = (cols) => {
+        setUserCollections(cols);
+        try { localStorage.setItem('ct_collections', JSON.stringify(cols)); } catch {}
+    };
+    const _saveAnimalCollections = (map) => {
+        setAnimalCollections(map);
+        try { localStorage.setItem('ct_animal_collections', JSON.stringify(map)); } catch {}
+    };
+    const createCollection = (name) => {
+        if (!name.trim()) return;
+        const id = `col_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+        _saveCollections([...userCollections, { id, name: name.trim() }]);
+    };
+    const deleteCollection = (id) => {
+        _saveCollections(userCollections.filter(c => c.id !== id));
+        const next = { ...animalCollections };
+        Object.keys(next).forEach(aid => { next[aid] = next[aid].filter(cid => cid !== id); });
+        _saveAnimalCollections(next);
+    };
+    const renameCollection = (id, name) => {
+        if (!name.trim()) return;
+        _saveCollections(userCollections.map(c => c.id === id ? { ...c, name: name.trim() } : c));
+    };
+    const assignAnimalToCollection = (animalId, collectionId) => {
+        const current = animalCollections[animalId] || [];
+        if (current.includes(collectionId)) return;
+        _saveAnimalCollections({ ...animalCollections, [animalId]: [...current, collectionId] });
+    };
+    const removeAnimalFromCollection = (animalId, collectionId) => {
+        const current = animalCollections[animalId] || [];
+        _saveAnimalCollections({ ...animalCollections, [animalId]: current.filter(cid => cid !== collectionId) });
     };
 
     // Activity Log state
@@ -278,6 +316,27 @@ const AnimalList = ({
     const [restockingSupplyId, setRestockingSupplyId] = useState(null);
     const [restockForm, setRestockForm] = useState({ qty: '', cost: '', date: new Date().toISOString().slice(0, 10), notes: '' });
     const [restockSaving, setRestockSaving] = useState(false);
+
+    // ---- Collections state (localStorage-backed; backend sync TBD) ----
+    const [userCollections, setUserCollections] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('ct_collections') || '[]'); } catch { return []; }
+    });
+    const [animalCollections, setAnimalCollections] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('ct_animal_collections') || '{}'); } catch { return {}; }
+    });
+    const [showCollectionManager, setShowCollectionManager] = useState(false);
+    const [newCollectionName, setNewCollectionName] = useState('');
+    const [renamingCollectionId, setRenamingCollectionId] = useState(null);
+    const [renamingCollectionName, setRenamingCollectionName] = useState('');
+    const [collapsedCollections, setCollapsedCollections] = useState({});
+    const [assigningCollectionAnimalId, setAssigningCollectionAnimalId] = useState(null);
+
+    const isCollectionsView = animalView === 'collections';
+    const isListLikeView = animalView === 'list' || isCollectionsView;
+
+    useEffect(() => {
+        setAnimalView(normalizeAnimalView(initialAnimalView));
+    }, [initialAnimalView]);
     const [feedingModal, setFeedingModal] = useState(null); // { animal } when open
     const [feedingForm, setFeedingForm] = useState({ supplyId: '', qty: '1', notes: '', updateStock: true });
     const [enclosures, setEnclosures] = useState([]);
@@ -2254,6 +2313,209 @@ const AnimalList = ({
         );
     };
 
+    // -- Collections View ----------------------------------------------------------
+    const renderCollectionsView = () => {
+        const allOwnedAnimals = animals.filter(a => a.isOwned !== false);
+        return (
+            <div className="space-y-4">
+                {/* Collections Manager Header */}
+                <div className="flex items-center gap-2 mb-1">
+                    <button
+                        onClick={() => setShowCollectionManager(prev => !prev)}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-lg transition ${
+                            showCollectionManager ? 'bg-gray-200 hover:bg-gray-300 text-gray-700' : 'bg-primary hover:bg-primary/90 text-black'
+                        }`}
+                    >
+                        <FolderOpen size={14} />
+                        {showCollectionManager ? 'Close Manager' : 'Manage Collections'}
+                    </button>
+                </div>
+
+                {/* Collection Manager Panel */}
+                {showCollectionManager && (
+                    <div className="border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-3">
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                placeholder="New collection name…"
+                                value={newCollectionName}
+                                onChange={e => setNewCollectionName(e.target.value)}
+                                onKeyPress={e => { if (e.key === 'Enter' && newCollectionName.trim()) { createCollection(newCollectionName); setNewCollectionName(''); } }}
+                                className="flex-grow p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                            />
+                            <button
+                                onClick={() => { createCollection(newCollectionName); setNewCollectionName(''); }}
+                                disabled={!newCollectionName.trim()}
+                                className="px-3 py-2 bg-accent hover:bg-accent/90 text-white text-sm font-semibold rounded-lg transition disabled:opacity-50"
+                            >
+                                Create
+                            </button>
+                        </div>
+                        {userCollections.length > 0 ? (
+                            <ul className="space-y-1.5">
+                                {userCollections.map(col => (
+                                    <li key={col.id} className="flex items-center gap-2">
+                                        {renamingCollectionId === col.id ? (
+                                            <>
+                                                <input
+                                                    type="text"
+                                                    value={renamingCollectionName}
+                                                    onChange={e => setRenamingCollectionName(e.target.value)}
+                                                    onKeyPress={e => { if (e.key === 'Enter') { renameCollection(col.id, renamingCollectionName); setRenamingCollectionId(null); } }}
+                                                    className="flex-grow p-1.5 text-sm border border-gray-300 rounded-lg"
+                                                    autoFocus
+                                                />
+                                                <button onClick={() => { renameCollection(col.id, renamingCollectionName); setRenamingCollectionId(null); }} className="text-xs px-2 py-1 bg-primary text-black rounded-lg">Save</button>
+                                                <button onClick={() => setRenamingCollectionId(null)} className="text-xs px-2 py-1 bg-gray-200 text-gray-700 rounded-lg">Cancel</button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="flex-grow text-sm font-medium text-gray-700">{col.name}</span>
+                                                <span className="text-xs text-gray-400">{Object.values(animalCollections).filter(ids => Array.isArray(ids) && ids.includes(col.id)).length} animals</span>
+                                                <button onClick={() => { setRenamingCollectionId(col.id); setRenamingCollectionName(col.name); }} className="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg">Rename</button>
+                                                <button onClick={() => deleteCollection(col.id)} className="text-xs px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg">Delete</button>
+                                            </>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-sm text-gray-500 text-center py-2">No collections yet. Create one above.</p>
+                        )}
+                    </div>
+                )}
+
+                {loading && allOwnedAnimals.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                        <Loader2 size={24} className="animate-spin mx-auto mb-2" />
+                        Loading animals…
+                    </div>
+                )}
+
+                {/* Empty state: no collections created yet */}
+                {!loading && userCollections.length === 0 && (
+                    <div className="text-center p-10 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                        <FolderOpen size={40} className="text-gray-300 mx-auto mb-3" />
+                        <p className="text-lg font-semibold text-gray-600 mb-1">No collections yet</p>
+                        <p className="text-sm text-gray-500 mb-4">Create collections to organise your animals into custom folders.</p>
+                        <button onClick={() => setShowCollectionManager(true)} className="px-4 py-2 bg-accent hover:bg-accent/90 text-white text-sm font-semibold rounded-lg transition">
+                            Create First Collection
+                        </button>
+                    </div>
+                )}
+
+                {/* Collection sections */}
+                {userCollections.length > 0 && (
+                    <>
+                        {userCollections.map(col => {
+                            const colAnimals = allOwnedAnimals.filter(a => (animalCollections[a.id_public] || []).includes(col.id));
+                            const isColCollapsed = collapsedCollections[col.id] || false;
+                            return (
+                                <div key={col.id} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                                    <div
+                                        className="flex items-center justify-between bg-gray-100 px-4 py-2.5 border-b cursor-pointer"
+                                        onClick={() => setCollapsedCollections(prev => ({ ...prev, [col.id]: !prev[col.id] }))}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <FolderOpen size={16} className="text-amber-500" />
+                                            <span className="font-bold text-gray-700">{col.name} ({colAnimals.length})</span>
+                                        </div>
+                                        {isColCollapsed ? <ChevronDown size={16} className="text-gray-400" /> : <ChevronUp size={16} className="text-gray-400" />}
+                                    </div>
+                                    {!isColCollapsed && (
+                                        <div className="p-1.5 sm:p-4">
+                                            {colAnimals.length === 0 ? (
+                                                <p className="text-sm text-gray-400 text-center py-4">No animals yet. Assign animals from the Uncategorized section below.</p>
+                                            ) : (
+                                                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
+                                                    {colAnimals.map(animal => (
+                                                        <div key={animal.id_public} className="relative">
+                                                            <AnimalCard animal={animal} onEditAnimal={onEditAnimal} species={animal.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned} />
+                                                            <button
+                                                                onClick={e => { e.stopPropagation(); removeAnimalFromCollection(animal.id_public, col.id); }}
+                                                                className="absolute top-1 right-1 z-20 bg-white/90 hover:bg-red-50 text-red-400 hover:text-red-600 rounded-full p-0.5 shadow-sm border border-gray-200"
+                                                                title="Remove from this collection"
+                                                            >
+                                                                <X size={11} />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+
+                        {/* Uncategorized section */}
+                        {(() => {
+                            const validCollectionIds = new Set(userCollections.map(c => c.id));
+                            const uncategorized = allOwnedAnimals.filter(a => {
+                                const assigned = (animalCollections[a.id_public] || []).filter(cid => validCollectionIds.has(cid));
+                                return assigned.length === 0;
+                            });
+                            if (uncategorized.length === 0) return null;
+                            const isUncatCollapsed = collapsedCollections['__uncategorized'] || false;
+                            return (
+                                <div className="border border-dashed border-gray-300 rounded-xl overflow-hidden">
+                                    <div
+                                        className="flex items-center justify-between bg-gray-50 px-4 py-2.5 border-b cursor-pointer"
+                                        onClick={() => setCollapsedCollections(prev => ({ ...prev, __uncategorized: !prev.__uncategorized }))}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <FolderOpen size={16} className="text-gray-400" />
+                                            <span className="font-semibold text-gray-500">Uncategorized ({uncategorized.length})</span>
+                                        </div>
+                                        {isUncatCollapsed ? <ChevronDown size={16} className="text-gray-400" /> : <ChevronUp size={16} className="text-gray-400" />}
+                                    </div>
+                                    {!isUncatCollapsed && (
+                                        <div className="p-1.5 sm:p-4">
+                                            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
+                                                {uncategorized.map(animal => (
+                                                    <div key={animal.id_public} className="relative" onClick={e => { if (assigningCollectionAnimalId === animal.id_public) e.stopPropagation(); }}>
+                                                        <AnimalCard animal={animal} onEditAnimal={onEditAnimal} species={animal.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned} />
+                                                        <div className="absolute top-1 right-1 z-20">
+                                                            {assigningCollectionAnimalId === animal.id_public && (
+                                                                <div
+                                                                    className="absolute right-0 top-6 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[150px] z-30"
+                                                                    onClick={e => e.stopPropagation()}
+                                                                >
+                                                                    <p className="text-xs font-semibold text-gray-600 mb-1.5">Add to collection:</p>
+                                                                    {userCollections.map(col => (
+                                                                        <button
+                                                                            key={col.id}
+                                                                            onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }}
+                                                                            className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 rounded flex items-center gap-1.5 text-gray-700"
+                                                                        >
+                                                                            <FolderOpen size={11} className="text-amber-500" /> {col.name}
+                                                                        </button>
+                                                                    ))}
+                                                                    <button onClick={() => setAssigningCollectionAnimalId(null)} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 rounded text-gray-400 mt-1">Cancel</button>
+                                                                </div>
+                                                            )}
+                                                            <button
+                                                                onClick={e => { e.stopPropagation(); setAssigningCollectionAnimalId(prev => prev === animal.id_public ? null : animal.id_public); }}
+                                                                className="bg-white/90 hover:bg-amber-50 text-amber-500 hover:text-amber-700 rounded-full p-0.5 shadow-sm border border-gray-200"
+                                                                title="Add to a collection"
+                                                            >
+                                                                <Plus size={12} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })()}
+                    </>
+                )}
+            </div>
+        );
+    };
+
     // -- Management View ----------------------------------------------------------
     const renderManagementView = () => {
         const today = new Date();
@@ -3356,8 +3618,8 @@ const AnimalList = ({
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className='flex items-center gap-2'>
                     <ClipboardList size={20} className="sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
-                    {animalView === 'list' ? `My Animals (${displayedAnimalCount})` : showActivityLogScreen ? 'Activity Log' : showSuppliesScreen ? 'Supplies & Inventory' : 'Management View'}
-                    {animalView === 'list' && hasActiveFilters && (
+                    {animalView === 'list' ? `My Animals (${displayedAnimalCount})` : animalView === 'collections' ? 'Collections' : showActivityLogScreen ? 'Activity Log' : showSuppliesScreen ? 'Supplies & Inventory' : 'Management View'}
+                    {isListLikeView && hasActiveFilters && (
                         <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
                             Filtered
                         </span>
@@ -3373,7 +3635,7 @@ const AnimalList = ({
                     </button>
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2 flex-wrap" data-tutorial-target="bulk-privacy-controls">
-                    {animalView === 'list' && (<>
+                    {isListLikeView && (<>
                     <button 
                         onClick={() => navigate('/select-species')} 
                         className="bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
@@ -3439,7 +3701,7 @@ const AnimalList = ({
                             <span className="font-medium hidden sm:inline">Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
                         </button>
                     )}
-                    {animalView !== 'list' && (
+                    {animalView === 'management' && (
                     <button 
                         onClick={handleRefresh} 
                         disabled={loading}
@@ -3453,7 +3715,7 @@ const AnimalList = ({
                 </div>
             </h2>
 
-            {/* View Toggle: My Animals / Management */}
+            {/* View Toggle: My Animals / Collections / Management */}
             {!showArchiveScreen && (
             <div className="flex border border-gray-200 rounded-xl overflow-hidden shadow-sm mb-4">
                 <button
@@ -3464,6 +3726,15 @@ const AnimalList = ({
                 >
                     <ClipboardList size={15} />
                     <span>My Animals</span>
+                </button>
+                <button
+                    onClick={() => setAnimalView('collections')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 text-sm font-semibold transition ${
+                        animalView === 'collections' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'
+                    }`}
+                >
+                    <FolderOpen size={15} />
+                    <span>Collections</span>
                 </button>
                 <button
                     onClick={() => setAnimalView('management')}
@@ -3477,7 +3748,7 @@ const AnimalList = ({
             </div>
             )}
 
-            {animalView === 'list' && !showArchiveScreen && (
+            {isListLikeView && !showArchiveScreen && (
             <div className="mb-4 sm:mb-6 border rounded-lg bg-gray-50">
                 {/* Ownership filter buttons ? always visible, auto-apply */}
                 <div className="flex flex-wrap items-center justify-center gap-2 px-2 sm:px-3 py-2">
@@ -3728,7 +3999,7 @@ const AnimalList = ({
 
             {showArchiveScreen ? renderArchiveScreen() : animalView === 'management' ? (
                 showActivityLogScreen ? renderActivityLogScreen() : showSuppliesScreen ? renderSuppliesScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : renderManagementView()
-            ) : (loading && animals.length === 0) ? (
+            ) : animalView === 'collections' ? renderCollectionsView() : (loading && animals.length === 0) ? (
                 /* Skeleton grid ? only on very first load before any animals arrive */
                 <div className="space-y-3 sm:space-y-4">
                     {[0,1,2].map(gi => (
