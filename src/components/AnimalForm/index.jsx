@@ -5473,6 +5473,7 @@ const AnimalForm = ({
                                         data-tutorial-target="animal-status-select"
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                         <option value="Pet">Pet - Personal animal, not for breeding/sale</option>
+                                        <option value="Growout">Growout - Growing, not yet placed</option>
                                         <option value="Breeder">Breeder - Active breeding animal</option>
                                         <option value="Available">Available - For sale</option>
                                         <option value="Booked">Booked - Reserved/deposit received</option>
