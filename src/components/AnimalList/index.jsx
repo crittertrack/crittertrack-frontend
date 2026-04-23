@@ -284,12 +284,12 @@ const AnimalList = ({
     const _saveCollections = (cols, mapOverride) => {
         const map = mapOverride !== undefined ? mapOverride : animalCollections;
         setUserCollections(cols);
-        try { localStorage.setItem('ct_collections', JSON.stringify(cols)); } catch {}
+        try { localStorage.setItem(colKey, JSON.stringify(cols)); } catch {}
         _syncToApi(cols, map);
     };
     const _saveAnimalCollections = (map) => {
         setAnimalCollections(map);
-        try { localStorage.setItem('ct_animal_collections', JSON.stringify(map)); } catch {}
+        try { localStorage.setItem(acolKey, JSON.stringify(map)); } catch {}
         _syncToApi(userCollections, map);
     };
     const createCollection = (name) => {
@@ -303,8 +303,8 @@ const AnimalList = ({
         Object.keys(next).forEach(aid => { next[aid] = next[aid].filter(cid => cid !== id); });
         setUserCollections(newCols);
         setAnimalCollections(next);
-        try { localStorage.setItem('ct_collections', JSON.stringify(newCols)); } catch {}
-        try { localStorage.setItem('ct_animal_collections', JSON.stringify(next)); } catch {}
+        try { localStorage.setItem(colKey, JSON.stringify(newCols)); } catch {}
+        try { localStorage.setItem(acolKey, JSON.stringify(next)); } catch {}
         _syncToApi(newCols, next);
     };
     const renameCollection = (id, name) => {
@@ -348,12 +348,14 @@ const AnimalList = ({
     const [restockForm, setRestockForm] = useState({ qty: '', cost: '', date: new Date().toISOString().slice(0, 10), notes: '' });
     const [restockSaving, setRestockSaving] = useState(false);
 
-    // ---- Collections state (localStorage-backed; backend sync TBD) ----
+    // ---- Collections state (localStorage-backed, keyed by user id_public) ----
+    const colKey = userProfile?.id_public ? `ct_collections_${userProfile.id_public}` : 'ct_collections';
+    const acolKey = userProfile?.id_public ? `ct_animal_collections_${userProfile.id_public}` : 'ct_animal_collections';
     const [userCollections, setUserCollections] = useState(() => {
-        try { return JSON.parse(localStorage.getItem('ct_collections') || '[]'); } catch { return []; }
+        try { return JSON.parse(localStorage.getItem(colKey) || '[]'); } catch { return []; }
     });
     const [animalCollections, setAnimalCollections] = useState(() => {
-        try { return JSON.parse(localStorage.getItem('ct_animal_collections') || '{}'); } catch { return {}; }
+        try { return JSON.parse(localStorage.getItem(acolKey) || '{}'); } catch { return {}; }
     });
     const [showCollectionManager, setShowCollectionManager] = useState(false);
     const [newCollectionName, setNewCollectionName] = useState('');
@@ -672,11 +674,11 @@ const AnimalList = ({
                 const { collections, animalMap } = res.data || {};
                 if (Array.isArray(collections) && collections.length > 0) {
                     setUserCollections(collections);
-                    try { localStorage.setItem('ct_collections', JSON.stringify(collections)); } catch {}
+                    try { localStorage.setItem(colKey, JSON.stringify(collections)); } catch {}
                 }
                 if (animalMap && typeof animalMap === 'object' && Object.keys(animalMap).length > 0) {
                     setAnimalCollections(animalMap);
-                    try { localStorage.setItem('ct_animal_collections', JSON.stringify(animalMap)); } catch {}
+                    try { localStorage.setItem(acolKey, JSON.stringify(animalMap)); } catch {}
                 }
             })
             .catch(err => console.warn('[collections load]', err));
