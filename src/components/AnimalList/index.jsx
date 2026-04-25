@@ -98,6 +98,7 @@ const formatDateDisplay = (dateStr) => {
 ﻿
 // -- Module-level cache so AnimalList survives unmount/remount without refetching --
 let _alCache = null;       // last animals array
+let _alCacheUserKey = null; // user key the cache belongs to
 
 // Keep cache patched even while AnimalList is unmounted
 if (!window.__alCacheListenerAttached) {
@@ -108,7 +109,10 @@ if (!window.__alCacheListenerAttached) {
             _alCache = _alCache.map(a => a.id_public === u.id_public ? { ...a, ...u } : a);
         }
     });
-    window.addEventListener('animals-changed', () => { _alCache = null; }); // bust on full reload signal
+    window.addEventListener('animals-changed', () => {
+        _alCache = null;
+        _alCacheUserKey = null;
+    }); // bust on full reload signal
 }
 
 const AnimalList = ({ 
@@ -136,19 +140,23 @@ const AnimalList = ({
     const showModalMessageRef = useRef(showModalMessage);
     useEffect(() => { showModalMessageRef.current = showModalMessage; });
 
-    const [animals, setAnimalsRaw] = useState(() => _alCache || []);
+    const userCacheKey = userProfile?.id_public || userProfile?._id || null;
+    const hasMatchingCache = !!(userCacheKey && _alCache && _alCacheUserKey === userCacheKey);
+
+    const [animals, setAnimalsRaw] = useState(() => hasMatchingCache ? _alCache : []);
     const setAnimals = useCallback((valOrFn) => {
         setAnimalsRaw(prev => {
             const next = typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn;
             _alCache = next;
+            _alCacheUserKey = userCacheKey;
             return next;
         });
-    }, []);
+    }, [userCacheKey]);
     const [allAnimalsRaw, setAllAnimalsRaw] = useState([]); // Unfiltered ? used by Management View
     const [availableAnimalsRaw, setAvailableAnimalsRaw] = useState([]); // All user-created animals with status=Available (no ownership filter)
     const [soldTransferredRaw, setSoldTransferredRaw] = useState([]); // View-only/transferred animals ? shown in Management > Sold/Transferred section
     const [soldOwnerFilter, setSoldOwnerFilter] = useState(''); // Filter sold/transferred section by recipient owner
-    const [loading, setLoading] = useState(() => !_alCache);
+    const [loading, setLoading] = useState(() => !hasMatchingCache);
     const [allAnimalsFetched, setAllAnimalsFetched] = useState(false); // true once Phase 2 (all animals) fetch completes
     
     // Load filters from localStorage or use defaults
@@ -367,6 +375,22 @@ const AnimalList = ({
 
     const isCollectionsView = animalView === 'collections';
     const isListLikeView = animalView === 'list' || isCollectionsView;
+
+    // Prevent cross-account data bleed when switching users in the same SPA session.
+    useEffect(() => {
+        if (!userCacheKey) {
+            _alCache = null;
+            _alCacheUserKey = null;
+            setAnimalsRaw([]);
+            setLoading(true);
+            return;
+        }
+
+        if (!_alCache || _alCacheUserKey !== userCacheKey) {
+            setAnimalsRaw([]);
+            setLoading(true);
+        }
+    }, [userCacheKey]);
 
     useEffect(() => {
         // Only override if the caller explicitly passed a non-default view (e.g. deep-link)
@@ -589,8 +613,8 @@ const AnimalList = ({
     }, [authToken, API_BASE_URL]);
 
     useEffect(() => {
-        // Skip fetch if we have a cache (e.g. returning from edit/view)
-        if (_alCache && _alCache.length > 0) {
+        // Skip fetch if we have a cache for THIS user (e.g. returning from edit/view)
+        if (_alCache && _alCacheUserKey === userCacheKey && _alCache.length > 0) {
             setAnimalsRaw(_alCache);
             setLoading(false);
             // Still derive species from cached data
@@ -601,7 +625,7 @@ const AnimalList = ({
             return;
         }
         fetchAnimals();
-    }, [fetchAnimals]);
+    }, [fetchAnimals, userCacheKey]);
 
     // Refresh animals when other parts of the app signal a change (e.g., after upload/save)
     useEffect(() => {
@@ -666,24 +690,33 @@ const AnimalList = ({
         return () => window.removeEventListener('scroll', close, true);
     }, [collectionDropdownPos]);
 
-    // Load collections from API on mount; fall back to localStorage cache already in state
+    // Rehydrate collections from user-scoped localStorage whenever account changes.
+    useEffect(() => {
+        if (!userCacheKey) {
+            setUserCollections([]);
+            setAnimalCollections({});
+            return;
+        }
+        try { setUserCollections(JSON.parse(localStorage.getItem(colKey) || '[]')); } catch { setUserCollections([]); }
+        try { setAnimalCollections(JSON.parse(localStorage.getItem(acolKey) || '{}')); } catch { setAnimalCollections({}); }
+    }, [userCacheKey, colKey, acolKey]);
+
+    // Load collections from API on auth/user change; overwrite local state even when empty.
     useEffect(() => {
         if (!authToken) return;
         axios.get(`${API_BASE_URL}/collections`, { headers: { Authorization: `Bearer ${authToken}` } })
             .then(res => {
                 const { collections, animalMap } = res.data || {};
-                if (Array.isArray(collections) && collections.length > 0) {
-                    setUserCollections(collections);
-                    try { localStorage.setItem(colKey, JSON.stringify(collections)); } catch {}
-                }
-                if (animalMap && typeof animalMap === 'object' && Object.keys(animalMap).length > 0) {
-                    setAnimalCollections(animalMap);
-                    try { localStorage.setItem(acolKey, JSON.stringify(animalMap)); } catch {}
-                }
+                const safeCollections = Array.isArray(collections) ? collections : [];
+                const safeAnimalMap = (animalMap && typeof animalMap === 'object' && !Array.isArray(animalMap)) ? animalMap : {};
+                setUserCollections(safeCollections);
+                setAnimalCollections(safeAnimalMap);
+                try { localStorage.setItem(colKey, JSON.stringify(safeCollections)); } catch {}
+                try { localStorage.setItem(acolKey, JSON.stringify(safeAnimalMap)); } catch {}
             })
             .catch(err => console.warn('[collections load]', err));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [authToken]);
+    }, [authToken, userCacheKey]);
 
     // Fetch the current user's activity log (lazy ? only when log screen opens)
     const fetchActivityLogs = useCallback(async (page = 1, filters = {}) => {
