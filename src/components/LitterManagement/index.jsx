@@ -780,7 +780,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             coiCacheRef.current[cacheKey] = val;
             setTpCOI(val);
         } catch (err) {
-            if (axios.isCancel(err)) setTpError('Request timed out ? please try again.');
+            if (axios.isCancel(err)) setTpError('Request timed out — please try again.');
             else setTpError('Failed to calculate COI. Please try again.');
         } finally {
             clearTimeout(timeout);
@@ -1608,7 +1608,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     };
 
     const handleUnlinkOffspring = async (litter, animalId_public) => {
-        if (!window.confirm('Remove this animal from the litter? The animal record will NOT be deleted ? only the link to this litter will be removed.')) return;
+        if (!window.confirm('Remove this animal from the litter? The animal record will NOT be deleted — only the link to this litter will be removed.')) return;
         try {
             const updatedOffspringIds = (litter.offspringIds_public || []).filter(id => id !== animalId_public);
             const remainingOffspring = (litterOffspringMap[litter._id] || []).filter(a => a.id_public !== animalId_public);
@@ -2142,7 +2142,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     {/* Urgency Alerts Toggle */}
                     <button
                         onClick={toggleUrgency}
-                        title={urgencyEnabled ? 'Urgency alerts on ? click to disable' : 'Urgency alerts off ? click to enable'}
+                        title={urgencyEnabled ? 'Urgency alerts on — click to disable' : 'Urgency alerts off — click to enable'}
                         className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border shadow-sm transition-colors ${urgencyEnabled ? 'bg-amber-50 border-amber-300 text-amber-700 hover:bg-amber-100' : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50'}`}
                     >
                         <Bell size={14} />
@@ -2552,7 +2552,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 onChange={(e) => setFormData({...formData, expectedDueDate: e.target.value})}
                                                 className="px-3 py-2"
                                             />
-                                            <p className="text-xs text-gray-500 mt-1">Optional ? shows on calendar</p>
+                                            <p className="text-xs text-gray-500 mt-1">Optional — shows on calendar</p>
                                         </div>
 
                                         {/* Birth Method */}
@@ -2640,7 +2640,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 placeholder="0"
                                                 min={myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length || 0}
                                             />
-                                            {(() => { const lm = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length; return lm > 0 && (formData.maleCount || 0) < lm ? (<p className="text-xs text-red-600 mt-1">? {lm} male{lm > 1 ? 's' : ''} linked ? can't be below {lm}</p>) : lm > 0 ? (<p className="text-xs text-gray-500 mt-1">{lm} male{lm > 1 ? 's' : ''} linked</p>) : null; })()}
+                                            {(() => { const lm = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length; return lm > 0 && (formData.maleCount || 0) < lm ? (<p className="text-xs text-red-600 mt-1">⚠ {lm} male{lm > 1 ? 's' : ''} linked — can't be below {lm}</p>) : lm > 0 ? (<p className="text-xs text-gray-500 mt-1">{lm} male{lm > 1 ? 's' : ''} linked</p>) : null; })()}
                                         </div>
 
                                         {/* Female Count */}
@@ -2659,7 +2659,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 placeholder="0"
                                                 min={myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Female').length || 0}
                                             />
-                                            {(() => { const lf = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Female').length; return lf > 0 && (formData.femaleCount || 0) < lf ? (<p className="text-xs text-red-600 mt-1">? {lf} female{lf > 1 ? 's' : ''} linked ? can't be below {lf}</p>) : lf > 0 ? (<p className="text-xs text-gray-500 mt-1">{lf} female{lf > 1 ? 's' : ''} linked</p>) : null; })()}
+                                            {(() => { const lf = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Female').length; return lf > 0 && (formData.femaleCount || 0) < lf ? (<p className="text-xs text-red-600 mt-1">⚠ {lf} female{lf > 1 ? 's' : ''} linked — can't be below {lf}</p>) : lf > 0 ? (<p className="text-xs text-gray-500 mt-1">{lf} female{lf > 1 ? 's' : ''} linked</p>) : null; })()}
                                         </div>
 
                                         {/* Unknown/Intersex Count */}
@@ -2678,7 +2678,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 placeholder="0"
                                                 min={myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && (a.gender === 'Unknown' || a.gender === 'Intersex' || !a.gender)).length || 0}
                                             />
-                                            {(() => { const lu = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && (a.gender === 'Unknown' || a.gender === 'Intersex' || !a.gender)).length; return lu > 0 && (formData.unknownCount || 0) < lu ? (<p className="text-xs text-red-600 mt-1">? {lu} unknown linked ? can't be below {lu}</p>) : lu > 0 ? (<p className="text-xs text-gray-500 mt-1">{lu} unknown linked</p>) : null; })()}
+                                            {(() => { const lu = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && (a.gender === 'Unknown' || a.gender === 'Intersex' || !a.gender)).length; return lu > 0 && (formData.unknownCount || 0) < lu ? (<p className="text-xs text-red-600 mt-1">⚠ {lu} unknown linked — can't be below {lu}</p>) : lu > 0 ? (<p className="text-xs text-gray-500 mt-1">{lu} unknown linked</p>) : null; })()}
                                         </div>
                                     </div>
 
@@ -3064,13 +3064,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Mating Date</label>
                                 <DatePicker value={matingData.matingDate} onChange={(e) => setMatingData({...matingData, matingDate: e.target.value})} minDate={new Date()} className="px-3 py-2" />
-                                <p className="text-xs text-gray-500 mt-1">Today or future ? shows on calendar as "Mated"</p>
+                                <p className="text-xs text-gray-500 mt-1">Today or future — shows on calendar as "Mated"</p>
                             </div>
                             {/* Expected Due Date */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Expected Due Date</label>
                                 <DatePicker value={matingData.expectedDueDate} onChange={(e) => setMatingData({...matingData, expectedDueDate: e.target.value})} minDate={matingData.matingDate ? new Date(matingData.matingDate) : new Date()} className="px-3 py-2" />
-                                <p className="text-xs text-gray-500 mt-1">Must be on or after mating date ? shows on calendar as "Due"</p>
+                                <p className="text-xs text-gray-500 mt-1">Must be on or after mating date — shows on calendar as "Due"</p>
                             </div>
                             {/* Expandable breeding details */}
                             <button
