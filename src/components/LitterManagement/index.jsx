@@ -655,6 +655,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         litterSizeBorn: null,
         litterSizeWeaned: null,
         stillbornCount: null,
+        lossesCount: null,
         expectedDueDate: '',
         weaningDate: ''
     });
@@ -1213,7 +1214,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     // -- Litter form save-time reconciliation ---------------------------------
     // Returns { correctedCounts, warnings[] } based on form values + linked animals.
     // Rule 1: gender sum > total ? bump total (silent)
-    // Rule 2: stillborn or weaned > total ? warn, do NOT auto-correct
+    // Rule 2: stillborn, losses, or weaned > total ? warn, do NOT auto-correct
     const reconcileLitterFormCounts = (fd, linkedAnimals = []) => {
         const linkedMales   = linkedAnimals.filter(a => a.gender === 'Male').length;
         const linkedFemales = linkedAnimals.filter(a => a.gender === 'Female').length;
@@ -1227,14 +1228,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         const manualTotal  = parseInt(fd.litterSizeBorn) || 0;
         const litterSizeBorn = Math.max(manualTotal, genderSum, linkedCount) || null;
         const stillborn    = parseInt(fd.stillbornCount) || 0;
+        const losses      = parseInt(fd.lossesCount) || 0;
         const weaned       = parseInt(fd.litterSizeWeaned) || 0;
         const warnings     = [];
         if (litterSizeBorn && stillborn > litterSizeBorn)
             warnings.push(`Stillborn (${stillborn}) exceeds Total Born (${litterSizeBorn}).`);
+        if (litterSizeBorn && losses > litterSizeBorn)
+            warnings.push(`Losses (${losses}) exceeds Total Born (${litterSizeBorn}).`);
         if (litterSizeBorn && weaned > litterSizeBorn)
             warnings.push(`Weaned (${weaned}) exceeds Total Born (${litterSizeBorn}).`);
-        if (litterSizeBorn && (stillborn + weaned) > litterSizeBorn)
-            warnings.push(`Stillborn + Weaned (${stillborn + weaned}) exceeds Total Born (${litterSizeBorn}).`);
+        if (litterSizeBorn && (stillborn + losses + weaned) > litterSizeBorn)
+            warnings.push(`Stillborn + Losses + Weaned (${stillborn + losses + weaned}) exceeds Total Born (${litterSizeBorn}).`);
         return {
             correctedCounts: { maleCount: maleCount || null, femaleCount: femaleCount || null, unknownCount: unknownCount || null, litterSizeBorn, numberBorn: litterSizeBorn },
             warnings,
@@ -1305,6 +1309,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 birthMethod: formData.birthMethod || null,
                 litterSizeWeaned: formData.litterSizeWeaned || null,
                 stillbornCount: formData.stillbornCount || null,
+                lossesCount: formData.lossesCount || null,
                 weaningDate: formData.weaningDate || null
             };
 
@@ -1445,6 +1450,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 litterSizeBorn: null,
                 litterSizeWeaned: null,
                 stillbornCount: null,
+                lossesCount: null,
                 weaningDate: ''
             });
             setCreateOffspringCounts({ males: 0, females: 0, unknown: 0 });
@@ -1466,7 +1472,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     //  1. Linked animals are ground truth for gender counts (always overwrite)
     //  2. litterSizeBorn = max(current manual total, gender sum, linked count)
     //  3. numberBorn stays in sync with litterSizeBorn
-    //  4. stillborn/weaned are never touched here
+    //  4. stillborn/losses/weaned are never touched here
     const calcLitterCounts = (litter, allLinkedAnimals) => {
         const maleCount   = allLinkedAnimals.filter(a => a.gender === 'Male').length;
         const femaleCount = allLinkedAnimals.filter(a => a.gender === 'Female').length;
@@ -1759,6 +1765,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             litterSizeBorn: litter.litterSizeBorn || litter.numberBorn || null,
             litterSizeWeaned: litter.litterSizeWeaned || litter.numberWeaned || null,
             stillbornCount: litter.stillbornCount || litter.stillborn || null,
+            lossesCount: litter.lossesCount || litter.losses || null,
             expectedDueDate: formatDateForInput(litter.expectedDueDate),
             weaningDate: formatDateForInput(litter.weaningDate)
         });
@@ -1873,6 +1880,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 birthMethod: formData.birthMethod || null,
                 litterSizeWeaned: formData.litterSizeWeaned || null,
                 stillbornCount: formData.stillbornCount || null,
+                lossesCount: formData.lossesCount || null,
                 weaningDate: formData.weaningDate || null
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
@@ -1918,6 +1926,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 litterSizeBorn: null,
                 litterSizeWeaned: null,
                 stillbornCount: null,
+                lossesCount: null,
                 weaningDate: ''
             });
             setCreateOffspringCounts({ males: 0, females: 0, unknown: 0 });
@@ -2573,7 +2582,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         <Baby size={18} className="inline-block align-middle text-green-600 mr-2 flex-shrink-0" />Birth & Offspring Details
                                     </h4>
                                     
-                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4" data-tutorial-target="litter-dates-counts">
+                                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4" data-tutorial-target="litter-dates-counts">
                                         {/* Birth Date */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -2625,6 +2634,21 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 type="number"
                                                 value={typeof formData.litterSizeWeaned === 'number' ? formData.litterSizeWeaned : (formData.litterSizeWeaned || '')}
                                                 onChange={(e) => setFormData({...formData, litterSizeWeaned: e.target.value ? parseInt(e.target.value) : null})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                placeholder="0"
+                                                min="0"
+                                            />
+                                        </div>
+
+                                        {/* Losses */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Losses
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={typeof formData.lossesCount === 'number' ? formData.lossesCount : (formData.lossesCount || '')}
+                                                onChange={(e) => setFormData({...formData, lossesCount: e.target.value ? parseInt(e.target.value) : null})}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                                 placeholder="0"
                                                 min="0"
@@ -3538,8 +3562,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         {/* -- 3. Litter Stats: left = counts, right = sex ------------ */}
                                         {!litter.isPlanned && <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4 shadow-sm">
                                             <div className="flex flex-col sm:grid sm:grid-cols-2 sm:divide-x divide-gray-200 gap-3 sm:gap-0">
-                                                {/* Left: Born / Stillborn / Weaned */}
-                                                <div className="grid grid-cols-3 sm:pr-4">
+                                                {/* Left: Born / Stillborn / Weaned / Losses */}
+                                                <div className="grid grid-cols-4 sm:pr-4">
                                                     <div>
                                                         <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Born</div>
                                                         <div className="text-xl font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</div>
@@ -3551,6 +3575,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     <div>
                                                         <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaned</div>
                                                         <div className="text-xl font-bold text-green-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? 0}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Losses</div>
+                                                        <div className="text-xl font-bold text-red-500">{litter.lossesCount ?? litter.losses ?? 0}</div>
                                                     </div>
                                                 </div>
                                                 {/* Right: Males / Females / Unknown */}
@@ -4101,6 +4129,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <Row label="Males:" value={l.maleCount ?? null} />
                                             <Row label="Females:" value={l.femaleCount ?? null} />
                                             <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Stillborn:</span><span className="text-gray-800 font-medium">{l.stillbornCount ?? 0}</span></div>
+                                            <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Losses:</span><span className="text-gray-800 font-medium">{l.lossesCount ?? 0}</span></div>
                                             <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Weaned:</span><span className="text-gray-800 font-medium">{l.litterSizeWeaned ?? l.numberWeaned ?? 0}</span></div>
                                             <Row label="Weaning Date:" value={fmtD(l.weaningDate)} />
                                         </>)}
