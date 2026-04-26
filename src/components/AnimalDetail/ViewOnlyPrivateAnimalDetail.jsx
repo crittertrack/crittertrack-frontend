@@ -11,6 +11,20 @@ import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/l
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { PedigreeChart } from '../AnimalForm';
 const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, showModalMessage, onViewAnimal, breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, initialTab = 1, initialBetaView = 'vertical' }) => {
+    // Always fetch full animal record by id_public
+    const [fullAnimal, setFullAnimal] = useState(animal);
+    useEffect(() => {
+        if (!animal?.id_public) return;
+        let cancelled = false;
+        axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(animal.id_public)}`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(res => { if (!cancelled) setFullAnimal(res.data); })
+            .catch(() => {});
+        return () => { cancelled = true; };
+    }, [animal?.id_public, API_BASE_URL, authToken]);
+    // Use fullAnimal for all rendering below
+// eslint-disable-next-line
+const animal = fullAnimal;
+
     const [breederInfo, setBreederInfo] = useState(null);
     const [ownerInfo, setOwnerInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
