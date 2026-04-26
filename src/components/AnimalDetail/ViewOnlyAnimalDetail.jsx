@@ -12,20 +12,19 @@ import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { PedigreeChart } from '../AnimalForm';
 import { QRModal } from '../PublicProfile/PublicProfileView';
 import ReportButton from '../ReportButton';
-const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onViewProfile, onViewAnimal, authToken, setModCurrentContext, setShowImageModal, setEnlargedImageUrl, initialTab = 1 }) => {
+const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BASE_URL, onViewProfile, onViewAnimal, authToken, setModCurrentContext, setShowImageModal, setEnlargedImageUrl, initialTab = 1 }) => {
     // Always fetch full animal record by id_public
-    const [fullAnimal, setFullAnimal] = useState(animal);
+    const [fullAnimal, setFullAnimal] = useState(animalProp);
     useEffect(() => {
-        if (!animal?.id_public) return;
+        if (!animalProp?.id_public) return;
         let cancelled = false;
-        axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(animal.id_public)}`, { headers: { Authorization: `Bearer ${authToken}` } })
+        axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(animalProp.id_public)}`, { headers: { Authorization: `Bearer ${authToken}` } })
             .then(res => { if (!cancelled) setFullAnimal(res.data); })
             .catch(() => {});
         return () => { cancelled = true; };
-    }, [animal?.id_public, API_BASE_URL, authToken]);
+    }, [animalProp?.id_public, API_BASE_URL, authToken]);
     // Use fullAnimal for all rendering below
-// eslint-disable-next-line
-const animal = fullAnimal;
+    const animal = fullAnimal;
 
     const [breederInfo, setBreederInfo] = useState(null);
     const [ownerInfo, setOwnerInfo] = useState(null);
