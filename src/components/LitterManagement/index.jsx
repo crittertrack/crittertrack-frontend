@@ -2581,12 +2581,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     <h4 className="text-md font-semibold text-gray-700 mb-4 flex items-center">
                                         <Baby size={18} className="inline-block align-middle text-green-600 mr-2 flex-shrink-0" />Birth & Offspring Details
                                     </h4>
-                                    
-                                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4" data-tutorial-target="litter-dates-counts">
-                                        {/* Birth Date */}
+
+                                    {/* Row 1: Dates */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4" data-tutorial-target="litter-dates-counts">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Birth Date (Optional)
+                                                Birth Date <span className="text-xs text-gray-400 font-normal">(optional)</span>
                                             </label>
                                             <DatePicker
                                                 value={formData.birthDate}
@@ -2595,86 +2595,38 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 className="px-3 py-2"
                                             />
                                         </div>
-
-                                        {/* Total Born - auto-computed from male + female + unknown */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Total Born <span className="text-xs text-gray-400 font-normal">(auto)</span>
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={typeof formData.litterSizeBorn === 'number' ? formData.litterSizeBorn : (formData.litterSizeBorn || '')}
-                                                readOnly
-                                                className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
-                                                placeholder="Set counts below"
-                                            />
-                                        </div>
-
-                                        {/* Stillborn Count */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Stillborn
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={typeof formData.stillbornCount === 'number' ? formData.stillbornCount : (formData.stillbornCount || '')}
-                                                onChange={(e) => setFormData({...formData, stillbornCount: e.target.value ? parseInt(e.target.value) : null})}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                placeholder="0"
-                                                min="0"
-                                            />
-                                        </div>
-
-                                        {/* Total Weaned */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Total Weaned
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={typeof formData.litterSizeWeaned === 'number' ? formData.litterSizeWeaned : (formData.litterSizeWeaned || '')}
-                                                onChange={(e) => setFormData({...formData, litterSizeWeaned: e.target.value ? parseInt(e.target.value) : null})}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                placeholder="0"
-                                                min="0"
-                                            />
-                                        </div>
-
-                                        {/* Losses */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Losses
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={typeof formData.lossesCount === 'number' ? formData.lossesCount : (formData.lossesCount || '')}
-                                                onChange={(e) => setFormData({...formData, lossesCount: e.target.value ? parseInt(e.target.value) : null})}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                placeholder="0"
-                                                min="0"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Weaning Date */}
-                                    <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Weaning Date
+                                                Weaning Date <span className="text-xs text-gray-400 font-normal">(optional — shows on calendar)</span>
                                             </label>
                                             <DatePicker
                                                 value={formData.weaningDate || ''}
                                                 onChange={(e) => setFormData({...formData, weaningDate: e.target.value})}
                                                 className="px-3 py-2"
                                             />
-                                            <p className="text-xs text-gray-500 mt-1">Optional ? shows on calendar</p>
                                         </div>
                                     </div>
 
-                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    {/* Row 2: Total Born (auto) + sex breakdown */}
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                                        {/* Total Born - read-only, summed from M+F+U */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Total Born
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={typeof formData.litterSizeBorn === 'number' ? formData.litterSizeBorn : (formData.litterSizeBorn || '')}
+                                                readOnly
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 cursor-not-allowed font-semibold"
+                                                placeholder="0"
+                                            />
+                                            <p className="text-xs text-gray-400 mt-1">Auto-calculated from M + F + U</p>
+                                        </div>
+
                                         {/* Male Count */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Number of Males</label>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Males</label>
                                             <input
                                                 type="number"
                                                 value={typeof formData.maleCount === 'number' ? formData.maleCount : (formData.maleCount || '')}
@@ -2693,7 +2645,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                         {/* Female Count */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Number of Females</label>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Females</label>
                                             <input
                                                 type="number"
                                                 value={typeof formData.femaleCount === 'number' ? formData.femaleCount : (formData.femaleCount || '')}
@@ -2730,12 +2682,56 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </div>
                                     </div>
 
-                                    {/* Total Born (auto-computed) */}
-                                    {formData.litterSizeBorn > 0 && (
-                                        <div className="mt-2 p-2 rounded-md bg-green-50 border border-green-200">
-                                            <p className="text-xs text-green-800"><Hash size={12} className="inline-block align-middle mr-0.5" /> <strong>Total Born auto-set to {formData.litterSizeBorn}</strong> ({formData.maleCount || 0}M + {formData.femaleCount || 0}F + {formData.unknownCount || 0}U)</p>
+                                    {/* Row 3: Outcomes */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        {/* Stillborn Count */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Stillborn
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={typeof formData.stillbornCount === 'number' ? formData.stillbornCount : (formData.stillbornCount || '')}
+                                                onChange={(e) => setFormData({...formData, stillbornCount: e.target.value ? parseInt(e.target.value) : null})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                placeholder="0"
+                                                min="0"
+                                            />
+                                            <p className="text-xs text-gray-400 mt-1">Born dead</p>
                                         </div>
-                                    )}
+
+                                        {/* Losses */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Losses
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={typeof formData.lossesCount === 'number' ? formData.lossesCount : (formData.lossesCount || '')}
+                                                onChange={(e) => setFormData({...formData, lossesCount: e.target.value ? parseInt(e.target.value) : null})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                placeholder="0"
+                                                min="0"
+                                            />
+                                            <p className="text-xs text-gray-400 mt-1">Died after birth</p>
+                                        </div>
+
+                                        {/* Total Weaned */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Total Weaned
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={typeof formData.litterSizeWeaned === 'number' ? formData.litterSizeWeaned : (formData.litterSizeWeaned || '')}
+                                                onChange={(e) => setFormData({...formData, litterSizeWeaned: e.target.value ? parseInt(e.target.value) : null})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                placeholder="0"
+                                                min="0"
+                                            />
+                                            <p className="text-xs text-gray-400 mt-1">Survived to weaning</p>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {/* Link Existing Offspring */}
