@@ -235,9 +235,8 @@ const getMinimumParentCarrierRequirements = (selectedTraits) => {
     const bothParents = [];
     const oneParent = [];
 
-    // Dominant wildtype symbol per locus (for formatting carrier genotype)
     const dominantSymbol = {
-        A: 'A', B: 'B', C: 'C', D: 'D', E: 'E', P: 'P',
+        B: 'B', C: 'C', D: 'D', E: 'E', P: 'P',
         S: 'S', Rn: 'Rn', Si: 'Si', Sa: 'Sa', Rst: 'Rst',
         Go: 'Go', Fz: 'Fz',
     };
@@ -257,23 +256,38 @@ const getMinimumParentCarrierRequirements = (selectedTraits) => {
 
         // Explicitly dominant-het targets
         if (domHetTargets[locus]?.[value]) {
-            oneParent.push(domHetTargets[locus][value]);
+            oneParent.push({ label: domHetTargets[locus][value] });
             continue;
         }
-        // A-locus dominant-het (Dom Red, Am. Brindle)
+        // A-locus: dominant-het (Dom Red, Am. Brindle) — one parent only
         if (locus === 'A' && (value === 'Ay/a' || value === 'Avy/a')) {
-            oneParent.push(`${a1} (${value === 'Ay/a' ? 'dom. red/fawn/amber' : 'am. brindle'})`);
+            oneParent.push({ label: `${a1} (${value === 'Ay/a' ? 'dom. red/fawn/amber' : 'am. brindle'})` });
+            continue;
+        }
+        // A-locus a/a — both parents need at least one 'a', but any other allele can pair with it
+        if (locus === 'A' && value === 'a/a') {
+            bothParents.push({ label: '−/a at A', hint: 'any of: a/a, at/a, Ay/a, Avy/a' });
+            continue;
+        }
+        // A-locus at/at
+        if (locus === 'A' && value === 'at/at') {
+            bothParents.push({ label: '−/at at A', hint: 'at/at or at/a' });
+            continue;
+        }
+        // A-locus A/A — both parents need at least one dominant A
+        if (locus === 'A' && value === 'A/A') {
+            bothParents.push({ label: 'A/− at A', hint: 'at least one A allele (e.g. A/A, A/a, A/at)' });
             continue;
         }
         // Homozygous recessive: both alleles equal and lowercase
         if (a1 === a2 && a1 === a1.toLowerCase()) {
             const dom = dominantSymbol[locus] || (locus.charAt(0).toUpperCase() + locus.slice(1));
-            bothParents.push(`${dom}/${a1}`);
+            bothParents.push({ label: `${dom}/${a1}` });
             continue;
         }
         // Compound heterozygous (e.g. c/ch, ce/cch): both alleles recessive but different
         if (a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase()) {
-            bothParents.push(`${a1} + ${a2} at ${locus}`);
+            bothParents.push({ label: `${a1} + ${a2} at ${locus}` });
         }
     }
 
@@ -5064,13 +5078,25 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     {reqs.bothParents.length > 0 && (
                                                         <div className="text-[10px] text-gray-500">
                                                             <span className="font-medium text-gray-700">Both parents must carry:</span>{' '}
-                                                            {reqs.bothParents.join(' · ')}
+                                                            {reqs.bothParents.map((item, i) => (
+                                                                <span key={i}>
+                                                                    {i > 0 && ' · '}
+                                                                    <span className="font-mono">{item.label}</span>
+                                                                    {item.hint && <span className="text-gray-400"> ({item.hint})</span>}
+                                                                </span>
+                                                            ))}
                                                         </div>
                                                     )}
                                                     {reqs.oneParent.length > 0 && (
                                                         <div className="text-[10px] text-gray-500">
                                                             <span className="font-medium text-gray-700">At least one parent needs:</span>{' '}
-                                                            {reqs.oneParent.join(' · ')}
+                                                            {reqs.oneParent.map((item, i) => (
+                                                                <span key={i}>
+                                                                    {i > 0 && ' · '}
+                                                                    <span className="font-mono">{item.label}</span>
+                                                                    {item.hint && <span className="text-gray-400"> ({item.hint})</span>}
+                                                                </span>
+                                                            ))}
                                                         </div>
                                                     )}
                                                 </div>
