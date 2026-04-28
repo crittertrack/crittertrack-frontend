@@ -1521,9 +1521,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const { score: selScore, dominantBlocked: selBlocked } = scorePairProduction(selectedSire, selectedDam);
             if (!selBlocked) pairs.push({
                 sireId: selectedSire.id_public,
-                sireName: selectedSire.name || selectedSire.id_public,
+                sireName: [selectedSire.prefix, selectedSire.name, selectedSire.suffix].filter(Boolean).join(' ') || selectedSire.id_public,
                 damId: selectedDam.id_public,
-                damName: selectedDam.name || selectedDam.id_public,
+                damName: [selectedDam.prefix, selectedDam.name, selectedDam.suffix].filter(Boolean).join(' ') || selectedDam.id_public,
                 pairScore: selScore,
                 source: 'selected'
             });
@@ -1536,9 +1536,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 if (dominantBlocked) return; // dominant gene confirmed absent from both parents
                 pairs.push({
                     sireId: sire.id_public,
-                    sireName: sire.name || sire.id_public,
+                    sireName: [sire.prefix, sire.name, sire.suffix].filter(Boolean).join(' ') || sire.id_public,
                     damId: dam.id_public,
-                    damName: dam.name || dam.id_public,
+                    damName: [dam.prefix, dam.name, dam.suffix].filter(Boolean).join(' ') || dam.id_public,
                     pairScore: score,
                     source: 'mine',
                     sireBirthDate: sire.birthDate || null,
