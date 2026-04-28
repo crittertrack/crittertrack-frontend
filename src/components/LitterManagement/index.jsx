@@ -1048,6 +1048,7 @@ const TpResultCard = ({ r, idx, globalIdx, expandedCard, setExpandedCard, onUseP
 const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) => {
     const produceResults = results.filter(r => r.tier === 'produce');
     const carrierResults = results.filter(r => r.tier === 'carrier');
+    const nodataResults = results.filter(r => r.tier === 'nodata');
     return (
         <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
             {produceResults.length > 0 && (
@@ -1077,7 +1078,21 @@ const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) =>
                     </div>
                 </div>
             )}
-            {produceResults.length === 0 && carrierResults.length === 0 && (
+            {nodataResults.length > 0 && (
+                <div className={(produceResults.length > 0 || carrierResults.length > 0) ? 'pt-2 border-t border-gray-200' : ''}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-xs font-semibold text-gray-500">No Genetic Data</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">{nodataResults.length}</span>
+                        <span className="text-[10px] text-gray-400">add genetic codes to these animals for better predictions</span>
+                    </div>
+                    <div className="space-y-2">
+                        {nodataResults.slice(0, 6).map((r, i) => (
+                            <TpResultCard key={i} r={r} idx={i} globalIdx={produceResults.length + carrierResults.length + i} expandedCard={expandedCard} setExpandedCard={setExpandedCard} onUsePair={onUsePair} />
+                        ))}
+                    </div>
+                </div>
+            )}
+            {produceResults.length === 0 && carrierResults.length === 0 && nodataResults.length === 0 && (
                 <div className="p-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500">
                     No matching pairs found for the selected traits.
                 </div>
@@ -1506,11 +1521,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             });
         }
 
-        scoredMales.slice(0, 10).forEach(({ animal: sire }) => {
-            scoredFemales.slice(0, 10).forEach(({ animal: dam }) => {
+        scoredMales.forEach(({ animal: sire }) => {
+            scoredFemales.forEach(({ animal: dam }) => {
                 if (sire.id_public === dam.id_public) return;
                 const { score, dominantBlocked } = scorePairProduction(sire, dam);
-                if (dominantBlocked) return; // dominant gene absent from both parents — impossible pair
+                if (dominantBlocked) return; // dominant gene confirmed absent from both parents
                 pairs.push({
                     sireId: sire.id_public,
                     sireName: sire.name || sire.id_public,
@@ -1561,7 +1576,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                 // tier: 'produce' = all required loci covered by both parents
                 //        'carrier' = partial coverage — can produce carriers, not guaranteed phenotype
-                const tier = pairScore >= maxPossibleScore ? 'produce' : 'carrier';
+                //        'nodata'  = no evidence either way (neither animal has gc or matching variety text)
+                const tier = pairScore >= maxPossibleScore ? 'produce' : pairScore > 0 ? 'carrier' : 'nodata';
 
                 return {
                     ...pair,
@@ -1578,14 +1594,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         `This pair covers ${pairScore} out of ${maxPossibleScore} points across ${targetLoci.length} trait(s) needed.`,
                         tier === 'produce'
                             ? 'Both parents carry the right genes — this pair can produce your target.'
-                            : `Not all traits are covered yet. Offspring from this pair might carry some of the right genes but probably won't show the full target look.`,
+                            : tier === 'carrier'
+                            ? `Not all traits are covered yet. Offspring from this pair might carry some of the right genes but probably won't show the full target look.`
+                            : `No genetic data recorded for these animals — pairing shown as a candidate but outcome is unknown.`,
                         `Match confidence: ${phenotypeConfidence.label}`,
                         prototypeAssumptions.length ? `Assumptions made: ${prototypeAssumptions.join(' ')}` : null,
                         `Coverage is estimated from each animal's recorded variety, color, and coat notes.`,
                     ].filter(Boolean)
                 };
             })
-            .filter(r => r.pairScore > 0); // drop pairs with zero coverage entirely
+            .filter(Boolean);
 
         console.log('[TP] results:', results.length, results.slice(0,3).map(r => `${r.sireName} × ${r.damName} (${r.pairScore}/${r.maxPossibleScore} ${r.tier})`));
         setTimeout(() => {
