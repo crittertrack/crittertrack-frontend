@@ -1313,14 +1313,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             ['Male', 'Intersex', 'Unknown'].includes(a.gender) &&
             a.status !== 'Deceased' &&
             !a.isViewOnly &&
-            !a.isTransferred
+            !a.isTransferred &&
+            !!a.geneticCode
         );
         const femalePool = myAnimals.filter(a =>
             (a.species?.toLowerCase() === speciesForPairs.toLowerCase()) &&
             ['Female', 'Intersex', 'Unknown'].includes(a.gender) &&
             a.status !== 'Deceased' &&
             !a.isViewOnly &&
-            !a.isTransferred
+            !a.isTransferred &&
+            !!a.geneticCode
         );
 
         const selectedSire = tpSireId ? (myAnimals.find(a => a.id_public === tpSireId) || selectedTpSireAnimal) : null;
