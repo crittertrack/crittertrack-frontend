@@ -1076,8 +1076,9 @@ const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) =>
                     <TpResultCard key={i} r={r} idx={i} globalIdx={i} expandedCard={expandedCard} setExpandedCard={setExpandedCard} onUsePair={onUsePair} />
                 ))
             ) : (
-                <div className="p-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500">
-                    No matching pairs found for the selected traits.
+                <div className="p-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500 space-y-1">
+                    <div>No matching pairs found for the selected traits.</div>
+                    <div className="text-xs text-gray-400">Only animals with a genetic code entered are included. Make sure your animals have their genetic codes filled in.</div>
                 </div>
             )}
         </div>
