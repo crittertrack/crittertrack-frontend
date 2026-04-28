@@ -1004,9 +1004,9 @@ const TpResultCard = ({ r, idx, globalIdx, expandedCard, setExpandedCard, onUseP
                         <button
                             type="button"
                             onClick={() => setExpandedCard(isExpanded ? null : cardKey)}
-                            className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold cursor-pointer transition ${r.phenotypeConfidence?.className || 'bg-gray-100 text-gray-700'}`}
+                            className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold cursor-pointer transition bg-gray-100 text-gray-600 hover:bg-gray-200"
                         >
-                            {r.phenotypeConfidence?.label || 'Needs More Loci'} {isExpanded ? '▲' : '▼'}
+                            Details {isExpanded ? '▲' : '▼'}
                         </button>
                     </div>
                 </div>
@@ -5557,32 +5557,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             <div className="p-5 space-y-3 overflow-y-auto min-h-0">
                                 <div className="flex items-center justify-between">
                                     <h4 className="text-sm font-semibold text-gray-700">Ranked Results Preview</h4>
-                                    <button
-                                        type="button"
-                                        onClick={() => setTpShowResultsHelp(v => !v)}
-                                        className="text-[11px] text-gray-400 hover:text-gray-600 underline underline-offset-2 transition"
-                                    >
-                                        {tpShowResultsHelp ? 'Hide help' : 'What do these scores mean?'}
-                                    </button>
-                                </div>
-                                {tpShowResultsHelp && (
-                                    <div className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2.5 text-xs text-blue-800 space-y-1.5">
-                                        <div><span className="font-semibold">Target match %</span> — estimated probability that offspring of this pair express your selected target traits (prototype calculation).</div>
-                                        <div><span className="font-semibold">COI %</span> — coefficient of inbreeding; lower is generally better. Pairs with a COI warning are flagged in amber.</div>
-                                        <div className="pt-0.5 border-t border-blue-200 space-y-1">
-                                            <div className="font-semibold text-blue-900">Confidence levels</div>
-                                            <div><span className="font-semibold text-emerald-700">High</span> — phenotype resolved, ≥3 loci selected, no assumptions needed.</div>
-                                            <div><span className="font-semibold text-amber-700">Medium</span> — phenotype resolved OR ≥2 loci, but may include assumptions.</div>
-                                            <div><span className="font-semibold text-gray-600">Needs More Loci</span> — not enough genetic information to resolve a named phenotype; add more trait chips.</div>
-                                        </div>
-                                        <div className="pt-0.5 border-t border-blue-200">Click the <span className="font-semibold">confidence badge</span> or <span className="font-semibold">Assumptions chip</span> on any result card to expand its full reasoning.</div>
-                                    </div>
-                                )}
-                                <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-                                    <span className="text-gray-500">Confidence legend:</span>
-                                    <span className="px-1.5 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-800">High</span>
-                                    <span className="px-1.5 py-0.5 rounded-full font-semibold bg-amber-100 text-amber-800">Medium</span>
-                                    <span className="px-1.5 py-0.5 rounded-full font-semibold bg-gray-100 text-gray-700">Needs More Loci</span>
                                 </div>
                                 {tpGenerating ? (
                                     <div className="space-y-2">
