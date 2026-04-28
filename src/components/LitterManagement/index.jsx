@@ -5207,12 +5207,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </div>
                                         <div>
                                             <label className="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Species</label>
-                                            <div className="px-3 py-1.5 border border-gray-200 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 whitespace-nowrap">
-                                                {TARGET_OUTCOME_PROTOTYPE_SPECIES}
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <div className="px-3 py-1.5 border border-gray-200 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 whitespace-nowrap">
+                                                    {TARGET_OUTCOME_PROTOTYPE_SPECIES}
+                                                </div>
+                                                <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5">
+                                                    <span className="font-semibold">Coming later:</span> {TARGET_OUTCOME_PENDING_SPECIES.join(', ')}
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 self-end">
-                                            <span className="font-semibold">Coming later:</span> {TARGET_OUTCOME_PENDING_SPECIES.join(', ')}
                                         </div>
                                     </div>
                                 </div>
