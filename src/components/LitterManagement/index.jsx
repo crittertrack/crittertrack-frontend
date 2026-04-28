@@ -994,9 +994,9 @@ const TpResultCard = ({ r, idx, globalIdx, expandedCard, setExpandedCard, onUseP
                     <div className="min-w-0">
                         <div className="text-sm font-semibold text-gray-800 truncate">{r.sireName} × {r.damName}</div>
                         <div className="text-xs text-gray-500 mt-0.5">
-                            COI: <span className="font-semibold text-gray-700">{r.coiValue.toFixed(2)}%</span>
+                            Match: <span className="font-semibold text-emerald-700">{r.probability}%</span>
                             {' '}•{' '}
-                            Coverage: <span className="font-semibold text-gray-700">{r.pairScore}/{r.maxPossibleScore}</span>
+                            COI: <span className={`font-semibold ${r.coiValue >= 12.5 ? 'text-amber-600' : 'text-gray-700'}`}>{r.coiValue.toFixed(2)}%</span>
                         </div>
                     </div>
                     <div className="flex flex-col items-end gap-1 flex-shrink-0">
@@ -1047,8 +1047,8 @@ const TpResultCard = ({ r, idx, globalIdx, expandedCard, setExpandedCard, onUseP
                                 {r.locusBreakdown.map((l, i) => (
                                     <div key={i} className="flex items-center gap-2 text-xs">
                                         <span className="w-36 text-gray-600 truncate">{l.locus} <span className="text-gray-400">({l.alleles})</span></span>
-                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${l.sireHas ? 'bg-emerald-100 text-emerald-700' : 'bg-red-50 text-red-500'}`}>{r.sireName}: {l.sireHas ? '✓ carries' : '✗ no evidence'}</span>
-                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${l.damHas ? 'bg-emerald-100 text-emerald-700' : 'bg-red-50 text-red-500'}`}>{r.damName}: {l.damHas ? '✓ carries' : '✗ no evidence'}</span>
+                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${l.sireHas === 'visual' ? 'bg-indigo-100 text-indigo-700' : l.sireHas === 'carrier' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-50 text-red-500'}`}>{r.sireName}: {l.sireHas === 'visual' ? '✓ visual' : l.sireHas === 'carrier' ? '✓ het carrier' : '✗ no evidence'}</span>
+                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${l.damHas === 'visual' ? 'bg-indigo-100 text-indigo-700' : l.damHas === 'carrier' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-50 text-red-500'}`}>{r.damName}: {l.damHas === 'visual' ? '✓ visual' : l.damHas === 'carrier' ? '✓ het carrier' : '✗ no evidence'}</span>
                                     </div>
                                 ))}
                             </div>
@@ -1396,18 +1396,35 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             [animal.color, animal.phenotype, animal.coatPattern, animal.coat, animal.markings, animal.morph]
                 .filter(Boolean).join(' ').toLowerCase();
 
-        // Does this animal carry at least one copy of a1 OR a2?
-        // Genetic code is checked first (definitive positive). If the allele isn't found there,
-        // falls back to keyword matching — this handles partial genetic codes and missing codes.
-        const animalCoversLocus = (animal, a1, a2) => {
+        // Returns 'visual' (homozygous recessive confirmed in gc), 'carrier' (het or keyword evidence), or false
+        const animalLocusStatus = (animal, a1, a2) => {
             if (!animal) return false;
+            const isRecessiveHom = a1 === a2 && a1 === a1.toLowerCase();
+            if (isRecessiveHom && animal.geneticCode) {
+                const allele = a1;
+                const tokens = animal.geneticCode
+                    .replace(/,/g, ' ').replace(/\t/g, ' ').trim().split(/\s+/).filter(Boolean);
+                for (const token of tokens) {
+                    const slash = token.indexOf('/');
+                    if (slash < 0) continue;
+                    const left = token.slice(0, slash).trim();
+                    const right = token.slice(slash + 1).trim();
+                    if (left === allele || right === allele) {
+                        return (left === allele && right === allele) ? 'visual' : 'carrier';
+                    }
+                }
+                // Locus not found in gc tokens — fall through to keyword
+            }
             if (animal.geneticCode) {
                 const alleles = parseAnimalAlleles(animal);
-                if (alleles.has(a1) || alleles.has(a2)) return true;
+                if (alleles.has(a1) || alleles.has(a2)) return 'carrier';
             }
             const text = getVarietyText(animal);
-            return [...(ALLELE_KW[a1] || []), ...(ALLELE_KW[a2] || [])].some(kw => text.includes(kw));
+            return [...(ALLELE_KW[a1] || []), ...(ALLELE_KW[a2] || [])].some(kw => text.includes(kw)) ? 'carrier' : false;
         };
+
+        // Does this animal carry at least one copy of a1 OR a2?
+        const animalCoversLocus = (animal, a1, a2) => !!animalLocusStatus(animal, a1, a2);
 
         const animalHasAllele = (animal, allele) => {
             if (!animal) return false;
@@ -1440,47 +1457,45 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             return (sireHasA1 && !sireHasA2 && damHasA2 && !damHasA1) || (sireHasA2 && !sireHasA1 && damHasA1 && !damHasA2);
         };
 
-        // Score a pair on production potential per locus:
-        //   recessive (a1===a2 lowercase) or compound-het recessive: BOTH parents must carry a copy
-        //     → +2 if both show carrier evidence, +0 if only one (can't produce the phenotype)
-        //   compound-het dominant (Avy/at, A/at, etc): each parent must supply a DIFFERENT allele
-        //     → +2 if split evidence (one has a1, other has a2), +0 otherwise
-        //   dominant-het or dominant-lowercase: ONE parent is enough → +2 if either carries
-        //   dominantBlocked: true if any DOMINANT locus is completely uncovered by both parents
-        //     → dominant genes can't be silently carried; a pair with no evidence is impossible, not a carrier
+        // Score a pair: returns probability (0–1) of producing the target across all loci.
+        //   recessive hom (a1===a2 lowercase): visual×visual=1.0, visual×carrier=0.5, carrier×carrier=0.25, missing=0
+        //   compound-het recessive: binary — both must contribute; probability factor 0.25
+        //   compound-het dominant (Avy/at, etc): split-pair required, binary
+        //   dominant: one parent sufficient, binary (probability unchanged if either carries)
         const scorePairProduction = (sire, dam) => {
-            let score = 0;
+            let probability = 1.0;
             let dominantBlocked = false;
             for (const [locus, value] of targetLoci) {
                 const [a1, a2] = value.split('/');
-                const sireCovers = animalCoversLocus(sire, a1, a2);
-                const damCovers  = animalCoversLocus(dam,  a1, a2);
+                const sireStatus = animalLocusStatus(sire, a1, a2);
+                const damStatus  = animalLocusStatus(dam,  a1, a2);
                 const isRecessiveHom = a1 === a2 && a1 === a1.toLowerCase();
                 const isCompoundHetRec = a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase()
                     && !DOMINANT_LOWERCASE_ALLELES.has(a1) && !DOMINANT_LOWERCASE_ALLELES.has(a2);
 
-                // Compound-het dominant special case (e.g., Avy/at)
                 if (locus === 'A' && COMPOUND_HET_DOMINANT.has(value)) {
                     const [da1, da2] = value.split('/');
                     const anyHasA1 = animalHasAllele(sire, da1) || animalHasAllele(dam, da1);
                     const anyHasA2 = animalHasAllele(sire, da2) || animalHasAllele(dam, da2);
-                    // If neither parent in the pair has evidence for a required dominant allele → blocked
-                    if (!anyHasA1 || !anyHasA2) dominantBlocked = true;
-                    if (splitCoverCompoundHetDom(sire, dam, value)) score += 2;
-                } else if (isRecessiveHom || isCompoundHetRec) {
-                    // Both must contribute — a pair where only one carries cannot produce this locus
-                    if (sireCovers && damCovers) score += 2;
+                    if (!anyHasA1 || !anyHasA2) { dominantBlocked = true; break; }
+                    if (!splitCoverCompoundHetDom(sire, dam, value)) { probability = 0; break; }
+                } else if (isRecessiveHom) {
+                    if (!sireStatus || !damStatus) { probability = 0; break; }
+                    if (sireStatus === 'visual' && damStatus === 'visual') { /* ×1.0 */ }
+                    else if (sireStatus === 'visual' || damStatus === 'visual') probability *= 0.5;
+                    else probability *= 0.25; // both het carriers
+                } else if (isCompoundHetRec) {
+                    if (!(!!sireStatus && !!damStatus)) { probability = 0; break; }
+                    probability *= 0.25;
                 } else {
-                    // Dominant (or dominant-acting lowercase like at) — one parent is sufficient
-                    // Only block if BOTH animals have genetic code AND neither carries the dominant allele.
-                    // If either lacks a genetic code, we can't rule it out — score 0 but don't block.
+                    // Dominant — one parent is sufficient
                     const sireDefinitelyLacks = !!sire.geneticCode && !animalHasAllele(sire, a1) && !animalHasAllele(sire, a2);
                     const damDefinitelyLacks = !!dam.geneticCode && !animalHasAllele(dam, a1) && !animalHasAllele(dam, a2);
-                    if (sireDefinitelyLacks && damDefinitelyLacks) dominantBlocked = true;
-                    else if (sireCovers || damCovers) score += 2;
+                    if (sireDefinitelyLacks && damDefinitelyLacks) { dominantBlocked = true; break; }
+                    if (!sireStatus && !damStatus) { probability = 0; break; }
                 }
             }
-            return { score, dominantBlocked };
+            return { probability: dominantBlocked ? 0 : probability, dominantBlocked };
         };
 
         // Sort animals by how many target loci they cover, then cross top candidates
@@ -1493,13 +1508,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
         const pairs = [];
         if (selectedSire?.id_public && selectedDam?.id_public) {
-            const { score: selScore, dominantBlocked: selBlocked } = scorePairProduction(selectedSire, selectedDam);
-            if (!selBlocked) pairs.push({
+            const { probability: selProbability, dominantBlocked: selBlocked } = scorePairProduction(selectedSire, selectedDam);
+            if (!selBlocked && selProbability > 0) pairs.push({
                 sireId: selectedSire.id_public,
                 sireName: [selectedSire.prefix, selectedSire.name, selectedSire.suffix].filter(Boolean).join(' ') || selectedSire.id_public,
                 damId: selectedDam.id_public,
                 damName: [selectedDam.prefix, selectedDam.name, selectedDam.suffix].filter(Boolean).join(' ') || selectedDam.id_public,
-                pairScore: selScore,
+                pairProb: selProbability,
                 source: 'selected'
             });
         }
@@ -1507,14 +1522,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         scoredMales.forEach(({ animal: sire }) => {
             scoredFemales.forEach(({ animal: dam }) => {
                 if (sire.id_public === dam.id_public) return;
-                const { score, dominantBlocked } = scorePairProduction(sire, dam);
-                if (dominantBlocked) return; // dominant gene confirmed absent from both parents
+                const { probability, dominantBlocked } = scorePairProduction(sire, dam);
+                if (dominantBlocked || probability === 0) return;
                 pairs.push({
                     sireId: sire.id_public,
                     sireName: [sire.prefix, sire.name, sire.suffix].filter(Boolean).join(' ') || sire.id_public,
                     damId: dam.id_public,
                     damName: [dam.prefix, dam.name, dam.suffix].filter(Boolean).join(' ') || dam.id_public,
-                    pairScore: score,
+                    pairProb: probability,
                     source: 'mine',
                     sireBirthDate: sire.birthDate || null,
                     damBirthDate: dam.birthDate || null,
@@ -1535,21 +1550,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         const phenotypeInterpretation = getPrototypePhenotypeInterpretation(tpSelectedTraits);
         const phenotypeConfidence = getPrototypePhenotypeConfidence(tpSelectedTraits);
 
-        const maxPossibleScore = Math.max(1, targetLoci.length * 2);
-
-        const sorted = uniq.sort((a, b) => (b.pairScore || 0) - (a.pairScore || 0));
-
-        // Only include pairs where both parents fully cover all target loci
-        const producePairs = sorted.filter(p => p.pairScore >= maxPossibleScore);
-        const tieredPairs = producePairs;
+        const sorted = uniq.sort((a, b) => (b.pairProb || 0) - (a.pairProb || 0));
+        const tieredPairs = sorted.filter(p => (p.pairProb || 0) > 0);
 
         const mapPair = (pair) => {
-                const pairScore = pair.pairScore || 0;
+                const pairProb = pair.pairProb || 0;
+                const probability = Math.round(pairProb * 100);
+
                 const hash = `${pair.sireId}${pair.damId}`
                     .split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-                const jitter = (hash % 9) - 4;
-                const scaled = pairScore / maxPossibleScore;
-                const probability = Math.max(5, Math.min(90, Math.round(10 + scaled * 80 + jitter)));
 
                 const coiKey = `${pair.sireId}:${pair.damId}`;
                 const coiValue = (pair.source === 'selected' && tpCOI != null)
@@ -1558,14 +1567,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         ? coiCacheRef.current[coiKey]
                         : Math.max(0, ((hash % 190) / 10));
 
+                // COI above 12.5% lowers the sort score proportionally
+                const sortScore = probability - Math.max(0, (coiValue - 12.5) * 0.5);
+
                 const warnings = [];
                 if (coiValue >= 12.5) warnings.push('Higher COI than ideal range');
                 if (tpSourceMode === 'mine+favorited' && pair.source !== 'mine') warnings.push('Favorited external candidate');
-
-                // tier: 'produce' = all required loci covered by both parents
-                //        'carrier' = partial coverage — can produce carriers, not guaranteed phenotype
-                //        'nodata'  = no evidence either way (neither animal has gc or matching variety text)
-                const tier = pairScore >= maxPossibleScore ? 'produce' : pairScore > 0 ? 'carrier' : 'nodata';
 
                 // Build per-locus breakdown for each parent
                 const sireAnimal = myAnimals.find(a => a.id_public === pair.sireId);
@@ -1574,8 +1581,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 const damVariety  = [damAnimal?.color,  damAnimal?.phenotype,  damAnimal?.geneticCode ].filter(Boolean).join(' · ') || 'No data recorded';
                 const locusBreakdown = targetLoci.map(([locus, value]) => {
                     const [a1, a2] = value.split('/');
-                    const sireHas = animalCoversLocus(sireAnimal, a1, a2);
-                    const damHas  = animalCoversLocus(damAnimal,  a1, a2);
+                    const sireHas = animalLocusStatus(sireAnimal, a1, a2);
+                    const damHas  = animalLocusStatus(damAnimal,  a1, a2);
                     const locusLabel = locus === 'A' ? 'A-locus' : locus === 'B' ? 'B-locus (chocolate)' : locus === 'D' ? 'D-locus (blue dilute)' : locus === 'P' ? 'P-locus (pink-eyed dilute)' : locus === 'E' ? 'E-locus (extension)' : locus === 'C' ? 'C-locus (dilution)' : locus === 'Go' ? 'Go-locus (coat length)' : locus === 'S' ? 'S-locus (piebald)' : locus === 'W' ? 'W-locus (variegation)' : locus;
                     return { locus: locusLabel, alleles: value, sireHas, damHas };
                 });
@@ -1583,21 +1590,19 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 return {
                     ...pair,
                     probability,
+                    sortScore,
                     coiValue,
                     warnings,
-                    tier,
-                    pairScore,
-                    maxPossibleScore,
                     phenotypeConfidence,
                     assumptions: prototypeAssumptions,
                     sireVariety,
                     damVariety,
                     locusBreakdown,
-
                 };
         };
 
-        const results = tieredPairs.map(mapPair).filter(Boolean);
+        const results = tieredPairs.map(mapPair).filter(Boolean)
+            .sort((a, b) => b.sortScore - a.sortScore);
 
         setTimeout(() => {
             setTpMockResults(results);
