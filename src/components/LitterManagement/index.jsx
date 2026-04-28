@@ -1225,7 +1225,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
         const results = uniq
             .sort((a, b) => (b.pairScore || 0) - (a.pairScore || 0))
-            .slice(0, 6)
+            .slice(0, 20)
             .map((pair) => {
                 const pairScore = pair.pairScore || 0;
                 const hash = `${pair.sireId}${pair.damId}`
@@ -1244,24 +1244,34 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 const warnings = [];
                 if (coiValue >= 12.5) warnings.push('Higher COI than ideal range');
                 if (tpSourceMode === 'mine+favorited' && pair.source !== 'mine') warnings.push('Favorited external candidate');
-                if (pairScore === 0) warnings.push('No carrier evidence found for target loci in recorded variety');
+
+                // tier: 'produce' = all required loci covered by both parents
+                //        'carrier' = partial coverage — can produce carriers, not guaranteed phenotype
+                const tier = pairScore >= maxPossibleScore ? 'produce' : 'carrier';
 
                 return {
                     ...pair,
                     probability,
                     coiValue,
                     warnings,
+                    tier,
+                    pairScore,
+                    maxPossibleScore,
                     phenotypeConfidence,
                     assumptions: prototypeAssumptions,
                     explanation: [
                         phenotypeInterpretation ? `Target: ${phenotypeInterpretation}` : null,
                         `Carrier evidence: ${pairScore} / ${maxPossibleScore} across ${targetLoci.length} required loci`,
+                        tier === 'produce'
+                            ? 'Both parents show evidence for all required loci — can produce target phenotype.'
+                            : 'Partial coverage — pair may produce carriers but target phenotype not guaranteed.',
                         `Confidence: ${phenotypeConfidence.label} — ${phenotypeConfidence.detail}`,
                         prototypeAssumptions.length ? `Assumptions: ${prototypeAssumptions.join(' ')}` : null,
-                        `Scoring is based on allele carrier evidence in each animal's recorded variety (prototype).`,
+                        `Scoring is based on allele carrier evidence in recorded variety text (prototype).`,
                     ].filter(Boolean)
                 };
-            });
+            })
+            .filter(r => r.pairScore > 0); // drop pairs with zero coverage entirely
 
         setTimeout(() => {
             setTpMockResults(results);
@@ -5251,22 +5261,22 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     <div className="p-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500">
                                         Select traits and run the prototype to see ranked pair cards here.
                                     </div>
-                                ) : (
-                                    <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
-                                        {tpMockResults.map((r, idx) => {
-                                            const cardKey = `${r.sireId}:${r.damId}:${idx}`;
-                                            const isExpanded = tpExpandedCard === cardKey;
-                                            return (
+                                ) : (() => {
+                                    const produceResults = tpMockResults.filter(r => r.tier === 'produce');
+                                    const carrierResults = tpMockResults.filter(r => r.tier === 'carrier');
+                                    const renderCard = (r, idx, globalIdx) => {
+                                        const cardKey = `${r.sireId}:${r.damId}:${globalIdx}`;
+                                        const isExpanded = tpExpandedCard === cardKey;
+                                        return (
                                             <div key={cardKey} className="rounded-lg border border-gray-200 bg-white overflow-hidden">
-                                                {/* Card header — always visible */}
                                                 <div className="p-3">
                                                     <div className="flex items-start justify-between gap-2">
                                                         <div className="min-w-0">
-                                                            <div className="text-sm font-semibold text-gray-800 truncate">{r.sireName} ({r.sireId}) × {r.damName} ({r.damId})</div>
+                                                            <div className="text-sm font-semibold text-gray-800 truncate">{r.sireName} × {r.damName}</div>
                                                             <div className="text-xs text-gray-500 mt-0.5">
-                                                                Target match: <span className="font-semibold text-gray-700">{r.probability.toFixed(2)}%</span>
-                                                                {' '}•{' '}
                                                                 COI: <span className="font-semibold text-gray-700">{r.coiValue.toFixed(2)}%</span>
+                                                                {' '}•{' '}
+                                                                Coverage: <span className="font-semibold text-gray-700">{r.pairScore}/{r.maxPossibleScore}</span>
                                                             </div>
                                                         </div>
                                                         <div className="flex flex-col items-end gap-1 flex-shrink-0">
@@ -5275,20 +5285,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                 type="button"
                                                                 onClick={() => setTpExpandedCard(isExpanded ? null : cardKey)}
                                                                 className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold cursor-pointer transition ${r.phenotypeConfidence?.className || 'bg-gray-100 text-gray-700'}`}
-                                                                title={`Click to ${isExpanded ? 'hide' : 'show'} reasoning`}
                                                             >
                                                                 {r.phenotypeConfidence?.label || 'Needs More Loci'} {isExpanded ? '▲' : '▼'}
                                                             </button>
-                                                            {r.assumptions?.length > 0 && (
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => setTpExpandedCard(isExpanded ? null : cardKey)}
-                                                                    className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold bg-yellow-100 text-yellow-800 cursor-pointer transition"
-                                                                    title="Click to expand reasoning"
-                                                                >
-                                                                    Assumptions ({r.assumptions.length})
-                                                                </button>
-                                                            )}
                                                         </div>
                                                     </div>
                                                     {r.warnings.length > 0 && (
@@ -5302,11 +5301,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                             onClick={() => usePairForPlannedMating(r)}
                                                             className="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white"
                                                         >
-                                                            Use Pair in Planned Mating
+                                                            Use in Planned Mating
                                                         </button>
                                                     </div>
                                                 </div>
-                                                {/* Expandable reasoning panel */}
                                                 {isExpanded && (
                                                     <div className="border-t border-gray-100 bg-gray-50 px-3 py-2.5 space-y-1.5">
                                                         <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-wide">Reasoning</div>
@@ -5324,10 +5322,41 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     </div>
                                                 )}
                                             </div>
-                                            );
-                                        })}
-                                    </div>
-                                )}
+                                        );
+                                    };
+                                    return (
+                                        <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
+                                            {produceResults.length > 0 && (
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-1.5">
+                                                        <span className="text-xs font-semibold text-emerald-700">Can Produce Target</span>
+                                                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">{produceResults.length}</span>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        {produceResults.slice(0, 6).map((r, i) => renderCard(r, i, i))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {carrierResults.length > 0 && (
+                                                <div className={produceResults.length > 0 ? 'pt-2 border-t border-gray-200' : ''}>
+                                                    <div className="flex items-center gap-2 mb-1.5">
+                                                        <span className="text-xs font-semibold text-amber-700">Carrier Pairings</span>
+                                                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">{carrierResults.length}</span>
+                                                        <span className="text-[10px] text-gray-400">partial loci coverage — offspring may carry but not express</span>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        {carrierResults.slice(0, 6).map((r, i) => renderCard(r, i, produceResults.length + i))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {produceResults.length === 0 && carrierResults.length === 0 && (
+                                                <div className="p-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500">
+                                                    No animals in your collection show carrier evidence for the required loci.
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })()
                             </div>
                         </div>
                         )}
