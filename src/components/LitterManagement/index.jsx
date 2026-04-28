@@ -236,19 +236,24 @@ const getMinimumParentCarrierRequirements = (selectedTraits) => {
     const bothParents = [];
     const oneParent = [];
 
-    const dominantSymbol = {
-        B: 'B', C: 'C', D: 'D', E: 'E', P: 'P',
-        S: 'S', Rn: 'Rn', Si: 'Si', Sa: 'Sa', Rst: 'Rst',
-        Go: 'Go', Fz: 'Fz',
+    // Human-readable names for recessive alleles
+    const ALLELE_NAMES = {
+        a: 'non-agouti', at: 'tan', b: 'chocolate', d: 'blue dilute',
+        p: 'pink-eyed dilute', e: 'recessive red', c: 'albino',
+        ch: 'himalayan/siamese', ce: 'beige', cch: 'chinchilla/burmese',
+        s: 'piebald', si: 'pearl', go: 'longhair', re: 'rex',
+        sa: 'satin', rst: 'rosette', fz: 'fuzz', nu: 'hairless',
+        rn: 'merle', spl: 'splashed', mobr: 'xbrindle',
     };
+    const alleleName = (a) => ALLELE_NAMES[a.toLowerCase()] || a;
 
     // Heterozygous dominant targets — only one parent needs the dominant allele
     const domHetTargets = {
-        W:    { 'W/w': 'W (variegated)', 'Wsh/w': 'Wsh (banded)' },
-        Spl:  { 'Spl/spl': 'Spl (splashed)' },
-        Mobr: { 'Mobr/mobr': 'Mobr (xbrindle)' },
-        Re:   { 'Re/re': 'Re (astrex/texel)' },
-        Nu:   { 'Nu/nu': 'Nu (dom. hairless)' },
+        W:    { 'W/w': 'Variegated gene (W)', 'Wsh/w': 'Banded gene (Wsh)' },
+        Spl:  { 'Spl/spl': 'Splashed gene (Spl)' },
+        Mobr: { 'Mobr/mobr': 'XBrindle gene (Mobr)' },
+        Re:   { 'Re/re': 'Rex gene (Re)' },
+        Nu:   { 'Nu/nu': 'Hairless gene (Nu)' },
     };
 
     for (const [locus, value] of Object.entries(genotype)) {
@@ -262,33 +267,32 @@ const getMinimumParentCarrierRequirements = (selectedTraits) => {
         }
         // A-locus: dominant-het (Dom Red, Am. Brindle) — one parent only
         if (locus === 'A' && (value === 'Ay/a' || value === 'Avy/a')) {
-            oneParent.push({ label: `${a1} (${value === 'Ay/a' ? 'dom. red/fawn/amber' : 'am. brindle'})` });
+            oneParent.push({ label: value === 'Ay/a' ? 'Dominant red/fawn gene (Ay)' : 'Am. Brindle gene (Avy)' });
             continue;
         }
-        // A-locus a/a — both parents need at least one 'a', but any other allele can pair with it
+        // A-locus a/a — both parents must carry a recessive a
         if (locus === 'A' && value === 'a/a') {
-            bothParents.push({ label: '−/a at A', hint: 'any of: a/a, at/a, Ay/a, Avy/a' });
+            bothParents.push({ label: 'non-agouti (a)' });
             continue;
         }
-        // A-locus at/a — tan is dominant; only one parent needs to carry 'at'
+        // A-locus at/a — tan is dominant; only one parent needs it
         if (locus === 'A' && value === 'at/a') {
-            oneParent.push({ label: 'at (tan)' });
+            oneParent.push({ label: 'tan gene (at)' });
             continue;
         }
         // A-locus A/A — both parents need at least one dominant A
         if (locus === 'A' && value === 'A/A') {
-            bothParents.push({ label: 'A/− at A', hint: 'at least one A allele (e.g. A/A, A/a, A/at)' });
+            bothParents.push({ label: 'agouti (A)' });
             continue;
         }
-        // Homozygous recessive: both alleles equal and lowercase
+        // Homozygous recessive: both alleles equal and lowercase — each parent must carry one copy
         if (a1 === a2 && a1 === a1.toLowerCase()) {
-            const dom = dominantSymbol[locus] || (locus.charAt(0).toUpperCase() + locus.slice(1));
-            bothParents.push({ label: `${dom}/${a1}` });
+            bothParents.push({ label: `${alleleName(a1)} (${a1})` });
             continue;
         }
-        // Compound heterozygous (e.g. c/ch, ce/cch): both alleles recessive but different
+        // Compound heterozygous (e.g. c/ch, ce/cch): both parents must together supply both alleles
         if (a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase()) {
-            bothParents.push({ label: `${a1} + ${a2} at ${locus}` });
+            bothParents.push({ label: `${alleleName(a1)} (${a1}) + ${alleleName(a2)} (${a2})` });
         }
     }
 
