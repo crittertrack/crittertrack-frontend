@@ -1026,13 +1026,36 @@ const TpResultCard = ({ r, idx, globalIdx, expandedCard, setExpandedCard, onUseP
                 </div>
             </div>
             {isExpanded && (
-                <div className="border-t border-gray-100 bg-gray-50 px-3 py-2.5 space-y-1.5">
+                <div className="border-t border-gray-100 bg-gray-50 px-3 py-2.5 space-y-2.5">
                     <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-wide">Why this pair?</div>
-                    <ul className="text-xs text-gray-600 space-y-0.5 list-disc list-inside">
-                        {r.explanation.map((line, i) => <li key={i}>{line}</li>)}
-                    </ul>
+                    {/* Per-parent summary */}
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                            <div className="font-semibold text-gray-700 mb-0.5">{r.sireName} (sire)</div>
+                            <div className="text-gray-500 text-[11px] leading-snug">{r.sireVariety}</div>
+                        </div>
+                        <div>
+                            <div className="font-semibold text-gray-700 mb-0.5">{r.damName} (dam)</div>
+                            <div className="text-gray-500 text-[11px] leading-snug">{r.damVariety}</div>
+                        </div>
+                    </div>
+                    {/* Per-locus coverage */}
+                    {r.locusBreakdown?.length > 0 && (
+                        <div>
+                            <div className="text-[11px] font-semibold text-gray-500 mb-1">Locus coverage</div>
+                            <div className="space-y-1">
+                                {r.locusBreakdown.map((l, i) => (
+                                    <div key={i} className="flex items-center gap-2 text-xs">
+                                        <span className="w-36 text-gray-600 truncate">{l.locus} <span className="text-gray-400">({l.alleles})</span></span>
+                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${l.sireHas ? 'bg-emerald-100 text-emerald-700' : 'bg-red-50 text-red-500'}`}>{r.sireName}: {l.sireHas ? '✓ carries' : '✗ no evidence'}</span>
+                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${l.damHas ? 'bg-emerald-100 text-emerald-700' : 'bg-red-50 text-red-500'}`}>{r.damName}: {l.damHas ? '✓ carries' : '✗ no evidence'}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                     {r.assumptions?.length > 0 && (
-                        <div className="mt-1.5 pt-1.5 border-t border-yellow-200">
+                        <div className="pt-1.5 border-t border-yellow-200">
                             <div className="text-[11px] font-semibold text-yellow-800 mb-0.5">Assumptions applied</div>
                             <ul className="text-xs text-yellow-700 space-y-0.5 list-disc list-inside">
                                 {r.assumptions.map((a, i) => <li key={i}>{a}</li>)}
@@ -1600,6 +1623,19 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 //        'nodata'  = no evidence either way (neither animal has gc or matching variety text)
                 const tier = pairScore >= maxPossibleScore ? 'produce' : pairScore > 0 ? 'carrier' : 'nodata';
 
+                // Build per-locus breakdown for each parent
+                const sireAnimal = myAnimals.find(a => a.id_public === pair.sireId);
+                const damAnimal  = myAnimals.find(a => a.id_public === pair.damId);
+                const sireVariety = [sireAnimal?.color, sireAnimal?.phenotype, sireAnimal?.geneticCode].filter(Boolean).join(' · ') || 'No data recorded';
+                const damVariety  = [damAnimal?.color,  damAnimal?.phenotype,  damAnimal?.geneticCode ].filter(Boolean).join(' · ') || 'No data recorded';
+                const locusBreakdown = targetLoci.map(([locus, value]) => {
+                    const [a1, a2] = value.split('/');
+                    const sireHas = animalCoversLocus(sireAnimal, a1, a2);
+                    const damHas  = animalCoversLocus(damAnimal,  a1, a2);
+                    const locusLabel = locus === 'A' ? 'A-locus' : locus === 'B' ? 'B-locus (chocolate)' : locus === 'D' ? 'D-locus (blue dilute)' : locus === 'P' ? 'P-locus (pink-eyed dilute)' : locus === 'E' ? 'E-locus (extension)' : locus === 'C' ? 'C-locus (dilution)' : locus === 'Go' ? 'Go-locus (coat length)' : locus === 'S' ? 'S-locus (piebald)' : locus === 'W' ? 'W-locus (variegation)' : locus;
+                    return { locus: locusLabel, alleles: value, sireHas, damHas };
+                });
+
                 return {
                     ...pair,
                     probability,
@@ -1610,24 +1646,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     maxPossibleScore,
                     phenotypeConfidence,
                     assumptions: prototypeAssumptions,
-                    explanation: [
-                        phenotypeInterpretation ? `You're targeting: ${phenotypeInterpretation}` : null,
-                        `This pair covers ${pairScore} out of ${maxPossibleScore} points across ${targetLoci.length} trait(s) needed.`,
-                        tier === 'produce'
-                            ? 'Both parents carry the right genes — this pair can produce your target.'
-                            : tier === 'carrier'
-                            ? `Not all traits are covered yet. Offspring from this pair might carry some of the right genes but probably won't show the full target look.`
-                            : `No genetic data recorded for these animals — pairing shown as a candidate but outcome is unknown.`,
-                        `Match confidence: ${phenotypeConfidence.label}`,
-                        prototypeAssumptions.length ? `Assumptions made: ${prototypeAssumptions.join(' ')}` : null,
-                        `Coverage is estimated from each animal's recorded variety, color, and coat notes.`,
-                    ].filter(Boolean)
+                    sireVariety,
+                    damVariety,
+                    locusBreakdown,
                 };
         };
 
         const results = tieredPairs.map(mapPair).filter(Boolean);
 
-        console.log('[TP] results:', results.length, results.slice(0,3).map(r => `${r.sireName} × ${r.damName} (${r.pairScore}/${r.maxPossibleScore} ${r.tier})`));
         setTimeout(() => {
             setTpMockResults(results);
             setTpGenerating(false);
