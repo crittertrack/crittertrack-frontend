@@ -1552,10 +1552,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
         const maxPossibleScore = Math.max(1, targetLoci.length * 2);
 
-        const results = uniq
-            .sort((a, b) => (b.pairScore || 0) - (a.pairScore || 0))
-            .slice(0, 20)
-            .map((pair) => {
+        const sorted = uniq.sort((a, b) => (b.pairScore || 0) - (a.pairScore || 0));
+
+        // Split into tiers BEFORE capping — so nodata animals aren't crowded out by scored pairs
+        const producePairs  = sorted.filter(p => p.pairScore >= maxPossibleScore).slice(0, 8);
+        const carrierPairs  = sorted.filter(p => p.pairScore > 0 && p.pairScore < maxPossibleScore).slice(0, 8);
+        const nodataPairs   = sorted.filter(p => !p.pairScore).slice(0, 8);
+        const tieredPairs   = [...producePairs, ...carrierPairs, ...nodataPairs];
+
+        const mapPair = (pair) => {
                 const pairScore = pair.pairScore || 0;
                 const hash = `${pair.sireId}${pair.damId}`
                     .split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
@@ -1602,8 +1607,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         `Coverage is estimated from each animal's recorded variety, color, and coat notes.`,
                     ].filter(Boolean)
                 };
-            })
-            .filter(Boolean);
+        };
+
+        const results = tieredPairs.map(mapPair).filter(Boolean);
 
         console.log('[TP] results:', results.length, results.slice(0,3).map(r => `${r.sireName} × ${r.damName} (${r.pairScore}/${r.maxPossibleScore} ${r.tier})`));
         setTimeout(() => {
