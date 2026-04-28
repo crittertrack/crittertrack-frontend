@@ -1079,7 +1079,7 @@ const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) =>
             )}
             {produceResults.length === 0 && carrierResults.length === 0 && (
                 <div className="p-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500">
-                    No animals in your collection show carrier evidence for the required loci.
+                    No matching pairs found for the selected traits.
                 </div>
             )}
         </div>
