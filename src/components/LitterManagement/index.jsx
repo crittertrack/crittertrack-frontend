@@ -5467,10 +5467,19 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
 {/* Run button */}
                                 <div className="px-5 py-4">
+                                {tpSelectedTraits.includes('fox') && !tpSelectedTraits.some(id => ['albino','himalayan','bone','siamese','burmese','stone','beige','colorpoint-beige','mock-choc'].includes(id)) && (
+                                    <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
+                                        Fox requires a C-locus dilution chip — please also select Himalayan, Siamese, Burmese, or similar.
+                                    </p>
+                                )}
                                 <button
                                     type="button"
                                     onClick={runTargetOutcomePrototype}
-                                    disabled={tpSelectedTraits.length === 0 || tpGenerating}
+                                    disabled={
+                                        tpSelectedTraits.length === 0 ||
+                                        tpGenerating ||
+                                        (tpSelectedTraits.includes('fox') && !tpSelectedTraits.some(id => ['albino','himalayan','bone','siamese','burmese','stone','beige','colorpoint-beige','mock-choc'].includes(id)))
+                                    }
                                     className="w-full py-2 px-4 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors"
                                 >
                                     {tpGenerating ? <><Loader2 className="w-4 h-4 animate-spin" /> Building Prototype Results...</> : <><Star size={15} /> Find Best Pairings (Prototype)</>}
