@@ -1152,7 +1152,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             }, 0);
 
         // Score a pair on production potential per locus:
-        //   recessive (a1===a2 lowercase) or compound-het: BOTH must carry → +2 both, +1 one only
+        //   recessive (a1===a2 lowercase) or compound-het: BOTH parents must carry a copy
+        //     → +2 if both show carrier evidence, +0 if only one (can't produce the phenotype)
         //   dominant-het: ONE parent is enough → +2 if either carries
         const scorePairProduction = (sire, dam) => {
             let score = 0;
@@ -1163,9 +1164,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 const isRecessiveHom = a1 === a2 && a1 === a1.toLowerCase();
                 const isCompoundHet  = a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase();
                 if (isRecessiveHom || isCompoundHet) {
+                    // Both must contribute — a pair where only one carries cannot produce this locus
                     if (sireCovers && damCovers) score += 2;
-                    else if (sireCovers || damCovers) score += 1;
                 } else {
+                    // Dominant — one parent is sufficient
                     if (sireCovers || damCovers) score += 2;
                 }
             }
