@@ -4887,36 +4887,37 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         <div className="grid grid-cols-1 lg:grid-cols-5 divide-y lg:divide-y-0 lg:divide-x divide-gray-200">
                             <div className="lg:col-span-3 divide-y divide-gray-200">
 
-                                {/* Pair Source */}
+                                {/* Pair Source + Species */}
                                 <div className="px-5 py-4">
-                                    <label className="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Pair Source</label>
-                                    <div className="flex gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => setTpSourceMode('mine')}
-                                            className={`px-3 py-1.5 text-sm rounded-lg border ${tpSourceMode === 'mine' ? 'bg-primary text-black border-primary' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
-                                        >
-                                            My Animals
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setTpSourceMode('mine+favorited')}
-                                            className={`px-3 py-1.5 text-sm rounded-lg border ${tpSourceMode === 'mine+favorited' ? 'bg-primary text-black border-primary' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
-                                        >
-                                            My Animals + Favorited
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Species */}
-                                <div className="px-5 py-4">
-                                    <label className="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Species</label>
-                                    <div className="w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded-lg text-sm font-medium text-gray-700">
-                                        {TARGET_OUTCOME_PROTOTYPE_SPECIES}
-                                    </div>
-                                    <div className="mt-2 p-2.5 rounded-lg border border-amber-200 bg-amber-50 text-xs text-amber-800">
-                                        <div className="font-semibold">Coming later by species rollout</div>
-                                        <div className="mt-1">{TARGET_OUTCOME_PENDING_SPECIES.join(', ')}</div>
+                                    <div className="flex items-end gap-6 flex-wrap">
+                                        <div>
+                                            <label className="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Pair Source</label>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setTpSourceMode('mine')}
+                                                    className={`px-3 py-1.5 text-sm rounded-lg border ${tpSourceMode === 'mine' ? 'bg-primary text-black border-primary' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                                                >
+                                                    My Animals
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setTpSourceMode('mine+favorited')}
+                                                    className={`px-3 py-1.5 text-sm rounded-lg border ${tpSourceMode === 'mine+favorited' ? 'bg-primary text-black border-primary' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                                                >
+                                                    My Animals + Favorited
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Species</label>
+                                            <div className="px-3 py-1.5 border border-gray-200 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 whitespace-nowrap">
+                                                {TARGET_OUTCOME_PROTOTYPE_SPECIES}
+                                            </div>
+                                        </div>
+                                        <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 self-end">
+                                            <span className="font-semibold">Coming later:</span> {TARGET_OUTCOME_PENDING_SPECIES.join(', ')}
+                                        </div>
                                     </div>
                                 </div>
 
