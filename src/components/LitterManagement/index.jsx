@@ -1384,13 +1384,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             return alleles;
         };
 
-        // Allele-set cache to avoid re-parsing per animal per check
-        const alleleCache = new Map();
-        const getAlleles = (animal) => {
-            if (!alleleCache.has(animal.id_public)) alleleCache.set(animal.id_public, parseAnimalAlleles(animal));
-            return alleleCache.get(animal.id_public);
-        };
-
         const getVarietyText = (animal) =>
             [animal.color, animal.phenotype, animal.coatPattern, animal.coat, animal.markings, animal.morph]
                 .filter(Boolean).join(' ').toLowerCase();
@@ -1401,18 +1394,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         const animalCoversLocus = (animal, a1, a2) => {
             if (!animal) return false;
             if (animal.geneticCode) {
-                const alleles = getAlleles(animal);
+                const alleles = parseAnimalAlleles(animal);
                 if (alleles.has(a1) || alleles.has(a2)) return true;
             }
-            // Fallback: keyword matching on variety text fields
             const text = getVarietyText(animal);
             return [...(ALLELE_KW[a1] || []), ...(ALLELE_KW[a2] || [])].some(kw => text.includes(kw));
         };
 
-        // Does this animal carry a specific single allele?
         const animalHasAllele = (animal, allele) => {
             if (!animal) return false;
-            if (animal.geneticCode && getAlleles(animal).has(allele)) return true;
+            if (animal.geneticCode && parseAnimalAlleles(animal).has(allele)) return true;
             const text = getVarietyText(animal);
             return (ALLELE_KW[allele] || []).some(kw => text.includes(kw));
         };
