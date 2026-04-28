@@ -1271,13 +1271,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             (a.species === speciesForPairs) &&
             ['Male', 'Intersex', 'Unknown'].includes(a.gender) &&
             a.status !== 'Deceased' &&
-            !a.isTransferred
+            !a.isTransferred &&
+            (!a.ownerId_public || a.ownerId_public === userProfile?.id_public)
         );
         const femalePool = myAnimals.filter(a =>
             (a.species === speciesForPairs) &&
             ['Female', 'Intersex', 'Unknown'].includes(a.gender) &&
             a.status !== 'Deceased' &&
-            !a.isTransferred
+            !a.isTransferred &&
+            (!a.ownerId_public || a.ownerId_public === userProfile?.id_public)
         );
 
         const selectedSire = tpSireId ? (myAnimals.find(a => a.id_public === tpSireId) || selectedTpSireAnimal) : null;
@@ -1767,7 +1769,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const response = await axios.get(`${API_BASE_URL}/animals`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            const animalsData = (response.data || []).filter(a => a.ownerId_public === userProfile?.id_public);
+            const animalsData = response.data || [];
             
             // Set animals immediately so UI can render
             setMyAnimals(animalsData);
