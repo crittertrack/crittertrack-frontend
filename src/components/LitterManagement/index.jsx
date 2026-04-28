@@ -1403,10 +1403,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             [animal.color, animal.phenotype, animal.coatPattern, animal.coat, animal.markings, animal.morph]
                 .filter(Boolean).join(' ').toLowerCase();
 
-        // Returns 'visual' (homozygous recessive confirmed in gc), 'carrier' (het or keyword evidence), or false
+        // Returns 'visual' (homozygous recessive confirmed in gc), 'carrier' (het recessive), or false
         const animalLocusStatus = (animal, a1, a2) => {
             if (!animal) return false;
             const isRecessiveHom = a1 === a2 && a1 === a1.toLowerCase();
+            const isCompoundHetRec = a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase()
+                && !DOMINANT_LOWERCASE_ALLELES.has(a1) && !DOMINANT_LOWERCASE_ALLELES.has(a2);
+            const isDominant = !isRecessiveHom && !isCompoundHetRec;
+
             if (isRecessiveHom && animal.geneticCode) {
                 const allele = a1;
                 const tokens = animal.geneticCode
@@ -1424,10 +1428,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             }
             if (animal.geneticCode) {
                 const alleles = parseAnimalAlleles(animal);
-                if (alleles.has(a1) || alleles.has(a2)) return 'carrier';
+                if (alleles.has(a1) || alleles.has(a2)) return isDominant ? 'visual' : 'carrier';
             }
             const text = getVarietyText(animal);
-            return [...(ALLELE_KW[a1] || []), ...(ALLELE_KW[a2] || [])].some(kw => text.includes(kw)) ? 'carrier' : false;
+            return [...(ALLELE_KW[a1] || []), ...(ALLELE_KW[a2] || [])].some(kw => text.includes(kw)) ? (isDominant ? 'visual' : 'carrier') : false;
         };
 
         // Does this animal carry at least one copy of a1 OR a2?
