@@ -235,9 +235,7 @@ const getPrototypePhenotypeInterpretation = (selectedTraits) => {
         .map(c => c.label);
 
     if (basePheno) {
-        const combined = [basePheno, ...missingModifiers].join(' ');
-        const extras = assumptions.length ? [`assumptions: ${assumptions.join(' ')}`] : [];
-        return `${combined}${extras.length ? ` (${extras.join(' | ')})` : ''}`;
+        return [basePheno, ...missingModifiers].join(' ');
     }
 
     // No base color resolved — fall back to composing from chip labels directly
@@ -247,13 +245,9 @@ const getPrototypePhenotypeInterpretation = (selectedTraits) => {
         .map(c => c.label);
 
     if (allLabels.length) {
-        const extras = assumptions.length ? [`assumptions: ${assumptions.join(' ')}`] : [];
-        return `${allLabels.join(' ')}${extras.length ? ` (${extras.join(' | ')})` : ''}`;
+        return allLabels.join(' ');
     }
 
-    if (assumptions.length) {
-        return `Pending more loci (${assumptions.join(' ')})`;
-    }
     return 'Select more trait chips to resolve a named phenotype.';
 };
 
@@ -5464,6 +5458,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     const preview = getPrototypePhenotypeInterpretation(tpSelectedTraits);
                                     const conf = getPrototypePhenotypeConfidence(tpSelectedTraits);
                                     const reqs = getMinimumParentCarrierRequirements(tpSelectedTraits);
+                                    const { assumptions } = buildPrototypeGenotypeFromTraits(tpSelectedTraits);
                                     const isResolved = conf?.level === 'high' || conf?.level === 'medium';
                                     return (
                                         <div className={`px-5 py-4 border-b border-gray-200 text-xs ${isResolved ? 'bg-emerald-50' : 'bg-gray-50'}`}>
@@ -5472,7 +5467,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 <span className="font-semibold flex-shrink-0">Target phenotype:</span>
                                                 <span className="truncate">{preview || 'Select chips below to preview'}</span>
                                             </div>
-
+                                            {assumptions.length > 0 && (
+                                                <div className="mt-1.5 pl-3 text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+                                                    Also select a <span className="font-semibold">Base Color</span> chip to fully specify this target.
+                                                </div>
+                                            )}
                                             {(reqs.bothParents.length > 0 || reqs.oneParent.length > 0 || reqs.splitParents?.length > 0) && (
                                                 <div className="mt-2 pl-3 space-y-0.5 border-t border-gray-200 pt-2">
                                                     {reqs.bothParents.length > 0 && (
