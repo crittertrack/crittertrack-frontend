@@ -1255,11 +1255,50 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
     };
 
+    // Chips are grouped by the locus they write to. Selecting a chip from one group removes
+    // chips from competing groups. Exceptions:
+    //   - tan & fox are A-locus but compound-het capable — they may coexist with one other A series
+    //   - Within the same A-locus series (e.g. blue + chocolate = lilac) chips can combine freely
+
+    const CHIP_A_SERIES = {
+        black:        ['black','chocolate','blue','dove','lilac','champagne','silver','lavender'],
+        agouti:       ['agouti','cinnamon','blue-agouti','argente','cinnamon-argente'],
+        domred:       ['dom-red','dom-fawn','dom-amber'],
+        recred:       ['rec-red','rec-fawn','rec-amber'],
+        brindle:      ['am-brindle'],
+        sepia:        ['sepia'],         // a/a + C-locus
+        silveragouti: ['silver-agouti'], // A/A + C-locus
+    };
+    // Build chip→series lookup
+    const chipToASeries = {};
+    Object.entries(CHIP_A_SERIES).forEach(([series, chips]) => chips.forEach(c => chipToASeries[c] = series));
+
+    const CHIP_A_COMPOUND_HET_CAPABLE = new Set(['tan', 'fox']); // may pair with one A-locus series
+    const CHIP_C_EXCLUSIVE  = new Set(['albino','himalayan','bone','siamese','burmese','stone','beige','colorpoint-beige','mock-choc','sepia','silver-agouti']);
+    const CHIP_GO_EXCLUSIVE = new Set(['shorthair','longhair','texel']);
+    const CHIP_W_EXCLUSIVE  = new Set(['variegated','banded']);
+
     const toggleTargetTraitChip = (chipId) => {
-        setTpSelectedTraits(prev => prev.includes(chipId)
-            ? prev.filter(id => id !== chipId)
-            : [...prev, chipId]
-        );
+        setTpSelectedTraits(prev => {
+            if (prev.includes(chipId)) return prev.filter(id => id !== chipId);
+            let next = [...prev];
+            // A-locus: remove chips from OTHER series (keep same-series and compound-het capable chips)
+            if (chipToASeries[chipId]) {
+                const thisSeries = chipToASeries[chipId];
+                next = next.filter(id =>
+                    CHIP_A_COMPOUND_HET_CAPABLE.has(id) ||   // keep tan/fox
+                    chipToASeries[id] === thisSeries ||        // keep same series
+                    !chipToASeries[id]                         // keep non-A chips
+                );
+            }
+            // C-locus: mutually exclusive
+            if (CHIP_C_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_C_EXCLUSIVE.has(id));
+            // Go-locus: mutually exclusive
+            if (CHIP_GO_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_GO_EXCLUSIVE.has(id));
+            // W-locus: mutually exclusive
+            if (CHIP_W_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_W_EXCLUSIVE.has(id));
+            return [...next, chipId];
+        });
     };
 
     const runTargetOutcomePrototype = () => {
