@@ -4711,9 +4711,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
             {/* Test Pairing Modal */}
             {showTestPairingModal && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl">
-                        <div className="flex justify-between items-center border-b p-4">
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-6 z-50">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh]">
+                        {/* Header */}
+                        <div className="flex justify-between items-center border-b border-gray-200 px-5 py-4 flex-shrink-0">
                             <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
                                 <Calculator size={18} className="text-primary" />
                                 Test Pairing
@@ -4722,7 +4723,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 <X size={22} />
                             </button>
                         </div>
-                        <div className="px-5 pt-4">
+                        {/* Tab bar */}
+                        <div className="px-5 py-3 border-b border-gray-200 flex-shrink-0">
                             <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
                                 <button
                                     type="button"
@@ -4740,11 +4742,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 </button>
                             </div>
                         </div>
+                        {/* Scrollable body */}
+                        <div className="overflow-y-auto flex-1">
 
                         {tpMode === 'coi' && (
-                        <div className="p-5 space-y-4">
+                        <div className="p-5 space-y-5">
                             <p className="text-sm text-gray-500">Pick a sire and dam to calculate the predicted Coefficient of Inbreeding (COI) for their offspring.</p>
-                            {/* Sire */}
+                            <hr className="border-gray-100" />
+                            {/* Sire */}}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Sire (Father)</label>
                                 <button
@@ -4791,6 +4796,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 </button>
                             </div>
                             {/* Calculate Button */}
+                            <hr className="border-gray-100" />
                             <button
                                 onClick={handleCalculateTestPairing}
                                 disabled={!tpSireId || !tpDamId || tpCalculating}
@@ -4817,9 +4823,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         )}
 
                         {tpMode === 'target' && (
-                        <div className="p-5 grid grid-cols-1 lg:grid-cols-2 gap-5">
-                            <div className="space-y-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-100">
+                            <div className="p-5 space-y-5">
                                 <p className="text-sm text-gray-500">Prototype only: Fancy Mouse is currently supported. Choose source + trait chips, then preview ranked pairing suggestions while keeping COI mode available in the other tab.</p>
+                                <hr className="border-gray-100" />
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Pair Source</label>
@@ -4840,7 +4847,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </button>
                                     </div>
                                 </div>
-
+                                <hr className="border-gray-100" />
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Species</label>
                                     <div className="w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded-lg text-sm font-medium text-gray-700">
@@ -4926,7 +4933,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 </button>
                             </div>
 
-                            <div className="space-y-3">
+                            <div className="p-5 space-y-3">
                                 <div className="flex items-center justify-between">
                                     <h4 className="text-sm font-semibold text-gray-700">Ranked Results Preview</h4>
                                     <button
@@ -5061,7 +5068,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         </div>
                         )}
 
-                        <div className="border-t p-4 flex justify-end">
+                        </div>{/* end scrollable body */}
+                        <div className="border-t border-gray-200 px-5 py-3 flex justify-end flex-shrink-0">
                             <button onClick={() => setShowTestPairingModal(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Close</button>
                         </div>
                     </div>
