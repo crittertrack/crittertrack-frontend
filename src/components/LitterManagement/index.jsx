@@ -1282,13 +1282,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         setTpSelectedTraits(prev => {
             if (prev.includes(chipId)) return prev.filter(id => id !== chipId);
             let next = [...prev];
-            // A-locus: remove chips from OTHER series (keep same-series and compound-het capable chips)
+            // A-locus: all base color chips are mutually exclusive (lilac, blue, chocolate etc. are all
+            // complete phenotypes — selecting one removes all others except tan/fox compound-het chips)
             if (chipToASeries[chipId]) {
-                const thisSeries = chipToASeries[chipId];
                 next = next.filter(id =>
-                    CHIP_A_COMPOUND_HET_CAPABLE.has(id) ||   // keep tan/fox
-                    chipToASeries[id] === thisSeries ||        // keep same series
-                    !chipToASeries[id]                         // keep non-A chips
+                    CHIP_A_COMPOUND_HET_CAPABLE.has(id) || // keep tan/fox
+                    !chipToASeries[id]                      // keep non-A chips
                 );
             }
             // C-locus: mutually exclusive
