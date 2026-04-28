@@ -1253,10 +1253,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 return acc + (animalCoversLocus(animal, a1, a2) ? 1 : 0);
             }, 0);
 
+        // Alleles that are lowercase but dominant in expression (e.g. at = tan, dominant over a)
+        const DOMINANT_LOWERCASE_ALLELES = new Set(['at']);
+
         // Score a pair on production potential per locus:
         //   recessive (a1===a2 lowercase) or compound-het: BOTH parents must carry a copy
         //     → +2 if both show carrier evidence, +0 if only one (can't produce the phenotype)
-        //   dominant-het: ONE parent is enough → +2 if either carries
+        //   dominant-het or dominant-lowercase: ONE parent is enough → +2 if either carries
         const scorePairProduction = (sire, dam) => {
             let score = 0;
             for (const [, value] of targetLoci) {
@@ -1264,12 +1267,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 const sireCovers = animalCoversLocus(sire, a1, a2);
                 const damCovers  = animalCoversLocus(dam,  a1, a2);
                 const isRecessiveHom = a1 === a2 && a1 === a1.toLowerCase();
-                const isCompoundHet  = a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase();
+                const isCompoundHet  = a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase()
+                    && !DOMINANT_LOWERCASE_ALLELES.has(a1) && !DOMINANT_LOWERCASE_ALLELES.has(a2);
                 if (isRecessiveHom || isCompoundHet) {
                     // Both must contribute — a pair where only one carries cannot produce this locus
                     if (sireCovers && damCovers) score += 2;
                 } else {
-                    // Dominant — one parent is sufficient
+                    // Dominant (or dominant-acting lowercase like at) — one parent is sufficient
                     if (sireCovers || damCovers) score += 2;
                 }
             }
@@ -5213,6 +5217,42 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     </div>
                                 </div>
 
+                                {/* Live phenotype preview */}
+                                {tpSelectedTraits.length > 0 && (() => {
+                                    const preview = getPrototypePhenotypeInterpretation(tpSelectedTraits);
+                                    const conf = getPrototypePhenotypeConfidence(tpSelectedTraits);
+                                    const reqs = getMinimumParentCarrierRequirements(tpSelectedTraits);
+                                    const isResolved = conf?.level === 'high' || conf?.level === 'medium';
+                                    return (
+                                        <div className={`px-5 py-4 border-b border-gray-200 text-xs ${isResolved ? 'bg-emerald-50' : 'bg-gray-50'}`}>
+                                            <div className={`flex items-center gap-1.5 ${isResolved ? 'text-emerald-800' : 'text-gray-500'}`}>
+                                                <span className={`inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 ${isResolved ? 'bg-emerald-500' : 'bg-gray-400'}`} />
+                                                <span className="font-semibold flex-shrink-0">Target phenotype:</span>
+                                                <span className="truncate">{preview || 'Select chips below to preview'}</span>
+                                            </div>
+                                            {conf && (
+                                                <div className="mt-1 pl-3 text-[10px] text-gray-400">{conf.detail}</div>
+                                            )}
+                                            {(reqs.bothParents.length > 0 || reqs.oneParent.length > 0) && (
+                                                <div className="mt-2 pl-3 space-y-0.5 border-t border-gray-200 pt-2">
+                                                    {reqs.bothParents.length > 0 && (
+                                                        <div className="text-[10px] text-gray-500">
+                                                            <span className="font-medium text-gray-700">Both parents must carry:</span>{' '}
+                                                            <span className="font-mono">{reqs.bothParents.map(r => r.label).join(' · ')}</span>
+                                                        </div>
+                                                    )}
+                                                    {reqs.oneParent.length > 0 && (
+                                                        <div className="text-[10px] text-gray-500">
+                                                            <span className="font-medium text-gray-700">At least one parent needs:</span>{' '}
+                                                            <span className="font-mono">{reqs.oneParent.map(r => r.label).join(' · ')}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })()}
+
                                 {/* Trait Chips */}
                                 <div className="px-5 py-4">
                                     <div className="flex items-center justify-between mb-3">
@@ -5258,42 +5298,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         ))}
                                     </div>
                                 </div>
-
-                                {/* Live phenotype preview */}
-                                {tpSelectedTraits.length > 0 && (() => {
-                                    const preview = getPrototypePhenotypeInterpretation(tpSelectedTraits);
-                                    const conf = getPrototypePhenotypeConfidence(tpSelectedTraits);
-                                    const reqs = getMinimumParentCarrierRequirements(tpSelectedTraits);
-                                    const isResolved = conf?.level === 'high' || conf?.level === 'medium';
-                                    return (
-                                        <div className={`px-5 py-4 border-b border-gray-200 text-xs ${isResolved ? 'bg-emerald-50' : 'bg-gray-50'}`}>
-                                            <div className={`flex items-center gap-1.5 ${isResolved ? 'text-emerald-800' : 'text-gray-500'}`}>
-                                                <span className={`inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 ${isResolved ? 'bg-emerald-500' : 'bg-gray-400'}`} />
-                                                <span className="font-semibold flex-shrink-0">Target phenotype:</span>
-                                                <span className="truncate">{preview || 'Select chips above to preview'}</span>
-                                            </div>
-                                            {conf && (
-                                                <div className="mt-1 pl-3 text-[10px] text-gray-400">{conf.detail}</div>
-                                            )}
-                                            {(reqs.bothParents.length > 0 || reqs.oneParent.length > 0) && (
-                                                <div className="mt-2 pl-3 space-y-0.5 border-t border-gray-200 pt-2">
-                                                    {reqs.bothParents.length > 0 && (
-                                                        <div className="text-[10px] text-gray-500">
-                                                            <span className="font-medium text-gray-700">Both parents must carry:</span>{' '}
-                                                            <span className="font-mono">{reqs.bothParents.map(r => r.label).join(' · ')}</span>
-                                                        </div>
-                                                    )}
-                                                    {reqs.oneParent.length > 0 && (
-                                                        <div className="text-[10px] text-gray-500">
-                                                            <span className="font-medium text-gray-700">At least one parent needs:</span>{' '}
-                                                            <span className="font-mono">{reqs.oneParent.map(r => r.label).join(' · ')}</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })()}
 
 {/* Run button */}
                                 <div className="px-5 py-4">
