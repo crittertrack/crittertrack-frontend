@@ -904,7 +904,109 @@ const ParentSearchModal = ({
 
 
 
-﻿// Litter Management Component
+const TpResultCard = ({ r, idx, globalIdx, expandedCard, setExpandedCard, onUsePair }) => {
+    const cardKey = `${r.sireId}:${r.damId}:${globalIdx}`;
+    const isExpanded = expandedCard === cardKey;
+    return (
+        <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
+            <div className="p-3">
+                <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                        <div className="text-sm font-semibold text-gray-800 truncate">{r.sireName} × {r.damName}</div>
+                        <div className="text-xs text-gray-500 mt-0.5">
+                            COI: <span className="font-semibold text-gray-700">{r.coiValue.toFixed(2)}%</span>
+                            {' '}•{' '}
+                            Coverage: <span className="font-semibold text-gray-700">{r.pairScore}/{r.maxPossibleScore}</span>
+                        </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600">#{idx + 1}</span>
+                        <button
+                            type="button"
+                            onClick={() => setExpandedCard(isExpanded ? null : cardKey)}
+                            className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold cursor-pointer transition ${r.phenotypeConfidence?.className || 'bg-gray-100 text-gray-700'}`}
+                        >
+                            {r.phenotypeConfidence?.label || 'Needs More Loci'} {isExpanded ? '▲' : '▼'}
+                        </button>
+                    </div>
+                </div>
+                {r.warnings.length > 0 && (
+                    <div className="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+                        {r.warnings.join(' • ')}
+                    </div>
+                )}
+                <div className="mt-2 flex justify-end">
+                    <button
+                        type="button"
+                        onClick={() => onUsePair(r)}
+                        className="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white"
+                    >
+                        Use in Planned Mating
+                    </button>
+                </div>
+            </div>
+            {isExpanded && (
+                <div className="border-t border-gray-100 bg-gray-50 px-3 py-2.5 space-y-1.5">
+                    <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-wide">Reasoning</div>
+                    <ul className="text-xs text-gray-600 space-y-0.5 list-disc list-inside">
+                        {r.explanation.map((line, i) => <li key={i}>{line}</li>)}
+                    </ul>
+                    {r.assumptions?.length > 0 && (
+                        <div className="mt-1.5 pt-1.5 border-t border-yellow-200">
+                            <div className="text-[11px] font-semibold text-yellow-800 mb-0.5">Assumptions applied</div>
+                            <ul className="text-xs text-yellow-700 space-y-0.5 list-disc list-inside">
+                                {r.assumptions.map((a, i) => <li key={i}>{a}</li>)}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+
+const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) => {
+    const produceResults = results.filter(r => r.tier === 'produce');
+    const carrierResults = results.filter(r => r.tier === 'carrier');
+    return (
+        <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
+            {produceResults.length > 0 && (
+                <div>
+                    <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-xs font-semibold text-emerald-700">Can Produce Target</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">{produceResults.length}</span>
+                    </div>
+                    <div className="space-y-2">
+                        {produceResults.slice(0, 6).map((r, i) => (
+                            <TpResultCard key={i} r={r} idx={i} globalIdx={i} expandedCard={expandedCard} setExpandedCard={setExpandedCard} onUsePair={onUsePair} />
+                        ))}
+                    </div>
+                </div>
+            )}
+            {carrierResults.length > 0 && (
+                <div className={produceResults.length > 0 ? 'pt-2 border-t border-gray-200' : ''}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-xs font-semibold text-amber-700">Carrier Pairings</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">{carrierResults.length}</span>
+                        <span className="text-[10px] text-gray-400">partial loci coverage — offspring may carry but not express</span>
+                    </div>
+                    <div className="space-y-2">
+                        {carrierResults.slice(0, 6).map((r, i) => (
+                            <TpResultCard key={i} r={r} idx={i} globalIdx={produceResults.length + i} expandedCard={expandedCard} setExpandedCard={setExpandedCard} onUsePair={onUsePair} />
+                        ))}
+                    </div>
+                </div>
+            )}
+            {produceResults.length === 0 && carrierResults.length === 0 && (
+                <div className="p-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500">
+                    No animals in your collection show carrier evidence for the required loci.
+                </div>
+            )}
+        </div>
+    );
+};
+
+// Litter Management Component
 const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp }) => {
     const [litters, setLitters] = useState([]);
     const [myAnimals, setMyAnimals] = useState([]);
@@ -5261,102 +5363,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     <div className="p-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500">
                                         Select traits and run the prototype to see ranked pair cards here.
                                     </div>
-                                ) : (() => {
-                                    const produceResults = tpMockResults.filter(r => r.tier === 'produce');
-                                    const carrierResults = tpMockResults.filter(r => r.tier === 'carrier');
-                                    const renderCard = (r, idx, globalIdx) => {
-                                        const cardKey = `${r.sireId}:${r.damId}:${globalIdx}`;
-                                        const isExpanded = tpExpandedCard === cardKey;
-                                        return (
-                                            <div key={cardKey} className="rounded-lg border border-gray-200 bg-white overflow-hidden">
-                                                <div className="p-3">
-                                                    <div className="flex items-start justify-between gap-2">
-                                                        <div className="min-w-0">
-                                                            <div className="text-sm font-semibold text-gray-800 truncate">{r.sireName} × {r.damName}</div>
-                                                            <div className="text-xs text-gray-500 mt-0.5">
-                                                                COI: <span className="font-semibold text-gray-700">{r.coiValue.toFixed(2)}%</span>
-                                                                {' '}•{' '}
-                                                                Coverage: <span className="font-semibold text-gray-700">{r.pairScore}/{r.maxPossibleScore}</span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                                                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600">#{idx + 1}</span>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => setTpExpandedCard(isExpanded ? null : cardKey)}
-                                                                className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold cursor-pointer transition ${r.phenotypeConfidence?.className || 'bg-gray-100 text-gray-700'}`}
-                                                            >
-                                                                {r.phenotypeConfidence?.label || 'Needs More Loci'} {isExpanded ? '▲' : '▼'}
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                    {r.warnings.length > 0 && (
-                                                        <div className="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
-                                                            {r.warnings.join(' • ')}
-                                                        </div>
-                                                    )}
-                                                    <div className="mt-2 flex justify-end">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => usePairForPlannedMating(r)}
-                                                            className="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white"
-                                                        >
-                                                            Use in Planned Mating
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                                {isExpanded && (
-                                                    <div className="border-t border-gray-100 bg-gray-50 px-3 py-2.5 space-y-1.5">
-                                                        <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-wide">Reasoning</div>
-                                                        <ul className="text-xs text-gray-600 space-y-0.5 list-disc list-inside">
-                                                            {r.explanation.map((line, i) => <li key={i}>{line}</li>)}
-                                                        </ul>
-                                                        {r.assumptions?.length > 0 && (
-                                                            <div className="mt-1.5 pt-1.5 border-t border-yellow-200">
-                                                                <div className="text-[11px] font-semibold text-yellow-800 mb-0.5">Assumptions applied</div>
-                                                                <ul className="text-xs text-yellow-700 space-y-0.5 list-disc list-inside">
-                                                                    {r.assumptions.map((a, i) => <li key={i}>{a}</li>)}
-                                                                </ul>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    };
-                                    return (
-                                        <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
-                                            {produceResults.length > 0 && (
-                                                <div>
-                                                    <div className="flex items-center gap-2 mb-1.5">
-                                                        <span className="text-xs font-semibold text-emerald-700">Can Produce Target</span>
-                                                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">{produceResults.length}</span>
-                                                    </div>
-                                                    <div className="space-y-2">
-                                                        {produceResults.slice(0, 6).map((r, i) => renderCard(r, i, i))}
-                                                    </div>
-                                                </div>
-                                            )}
-                                            {carrierResults.length > 0 && (
-                                                <div className={produceResults.length > 0 ? 'pt-2 border-t border-gray-200' : ''}>
-                                                    <div className="flex items-center gap-2 mb-1.5">
-                                                        <span className="text-xs font-semibold text-amber-700">Carrier Pairings</span>
-                                                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">{carrierResults.length}</span>
-                                                        <span className="text-[10px] text-gray-400">partial loci coverage — offspring may carry but not express</span>
-                                                    </div>
-                                                    <div className="space-y-2">
-                                                        {carrierResults.slice(0, 6).map((r, i) => renderCard(r, i, produceResults.length + i))}
-                                                    </div>
-                                                </div>
-                                            )}
-                                            {produceResults.length === 0 && carrierResults.length === 0 && (
-                                                <div className="p-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500">
-                                                    No animals in your collection show carrier evidence for the required loci.
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })()
+                                ) : (
+                                    <TpResultsList
+                                        results={tpMockResults}
+                                        expandedCard={tpExpandedCard}
+                                        setExpandedCard={setTpExpandedCard}
+                                        tpSourceMode={tpSourceMode}
+                                        onUsePair={usePairForPlannedMating}
+                                    />
+                                )}
                             </div>
                         </div>
                         )}
