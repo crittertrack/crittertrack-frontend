@@ -175,6 +175,18 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits) => {
         assumptions.push('C-locus phenotype assumed on black base (a/a) — add a Base Color chip to override.');
     }
 
+    // Resolve compound A-locus combinations when multiple A-locus chips are selected.
+    // The forEach above lets whichever ran last win — this corrects known multi-chip combos.
+    const hasTan     = selectedTraits.some(id => id === 'tan' || id === 'fox');
+    const hasAgouti  = selectedTraits.some(id => ['agouti','cinnamon','blue-agouti','argente','cinnamon-argente','silver-agouti'].includes(id));
+    const hasBrindle = selectedTraits.includes('am-brindle');
+    const hasDomRed  = selectedTraits.some(id => ['dom-red','dom-fawn','dom-amber'].includes(id));
+
+    if (hasTan && hasBrindle)        genotype.A = 'Avy/at'; // Brindle Tan
+    else if (hasTan && hasAgouti)    genotype.A = 'A/at';   // Agouti Tan
+    else if (hasTan && hasDomRed)    genotype.A = 'Ay/at';  // Dom Red Tan
+    else if (hasBrindle && hasAgouti) genotype.A = 'Avy/A'; // Agouti Brindle
+
     return { genotype, assumptions };
 };
 
