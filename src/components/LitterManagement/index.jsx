@@ -228,6 +228,58 @@ const getPrototypePhenotypeConfidence = (selectedTraits) => {
     };
 };
 
+const getMinimumParentCarrierRequirements = (selectedTraits) => {
+    const { genotype } = buildPrototypeGenotypeFromTraits(selectedTraits);
+    if (!Object.keys(genotype).length) return { bothParents: [], oneParent: [] };
+
+    const bothParents = [];
+    const oneParent = [];
+
+    // Dominant wildtype symbol per locus (for formatting carrier genotype)
+    const dominantSymbol = {
+        A: 'A', B: 'B', C: 'C', D: 'D', E: 'E', P: 'P',
+        S: 'S', Rn: 'Rn', Si: 'Si', Sa: 'Sa', Rst: 'Rst',
+        Go: 'Go', Fz: 'Fz',
+    };
+
+    // Heterozygous dominant targets — only one parent needs the dominant allele
+    const domHetTargets = {
+        W:    { 'W/w': 'W (variegated)', 'Wsh/w': 'Wsh (banded)' },
+        Spl:  { 'Spl/spl': 'Spl (splashed)' },
+        Mobr: { 'Mobr/mobr': 'Mobr (xbrindle)' },
+        Re:   { 'Re/re': 'Re (astrex/texel)' },
+        Nu:   { 'Nu/nu': 'Nu (dom. hairless)' },
+    };
+
+    for (const [locus, value] of Object.entries(genotype)) {
+        if (!value || !value.includes('/')) continue;
+        const [a1, a2] = value.split('/');
+
+        // Explicitly dominant-het targets
+        if (domHetTargets[locus]?.[value]) {
+            oneParent.push(domHetTargets[locus][value]);
+            continue;
+        }
+        // A-locus dominant-het (Dom Red, Am. Brindle)
+        if (locus === 'A' && (value === 'Ay/a' || value === 'Avy/a')) {
+            oneParent.push(`${a1} (${value === 'Ay/a' ? 'dom. red/fawn/amber' : 'am. brindle'})`);
+            continue;
+        }
+        // Homozygous recessive: both alleles equal and lowercase
+        if (a1 === a2 && a1 === a1.toLowerCase()) {
+            const dom = dominantSymbol[locus] || (locus.charAt(0).toUpperCase() + locus.slice(1));
+            bothParents.push(`${dom}/${a1}`);
+            continue;
+        }
+        // Compound heterozygous (e.g. c/ch, ce/cch): both alleles recessive but different
+        if (a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase()) {
+            bothParents.push(`${a1} + ${a2} at ${locus}`);
+        }
+    }
+
+    return { bothParents, oneParent };
+};
+
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
         'Fancy Mouse': 'Fancy Mice', 'Mouse': 'Fancy Mice',
@@ -4995,6 +5047,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 {tpSelectedTraits.length > 0 && (() => {
                                     const preview = getPrototypePhenotypeInterpretation(tpSelectedTraits);
                                     const conf = getPrototypePhenotypeConfidence(tpSelectedTraits);
+                                    const reqs = getMinimumParentCarrierRequirements(tpSelectedTraits);
                                     const isResolved = conf?.level === 'high' || conf?.level === 'medium';
                                     return (
                                         <div className={`px-5 py-4 border-b border-gray-200 text-xs ${isResolved ? 'bg-emerald-50' : 'bg-gray-50'}`}>
@@ -5005,6 +5058,22 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             </div>
                                             {conf && (
                                                 <div className="mt-1 pl-3 text-[10px] text-gray-400">{conf.detail}</div>
+                                            )}
+                                            {(reqs.bothParents.length > 0 || reqs.oneParent.length > 0) && (
+                                                <div className="mt-2 pl-3 space-y-0.5 border-t border-gray-200 pt-2">
+                                                    {reqs.bothParents.length > 0 && (
+                                                        <div className="text-[10px] text-gray-500">
+                                                            <span className="font-medium text-gray-700">Both parents must carry:</span>{' '}
+                                                            {reqs.bothParents.join(' · ')}
+                                                        </div>
+                                                    )}
+                                                    {reqs.oneParent.length > 0 && (
+                                                        <div className="text-[10px] text-gray-500">
+                                                            <span className="font-medium text-gray-700">At least one parent needs:</span>{' '}
+                                                            {reqs.oneParent.join(' · ')}
+                                                        </div>
+                                                    )}
+                                                </div>
                                             )}
                                         </div>
                                     );
