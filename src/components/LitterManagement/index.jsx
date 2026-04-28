@@ -1359,8 +1359,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         //   compound-het dominant (Avy/at, A/at, etc): each parent must supply a DIFFERENT allele
         //     → +2 if split evidence (one has a1, other has a2), +0 otherwise
         //   dominant-het or dominant-lowercase: ONE parent is enough → +2 if either carries
+        //   dominantBlocked: true if any DOMINANT locus is completely uncovered by both parents
+        //     → dominant genes can't be silently carried; a pair with no evidence is impossible, not a carrier
         const scorePairProduction = (sire, dam) => {
             let score = 0;
+            let dominantBlocked = false;
             for (const [locus, value] of targetLoci) {
                 const [a1, a2] = value.split('/');
                 const sireCovers = animalCoversLocus(sire, a1, a2);
@@ -1368,19 +1371,28 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 const isRecessiveHom = a1 === a2 && a1 === a1.toLowerCase();
                 const isCompoundHetRec = a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase()
                     && !DOMINANT_LOWERCASE_ALLELES.has(a1) && !DOMINANT_LOWERCASE_ALLELES.has(a2);
-                
+
                 // Compound-het dominant special case (e.g., Avy/at)
                 if (locus === 'A' && COMPOUND_HET_DOMINANT.has(value)) {
+                    const [da1, da2] = value.split('/');
+                    const sireText = getVarietyText(sire);
+                    const damText  = getVarietyText(dam);
+                    const anyHasA1 = (ALLELE_KW[da1] || []).some(kw => sireText.includes(kw) || damText.includes(kw));
+                    const anyHasA2 = (ALLELE_KW[da2] || []).some(kw => sireText.includes(kw) || damText.includes(kw));
+                    // If neither parent in the pair has evidence for a required dominant allele → blocked
+                    if (!anyHasA1 || !anyHasA2) dominantBlocked = true;
                     if (splitCoverCompoundHetDom(sire, dam, value)) score += 2;
                 } else if (isRecessiveHom || isCompoundHetRec) {
                     // Both must contribute — a pair where only one carries cannot produce this locus
                     if (sireCovers && damCovers) score += 2;
                 } else {
                     // Dominant (or dominant-acting lowercase like at) — one parent is sufficient
-                    if (sireCovers || damCovers) score += 2;
+                    // If NEITHER parent shows any evidence → blocked (dominant can't be silently carried)
+                    if (!sireCovers && !damCovers) dominantBlocked = true;
+                    else score += 2;
                 }
             }
-            return score;
+            return { score, dominantBlocked };
         };
 
         // Sort animals by how many target loci they cover, then cross top candidates
@@ -1393,12 +1405,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
         const pairs = [];
         if (selectedSire?.id_public && selectedDam?.id_public) {
-            pairs.push({
+            const { score: selScore, dominantBlocked: selBlocked } = scorePairProduction(selectedSire, selectedDam);
+            if (!selBlocked) pairs.push({
                 sireId: selectedSire.id_public,
                 sireName: selectedSire.name || selectedSire.id_public,
                 damId: selectedDam.id_public,
                 damName: selectedDam.name || selectedDam.id_public,
-                pairScore: scorePairProduction(selectedSire, selectedDam),
+                pairScore: selScore,
                 source: 'selected'
             });
         }
@@ -1406,12 +1419,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         scoredMales.slice(0, 10).forEach(({ animal: sire }) => {
             scoredFemales.slice(0, 10).forEach(({ animal: dam }) => {
                 if (sire.id_public === dam.id_public) return;
+                const { score, dominantBlocked } = scorePairProduction(sire, dam);
+                if (dominantBlocked) return; // dominant gene absent from both parents — impossible pair
                 pairs.push({
                     sireId: sire.id_public,
                     sireName: sire.name || sire.id_public,
                     damId: dam.id_public,
                     damName: dam.name || dam.id_public,
-                    pairScore: scorePairProduction(sire, dam),
+                    pairScore: score,
                     source: 'mine'
                 });
             });
