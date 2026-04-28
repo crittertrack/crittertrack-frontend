@@ -1270,12 +1270,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         const malePool = myAnimals.filter(a =>
             (a.species === speciesForPairs) &&
             ['Male', 'Intersex', 'Unknown'].includes(a.gender) &&
-            a.status !== 'Deceased'
+            a.status !== 'Deceased' &&
+            !a.isTransferred
         );
         const femalePool = myAnimals.filter(a =>
             (a.species === speciesForPairs) &&
             ['Female', 'Intersex', 'Unknown'].includes(a.gender) &&
-            a.status !== 'Deceased'
+            a.status !== 'Deceased' &&
+            !a.isTransferred
         );
 
         const selectedSire = tpSireId ? (myAnimals.find(a => a.id_public === tpSireId) || selectedTpSireAnimal) : null;
