@@ -1331,6 +1331,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         const { genotype: targetGenotype } = buildPrototypeGenotypeFromTraits(tpSelectedTraits);
         const targetLoci = Object.entries(targetGenotype); // [[locus, 'a1/a2'], ...]
 
+        // === DIAGNOSTICS (temporary) ===
+        console.log('[TP] selectedTraits:', tpSelectedTraits);
+        console.log('[TP] targetLoci:', targetLoci);
+        console.log('[TP] myAnimals total:', myAnimals.length);
+        console.log('[TP] malePool size:', malePool.length, malePool.map(a => `${a.id_public}(${a.species}|isViewOnly=${a.isViewOnly}|gc=${a.geneticCode||'none'})`));
+        console.log('[TP] femalePool size:', femalePool.length, femalePool.map(a => `${a.id_public}(${a.species}|isViewOnly=${a.isViewOnly}|gc=${a.geneticCode||'none'})`));
+
         // Keywords indicating an animal likely carries at least one copy of an allele (fallback only)
         const ALLELE_KW = {
             'a':    ['black','chocolate','blue','dove','lilac','champagne','silver','lavender','tan','fox'],
