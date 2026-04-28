@@ -1882,7 +1882,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 setMyAnimals([...animalsData]);
             });
         } catch (error) {
-            console.error('Error fetching animals:', error);
+            console.error('[fetchMyAnimals] Error fetching animals:', error?.response?.status, error?.message);
             setMyAnimals([]);
         }
     };
@@ -2990,6 +2990,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             setTpMockResults([]);
                             setTpGenerating(false);
                             setTpExpandedCard(null);
+                            // Ensure animals are loaded for the pairing pool
+                            if (!myAnimalsLoaded) fetchMyAnimals().catch(err => console.error('[TP] animal fetch failed:', err));
                         }}
                         className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border shadow-sm bg-white border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
                         title="Test a sire/dam pairing to predict COI"
@@ -5523,11 +5525,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     disabled={
                                         tpSelectedTraits.length === 0 ||
                                         tpGenerating ||
+                                        !myAnimalsLoaded ||
                                         (tpSelectedTraits.includes('fox') && !tpSelectedTraits.some(id => ['albino','himalayan','bone','siamese','burmese','stone','beige','colorpoint-beige','mock-choc'].includes(id)))
                                     }
                                     className="w-full py-2 px-4 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors"
                                 >
-                                    {tpGenerating ? <><Loader2 className="w-4 h-4 animate-spin" /> Building Prototype Results...</> : <><Star size={15} /> Find Best Pairings (Prototype)</>}
+                                    {!myAnimalsLoaded ? <><Loader2 className="w-4 h-4 animate-spin" /> Loading Animals...</> : tpGenerating ? <><Loader2 className="w-4 h-4 animate-spin" /> Building Prototype Results...</> : <><Star size={15} /> Find Best Pairings (Prototype)</>}
                                 </button>
                             </div>{/* end Run button section */}
 
