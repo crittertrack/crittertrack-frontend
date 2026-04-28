@@ -1313,15 +1313,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             (a.species === speciesForPairs) &&
             ['Male', 'Intersex', 'Unknown'].includes(a.gender) &&
             a.status !== 'Deceased' &&
-            !a.isTransferred &&
-            (!a.ownerId_public || a.ownerId_public === userProfile?.id_public)
+            !a.isTransferred
         );
         const femalePool = myAnimals.filter(a =>
             (a.species === speciesForPairs) &&
             ['Female', 'Intersex', 'Unknown'].includes(a.gender) &&
             a.status !== 'Deceased' &&
-            !a.isTransferred &&
-            (!a.ownerId_public || a.ownerId_public === userProfile?.id_public)
+            !a.isTransferred
         );
 
         const selectedSire = tpSireId ? (myAnimals.find(a => a.id_public === tpSireId) || selectedTpSireAnimal) : null;
@@ -1386,12 +1384,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 .filter(Boolean).join(' ').toLowerCase();
 
         // Does this animal carry at least one copy of a1 OR a2?
-        // Primary: check geneticCode allele set. Fallback: keyword match on variety text.
+        // Genetic code is checked first (definitive positive). If the allele isn't found there,
+        // falls back to keyword matching — this handles partial genetic codes and missing codes.
         const animalCoversLocus = (animal, a1, a2) => {
             if (!animal) return false;
             if (animal.geneticCode) {
                 const alleles = getAlleles(animal);
-                return alleles.has(a1) || alleles.has(a2);
+                if (alleles.has(a1) || alleles.has(a2)) return true;
             }
             // Fallback: keyword matching on variety text fields
             const text = getVarietyText(animal);
@@ -1401,7 +1400,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         // Does this animal carry a specific single allele?
         const animalHasAllele = (animal, allele) => {
             if (!animal) return false;
-            if (animal.geneticCode) return getAlleles(animal).has(allele);
+            if (animal.geneticCode && getAlleles(animal).has(allele)) return true;
             const text = getVarietyText(animal);
             return (ALLELE_KW[allele] || []).some(kw => text.includes(kw));
         };
