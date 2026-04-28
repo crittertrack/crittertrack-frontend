@@ -1099,39 +1099,85 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         const selectedSire = tpSireId ? (myAnimals.find(a => a.id_public === tpSireId) || selectedTpSireAnimal) : null;
         const selectedDam = tpDamId ? (myAnimals.find(a => a.id_public === tpDamId) || selectedTpDamAnimal) : null;
 
-        // Build keyword set from target phenotype name + chip labels
-        const resolvedPhenotype = getPrototypePhenotypeInterpretation(tpSelectedTraits) || '';
-        const chipKeywords = tpSelectedTraits
-            .map(id => getTargetTraitChipById(id)?.label || '')
-            .join(' ');
-        const rawKeywords = `${resolvedPhenotype} ${chipKeywords}`
-            .toLowerCase()
-            .replace(/[^a-z0-9\s]/g, ' ')
-            .split(/\s+/)
-            .filter(w => w.length > 2);
-        const keywords = [...new Set(rawKeywords)];
+        // Derive per-locus requirements from the target chip selection
+        const { genotype: targetGenotype } = buildPrototypeGenotypeFromTraits(tpSelectedTraits);
+        const targetLoci = Object.entries(targetGenotype); // [[locus, 'a1/a2'], ...]
 
-        // Score an individual animal by keyword match against its descriptive fields
-        const scoreAnimal = (animal) => {
-            if (!animal) return 0;
-            const primaryText = [animal.color, animal.phenotype, animal.coatPattern]
+        // Keywords indicating an animal likely carries at least one copy of an allele
+        const ALLELE_KW = {
+            'a':    ['black','chocolate','blue','dove','lilac','champagne','silver','lavender','tan','fox'],
+            'at':   ['tan','fox','black tan'],
+            'A':    ['agouti','cinnamon','argente','blue agouti','silver agouti'],
+            'Ay':   ['dominant red','dominant fawn','dominant amber'],
+            'Avy':  ['brindle','american brindle','am. brindle'],
+            'b':    ['chocolate','cinnamon','dove','lilac','champagne','lavender','mock chocolate'],
+            'd':    ['blue','dove','lilac','silver','lavender','blue agouti','dominant amber','recessive amber'],
+            'p':    ['dove','champagne','argente','silver','lavender','cinnamon argente','dominant fawn','recessive fawn'],
+            'e':    ['recessive red','recessive fawn','recessive amber'],
+            'c':    ['albino','himalayan','bone'],
+            'ch':   ['siamese','himalayan','burmese','colorpoint'],
+            'ce':   ['beige','bone','stone','mock chocolate','sepia'],
+            'cch':  ['stone','burmese','colorpoint beige','sepia','silver agouti'],
+            'si':   ['pearl','silver agouti'],
+            's':    ['pied','piebald'],
+            'W':    ['variegated'],
+            'Wsh':  ['banded'],
+            'rst':  ['rosette'],
+            'go':   ['longhair','angora','texel'],
+            'Re':   ['astrex','texel','rex'],
+            'sa':   ['satin'],
+            'rn':   ['merle'],
+            'Spl':  ['splashed'],
+            'fz':   ['fuzz'],
+            'Nu':   ['hairless'],
+            'Mobr': ['xbrindle'],
+        };
+
+        const getVarietyText = (animal) =>
+            [animal.color, animal.phenotype, animal.coatPattern, animal.coat, animal.markings, animal.morph]
                 .filter(Boolean).join(' ').toLowerCase();
-            const secondaryText = [animal.coat, animal.markings, animal.morph, animal.eyeColor]
-                .filter(Boolean).join(' ').toLowerCase();
+
+        // Does this animal's variety text suggest it carries the alleles needed at this locus?
+        const animalCoversLocus = (animal, a1, a2) => {
+            if (!animal) return false;
+            const text = getVarietyText(animal);
+            return [...(ALLELE_KW[a1] || []), ...(ALLELE_KW[a2] || [])].some(kw => text.includes(kw));
+        };
+
+        // Score how many of the target loci an animal shows evidence of carrying
+        const scoreAnimalLoci = (animal) =>
+            targetLoci.reduce((acc, [, value]) => {
+                const [a1, a2] = value.split('/');
+                return acc + (animalCoversLocus(animal, a1, a2) ? 1 : 0);
+            }, 0);
+
+        // Score a pair on production potential per locus:
+        //   recessive (a1===a2 lowercase) or compound-het: BOTH must carry → +2 both, +1 one only
+        //   dominant-het: ONE parent is enough → +2 if either carries
+        const scorePairProduction = (sire, dam) => {
             let score = 0;
-            keywords.forEach(kw => {
-                if (primaryText.includes(kw)) score += 2;
-                else if (secondaryText.includes(kw)) score += 1;
-            });
+            for (const [, value] of targetLoci) {
+                const [a1, a2] = value.split('/');
+                const sireCovers = animalCoversLocus(sire, a1, a2);
+                const damCovers  = animalCoversLocus(dam,  a1, a2);
+                const isRecessiveHom = a1 === a2 && a1 === a1.toLowerCase();
+                const isCompoundHet  = a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase();
+                if (isRecessiveHom || isCompoundHet) {
+                    if (sireCovers && damCovers) score += 2;
+                    else if (sireCovers || damCovers) score += 1;
+                } else {
+                    if (sireCovers || damCovers) score += 2;
+                }
+            }
             return score;
         };
 
-        // Score all animals upfront, then build pairs from the best candidates
+        // Sort animals by how many target loci they cover, then cross top candidates
         const scoredMales = malePool
-            .map(a => ({ animal: a, score: scoreAnimal(a) }))
+            .map(a => ({ animal: a, score: scoreAnimalLoci(a) }))
             .sort((a, b) => b.score - a.score);
         const scoredFemales = femalePool
-            .map(a => ({ animal: a, score: scoreAnimal(a) }))
+            .map(a => ({ animal: a, score: scoreAnimalLoci(a) }))
             .sort((a, b) => b.score - a.score);
 
         const pairs = [];
@@ -1141,21 +1187,20 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 sireName: selectedSire.name || selectedSire.id_public,
                 damId: selectedDam.id_public,
                 damName: selectedDam.name || selectedDam.id_public,
-                pairScore: scoreAnimal(selectedSire) + scoreAnimal(selectedDam),
+                pairScore: scorePairProduction(selectedSire, selectedDam),
                 source: 'selected'
             });
         }
 
-        // Cross top-scored males × females (up to 8 each) to get candidate pairs
-        scoredMales.slice(0, 8).forEach(({ animal: sire, score: ss }) => {
-            scoredFemales.slice(0, 8).forEach(({ animal: dam, score: ds }) => {
+        scoredMales.slice(0, 10).forEach(({ animal: sire }) => {
+            scoredFemales.slice(0, 10).forEach(({ animal: dam }) => {
                 if (sire.id_public === dam.id_public) return;
                 pairs.push({
                     sireId: sire.id_public,
                     sireName: sire.name || sire.id_public,
                     damId: dam.id_public,
                     damName: dam.name || dam.id_public,
-                    pairScore: ss + ds,
+                    pairScore: scorePairProduction(sire, dam),
                     source: 'mine'
                 });
             });
@@ -1170,56 +1215,51 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             uniq.push(p);
         });
 
-        const selectedTraitLabels = tpSelectedTraits.map(id => {  // eslint-disable-line no-unused-vars
-            const found = getTargetTraitChipById(id);
-            return found ? formatTargetTraitChip(found) : id;
-        });
         const { assumptions: prototypeAssumptions } = buildPrototypeGenotypeFromTraits(tpSelectedTraits);
         const phenotypeInterpretation = getPrototypePhenotypeInterpretation(tpSelectedTraits);
         const phenotypeConfidence = getPrototypePhenotypeConfidence(tpSelectedTraits);
 
-        const maxPairScore = Math.max(1, ...uniq.map(p => p.pairScore || 0));
+        const maxPossibleScore = Math.max(1, targetLoci.length * 2);
 
         const results = uniq
             .sort((a, b) => (b.pairScore || 0) - (a.pairScore || 0))
             .slice(0, 6)
             .map((pair) => {
-            const pairScore = pair.pairScore || 0;
-            // Probability: 15–85 scaled by how well parents match target keywords, with small hash jitter
-            const hash = `${pair.sireId}${pair.damId}`
-                .split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-            const jitter = (hash % 9) - 4;
-            const scaled = maxPairScore > 0 ? (pairScore / maxPairScore) : 0;
-            const probability = Math.max(5, Math.min(90, Math.round(15 + scaled * 70 + jitter)));
+                const pairScore = pair.pairScore || 0;
+                const hash = `${pair.sireId}${pair.damId}`
+                    .split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+                const jitter = (hash % 9) - 4;
+                const scaled = pairScore / maxPossibleScore;
+                const probability = Math.max(5, Math.min(90, Math.round(10 + scaled * 80 + jitter)));
 
-            const coiKey = `${pair.sireId}:${pair.damId}`;
-            const coiValue = (pair.source === 'selected' && tpCOI != null)
-                ? tpCOI
-                : coiCacheRef.current[coiKey] != null
-                    ? coiCacheRef.current[coiKey]
-                    : Math.max(0, ((hash % 190) / 10));
+                const coiKey = `${pair.sireId}:${pair.damId}`;
+                const coiValue = (pair.source === 'selected' && tpCOI != null)
+                    ? tpCOI
+                    : coiCacheRef.current[coiKey] != null
+                        ? coiCacheRef.current[coiKey]
+                        : Math.max(0, ((hash % 190) / 10));
 
-            const warnings = [];
-            if (coiValue >= 12.5) warnings.push('Higher COI than ideal range');
-            if (tpSourceMode === 'mine+favorited' && pair.source !== 'mine') warnings.push('Favorited external candidate');
-            if (pairScore === 0) warnings.push('No phenotype overlap detected in recorded variety');
+                const warnings = [];
+                if (coiValue >= 12.5) warnings.push('Higher COI than ideal range');
+                if (tpSourceMode === 'mine+favorited' && pair.source !== 'mine') warnings.push('Favorited external candidate');
+                if (pairScore === 0) warnings.push('No carrier evidence found for target loci in recorded variety');
 
-            return {
-                ...pair,
-                probability,
-                coiValue,
-                warnings,
-                phenotypeConfidence,
-                assumptions: prototypeAssumptions,
-                explanation: [
-                    phenotypeInterpretation ? `Target: ${phenotypeInterpretation}` : null,
-                    `Phenotype keyword match score: ${pairScore}/${maxPairScore * 2} (sire + dam combined)`,
-                    `Confidence: ${phenotypeConfidence.label} — ${phenotypeConfidence.detail}`,
-                    prototypeAssumptions.length ? `Assumptions: ${prototypeAssumptions.join(' ')}` : null,
-                    `Scoring is keyword-based on recorded variety text (prototype).`,
-                ].filter(Boolean)
-            };
-        });
+                return {
+                    ...pair,
+                    probability,
+                    coiValue,
+                    warnings,
+                    phenotypeConfidence,
+                    assumptions: prototypeAssumptions,
+                    explanation: [
+                        phenotypeInterpretation ? `Target: ${phenotypeInterpretation}` : null,
+                        `Carrier evidence: ${pairScore} / ${maxPossibleScore} across ${targetLoci.length} required loci`,
+                        `Confidence: ${phenotypeConfidence.label} — ${phenotypeConfidence.detail}`,
+                        prototypeAssumptions.length ? `Assumptions: ${prototypeAssumptions.join(' ')}` : null,
+                        `Scoring is based on allele carrier evidence in each animal's recorded variety (prototype).`,
+                    ].filter(Boolean)
+                };
+            });
 
         setTimeout(() => {
             setTpMockResults(results);
