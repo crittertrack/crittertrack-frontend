@@ -1331,7 +1331,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         const { genotype: targetGenotype } = buildPrototypeGenotypeFromTraits(tpSelectedTraits);
         const targetLoci = Object.entries(targetGenotype); // [[locus, 'a1/a2'], ...]
 
-        // Keywords indicating an animal likely carries at least one copy of an allele
+        // Keywords indicating an animal likely carries at least one copy of an allele (fallback only)
         const ALLELE_KW = {
             'a':    ['black','chocolate','blue','dove','lilac','champagne','silver','lavender','tan','fox'],
             'at':   ['tan','fox','black tan'],
@@ -1362,15 +1362,48 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             'U':    ['umbrous'],
         };
 
+        // Parse an animal's geneticCode string ("a/a d/d Go/Go ...") into a set of alleles present.
+        // An animal carries an allele if either slot at any locus contains it.
+        const parseAnimalAlleles = (animal) => {
+            const alleles = new Set();
+            if (!animal?.geneticCode) return alleles;
+            animal.geneticCode.replace(/,/g, ' ').trim().split(/\s+/).forEach(part => {
+                const m = part.match(/^([A-Za-z]+)\/([A-Za-z]+)$/);
+                if (m) { alleles.add(m[1]); alleles.add(m[2]); }
+            });
+            return alleles;
+        };
+
+        // Allele-set cache to avoid re-parsing per animal per check
+        const alleleCache = new Map();
+        const getAlleles = (animal) => {
+            if (!alleleCache.has(animal.id_public)) alleleCache.set(animal.id_public, parseAnimalAlleles(animal));
+            return alleleCache.get(animal.id_public);
+        };
+
         const getVarietyText = (animal) =>
             [animal.color, animal.phenotype, animal.coatPattern, animal.coat, animal.markings, animal.morph]
                 .filter(Boolean).join(' ').toLowerCase();
 
-        // Does this animal's variety text suggest it carries the alleles needed at this locus?
+        // Does this animal carry at least one copy of a1 OR a2?
+        // Primary: check geneticCode allele set. Fallback: keyword match on variety text.
         const animalCoversLocus = (animal, a1, a2) => {
             if (!animal) return false;
+            if (animal.geneticCode) {
+                const alleles = getAlleles(animal);
+                return alleles.has(a1) || alleles.has(a2);
+            }
+            // Fallback: keyword matching on variety text fields
             const text = getVarietyText(animal);
             return [...(ALLELE_KW[a1] || []), ...(ALLELE_KW[a2] || [])].some(kw => text.includes(kw));
+        };
+
+        // Does this animal carry a specific single allele?
+        const animalHasAllele = (animal, allele) => {
+            if (!animal) return false;
+            if (animal.geneticCode) return getAlleles(animal).has(allele);
+            const text = getVarietyText(animal);
+            return (ALLELE_KW[allele] || []).some(kw => text.includes(kw));
         };
 
         // Score how many of the target loci an animal shows evidence of carrying
@@ -1389,12 +1422,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         // Does the given pair split-cover a compound-het dominant (one parent has a1, the other has a2)?
         const splitCoverCompoundHetDom = (sire, dam, value) => {
             const [a1, a2] = value.split('/');
-            const sireText = getVarietyText(sire);
-            const damText  = getVarietyText(dam);
-            const sireHasA1 = (ALLELE_KW[a1] || []).some(kw => sireText.includes(kw));
-            const sireHasA2 = (ALLELE_KW[a2] || []).some(kw => sireText.includes(kw));
-            const damHasA1  = (ALLELE_KW[a1] || []).some(kw => damText.includes(kw));
-            const damHasA2  = (ALLELE_KW[a2] || []).some(kw => damText.includes(kw));
+            const sireHasA1 = animalHasAllele(sire, a1);
+            const sireHasA2 = animalHasAllele(sire, a2);
+            const damHasA1  = animalHasAllele(dam,  a1);
+            const damHasA2  = animalHasAllele(dam,  a2);
             // Valid split: one parent has a1 (but not a2), the other has a2 (but not a1)
             return (sireHasA1 && !sireHasA2 && damHasA2 && !damHasA1) || (sireHasA2 && !sireHasA1 && damHasA1 && !damHasA2);
         };
@@ -1421,10 +1452,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 // Compound-het dominant special case (e.g., Avy/at)
                 if (locus === 'A' && COMPOUND_HET_DOMINANT.has(value)) {
                     const [da1, da2] = value.split('/');
-                    const sireText = getVarietyText(sire);
-                    const damText  = getVarietyText(dam);
-                    const anyHasA1 = (ALLELE_KW[da1] || []).some(kw => sireText.includes(kw) || damText.includes(kw));
-                    const anyHasA2 = (ALLELE_KW[da2] || []).some(kw => sireText.includes(kw) || damText.includes(kw));
+                    const anyHasA1 = animalHasAllele(sire, da1) || animalHasAllele(dam, da1);
+                    const anyHasA2 = animalHasAllele(sire, da2) || animalHasAllele(dam, da2);
                     // If neither parent in the pair has evidence for a required dominant allele → blocked
                     if (!anyHasA1 || !anyHasA2) dominantBlocked = true;
                     if (splitCoverCompoundHetDom(sire, dam, value)) score += 2;
