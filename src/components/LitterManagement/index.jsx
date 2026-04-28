@@ -1310,15 +1310,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
         const speciesForPairs = TARGET_OUTCOME_PROTOTYPE_SPECIES;
         const malePool = myAnimals.filter(a =>
-            (a.species === speciesForPairs) &&
+            (a.species?.toLowerCase() === speciesForPairs.toLowerCase()) &&
             ['Male', 'Intersex', 'Unknown'].includes(a.gender) &&
             a.status !== 'Deceased' &&
+            !a.isViewOnly &&
             !a.isTransferred
         );
         const femalePool = myAnimals.filter(a =>
-            (a.species === speciesForPairs) &&
+            (a.species?.toLowerCase() === speciesForPairs.toLowerCase()) &&
             ['Female', 'Intersex', 'Unknown'].includes(a.gender) &&
             a.status !== 'Deceased' &&
+            !a.isViewOnly &&
             !a.isTransferred
         );
 
