@@ -4823,13 +4823,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         )}
 
                         {tpMode === 'target' && (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-100">
-                            <div className="p-5 space-y-5">
-                                <p className="text-sm text-gray-500">Prototype only: Fancy Mouse is currently supported. Choose source + trait chips, then preview ranked pairing suggestions while keeping COI mode available in the other tab.</p>
-                                <hr className="border-gray-100" />
+                        <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-200">
+                            <div className="divide-y divide-gray-200">
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Pair Source</label>
+                                {/* Description */}
+                                <div className="px-5 py-4">
+                                    <p className="text-sm text-gray-500">Prototype only: Fancy Mouse is currently supported. Choose source + trait chips, then preview ranked pairing suggestions while keeping COI mode available in the other tab.</p>
+                                </div>
+
+                                {/* Pair Source */}
+                                <div className="px-5 py-4">
+                                    <label className="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Pair Source</label>
                                     <div className="flex gap-2">
                                         <button
                                             type="button"
@@ -4847,9 +4851,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </button>
                                     </div>
                                 </div>
-                                <hr className="border-gray-100" />
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Species</label>
+
+                                {/* Species */}
+                                <div className="px-5 py-4">
+                                    <label className="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Species</label>
                                     <div className="w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded-lg text-sm font-medium text-gray-700">
                                         {TARGET_OUTCOME_PROTOTYPE_SPECIES}
                                     </div>
@@ -4859,12 +4864,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     </div>
                                 </div>
 
-                                <div>
-                                    <div className="flex items-center justify-between mb-2">
-                                        <label className="text-sm font-medium text-gray-700">
+                                {/* Trait Chips */}
+                                <div className="px-5 py-4">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <label className="text-xs font-semibold uppercase tracking-wide text-gray-400">
                                             Trait Chips
                                             {tpSelectedTraits.length > 0 && (
-                                                <span className="ml-1.5 px-1.5 py-0.5 text-[10px] rounded-full bg-primary/20 text-gray-700 font-semibold">
+                                                <span className="ml-1.5 px-1.5 py-0.5 text-[10px] rounded-full bg-primary/20 text-gray-700 font-semibold normal-case tracking-normal">
                                                     {tpSelectedTraits.length} selected
                                                 </span>
                                             )}
@@ -4910,8 +4916,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     const conf = getPrototypePhenotypeConfidence(tpSelectedTraits);
                                     const isResolved = conf?.level === 'high' || conf?.level === 'medium';
                                     return (
-                                        <div className={`rounded-lg border px-3 py-2 text-xs ${isResolved ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-gray-200 bg-gray-50 text-gray-500'}`}>
-                                            <div className="flex items-center gap-1.5">
+                                        <div className={`px-5 py-4 border-b border-gray-200 text-xs ${isResolved ? 'bg-emerald-50' : 'bg-gray-50'}`}>
+                                            <div className={`flex items-center gap-1.5 ${isResolved ? 'text-emerald-800' : 'text-gray-500'}`}>
                                                 <span className={`inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 ${isResolved ? 'bg-emerald-500' : 'bg-gray-400'}`} />
                                                 <span className="font-semibold flex-shrink-0">Target phenotype:</span>
                                                 <span className="truncate">{preview || 'Select chips above to preview'}</span>
@@ -4923,6 +4929,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     );
                                 })()}
 
+{/* Run button */}
+                                <div className="px-5 py-4">
                                 <button
                                     type="button"
                                     onClick={runTargetOutcomePrototype}
@@ -4931,7 +4939,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 >
                                     {tpGenerating ? <><Loader2 className="w-4 h-4 animate-spin" /> Building Prototype Results...</> : <><Star size={15} /> Find Best Pairings (Prototype)</>}
                                 </button>
-                            </div>
+                            </div>{/* end Run button section */}
+
+                            </div>{/* end left divide-y column */}
 
                             <div className="p-5 space-y-3">
                                 <div className="flex items-center justify-between">
