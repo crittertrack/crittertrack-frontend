@@ -4749,7 +4749,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         <div className="p-5 space-y-5">
                             <p className="text-sm text-gray-500">Pick a sire and dam to calculate the predicted Coefficient of Inbreeding (COI) for their offspring.</p>
                             <hr className="border-gray-100" />
-                            {/* Sire */}}
+                            {/* Sire */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Sire (Father)</label>
                                 <button
