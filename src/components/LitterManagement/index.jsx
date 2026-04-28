@@ -1767,7 +1767,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const response = await axios.get(`${API_BASE_URL}/animals`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            const animalsData = response.data || [];
+            const animalsData = (response.data || []).filter(a => a.ownerId_public === userProfile?.id_public);
             
             // Set animals immediately so UI can render
             setMyAnimals(animalsData);
