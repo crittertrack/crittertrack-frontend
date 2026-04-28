@@ -947,7 +947,7 @@ const TpResultCard = ({ r, idx, globalIdx, expandedCard, setExpandedCard, onUseP
             </div>
             {isExpanded && (
                 <div className="border-t border-gray-100 bg-gray-50 px-3 py-2.5 space-y-1.5">
-                    <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-wide">Reasoning</div>
+                    <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-wide">Why this pair?</div>
                     <ul className="text-xs text-gray-600 space-y-0.5 list-disc list-inside">
                         {r.explanation.map((line, i) => <li key={i}>{line}</li>)}
                     </ul>
@@ -1362,14 +1362,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     phenotypeConfidence,
                     assumptions: prototypeAssumptions,
                     explanation: [
-                        phenotypeInterpretation ? `Target: ${phenotypeInterpretation}` : null,
-                        `Carrier evidence: ${pairScore} / ${maxPossibleScore} across ${targetLoci.length} required loci`,
+                        phenotypeInterpretation ? `You're targeting: ${phenotypeInterpretation}` : null,
+                        `This pair covers ${pairScore} out of ${maxPossibleScore} points across ${targetLoci.length} trait(s) needed.`,
                         tier === 'produce'
-                            ? 'Both parents show evidence for all required loci — can produce target phenotype.'
-                            : 'Partial coverage — pair may produce carriers but target phenotype not guaranteed.',
-                        `Confidence: ${phenotypeConfidence.label} — ${phenotypeConfidence.detail}`,
-                        prototypeAssumptions.length ? `Assumptions: ${prototypeAssumptions.join(' ')}` : null,
-                        `Scoring is based on allele carrier evidence in recorded variety text (prototype).`,
+                            ? 'Both parents carry the right genes — this pair can produce your target.'
+                            : `Not all traits are covered yet. Offspring from this pair might carry some of the right genes but probably won't show the full target look.`,
+                        `Match confidence: ${phenotypeConfidence.label}`,
+                        prototypeAssumptions.length ? `Assumptions made: ${prototypeAssumptions.join(' ')}` : null,
+                        `Coverage is estimated from each animal's recorded variety, color, and coat notes.`,
                     ].filter(Boolean)
                 };
             })
