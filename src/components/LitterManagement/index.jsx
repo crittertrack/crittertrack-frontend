@@ -1073,7 +1073,7 @@ const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) =>
     const nodataResults = results.filter(r => r.tier === 'nodata');
     const nodataTotal = nodataResults[0]?.nodataTotal ?? nodataResults.length;
     return (
-        <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
+        <div className="space-y-3 pr-1">
             {produceResults.length > 0 && (
                 <div>
                     <div className="flex items-center gap-2 mb-1.5">
@@ -5385,10 +5385,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             </div>
                         </div>
                         {/* Scrollable body */}
-                        <div className="overflow-y-auto flex-1">
+                        <div className="flex-1 overflow-hidden">
 
                         {tpMode === 'coi' && (
-                        <div className="p-5 space-y-5">
+                        <div className="p-5 space-y-5 overflow-y-auto h-full">
                             <p className="text-sm text-gray-500">Pick a sire and dam to calculate the predicted Coefficient of Inbreeding (COI) for their offspring.</p>
                             <hr className="border-gray-100" />
                             {/* Sire */}
@@ -5465,8 +5465,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         )}
 
                         {tpMode === 'target' && (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-200">
-                            <div className="divide-y divide-gray-200">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-200 h-full">
+                            <div className="divide-y divide-gray-200 overflow-y-auto">
 
                                 {/* Pair Source + Species */}
                                 <div className="px-5 py-4">
@@ -5610,7 +5610,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                             </div>{/* end left divide-y column */}
 
-                            <div className="p-5 space-y-3">
+                            <div className="p-5 space-y-3 overflow-y-auto">
                                 <div className="flex items-center justify-between">
                                     <h4 className="text-sm font-semibold text-gray-700">Ranked Results Preview</h4>
                                     <button
