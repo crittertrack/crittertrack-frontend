@@ -1361,14 +1361,26 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         };
 
         // Parse an animal's geneticCode string ("a/a d/d Go/Go ...") into a set of alleles present.
+        // Handles: spaces, commas, tabs, extra whitespace, mixed case allele names like Avy, Wsh, Mobr.
         // An animal carries an allele if either slot at any locus contains it.
         const parseAnimalAlleles = (animal) => {
             const alleles = new Set();
             if (!animal?.geneticCode) return alleles;
-            animal.geneticCode.replace(/,/g, ' ').trim().split(/\s+/).forEach(part => {
-                const m = part.match(/^([A-Za-z]+)\/([A-Za-z]+)$/);
-                if (m) { alleles.add(m[1]); alleles.add(m[2]); }
-            });
+            const parts = animal.geneticCode
+                .replace(/,/g, ' ')
+                .replace(/\t/g, ' ')
+                .trim()
+                .split(/\s+/)
+                .filter(Boolean);
+            for (const part of parts) {
+                const slash = part.indexOf('/');
+                if (slash > 0 && slash < part.length - 1) {
+                    const a1 = part.slice(0, slash).trim();
+                    const a2 = part.slice(slash + 1).trim();
+                    if (a1) alleles.add(a1);
+                    if (a2) alleles.add(a2);
+                }
+            }
             return alleles;
         };
 
