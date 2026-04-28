@@ -25,42 +25,37 @@ const TARGET_OUTCOME_PENDING_SPECIES = DEFAULT_SPECIES_OPTIONS.filter(species =>
 
 const TARGET_OUTCOME_TRAIT_CHIPS = {
     'Fancy Mouse': [
-        // Base Color
-        { id: 'agouti-AA',              label: 'Agouti',                code: 'A/A',          group: 'Base Color' },
-        { id: 'agouti-Aa',              label: 'Agouti Carrier',        code: 'A/a',          group: 'Base Color' },
-        { id: 'black-aa',               label: 'Black',                 code: 'a/a',          group: 'Base Color' },
-        { id: 'tan-atat',               label: 'Tan',                   code: 'at/at',        group: 'Base Color' },
-        { id: 'chocolate-bb',           label: 'Chocolate',             code: 'b/b',          group: 'Base Color' },
-        { id: 'chocolate-carrier',      label: 'Chocolate Carrier',     code: 'B/b',          group: 'Base Color' },
-        { id: 'blue-dd',                label: 'Blue',                  code: 'd/d',          group: 'Base Color' },
-        { id: 'blue-carrier',           label: 'Blue Carrier',          code: 'D/d',          group: 'Base Color' },
-        { id: 'argente-pp',             label: 'Argente',               code: 'p/p + agouti', group: 'Base Color' },
-        { id: 'argente-carrier',        label: 'Argente Carrier',       code: 'P/p',          group: 'Base Color' },
-        { id: 'recessive-red-ee',       label: 'Recessive Red',         code: 'e/e',          group: 'Base Color' },
-        { id: 'recessive-red-carrier',  label: 'Rec. Red Carrier',      code: 'E/e',          group: 'Base Color' },
-        // Albino & Dilution
-        { id: 'albino-cc',              label: 'Albino',                code: 'c/c',          group: 'Albino & Dilution' },
-        { id: 'albino-carrier',         label: 'Albino Carrier',        code: 'C/c',          group: 'Albino & Dilution' },
-        { id: 'siamese-chch',           label: 'Siamese',               code: 'ch/ch',        group: 'Albino & Dilution' },
-        { id: 'himalayan-cch',          label: 'Himalayan',             code: 'c/ch',         group: 'Albino & Dilution' },
+        // Base Color — A locus
+        { id: 'agouti',         label: 'Agouti',            code: 'A/-',     group: 'Base Color' },
+        { id: 'black',          label: 'Black',             code: 'a/a',     group: 'Base Color' },
+        { id: 'black-tan',      label: 'Black Tan',         code: 'at/-',    group: 'Base Color' },
+        { id: 'dom-yellow',     label: 'Dom. Yellow',       code: 'Ay/-',    group: 'Base Color' },
+        { id: 'brindle',        label: 'Brindle',           code: 'Avy/-',   group: 'Base Color' },
+        // Base Color — B locus
+        { id: 'chocolate',      label: 'Chocolate',         code: 'b/b',     group: 'Base Color' },
+        // Base Color — D locus
+        { id: 'blue',           label: 'Blue',              code: 'd/d',     group: 'Base Color' },
+        // Base Color — E locus
+        { id: 'rec-red',        label: 'Recessive Red',     code: 'e/e',     group: 'Base Color' },
+        // Albino & Dilution — C locus
+        { id: 'albino',         label: 'Albino',            code: 'c/c',     group: 'Albino & Dilution' },
+        { id: 'siamese',        label: 'Siamese',           code: 'ch/ch',   group: 'Albino & Dilution' },
+        { id: 'himalayan',      label: 'Himalayan',         code: 'c/ch',    group: 'Albino & Dilution' },
+        // Albino & Dilution — P locus
+        { id: 'pink-eye',       label: 'Pink-eye Dilute',   code: 'p/p',     group: 'Albino & Dilution' },
         // Pattern & Markings
-        { id: 'pied-ss',                label: 'Pied',                  code: 's/s',          group: 'Pattern & Markings' },
-        { id: 'pied-carrier',           label: 'Pied Carrier',          code: 'S/s',          group: 'Pattern & Markings' },
-        { id: 'roan-rnrn',              label: 'Roan',                  code: 'rn/rn',        group: 'Pattern & Markings' },
-        { id: 'roan-carrier',           label: 'Roan Carrier',          code: 'Rn/rn',        group: 'Pattern & Markings' },
-        { id: 'banded-Ww',              label: 'Banded',                code: 'W/w',          group: 'Pattern & Markings' },
-        { id: 'variegated-Wshw',        label: 'Variegated',            code: 'Wsh/w',        group: 'Pattern & Markings' },
-        { id: 'splashed-Splspl',        label: 'Splashed',              code: 'Spl/spl',      group: 'Pattern & Markings' },
-        { id: 'silver-sisi',            label: 'Silver',                code: 'si/si',        group: 'Pattern & Markings' },
+        { id: 'pied',           label: 'Pied',              code: 's/s',     group: 'Pattern & Markings' },
+        { id: 'roan',           label: 'Roan',              code: 'rn/rn',   group: 'Pattern & Markings' },
+        { id: 'banded',         label: 'Banded',            code: 'W/w',     group: 'Pattern & Markings' },
+        { id: 'variegated',     label: 'Variegated',        code: 'Wsh/w',   group: 'Pattern & Markings' },
+        { id: 'splashed',       label: 'Splashed',          code: 'Spl/spl', group: 'Pattern & Markings' },
+        { id: 'silver',         label: 'Silver',            code: 'si/si',   group: 'Pattern & Markings' },
         // Coat & Texture
-        { id: 'satin-sasa',             label: 'Satin',                 code: 'sa/sa',        group: 'Coat & Texture' },
-        { id: 'satin-carrier',          label: 'Satin Carrier',         code: 'Sa/sa',        group: 'Coat & Texture' },
-        { id: 'rosette-rstrst',         label: 'Rosette',               code: 'rst/rst',      group: 'Coat & Texture' },
-        { id: 'rosette-carrier',        label: 'Rosette Carrier',       code: 'Rst/rst',      group: 'Coat & Texture' },
-        { id: 'longhair-gogo',          label: 'Longhair',              code: 'go/go',        group: 'Coat & Texture' },
-        { id: 'longhair-carrier',       label: 'Longhair Carrier',      code: 'Go/go',        group: 'Coat & Texture' },
-        { id: 'astrex-Rere',            label: 'Astrex',                code: 'Re/re',        group: 'Coat & Texture' },
-        { id: 'fuzz-fzfz',              label: 'Fuzz',                  code: 'fz/fz',        group: 'Coat & Texture' },
+        { id: 'satin',          label: 'Satin',             code: 'sa/sa',   group: 'Coat & Texture' },
+        { id: 'rosette',        label: 'Rosette',           code: 'rst/rst', group: 'Coat & Texture' },
+        { id: 'longhair',       label: 'Longhair',          code: 'go/go',   group: 'Coat & Texture' },
+        { id: 'astrex',         label: 'Astrex',            code: 'Re/-',    group: 'Coat & Texture' },
+        { id: 'fuzz',           label: 'Fuzz',              code: 'fz/fz',   group: 'Coat & Texture' },
     ],
 };
 
@@ -90,61 +85,52 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits) => {
 
     selectedTraits.forEach((id) => {
         switch (id) {
-            // A locus
-            case 'agouti-AA':             genotype.A  = 'A/A';      break;
-            case 'agouti-Aa':             genotype.A  = 'A/a';      break;
-            case 'black-aa':              genotype.A  = 'a/a';      break;
-            case 'tan-atat':              genotype.A  = 'at/at';    break;
+            // A locus — use most specific homozygous expression for phenotype preview
+            case 'agouti':      genotype.A   = 'A/A';      break;
+            case 'black':       genotype.A   = 'a/a';      break;
+            case 'black-tan':   genotype.A   = 'at/at';    break;
+            case 'dom-yellow':  genotype.A   = 'Ay/a';     break;
+            case 'brindle':     genotype.A   = 'Avy/a';    break;
             // B locus
-            case 'chocolate-bb':          genotype.B  = 'b/b';      break;
-            case 'chocolate-carrier':     genotype.B  = 'B/b';      break;
+            case 'chocolate':   genotype.B   = 'b/b';      break;
             // C locus
-            case 'albino-cc':             genotype.C  = 'c/c';      break;
-            case 'albino-carrier':        genotype.C  = 'C/c';      break;
-            case 'siamese-chch':          genotype.C  = 'ch/ch';    break;
-            case 'himalayan-cch':         genotype.C  = 'c/ch';     break;
+            case 'albino':      genotype.C   = 'c/c';      break;
+            case 'siamese':     genotype.C   = 'ch/ch';    break;
+            case 'himalayan':   genotype.C   = 'c/ch';     break;
             // D locus
-            case 'blue-dd':               genotype.D  = 'd/d';      break;
-            case 'blue-carrier':          genotype.D  = 'D/d';      break;
+            case 'blue':        genotype.D   = 'd/d';      break;
             // E locus
-            case 'recessive-red-ee':      genotype.E  = 'e/e';      break;
-            case 'recessive-red-carrier': genotype.E  = 'E/e';      break;
+            case 'rec-red':     genotype.E   = 'e/e';      break;
             // P locus
-            case 'argente-pp':            genotype.P  = 'p/p';      break;
-            case 'argente-carrier':       genotype.P  = 'P/p';      break;
+            case 'pink-eye':    genotype.P   = 'p/p';      break;
             // S locus
-            case 'pied-ss':               genotype.S  = 's/s';      break;
-            case 'pied-carrier':          genotype.S  = 'S/s';      break;
+            case 'pied':        genotype.S   = 's/s';      break;
             // W locus
-            case 'banded-Ww':             genotype.W  = 'W/w';      break;
-            case 'variegated-Wshw':       genotype.W  = 'Wsh/w';    break;
+            case 'banded':      genotype.W   = 'W/w';      break;
+            case 'variegated':  genotype.W   = 'Wsh/w';    break;
             // Spl locus
-            case 'splashed-Splspl':       genotype.Spl = 'Spl/spl'; break;
+            case 'splashed':    genotype.Spl = 'Spl/spl';  break;
             // Rn locus
-            case 'roan-rnrn':             genotype.Rn = 'rn/rn';    break;
-            case 'roan-carrier':          genotype.Rn = 'Rn/rn';    break;
+            case 'roan':        genotype.Rn  = 'rn/rn';    break;
             // Si locus
-            case 'silver-sisi':           genotype.Si = 'si/si';    break;
+            case 'silver':      genotype.Si  = 'si/si';    break;
             // Sa locus
-            case 'satin-sasa':            genotype.Sa = 'sa/sa';    break;
-            case 'satin-carrier':         genotype.Sa = 'Sa/sa';    break;
+            case 'satin':       genotype.Sa  = 'sa/sa';    break;
             // Rst locus
-            case 'rosette-rstrst':        genotype.Rst = 'rst/rst'; break;
-            case 'rosette-carrier':       genotype.Rst = 'Rst/rst'; break;
+            case 'rosette':     genotype.Rst = 'rst/rst';  break;
             // Go locus
-            case 'longhair-gogo':         genotype.Go = 'go/go';    break;
-            case 'longhair-carrier':      genotype.Go = 'Go/go';    break;
+            case 'longhair':    genotype.Go  = 'go/go';    break;
             // Re locus
-            case 'astrex-Rere':           genotype.Re = 'Re/re';    break;
+            case 'astrex':      genotype.Re  = 'Re/re';    break;
             // Fz locus
-            case 'fuzz-fzfz':             genotype.Fz = 'fz/fz';   break;
+            case 'fuzz':        genotype.Fz  = 'fz/fz';   break;
             default: break;
         }
     });
 
-    if (selectedTraits.includes('argente-pp') && !genotype.A) {
+    if (selectedTraits.includes('pink-eye') && !genotype.A) {
         genotype.A = 'A/A';
-        assumptions.push('Argente (p/p) assumed with agouti context (A/A) when A-locus was not explicitly selected.');
+        assumptions.push('Pink-eye Dilute (p/p) assumed with agouti context (A/A) — add an A-locus chip to override.');
     }
 
     return { genotype, assumptions };
