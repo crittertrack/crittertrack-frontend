@@ -183,14 +183,13 @@ const getPrototypePhenotypeInterpretation = (selectedTraits) => {
     const result = calculatePhenotype(genotype, genotype);
     if (result?.phenotype && result.phenotype !== 'Standard') {
         const extras = [];
-        if (result.carriers?.length) extras.push(`carriers: ${result.carriers.join(', ')}`);
         if (assumptions.length) extras.push(`assumptions: ${assumptions.join(' ')}`);
-        return `Phenotype preview (Genetics Builder logic): ${result.phenotype}${extras.length ? ` (${extras.join(' | ')})` : ''}`;
+        return `${result.phenotype}${extras.length ? ` (${extras.join(' | ')})` : ''}`;
     }
     if (assumptions.length) {
-        return `Phenotype preview pending more loci (${assumptions.join(' ')})`;
+        return `Pending more loci (${assumptions.join(' ')})`;
     }
-    return 'Phenotype preview pending more loci to resolve a named outcome.';
+    return 'Select more trait chips to resolve a named phenotype.';
 };
 
 const getPrototypePhenotypeConfidence = (selectedTraits) => {
