@@ -1099,6 +1099,41 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         const selectedSire = tpSireId ? (myAnimals.find(a => a.id_public === tpSireId) || selectedTpSireAnimal) : null;
         const selectedDam = tpDamId ? (myAnimals.find(a => a.id_public === tpDamId) || selectedTpDamAnimal) : null;
 
+        // Build keyword set from target phenotype name + chip labels
+        const resolvedPhenotype = getPrototypePhenotypeInterpretation(tpSelectedTraits) || '';
+        const chipKeywords = tpSelectedTraits
+            .map(id => getTargetTraitChipById(id)?.label || '')
+            .join(' ');
+        const rawKeywords = `${resolvedPhenotype} ${chipKeywords}`
+            .toLowerCase()
+            .replace(/[^a-z0-9\s]/g, ' ')
+            .split(/\s+/)
+            .filter(w => w.length > 2);
+        const keywords = [...new Set(rawKeywords)];
+
+        // Score an individual animal by keyword match against its descriptive fields
+        const scoreAnimal = (animal) => {
+            if (!animal) return 0;
+            const primaryText = [animal.color, animal.phenotype, animal.coatPattern]
+                .filter(Boolean).join(' ').toLowerCase();
+            const secondaryText = [animal.coat, animal.markings, animal.morph, animal.eyeColor]
+                .filter(Boolean).join(' ').toLowerCase();
+            let score = 0;
+            keywords.forEach(kw => {
+                if (primaryText.includes(kw)) score += 2;
+                else if (secondaryText.includes(kw)) score += 1;
+            });
+            return score;
+        };
+
+        // Score all animals upfront, then build pairs from the best candidates
+        const scoredMales = malePool
+            .map(a => ({ animal: a, score: scoreAnimal(a) }))
+            .sort((a, b) => b.score - a.score);
+        const scoredFemales = femalePool
+            .map(a => ({ animal: a, score: scoreAnimal(a) }))
+            .sort((a, b) => b.score - a.score);
+
         const pairs = [];
         if (selectedSire?.id_public && selectedDam?.id_public) {
             pairs.push({
@@ -1106,18 +1141,21 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 sireName: selectedSire.name || selectedSire.id_public,
                 damId: selectedDam.id_public,
                 damName: selectedDam.name || selectedDam.id_public,
+                pairScore: scoreAnimal(selectedSire) + scoreAnimal(selectedDam),
                 source: 'selected'
             });
         }
 
-        malePool.slice(0, 4).forEach((sire) => {
-            femalePool.slice(0, 4).forEach((dam) => {
+        // Cross top-scored males × females (up to 8 each) to get candidate pairs
+        scoredMales.slice(0, 8).forEach(({ animal: sire, score: ss }) => {
+            scoredFemales.slice(0, 8).forEach(({ animal: dam, score: ds }) => {
                 if (sire.id_public === dam.id_public) return;
                 pairs.push({
                     sireId: sire.id_public,
                     sireName: sire.name || sire.id_public,
                     damId: dam.id_public,
                     damName: dam.name || dam.id_public,
+                    pairScore: ss + ds,
                     source: 'mine'
                 });
             });
@@ -1132,7 +1170,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             uniq.push(p);
         });
 
-        const selectedTraitLabels = tpSelectedTraits.map(id => {
+        const selectedTraitLabels = tpSelectedTraits.map(id => {  // eslint-disable-line no-unused-vars
             const found = getTargetTraitChipById(id);
             return found ? formatTargetTraitChip(found) : id;
         });
@@ -1140,21 +1178,31 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         const phenotypeInterpretation = getPrototypePhenotypeInterpretation(tpSelectedTraits);
         const phenotypeConfidence = getPrototypePhenotypeConfidence(tpSelectedTraits);
 
-        const results = uniq.slice(0, 6).map((pair, idx) => {
-            const hash = `${pair.sireId}${pair.damId}${tpSelectedTraits.join('|')}`
-                .split('')
-                .reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-            const jitter = (hash % 17) - 8;
-            const base = 30 + (tpSelectedTraits.length * 4) - (idx * 5) + jitter;
-            const probability = Math.max(1, Math.min(95, base));
+        const maxPairScore = Math.max(1, ...uniq.map(p => p.pairScore || 0));
 
-            const coiValue = idx === 0 && tpCOI != null
+        const results = uniq
+            .sort((a, b) => (b.pairScore || 0) - (a.pairScore || 0))
+            .slice(0, 6)
+            .map((pair) => {
+            const pairScore = pair.pairScore || 0;
+            // Probability: 15–85 scaled by how well parents match target keywords, with small hash jitter
+            const hash = `${pair.sireId}${pair.damId}`
+                .split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+            const jitter = (hash % 9) - 4;
+            const scaled = maxPairScore > 0 ? (pairScore / maxPairScore) : 0;
+            const probability = Math.max(5, Math.min(90, Math.round(15 + scaled * 70 + jitter)));
+
+            const coiKey = `${pair.sireId}:${pair.damId}`;
+            const coiValue = (pair.source === 'selected' && tpCOI != null)
                 ? tpCOI
-                : Math.max(0, ((hash % 190) / 10));
+                : coiCacheRef.current[coiKey] != null
+                    ? coiCacheRef.current[coiKey]
+                    : Math.max(0, ((hash % 190) / 10));
 
             const warnings = [];
             if (coiValue >= 12.5) warnings.push('Higher COI than ideal range');
             if (tpSourceMode === 'mine+favorited' && pair.source !== 'mine') warnings.push('Favorited external candidate');
+            if (pairScore === 0) warnings.push('No phenotype overlap detected in recorded variety');
 
             return {
                 ...pair,
@@ -1164,15 +1212,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 phenotypeConfidence,
                 assumptions: prototypeAssumptions,
                 explanation: [
-                    `Supports target traits: ${selectedTraitLabels.slice(0, 2).join(', ')}${selectedTraitLabels.length > 2 ? ' +' : ''}`,
-                    phenotypeInterpretation,
+                    phenotypeInterpretation ? `Target: ${phenotypeInterpretation}` : null,
+                    `Phenotype keyword match score: ${pairScore}/${maxPairScore * 2} (sire + dam combined)`,
                     `Confidence: ${phenotypeConfidence.label} — ${phenotypeConfidence.detail}`,
-                    prototypeAssumptions.length ? `Assumptions used: ${prototypeAssumptions.length}` : null,
-                    `Trait coverage confidence is prototype-only (UI mock scoring).`,
-                    `COI penalty applied in ranking preview.`
+                    prototypeAssumptions.length ? `Assumptions: ${prototypeAssumptions.join(' ')}` : null,
+                    `Scoring is keyword-based on recorded variety text (prototype).`,
                 ].filter(Boolean)
             };
-        }).sort((a, b) => b.probability - a.probability);
+        });
 
         setTimeout(() => {
             setTpMockResults(results);
