@@ -1071,6 +1071,7 @@ const TpResultCard = ({ r, idx, globalIdx, expandedCard, setExpandedCard, onUseP
 const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) => {
     const produceResults = results.filter(r => r.tier === 'produce');
     const nodataResults = results.filter(r => r.tier === 'nodata');
+    const nodataTotal = nodataResults[0]?.nodataTotal ?? nodataResults.length;
     return (
         <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
             {produceResults.length > 0 && (
@@ -1090,7 +1091,7 @@ const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) =>
                 <div className={produceResults.length > 0 ? 'pt-2 border-t border-gray-200' : ''}>
                     <div className="flex items-center gap-2 mb-1.5">
                         <span className="text-xs font-semibold text-gray-500">No Genetic Data</span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">{nodataResults.length}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">{nodataResults.length}{nodataTotal > nodataResults.length ? ` of ${nodataTotal}` : ''}</span>
                         <span className="text-[10px] text-gray-400">add genetic codes to these animals for better predictions</span>
                     </div>
                     <div className="space-y-2">
@@ -1587,17 +1588,21 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 return aDate < bDate ? -1 : aDate > bDate ? 1 : 0;
             });
         });
-        // Round-robin: take one dam per sire in rotation until all are exhausted
+        // Round-robin: take one dam per sire in rotation, cap total at 30
+        const NODATA_CAP = 30;
         const nodataPairs = [];
         let siresWithData = siresSorted.filter(id => nodataBySire[id].length > 0);
-        while (siresWithData.length > 0) {
+        while (siresWithData.length > 0 && nodataPairs.length < NODATA_CAP) {
             siresWithData.forEach(sireId => {
-                if (nodataBySire[sireId].length > 0) nodataPairs.push(nodataBySire[sireId].shift());
+                if (nodataPairs.length < NODATA_CAP && nodataBySire[sireId].length > 0) {
+                    nodataPairs.push(nodataBySire[sireId].shift());
+                }
             });
             siresWithData = siresWithData.filter(id => nodataBySire[id].length > 0);
         }
 
         const tieredPairs = [...producePairs, ...nodataPairs];
+        const nodataTotal = nodataRaw.length;
 
         const mapPair = (pair) => {
                 const pairScore = pair.pairScore || 0;
@@ -1649,6 +1654,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     sireVariety,
                     damVariety,
                     locusBreakdown,
+                    nodataTotal: pair.pairScore ? undefined : nodataTotal,
                 };
         };
 
