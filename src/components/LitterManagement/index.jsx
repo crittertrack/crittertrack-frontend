@@ -1047,7 +1047,6 @@ const TpResultCard = ({ r, idx, globalIdx, expandedCard, setExpandedCard, onUseP
 
 const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) => {
     const produceResults = results.filter(r => r.tier === 'produce');
-    const carrierResults = results.filter(r => r.tier === 'carrier');
     const nodataResults = results.filter(r => r.tier === 'nodata');
     return (
         <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
@@ -1064,22 +1063,8 @@ const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) =>
                     </div>
                 </div>
             )}
-            {carrierResults.length > 0 && (
-                <div className={produceResults.length > 0 ? 'pt-2 border-t border-gray-200' : ''}>
-                    <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-xs font-semibold text-amber-700">Carrier Pairings</span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">{carrierResults.length}</span>
-                        <span className="text-[10px] text-gray-400">partial loci coverage — offspring may carry but not express</span>
-                    </div>
-                    <div className="space-y-2">
-                        {carrierResults.map((r, i) => (
-                            <TpResultCard key={i} r={r} idx={i} globalIdx={produceResults.length + i} expandedCard={expandedCard} setExpandedCard={setExpandedCard} onUsePair={onUsePair} />
-                        ))}
-                    </div>
-                </div>
-            )}
             {nodataResults.length > 0 && (
-                <div className={(produceResults.length > 0 || carrierResults.length > 0) ? 'pt-2 border-t border-gray-200' : ''}>
+                <div className={produceResults.length > 0 ? 'pt-2 border-t border-gray-200' : ''}>
                     <div className="flex items-center gap-2 mb-1.5">
                         <span className="text-xs font-semibold text-gray-500">No Genetic Data</span>
                         <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">{nodataResults.length}</span>
@@ -1087,12 +1072,12 @@ const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) =>
                     </div>
                     <div className="space-y-2">
                         {nodataResults.map((r, i) => (
-                            <TpResultCard key={i} r={r} idx={i} globalIdx={produceResults.length + carrierResults.length + i} expandedCard={expandedCard} setExpandedCard={setExpandedCard} onUsePair={onUsePair} />
+                            <TpResultCard key={i} r={r} idx={i} globalIdx={produceResults.length + i} expandedCard={expandedCard} setExpandedCard={setExpandedCard} onUsePair={onUsePair} />
                         ))}
                     </div>
                 </div>
             )}
-            {produceResults.length === 0 && carrierResults.length === 0 && nodataResults.length === 0 && (
+            {produceResults.length === 0 && nodataResults.length === 0 && (
                 <div className="p-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500">
                     No matching pairs found for the selected traits.
                 </div>
@@ -1558,7 +1543,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
         // Scored tiers: all pairs, sorted by score descending
         const producePairs = sorted.filter(p => p.pairScore >= maxPossibleScore);
-        const carrierPairs = sorted.filter(p => p.pairScore > 0 && p.pairScore < maxPossibleScore);
 
         // Nodata tier: round-robin across sires (oldest first) so all sires are represented
         const nodataRaw = sorted.filter(p => !p.pairScore);
@@ -1590,7 +1574,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             siresWithData = siresWithData.filter(id => nodataBySire[id].length > 0);
         }
 
-        const tieredPairs = [...producePairs, ...carrierPairs, ...nodataPairs];
+        const tieredPairs = [...producePairs, ...nodataPairs];
 
         const mapPair = (pair) => {
                 const pairScore = pair.pairScore || 0;
