@@ -5472,7 +5472,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 <span className="font-semibold flex-shrink-0">Target phenotype:</span>
                                                 <span className="truncate">{preview || 'Select chips below to preview'}</span>
                                             </div>
-                                            {conf && (
+                                            {conf && conf.level !== 'high' && (
                                                 <div className="mt-1 pl-3 text-[10px] text-gray-400">{conf.detail}</div>
                                             )}
                                             {(reqs.bothParents.length > 0 || reqs.oneParent.length > 0 || reqs.splitParents?.length > 0) && (
