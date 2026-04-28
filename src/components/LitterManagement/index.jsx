@@ -4826,11 +4826,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-200">
                             <div className="divide-y divide-gray-200">
 
-                                {/* Description */}
-                                <div className="px-5 py-4">
-                                    <p className="text-sm text-gray-500">Prototype only: Fancy Mouse is currently supported. Choose source + trait chips, then preview ranked pairing suggestions while keeping COI mode available in the other tab.</p>
-                                </div>
-
                                 {/* Pair Source */}
                                 <div className="px-5 py-4">
                                     <label className="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Pair Source</label>
