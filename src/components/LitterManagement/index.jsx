@@ -202,15 +202,37 @@ const getPrototypePhenotypeInterpretation = (selectedTraits) => {
     const catalog = getTargetTraitChipCatalog();
     const MODIFIER_GROUPS = new Set(['Pattern & Markings', 'Coat & Texture']);
 
+    // Some chip labels don't literally appear in the resolved phenotype — map to what the engine actually outputs
+    const CHIP_EXPRESSED_AS = {
+        'am-brindle':   ['brindle'],
+        'tan':          ['tan'],
+        'fox':          ['fox'],
+        'dom-red':      ['brindle', 'red', 'fawn', 'amber'],
+        'dom-fawn':     ['fawn'],
+        'dom-amber':    ['amber'],
+        'astrex':       ['astrex', 'texel'],
+        'texel':        ['texel'],
+        'mock-choc':    ['mock chocolate'],
+        'colorpoint-beige': ['colorpoint'],
+        'blue-agouti':  ['blue agouti'],
+        'cinnamon-argente': ['cinnamon argente'],
+        'silver-agouti': ['silver agouti'],
+        'dom-hairless':  ['hairless'],
+    };
+
     // Build a list of all selected modifier chip labels
     const selectedModifierChips = selectedTraits
         .map(id => catalog.find(c => c.id === id))
         .filter(c => c && MODIFIER_GROUPS.has(c.group));
 
     // Append modifier labels that aren't already present in the calculated phenotype string
+    const phenoLower = basePheno ? basePheno.toLowerCase() : '';
     const missingModifiers = selectedModifierChips
-        .map(c => c.label)
-        .filter(label => !basePheno || !basePheno.toLowerCase().includes(label.toLowerCase()));
+        .filter(c => {
+            const keywords = CHIP_EXPRESSED_AS[c.id] || [c.label.toLowerCase()];
+            return !keywords.some(kw => phenoLower.includes(kw));
+        })
+        .map(c => c.label);
 
     if (basePheno) {
         const combined = [basePheno, ...missingModifiers].join(' ');
