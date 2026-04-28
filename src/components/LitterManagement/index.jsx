@@ -1058,7 +1058,7 @@ const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) =>
                         <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">{produceResults.length}</span>
                     </div>
                     <div className="space-y-2">
-                        {produceResults.slice(0, 6).map((r, i) => (
+                        {produceResults.map((r, i) => (
                             <TpResultCard key={i} r={r} idx={i} globalIdx={i} expandedCard={expandedCard} setExpandedCard={setExpandedCard} onUsePair={onUsePair} />
                         ))}
                     </div>
@@ -1072,7 +1072,7 @@ const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) =>
                         <span className="text-[10px] text-gray-400">partial loci coverage — offspring may carry but not express</span>
                     </div>
                     <div className="space-y-2">
-                        {carrierResults.slice(0, 6).map((r, i) => (
+                        {carrierResults.map((r, i) => (
                             <TpResultCard key={i} r={r} idx={i} globalIdx={produceResults.length + i} expandedCard={expandedCard} setExpandedCard={setExpandedCard} onUsePair={onUsePair} />
                         ))}
                     </div>
@@ -1086,7 +1086,7 @@ const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) =>
                         <span className="text-[10px] text-gray-400">add genetic codes to these animals for better predictions</span>
                     </div>
                     <div className="space-y-2">
-                        {nodataResults.slice(0, 6).map((r, i) => (
+                        {nodataResults.map((r, i) => (
                             <TpResultCard key={i} r={r} idx={i} globalIdx={produceResults.length + carrierResults.length + i} expandedCard={expandedCard} setExpandedCard={setExpandedCard} onUsePair={onUsePair} />
                         ))}
                     </div>
@@ -1532,7 +1532,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     damId: dam.id_public,
                     damName: dam.name || dam.id_public,
                     pairScore: score,
-                    source: 'mine'
+                    source: 'mine',
+                    sireBirthDate: sire.birthDate || null,
+                    damBirthDate: dam.birthDate || null,
                 });
             });
         });
@@ -1554,11 +1556,41 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
         const sorted = uniq.sort((a, b) => (b.pairScore || 0) - (a.pairScore || 0));
 
-        // Split into tiers BEFORE capping — so nodata animals aren't crowded out by scored pairs
-        const producePairs  = sorted.filter(p => p.pairScore >= maxPossibleScore).slice(0, 8);
-        const carrierPairs  = sorted.filter(p => p.pairScore > 0 && p.pairScore < maxPossibleScore).slice(0, 8);
-        const nodataPairs   = sorted.filter(p => !p.pairScore).slice(0, 8);
-        const tieredPairs   = [...producePairs, ...carrierPairs, ...nodataPairs];
+        // Scored tiers: all pairs, sorted by score descending
+        const producePairs = sorted.filter(p => p.pairScore >= maxPossibleScore);
+        const carrierPairs = sorted.filter(p => p.pairScore > 0 && p.pairScore < maxPossibleScore);
+
+        // Nodata tier: round-robin across sires (oldest first) so all sires are represented
+        const nodataRaw = sorted.filter(p => !p.pairScore);
+        const nodataBySire = {};
+        nodataRaw.forEach(p => {
+            if (!nodataBySire[p.sireId]) nodataBySire[p.sireId] = [];
+            nodataBySire[p.sireId].push(p);
+        });
+        // Sort sires oldest-first; within each sire sort dams oldest-first
+        const siresSorted = Object.keys(nodataBySire).sort((a, b) => {
+            const aDate = nodataBySire[a][0]?.sireBirthDate || '';
+            const bDate = nodataBySire[b][0]?.sireBirthDate || '';
+            return aDate < bDate ? -1 : aDate > bDate ? 1 : 0;
+        });
+        siresSorted.forEach(sireId => {
+            nodataBySire[sireId].sort((a, b) => {
+                const aDate = a.damBirthDate || '';
+                const bDate = b.damBirthDate || '';
+                return aDate < bDate ? -1 : aDate > bDate ? 1 : 0;
+            });
+        });
+        // Round-robin: take one dam per sire in rotation until all are exhausted
+        const nodataPairs = [];
+        let siresWithData = siresSorted.filter(id => nodataBySire[id].length > 0);
+        while (siresWithData.length > 0) {
+            siresWithData.forEach(sireId => {
+                if (nodataBySire[sireId].length > 0) nodataPairs.push(nodataBySire[sireId].shift());
+            });
+            siresWithData = siresWithData.filter(id => nodataBySire[id].length > 0);
+        }
+
+        const tieredPairs = [...producePairs, ...carrierPairs, ...nodataPairs];
 
         const mapPair = (pair) => {
                 const pairScore = pair.pairScore || 0;
