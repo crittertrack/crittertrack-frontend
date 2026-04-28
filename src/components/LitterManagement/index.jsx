@@ -1069,39 +1069,13 @@ const TpResultCard = ({ r, idx, globalIdx, expandedCard, setExpandedCard, onUseP
 };
 
 const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) => {
-    const produceResults = results.filter(r => r.tier === 'produce');
-    const nodataResults = results.filter(r => r.tier === 'nodata');
-    const nodataTotal = nodataResults[0]?.nodataTotal ?? nodataResults.length;
     return (
-        <div className="space-y-3 pr-1">
-            {produceResults.length > 0 && (
-                <div>
-                    <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-xs font-semibold text-emerald-700">Can Produce Target</span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">{produceResults.length}</span>
-                    </div>
-                    <div className="space-y-2">
-                        {produceResults.map((r, i) => (
-                            <TpResultCard key={i} r={r} idx={i} globalIdx={i} expandedCard={expandedCard} setExpandedCard={setExpandedCard} onUsePair={onUsePair} />
-                        ))}
-                    </div>
-                </div>
-            )}
-            {nodataResults.length > 0 && (
-                <div className={produceResults.length > 0 ? 'pt-2 border-t border-gray-200' : ''}>
-                    <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-xs font-semibold text-gray-500">No Genetic Data</span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">{nodataResults.length}{nodataTotal > nodataResults.length ? ` of ${nodataTotal}` : ''}</span>
-                        <span className="text-[10px] text-gray-400">add genetic codes to these animals for better predictions</span>
-                    </div>
-                    <div className="space-y-2">
-                        {nodataResults.map((r, i) => (
-                            <TpResultCard key={i} r={r} idx={i} globalIdx={produceResults.length + i} expandedCard={expandedCard} setExpandedCard={setExpandedCard} onUsePair={onUsePair} />
-                        ))}
-                    </div>
-                </div>
-            )}
-            {produceResults.length === 0 && nodataResults.length === 0 && (
+        <div className="space-y-2 pr-1">
+            {results.length > 0 ? (
+                results.map((r, i) => (
+                    <TpResultCard key={i} r={r} idx={i} globalIdx={i} expandedCard={expandedCard} setExpandedCard={setExpandedCard} onUsePair={onUsePair} />
+                ))
+            ) : (
                 <div className="p-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500">
                     No matching pairs found for the selected traits.
                 </div>
@@ -1565,44 +1539,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
         const sorted = uniq.sort((a, b) => (b.pairScore || 0) - (a.pairScore || 0));
 
-        // Scored tiers: all pairs, sorted by score descending
+        // Only include pairs where both parents fully cover all target loci
         const producePairs = sorted.filter(p => p.pairScore >= maxPossibleScore);
-
-        // Nodata tier: round-robin across sires (oldest first) so all sires are represented
-        const nodataRaw = sorted.filter(p => !p.pairScore);
-        const nodataBySire = {};
-        nodataRaw.forEach(p => {
-            if (!nodataBySire[p.sireId]) nodataBySire[p.sireId] = [];
-            nodataBySire[p.sireId].push(p);
-        });
-        // Sort sires oldest-first; within each sire sort dams oldest-first
-        const siresSorted = Object.keys(nodataBySire).sort((a, b) => {
-            const aDate = nodataBySire[a][0]?.sireBirthDate || '';
-            const bDate = nodataBySire[b][0]?.sireBirthDate || '';
-            return aDate < bDate ? -1 : aDate > bDate ? 1 : 0;
-        });
-        siresSorted.forEach(sireId => {
-            nodataBySire[sireId].sort((a, b) => {
-                const aDate = a.damBirthDate || '';
-                const bDate = b.damBirthDate || '';
-                return aDate < bDate ? -1 : aDate > bDate ? 1 : 0;
-            });
-        });
-        // Round-robin: take one dam per sire in rotation, cap total at 30
-        const NODATA_CAP = 30;
-        const nodataPairs = [];
-        let siresWithData = siresSorted.filter(id => nodataBySire[id].length > 0);
-        while (siresWithData.length > 0 && nodataPairs.length < NODATA_CAP) {
-            siresWithData.forEach(sireId => {
-                if (nodataPairs.length < NODATA_CAP && nodataBySire[sireId].length > 0) {
-                    nodataPairs.push(nodataBySire[sireId].shift());
-                }
-            });
-            siresWithData = siresWithData.filter(id => nodataBySire[id].length > 0);
-        }
-
-        const tieredPairs = [...producePairs, ...nodataPairs];
-        const nodataTotal = nodataRaw.length;
+        const tieredPairs = producePairs;
 
         const mapPair = (pair) => {
                 const pairScore = pair.pairScore || 0;
@@ -1654,7 +1593,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     sireVariety,
                     damVariety,
                     locusBreakdown,
-                    nodataTotal: pair.pairScore ? undefined : nodataTotal,
+
                 };
         };
 
