@@ -1297,7 +1297,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   return { phenotype: result || 'Unknown', carriers, hidden, notes };
 };
 
-const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole = null }) => {
+const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole = null }) => {
   // Species and genetics data states
   const [selectedSpecies, setSelectedSpecies] = useState('Fancy Mouse');
   const [availableSpecies, setAvailableSpecies] = useState([]);
@@ -2745,6 +2745,6 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], user
   );
 };
 
-export default MouseGeneticsCalculator;
+export default GeneticsCalculator;
 export { calculatePhenotype, GENE_LOCI };
 

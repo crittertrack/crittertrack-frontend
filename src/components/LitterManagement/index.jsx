@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { formatDate, formatDateShort } from '../../utils/dateFormatter';
 import DatePicker from '../DatePicker';
+import { calculatePhenotype } from '../GeneticsCalculator';
 
 const AnimalImage = ({ src, alt = 'Animal', className = 'w-full h-full object-cover', iconSize = 24 }) => {
     const [imageError, setImageError] = React.useState(false);
@@ -19,6 +20,128 @@ const AnimalImage = ({ src, alt = 'Animal', className = 'w-full h-full object-co
 };
 
 const DEFAULT_SPECIES_OPTIONS = ['Fancy Mouse', 'Fancy Rat', 'Russian Dwarf Hamster', 'Campbells Dwarf Hamster', 'Chinese Dwarf Hamster', 'Syrian Hamster', 'Guinea Pig'];
+const TARGET_OUTCOME_PROTOTYPE_SPECIES = 'Fancy Mouse';
+const TARGET_OUTCOME_PENDING_SPECIES = DEFAULT_SPECIES_OPTIONS.filter(species => species !== TARGET_OUTCOME_PROTOTYPE_SPECIES);
+
+const TARGET_OUTCOME_TRAIT_CHIPS = {
+    'Fancy Mouse': [
+        { id: 'agouti-AA',     label: 'Agouti',         code: 'A/A',           group: 'Base Color' },
+        { id: 'agouti-Aa',     label: 'Agouti Carrier',  code: 'A/a',           group: 'Base Color' },
+        { id: 'black-aa',      label: 'Black',           code: 'a/a',           group: 'Base Color' },
+        { id: 'chocolate-bb',  label: 'Chocolate',       code: 'b/b',           group: 'Base Color' },
+        { id: 'blue-dd',       label: 'Blue',            code: 'd/d',           group: 'Base Color' },
+        { id: 'argente-pp',    label: 'Argente',         code: 'p/p + agouti',  group: 'Base Color' },
+        { id: 'pied-ss',       label: 'Pied',            code: 's/s',           group: 'Pattern & Markings' },
+        { id: 'roan-rnrn',     label: 'Roan',            code: 'rn/rn',         group: 'Pattern & Markings' },
+        { id: 'satin-sasa',    label: 'Satin',           code: 'sa/sa',         group: 'Coat & Texture' },
+        { id: 'rosette-rstrst',label: 'Rosette',         code: 'rst/rst',       group: 'Coat & Texture' },
+    ],
+};
+
+const getTargetTraitChipCatalog = () => TARGET_OUTCOME_TRAIT_CHIPS[TARGET_OUTCOME_PROTOTYPE_SPECIES];
+
+const getTargetTraitChipGroups = () => {
+    const chips = getTargetTraitChipCatalog();
+    const order = [];
+    const map = {};
+    chips.forEach(chip => {
+        if (!map[chip.group]) { map[chip.group] = []; order.push(chip.group); }
+        map[chip.group].push(chip);
+    });
+    return order.map(g => ({ group: g, chips: map[g] }));
+};
+
+const getTargetTraitChipById = (chipId) => getTargetTraitChipCatalog().find(c => c.id === chipId);
+
+const formatTargetTraitChip = (chip) => {
+    if (!chip) return '';
+    return `${chip.label} (${chip.code})`;
+};
+
+const buildPrototypeGenotypeFromTraits = (selectedTraits) => {
+    const genotype = {};
+    const assumptions = [];
+
+    selectedTraits.forEach((id) => {
+        switch (id) {
+            case 'agouti-AA': genotype.A = 'A/A'; break;
+            case 'agouti-Aa': genotype.A = 'A/a'; break;
+            case 'black-aa': genotype.A = 'a/a'; break;
+            case 'chocolate-bb': genotype.B = 'b/b'; break;
+            case 'chocolate-carrier': genotype.B = 'B/b'; break;
+            case 'blue-dd': genotype.D = 'd/d'; break;
+            case 'argente-pp': genotype.P = 'p/p'; break;
+            case 'pied-ss': genotype.S = 's/s'; break;
+            case 'pied-carrier': genotype.S = 'S/s'; break;
+            case 'roan-rnrn': genotype.Rn = 'rn/rn'; break;
+            case 'satin-sasa': genotype.Sa = 'sa/sa'; break;
+            case 'rosette-rstrst': genotype.Rst = 'rst/rst'; break;
+            case 'rosette-carrier': genotype.Rst = 'Rst/rst'; break;
+            default: break;
+        }
+    });
+
+    if (selectedTraits.includes('argente-pp') && !genotype.A) {
+        genotype.A = 'A/A';
+        assumptions.push('Argente (p/p) assumed with agouti context (A/A) when A-locus was not explicitly selected.');
+    }
+
+    return { genotype, assumptions };
+};
+
+const getPrototypePhenotypeInterpretation = (selectedTraits) => {
+    const { genotype, assumptions } = buildPrototypeGenotypeFromTraits(selectedTraits);
+    if (!Object.keys(genotype).length) return null;
+
+    const result = calculatePhenotype(genotype, genotype);
+    if (result?.phenotype && result.phenotype !== 'Standard') {
+        const extras = [];
+        if (result.carriers?.length) extras.push(`carriers: ${result.carriers.join(', ')}`);
+        if (assumptions.length) extras.push(`assumptions: ${assumptions.join(' ')}`);
+        return `Phenotype preview (Genetics Builder logic): ${result.phenotype}${extras.length ? ` (${extras.join(' | ')})` : ''}`;
+    }
+    if (assumptions.length) {
+        return `Phenotype preview pending more loci (${assumptions.join(' ')})`;
+    }
+    return 'Phenotype preview pending more loci to resolve a named outcome.';
+};
+
+const getPrototypePhenotypeConfidence = (selectedTraits) => {
+    const { genotype, assumptions } = buildPrototypeGenotypeFromTraits(selectedTraits);
+    const lociSelected = Object.keys(genotype).length;
+    const result = lociSelected ? calculatePhenotype(genotype, genotype) : null;
+    const hasResolvedPhenotype = Boolean(result?.phenotype && result.phenotype !== 'Standard');
+    const phenotypeLabel = hasResolvedPhenotype ? result.phenotype : 'unresolved';
+    const assumptionCount = assumptions.length;
+
+    if (hasResolvedPhenotype && lociSelected >= 3 && assumptions.length === 0) {
+        return {
+            level: 'high',
+            label: 'High Confidence',
+            className: 'bg-emerald-100 text-emerald-800',
+            detail: `Rule match: resolved phenotype "${phenotypeLabel}" with ${lociSelected} loci and 0 assumptions.`
+        };
+    }
+
+    if (hasResolvedPhenotype || lociSelected >= 2) {
+        const mediumReason = hasResolvedPhenotype
+            ? `Rule match: resolved phenotype "${phenotypeLabel}" with ${lociSelected} loci and ${assumptionCount} assumption${assumptionCount === 1 ? '' : 's'}.`
+            : `Rule match: phenotype unresolved with ${lociSelected} loci and ${assumptionCount} assumption${assumptionCount === 1 ? '' : 's'}.`;
+        return {
+            level: 'medium',
+            label: 'Medium Confidence',
+            className: 'bg-amber-100 text-amber-800',
+            detail: mediumReason
+        };
+    }
+
+    return {
+        level: 'low',
+        label: 'Needs More Loci',
+        className: 'bg-gray-100 text-gray-700',
+        detail: `Rule match: only ${lociSelected} locus selected and phenotype unresolved.`
+    };
+};
 
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
@@ -726,6 +849,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [viewMode, setViewMode] = useState('list'); // 'list' | 'calendar'
     const [calendarMonth, setCalendarMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
     const [calendarTooltip, setCalendarTooltip] = useState(null); // { litterId, eventType, litter, x, y }
+    const [calendarQuery, setCalendarQuery] = useState('');
+    const [calendarPlannedOnly, setCalendarPlannedOnly] = useState(false);
+    const [calendarEventFilters, setCalendarEventFilters] = useState({ mated: true, due: true, born: true, weaned: true });
     const [urgencyEnabled, setUrgencyEnabled] = useState(() => {
         try { return localStorage.getItem('ct_urgency_enabled') !== 'false'; } catch { return true; }
     });
@@ -757,6 +883,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [tpCOI, setTpCOI] = useState(null);
     const [tpCalculating, setTpCalculating] = useState(false);
     const [tpError, setTpError] = useState(null);
+    const [tpMode, setTpMode] = useState('coi'); // 'coi' | 'target'
+    const [tpSourceMode, setTpSourceMode] = useState('mine'); // 'mine' | 'mine+favorited'
+    const [tpTargetSpecies, setTpTargetSpecies] = useState(TARGET_OUTCOME_PROTOTYPE_SPECIES);
+    const [tpSelectedTraits, setTpSelectedTraits] = useState([]);
+    const [tpGenerating, setTpGenerating] = useState(false);
+    const [tpMockResults, setTpMockResults] = useState([]);
+    const [tpExpandedCard, setTpExpandedCard] = useState(null); // key = `${sireId}:${damId}:${idx}`
+    const [tpShowResultsHelp, setTpShowResultsHelp] = useState(false);
     const handleCalculateTestPairing = async () => {
         if (!tpSireId || !tpDamId) return;
         const cacheKey = `${tpSireId}:${tpDamId}`;
@@ -785,6 +919,141 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             clearTimeout(timeout);
             setTpCalculating(false);
         }
+    };
+
+    const toggleTargetTraitChip = (chipId) => {
+        setTpSelectedTraits(prev => prev.includes(chipId)
+            ? prev.filter(id => id !== chipId)
+            : [...prev, chipId]
+        );
+    };
+
+    const runTargetOutcomePrototype = () => {
+        if (tpSelectedTraits.length === 0) return;
+        setTpGenerating(true);
+
+        const speciesForPairs = TARGET_OUTCOME_PROTOTYPE_SPECIES;
+        const malePool = myAnimals.filter(a =>
+            (a.species === speciesForPairs) &&
+            ['Male', 'Intersex', 'Unknown'].includes(a.gender) &&
+            a.status !== 'Deceased'
+        );
+        const femalePool = myAnimals.filter(a =>
+            (a.species === speciesForPairs) &&
+            ['Female', 'Intersex', 'Unknown'].includes(a.gender) &&
+            a.status !== 'Deceased'
+        );
+
+        const selectedSire = tpSireId ? (myAnimals.find(a => a.id_public === tpSireId) || selectedTpSireAnimal) : null;
+        const selectedDam = tpDamId ? (myAnimals.find(a => a.id_public === tpDamId) || selectedTpDamAnimal) : null;
+
+        const pairs = [];
+        if (selectedSire?.id_public && selectedDam?.id_public) {
+            pairs.push({
+                sireId: selectedSire.id_public,
+                sireName: selectedSire.name || selectedSire.id_public,
+                damId: selectedDam.id_public,
+                damName: selectedDam.name || selectedDam.id_public,
+                source: 'selected'
+            });
+        }
+
+        malePool.slice(0, 4).forEach((sire) => {
+            femalePool.slice(0, 4).forEach((dam) => {
+                if (sire.id_public === dam.id_public) return;
+                pairs.push({
+                    sireId: sire.id_public,
+                    sireName: sire.name || sire.id_public,
+                    damId: dam.id_public,
+                    damName: dam.name || dam.id_public,
+                    source: 'mine'
+                });
+            });
+        });
+
+        const uniq = [];
+        const seen = new Set();
+        pairs.forEach(p => {
+            const key = `${p.sireId}:${p.damId}`;
+            if (seen.has(key)) return;
+            seen.add(key);
+            uniq.push(p);
+        });
+
+        const selectedTraitLabels = tpSelectedTraits.map(id => {
+            const found = getTargetTraitChipById(id);
+            return found ? formatTargetTraitChip(found) : id;
+        });
+        const { assumptions: prototypeAssumptions } = buildPrototypeGenotypeFromTraits(tpSelectedTraits);
+        const phenotypeInterpretation = getPrototypePhenotypeInterpretation(tpSelectedTraits);
+        const phenotypeConfidence = getPrototypePhenotypeConfidence(tpSelectedTraits);
+
+        const results = uniq.slice(0, 6).map((pair, idx) => {
+            const hash = `${pair.sireId}${pair.damId}${tpSelectedTraits.join('|')}`
+                .split('')
+                .reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+            const jitter = (hash % 17) - 8;
+            const base = 30 + (tpSelectedTraits.length * 4) - (idx * 5) + jitter;
+            const probability = Math.max(1, Math.min(95, base));
+
+            const coiValue = idx === 0 && tpCOI != null
+                ? tpCOI
+                : Math.max(0, ((hash % 190) / 10));
+
+            const warnings = [];
+            if (coiValue >= 12.5) warnings.push('Higher COI than ideal range');
+            if (tpSourceMode === 'mine+favorited' && pair.source !== 'mine') warnings.push('Favorited external candidate');
+
+            return {
+                ...pair,
+                probability,
+                coiValue,
+                warnings,
+                phenotypeConfidence,
+                assumptions: prototypeAssumptions,
+                explanation: [
+                    `Supports target traits: ${selectedTraitLabels.slice(0, 2).join(', ')}${selectedTraitLabels.length > 2 ? ' +' : ''}`,
+                    phenotypeInterpretation,
+                    `Confidence: ${phenotypeConfidence.label} — ${phenotypeConfidence.detail}`,
+                    prototypeAssumptions.length ? `Assumptions used: ${prototypeAssumptions.length}` : null,
+                    `Trait coverage confidence is prototype-only (UI mock scoring).`,
+                    `COI penalty applied in ranking preview.`
+                ].filter(Boolean)
+            };
+        }).sort((a, b) => b.probability - a.probability);
+
+        setTimeout(() => {
+            setTpMockResults(results);
+            setTpGenerating(false);
+            setTpExpandedCard(null);
+        }, 350);
+    };
+
+    const usePairForPlannedMating = (pair) => {
+        const selectedTraitLabels = tpSelectedTraits
+            .map(id => getTargetTraitChipById(id))
+            .filter(Boolean)
+            .map(formatTargetTraitChip);
+
+        setMatingData(prev => ({
+            ...prev,
+            species: tpTargetSpecies,
+            sireId_public: pair.sireId,
+            damId_public: pair.damId,
+            notes: [
+                prev.notes || '',
+                `Target Outcome prototype: ${selectedTraitLabels.join(', ')}`,
+                `Predicted match: ${pair.probability.toFixed(2)}%`
+            ].filter(Boolean).join('\n')
+        }));
+
+        const sire = myAnimals.find(a => a.id_public === pair.sireId) || null;
+        const dam = myAnimals.find(a => a.id_public === pair.damId) || null;
+        setSelectedMatingSire(sire);
+        setSelectedMatingDam(dam);
+
+        setShowTestPairingModal(false);
+        setShowAddMatingForm(true);
     };
 
     useEffect(() => {
@@ -2141,7 +2410,21 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     </button>
                     {/* Test Pairing Button */}
                     <button
-                        onClick={() => { setShowTestPairingModal(true); setTpSireId(''); setTpDamId(''); setTpCOI(null); setTpError(null); setTpCalculating(false); }}
+                        onClick={() => {
+                            setShowTestPairingModal(true);
+                            setTpSireId('');
+                            setTpDamId('');
+                            setTpCOI(null);
+                            setTpError(null);
+                            setTpCalculating(false);
+                            setTpMode('coi');
+                            setTpSourceMode('mine');
+                            setTpTargetSpecies(TARGET_OUTCOME_PROTOTYPE_SPECIES);
+                            setTpSelectedTraits([]);
+                            setTpMockResults([]);
+                            setTpGenerating(false);
+                            setTpExpandedCard(null);
+                        }}
                         className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border shadow-sm bg-white border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
                         title="Test a sire/dam pairing to predict COI"
                     >
@@ -3890,8 +4173,24 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                 // Build event map: 'YYYY-MM-DD' -> [{type, litter}]
                 const eventMap = {};
+                const q = (calendarQuery || '').trim().toLowerCase();
+                const filteredLitters = litters.filter(l => {
+                    if (calendarPlannedOnly && !l.isPlanned) return false;
+                    if (!q) return true;
+                    const text = [
+                        l.breedingPairCodeName,
+                        l.litter_id_public,
+                        l.sire?.name,
+                        l.dam?.name,
+                        l.sireId_public,
+                        l.damId_public
+                    ].filter(Boolean).join(' ').toLowerCase();
+                    return text.includes(q);
+                });
+
                 const addEvent = (dateVal, type, litter) => {
                     if (!dateVal) return;
+                    if (!calendarEventFilters[type]) return;
                     let d;
                     try {
                         // Parse as local time to avoid UTC-offset date shifting
@@ -3901,16 +4200,31 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     } catch(e) { return; }
                     const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
                     if (!eventMap[k]) eventMap[k] = [];
-                    // Skip if this litter already has an event on this day (prevents duplicates when dates coincide)
-                    if (eventMap[k].some(e => e.litter._id === litter._id)) return;
+                    // Skip only duplicate same litter + same event type on same day.
+                    if (eventMap[k].some(e => e.litter._id === litter._id && e.type === type)) return;
                     eventMap[k].push({ type, litter });
                 };
-                litters.forEach(l => {
+                filteredLitters.forEach(l => {
                     addEvent(l.matingDate, 'mated', l);
                     addEvent(l.expectedDueDate, 'due', l);
                     addEvent(l.birthDate, 'born', l);
                     addEvent(l.weaningDate, 'weaned', l);
                 });
+
+                const monthStart = new Date(year, month, 1);
+                const monthEnd = new Date(year, month + 1, 0);
+                const monthEventList = Object.entries(eventMap)
+                    .flatMap(([dateKey, events]) => events.map(ev => ({ dateKey, ...ev })))
+                    .filter(ev => {
+                        const d = new Date(`${ev.dateKey}T00:00:00`);
+                        return d >= monthStart && d <= monthEnd;
+                    })
+                    .sort((a, b) => {
+                        if (a.dateKey < b.dateKey) return -1;
+                        if (a.dateKey > b.dateKey) return 1;
+                        const order = { mated: 0, due: 1, born: 2, weaned: 3 };
+                        return (order[a.type] ?? 99) - (order[b.type] ?? 99);
+                    });
 
                 const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
                 const allDayAbbr = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -3983,6 +4297,49 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             >
                                 <ChevronRight size={20} className="text-gray-600" />
                             </button>
+                        </div>
+
+                        <div className="px-4 py-3 bg-white border-b border-gray-200 space-y-3">
+                            <div className="flex flex-col md:flex-row md:items-center gap-2">
+                                <div className="flex items-center gap-2 w-full md:w-auto">
+                                    <Search size={14} className="text-gray-400" />
+                                    <input
+                                        value={calendarQuery}
+                                        onChange={(e) => setCalendarQuery(e.target.value)}
+                                        placeholder="Filter by pair, litter ID, sire or dam"
+                                        className="w-full md:w-80 p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                    />
+                                </div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <button
+                                        onClick={() => {
+                                            const now = new Date();
+                                            setCalendarMonth(new Date(now.getFullYear(), now.getMonth(), 1));
+                                        }}
+                                        className="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+                                    >
+                                        Today
+                                    </button>
+                                    <button
+                                        onClick={() => setCalendarPlannedOnly(v => !v)}
+                                        className={`px-2.5 py-1.5 text-xs font-medium rounded-lg border ${calendarPlannedOnly ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+                                    >
+                                        Planned Only
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2">
+                                {Object.entries(typeStyles).map(([key, style]) => (
+                                    <button
+                                        key={key}
+                                        onClick={() => setCalendarEventFilters(prev => ({ ...prev, [key]: !prev[key] }))}
+                                        className={`px-2.5 py-1 text-xs font-medium rounded-full border transition ${calendarEventFilters[key] ? `${style.bg}` : 'border-gray-300 text-gray-500 bg-white hover:bg-gray-50'}`}
+                                    >
+                                        {style.label}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         {/* Day-of-week headers */}
@@ -4138,6 +4495,37 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             );
                         })()}
 
+                        <div className="mx-3 mb-3 p-3 bg-white border border-gray-200 rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                                <h4 className="text-sm font-semibold text-gray-800">Month Agenda</h4>
+                                <span className="text-xs text-gray-500">{monthEventList.length} event{monthEventList.length !== 1 ? 's' : ''}</span>
+                            </div>
+                            {monthEventList.length === 0 ? (
+                                <p className="text-xs text-gray-500">No events match the current month/filter selection.</p>
+                            ) : (
+                                <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+                                    {monthEventList.map((ev, idx) => {
+                                        const st = (ev.type === 'due' && ev.litter.birthDate)
+                                            ? { bg: 'bg-gray-100 text-gray-500 border border-gray-300', label: 'Due (Born)' }
+                                            : (typeStyles[ev.type] || typeStyles.born);
+                                        return (
+                                            <button
+                                                key={`${ev.dateKey}-${ev.type}-${ev.litter._id}-${idx}`}
+                                                onClick={() => setCalendarTooltip({ key: `${ev.dateKey}-${idx}`, litter: ev.litter, type: ev.type })}
+                                                className="w-full text-left px-2 py-1.5 rounded border border-gray-200 hover:bg-gray-50 transition"
+                                            >
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-semibold rounded-full ${st.bg}`}>{st.label}</span>
+                                                    <span className="text-[11px] text-gray-500">{fmtD(ev.dateKey)}</span>
+                                                </div>
+                                                <div className="text-xs text-gray-800 font-medium mt-1 truncate">{getPillLabel(ev)}</div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+
                         {/* Legend */}
                         <div className="px-4 py-2.5 bg-gray-50 border-t border-gray-200 flex flex-wrap gap-4 text-xs text-gray-600 items-center">
                             {Object.entries(typeStyles).map(([k, v]) => (
@@ -4146,8 +4534,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     {v.label}
                                 </span>
                             ))}
-                            {litters.length === 0 && (
-                                <span className="text-gray-400 italic ml-auto">No litters yet ? create one to see events here</span>
+                            {filteredLitters.length === 0 && (
+                                <span className="text-gray-400 italic ml-auto">No litters match current calendar filters</span>
                             )}
                             <span className="text-gray-400 ml-auto hidden sm:block">Click a pill for details</span>
                         </div>
@@ -4324,16 +4712,36 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             {/* Test Pairing Modal */}
             {showTestPairingModal && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl">
                         <div className="flex justify-between items-center border-b p-4">
                             <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
                                 <Calculator size={18} className="text-primary" />
-                                Test Pairing ? Predict COI
+                                Test Pairing
                             </h3>
                             <button onClick={() => setShowTestPairingModal(false)} className="text-gray-500 hover:text-gray-800">
                                 <X size={22} />
                             </button>
                         </div>
+                        <div className="px-5 pt-4">
+                            <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
+                                <button
+                                    type="button"
+                                    onClick={() => setTpMode('coi')}
+                                    className={`px-3 py-1.5 text-sm font-medium ${tpMode === 'coi' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+                                >
+                                    COI Calculator
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setTpMode('target')}
+                                    className={`px-3 py-1.5 text-sm font-medium border-l border-gray-200 ${tpMode === 'target' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+                                >
+                                    Target Outcome (Prototype)
+                                </button>
+                            </div>
+                        </div>
+
+                        {tpMode === 'coi' && (
                         <div className="p-5 space-y-4">
                             <p className="text-sm text-gray-500">Pick a sire and dam to calculate the predicted Coefficient of Inbreeding (COI) for their offspring.</p>
                             {/* Sire */}
@@ -4406,6 +4814,253 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">{tpError}</div>
                             )}
                         </div>
+                        )}
+
+                        {tpMode === 'target' && (
+                        <div className="p-5 grid grid-cols-1 lg:grid-cols-2 gap-5">
+                            <div className="space-y-4">
+                                <p className="text-sm text-gray-500">Prototype only: Fancy Mouse is currently supported. Choose source + trait chips, then preview ranked pairing suggestions while keeping COI mode available in the other tab.</p>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Pair Source</label>
+                                    <div className="flex gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setTpSourceMode('mine')}
+                                            className={`px-3 py-1.5 text-sm rounded-lg border ${tpSourceMode === 'mine' ? 'bg-primary text-black border-primary' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                                        >
+                                            My Animals
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setTpSourceMode('mine+favorited')}
+                                            className={`px-3 py-1.5 text-sm rounded-lg border ${tpSourceMode === 'mine+favorited' ? 'bg-primary text-black border-primary' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                                        >
+                                            My Animals + Favorited
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Species</label>
+                                    <div className="w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded-lg text-sm font-medium text-gray-700">
+                                        {TARGET_OUTCOME_PROTOTYPE_SPECIES}
+                                    </div>
+                                    <div className="mt-2 p-2.5 rounded-lg border border-amber-200 bg-amber-50 text-xs text-amber-800">
+                                        <div className="font-semibold">Coming later by species rollout</div>
+                                        <div className="mt-1">{TARGET_OUTCOME_PENDING_SPECIES.join(', ')}</div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <label className="text-sm font-medium text-gray-700">
+                                            Trait Chips
+                                            {tpSelectedTraits.length > 0 && (
+                                                <span className="ml-1.5 px-1.5 py-0.5 text-[10px] rounded-full bg-primary/20 text-gray-700 font-semibold">
+                                                    {tpSelectedTraits.length} selected
+                                                </span>
+                                            )}
+                                        </label>
+                                        {tpSelectedTraits.length > 0 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => { setTpSelectedTraits([]); setTpMockResults([]); setTpExpandedCard(null); }}
+                                                className="text-xs text-gray-400 hover:text-red-500 transition"
+                                            >
+                                                Clear all
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="space-y-3">
+                                        {getTargetTraitChipGroups().map(({ group, chips }) => (
+                                            <div key={group}>
+                                                <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1.5">{group}</div>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {chips.map(chip => {
+                                                        const active = tpSelectedTraits.includes(chip.id);
+                                                        return (
+                                                            <button
+                                                                key={chip.id}
+                                                                type="button"
+                                                                onClick={() => toggleTargetTraitChip(chip.id)}
+                                                                className={`px-2.5 py-1.5 text-xs rounded-full border transition ${active ? 'bg-primary/20 border-primary text-gray-800' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                                                                title={formatTargetTraitChip(chip)}
+                                                            >
+                                                                {formatTargetTraitChip(chip)}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Live phenotype preview */}
+                                {tpSelectedTraits.length > 0 && (() => {
+                                    const preview = getPrototypePhenotypeInterpretation(tpSelectedTraits);
+                                    const conf = getPrototypePhenotypeConfidence(tpSelectedTraits);
+                                    const isResolved = conf?.level === 'high' || conf?.level === 'medium';
+                                    return (
+                                        <div className={`rounded-lg border px-3 py-2 text-xs ${isResolved ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-gray-200 bg-gray-50 text-gray-500'}`}>
+                                            <div className="flex items-center gap-1.5">
+                                                <span className={`inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 ${isResolved ? 'bg-emerald-500' : 'bg-gray-400'}`} />
+                                                <span className="font-semibold flex-shrink-0">Target phenotype:</span>
+                                                <span className="truncate">{preview || 'Select chips above to preview'}</span>
+                                            </div>
+                                            {conf && (
+                                                <div className="mt-1 pl-3 text-[10px] text-gray-400">{conf.detail}</div>
+                                            )}
+                                        </div>
+                                    );
+                                })()}
+
+                                <button
+                                    type="button"
+                                    onClick={runTargetOutcomePrototype}
+                                    disabled={tpSelectedTraits.length === 0 || tpGenerating}
+                                    className="w-full py-2 px-4 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors"
+                                >
+                                    {tpGenerating ? <><Loader2 className="w-4 h-4 animate-spin" /> Building Prototype Results...</> : <><Star size={15} /> Find Best Pairings (Prototype)</>}
+                                </button>
+                            </div>
+
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <h4 className="text-sm font-semibold text-gray-700">Ranked Results Preview</h4>
+                                    <button
+                                        type="button"
+                                        onClick={() => setTpShowResultsHelp(v => !v)}
+                                        className="text-[11px] text-gray-400 hover:text-gray-600 underline underline-offset-2 transition"
+                                    >
+                                        {tpShowResultsHelp ? 'Hide help' : 'What do these scores mean?'}
+                                    </button>
+                                </div>
+                                {tpShowResultsHelp && (
+                                    <div className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2.5 text-xs text-blue-800 space-y-1.5">
+                                        <div><span className="font-semibold">Target match %</span> — estimated probability that offspring of this pair express your selected target traits (prototype calculation).</div>
+                                        <div><span className="font-semibold">COI %</span> — coefficient of inbreeding; lower is generally better. Pairs with a COI warning are flagged in amber.</div>
+                                        <div className="pt-0.5 border-t border-blue-200 space-y-1">
+                                            <div className="font-semibold text-blue-900">Confidence levels</div>
+                                            <div><span className="font-semibold text-emerald-700">High</span> — phenotype resolved, ≥3 loci selected, no assumptions needed.</div>
+                                            <div><span className="font-semibold text-amber-700">Medium</span> — phenotype resolved OR ≥2 loci, but may include assumptions.</div>
+                                            <div><span className="font-semibold text-gray-600">Needs More Loci</span> — not enough genetic information to resolve a named phenotype; add more trait chips.</div>
+                                        </div>
+                                        <div className="pt-0.5 border-t border-blue-200">Click the <span className="font-semibold">confidence badge</span> or <span className="font-semibold">Assumptions chip</span> on any result card to expand its full reasoning.</div>
+                                    </div>
+                                )}
+                                <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                                    <span className="text-gray-500">Confidence legend:</span>
+                                    <span className="px-1.5 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-800">High</span>
+                                    <span className="px-1.5 py-0.5 rounded-full font-semibold bg-amber-100 text-amber-800">Medium</span>
+                                    <span className="px-1.5 py-0.5 rounded-full font-semibold bg-gray-100 text-gray-700">Needs More Loci</span>
+                                </div>
+                                {tpGenerating ? (
+                                    <div className="space-y-2">
+                                        {[1,2,3].map(i => (
+                                            <div key={i} className="rounded-lg border border-gray-200 bg-white p-3 animate-pulse">
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <div className="flex-1 space-y-2">
+                                                        <div className="h-3 bg-gray-200 rounded w-3/4" />
+                                                        <div className="h-2.5 bg-gray-100 rounded w-1/2" />
+                                                    </div>
+                                                    <div className="flex flex-col items-end gap-1.5">
+                                                        <div className="h-4 w-6 bg-gray-100 rounded-full" />
+                                                        <div className="h-4 w-20 bg-gray-200 rounded-full" />
+                                                    </div>
+                                                </div>
+                                                <div className="mt-3 flex justify-end">
+                                                    <div className="h-6 w-36 bg-gray-100 rounded-lg" />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : tpMockResults.length === 0 ? (
+                                    <div className="p-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500">
+                                        Select traits and run the prototype to see ranked pair cards here.
+                                    </div>
+                                ) : (
+                                    <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+                                        {tpMockResults.map((r, idx) => {
+                                            const cardKey = `${r.sireId}:${r.damId}:${idx}`;
+                                            const isExpanded = tpExpandedCard === cardKey;
+                                            return (
+                                            <div key={cardKey} className="rounded-lg border border-gray-200 bg-white overflow-hidden">
+                                                {/* Card header — always visible */}
+                                                <div className="p-3">
+                                                    <div className="flex items-start justify-between gap-2">
+                                                        <div className="min-w-0">
+                                                            <div className="text-sm font-semibold text-gray-800 truncate">{r.sireName} ({r.sireId}) × {r.damName} ({r.damId})</div>
+                                                            <div className="text-xs text-gray-500 mt-0.5">
+                                                                Target match: <span className="font-semibold text-gray-700">{r.probability.toFixed(2)}%</span>
+                                                                {' '}•{' '}
+                                                                COI: <span className="font-semibold text-gray-700">{r.coiValue.toFixed(2)}%</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                                                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600">#{idx + 1}</span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setTpExpandedCard(isExpanded ? null : cardKey)}
+                                                                className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold cursor-pointer transition ${r.phenotypeConfidence?.className || 'bg-gray-100 text-gray-700'}`}
+                                                                title={`Click to ${isExpanded ? 'hide' : 'show'} reasoning`}
+                                                            >
+                                                                {r.phenotypeConfidence?.label || 'Needs More Loci'} {isExpanded ? '▲' : '▼'}
+                                                            </button>
+                                                            {r.assumptions?.length > 0 && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setTpExpandedCard(isExpanded ? null : cardKey)}
+                                                                    className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold bg-yellow-100 text-yellow-800 cursor-pointer transition"
+                                                                    title="Click to expand reasoning"
+                                                                >
+                                                                    Assumptions ({r.assumptions.length})
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    {r.warnings.length > 0 && (
+                                                        <div className="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+                                                            {r.warnings.join(' • ')}
+                                                        </div>
+                                                    )}
+                                                    <div className="mt-2 flex justify-end">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => usePairForPlannedMating(r)}
+                                                            className="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white"
+                                                        >
+                                                            Use Pair in Planned Mating
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                {/* Expandable reasoning panel */}
+                                                {isExpanded && (
+                                                    <div className="border-t border-gray-100 bg-gray-50 px-3 py-2.5 space-y-1.5">
+                                                        <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-wide">Reasoning</div>
+                                                        <ul className="text-xs text-gray-600 space-y-0.5 list-disc list-inside">
+                                                            {r.explanation.map((line, i) => <li key={i}>{line}</li>)}
+                                                        </ul>
+                                                        {r.assumptions?.length > 0 && (
+                                                            <div className="mt-1.5 pt-1.5 border-t border-yellow-200">
+                                                                <div className="text-[11px] font-semibold text-yellow-800 mb-0.5">Assumptions applied</div>
+                                                                <ul className="text-xs text-yellow-700 space-y-0.5 list-disc list-inside">
+                                                                    {r.assumptions.map((a, i) => <li key={i}>{a}</li>)}
+                                                                </ul>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        )}
+
                         <div className="border-t p-4 flex justify-end">
                             <button onClick={() => setShowTestPairingModal(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Close</button>
                         </div>

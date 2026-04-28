@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import {
     ArrowLeft, Calendar, Cat, CheckCircle, ChevronDown, ChevronUp, Circle,
@@ -292,6 +292,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     const [ratingError, setRatingError] = useState('');
     const [isFavorited, setIsFavorited] = useState(false);
     const [favoritePending, setFavoritePending] = useState(false);
+    const [showReturnConfirmation, setShowReturnConfirmation] = useState(false);
+    const returnTimerRef = useRef(null);
     const toggleInfoField = (key) => setExpandedInfoFields(prev => {
         const next = new Set(prev);
         next.has(key) ? next.delete(key) : next.add(key);
@@ -608,11 +610,33 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         return a.localeCompare(b);
     });
 
+    const handleBackClick = () => {
+        if (showReturnConfirmation) return;
+        setShowReturnConfirmation(true);
+        returnTimerRef.current = setTimeout(() => {
+            onBack?.();
+        }, 220);
+    };
+
+    useEffect(() => {
+        return () => {
+            if (returnTimerRef.current) {
+                clearTimeout(returnTimerRef.current);
+            }
+        };
+    }, []);
+
     return (
+        <>
+        {showReturnConfirmation && (
+            <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[220] px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold shadow-xl">
+                Returning to previous screen...
+            </div>
+        )}
         <div className="w-full max-w-7xl bg-white p-6 rounded-xl shadow-lg">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-6">
                 <button 
-                    onClick={onBack} 
+                    onClick={handleBackClick}
                     className="flex items-center text-gray-600 hover:text-gray-800 transition"
                 >
                     <ArrowLeft size={18} className="mr-1" /> Back
@@ -827,7 +851,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                     type="text"
                                     value={animalSearch}
                                     onChange={(e) => setAnimalSearch(e.target.value)}
-                                    placeholder="Search by name or ID?"
+                                    placeholder="Search by name or ID"
                                     className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[160px]"
                                 />
                             </div>
@@ -1557,6 +1581,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 );
             })()}
         </div>
+        </>
     );
 };
 

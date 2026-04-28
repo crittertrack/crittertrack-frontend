@@ -56,6 +56,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
     const chartRef = useRef(null);
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
     const [betaPedigreeView, setBetaPedigreeView] = useState(initialBetaView);
+    const [returningAnimal, setReturningAnimal] = useState(false);
     useEffect(() => {
         if (detailViewTab !== 5) return;
         let cancelled = false;
@@ -127,6 +128,30 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
         })();
         return () => { cancelled = true; };
     }, [detailViewTab, animal?.id_public]);
+
+    const handleReturnTransferredAnimal = useCallback(async () => {
+        if (!animal?.id_public || returningAnimal) return;
+
+        const breederName = animal.breederName || 'the breeder';
+        if (!window.confirm(`Return ${animal.name} to ${breederName}? This will remove the animal from your account.`)) {
+            return;
+        }
+
+        setReturningAnimal(true);
+        try {
+            await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/return`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            window.dispatchEvent(new Event('animals-changed'));
+            showModalMessage('Success', `Animal has been returned to ${breederName}.`);
+            (onCloseAll || onClose)?.();
+        } catch (error) {
+            console.error('Failed to return animal:', error);
+            showModalMessage('Error', `Failed to return animal: ${error.response?.data?.message || error.message}`);
+        } finally {
+            setReturningAnimal(false);
+        }
+    }, [animal, returningAnimal, API_BASE_URL, authToken, showModalMessage, onCloseAll, onClose]);
     useEffect(() => { setMpEnrichedData(null); setMpLoading(false); }, [animal?.id_public]);
     useEffect(() => { setDetailViewTab(initialTab); setBetaPedigreeView(initialBetaView); }, [animal?.id_public, initialTab, initialBetaView]);
 
@@ -446,25 +471,13 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                                 if (iWasTransferredThisAnimal) {
                                     return (
                                         <button
-                                            onClick={async () => {
-                                                if (window.confirm(`Return ${animal.name} to ${animal.breederName || 'the breeder'}? This will remove the animal from your account.`)) {
-                                                    try {
-                                                        await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/return`, {}, {
-                                                            headers: { Authorization: `Bearer ${authToken}` }
-                                                        });
-                                                        onClose();
-                                                        showModalMessage('Success', `Animal has been returned to ${animal.breederName || 'the breeder'}.`);
-                                                    } catch (error) {
-                                                        console.error('Failed to return animal:', error);
-                                                        showModalMessage('Error', `Failed to return animal: ${error.response?.data?.message || error.message}`);
-                                                    }
-                                                }
-                                            }}
+                                            onClick={handleReturnTransferredAnimal}
+                                            disabled={returningAnimal}
                                             className="px-2 py-1 bg-orange-100 hover:bg-orange-200 text-orange-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
                                             title="Return to breeder"
                                         >
                                             <RotateCcw size={14} />
-                                            Return
+                                            {returningAnimal ? 'Returning...' : 'Return'}
                                         </button>
                                     );
                                 }
@@ -542,26 +555,13 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                                 if (iWasTransferredThisAnimal) {
                                     return (
                                         <button
-                                            onClick={async () => {
-                                                if (window.confirm(`Return ${animal.name} to ${animal.breederName || 'the breeder'}? This will remove the animal from your account.`)) {
-                                                    try {
-                                                        await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/return`, {}, {
-                                                            headers: { Authorization: `Bearer ${authToken}` }
-                                                        });
-                                                        window.dispatchEvent(new Event('animals-changed'));
-                                                        onClose();
-                                                        showModalMessage('Success', `Animal has been returned to ${animal.breederName || 'the breeder'}.`);
-                                                    } catch (error) {
-                                                        console.error('Failed to return animal:', error);
-                                                        showModalMessage('Error', `Failed to return animal: ${error.response?.data?.message || error.message}`);
-                                                    }
-                                                }
-                                            }}
+                                            onClick={handleReturnTransferredAnimal}
+                                            disabled={returningAnimal}
                                             className="px-3 py-1.5 bg-orange-100 hover:bg-orange-200 text-orange-700 font-semibold rounded-lg transition flex items-center gap-2"
                                             title="Return to breeder"
                                         >
                                             <RotateCcw size={16} />
-                                            Return Animal
+                                            {returningAnimal ? 'Returning...' : 'Return Animal'}
                                         </button>
                                     );
                                 }

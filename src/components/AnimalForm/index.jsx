@@ -3706,6 +3706,27 @@ const AnimalForm = ({
         fetchParentNames();
     }, [formData.fatherId_public, formData.motherId_public]);
 
+    useEffect(() => {
+        const handleAnimalUpdated = (e) => {
+            const updated = e.detail;
+            if (!updated?.id_public) return;
+
+            const fatherId = formData.fatherId_public;
+            const motherId = formData.motherId_public;
+
+            if (fatherId && updated.id_public === fatherId) {
+                setFatherInfo(prev => prev ? { ...prev, ...updated } : prev);
+            }
+
+            if (motherId && updated.id_public === motherId) {
+                setMotherInfo(prev => prev ? { ...prev, ...updated } : prev);
+            }
+        };
+
+        window.addEventListener('animal-updated', handleAnimalUpdated);
+        return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
+    }, [formData.fatherId_public, formData.motherId_public]);
+
     const addMeasurement = () => {
         if (!newMeasurement.date || !newMeasurement.weight) {
             showModalMessage('Missing Data', 'Please enter at least a date and weight.');

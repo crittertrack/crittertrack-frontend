@@ -169,6 +169,44 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
         fetchAnimals(1);
     }, [listingType, selectedSpecies, selectedGender, selectedCountry, selectedState]);
 
+    // Keep visible marketplace entries in sync when another view updates an animal.
+    useEffect(() => {
+        const handleAnimalUpdated = (e) => {
+            const updated = e.detail;
+            if (!updated?.id_public) return;
+
+            let matchedInCurrentPage = false;
+            setAnimals(prev => {
+                let changed = false;
+                const next = prev.map(animal => {
+                    if (animal.id_public !== updated.id_public) return animal;
+                    matchedInCurrentPage = true;
+                    changed = true;
+                    return { ...animal, ...updated };
+                });
+                return changed ? next : prev;
+            });
+
+            if (selectedAnimalForModal?.id_public === updated.id_public) {
+                setSelectedAnimalForModal(prev => prev ? { ...prev, ...updated } : prev);
+            }
+
+            // Listing-state changes can affect filter inclusion; refetch current page for correctness.
+            if (matchedInCurrentPage && (
+                updated.isForSale !== undefined ||
+                updated.availableForBreeding !== undefined ||
+                updated.salePriceAmount !== undefined ||
+                updated.studFeeAmount !== undefined ||
+                updated.status !== undefined
+            )) {
+                fetchAnimals(pagination.page || 1);
+            }
+        };
+
+        window.addEventListener('animal-updated', handleAnimalUpdated);
+        return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
+    }, [fetchAnimals, pagination.page, selectedAnimalForModal?.id_public]);
+
     // Handle search submit
     const handleSearch = (e) => {
         e.preventDefault();
