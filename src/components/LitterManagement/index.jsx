@@ -4712,7 +4712,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             {/* Test Pairing Modal */}
             {showTestPairingModal && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-6 z-50">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl flex flex-col max-h-[90vh]">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-7xl flex flex-col max-h-[90vh]">
                         {/* Header */}
                         <div className="flex justify-between items-center border-b border-gray-200 px-5 py-4 flex-shrink-0">
                             <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
@@ -4823,8 +4823,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         )}
 
                         {tpMode === 'target' && (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-200">
-                            <div className="divide-y divide-gray-200">
+                        <div className="grid grid-cols-1 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-gray-200">
+                            <div className="lg:col-span-3 divide-y divide-gray-200">
 
                                 {/* Pair Source */}
                                 <div className="px-5 py-4">
@@ -4938,7 +4938,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                             </div>{/* end left divide-y column */}
 
-                            <div className="p-5 space-y-3">
+                            <div className="lg:col-span-1 p-5 space-y-3">
                                 <div className="flex items-center justify-between">
                                     <h4 className="text-sm font-semibold text-gray-700">Ranked Results Preview</h4>
                                     <button
