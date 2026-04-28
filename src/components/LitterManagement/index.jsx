@@ -4823,7 +4823,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         )}
 
                         {tpMode === 'target' && (
-                        <div className="grid grid-cols-1 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-gray-200">
+                        <div className="grid grid-cols-1 lg:grid-cols-5 divide-y lg:divide-y-0 lg:divide-x divide-gray-200">
                             <div className="lg:col-span-3 divide-y divide-gray-200">
 
                                 {/* Pair Source */}
@@ -4938,7 +4938,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                             </div>{/* end left divide-y column */}
 
-                            <div className="lg:col-span-1 p-5 space-y-3">
+                            <div className="lg:col-span-2 p-5 space-y-3">
                                 <div className="flex items-center justify-between">
                                     <h4 className="text-sm font-semibold text-gray-700">Ranked Results Preview</h4>
                                     <button
