@@ -183,11 +183,40 @@ const getPrototypePhenotypeInterpretation = (selectedTraits) => {
     if (!Object.keys(genotype).length) return null;
 
     const result = calculatePhenotype(genotype, genotype);
-    if (result?.phenotype && result.phenotype !== 'Standard') {
-        const extras = [];
-        if (assumptions.length) extras.push(`assumptions: ${assumptions.join(' ')}`);
-        return `${result.phenotype}${extras.length ? ` (${extras.join(' | ')})` : ''}`;
+    const basePheno = result?.phenotype && result.phenotype !== 'Standard' && result.phenotype !== 'Unknown' && result.phenotype !== ''
+        ? result.phenotype
+        : null;
+
+    const catalog = getTargetTraitChipCatalog();
+    const MODIFIER_GROUPS = new Set(['Pattern & Markings', 'Coat & Texture']);
+
+    // Build a list of all selected modifier chip labels
+    const selectedModifierChips = selectedTraits
+        .map(id => catalog.find(c => c.id === id))
+        .filter(c => c && MODIFIER_GROUPS.has(c.group));
+
+    // Append modifier labels that aren't already present in the calculated phenotype string
+    const missingModifiers = selectedModifierChips
+        .map(c => c.label)
+        .filter(label => !basePheno || !basePheno.toLowerCase().includes(label.toLowerCase()));
+
+    if (basePheno) {
+        const combined = [basePheno, ...missingModifiers].join(' ');
+        const extras = assumptions.length ? [`assumptions: ${assumptions.join(' ')}`] : [];
+        return `${combined}${extras.length ? ` (${extras.join(' | ')})` : ''}`;
     }
+
+    // No base color resolved — fall back to composing from chip labels directly
+    const allLabels = selectedTraits
+        .map(id => catalog.find(c => c.id === id))
+        .filter(Boolean)
+        .map(c => c.label);
+
+    if (allLabels.length) {
+        const extras = assumptions.length ? [`assumptions: ${assumptions.join(' ')}`] : [];
+        return `${allLabels.join(' ')}${extras.length ? ` (${extras.join(' | ')})` : ''}`;
+    }
+
     if (assumptions.length) {
         return `Pending more loci (${assumptions.join(' ')})`;
     }
