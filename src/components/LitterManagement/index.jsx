@@ -271,9 +271,9 @@ const getMinimumParentCarrierRequirements = (selectedTraits) => {
             bothParents.push({ label: '−/a at A', hint: 'any of: a/a, at/a, Ay/a, Avy/a' });
             continue;
         }
-        // A-locus at/a — tan visible, both parents need at least one 'at'
+        // A-locus at/a — tan is dominant; only one parent needs to carry 'at'
         if (locus === 'A' && value === 'at/a') {
-            bothParents.push({ label: '−/at at A', hint: 'at/at or at/a' });
+            oneParent.push({ label: 'at (tan)' });
             continue;
         }
         // A-locus A/A — both parents need at least one dominant A
