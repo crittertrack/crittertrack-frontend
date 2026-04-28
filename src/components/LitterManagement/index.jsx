@@ -1290,6 +1290,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     !chipToASeries[id]                      // keep non-A chips
                 );
             }
+            // tan and fox share the same A-locus (at/a) — mutually exclusive with each other
+            if (CHIP_A_COMPOUND_HET_CAPABLE.has(chipId)) {
+                next = next.filter(id => !CHIP_A_COMPOUND_HET_CAPABLE.has(id));
+            }
             // C-locus: mutually exclusive
             if (CHIP_C_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_C_EXCLUSIVE.has(id));
             // Go-locus: mutually exclusive
