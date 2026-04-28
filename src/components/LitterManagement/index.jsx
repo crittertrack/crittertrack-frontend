@@ -1346,8 +1346,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             'A':    ['agouti','cinnamon','argente','blue agouti','silver agouti'],
             'Ay':   ['dominant red','dominant fawn','dominant amber'],
             'Avy':  ['brindle','american brindle','am. brindle'],
-            'b':    ['chocolate','cinnamon','dove','lilac','champagne','lavender','mock chocolate'],
-            'd':    ['blue','dove','lilac','silver','lavender','blue agouti','dominant amber','recessive amber'],
+            'b':    ['chocolate','cinnamon','lilac','champagne','lavender'],
+            'd':    ['blue','lilac','silver','lavender','blue agouti','dominant amber','recessive amber'],
             'p':    ['dove','champagne','argente','silver','lavender','cinnamon argente','dominant fawn','recessive fawn'],
             'e':    ['recessive red','recessive fawn','recessive amber'],
             'c':    ['albino','himalayan','bone'],
@@ -1884,6 +1884,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         } catch (error) {
             console.error('[fetchMyAnimals] Error fetching animals:', error?.response?.status, error?.message);
             setMyAnimals([]);
+        } finally {
+            setMyAnimalsLoaded(true);
         }
     };
 
