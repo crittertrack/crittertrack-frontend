@@ -5078,25 +5078,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     {reqs.bothParents.length > 0 && (
                                                         <div className="text-[10px] text-gray-500">
                                                             <span className="font-medium text-gray-700">Both parents must carry:</span>{' '}
-                                                            {reqs.bothParents.map((item, i) => (
-                                                                <span key={i}>
-                                                                    {i > 0 && ' · '}
-                                                                    <span className="font-mono">{item.label}</span>
-                                                                    {item.hint && <span className="text-gray-400"> ({item.hint})</span>}
-                                                                </span>
-                                                            ))}
+                                                            <span className="font-mono">{reqs.bothParents.map(r => r.label).join(' · ')}</span>
                                                         </div>
                                                     )}
                                                     {reqs.oneParent.length > 0 && (
                                                         <div className="text-[10px] text-gray-500">
                                                             <span className="font-medium text-gray-700">At least one parent needs:</span>{' '}
-                                                            {reqs.oneParent.map((item, i) => (
-                                                                <span key={i}>
-                                                                    {i > 0 && ' · '}
-                                                                    <span className="font-mono">{item.label}</span>
-                                                                    {item.hint && <span className="text-gray-400"> ({item.hint})</span>}
-                                                                </span>
-                                                            ))}
+                                                            <span className="font-mono">{reqs.oneParent.map(r => r.label).join(' · ')}</span>
                                                         </div>
                                                     )}
                                                 </div>
