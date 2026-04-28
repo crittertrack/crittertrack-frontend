@@ -1047,8 +1047,8 @@ const TpResultCard = ({ r, idx, globalIdx, expandedCard, setExpandedCard, onUseP
                                 {r.locusBreakdown.map((l, i) => (
                                     <div key={i} className="flex items-center gap-2 text-xs">
                                         <span className="w-36 text-gray-600 truncate">{l.locus} <span className="text-gray-400">({l.alleles})</span></span>
-                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${l.sireHas === 'visual' ? 'bg-indigo-100 text-indigo-700' : l.sireHas === 'carrier' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-50 text-red-500'}`}>{r.sireName}: {l.sireHas === 'visual' ? '✓ visual' : l.sireHas === 'carrier' ? '✓ het carrier' : '✗ no evidence'}</span>
-                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${l.damHas === 'visual' ? 'bg-indigo-100 text-indigo-700' : l.damHas === 'carrier' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-50 text-red-500'}`}>{r.damName}: {l.damHas === 'visual' ? '✓ visual' : l.damHas === 'carrier' ? '✓ het carrier' : '✗ no evidence'}</span>
+                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${l.sireHas === 'visual' ? 'bg-emerald-100 text-emerald-700' : l.sireHas === 'carrier' ? 'bg-blue-100 text-blue-700' : 'bg-red-50 text-red-500'}`}>{r.sireName}: {l.sireHas === 'visual' ? '✓ visual' : l.sireHas === 'carrier' ? '✓ carrier' : '✗ no evidence'}</span>
+                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${l.damHas === 'visual' ? 'bg-emerald-100 text-emerald-700' : l.damHas === 'carrier' ? 'bg-blue-100 text-blue-700' : 'bg-red-50 text-red-500'}`}>{r.damName}: {l.damHas === 'visual' ? '✓ visual' : l.damHas === 'carrier' ? '✓ carrier' : '✗ no evidence'}</span>
                                     </div>
                                 ))}
                             </div>
