@@ -1044,13 +1044,23 @@ const TpResultCard = ({ r, idx, globalIdx, expandedCard, setExpandedCard, onUseP
                         <div>
                             <div className="text-[11px] font-semibold text-gray-500 mb-1">Locus coverage</div>
                             <div className="space-y-1">
-                                {r.locusBreakdown.map((l, i) => (
+                                {r.locusBreakdown.map((l, i) => {
+                                    const sireNotNeeded = l.isDominant && !l.sireHas && !!l.damHas;
+                                    const damNotNeeded  = l.isDominant && !l.damHas  && !!l.sireHas;
+                                    return (
                                     <div key={i} className="flex items-center gap-2 text-xs">
                                         <span className="w-36 text-gray-600 truncate">{l.locus} <span className="text-gray-400">({l.alleles})</span></span>
-                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${l.sireHas === 'visual' ? 'bg-emerald-100 text-emerald-700' : l.sireHas === 'carrier' ? 'bg-blue-100 text-blue-700' : 'bg-red-50 text-red-500'}`}>{r.sireName}: {l.sireHas === 'visual' ? '✓ visual' : l.sireHas === 'carrier' ? '✓ carrier' : '✗ no evidence'}</span>
-                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${l.damHas === 'visual' ? 'bg-emerald-100 text-emerald-700' : l.damHas === 'carrier' ? 'bg-blue-100 text-blue-700' : 'bg-red-50 text-red-500'}`}>{r.damName}: {l.damHas === 'visual' ? '✓ visual' : l.damHas === 'carrier' ? '✓ carrier' : '✗ no evidence'}</span>
+                                        {sireNotNeeded
+                                            ? <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-400">{r.sireName}: —</span>
+                                            : <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${l.sireHas === 'visual' ? 'bg-emerald-100 text-emerald-700' : l.sireHas === 'carrier' ? 'bg-blue-100 text-blue-700' : 'bg-red-50 text-red-500'}`}>{r.sireName}: {l.sireHas === 'visual' ? '✓ visual' : l.sireHas === 'carrier' ? '✓ carrier' : 'not present'}</span>
+                                        }
+                                        {damNotNeeded
+                                            ? <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-400">{r.damName}: —</span>
+                                            : <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${l.damHas === 'visual' ? 'bg-emerald-100 text-emerald-700' : l.damHas === 'carrier' ? 'bg-blue-100 text-blue-700' : 'bg-red-50 text-red-500'}`}>{r.damName}: {l.damHas === 'visual' ? '✓ visual' : l.damHas === 'carrier' ? '✓ carrier' : 'not present'}</span>
+                                        }
                                     </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     )}
@@ -1586,8 +1596,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     const [a1, a2] = value.split('/');
                     const sireHas = animalLocusStatus(sireAnimal, a1, a2);
                     const damHas  = animalLocusStatus(damAnimal,  a1, a2);
+                    const isRecessiveHom = a1 === a2 && a1 === a1.toLowerCase();
+                    const isCompoundHetRec = a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase();
+                    const isDominant = !isRecessiveHom && !isCompoundHetRec;
                     const locusLabel = locus === 'A' ? 'A-locus' : locus === 'B' ? 'B-locus (chocolate)' : locus === 'D' ? 'D-locus (blue dilute)' : locus === 'P' ? 'P-locus (pink-eyed dilute)' : locus === 'E' ? 'E-locus (extension)' : locus === 'C' ? 'C-locus (dilution)' : locus === 'Go' ? 'Go-locus (coat length)' : locus === 'S' ? 'S-locus (piebald)' : locus === 'W' ? 'W-locus (variegation)' : locus;
-                    return { locus: locusLabel, alleles: value, sireHas, damHas };
+                    return { locus: locusLabel, alleles: value, sireHas, damHas, isDominant };
                 });
 
                 return {
