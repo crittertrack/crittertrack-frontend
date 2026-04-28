@@ -70,6 +70,7 @@ const TARGET_OUTCOME_TRAIT_CHIPS = {
         { id: 'splashed',           label: 'Splashed',          code: 'Spl/spl',        group: 'Pattern & Markings' },
         { id: 'merle',              label: 'Merle',             code: 'rn/rn',          group: 'Pattern & Markings' },
         { id: 'pearl',              label: 'Pearl',             code: 'si/si',          group: 'Pattern & Markings' },
+        { id: 'umbrous',            label: 'Umbrous',           code: 'U/-',            group: 'Pattern & Markings' },
         // Coat & Texture
         { id: 'shorthair',          label: 'Shorthair',         code: 'Go/-',           group: 'Coat & Texture' },
         { id: 'longhair',           label: 'Longhair',          code: 'go/go',          group: 'Coat & Texture' },
@@ -153,6 +154,7 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits) => {
             case 'splashed':         genotype.Spl = 'Spl/spl'; break;
             case 'merle':            genotype.Rn = 'rn/rn';   break;
             case 'pearl':            genotype.Si = 'si/si';   break;
+            case 'umbrous':          genotype.U  = 'U/u';     break;
             // Coat & Texture
             case 'shorthair':        genotype.Go = 'Go/Go';   break;
             case 'longhair':         genotype.Go = 'go/go';   break;
@@ -254,6 +256,7 @@ const getMinimumParentCarrierRequirements = (selectedTraits) => {
         Mobr: { 'Mobr/mobr': 'XBrindle gene (Mobr)' },
         Re:   { 'Re/re': 'Rex gene (Re)' },
         Nu:   { 'Nu/nu': 'Hairless gene (Nu)' },
+        U:    { 'U/u': 'Umbrous gene (U)' },
     };
 
     for (const [locus, value] of Object.entries(genotype)) {
@@ -1237,6 +1240,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             'fz':   ['fuzz'],
             'Nu':   ['hairless'],
             'Mobr': ['xbrindle'],
+            'U':    ['umbrous'],
         };
 
         const getVarietyText = (animal) =>
