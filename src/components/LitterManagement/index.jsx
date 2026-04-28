@@ -270,14 +270,14 @@ const getPrototypePhenotypeConfidence = (selectedTraits) => {
             level: 'high',
             label: 'High Confidence',
             className: 'bg-emerald-100 text-emerald-800',
-            detail: `Rule match: resolved phenotype "${phenotypeLabel}" with ${lociSelected} loci and 0 assumptions.`
+            detail: `Phenotype "${phenotypeLabel}" fully resolved across ${lociSelected} loci.`
         };
     }
 
     if (hasResolvedPhenotype || lociSelected >= 2) {
         const mediumReason = hasResolvedPhenotype
-            ? `Rule match: resolved phenotype "${phenotypeLabel}" with ${lociSelected} loci and ${assumptionCount} assumption${assumptionCount === 1 ? '' : 's'}.`
-            : `Rule match: phenotype unresolved with ${lociSelected} loci and ${assumptionCount} assumption${assumptionCount === 1 ? '' : 's'}.`;
+            ? `Phenotype "${phenotypeLabel}" resolved across ${lociSelected} loci${assumptionCount > 0 ? ` (${assumptionCount} assumption${assumptionCount === 1 ? '' : 's'})` : ''}.`
+            : `Phenotype not yet resolved — ${lociSelected} loci selected${assumptionCount > 0 ? `, ${assumptionCount} assumption${assumptionCount === 1 ? '' : 's'}` : ''}. Add more chips.`;
         return {
             level: 'medium',
             label: 'Medium Confidence',
@@ -290,7 +290,7 @@ const getPrototypePhenotypeConfidence = (selectedTraits) => {
         level: 'low',
         label: 'Needs More Loci',
         className: 'bg-gray-100 text-gray-700',
-        detail: `Rule match: only ${lociSelected} locus selected and phenotype unresolved.`
+        detail: `Only ${lociSelected} locus selected — add more trait chips to resolve a phenotype.`
     };
 };
 
