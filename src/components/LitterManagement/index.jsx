@@ -1279,6 +1279,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const CHIP_W_EXCLUSIVE  = new Set(['variegated','banded']);
 
     const toggleTargetTraitChip = (chipId) => {
+        setTpMockResults([]); // clear stale results whenever chip selection changes
         setTpSelectedTraits(prev => {
             if (prev.includes(chipId)) return prev.filter(id => id !== chipId);
             let next = [...prev];
@@ -1473,9 +1474,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     if (sireCovers && damCovers) score += 2;
                 } else {
                     // Dominant (or dominant-acting lowercase like at) — one parent is sufficient
-                    // If NEITHER parent shows any evidence → blocked (dominant can't be silently carried)
-                    if (!sireCovers && !damCovers) dominantBlocked = true;
-                    else score += 2;
+                    // Only block if BOTH animals have genetic code AND neither carries the dominant allele.
+                    // If either lacks a genetic code, we can't rule it out — score 0 but don't block.
+                    const sireDefinitelyLacks = !!sire.geneticCode && !animalHasAllele(sire, a1) && !animalHasAllele(sire, a2);
+                    const damDefinitelyLacks = !!dam.geneticCode && !animalHasAllele(dam, a1) && !animalHasAllele(dam, a2);
+                    if (sireDefinitelyLacks && damDefinitelyLacks) dominantBlocked = true;
+                    else if (sireCovers || damCovers) score += 2;
                 }
             }
             return { score, dominantBlocked };
@@ -1583,6 +1587,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             })
             .filter(r => r.pairScore > 0); // drop pairs with zero coverage entirely
 
+        console.log('[TP] results:', results.length, results.slice(0,3).map(r => `${r.sireName} × ${r.damName} (${r.pairScore}/${r.maxPossibleScore} ${r.tier})`));
         setTimeout(() => {
             setTpMockResults(results);
             setTpGenerating(false);
