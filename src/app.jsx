@@ -1832,7 +1832,7 @@ const App = () => {
                                 <HelpCircle size={18} />
                             </button>
                             
-                            {/* Avatar / Profile Dropdown (mobile) */
+                            {/* Avatar / Profile Dropdown (mobile) */}
                             <div className="relative" ref={profileMenuMobileRef}>
                                 <button
                                     onClick={() => setShowProfileMenu(p => !p)}
