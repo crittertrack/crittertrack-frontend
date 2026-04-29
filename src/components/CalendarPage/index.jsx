@@ -71,6 +71,42 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         try { const d = new Date(v); if (isNaN(d)) return null; return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }); } catch(e) { return null; }
     };
     const getAnimalDisplayName = (a) => [a.prefix, a.name, a.suffix].filter(Boolean).join(' ') || a.id_public || 'Unknown';
+    const getParentDisplayName = (parentObj, parentIdPublic) => {
+        if (parentObj && (parentObj.prefix || parentObj.name || parentObj.suffix)) {
+            return [parentObj.prefix, parentObj.name, parentObj.suffix].filter(Boolean).join(' ');
+        }
+        return parentObj?.name || parentIdPublic || '?';
+    };
+    const getPairDisplayForPill = (litter) => {
+        if (litter?.breedingPairCodeName) return litter.breedingPairCodeName;
+        const sireName = getParentDisplayName(litter?.sire, litter?.sireId_public);
+        const damName = getParentDisplayName(litter?.dam, litter?.damId_public);
+        return `${sireName} + ${damName}`;
+    };
+    const getAgeShort = (birthDate) => {
+        if (!birthDate) return null;
+        const born = new Date(String(birthDate).substring(0, 10) + 'T00:00:00');
+        if (isNaN(born)) return null;
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const ageDays = Math.max(0, Math.round((now - born) / 86400000));
+        const years = Math.floor(ageDays / 365);
+        const months = Math.floor((ageDays % 365) / 30);
+        if (years > 0) return `${years}y ${months}m`;
+        return `${months}m`;
+    };
+    const getDueStatusText = (expectedDueDate) => {
+        if (!expectedDueDate) return 'Due';
+        const due = new Date(expectedDueDate);
+        if (isNaN(due)) return 'Due';
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        due.setHours(0, 0, 0, 0);
+        const diff = Math.round((due - now) / 86400000);
+        if (diff > 0) return `Due in ${diff}d`;
+        if (diff === 0) return 'Due today';
+        return `${Math.abs(diff)}d overdue`;
+    };
     const getLitterName = (l) => l.breedingPairCodeName || l.litter_id_public || 'Unnamed Litter';
     const getSireDam = (l) => `${l.sire?.name || l.sireId_public || '?'} · ${l.dam?.name || l.damId_public || '?'}`;
     const nextDueDate = (lastDate, freqDays) => {
@@ -140,16 +176,31 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
     animals.forEach(a => {
         addAnimalEvent(a.birthDate, 'birthday', a);
         const feedNext = nextDueDate(a.lastFedDate, a.feedingFrequencyDays);
-        if (feedNext) addAnimalEvent(feedNext, 'feeding', { ...a, _calLabel: a.name || a.id_public, _calDetail: `Feed every ${a.feedingFrequencyDays}d` });
+        if (feedNext) addAnimalEvent(feedNext, 'feeding', {
+            ...a,
+            _calLabel: a.name || a.id_public,
+            _calDetail: `Feed every ${a.feedingFrequencyDays}d`,
+            _calFeedType: a.dietType || a.feedingSchedule || '',
+        });
         const maintNext = nextDueDate(a.lastMaintenanceDate, a.maintenanceFrequencyDays);
         if (maintNext) addAnimalEvent(maintNext, 'maintenance', { ...a, _calLabel: a.name || a.id_public, _calDetail: `Maintenance every ${a.maintenanceFrequencyDays}d` });
         (a.careTasks || []).forEach(t => {
             const dn = nextDueDate(t.lastDoneDate, t.frequencyDays);
-            if (dn) addAnimalEvent(dn, 'caretask', { ...a, _calLabel: t.taskName || t.name || 'Enclosure Task', _calDetail: a.name || a.id_public });
+            if (dn) addAnimalEvent(dn, 'caretask', {
+                ...a,
+                _calLabel: t.taskName || t.name || 'Enclosure Task',
+                _calDetail: a.name || a.id_public,
+                _calSubject: '',
+            });
         });
         (a.animalCareTasks || []).forEach(t => {
             const dn = nextDueDate(t.lastDoneDate, t.frequencyDays);
-            if (dn) addAnimalEvent(dn, 'caretask', { ...a, _calLabel: t.taskName || t.name || 'Animal Task', _calDetail: a.name || a.id_public });
+            if (dn) addAnimalEvent(dn, 'caretask', {
+                ...a,
+                _calLabel: t.taskName || t.name || 'Animal Task',
+                _calDetail: a.name || a.id_public,
+                _calSubject: '',
+            });
         });
     });
 
@@ -159,14 +210,31 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
             const dn = nextDueDate(t.lastDoneDate, t.frequencyDays);
             if (dn && calendarEventFilters.caretask) {
                 if (!eventMap[dn]) eventMap[dn] = [];
-                eventMap[dn].push({ type: 'caretask', animal: { _id: enc._id, _calLabel: t.taskName || t.name || 'Cleaning Task', _calDetail: enc.name || 'Enclosure', id_public: enc._id } });
+                eventMap[dn].push({
+                    type: 'caretask',
+                    animal: {
+                        _id: enc._id,
+                        _calLabel: t.taskName || t.name || 'Cleaning Task',
+                        _calDetail: enc.name || 'Enclosure',
+                        _calSubject: enc.name || 'Enclosure',
+                        _calAnimalName: 'Enclosure',
+                        id_public: enc._id,
+                    },
+                });
             }
         });
     });
 
     // Supplies
     supplies.forEach(s => {
-        if (s.nextOrderDate) addAnimalEvent(s.nextOrderDate.substring(0,10), 'supply', { _id: s._id, _calLabel: s.name || 'Supply', _calDetail: s.category || '', id_public: s._id });
+        if (s.nextOrderDate) addAnimalEvent(s.nextOrderDate.substring(0,10), 'supply', {
+            _id: s._id,
+            _calLabel: s.name || 'Supply',
+            _calDetail: s.category || '',
+            _calAmount: s.reorderThreshold,
+            _calUnit: s.unit,
+            id_public: s._id,
+        });
     });
 
     const monthStart = new Date(year, month, 1);
@@ -195,22 +263,57 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
     const getPillLabel = (ev) => {
         if (ev.animal) {
             const a = ev.animal;
-            if (ev.type === 'birthday') return getAnimalDisplayName(a);
-            if (ev.type === 'feeding') return `${a._calLabel || getAnimalDisplayName(a)}`;
-            if (ev.type === 'maintenance') return `${a._calLabel || getAnimalDisplayName(a)}`;
-            if (ev.type === 'caretask') return `${a._calLabel || 'Task'} · ${a._calDetail || ''}`;
-            if (ev.type === 'supply') return `${a._calLabel || 'Supply'}`;
+            const animalName = a._calAnimalName || getAnimalDisplayName(a);
+            if (ev.type === 'birthday') {
+                const age = getAgeShort(a.birthDate);
+                return age ? `${animalName} ${age}` : animalName;
+            }
+            if (ev.type === 'feeding') {
+                const feedType = (a._calFeedType || '').trim();
+                return feedType ? `${animalName} ${feedType} Feed due` : `${animalName} Feed due`;
+            }
+            if (ev.type === 'maintenance') return `${animalName} Maintenance due`;
+            if (ev.type === 'caretask') {
+                const taskName = a._calLabel || 'Task';
+                const subject = (a._calSubject || '').trim();
+                return subject ? `${animalName} ${taskName} · ${subject}` : `${animalName} ${taskName}`;
+            }
+            if (ev.type === 'supply') {
+                const amount = (a._calAmount != null && a._calAmount !== '')
+                    ? `${a._calAmount}${a._calUnit ? ` ${a._calUnit}` : ''}`
+                    : '';
+                return amount
+                    ? `Supply Order: ${a._calLabel || 'Supply'} ${amount} · Reorder`
+                    : `Supply Order: ${a._calLabel || 'Supply'} · Reorder`;
+            }
             return getAnimalDisplayName(a);
         }
         const l = ev.litter;
-        const pairName = l.breedingPairCodeName || l.litter_id_public || 'Unnamed';
-        const sn = l.sire?.name || l.sireId_public || '?';
-        const dn = l.dam?.name || l.damId_public || '?';
-        if (ev.type === 'due') return `${pairName} · ${dn}`;
-        if (ev.type === 'planned') return `${pairName} · ${sn} × ${dn}`;
-        if (ev.type === 'born') { const total = l.litterSizeBorn ?? l.numberBorn ?? 0; const m = l.maleCount ?? 0; const f = l.femaleCount ?? 0; return `${pairName} · ${total} born (${m}M/${f}F)`; }
-        if (ev.type === 'weaned') { const total = l.litterSizeWeaned ?? l.numberWeaned ?? (l.litterSizeBorn ?? l.numberBorn ?? 0); return `${pairName} · ${total} to wean`; }
-        return `${pairName} · ${sn} · ${dn}`;
+        const pairBase = getPairDisplayForPill(l);
+        if (ev.type === 'planned') return pairBase;
+        if (ev.type === 'mated') return pairBase;
+        if (ev.type === 'due') {
+            if (l?.breedingPairCodeName) return l.breedingPairCodeName;
+            return `${pairBase} ${getDueStatusText(l.expectedDueDate)}`;
+        }
+        if (ev.type === 'born') {
+            const total = l.litterSizeBorn ?? l.numberBorn ?? 0;
+            return l?.breedingPairCodeName ? l.breedingPairCodeName : `${pairBase} ${total} born`;
+        }
+        if (ev.type === 'weaned') {
+            const total = l.litterSizeWeaned ?? l.numberWeaned ?? (l.litterSizeBorn ?? l.numberBorn ?? 0);
+            const wd = l.weaningDate ? new Date(l.weaningDate) : null;
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            let weanedPastOrToday = false;
+            if (wd && !isNaN(wd)) {
+                wd.setHours(0, 0, 0, 0);
+                weanedPastOrToday = wd <= now;
+            }
+            const verb = weanedPastOrToday ? 'weaned' : 'to wean';
+            return l?.breedingPairCodeName ? l.breedingPairCodeName : `${pairBase} ${total} ${verb}`;
+        }
+        return pairBase;
     };
 
     const TooltipRow = ({ label, value }) => value ? (
