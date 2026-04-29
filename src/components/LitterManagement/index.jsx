@@ -1106,7 +1106,7 @@ const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) =>
 };
 
 // Litter Management Component
-const TARGET_OUTCOME_ALLOWED_USERS = ['CTU1', 'CTU2', 'CTU5', 'CTU9'];
+const TARGET_OUTCOME_ALLOWED_USERS = ['CTU1', 'CTU2', 'CTU5', 'CTU9', 'CTU24'];
 
 const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp }) => {
     const canAccessTargetOutcome = TARGET_OUTCOME_ALLOWED_USERS.includes(userProfile?.id_public);
