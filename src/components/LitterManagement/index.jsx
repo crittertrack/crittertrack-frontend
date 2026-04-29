@@ -5662,7 +5662,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     }
                                     className="w-full py-2 px-4 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors"
                                 >
-                                    {!myAnimalsLoaded ? <><Loader2 className="w-4 h-4 animate-spin" /> Loading Animals...</> : tpGenerating ? <><Loader2 className="w-4 h-4 animate-spin" /> Building Prototype Results...</> : <><Star size={15} /> Find Best Pairings (Prototype)</>}
+                                    {!myAnimalsLoaded ? <><Loader2 className="w-4 h-4 animate-spin" /> Loading Animals...</> : tpGenerating ? <><Loader2 className="w-4 h-4 animate-spin" /> Finding Best Pairings...</> : <><Star size={15} /> Find Best Pairings</>}
                                 </button>
                             </div>{/* end Run button section */}
 
