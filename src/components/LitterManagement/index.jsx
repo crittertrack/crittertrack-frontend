@@ -1208,7 +1208,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [calendarTooltip, setCalendarTooltip] = useState(null); // { litterId, eventType, litter, x, y }
     const [calendarQuery, setCalendarQuery] = useState('');
     const [calendarPlannedOnly, setCalendarPlannedOnly] = useState(false);
-    const [calendarEventFilters, setCalendarEventFilters] = useState({ mated: true, due: true, born: true, weaned: true });
+    const [calendarEventFilters, setCalendarEventFilters] = useState({ mated: true, due: true, born: true, weaned: true, birthday: true });
+    const [calendarAnimals, setCalendarAnimals] = useState([]);
     const [urgencyEnabled, setUrgencyEnabled] = useState(() => {
         try { return localStorage.getItem('ct_urgency_enabled') !== 'false'; } catch { return true; }
     });
@@ -1875,6 +1876,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             setLoading(false);
         }
     };
+
+    // Fetch animals for calendar view (birthday events etc.)
+    useEffect(() => {
+        if (viewMode !== 'calendar' || !authToken) return;
+        axios.get(`${API_BASE_URL}/animals?isOwned=true`, {
+            headers: { Authorization: `Bearer ${authToken}` }
+        }).then(r => setCalendarAnimals(Array.isArray(r.data) ? r.data : [])).catch(() => {});
+    }, [viewMode, authToken, API_BASE_URL]);
 
     const fetchLitters = async ({ preserveOffspring = false } = {}) => {
         try {
@@ -4938,6 +4947,24 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     addEvent(l.weaningDate, 'weaned', l);
                 });
 
+                // Animal events
+                const addAnimalEvent = (dateVal, type, animal) => {
+                    if (!dateVal || !calendarEventFilters[type]) return;
+                    let d;
+                    try {
+                        const s = typeof dateVal === 'string' ? dateVal.substring(0, 10) : null;
+                        d = s ? new Date(s + 'T00:00:00') : new Date(dateVal);
+                        if (isNaN(d.getTime())) return;
+                    } catch(e) { return; }
+                    const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                    if (!eventMap[k]) eventMap[k] = [];
+                    if (eventMap[k].some(e => e.animal?._id === animal._id && e.type === type)) return;
+                    eventMap[k].push({ type, animal });
+                };
+                calendarAnimals.forEach(a => {
+                    addAnimalEvent(a.birthDate, 'birthday', a);
+                });
+
                 const monthStart = new Date(year, month, 1);
                 const monthEnd = new Date(year, month + 1, 0);
                 const monthEventList = Object.entries(eventMap)
@@ -4949,7 +4976,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     .sort((a, b) => {
                         if (a.dateKey < b.dateKey) return -1;
                         if (a.dateKey > b.dateKey) return 1;
-                        const order = { mated: 0, due: 1, born: 2, weaned: 3 };
+                        const order = { mated: 0, due: 1, born: 2, weaned: 3, birthday: 4 };
                         return (order[a.type] ?? 99) - (order[b.type] ?? 99);
                     });
 
@@ -4969,10 +4996,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 while (cells.length % 7 !== 0) cells.push(null);
 
                 const typeStyles = {
-                    mated:  { bg: 'bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300', dot: 'bg-purple-400', label: 'Mated' },
-                    due:    { bg: 'bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300', dot: 'bg-amber-400', label: 'Due' },
-                    born:   { bg: 'bg-green-100 hover:bg-green-200 text-green-800 border border-green-500', dot: 'bg-green-500', label: 'Born' },
-                    weaned: { bg: 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300', dot: 'bg-sky-400', label: 'Weaned' },
+                    mated:    { bg: 'bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300', dot: 'bg-purple-400', label: 'Mated' },
+                    due:      { bg: 'bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300', dot: 'bg-amber-400', label: 'Due' },
+                    born:     { bg: 'bg-green-100 hover:bg-green-200 text-green-800 border border-green-500', dot: 'bg-green-500', label: 'Born' },
+                    weaned:   { bg: 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300', dot: 'bg-sky-400', label: 'Weaned' },
+                    birthday: { bg: 'bg-pink-100 hover:bg-pink-200 text-pink-800 border border-pink-300', dot: 'bg-pink-400', label: 'Birthday' },
                 };
 
                 const getLitterName = (l) => l.breedingPairCodeName || l.litter_id_public || 'Unnamed Litter';
@@ -4987,7 +5015,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     try { const d = new Date(v); if (isNaN(d)) return null; return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }); } catch(e) { return null; }
                 };
                 // Type-specific pill label
+                const getAnimalDisplayName = (a) => [a.prefix, a.name, a.suffix].filter(Boolean).join(' ') || a.id_public || 'Unknown';
+
                 const getPillLabel = (ev) => {
+                    if (ev.animal) {
+                        if (ev.type === 'birthday') return `🎂 ${getAnimalDisplayName(ev.animal)}`;
+                        return getAnimalDisplayName(ev.animal);
+                    }
                     const l = ev.litter;
                     const pairName = l.breedingPairCodeName || l.litter_id_public || 'Unnamed';
                     const sn = l.sire?.name || l.sireId_public || '?';
@@ -5096,17 +5130,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </span>
                                         <div className="mt-0.5 space-y-0.5">
                                             {events.map((ev, i) => {
-                                                const st = (ev.type === 'due' && ev.litter.birthDate)
+                                                const st = (ev.type === 'due' && ev.litter?.birthDate)
                                                     ? { bg: 'bg-gray-100 hover:bg-gray-200 text-gray-500 border border-gray-300', label: 'Due (Born)' }
                                                     : (typeStyles[ev.type] || typeStyles.born);
                                                 return (
                                                     <button
                                                         key={i}
-                                                        onClick={() => setCalendarTooltip(t => (t && t.key === `${dateKey}-${i}`) ? null : { key: `${dateKey}-${i}`, litter: ev.litter, type: ev.type })}
-                                                        className={`w-full text-left px-1.5 py-0.5 rounded text-xs truncate transition-colors ${st.bg}${ev.litter.isPlanned ? ' border-dashed opacity-80' : ''}`}
-                                                        title={`${ev.litter.isPlanned ? '[Planned] ' : ''}${st.label}: ${getLitterName(ev.litter)} (${getSireDam(ev.litter)})`}
+                                                        onClick={() => setCalendarTooltip(t => (t && t.key === `${dateKey}-${i}`) ? null : { key: `${dateKey}-${i}`, litter: ev.litter, animal: ev.animal, type: ev.type })}
+                                                        className={`w-full text-left px-1.5 py-0.5 rounded text-xs truncate transition-colors ${st.bg}${ev.litter?.isPlanned ? ' border-dashed opacity-80' : ''}`}
+                                                        title={ev.animal ? `${st.label}: ${getAnimalDisplayName(ev.animal)}` : `${ev.litter?.isPlanned ? '[Planned] ' : ''}${st.label}: ${getLitterName(ev.litter)} (${getSireDam(ev.litter)})`}
                                                     >
-                                                        {ev.litter.isPlanned && '~ '}{getPillLabel(ev)}
+                                                        {ev.litter?.isPlanned && '~ '}{getPillLabel(ev)}
                                                     </button>
                                                 );
                                             })}
@@ -5118,6 +5152,41 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                         {/* Selected event detail */}
                         {calendarTooltip && (() => {
+                            // Animal event tooltip
+                            if (calendarTooltip.animal) {
+                                const a = calendarTooltip.animal;
+                                const name = getAnimalDisplayName(a);
+                                const st = typeStyles[calendarTooltip.type] || typeStyles.born;
+                                return (
+                                    <div className="mx-3 mb-3 mt-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                                        <div className="flex justify-between items-start gap-2 mb-2">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${st.bg}`}>{st.label}</span>
+                                                <span className="font-bold text-gray-800 text-sm">{name}</span>
+                                            </div>
+                                            <button onClick={() => setCalendarTooltip(null)} className="text-gray-400 hover:text-gray-600 flex-shrink-0"><X size={16} /></button>
+                                        </div>
+                                        <div className="space-y-1">
+                                            {a.id_public && <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">ID:</span><span className="text-gray-800 font-medium">{a.id_public}</span></div>}
+                                            {a.species && <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Species:</span><span className="text-gray-800 font-medium">{a.species}</span></div>}
+                                            {a.gender && <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Gender:</span><span className="text-gray-800 font-medium">{a.gender}</span></div>}
+                                            {a.birthDate && (() => {
+                                                const born = new Date(a.birthDate + 'T00:00:00');
+                                                const now = new Date(); now.setHours(0,0,0,0);
+                                                const ageDays = Math.round((now - born) / 86400000);
+                                                const years = Math.floor(ageDays / 365);
+                                                const months = Math.floor((ageDays % 365) / 30);
+                                                const ageStr = years > 0 ? `${years}y ${months}m` : `${months} month${months !== 1 ? 's' : ''}`;
+                                                return (<>
+                                                    <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Birthday:</span><span className="text-gray-800 font-medium">{fmtD(a.birthDate)}</span></div>
+                                                    <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Age (today):</span><span className="text-gray-800 font-medium">{ageStr}</span></div>
+                                                </>);
+                                            })()}
+                                        </div>
+                                    </div>
+                                );
+                            }
+
                             const l = calendarTooltip.litter;
                             const type = calendarTooltip.type;
                             const sn = l.sire?.name || l.sireId_public || '?';
@@ -5232,13 +5301,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             ) : (
                                 <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
                                     {monthEventList.map((ev, idx) => {
-                                        const st = (ev.type === 'due' && ev.litter.birthDate)
+                                        const st = (ev.type === 'due' && ev.litter?.birthDate)
                                             ? { bg: 'bg-gray-100 text-gray-500 border border-gray-300', label: 'Due (Born)' }
                                             : (typeStyles[ev.type] || typeStyles.born);
                                         return (
                                             <button
-                                                key={`${ev.dateKey}-${ev.type}-${ev.litter._id}-${idx}`}
-                                                onClick={() => setCalendarTooltip({ key: `${ev.dateKey}-${idx}`, litter: ev.litter, type: ev.type })}
+                                                key={`${ev.dateKey}-${ev.type}-${ev.litter?._id ?? ev.animal?._id ?? idx}-${idx}`}
+                                                onClick={() => setCalendarTooltip({ key: `${ev.dateKey}-${idx}`, litter: ev.litter, animal: ev.animal, type: ev.type })}
                                                 className="w-full text-left px-2 py-1.5 rounded border border-gray-200 hover:bg-gray-50 transition"
                                             >
                                                 <div className="flex items-center justify-between gap-2">

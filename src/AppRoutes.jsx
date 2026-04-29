@@ -261,6 +261,7 @@ export function AppRoutes({
       {/* Litters */}
       <Route path="/litters" element={
         <LitterManagement
+          key="litters-route"
           authToken={authToken}
           API_BASE_URL={API_BASE_URL}
           userProfile={userProfile}
@@ -279,6 +280,7 @@ export function AppRoutes({
       {/* Calendar — litter management opened directly in calendar view */}
       <Route path="/calendar" element={
         <LitterManagement
+          key="calendar-route"
           authToken={authToken}
           API_BASE_URL={API_BASE_URL}
           userProfile={userProfile}
