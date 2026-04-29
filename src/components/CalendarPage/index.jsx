@@ -211,7 +211,6 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                     <Calendar className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
                     Calendar
                 </h2>
-                {loading && <span className="text-xs text-gray-400 animate-pulse">Loading events…</span>}
             </div>
 
             {/* Calendar widget */}
@@ -275,6 +274,13 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                 </div>
 
                 {/* Day Cells */}
+                <div className="relative">
+                    {loading && (
+                        <div className="absolute inset-0 z-10 bg-white/70 backdrop-blur-[2px] flex flex-col items-center justify-center gap-3 rounded-b-xl">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                            <span className="text-sm text-gray-500 font-medium">Loading events…</span>
+                        </div>
+                    )}
                 <div className="grid grid-cols-7 divide-x divide-y divide-gray-300">
                     {cells.map((day, idx) => {
                         const colIdx = idx % 7;
@@ -308,6 +314,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                             </div>
                         );
                     })}
+                </div>
                 </div>
 
                 {/* Selected event detail */}
