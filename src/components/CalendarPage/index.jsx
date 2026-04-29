@@ -10,7 +10,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
     const [calendarMonth, setCalendarMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
     const [calendarTooltip, setCalendarTooltip] = useState(null);
     const [calendarQuery, setCalendarQuery] = useState('');
-    const [calendarPlannedOnly, setCalendarPlannedOnly] = useState(false);
+
     const [calendarEventFilters, setCalendarEventFilters] = useState({
         planned: true, mated: true, due: true, born: true, weaned: true,
         birthday: true, feeding: true, maintenance: true, caretask: true, supply: true,
@@ -119,7 +119,6 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
 
     // Litter events — planned litters get their own 'planned' type
     const filteredLitters = litters.filter(l => {
-        if (calendarPlannedOnly && !l.isPlanned) return false;
         if (!q) return true;
         return [l.breedingPairCodeName, l.litter_id_public, l.sire?.name, l.dam?.name, l.sireId_public, l.damId_public]
             .filter(Boolean).join(' ').toLowerCase().includes(q);
@@ -253,20 +252,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                 className="w-full md:w-80 p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
                             />
                         </div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <button
-                                onClick={() => setCalendarMonth(new Date(today.getFullYear(), today.getMonth(), 1))}
-                                className="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
-                            >
-                                Today
-                            </button>
-                            <button
-                                onClick={() => setCalendarPlannedOnly(v => !v)}
-                                className={`px-2.5 py-1.5 text-xs font-medium rounded-lg border ${calendarPlannedOnly ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
-                            >
-                                Planned Only
-                            </button>
-                        </div>
+
                     </div>
                     <div className="flex flex-wrap gap-2">
                         {Object.entries(typeStyles).map(([key, style]) => (
