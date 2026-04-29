@@ -1447,10 +1447,32 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             }
             if (animal.geneticCode) {
                 const alleles = parseAnimalAlleles(animal);
-                if (alleles.has(a1) || alleles.has(a2)) return isDominant ? 'visual' : 'carrier';
+                if (isDominant) {
+                    // For dominant targets, ONLY check the dominant allele.
+                    // Checking the recessive counterpart (e.g. 'a' in Ay/a, 're' in Re/re) would
+                    // produce false positives — most animals carry 'a' on the A-locus for example.
+                    const domAllele = (a1 === a2) ? a1
+                        : DOMINANT_LOWERCASE_ALLELES.has(a1) ? a1
+                        : DOMINANT_LOWERCASE_ALLELES.has(a2) ? a2
+                        : a1 !== a1.toLowerCase() ? a1
+                        : a2 !== a2.toLowerCase() ? a2
+                        : a1;
+                    if (alleles.has(domAllele)) return 'visual';
+                } else {
+                    if (alleles.has(a1) || alleles.has(a2)) return 'carrier';
+                }
             }
             const text = getVarietyText(animal);
-            return [...(ALLELE_KW[a1] || []), ...(ALLELE_KW[a2] || [])].some(kw => text.includes(kw)) ? (isDominant ? 'visual' : 'carrier') : false;
+            if (isDominant) {
+                const domAllele = (a1 === a2) ? a1
+                    : DOMINANT_LOWERCASE_ALLELES.has(a1) ? a1
+                    : DOMINANT_LOWERCASE_ALLELES.has(a2) ? a2
+                    : a1 !== a1.toLowerCase() ? a1
+                    : a2 !== a2.toLowerCase() ? a2
+                    : a1;
+                return (ALLELE_KW[domAllele] || []).some(kw => text.includes(kw)) ? 'visual' : false;
+            }
+            return [...(ALLELE_KW[a1] || []), ...(ALLELE_KW[a2] || [])].some(kw => text.includes(kw)) ? 'carrier' : false;
         };
 
         // Does this animal carry at least one copy of a1 OR a2?
@@ -1519,8 +1541,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     probability *= 0.25;
                 } else {
                     // Dominant — one parent is sufficient
-                    const sireDefinitelyLacks = !!sire.geneticCode && !animalHasAllele(sire, a1) && !animalHasAllele(sire, a2);
-                    const damDefinitelyLacks = !!dam.geneticCode && !animalHasAllele(dam, a1) && !animalHasAllele(dam, a2);
+                    // Only check the dominant allele; checking the recessive counterpart (e.g. 'a' in Ay/a)
+                    // would make "definitely lacks" almost never true since most animals carry 'a'.
+                    const domAllele = (a1 === a2) ? a1
+                        : DOMINANT_LOWERCASE_ALLELES.has(a1) ? a1
+                        : DOMINANT_LOWERCASE_ALLELES.has(a2) ? a2
+                        : a1 !== a1.toLowerCase() ? a1
+                        : a2 !== a2.toLowerCase() ? a2
+                        : a1;
+                    const sireDefinitelyLacks = !!sire.geneticCode && !animalHasAllele(sire, domAllele);
+                    const damDefinitelyLacks  = !!dam.geneticCode  && !animalHasAllele(dam,  domAllele);
                     if (sireDefinitelyLacks && damDefinitelyLacks) { dominantBlocked = true; break; }
                     if (!sireStatus && !damStatus) { probability = 0; break; }
                 }
