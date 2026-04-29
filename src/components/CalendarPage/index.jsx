@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
-    Calendar, ChevronLeft, ChevronRight, Search, X
+    Calendar, ChevronLeft, ChevronRight, Search, X,
+    CalendarPlus, Hourglass, BellRing, Cake, Rainbow,
+    PartyPopper, UtensilsCrossed, Wrench, HandCoins, Package
 } from 'lucide-react';
 
 const CalendarPage = ({ authToken, API_BASE_URL }) => {
@@ -10,8 +12,8 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
     const [calendarQuery, setCalendarQuery] = useState('');
     const [calendarPlannedOnly, setCalendarPlannedOnly] = useState(false);
     const [calendarEventFilters, setCalendarEventFilters] = useState({
-        mated: true, due: true, born: true, weaned: true,
-        birthday: true, feeding: true, maintenance: true, caretask: true, supply: true, planned: true,
+        planned: true, mated: true, due: true, born: true, weaned: true,
+        birthday: true, feeding: true, maintenance: true, caretask: true, supply: true,
     });
 
     const [litters, setLitters] = useState([]);
@@ -52,16 +54,16 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
     })();
 
     const typeStyles = {
-        mated:       { bg: 'bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300', dot: 'bg-purple-400', label: 'Mated' },
-        due:         { bg: 'bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300', dot: 'bg-amber-400', label: 'Due' },
-        born:        { bg: 'bg-green-100 hover:bg-green-200 text-green-800 border border-green-500', dot: 'bg-green-500', label: 'Born' },
-        weaned:      { bg: 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300', dot: 'bg-sky-400', label: 'Weaned' },
-        planned:     { bg: 'bg-indigo-100 hover:bg-indigo-200 text-indigo-800 border border-dashed border-indigo-400', dot: 'bg-indigo-400', label: 'Planned Mating' },
-        birthday:    { bg: 'bg-pink-100 hover:bg-pink-200 text-pink-800 border border-pink-300', dot: 'bg-pink-400', label: 'Birthday' },
-        feeding:     { bg: 'bg-orange-100 hover:bg-orange-200 text-orange-800 border border-orange-300', dot: 'bg-orange-400', label: 'Feeding Due' },
-        maintenance: { bg: 'bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border border-yellow-400', dot: 'bg-yellow-400', label: 'Maintenance Due' },
-        caretask:    { bg: 'bg-teal-100 hover:bg-teal-200 text-teal-800 border border-teal-300', dot: 'bg-teal-400', label: 'Care Task' },
-        supply:      { bg: 'bg-red-100 hover:bg-red-200 text-red-800 border border-red-300', dot: 'bg-red-400', label: 'Supply Order' },
+        planned:     { bg: 'bg-indigo-100 hover:bg-indigo-200 text-indigo-800 border border-dashed border-indigo-400', dot: 'bg-indigo-400', label: 'Planned Mating', Icon: CalendarPlus },
+        mated:       { bg: 'bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300', dot: 'bg-purple-400', label: 'Mated', Icon: Hourglass },
+        due:         { bg: 'bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300', dot: 'bg-amber-400', label: 'Due', Icon: BellRing },
+        born:        { bg: 'bg-green-100 hover:bg-green-200 text-green-800 border border-green-500', dot: 'bg-green-500', label: 'Born', Icon: Cake },
+        weaned:      { bg: 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300', dot: 'bg-sky-400', label: 'Weaned', Icon: Rainbow },
+        birthday:    { bg: 'bg-pink-100 hover:bg-pink-200 text-pink-800 border border-pink-300', dot: 'bg-pink-400', label: 'Birthdate', Icon: PartyPopper },
+        feeding:     { bg: 'bg-orange-100 hover:bg-orange-200 text-orange-800 border border-orange-300', dot: 'bg-orange-400', label: 'Feeding Due', Icon: UtensilsCrossed },
+        maintenance: { bg: 'bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border border-yellow-400', dot: 'bg-yellow-400', label: 'Maintenance', Icon: Wrench },
+        caretask:    { bg: 'bg-teal-100 hover:bg-teal-200 text-teal-800 border border-teal-300', dot: 'bg-teal-400', label: 'Care Task', Icon: HandCoins },
+        supply:      { bg: 'bg-red-100 hover:bg-red-200 text-red-800 border border-red-300', dot: 'bg-red-400', label: 'Supply Order', Icon: Package },
     };
 
     const fmtD = (v) => {
@@ -78,6 +80,11 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         const next = new Date(base);
         next.setDate(next.getDate() + Number(freqDays));
         return `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-${String(next.getDate()).padStart(2,'0')}`;
+    };
+
+    const getEventIcon = (type, size = 12, className = '') => {
+        const IconComp = typeStyles[type]?.Icon;
+        return IconComp ? <IconComp size={size} className={className} /> : null;
     };
 
     // Build event map
@@ -171,7 +178,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         .sort((a, b) => {
             if (a.dateKey < b.dateKey) return -1;
             if (a.dateKey > b.dateKey) return 1;
-            const order = { mated: 0, due: 1, born: 2, weaned: 3, birthday: 4, feeding: 5, maintenance: 6, caretask: 7, supply: 8 };
+            const order = { planned: 0, mated: 1, due: 2, born: 3, weaned: 4, birthday: 5, feeding: 6, maintenance: 7, caretask: 8, supply: 9 };
             return (order[a.type] ?? 99) - (order[b.type] ?? 99);
         });
 
@@ -189,11 +196,11 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
     const getPillLabel = (ev) => {
         if (ev.animal) {
             const a = ev.animal;
-            if (ev.type === 'birthday') return `🎂 ${getAnimalDisplayName(a)}`;
-            if (ev.type === 'feeding') return `🍽️ ${a._calLabel || getAnimalDisplayName(a)}`;
-            if (ev.type === 'maintenance') return `🔧 ${a._calLabel || getAnimalDisplayName(a)}`;
-            if (ev.type === 'caretask') return `✅ ${a._calLabel || 'Task'} · ${a._calDetail || ''}`;
-            if (ev.type === 'supply') return `📦 ${a._calLabel || 'Supply'}`;
+            if (ev.type === 'birthday') return getAnimalDisplayName(a);
+            if (ev.type === 'feeding') return `${a._calLabel || getAnimalDisplayName(a)}`;
+            if (ev.type === 'maintenance') return `${a._calLabel || getAnimalDisplayName(a)}`;
+            if (ev.type === 'caretask') return `${a._calLabel || 'Task'} · ${a._calDetail || ''}`;
+            if (ev.type === 'supply') return `${a._calLabel || 'Supply'}`;
             return getAnimalDisplayName(a);
         }
         const l = ev.litter;
@@ -201,7 +208,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         const sn = l.sire?.name || l.sireId_public || '?';
         const dn = l.dam?.name || l.damId_public || '?';
         if (ev.type === 'due') return `${pairName} · ${dn}`;
-        if (ev.type === 'planned') return `📅 ${pairName} · ${sn} × ${dn}`;
+        if (ev.type === 'planned') return `${pairName} · ${sn} × ${dn}`;
         if (ev.type === 'born') { const total = l.litterSizeBorn ?? l.numberBorn ?? 0; const m = l.maleCount ?? 0; const f = l.femaleCount ?? 0; return `${pairName} · ${total} born (${m}M/${f}F)`; }
         if (ev.type === 'weaned') { const total = l.litterSizeWeaned ?? l.numberWeaned ?? (l.litterSizeBorn ?? l.numberBorn ?? 0); return `${pairName} · ${total} to wean`; }
         return `${pairName} · ${sn} · ${dn}`;
@@ -268,7 +275,10 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                 onClick={() => setCalendarEventFilters(prev => ({ ...prev, [key]: !prev[key] }))}
                                 className={`px-2.5 py-1 text-xs font-medium rounded-full border transition ${calendarEventFilters[key] ? style.bg : 'border-gray-300 text-gray-500 bg-white hover:bg-gray-50'}`}
                             >
-                                {style.label}
+                                <span className="inline-flex items-center gap-1">
+                                    {getEventIcon(key, 12)}
+                                    <span>{style.label}</span>
+                                </span>
                             </button>
                         ))}
                     </div>
@@ -305,7 +315,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                 <div className="mt-0.5 space-y-0.5">
                                     {events.map((ev, i) => {
                                         const st = (ev.type === 'due' && ev.litter?.birthDate)
-                                            ? { bg: 'bg-gray-100 hover:bg-gray-200 text-gray-500 border border-gray-300', label: 'Due (Born)' }
+                                            ? { ...typeStyles.due, bg: 'bg-gray-100 hover:bg-gray-200 text-gray-500 border border-gray-300', label: 'Due (Born)' }
                                             : (typeStyles[ev.type] || typeStyles.born);
                                         return (
                                             <button
@@ -314,7 +324,10 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                                 className={`w-full text-left px-1.5 py-1 rounded text-[11px] leading-tight font-medium break-words transition-colors ${st.bg}`}
                                                 title={ev.animal ? `${st.label}: ${getAnimalDisplayName(ev.animal)}` : `${st.label}: ${getLitterName(ev.litter)} (${getSireDam(ev.litter)})`}
                                             >
-                                                {getPillLabel(ev)}
+                                                <span className="inline-flex items-start gap-1.5">
+                                                    {getEventIcon(ev.type, 11, 'mt-[1px] flex-shrink-0')}
+                                                    <span>{getPillLabel(ev)}</span>
+                                                </span>
                                             </button>
                                         );
                                     })}
@@ -479,7 +492,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                         <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
                             {monthEventList.map((ev, idx) => {
                                 const st = (ev.type === 'due' && ev.litter?.birthDate)
-                                    ? { bg: 'bg-gray-100 text-gray-500 border border-gray-300', label: 'Due (Born)' }
+                                    ? { ...typeStyles.due, bg: 'bg-gray-100 text-gray-500 border border-gray-300', label: 'Due (Born)' }
                                     : (typeStyles[ev.type] || typeStyles.born);
                                 return (
                                     <button
@@ -488,7 +501,10 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                         className="w-full text-left px-2 py-1.5 rounded border border-gray-200 hover:bg-gray-50 transition"
                                     >
                                         <div className="flex items-center justify-between gap-2">
-                                            <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-semibold rounded-full ${st.bg}`}>{st.label}</span>
+                                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-full ${st.bg}`}>
+                                                {getEventIcon(ev.type, 11)}
+                                                {st.label}
+                                            </span>
                                             <span className="text-[11px] text-gray-500">{fmtD(ev.dateKey)}</span>
                                         </div>
                                         <div className="text-xs text-gray-800 font-medium mt-1 truncate">{getPillLabel(ev)}</div>
@@ -503,7 +519,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                 <div className="px-4 py-2.5 bg-gray-50 border-t border-gray-200 flex flex-wrap gap-4 text-xs text-gray-600 items-center">
                     {Object.entries(typeStyles).map(([k, v]) => (
                         <span key={k} className="flex items-center gap-1.5">
-                            <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${v.dot}`} />
+                            {getEventIcon(k, 12)}
                             {v.label}
                         </span>
                     ))}
