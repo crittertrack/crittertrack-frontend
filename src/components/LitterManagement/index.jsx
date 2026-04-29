@@ -1434,18 +1434,30 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         const animalLocusStatus = (animal, a1, a2) => {
             if (!animal) return false;
             // Special case: at/a (tan/fox) — 'at' is always expressed and cannot be silently carried.
-            // A parent with 'at' contributes the dominant allele (visual); a parent with 'a' but not
-            // 'at' (self or agouti-carrying-a) contributes the recessive allele (carrier).
+            // Both parents are phenotypically visible contributors: the 'at' parent shows tan,
+            // the 'a' parent shows self. Neither is a hidden carrier — both show as 'visual'.
             if (a1 === 'at' && a2 === 'a') {
                 if (animal.geneticCode) {
                     const alleles = parseAnimalAlleles(animal);
                     if (alleles.has('at')) return 'visual';
-                    if (alleles.has('a'))  return 'carrier';
+                    if (alleles.has('a'))  return 'visual';
                     return false;
                 }
                 const text = getVarietyText(animal);
                 if ((ALLELE_KW['at'] || []).some(kw => text.includes(kw))) return 'visual';
-                if ((ALLELE_KW['a']  || []).some(kw => text.includes(kw))) return 'carrier';
+                if ((ALLELE_KW['a']  || []).some(kw => text.includes(kw))) return 'visual';
+                return false;
+            }
+            // Compound-het dominant A-locus (e.g. A/at, Ay/at, Avy/at): each parent supplies ONE
+            // of the two alleles — an animal carrying either allele is a visual contributor.
+            if (COMPOUND_HET_DOMINANT.has(a1 + '/' + a2) || COMPOUND_HET_DOMINANT.has(a2 + '/' + a1)) {
+                if (animal.geneticCode) {
+                    const alleles = parseAnimalAlleles(animal);
+                    if (alleles.has(a1) || alleles.has(a2)) return 'visual';
+                    return false;
+                }
+                const text = getVarietyText(animal);
+                if ([...(ALLELE_KW[a1] || []), ...(ALLELE_KW[a2] || [])].some(kw => text.includes(kw))) return 'visual';
                 return false;
             }
             const isRecessiveHom = a1 === a2 && a1 === a1.toLowerCase();
@@ -1674,9 +1686,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     const damHas  = animalLocusStatus(damAnimal,  a1, a2);
                     const isRecessiveHom = a1 === a2 && a1 === a1.toLowerCase();
                     const isCompoundHetRec = a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase();
-                    // at/a is a split target — both parents needed; isDominant=false prevents
-                    // false 'not needed' label when one parent has 'at' and the other has 'a'
-                    const isDominant = !isRecessiveHom && !isCompoundHetRec && !(a1 === 'at' && a2 === 'a');
+                    // at/a and compound-het dominant (A/at, Ay/at, etc.) are split targets — both
+                    // parents contribute a different allele, so neither should ever show as '—'
+                    const isCompoundHetDom = COMPOUND_HET_DOMINANT.has(value);
+                    const isDominant = !isRecessiveHom && !isCompoundHetRec && !(a1 === 'at' && a2 === 'a') && !isCompoundHetDom;
                     const locusLabel = locus === 'A' ? 'A-locus' : locus === 'B' ? 'B-locus (chocolate)' : locus === 'D' ? 'D-locus (blue dilute)' : locus === 'P' ? 'P-locus (pink-eyed dilute)' : locus === 'E' ? 'E-locus (extension)' : locus === 'C' ? 'C-locus (dilution)' : locus === 'Go' ? 'Go-locus (coat length)' : locus === 'S' ? 'S-locus (piebald)' : locus === 'W' ? 'W-locus (variegation)' : locus;
                     return { locus: locusLabel, alleles: value, sireHas, damHas, isDominant };
                 });
