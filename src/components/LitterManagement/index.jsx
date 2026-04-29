@@ -1720,6 +1720,52 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             setTpHasRun(true);
             setTpGenerating(false);
             setTpExpandedCard(null);
+
+            // Fetch actual COI for pairs not cached this session
+            const pairsNeedingCOI = results.filter(r => {
+                if (r.source === 'selected' && tpCOI != null) return false; // already have real COI
+                const cacheKey = `${r.sireId}:${r.damId}`;
+                return coiCacheRef.current[cacheKey] == null;
+            });
+
+            pairsNeedingCOI.forEach(async (result) => {
+                const cacheKey = `${result.sireId}:${result.damId}`;
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 15000);
+                try {
+                    const res = await axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
+                        params: { sireId: result.sireId, damId: result.damId, generations: 20 },
+                        headers: { Authorization: `Bearer ${authToken}` },
+                        signal: controller.signal,
+                    });
+                    const realCOI = res.data.inbreedingCoefficient ?? 0;
+                    coiCacheRef.current[cacheKey] = realCOI;
+
+                    // Update results with real COI and re-sort
+                    setTpMockResults(prev => {
+                        const updated = prev.map(r => {
+                            if (r.sireId === result.sireId && r.damId === result.damId) {
+                                const newSortScore = r.probability - Math.max(0, (realCOI - 12.5) * 0.5);
+                                return {
+                                    ...r,
+                                    coiValue: realCOI,
+                                    sortScore: newSortScore,
+                                    warnings: realCOI >= 12.5
+                                        ? Array.from(new Set([...r.warnings, 'Higher COI than ideal range']))
+                                        : r.warnings.filter(w => w !== 'Higher COI than ideal range'),
+                                };
+                            }
+                            return r;
+                        });
+                        // Re-sort by new sortScore
+                        return updated.sort((a, b) => b.sortScore - a.sortScore);
+                    });
+                } catch (err) {
+                    coiCacheRef.current[cacheKey] = 0; // prevent retry loops on error
+                } finally {
+                    clearTimeout(timeout);
+                }
+            });
         }, 350);
     };
 
