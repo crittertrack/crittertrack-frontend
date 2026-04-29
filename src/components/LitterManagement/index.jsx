@@ -360,9 +360,10 @@ const getMinimumParentCarrierRequirements = (selectedTraits) => {
             bothParents.push({ label: 'non-agouti (a)' });
             continue;
         }
-        // A-locus at/a — tan is dominant; only one parent needs it
+        // A-locus at/a — split: one parent must have 'at' (visible as tan/fox), other must have 'a' (self or agouti-carrier)
+        // at cannot be silently carried, so self (a/a) mice cannot carry tan — they are the 'a' contributor
         if (locus === 'A' && value === 'at/a') {
-            oneParent.push({ label: 'tan gene (at)' });
+            splitParents.push({ label: `one parent: tan (at) · other parent: non-agouti (a)` });
             continue;
         }
         // A-locus A/A — dominant, one parent is sufficient
@@ -1432,6 +1433,21 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         // Returns 'visual' (homozygous recessive confirmed in gc), 'carrier' (het recessive), or false
         const animalLocusStatus = (animal, a1, a2) => {
             if (!animal) return false;
+            // Special case: at/a (tan/fox) — 'at' is always expressed and cannot be silently carried.
+            // A parent with 'at' contributes the dominant allele (visual); a parent with 'a' but not
+            // 'at' (self or agouti-carrying-a) contributes the recessive allele (carrier).
+            if (a1 === 'at' && a2 === 'a') {
+                if (animal.geneticCode) {
+                    const alleles = parseAnimalAlleles(animal);
+                    if (alleles.has('at')) return 'visual';
+                    if (alleles.has('a'))  return 'carrier';
+                    return false;
+                }
+                const text = getVarietyText(animal);
+                if ((ALLELE_KW['at'] || []).some(kw => text.includes(kw))) return 'visual';
+                if ((ALLELE_KW['a']  || []).some(kw => text.includes(kw))) return 'carrier';
+                return false;
+            }
             const isRecessiveHom = a1 === a2 && a1 === a1.toLowerCase();
             const isCompoundHetRec = a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase()
                 && !DOMINANT_LOWERCASE_ALLELES.has(a1) && !DOMINANT_LOWERCASE_ALLELES.has(a2);
@@ -1532,7 +1548,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 const isCompoundHetRec = a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase()
                     && !DOMINANT_LOWERCASE_ALLELES.has(a1) && !DOMINANT_LOWERCASE_ALLELES.has(a2);
 
-                if (locus === 'A' && COMPOUND_HET_DOMINANT.has(value)) {
+                if (locus === 'A' && value === 'at/a') {
+                    // at cannot be silently carried — need one parent with 'at' AND one parent with 'a'
+                    const anyHasAt = animalHasAllele(sire, 'at') || animalHasAllele(dam, 'at');
+                    const anyHasA  = animalHasAllele(sire, 'a')  || animalHasAllele(dam, 'a');
+                    if (!anyHasAt || !anyHasA) { probability = 0; break; }
+                    probability *= 0.5; // approximate: at/a×a/a and at/a×at/a both give ~50%
+                } else if (locus === 'A' && COMPOUND_HET_DOMINANT.has(value)) {
                     const [da1, da2] = value.split('/');
                     const anyHasA1 = animalHasAllele(sire, da1) || animalHasAllele(dam, da1);
                     const anyHasA2 = animalHasAllele(sire, da2) || animalHasAllele(dam, da2);
@@ -1652,7 +1674,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     const damHas  = animalLocusStatus(damAnimal,  a1, a2);
                     const isRecessiveHom = a1 === a2 && a1 === a1.toLowerCase();
                     const isCompoundHetRec = a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase();
-                    const isDominant = !isRecessiveHom && !isCompoundHetRec;
+                    // at/a is a split target — both parents needed; isDominant=false prevents
+                    // false 'not needed' label when one parent has 'at' and the other has 'a'
+                    const isDominant = !isRecessiveHom && !isCompoundHetRec && !(a1 === 'at' && a2 === 'a');
                     const locusLabel = locus === 'A' ? 'A-locus' : locus === 'B' ? 'B-locus (chocolate)' : locus === 'D' ? 'D-locus (blue dilute)' : locus === 'P' ? 'P-locus (pink-eyed dilute)' : locus === 'E' ? 'E-locus (extension)' : locus === 'C' ? 'C-locus (dilution)' : locus === 'Go' ? 'Go-locus (coat length)' : locus === 'S' ? 'S-locus (piebald)' : locus === 'W' ? 'W-locus (variegation)' : locus;
                     return { locus: locusLabel, alleles: value, sireHas, damHas, isDominant };
                 });
