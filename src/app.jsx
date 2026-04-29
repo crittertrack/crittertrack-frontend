@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, TableOfContents, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2, Hash, Dna, TreeDeciduous, Tag, Egg, Hospital, Brain, Trophy, Scale, FileCheck, Palette, Sprout, Ruler, FolderOpen, Leaf, Microscope, Pill, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Feather, Medal, Target, Key, Dumbbell, Gem, Flame, Baby, PawPrint, ArrowRight, LockOpen, Camera, BarChart2, Bird, Fish, Bug, Worm, Turtle, SlidersHorizontal } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, Upload, FileText, Link, Unlink, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, HelpCircle, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, TableOfContents, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar, Sparkles, QrCode, Images, Share2, Hash, Dna, TreeDeciduous, Tag, Egg, Hospital, Brain, Trophy, Scale, FileCheck, Palette, Sprout, Ruler, FolderOpen, Leaf, Microscope, Pill, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Feather, Medal, Target, Key, Dumbbell, Gem, Flame, Baby, PawPrint, ArrowRight, LockOpen, Camera, BarChart2, Bird, Fish, Bug, Worm, Turtle, SlidersHorizontal } from 'lucide-react';
 import ArchiveScreen from './components/ArchiveScreen';
 import { QRCodeSVG } from 'qrcode.react';
 import jsPDF from 'jspdf';
@@ -1688,13 +1688,17 @@ const App = () => {
                             <MoonStar size={18} className="mb-1" />
                             <span>Breeders</span>
                         </button>
-                        <button onClick={() => setShowInfoTab(true)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`}>
-                            <BookOpen size={18} className="mb-1" />
-                            <span>Help</span>
-                        </button>
                     </nav>
 
                     <div className="flex items-center space-x-3">
+                        <button
+                            onClick={() => setShowInfoTab(true)}
+                            className="relative flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
+                            title="Help"
+                        >
+                            <HelpCircle size={18} />
+                        </button>
+
                         <button
                             onClick={() => {
                                 setShowNotifications(true);
@@ -1819,8 +1823,16 @@ const App = () => {
                                     </span>
                                 )}
                             </button>
+
+                            <button
+                                onClick={() => setShowInfoTab(true)}
+                                className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
+                                title="Help"
+                            >
+                                <HelpCircle size={18} />
+                            </button>
                             
-                            {/* Avatar / Profile Dropdown (mobile) */}
+                            {/* Avatar / Profile Dropdown (mobile) */
                             <div className="relative" ref={profileMenuMobileRef}>
                                 <button
                                     onClick={() => setShowProfileMenu(p => !p)}
@@ -1879,8 +1891,8 @@ const App = () => {
                         </button>
                     </nav>
 
-                    {/* Fourth row: Navigation row 2 (4 buttons) */}
-                    <nav className="grid grid-cols-4 gap-1">
+                    {/* Fourth row: Navigation row 2 (3 buttons) */}
+                    <nav className="grid grid-cols-3 gap-1">
                         <button onClick={() => navigate('/marketplace')} data-tutorial-target="marketplace-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <ShoppingBag size={18} className="mb-0.5" />
                             <span>Available</span>
@@ -1892,10 +1904,6 @@ const App = () => {
                         <button onClick={() => navigate('/breeder-directory')} data-tutorial-target="breeders-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <MoonStar size={18} className="mb-0.5" />
                             <span>Breeders</span>
-                        </button>
-                        <button onClick={() => setShowInfoTab(true)} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`}>
-                            <BookOpen size={18} className="mb-0.5" />
-                            <span>Help</span>
                         </button>
                     </nav>
                 </div>
