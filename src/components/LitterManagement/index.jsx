@@ -1280,7 +1280,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         black:        ['black','chocolate','blue','dove','lilac','champagne','silver','lavender'],
         agouti:       ['agouti','cinnamon','blue-agouti','argente','cinnamon-argente'],
         domred:       ['dom-red','dom-fawn','dom-amber'],
-        recred:       ['rec-red','rec-fawn','rec-amber'],
         brindle:      ['am-brindle'],
         sepia:        ['sepia'],         // a/a + C-locus
         silveragouti: ['silver-agouti'], // A/A + C-locus
@@ -1290,6 +1289,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     Object.entries(CHIP_A_SERIES).forEach(([series, chips]) => chips.forEach(c => chipToASeries[c] = series));
 
     const CHIP_A_COMPOUND_HET_CAPABLE = new Set(['tan', 'fox']); // may pair with one A-locus series
+    // E-locus: rec-red/fawn/amber are mutually exclusive with each other, but CAN combine with A-locus chips
+    const CHIP_E_EXCLUSIVE  = new Set(['rec-red','rec-fawn','rec-amber']);
     const CHIP_C_EXCLUSIVE  = new Set(['albino','himalayan','bone','siamese','burmese','stone','beige','colorpoint-beige','mock-choc','sepia','silver-agouti']);
     const CHIP_GO_EXCLUSIVE = new Set(['shorthair','longhair','texel']);
     const CHIP_W_EXCLUSIVE  = new Set(['variegated','banded']);
@@ -1301,9 +1302,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             let next = [...prev];
             // A-locus: all base color chips are mutually exclusive (lilac, blue, chocolate etc. are all
             // complete phenotypes — selecting one removes all others except tan/fox compound-het chips)
+            // rec-red/fawn/amber are E-locus, not A-locus — they are NOT cleared here
             if (chipToASeries[chipId]) {
                 next = next.filter(id =>
                     CHIP_A_COMPOUND_HET_CAPABLE.has(id) || // keep tan/fox
+                    CHIP_E_EXCLUSIVE.has(id)             || // keep E-locus chips
                     !chipToASeries[id]                      // keep non-A chips
                 );
             }
@@ -1311,6 +1314,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             if (CHIP_A_COMPOUND_HET_CAPABLE.has(chipId)) {
                 next = next.filter(id => !CHIP_A_COMPOUND_HET_CAPABLE.has(id));
             }
+            // E-locus: mutually exclusive within rec-red/fawn/amber (different dilution modifiers)
+            if (CHIP_E_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_E_EXCLUSIVE.has(id));
             // C-locus: mutually exclusive
             if (CHIP_C_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_C_EXCLUSIVE.has(id));
             // Go-locus: mutually exclusive
