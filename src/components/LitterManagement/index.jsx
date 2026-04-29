@@ -1238,6 +1238,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [tpSelectedTraits, setTpSelectedTraits] = useState([]);
     const [tpGenerating, setTpGenerating] = useState(false);
     const [tpMockResults, setTpMockResults] = useState([]);
+    const [tpHasRun, setTpHasRun] = useState(false);
     const [tpExpandedCard, setTpExpandedCard] = useState(null); // key = `${sireId}:${damId}:${idx}`
     const [tpShowResultsHelp, setTpShowResultsHelp] = useState(false);
     const handleCalculateTestPairing = async () => {
@@ -1294,7 +1295,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const CHIP_W_EXCLUSIVE  = new Set(['variegated','banded']);
 
     const toggleTargetTraitChip = (chipId) => {
-        setTpMockResults([]); // clear stale results whenever chip selection changes
+        setTpMockResults([]); setTpHasRun(false); // clear stale results whenever chip selection changes
         setTpSelectedTraits(prev => {
             if (prev.includes(chipId)) return prev.filter(id => id !== chipId);
             let next = [...prev];
@@ -1669,6 +1670,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
         setTimeout(() => {
             setTpMockResults(results);
+            setTpHasRun(true);
             setTpGenerating(false);
             setTpExpandedCard(null);
         }, 350);
@@ -3069,6 +3071,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             setTpTargetSpecies(TARGET_OUTCOME_PROTOTYPE_SPECIES);
                             setTpSelectedTraits([]);
                             setTpMockResults([]);
+                            setTpHasRun(false);
                             setTpGenerating(false);
                             setTpExpandedCard(null);
                             // Ensure animals are loaded for the pairing pool
@@ -5564,7 +5567,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         {tpSelectedTraits.length > 0 && (
                                             <button
                                                 type="button"
-                                                onClick={() => { setTpSelectedTraits([]); setTpMockResults([]); setTpExpandedCard(null); }}
+                                                onClick={() => { setTpSelectedTraits([]); setTpMockResults([]); setTpHasRun(false); setTpExpandedCard(null); }}
                                                 className="text-xs text-gray-400 hover:text-red-500 transition"
                                             >
                                                 Clear all
@@ -5644,7 +5647,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             </div>
                                         ))}
                                     </div>
-                                ) : tpMockResults.length === 0 ? (
+                                ) : tpHasRun && tpMockResults.length === 0 ? (
+                                    <div className="p-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500">
+                                        <div className="font-medium text-gray-600 mb-1">No matching pairs found.</div>
+                                        <div>No animals in the pool carry enough of the required genetics to produce this target. Only animals with a genetic code entered are included.</div>
+                                    </div>
+                                ) : !tpHasRun ? (
                                     <div className="p-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500">
                                         Select traits and run the prototype to see ranked pair cards here.
                                     </div>
