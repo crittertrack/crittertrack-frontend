@@ -337,7 +337,7 @@ const getMinimumParentCarrierRequirements = (selectedTraits) => {
         }
         // A-locus simple dominant-het (Ay/a, Avy/a) — one parent only
         if (locus === 'A' && (value === 'Ay/a' || value === 'Avy/a')) {
-            oneParent.push({ label: value === 'Ay/a' ? 'Dominant red/fawn gene (Ay)' : 'Am. Brindle gene (Avy)' });
+            oneParent.push({ label: value === 'Ay/a' ? 'Dominant red gene (Ay)' : 'Am. Brindle gene (Avy)' });
             continue;
         }
         // A-locus a/a — both parents must carry a recessive a
