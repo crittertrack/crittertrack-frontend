@@ -132,11 +132,11 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         if (maintNext) addAnimalEvent(maintNext, 'maintenance', { ...a, _calLabel: a.name || a.id_public, _calDetail: `Maintenance every ${a.maintenanceFrequencyDays}d` });
         (a.careTasks || []).forEach(t => {
             const dn = nextDueDate(t.lastDoneDate, t.frequencyDays);
-            if (dn) addAnimalEvent(dn, 'caretask', { ...a, _calLabel: t.name || 'Enclosure Task', _calDetail: a.name || a.id_public });
+            if (dn) addAnimalEvent(dn, 'caretask', { ...a, _calLabel: t.taskName || t.name || 'Enclosure Task', _calDetail: a.name || a.id_public });
         });
         (a.animalCareTasks || []).forEach(t => {
             const dn = nextDueDate(t.lastDoneDate, t.frequencyDays);
-            if (dn) addAnimalEvent(dn, 'caretask', { ...a, _calLabel: t.name || 'Animal Task', _calDetail: a.name || a.id_public });
+            if (dn) addAnimalEvent(dn, 'caretask', { ...a, _calLabel: t.taskName || t.name || 'Animal Task', _calDetail: a.name || a.id_public });
         });
     });
 
@@ -146,7 +146,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
             const dn = nextDueDate(t.lastDoneDate, t.frequencyDays);
             if (dn && calendarEventFilters.caretask) {
                 if (!eventMap[dn]) eventMap[dn] = [];
-                eventMap[dn].push({ type: 'caretask', animal: { _id: enc._id, _calLabel: t.name || 'Cleaning Task', _calDetail: enc.name || 'Enclosure', id_public: enc._id } });
+                eventMap[dn].push({ type: 'caretask', animal: { _id: enc._id, _calLabel: t.taskName || t.name || 'Cleaning Task', _calDetail: enc.name || 'Enclosure', id_public: enc._id } });
             }
         });
     });
