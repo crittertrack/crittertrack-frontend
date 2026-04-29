@@ -327,9 +327,14 @@ const getMinimumParentCarrierRequirements = (selectedTraits) => {
         U:    { 'U/u': 'Umbrous gene (U)' },
     };
 
+    const eLociSelected = selectedTraits.some(id => ['rec-red','rec-fawn','rec-amber'].includes(id));
+
     for (const [locus, value] of Object.entries(genotype)) {
         if (!value || !value.includes('/')) continue;
         const [a1, a2] = value.split('/');
+
+        // e/e is epistatic over A-locus — skip A-locus requirement entirely when e/e is selected
+        if (locus === 'A' && eLociSelected) continue;
 
         // Explicitly dominant-het targets
         if (domHetTargets[locus]?.[value]) {
@@ -1341,7 +1346,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
         // Derive per-locus requirements from the target chip selection
         const { genotype: targetGenotype } = buildPrototypeGenotypeFromTraits(tpSelectedTraits);
-        const targetLoci = Object.entries(targetGenotype); // [[locus, 'a1/a2'], ...]
+        const eLociActive = tpSelectedTraits.some(id => ['rec-red','rec-fawn','rec-amber'].includes(id));
+        // e/e is epistatic over A-locus — exclude A from scoring when e/e chip is selected
+        const targetLoci = Object.entries(targetGenotype).filter(([locus]) => !(locus === 'A' && eLociActive));
 
         // === DIAGNOSTICS (temporary) ===
         console.log('[TP] selectedTraits:', tpSelectedTraits);
