@@ -443,6 +443,11 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     if (result.includes('Splashed') && result.includes('Pied')) {
       result = result.replace('Splashed', 'Tricolor').replace('Pied', '').replace(/\s+/g, ' ').trim();
     }
+
+    // Put Tricolor before Fox
+    if (result.includes('Fox') && result.includes('Tricolor')) {
+      result = result.replace('Fox Tricolor', 'Tricolor Fox');
+    }
     
     return result;
   };
@@ -1326,6 +1331,11 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   if (hasSplashed && hasPied) {
     // Replace "Splashed" with "Tricolor" and remove "Pied" (Pied + visible Splashed = Tricolor)
     result = result.replace('Splashed', 'Tricolor').replace('Pied', '').replace(/\s+/g, ' ').trim();
+  }
+
+  // If result has both Fox (as part of color name) and Tricolor (marking), put Tricolor before Fox
+  if (result.includes('Fox') && result.includes('Tricolor')) {
+    result = result.replace('Fox Tricolor', 'Tricolor Fox');
   }
 
   return { phenotype: result || 'Unknown', carriers, hidden, notes };
