@@ -175,6 +175,12 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits) => {
         assumptions.push('C-locus phenotype assumed on black base (a/a) — add a Base Color chip to override.');
     }
 
+    // E-locus (e/e) is epistatic over A-locus — auto-assume a/a so phenotype resolves
+    const eLociChips = ['rec-red', 'rec-fawn', 'rec-amber'];
+    if (selectedTraits.some(id => eLociChips.includes(id)) && !genotype.A) {
+        genotype.A = 'a/a';
+    }
+
     // Resolve compound A-locus combinations when multiple A-locus chips are selected.
     // The forEach above lets whichever ran last win — this corrects known multi-chip combos.
     const hasTan     = selectedTraits.some(id => id === 'tan' || id === 'fox');
