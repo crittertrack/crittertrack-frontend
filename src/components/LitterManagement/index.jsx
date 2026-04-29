@@ -43,11 +43,8 @@ const TARGET_OUTCOME_TRAIT_CHIPS = {
         { id: 'cinnamon-argente',   label: 'Cinnamon Argente',  code: 'A/- b/b p/p',   group: 'Base Color — Agouti' },
         // Base Color — Other
         { id: 'dom-red',            label: 'Dominant Red',      code: 'Ay/-',           group: 'Base Color — Other' },
-        { id: 'dom-fawn',           label: 'Dominant Fawn',     code: 'Ay/- p/p',       group: 'Base Color — Other' },
-        { id: 'dom-amber',          label: 'Dominant Amber',    code: 'Ay/- d/d',       group: 'Base Color — Other' },
         { id: 'rec-red',            label: 'Recessive Red',     code: 'e/e',            group: 'Base Color — Other' },
-        { id: 'rec-fawn',           label: 'Recessive Fawn',    code: 'e/e p/p',        group: 'Base Color — Other' },
-        { id: 'rec-amber',          label: 'Recessive Amber',   code: 'e/e d/d',        group: 'Base Color — Other' },
+        { id: 'am-brindle',         label: 'Am. Brindle',       code: 'Avy/-',          group: 'Base Color — Other' },
         // Albino & Dilution
         { id: 'albino',             label: 'Albino',            code: 'c/c',            group: 'Albino & Dilution' },
         { id: 'himalayan',          label: 'Himalayan',         code: 'c/ch',           group: 'Albino & Dilution' },
@@ -62,7 +59,7 @@ const TARGET_OUTCOME_TRAIT_CHIPS = {
         { id: 'silver-agouti',      label: 'Silver Agouti',     code: 'A/- cch/cch',    group: 'Albino & Dilution' },
         { id: 'fox',                label: 'Fox',               code: '−/at + C',        group: 'Albino & Dilution' },
         // Pattern & Markings
-        { id: 'am-brindle',         label: 'Am. Brindle',       code: 'Avy/-',          group: 'Pattern & Markings' },
+
         { id: 'xbrindle',           label: 'Xbrindle',          code: 'Mobr/mobr',      group: 'Pattern & Markings' },
         { id: 'pied',               label: 'Pied',              code: 's/s',            group: 'Pattern & Markings' },
         { id: 'variegated',         label: 'Variegated',        code: 'W/w',            group: 'Pattern & Markings' },
@@ -127,11 +124,7 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits) => {
             case 'cinnamon-argente': genotype.A  = 'A/A';  genotype.B = 'b/b'; genotype.P = 'p/p'; break;
             // Base Color — Other
             case 'dom-red':          genotype.A  = 'Ay/a';    break;
-            case 'dom-fawn':         genotype.A  = 'Ay/a';  genotype.P = 'p/p'; break;
-            case 'dom-amber':        genotype.A  = 'Ay/a';  genotype.D = 'd/d'; break;
             case 'rec-red':          genotype.E  = 'e/e';     break;
-            case 'rec-fawn':         genotype.E  = 'e/e';  genotype.P = 'p/p'; break;
-            case 'rec-amber':        genotype.E  = 'e/e';  genotype.D = 'd/d'; break;
             // Albino & Dilution — C locus
             case 'albino':           genotype.C  = 'c/c';     break;
             case 'himalayan':        genotype.C  = 'c/ch';    break;
@@ -176,22 +169,28 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits) => {
     }
 
     // E-locus (e/e) is epistatic over A-locus — auto-assume a/a so phenotype resolves
-    const eLociChips = ['rec-red', 'rec-fawn', 'rec-amber'];
+    const eLociChips = ['rec-red'];
     if (selectedTraits.some(id => eLociChips.includes(id)) && !genotype.A) {
         genotype.A = 'a/a';
     }
 
     // Resolve compound A-locus combinations when multiple A-locus chips are selected.
     // The forEach above lets whichever ran last win — this corrects known multi-chip combos.
-    const hasTan     = selectedTraits.some(id => id === 'tan' || id === 'fox');
-    const hasAgouti  = selectedTraits.some(id => ['agouti','cinnamon','blue-agouti','argente','cinnamon-argente','silver-agouti'].includes(id));
-    const hasBrindle = selectedTraits.includes('am-brindle');
-    const hasDomRed  = selectedTraits.some(id => ['dom-red','dom-fawn','dom-amber'].includes(id));
+    const hasTan        = selectedTraits.some(id => id === 'tan' || id === 'fox');
+    const hasAgouti     = selectedTraits.some(id => ['agouti','cinnamon','blue-agouti','argente','cinnamon-argente','silver-agouti'].includes(id));
+    const hasBrindle    = selectedTraits.includes('am-brindle');
+    const hasBlackSeries = selectedTraits.some(id => ['black','chocolate','blue','dove','lilac','champagne','silver','lavender'].includes(id));
+    const hasDomRed     = selectedTraits.includes('dom-red');
 
-    if (hasTan && hasBrindle)        genotype.A = 'Avy/at'; // Brindle Tan
-    else if (hasTan && hasAgouti)    genotype.A = 'A/at';   // Agouti Tan
-    else if (hasTan && hasDomRed)    genotype.A = 'Ay/at';  // Dom Red Tan
-    else if (hasBrindle && hasAgouti) genotype.A = 'Avy/A'; // Agouti Brindle
+    // Compound A-locus combinations — priority: most specific first
+    if      (hasTan && hasBrindle)          genotype.A = 'Avy/at'; // Brindle Tan
+    else if (hasTan && hasAgouti)           genotype.A = 'A/at';   // Agouti Tan
+    else if (hasTan && hasDomRed)           genotype.A = 'Ay/at';  // Dom Red Tan
+    else if (hasBrindle && hasAgouti)       genotype.A = 'Avy/A';  // Agouti Brindle
+    else if (hasBrindle && hasBlackSeries)  genotype.A = 'Avy/a';  // Brindle Black/Choc/etc (B/D/P modifiers already set)
+    else if (hasDomRed && hasAgouti)        genotype.A = 'Ay/A';   // Dom Red Agouti
+    else if (hasDomRed && hasBlackSeries)   genotype.A = 'Ay/a';   // Dom Red Black/Choc/etc (B/D/P modifiers already set)
+    // rec-red (e/e) is E-locus — A-locus set separately by black/agouti chip if present
 
     return { genotype, assumptions };
 };
@@ -327,8 +326,8 @@ const getMinimumParentCarrierRequirements = (selectedTraits) => {
         U:    { 'U/u': 'Umbrous gene (U)' },
     };
 
-    const eLociSelected = selectedTraits.some(id => ['rec-red','rec-fawn','rec-amber'].includes(id));
-    const aLociExplicit = selectedTraits.some(id => ['black','tan','chocolate','blue','dove','lilac','champagne','silver','lavender','agouti','cinnamon','blue-agouti','argente','cinnamon-argente','silver-agouti','dom-red','dom-fawn','dom-amber','fox','am-brindle','sepia'].includes(id));
+    const eLociSelected = selectedTraits.some(id => id === 'rec-red');
+    const aLociExplicit = selectedTraits.some(id => ['black','tan','chocolate','blue','dove','lilac','champagne','silver','lavender','agouti','cinnamon','blue-agouti','argente','cinnamon-argente','silver-agouti','dom-red','fox','am-brindle','sepia'].includes(id));
     const skipALocus = eLociSelected && !aLociExplicit;
 
     for (const [locus, value] of Object.entries(genotype)) {
@@ -1279,18 +1278,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const CHIP_A_SERIES = {
         black:        ['black','chocolate','blue','dove','lilac','champagne','silver','lavender'],
         agouti:       ['agouti','cinnamon','blue-agouti','argente','cinnamon-argente'],
-        domred:       ['dom-red','dom-fawn','dom-amber'],
-        brindle:      ['am-brindle'],
         sepia:        ['sepia'],         // a/a + C-locus
         silveragouti: ['silver-agouti'], // A/A + C-locus
+        // dom-red, am-brindle, rec-red are NOT here — they combine with black/agouti series
     };
     // Build chip→series lookup
     const chipToASeries = {};
     Object.entries(CHIP_A_SERIES).forEach(([series, chips]) => chips.forEach(c => chipToASeries[c] = series));
 
     const CHIP_A_COMPOUND_HET_CAPABLE = new Set(['tan', 'fox']); // may pair with one A-locus series
-    // E-locus: rec-red/fawn/amber are mutually exclusive with each other, but CAN combine with A-locus chips
-    const CHIP_E_EXCLUSIVE  = new Set(['rec-red','rec-fawn','rec-amber']);
+    // E-locus: only rec-red remains (fawn/amber removed); can combine with A-locus chips
+    const CHIP_E_EXCLUSIVE  = new Set(['rec-red']);
     const CHIP_C_EXCLUSIVE  = new Set(['albino','himalayan','bone','siamese','burmese','stone','beige','colorpoint-beige','mock-choc','sepia','silver-agouti']);
     const CHIP_GO_EXCLUSIVE = new Set(['shorthair','longhair','texel']);
     const CHIP_W_EXCLUSIVE  = new Set(['variegated','banded']);
@@ -1314,7 +1312,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             if (CHIP_A_COMPOUND_HET_CAPABLE.has(chipId)) {
                 next = next.filter(id => !CHIP_A_COMPOUND_HET_CAPABLE.has(id));
             }
-            // E-locus: mutually exclusive within rec-red/fawn/amber (different dilution modifiers)
+            // E-locus: rec-red is the only E chip; clearing is a no-op but kept for consistency
             if (CHIP_E_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_E_EXCLUSIVE.has(id));
             // C-locus: mutually exclusive
             if (CHIP_C_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_C_EXCLUSIVE.has(id));
@@ -1353,8 +1351,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
         // Derive per-locus requirements from the target chip selection
         const { genotype: targetGenotype } = buildPrototypeGenotypeFromTraits(tpSelectedTraits);
-        const eLociActive = tpSelectedTraits.some(id => ['rec-red','rec-fawn','rec-amber'].includes(id));
-        const aLociExplicit = tpSelectedTraits.some(id => ['black','tan','chocolate','blue','dove','lilac','champagne','silver','lavender','agouti','cinnamon','blue-agouti','argente','cinnamon-argente','silver-agouti','dom-red','dom-fawn','dom-amber','fox','am-brindle','sepia'].includes(id));
+        const eLociActive = tpSelectedTraits.some(id => id === 'rec-red');
+        const aLociExplicit = tpSelectedTraits.some(id => ['black','tan','chocolate','blue','dove','lilac','champagne','silver','lavender','agouti','cinnamon','blue-agouti','argente','cinnamon-argente','silver-agouti','dom-red','fox','am-brindle','sepia'].includes(id));
         // e/e is epistatic over A-locus — exclude A from scoring only when no explicit base color chip selected
         const targetLoci = Object.entries(targetGenotype).filter(([locus]) => !(locus === 'A' && eLociActive && !aLociExplicit));
 
@@ -3021,7 +3019,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     {/* Urgency Alerts Toggle */}
                     <button
                         onClick={toggleUrgency}
-                        title={urgencyEnabled ? 'Urgency alerts on ? click to disable' : 'Urgency alerts off ? click to enable'}
+                        title={urgencyEnabled ? 'Urgency alerts on — click to disable' : 'Urgency alerts off — click to enable'}
                         className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border shadow-sm transition-colors ${urgencyEnabled ? 'bg-amber-50 border-amber-300 text-amber-700 hover:bg-amber-100' : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50'}`}
                     >
                         <Bell size={14} />
@@ -3447,10 +3445,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 onChange={(e) => setFormData({...formData, expectedDueDate: e.target.value})}
                                                 className="px-3 py-2"
                                             />
-                                            <p className="text-xs text-gray-500 mt-1">Optional ? shows on calendar</p>
+                                            <p className="text-xs text-gray-500 mt-1">Optional — shows on calendar</p>
                                         </div>
 
-                                        {/* Birth Method */}
+                                        {/* Birth Method */}}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                                 Birth Method
@@ -3547,7 +3545,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 onChange={(e) => setFormData({...formData, weaningDate: e.target.value})}
                                                 className="px-3 py-2"
                                             />
-                                            <p className="text-xs text-gray-500 mt-1">Optional ? shows on calendar</p>
+                                            <p className="text-xs text-gray-500 mt-1">Optional — shows on calendar</p>
                                         </div>
                                     </div>
 
@@ -3948,13 +3946,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Mating Date</label>
                                 <DatePicker value={matingData.matingDate} onChange={(e) => setMatingData({...matingData, matingDate: e.target.value})} minDate={new Date()} className="px-3 py-2" />
-                                <p className="text-xs text-gray-500 mt-1">Today or future ? shows on calendar as "Mated"</p>
+                                <p className="text-xs text-gray-500 mt-1">Today or future — shows on calendar as "Mated"</p>
                             </div>
                             {/* Expected Due Date */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Expected Due Date</label>
                                 <DatePicker value={matingData.expectedDueDate} onChange={(e) => setMatingData({...matingData, expectedDueDate: e.target.value})} minDate={matingData.matingDate ? new Date(matingData.matingDate) : new Date()} className="px-3 py-2" />
-                                <p className="text-xs text-gray-500 mt-1">Must be on or after mating date ? shows on calendar as "Due"</p>
+                                <p className="text-xs text-gray-500 mt-1">Must be on or after mating date — shows on calendar as "Due"</p>
                             </div>
                             {/* Expandable breeding details */}
                             <button
@@ -4160,7 +4158,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     <button
                                         type="button"
                                         onClick={(e) => { e.stopPropagation(); toggleLitterPublic(litter); }}
-                                        title={litter.showOnPublicProfile ? 'Shown on public profile ? click to hide' : 'Hidden from public profile ? click to show'}
+                                        title={litter.showOnPublicProfile ? 'Shown on public profile — click to hide' : 'Hidden from public profile — click to show'}
                                         className={`flex-shrink-0 mr-2 p-1 rounded transition ${litter.showOnPublicProfile ? 'text-green-500 hover:text-green-600' : 'text-gray-400 hover:text-gray-600'}`}
                                     >
                                         {litter.showOnPublicProfile ? <Eye size={15} /> : <EyeOff size={15} />}
@@ -5054,7 +5052,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${tooltipPillStyle.bg}`}>
                                                     {tooltipPillStyle.label}
                                                 </span>
-                                                <span className="font-bold text-gray-800 text-sm">{pairName} ? {sn} ? {dn}</span>
+                                                <span className="font-bold text-gray-800 text-sm">{pairName} · {sn} · {dn}</span>
                                             </div>
                                             {callId && <p className="text-xs text-gray-400 mt-0.5">{callId}</p>}
                                         </div>
