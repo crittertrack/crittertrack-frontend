@@ -283,8 +283,8 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                     ? `${a._calAmount}${a._calUnit ? ` ${a._calUnit}` : ''}`
                     : '';
                 return amount
-                    ? `Supply Order: ${a._calLabel || 'Supply'} ${amount} · Reorder`
-                    : `Supply Order: ${a._calLabel || 'Supply'} · Reorder`;
+                    ? `Supply Order: ${a._calLabel || 'Supply'} ${amount}`
+                    : `Supply Order: ${a._calLabel || 'Supply'}`;
             }
             return getAnimalDisplayName(a);
         }
@@ -510,7 +510,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                 <div>
                                     <div className="flex items-center gap-2 flex-wrap">
                                         <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${tooltipPillStyle.bg}`}>{tooltipPillStyle.label}</span>
-                                        <span className="font-bold text-gray-800 text-sm">{pairName} · {sn} · {dn}</span>
+                                        <span className="font-bold text-gray-800 text-sm">{l.breedingPairCodeName ? pairName : `${sn} · ${dn}`}</span>
                                     </div>
                                     {callId && <p className="text-xs text-gray-400 mt-0.5">{callId}</p>}
                                 </div>
