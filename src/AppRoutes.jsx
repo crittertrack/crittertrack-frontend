@@ -276,6 +276,25 @@ export function AppRoutes({
         />
       } />
 
+      {/* Calendar — litter management opened directly in calendar view */}
+      <Route path="/calendar" element={
+        <LitterManagement
+          authToken={authToken}
+          API_BASE_URL={API_BASE_URL}
+          userProfile={userProfile}
+          showModalMessage={showModalMessage}
+          onViewAnimal={handleViewAnimal}
+          handleViewAnimal={handleViewAnimal}
+          handleEditAnimal={handleEditAnimal}
+          speciesOptions={speciesOptions}
+          cachedLitters={cachedLitters}
+          setCachedLitters={setCachedLitters}
+          litterCacheTimestamp={litterCacheTimestamp}
+          setLitterCacheTimestamp={setLitterCacheTimestamp}
+          initialView="calendar"
+        />
+      } />
+
       {/* Budget */}
       <Route path="/budget" element={
         <BudgetingTab

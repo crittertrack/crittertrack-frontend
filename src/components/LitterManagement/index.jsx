@@ -1108,7 +1108,7 @@ const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) =>
 // Litter Management Component
 const TARGET_OUTCOME_ALLOWED_USERS = ['CTU1', 'CTU2', 'CTU5', 'CTU9', 'CTU24'];
 
-const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp }) => {
+const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp, initialView = 'list' }) => {
     const canAccessTargetOutcome = TARGET_OUTCOME_ALLOWED_USERS.includes(userProfile?.id_public);
     const [litters, setLitters] = useState([]);
     const [myAnimals, setMyAnimals] = useState([]);
@@ -1182,6 +1182,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [searchQuery, setSearchQuery] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState('');
     const [yearFilter, setYearFilter] = useState('');
+    const [litterStatusFilter, setLitterStatusFilter] = useState('all'); // 'all' | 'planned' | 'mated' | 'born'
     // COI calculation state
     const [predictedCOI, setPredictedCOI] = useState(null);
     const [calculatingCOI, setCalculatingCOI] = useState(false);
@@ -1202,7 +1203,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [myAnimalsLoaded, setMyAnimalsLoaded] = useState(false);
     const [litterOffspringMap, setLitterOffspringMap] = useState({}); // litter._id ? offspring array (undefined = not yet loaded)
     const [offspringRefetchToken, setOffspringRefetchToken] = useState(0); // increment to force offspring re-fetch
-    const [viewMode, setViewMode] = useState('list'); // 'list' | 'calendar'
+    const [viewMode, setViewMode] = useState(initialView === 'calendar' ? 'calendar' : 'list'); // 'list' | 'calendar'
     const [calendarMonth, setCalendarMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
     const [calendarTooltip, setCalendarTooltip] = useState(null); // { litterId, eventType, litter, x, y }
     const [calendarQuery, setCalendarQuery] = useState('');
@@ -3003,7 +3004,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         // Use populated parent data first (covers transferred/hidden animals), fall back to myAnimals
         const sire = litter.sire || myAnimals.find(a => a.id_public === litter.sireId_public);
         const dam  = litter.dam  || myAnimals.find(a => a.id_public === litter.damId_public);
-        
+
+        // Status filter
+        if (litterStatusFilter !== 'all') {
+            const today = new Date();
+            const isMated = litter.isPlanned && litter.matingDate && new Date(litter.matingDate) <= today;
+            const isPlannedOnly = litter.isPlanned && !isMated;
+            const isBorn = !litter.isPlanned;
+            if (litterStatusFilter === 'planned' && !isPlannedOnly) return false;
+            if (litterStatusFilter === 'mated'   && !isMated)       return false;
+            if (litterStatusFilter === 'born'    && !isBorn)        return false;
+        }
+
         // Species filter
         if (speciesFilter) {
             if (sire?.species !== speciesFilter) return false;
@@ -4145,6 +4157,26 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             />
                         </div>
                         
+                        {/* Status filter */}
+                        <div className="flex flex-wrap gap-1.5 items-center">
+                            <span className="text-xs font-medium text-gray-500 mr-0.5">Show:</span>
+                            {[['all','All'],['planned','Planned'],['mated','Mated'],['born','Born']].map(([val, label]) => (
+                                <button
+                                    key={val}
+                                    type="button"
+                                    onClick={() => setLitterStatusFilter(val)}
+                                    className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
+                                        litterStatusFilter === val
+                                            ? val === 'planned' ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
+                                            : val === 'mated'   ? 'bg-purple-100 border-purple-300 text-purple-700'
+                                            : val === 'born'    ? 'bg-green-100 border-green-300 text-green-700'
+                                            : 'bg-primary border-primary/50 text-black'
+                                            : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+                                    }`}
+                                >{label}</button>
+                            ))}
+                        </div>
+
                         {/* Species filter */}
                         <div className="flex flex-wrap gap-3 items-center pt-2 border-t border-gray-200">
                             <div className="flex items-center gap-2">
