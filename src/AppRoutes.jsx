@@ -11,7 +11,7 @@ const CommunityPage = lazy(() => import('./components/Community/CommunityPage'))
 const BreederDirectory = lazy(() => import('./components/PublicProfile/BreederDirectory'));
 const LitterManagement = lazy(() => import('./components/LitterManagement'));
 const BudgetingTab = lazy(() => import('./components/BudgetingTab'));
-const MouseGeneticsCalculator = lazy(() => import('./components/MouseGeneticsCalculator'));
+const GeneticsCalculator = lazy(() => import('./components/GeneticsCalculator'));
 const SpeciesSelector = lazy(() => import('./components/Modals/SpeciesModals').then(m => ({ default: m.SpeciesSelector })));
 const SpeciesManager = lazy(() => import('./components/Modals/SpeciesModals').then(m => ({ default: m.SpeciesManager })));
 const AnimalForm = lazy(() => import('./components/AnimalForm'));
@@ -292,7 +292,7 @@ export function AppRoutes({
 
       {/* Genetics Calculator */}
       <Route path="/genetics-calculator" element={
-        <MouseGeneticsCalculator
+        <GeneticsCalculator
           API_BASE_URL={API_BASE_URL}
           authToken={authToken}
           myAnimals={myAnimalsForCalculator}

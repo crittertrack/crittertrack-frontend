@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { formatDate, formatDateShort } from '../../utils/dateFormatter';
 import DatePicker from '../DatePicker';
+import { calculatePhenotype } from '../GeneticsCalculator';
 
 const AnimalImage = ({ src, alt = 'Animal', className = 'w-full h-full object-cover', iconSize = 24 }) => {
     const [imageError, setImageError] = React.useState(false);
@@ -19,6 +20,370 @@ const AnimalImage = ({ src, alt = 'Animal', className = 'w-full h-full object-co
 };
 
 const DEFAULT_SPECIES_OPTIONS = ['Fancy Mouse', 'Fancy Rat', 'Russian Dwarf Hamster', 'Campbells Dwarf Hamster', 'Chinese Dwarf Hamster', 'Syrian Hamster', 'Guinea Pig'];
+const TARGET_OUTCOME_PROTOTYPE_SPECIES = 'Fancy Mouse';
+const TARGET_OUTCOME_PENDING_SPECIES = DEFAULT_SPECIES_OPTIONS.filter(species => species !== TARGET_OUTCOME_PROTOTYPE_SPECIES);
+
+const TARGET_OUTCOME_TRAIT_CHIPS = {
+    'Fancy Mouse': [
+        // Base Color — Black series
+        { id: 'black',              label: 'Black',             code: 'a/a',            group: 'Base Color — Black' },
+        { id: 'tan',                label: 'Tan',               code: '−/at',           group: 'Base Color — Black' },
+        { id: 'chocolate',          label: 'Chocolate',         code: 'b/b',            group: 'Base Color — Black' },
+        { id: 'blue',               label: 'Blue',              code: 'd/d',            group: 'Base Color — Black' },
+        { id: 'dove',               label: 'Dove',              code: 'p/p',            group: 'Base Color — Black' },
+        { id: 'lilac',              label: 'Lilac',             code: 'b/b d/d',        group: 'Base Color — Black' },
+        { id: 'champagne',          label: 'Champagne',         code: 'b/b p/p',        group: 'Base Color — Black' },
+        { id: 'silver',             label: 'Silver',            code: 'd/d p/p',        group: 'Base Color — Black' },
+        { id: 'lavender',           label: 'Lavender',          code: 'b/b d/d p/p',    group: 'Base Color — Black' },
+        // Base Color — Agouti series
+        { id: 'agouti',             label: 'Agouti',            code: 'A/-',            group: 'Base Color — Agouti' },
+        { id: 'cinnamon',           label: 'Cinnamon',          code: 'A/- b/b',        group: 'Base Color — Agouti' },
+        { id: 'blue-agouti',        label: 'Blue Agouti',       code: 'A/- d/d',        group: 'Base Color — Agouti' },
+        { id: 'argente',            label: 'Argente',           code: 'A/- p/p',        group: 'Base Color — Agouti' },
+        { id: 'cinnamon-argente',   label: 'Cinnamon Argente',  code: 'A/- b/b p/p',   group: 'Base Color — Agouti' },
+        // Base Color — Other
+        { id: 'dom-red',            label: 'Dominant Red',      code: 'Ay/-',           group: 'Base Color — Other' },
+        { id: 'rec-red',            label: 'Recessive Red',     code: 'e/e',            group: 'Base Color — Other' },
+        { id: 'am-brindle',         label: 'Am. Brindle',       code: 'Avy/-',          group: 'Base Color — Other' },
+        // Albino & Dilution
+        { id: 'albino',             label: 'Albino',            code: 'c/c',            group: 'Albino & Dilution' },
+        { id: 'himalayan',          label: 'Himalayan',         code: 'c/ch',           group: 'Albino & Dilution' },
+        { id: 'bone',               label: 'Bone',              code: 'c/ce',           group: 'Albino & Dilution' },
+        { id: 'siamese',            label: 'Siamese',           code: 'ch/ch',          group: 'Albino & Dilution' },
+        { id: 'burmese',            label: 'Burmese',           code: 'ch/cch',         group: 'Albino & Dilution' },
+        { id: 'stone',              label: 'Stone',             code: 'c/cch',          group: 'Albino & Dilution' },
+        { id: 'beige',              label: 'Beige',             code: 'ce/ce',          group: 'Albino & Dilution' },
+        { id: 'colorpoint-beige',   label: 'Colorpoint Beige',  code: 'ch/ce',          group: 'Albino & Dilution' },
+        { id: 'mock-choc',          label: 'Mock Chocolate',    code: 'ce/cch',         group: 'Albino & Dilution' },
+        { id: 'sepia',              label: 'Sepia',             code: 'a/a cch/cch',    group: 'Albino & Dilution' },
+        { id: 'silver-agouti',      label: 'Silver Agouti',     code: 'A/- cch/cch',    group: 'Albino & Dilution' },
+        { id: 'fox',                label: 'Fox',               code: '−/at + C',        group: 'Albino & Dilution' },
+        // Pattern & Markings
+
+        { id: 'xbrindle',           label: 'Xbrindle',          code: 'Mobr/mobr',      group: 'Pattern & Markings' },
+        { id: 'pied',               label: 'Pied',              code: 's/s',            group: 'Pattern & Markings' },
+        { id: 'variegated',         label: 'Variegated',        code: 'W/w',            group: 'Pattern & Markings' },
+        { id: 'banded',             label: 'Banded',            code: 'Wsh/w',          group: 'Pattern & Markings' },
+        { id: 'splashed',           label: 'Splashed',          code: 'Spl/spl',        group: 'Pattern & Markings' },
+        { id: 'merle',              label: 'Merle',             code: 'rn/rn',          group: 'Pattern & Markings' },
+        { id: 'pearl',              label: 'Pearl',             code: 'si/si',          group: 'Pattern & Markings' },
+        { id: 'umbrous',            label: 'Umbrous',           code: 'U/-',            group: 'Pattern & Markings' },
+        // Coat & Texture
+        { id: 'shorthair',          label: 'Shorthair',         code: 'Go/-',           group: 'Coat & Texture' },
+        { id: 'longhair',           label: 'Longhair',          code: 'go/go',          group: 'Coat & Texture' },
+        { id: 'satin',              label: 'Satin',             code: 'sa/sa',          group: 'Coat & Texture' },
+        { id: 'astrex',             label: 'Astrex',            code: 'Re/-',           group: 'Coat & Texture' },
+        { id: 'texel',              label: 'Texel',             code: 'Re/- go/go',     group: 'Coat & Texture' },
+        { id: 'rosette',            label: 'Rosette',           code: 'rst/rst',        group: 'Coat & Texture' },
+        { id: 'fuzz',               label: 'Fuzz',              code: 'fz/fz',          group: 'Coat & Texture' },
+        { id: 'dom-hairless',       label: 'Dominant Hairless', code: 'Nu/-',           group: 'Coat & Texture' },
+    ],
+};
+
+const getTargetTraitChipCatalog = () => TARGET_OUTCOME_TRAIT_CHIPS[TARGET_OUTCOME_PROTOTYPE_SPECIES];
+
+const getTargetTraitChipGroups = () => {
+    const chips = getTargetTraitChipCatalog();
+    const order = [];
+    const map = {};
+    chips.forEach(chip => {
+        if (!map[chip.group]) { map[chip.group] = []; order.push(chip.group); }
+        map[chip.group].push(chip);
+    });
+    return order.map(g => ({ group: g, chips: map[g] }));
+};
+
+const getTargetTraitChipById = (chipId) => getTargetTraitChipCatalog().find(c => c.id === chipId);
+
+const formatTargetTraitChip = (chip) => {
+    if (!chip) return '';
+    return `${chip.label} (${chip.code})`;
+};
+
+const buildPrototypeGenotypeFromTraits = (selectedTraits) => {
+    const genotype = {};
+    const assumptions = [];
+
+    selectedTraits.forEach((id) => {
+        switch (id) {
+            // Base Color — Black series
+            case 'black':            genotype.A  = 'a/a';     break;
+            case 'tan':              genotype.A  = 'at/a';    break;
+            case 'chocolate':        genotype.A  = 'a/a';  genotype.B = 'b/b'; break;
+            case 'blue':             genotype.A  = 'a/a';  genotype.D = 'd/d'; break;
+            case 'dove':             genotype.A  = 'a/a';  genotype.P = 'p/p'; break;
+            case 'lilac':            genotype.A  = 'a/a';  genotype.B = 'b/b'; genotype.D = 'd/d'; break;
+            case 'champagne':        genotype.A  = 'a/a';  genotype.B = 'b/b'; genotype.P = 'p/p'; break;
+            case 'silver':           genotype.A  = 'a/a';  genotype.D = 'd/d'; genotype.P = 'p/p'; break;
+            case 'lavender':         genotype.A  = 'a/a';  genotype.B = 'b/b'; genotype.D = 'd/d'; genotype.P = 'p/p'; break;
+            // Base Color — Agouti series
+            case 'agouti':           genotype.A  = 'A/A';     break;
+            case 'cinnamon':         genotype.A  = 'A/A';  genotype.B = 'b/b'; break;
+            case 'blue-agouti':      genotype.A  = 'A/A';  genotype.D = 'd/d'; break;
+            case 'argente':          genotype.A  = 'A/A';  genotype.P = 'p/p'; break;
+            case 'cinnamon-argente': genotype.A  = 'A/A';  genotype.B = 'b/b'; genotype.P = 'p/p'; break;
+            // Base Color — Other
+            case 'dom-red':          genotype.A  = 'Ay/a';    break;
+            case 'rec-red':          genotype.E  = 'e/e';     break;
+            // Albino & Dilution — C locus
+            case 'albino':           genotype.C  = 'c/c';     break;
+            case 'himalayan':        genotype.C  = 'c/ch';    break;
+            case 'bone':             genotype.C  = 'c/ce';    break;
+            case 'siamese':          genotype.C  = 'ch/ch';   break;
+            case 'burmese':          genotype.C  = 'ch/cch';  break;
+            case 'stone':            genotype.C  = 'c/cch';   break;
+            case 'beige':            genotype.C  = 'ce/ce';   break;
+            case 'colorpoint-beige': genotype.C  = 'ch/ce';   break;
+            case 'mock-choc':        genotype.C  = 'ce/cch';  break;
+            case 'sepia':            genotype.A  = 'a/a'; genotype.C = 'cch/cch'; break;
+            case 'silver-agouti':    genotype.A  = 'A/A'; genotype.C = 'cch/cch'; break;
+            case 'fox':              genotype.A  = 'at/a';    break; // pair with a C chip for full fox expression
+            // Pattern & Markings
+            case 'am-brindle':       genotype.A  = 'Avy/a';   break;
+            case 'xbrindle':         genotype.Mobr = 'Mobr/mobr'; break;
+            case 'pied':             genotype.S  = 's/s';     break;
+            case 'variegated':       genotype.W  = 'W/w';     break;
+            case 'banded':           genotype.W  = 'Wsh/w';   break;
+            case 'splashed':         genotype.Spl = 'Spl/spl'; break;
+            case 'merle':            genotype.Rn = 'rn/rn';   break;
+            case 'pearl':            genotype.Si = 'si/si';   break;
+            case 'umbrous':          genotype.U  = 'U/u';     break;
+            // Coat & Texture
+            case 'shorthair':        genotype.Go = 'Go/Go';   break;
+            case 'longhair':         genotype.Go = 'go/go';   break;
+            case 'satin':            genotype.Sa = 'sa/sa';   break;
+            case 'astrex':           genotype.Re = 'Re/re';   break;
+            case 'texel':            genotype.Re = 'Re/re'; genotype.Go = 'go/go'; break;
+            case 'rosette':          genotype.Rst = 'rst/rst'; break;
+            case 'fuzz':             genotype.Fz = 'fz/fz';  break;
+            case 'dom-hairless':     genotype.Nu = 'Nu/nu';   break;
+            default: break;
+        }
+    });
+
+    // If a C-locus chip is selected without an A-locus chip, assume black base
+    const cLociChips = ['albino','himalayan','bone','siamese','burmese','stone','beige','colorpoint-beige','mock-choc'];
+    if (selectedTraits.some(id => cLociChips.includes(id)) && !genotype.A) {
+        genotype.A = 'a/a';
+        assumptions.push('C-locus phenotype assumed on black base (a/a) — add a Base Color chip to override.');
+    }
+
+    // E-locus (e/e) is epistatic over A-locus — auto-assume a/a so phenotype resolves
+    const eLociChips = ['rec-red'];
+    if (selectedTraits.some(id => eLociChips.includes(id)) && !genotype.A) {
+        genotype.A = 'a/a';
+    }
+
+    // Resolve compound A-locus combinations when multiple A-locus chips are selected.
+    // The forEach above lets whichever ran last win — this corrects known multi-chip combos.
+    const hasTan        = selectedTraits.some(id => id === 'tan' || id === 'fox');
+    const hasAgouti     = selectedTraits.some(id => ['agouti','cinnamon','blue-agouti','argente','cinnamon-argente','silver-agouti'].includes(id));
+    const hasBrindle    = selectedTraits.includes('am-brindle');
+    const hasBlackSeries = selectedTraits.some(id => ['black','chocolate','blue','dove','lilac','champagne','silver','lavender'].includes(id));
+    const hasDomRed     = selectedTraits.includes('dom-red');
+
+    // Compound A-locus combinations — priority: most specific first
+    if      (hasTan && hasBrindle)          genotype.A = 'Avy/at'; // Brindle Tan
+    else if (hasTan && hasAgouti)           genotype.A = 'A/at';   // Agouti Tan
+    else if (hasTan && hasDomRed)           genotype.A = 'Ay/at';  // Dom Red Tan
+    else if (hasBrindle && hasAgouti)       genotype.A = 'Avy/A';  // Agouti Brindle
+    else if (hasBrindle && hasBlackSeries)  genotype.A = 'Avy/a';  // Brindle Black/Choc/etc (B/D/P modifiers already set)
+    else if (hasDomRed && hasAgouti)        genotype.A = 'Ay/A';   // Dom Red Agouti
+    else if (hasDomRed && hasBlackSeries)   genotype.A = 'Ay/a';   // Dom Red Black/Choc/etc (B/D/P modifiers already set)
+    // rec-red (e/e) is E-locus — A-locus set separately by black/agouti chip if present
+
+    return { genotype, assumptions };
+};
+
+const getPrototypePhenotypeInterpretation = (selectedTraits) => {
+    const { genotype, assumptions } = buildPrototypeGenotypeFromTraits(selectedTraits);
+    if (!Object.keys(genotype).length) return null;
+
+    const result = calculatePhenotype(genotype, genotype);
+    const basePheno = result?.phenotype && result.phenotype !== 'Standard' && result.phenotype !== 'Unknown' && result.phenotype !== ''
+        ? result.phenotype
+        : null;
+
+    const catalog = getTargetTraitChipCatalog();
+    const MODIFIER_GROUPS = new Set(['Pattern & Markings', 'Coat & Texture']);
+
+    // Some chip labels don't literally appear in the resolved phenotype — map to what the engine actually outputs
+    const CHIP_EXPRESSED_AS = {
+        'am-brindle':   ['brindle'],
+        'tan':          ['tan'],
+        'fox':          ['fox'],
+        'dom-red':      ['brindle', 'red', 'fawn', 'amber'],
+        'dom-fawn':     ['fawn'],
+        'dom-amber':    ['amber'],
+        'astrex':       ['astrex', 'texel'],
+        'texel':        ['texel'],
+        'mock-choc':    ['mock chocolate'],
+        'colorpoint-beige': ['colorpoint'],
+        'blue-agouti':  ['blue agouti'],
+        'cinnamon-argente': ['cinnamon argente'],
+        'silver-agouti': ['silver agouti'],
+        'dom-hairless':  ['hairless'],
+        // When Pied + Splashed are both selected, the engine outputs "Tricolor" (replaces both)
+        'pied':         ['pied', 'tricolor'],
+        'splashed':     ['splashed', 'tricolor'],
+    };
+
+    // Build a list of all selected modifier chip labels
+    const selectedModifierChips = selectedTraits
+        .map(id => catalog.find(c => c.id === id))
+        .filter(c => c && MODIFIER_GROUPS.has(c.group));
+
+    // Append modifier labels that aren't already present in the calculated phenotype string
+    const phenoLower = basePheno ? basePheno.toLowerCase() : '';
+    const missingModifiers = selectedModifierChips
+        .filter(c => {
+            const keywords = CHIP_EXPRESSED_AS[c.id] || [c.label.toLowerCase()];
+            return !keywords.some(kw => phenoLower.includes(kw));
+        })
+        .map(c => c.label);
+
+    if (basePheno) {
+        return [basePheno, ...missingModifiers].join(' ');
+    }
+
+    // No base color resolved — fall back to composing from chip labels directly
+    const allLabels = selectedTraits
+        .map(id => catalog.find(c => c.id === id))
+        .filter(Boolean)
+        .map(c => c.label);
+
+    if (allLabels.length) {
+        return allLabels.join(' ');
+    }
+
+    return 'Select more trait chips to resolve a named phenotype.';
+};
+
+const getPrototypePhenotypeConfidence = (selectedTraits) => {
+    const { genotype, assumptions } = buildPrototypeGenotypeFromTraits(selectedTraits);
+    const lociSelected = Object.keys(genotype).length;
+    const result = lociSelected ? calculatePhenotype(genotype, genotype) : null;
+    const hasResolvedPhenotype = Boolean(result?.phenotype && result.phenotype !== 'Standard');
+    const phenotypeLabel = hasResolvedPhenotype ? result.phenotype : 'unresolved';
+    const assumptionCount = assumptions.length;
+
+    if (hasResolvedPhenotype && lociSelected >= 3 && assumptions.length === 0) {
+        return {
+            level: 'high',
+            label: 'High Confidence',
+            className: 'bg-emerald-100 text-emerald-800',
+            detail: `Phenotype "${phenotypeLabel}" fully resolved across ${lociSelected} loci.`
+        };
+    }
+
+    if (hasResolvedPhenotype || lociSelected >= 2) {
+        const mediumReason = hasResolvedPhenotype
+            ? `Phenotype "${phenotypeLabel}" resolved across ${lociSelected} loci${assumptionCount > 0 ? ` (${assumptionCount} assumption${assumptionCount === 1 ? '' : 's'})` : ''}.`
+            : `Phenotype not yet resolved — ${lociSelected} loci selected${assumptionCount > 0 ? `, ${assumptionCount} assumption${assumptionCount === 1 ? '' : 's'}` : ''}. Add more chips.`;
+        return {
+            level: 'medium',
+            label: 'Medium Confidence',
+            className: 'bg-amber-100 text-amber-800',
+            detail: mediumReason
+        };
+    }
+
+    return {
+        level: 'low',
+        label: 'Needs More Loci',
+        className: 'bg-gray-100 text-gray-700',
+        detail: `Only ${lociSelected} locus selected — add more trait chips to resolve a phenotype.`
+    };
+};
+
+const getMinimumParentCarrierRequirements = (selectedTraits) => {
+    const { genotype } = buildPrototypeGenotypeFromTraits(selectedTraits);
+    if (!Object.keys(genotype).length) return { bothParents: [], oneParent: [] };
+
+    const bothParents = [];
+    const oneParent = [];
+    const splitParents = []; // compound-het dominant: each parent must supply a DIFFERENT allele
+
+    // Human-readable names for recessive alleles
+    const ALLELE_NAMES = {
+        a: 'non-agouti', at: 'tan', b: 'chocolate', d: 'blue dilute',
+        p: 'pink-eyed dilute', e: 'recessive red', c: 'albino',
+        ch: 'himalayan/siamese', ce: 'beige', cch: 'chinchilla/burmese',
+        s: 'piebald', si: 'pearl', go: 'longhair', re: 'rex',
+        sa: 'satin', rst: 'rosette', fz: 'fuzz', nu: 'hairless',
+        rn: 'merle', spl: 'splashed', mobr: 'xbrindle',
+        Ay: 'dominant red', Avy: 'am. brindle', A: 'agouti',
+    };
+    const alleleName = (a) => ALLELE_NAMES[a] || ALLELE_NAMES[a.toLowerCase()] || a;
+
+    // Compound-het dominant A-locus combos: one parent must carry each allele separately
+    const COMPOUND_HET_DOM_A = new Set(['Avy/at', 'at/Avy', 'Ay/at', 'at/Ay', 'A/at', 'at/A', 'Avy/A', 'A/Avy', 'Ay/A', 'A/Ay', 'Ay/Avy', 'Avy/Ay']);
+
+    // Heterozygous dominant targets — only one parent needs the dominant allele
+    const domHetTargets = {
+        W:    { 'W/w': 'Variegated gene (W)', 'Wsh/w': 'Banded gene (Wsh)' },
+        Spl:  { 'Spl/spl': 'Splashed gene (Spl)' },
+        Mobr: { 'Mobr/mobr': 'XBrindle gene (Mobr)' },
+        Re:   { 'Re/re': 'Rex gene (Re)' },
+        Nu:   { 'Nu/nu': 'Hairless gene (Nu)' },
+        U:    { 'U/u': 'Umbrous gene (U)' },
+    };
+
+    const eLociSelected = selectedTraits.some(id => id === 'rec-red');
+    const aLociExplicit = selectedTraits.some(id => ['black','tan','chocolate','blue','dove','lilac','champagne','silver','lavender','agouti','cinnamon','blue-agouti','argente','cinnamon-argente','silver-agouti','dom-red','fox','am-brindle','sepia'].includes(id));
+    const skipALocus = eLociSelected && !aLociExplicit;
+
+    for (const [locus, value] of Object.entries(genotype)) {
+        if (!value || !value.includes('/')) continue;
+        const [a1, a2] = value.split('/');
+
+        // e/e is epistatic over A-locus — skip A-locus requirement when no explicit base color was picked
+        if (locus === 'A' && skipALocus) continue;
+
+        // Explicitly dominant-het targets
+        if (domHetTargets[locus]?.[value]) {
+            oneParent.push({ label: domHetTargets[locus][value] });
+            continue;
+        }
+        // A-locus compound-het dominant (e.g. Avy/at, A/at) — split parents
+        if (locus === 'A' && COMPOUND_HET_DOM_A.has(value)) {
+            splitParents.push({ label: `one parent: ${alleleName(a1)} (${a1}) · other parent: ${alleleName(a2)} (${a2})` });
+            continue;
+        }
+        // A-locus simple dominant-het (Ay/a, Avy/a) — one parent only
+        if (locus === 'A' && (value === 'Ay/a' || value === 'Avy/a')) {
+            oneParent.push({ label: value === 'Ay/a' ? 'Dominant red gene (Ay)' : 'Am. Brindle gene (Avy)' });
+            continue;
+        }
+        // A-locus a/a — both parents must carry a recessive a
+        if (locus === 'A' && value === 'a/a') {
+            bothParents.push({ label: 'non-agouti (a)' });
+            continue;
+        }
+        // A-locus at/a — split: one parent must have 'at' (visible as tan/fox), other must have 'a' (self or agouti-carrier)
+        // at cannot be silently carried, so self (a/a) mice cannot carry tan — they are the 'a' contributor
+        if (locus === 'A' && value === 'at/a') {
+            splitParents.push({ label: `one parent: tan (at) · other parent: non-agouti (a)` });
+            continue;
+        }
+        // A-locus A/A — dominant, one parent is sufficient
+        if (locus === 'A' && value === 'A/A') {
+            oneParent.push({ label: 'agouti (A)' });
+            continue;
+        }
+        // Homozygous recessive: both alleles equal and lowercase — each parent must carry one copy
+        if (a1 === a2 && a1 === a1.toLowerCase()) {
+            bothParents.push({ label: `${alleleName(a1)} (${a1})` });
+            continue;
+        }
+        // Compound heterozygous recessive (e.g. c/ch, ce/cch): both parents must together supply both alleles
+        if (a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase()) {
+            bothParents.push({ label: `${alleleName(a1)} (${a1}) + ${alleleName(a2)} (${a2})` });
+        }
+    }
+
+    return { bothParents, oneParent, splitParents };
+};
 
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
@@ -629,8 +994,122 @@ const ParentSearchModal = ({
 
 
 
-﻿// Litter Management Component
+const TpResultCard = ({ r, idx, globalIdx, expandedCard, setExpandedCard, onUsePair }) => {
+    const cardKey = `${r.sireId}:${r.damId}:${globalIdx}`;
+    const isExpanded = expandedCard === cardKey;
+    return (
+        <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
+            <div className="p-3">
+                <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                        <div className="text-sm font-semibold text-gray-800 truncate">{r.sireName} × {r.damName}</div>
+                        <div className="text-xs text-gray-500 mt-0.5">
+                            Match: <span className="font-semibold text-emerald-700">{r.probability}%</span>
+                            {' '}•{' '}
+                            COI: <span className={`font-semibold ${r.coiValue >= 12.5 ? 'text-amber-600' : 'text-gray-700'}`}>{r.coiValue.toFixed(2)}%</span>
+                        </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600">#{idx + 1}</span>
+                        <button
+                            type="button"
+                            onClick={() => setExpandedCard(isExpanded ? null : cardKey)}
+                            className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold cursor-pointer transition bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        >
+                            Details {isExpanded ? '▲' : '▼'}
+                        </button>
+                    </div>
+                </div>
+                {r.warnings.length > 0 && (
+                    <div className="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+                        {r.warnings.join(' • ')}
+                    </div>
+                )}
+                <div className="mt-2 flex justify-end">
+                    <button
+                        type="button"
+                        onClick={() => onUsePair(r)}
+                        className="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white"
+                    >
+                        Use in Planned Mating
+                    </button>
+                </div>
+            </div>
+            {isExpanded && (
+                <div className="border-t border-gray-100 bg-gray-50 px-3 py-2.5 space-y-2.5">
+                    <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-wide">Why this pair?</div>
+                    {/* Per-parent summary */}
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                            <div className="font-semibold text-gray-700 mb-0.5">{r.sireName} (sire)</div>
+                            <div className="text-gray-500 text-[11px] leading-snug">{r.sireVariety}</div>
+                        </div>
+                        <div>
+                            <div className="font-semibold text-gray-700 mb-0.5">{r.damName} (dam)</div>
+                            <div className="text-gray-500 text-[11px] leading-snug">{r.damVariety}</div>
+                        </div>
+                    </div>
+                    {/* Per-locus coverage */}
+                    {r.locusBreakdown?.length > 0 && (
+                        <div>
+                            <div className="text-[11px] font-semibold text-gray-500 mb-1">Locus coverage</div>
+                            <div className="space-y-1">
+                                {r.locusBreakdown.map((l, i) => {
+                                    const sireNotNeeded = l.isDominant && !l.sireHas && !!l.damHas;
+                                    const damNotNeeded  = l.isDominant && !l.damHas  && !!l.sireHas;
+                                    return (
+                                    <div key={i} className="flex items-center gap-2 text-xs">
+                                        <span className="w-36 text-gray-600 truncate">{l.locus} <span className="text-gray-400">({l.alleles})</span></span>
+                                        {sireNotNeeded
+                                            ? <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-400">{r.sireName}: —</span>
+                                            : <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${l.sireHas === 'visual' ? 'bg-emerald-100 text-emerald-700' : l.sireHas === 'carrier' ? 'bg-blue-100 text-blue-700' : 'bg-red-50 text-red-500'}`}>{r.sireName}: {l.sireHas === 'visual' ? '✓ visual' : l.sireHas === 'carrier' ? '✓ carrier' : 'not present'}</span>
+                                        }
+                                        {damNotNeeded
+                                            ? <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-400">{r.damName}: —</span>
+                                            : <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${l.damHas === 'visual' ? 'bg-emerald-100 text-emerald-700' : l.damHas === 'carrier' ? 'bg-blue-100 text-blue-700' : 'bg-red-50 text-red-500'}`}>{r.damName}: {l.damHas === 'visual' ? '✓ visual' : l.damHas === 'carrier' ? '✓ carrier' : 'not present'}</span>
+                                        }
+                                    </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+                    {r.assumptions?.length > 0 && (
+                        <div className="pt-1.5 border-t border-yellow-200">
+                            <div className="text-[11px] font-semibold text-yellow-800 mb-0.5">Assumptions applied</div>
+                            <ul className="text-xs text-yellow-700 space-y-0.5 list-disc list-inside">
+                                {r.assumptions.map((a, i) => <li key={i}>{a}</li>)}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+
+const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) => {
+    return (
+        <div className="space-y-2 pr-1">
+            {results.length > 0 ? (
+                results.map((r, i) => (
+                    <TpResultCard key={i} r={r} idx={i} globalIdx={i} expandedCard={expandedCard} setExpandedCard={setExpandedCard} onUsePair={onUsePair} />
+                ))
+            ) : (
+                <div className="p-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500 space-y-1">
+                    <div>No matching pairs found for the selected traits.</div>
+                    <div className="text-xs text-gray-400">Only animals with a genetic code entered are included. Make sure your animals have their genetic codes filled in.</div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+// Litter Management Component
+const TARGET_OUTCOME_ALLOWED_USERS = ['CTU1', 'CTU2', 'CTU5'];
+
 const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp }) => {
+    const canAccessTargetOutcome = TARGET_OUTCOME_ALLOWED_USERS.includes(userProfile?.id_public);
     const [litters, setLitters] = useState([]);
     const [myAnimals, setMyAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -727,6 +1206,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [viewMode, setViewMode] = useState('list'); // 'list' | 'calendar'
     const [calendarMonth, setCalendarMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
     const [calendarTooltip, setCalendarTooltip] = useState(null); // { litterId, eventType, litter, x, y }
+    const [calendarQuery, setCalendarQuery] = useState('');
+    const [calendarPlannedOnly, setCalendarPlannedOnly] = useState(false);
+    const [calendarEventFilters, setCalendarEventFilters] = useState({ mated: true, due: true, born: true, weaned: true });
     const [urgencyEnabled, setUrgencyEnabled] = useState(() => {
         try { return localStorage.getItem('ct_urgency_enabled') !== 'false'; } catch { return true; }
     });
@@ -758,6 +1240,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [tpCOI, setTpCOI] = useState(null);
     const [tpCalculating, setTpCalculating] = useState(false);
     const [tpError, setTpError] = useState(null);
+    const [tpMode, setTpMode] = useState('coi'); // 'coi' | 'target'
+    const [tpSourceMode, setTpSourceMode] = useState('mine'); // 'mine' | 'mine+favorited'
+    const [tpTargetSpecies, setTpTargetSpecies] = useState(TARGET_OUTCOME_PROTOTYPE_SPECIES);
+    const [tpSelectedTraits, setTpSelectedTraits] = useState([]);
+    const [tpGenerating, setTpGenerating] = useState(false);
+    const [tpMockResults, setTpMockResults] = useState([]);
+    const [tpHasRun, setTpHasRun] = useState(false);
+    const [tpExpandedCard, setTpExpandedCard] = useState(null); // key = `${sireId}:${damId}:${idx}`
+    const [tpShowResultsHelp, setTpShowResultsHelp] = useState(false);
     const handleCalculateTestPairing = async () => {
         if (!tpSireId || !tpDamId) return;
         const cacheKey = `${tpSireId}:${tpDamId}`;
@@ -786,6 +1277,474 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             clearTimeout(timeout);
             setTpCalculating(false);
         }
+    };
+
+    // Chips are grouped by the locus they write to. Selecting a chip from one group removes
+    // chips from competing groups. Exceptions:
+    //   - tan & fox are A-locus but compound-het capable — they may coexist with one other A series
+    //   - Within the same A-locus series (e.g. blue + chocolate = lilac) chips can combine freely
+
+    const CHIP_A_SERIES = {
+        black:        ['black','chocolate','blue','dove','lilac','champagne','silver','lavender'],
+        agouti:       ['agouti','cinnamon','blue-agouti','argente','cinnamon-argente'],
+        sepia:        ['sepia'],         // a/a + C-locus
+        silveragouti: ['silver-agouti'], // A/A + C-locus
+        // dom-red, am-brindle, rec-red are NOT here — they combine with black/agouti series
+    };
+    // Build chip→series lookup
+    const chipToASeries = {};
+    Object.entries(CHIP_A_SERIES).forEach(([series, chips]) => chips.forEach(c => chipToASeries[c] = series));
+
+    const CHIP_A_COMPOUND_HET_CAPABLE = new Set(['tan', 'fox']); // may pair with one A-locus series
+    // E-locus: only rec-red remains (fawn/amber removed); can combine with A-locus chips
+    const CHIP_E_EXCLUSIVE  = new Set(['rec-red']);
+    const CHIP_C_EXCLUSIVE  = new Set(['albino','himalayan','bone','siamese','burmese','stone','beige','colorpoint-beige','mock-choc','sepia','silver-agouti']);
+    const CHIP_GO_EXCLUSIVE = new Set(['shorthair','longhair','texel']);
+    const CHIP_W_EXCLUSIVE  = new Set(['variegated','banded']);
+
+    const toggleTargetTraitChip = (chipId) => {
+        setTpMockResults([]); setTpHasRun(false); // clear stale results whenever chip selection changes
+        setTpSelectedTraits(prev => {
+            if (prev.includes(chipId)) return prev.filter(id => id !== chipId);
+            let next = [...prev];
+            // A-locus: all base color chips are mutually exclusive (lilac, blue, chocolate etc. are all
+            // complete phenotypes — selecting one removes all others except tan/fox compound-het chips)
+            // rec-red/fawn/amber are E-locus, not A-locus — they are NOT cleared here
+            if (chipToASeries[chipId]) {
+                next = next.filter(id =>
+                    CHIP_A_COMPOUND_HET_CAPABLE.has(id) || // keep tan/fox
+                    CHIP_E_EXCLUSIVE.has(id)             || // keep E-locus chips
+                    !chipToASeries[id]                      // keep non-A chips
+                );
+            }
+            // tan and fox share the same A-locus (at/a) — mutually exclusive with each other
+            if (CHIP_A_COMPOUND_HET_CAPABLE.has(chipId)) {
+                next = next.filter(id => !CHIP_A_COMPOUND_HET_CAPABLE.has(id));
+            }
+            // E-locus: rec-red is the only E chip; clearing is a no-op but kept for consistency
+            if (CHIP_E_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_E_EXCLUSIVE.has(id));
+            // C-locus: mutually exclusive
+            if (CHIP_C_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_C_EXCLUSIVE.has(id));
+            // Go-locus: mutually exclusive
+            if (CHIP_GO_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_GO_EXCLUSIVE.has(id));
+            // W-locus: mutually exclusive
+            if (CHIP_W_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_W_EXCLUSIVE.has(id));
+            return [...next, chipId];
+        });
+    };
+
+    const runTargetOutcomePrototype = () => {
+        if (tpSelectedTraits.length === 0) return;
+        setTpGenerating(true);
+
+        const speciesForPairs = TARGET_OUTCOME_PROTOTYPE_SPECIES;
+        const malePool = myAnimals.filter(a =>
+            (a.species?.toLowerCase() === speciesForPairs.toLowerCase()) &&
+            ['Male', 'Intersex', 'Unknown'].includes(a.gender) &&
+            a.status !== 'Deceased' &&
+            !a.isViewOnly &&
+            !a.isTransferred &&
+            !!a.geneticCode
+        );
+        const femalePool = myAnimals.filter(a =>
+            (a.species?.toLowerCase() === speciesForPairs.toLowerCase()) &&
+            ['Female', 'Intersex', 'Unknown'].includes(a.gender) &&
+            a.status !== 'Deceased' &&
+            !a.isViewOnly &&
+            !a.isTransferred &&
+            !!a.geneticCode
+        );
+
+        const selectedSire = tpSireId ? (myAnimals.find(a => a.id_public === tpSireId) || selectedTpSireAnimal) : null;
+        const selectedDam = tpDamId ? (myAnimals.find(a => a.id_public === tpDamId) || selectedTpDamAnimal) : null;
+
+        // Derive per-locus requirements from the target chip selection
+        const { genotype: targetGenotype } = buildPrototypeGenotypeFromTraits(tpSelectedTraits);
+        const eLociActive = tpSelectedTraits.some(id => id === 'rec-red');
+        const aLociExplicit = tpSelectedTraits.some(id => ['black','tan','chocolate','blue','dove','lilac','champagne','silver','lavender','agouti','cinnamon','blue-agouti','argente','cinnamon-argente','silver-agouti','dom-red','fox','am-brindle','sepia'].includes(id));
+        // e/e is epistatic over A-locus — exclude A from scoring only when no explicit base color chip selected
+        const targetLoci = Object.entries(targetGenotype).filter(([locus]) => !(locus === 'A' && eLociActive && !aLociExplicit));
+
+        // === DIAGNOSTICS (temporary) ===
+        console.log('[TP] selectedTraits:', tpSelectedTraits);
+        console.log('[TP] targetLoci:', targetLoci);
+        console.log('[TP] myAnimals total:', myAnimals.length);
+        console.log('[TP] malePool size:', malePool.length, malePool.map(a => `${a.id_public}(${a.species}|isViewOnly=${a.isViewOnly}|gc=${a.geneticCode||'none'})`));
+        console.log('[TP] femalePool size:', femalePool.length, femalePool.map(a => `${a.id_public}(${a.species}|isViewOnly=${a.isViewOnly}|gc=${a.geneticCode||'none'})`));
+
+        // Keywords indicating an animal likely carries at least one copy of an allele (fallback only)
+        const ALLELE_KW = {
+            'a':    ['black','chocolate','blue','dove','lilac','champagne','silver','lavender','tan','fox'],
+            'at':   ['tan','fox','black tan'],
+            'A':    ['agouti','cinnamon','argente','blue agouti','silver agouti'],
+            'Ay':   ['dominant red','dominant fawn','dominant amber'],
+            'Avy':  ['brindle','american brindle','am. brindle'],
+            'b':    ['chocolate','cinnamon','lilac','champagne','lavender'],
+            'd':    ['blue','lilac','silver','lavender','blue agouti','dominant amber','recessive amber'],
+            'p':    ['dove','champagne','argente','silver','lavender','cinnamon argente','dominant fawn','recessive fawn'],
+            'e':    ['recessive red','recessive fawn','recessive amber'],
+            'c':    ['albino','himalayan','bone'],
+            'ch':   ['siamese','himalayan','burmese','colorpoint'],
+            'ce':   ['beige','bone','stone','mock chocolate','sepia'],
+            'cch':  ['stone','burmese','colorpoint beige','sepia','silver agouti'],
+            'si':   ['pearl','silver agouti'],
+            's':    ['pied','piebald'],
+            'W':    ['variegated'],
+            'Wsh':  ['banded'],
+            'rst':  ['rosette'],
+            'go':   ['longhair','angora','texel'],
+            'Re':   ['astrex','texel','rex'],
+            'sa':   ['satin'],
+            'rn':   ['merle'],
+            'Spl':  ['splashed'],
+            'fz':   ['fuzz'],
+            'Nu':   ['hairless'],
+            'Mobr': ['xbrindle'],
+            'U':    ['umbrous'],
+        };
+
+        // Parse an animal's geneticCode string ("a/a d/d Go/Go ...") into a set of alleles present.
+        // Handles: spaces, commas, tabs, extra whitespace, mixed case allele names like Avy, Wsh, Mobr.
+        // An animal carries an allele if either slot at any locus contains it.
+        const parseAnimalAlleles = (animal) => {
+            const alleles = new Set();
+            if (!animal?.geneticCode) return alleles;
+            const parts = animal.geneticCode
+                .replace(/,/g, ' ')
+                .replace(/\t/g, ' ')
+                .trim()
+                .split(/\s+/)
+                .filter(Boolean);
+            for (const part of parts) {
+                const slash = part.indexOf('/');
+                if (slash > 0 && slash < part.length - 1) {
+                    const a1 = part.slice(0, slash).trim();
+                    const a2 = part.slice(slash + 1).trim();
+                    if (a1) alleles.add(a1);
+                    if (a2) alleles.add(a2);
+                }
+            }
+            return alleles;
+        };
+
+        const getVarietyText = (animal) =>
+            [animal.color, animal.phenotype, animal.coatPattern, animal.coat, animal.markings, animal.morph]
+                .filter(Boolean).join(' ').toLowerCase();
+
+        // Returns 'visual' (homozygous recessive confirmed in gc), 'carrier' (het recessive), or false
+        const animalLocusStatus = (animal, a1, a2) => {
+            if (!animal) return false;
+            // Special case: at/a (tan/fox) — 'at' is always expressed and cannot be silently carried.
+            // Both parents are phenotypically visible contributors: the 'at' parent shows tan,
+            // the 'a' parent shows self. Neither is a hidden carrier — both show as 'visual'.
+            if (a1 === 'at' && a2 === 'a') {
+                if (animal.geneticCode) {
+                    const alleles = parseAnimalAlleles(animal);
+                    if (alleles.has('at')) return 'visual';
+                    if (alleles.has('a'))  return 'visual';
+                    return false;
+                }
+                const text = getVarietyText(animal);
+                if ((ALLELE_KW['at'] || []).some(kw => text.includes(kw))) return 'visual';
+                if ((ALLELE_KW['a']  || []).some(kw => text.includes(kw))) return 'visual';
+                return false;
+            }
+            // Compound-het dominant A-locus (e.g. A/at, Ay/at, Avy/at): each parent supplies ONE
+            // of the two alleles — an animal carrying either allele is a visual contributor.
+            if (COMPOUND_HET_DOMINANT.has(a1 + '/' + a2) || COMPOUND_HET_DOMINANT.has(a2 + '/' + a1)) {
+                if (animal.geneticCode) {
+                    const alleles = parseAnimalAlleles(animal);
+                    if (alleles.has(a1) || alleles.has(a2)) return 'visual';
+                    return false;
+                }
+                const text = getVarietyText(animal);
+                if ([...(ALLELE_KW[a1] || []), ...(ALLELE_KW[a2] || [])].some(kw => text.includes(kw))) return 'visual';
+                return false;
+            }
+            const isRecessiveHom = a1 === a2 && a1 === a1.toLowerCase();
+            const isCompoundHetRec = a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase()
+                && !DOMINANT_LOWERCASE_ALLELES.has(a1) && !DOMINANT_LOWERCASE_ALLELES.has(a2);
+            const isDominant = !isRecessiveHom && !isCompoundHetRec;
+
+            if (isRecessiveHom && animal.geneticCode) {
+                const allele = a1;
+                const tokens = animal.geneticCode
+                    .replace(/,/g, ' ').replace(/\t/g, ' ').trim().split(/\s+/).filter(Boolean);
+                for (const token of tokens) {
+                    const slash = token.indexOf('/');
+                    if (slash < 0) continue;
+                    const left = token.slice(0, slash).trim();
+                    const right = token.slice(slash + 1).trim();
+                    if (left === allele || right === allele) {
+                        return (left === allele && right === allele) ? 'visual' : 'carrier';
+                    }
+                }
+                // Locus not found in gc tokens — fall through to keyword
+            }
+            if (animal.geneticCode) {
+                const alleles = parseAnimalAlleles(animal);
+                if (isDominant) {
+                    // For dominant targets, ONLY check the dominant allele.
+                    // Checking the recessive counterpart (e.g. 'a' in Ay/a, 're' in Re/re) would
+                    // produce false positives — most animals carry 'a' on the A-locus for example.
+                    const domAllele = (a1 === a2) ? a1
+                        : DOMINANT_LOWERCASE_ALLELES.has(a1) ? a1
+                        : DOMINANT_LOWERCASE_ALLELES.has(a2) ? a2
+                        : a1 !== a1.toLowerCase() ? a1
+                        : a2 !== a2.toLowerCase() ? a2
+                        : a1;
+                    if (alleles.has(domAllele)) return 'visual';
+                } else {
+                    if (alleles.has(a1) || alleles.has(a2)) return 'carrier';
+                }
+            }
+            const text = getVarietyText(animal);
+            if (isDominant) {
+                const domAllele = (a1 === a2) ? a1
+                    : DOMINANT_LOWERCASE_ALLELES.has(a1) ? a1
+                    : DOMINANT_LOWERCASE_ALLELES.has(a2) ? a2
+                    : a1 !== a1.toLowerCase() ? a1
+                    : a2 !== a2.toLowerCase() ? a2
+                    : a1;
+                return (ALLELE_KW[domAllele] || []).some(kw => text.includes(kw)) ? 'visual' : false;
+            }
+            return [...(ALLELE_KW[a1] || []), ...(ALLELE_KW[a2] || [])].some(kw => text.includes(kw)) ? 'carrier' : false;
+        };
+
+        // Does this animal carry at least one copy of a1 OR a2?
+        const animalCoversLocus = (animal, a1, a2) => !!animalLocusStatus(animal, a1, a2);
+
+        const animalHasAllele = (animal, allele) => {
+            if (!animal) return false;
+            if (animal.geneticCode && parseAnimalAlleles(animal).has(allele)) return true;
+            const text = getVarietyText(animal);
+            return (ALLELE_KW[allele] || []).some(kw => text.includes(kw));
+        };
+
+        // Score how many of the target loci an animal shows evidence of carrying
+        const scoreAnimalLoci = (animal) =>
+            targetLoci.reduce((acc, [, value]) => {
+                const [a1, a2] = value.split('/');
+                return acc + (animalCoversLocus(animal, a1, a2) ? 1 : 0);
+            }, 0);
+
+        // Alleles that are lowercase but dominant in expression (e.g. at = tan, dominant over a)
+        const DOMINANT_LOWERCASE_ALLELES = new Set(['at']);
+
+        // Compound-het dominant combinations — each parent must supply a different allele
+        const COMPOUND_HET_DOMINANT = new Set(['Avy/at', 'at/Avy', 'Ay/at', 'at/Ay', 'A/at', 'at/A', 'Avy/A', 'A/Avy', 'Ay/A', 'A/Ay', 'Ay/Avy', 'Avy/Ay']);
+
+        // Does the given pair split-cover a compound-het dominant (one parent has a1, the other has a2)?
+        const splitCoverCompoundHetDom = (sire, dam, value) => {
+            const [a1, a2] = value.split('/');
+            const sireHasA1 = animalHasAllele(sire, a1);
+            const sireHasA2 = animalHasAllele(sire, a2);
+            const damHasA1  = animalHasAllele(dam,  a1);
+            const damHasA2  = animalHasAllele(dam,  a2);
+            // Valid split: one parent has a1 (but not a2), the other has a2 (but not a1)
+            return (sireHasA1 && !sireHasA2 && damHasA2 && !damHasA1) || (sireHasA2 && !sireHasA1 && damHasA1 && !damHasA2);
+        };
+
+        // Score a pair: returns probability (0–1) of producing the target across all loci.
+        //   recessive hom (a1===a2 lowercase): visual×visual=1.0, visual×carrier=0.5, carrier×carrier=0.25, missing=0
+        //   compound-het recessive: binary — both must contribute; probability factor 0.25
+        //   compound-het dominant (Avy/at, etc): split-pair required, binary
+        //   dominant: one parent sufficient, binary (probability unchanged if either carries)
+        const scorePairProduction = (sire, dam) => {
+            let probability = 1.0;
+            let dominantBlocked = false;
+            for (const [locus, value] of targetLoci) {
+                const [a1, a2] = value.split('/');
+                const sireStatus = animalLocusStatus(sire, a1, a2);
+                const damStatus  = animalLocusStatus(dam,  a1, a2);
+                const isRecessiveHom = a1 === a2 && a1 === a1.toLowerCase();
+                const isCompoundHetRec = a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase()
+                    && !DOMINANT_LOWERCASE_ALLELES.has(a1) && !DOMINANT_LOWERCASE_ALLELES.has(a2);
+
+                if (locus === 'A' && value === 'at/a') {
+                    // at cannot be silently carried — need one parent with 'at' AND one parent with 'a'
+                    const anyHasAt = animalHasAllele(sire, 'at') || animalHasAllele(dam, 'at');
+                    const anyHasA  = animalHasAllele(sire, 'a')  || animalHasAllele(dam, 'a');
+                    if (!anyHasAt || !anyHasA) { probability = 0; break; }
+                    probability *= 0.5; // approximate: at/a×a/a and at/a×at/a both give ~50%
+                } else if (locus === 'A' && COMPOUND_HET_DOMINANT.has(value)) {
+                    const [da1, da2] = value.split('/');
+                    const anyHasA1 = animalHasAllele(sire, da1) || animalHasAllele(dam, da1);
+                    const anyHasA2 = animalHasAllele(sire, da2) || animalHasAllele(dam, da2);
+                    if (!anyHasA1 || !anyHasA2) { dominantBlocked = true; break; }
+                    if (!splitCoverCompoundHetDom(sire, dam, value)) { probability = 0; break; }
+                } else if (isRecessiveHom) {
+                    if (!sireStatus || !damStatus) { probability = 0; break; }
+                    if (sireStatus === 'visual' && damStatus === 'visual') { /* ×1.0 */ }
+                    else if (sireStatus === 'visual' || damStatus === 'visual') probability *= 0.5;
+                    else probability *= 0.25; // both het carriers
+                } else if (isCompoundHetRec) {
+                    if (!(!!sireStatus && !!damStatus)) { probability = 0; break; }
+                    probability *= 0.25;
+                } else {
+                    // Dominant — one parent is sufficient
+                    // Only check the dominant allele; checking the recessive counterpart (e.g. 'a' in Ay/a)
+                    // would make "definitely lacks" almost never true since most animals carry 'a'.
+                    const domAllele = (a1 === a2) ? a1
+                        : DOMINANT_LOWERCASE_ALLELES.has(a1) ? a1
+                        : DOMINANT_LOWERCASE_ALLELES.has(a2) ? a2
+                        : a1 !== a1.toLowerCase() ? a1
+                        : a2 !== a2.toLowerCase() ? a2
+                        : a1;
+                    const sireDefinitelyLacks = !!sire.geneticCode && !animalHasAllele(sire, domAllele);
+                    const damDefinitelyLacks  = !!dam.geneticCode  && !animalHasAllele(dam,  domAllele);
+                    if (sireDefinitelyLacks && damDefinitelyLacks) { dominantBlocked = true; break; }
+                    if (!sireStatus && !damStatus) { probability = 0; break; }
+                }
+            }
+            return { probability: dominantBlocked ? 0 : probability, dominantBlocked };
+        };
+
+        // Sort animals by how many target loci they cover, then cross top candidates
+        const scoredMales = malePool
+            .map(a => ({ animal: a, score: scoreAnimalLoci(a) }))
+            .sort((a, b) => b.score - a.score);
+        const scoredFemales = femalePool
+            .map(a => ({ animal: a, score: scoreAnimalLoci(a) }))
+            .sort((a, b) => b.score - a.score);
+
+        const pairs = [];
+        if (selectedSire?.id_public && selectedDam?.id_public) {
+            const { probability: selProbability, dominantBlocked: selBlocked } = scorePairProduction(selectedSire, selectedDam);
+            if (!selBlocked && selProbability > 0) pairs.push({
+                sireId: selectedSire.id_public,
+                sireName: [selectedSire.prefix, selectedSire.name, selectedSire.suffix].filter(Boolean).join(' ') || selectedSire.id_public,
+                damId: selectedDam.id_public,
+                damName: [selectedDam.prefix, selectedDam.name, selectedDam.suffix].filter(Boolean).join(' ') || selectedDam.id_public,
+                pairProb: selProbability,
+                source: 'selected'
+            });
+        }
+
+        scoredMales.forEach(({ animal: sire }) => {
+            scoredFemales.forEach(({ animal: dam }) => {
+                if (sire.id_public === dam.id_public) return;
+                const { probability, dominantBlocked } = scorePairProduction(sire, dam);
+                if (dominantBlocked || probability === 0) return;
+                pairs.push({
+                    sireId: sire.id_public,
+                    sireName: [sire.prefix, sire.name, sire.suffix].filter(Boolean).join(' ') || sire.id_public,
+                    damId: dam.id_public,
+                    damName: [dam.prefix, dam.name, dam.suffix].filter(Boolean).join(' ') || dam.id_public,
+                    pairProb: probability,
+                    source: 'mine',
+                    sireBirthDate: sire.birthDate || null,
+                    damBirthDate: dam.birthDate || null,
+                });
+            });
+        });
+
+        const uniq = [];
+        const seen = new Set();
+        pairs.forEach(p => {
+            const key = `${p.sireId}:${p.damId}`;
+            if (seen.has(key)) return;
+            seen.add(key);
+            uniq.push(p);
+        });
+
+        const { assumptions: prototypeAssumptions } = buildPrototypeGenotypeFromTraits(tpSelectedTraits);
+        const phenotypeInterpretation = getPrototypePhenotypeInterpretation(tpSelectedTraits);
+        const phenotypeConfidence = getPrototypePhenotypeConfidence(tpSelectedTraits);
+
+        const sorted = uniq.sort((a, b) => (b.pairProb || 0) - (a.pairProb || 0));
+        const tieredPairs = sorted.filter(p => (p.pairProb || 0) > 0);
+
+        const mapPair = (pair) => {
+                const pairProb = pair.pairProb || 0;
+                const probability = Math.round(pairProb * 100);
+
+                const hash = `${pair.sireId}${pair.damId}`
+                    .split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+
+                const coiKey = `${pair.sireId}:${pair.damId}`;
+                const coiValue = (pair.source === 'selected' && tpCOI != null)
+                    ? tpCOI
+                    : coiCacheRef.current[coiKey] != null
+                        ? coiCacheRef.current[coiKey]
+                        : Math.max(0, ((hash % 190) / 10));
+
+                // COI above 12.5% lowers the sort score proportionally
+                const sortScore = probability - Math.max(0, (coiValue - 12.5) * 0.5);
+
+                const warnings = [];
+                if (coiValue >= 12.5) warnings.push('Higher COI than ideal range');
+                if (tpSourceMode === 'mine+favorited' && pair.source !== 'mine') warnings.push('Favorited external candidate');
+
+                // Build per-locus breakdown for each parent
+                const sireAnimal = myAnimals.find(a => a.id_public === pair.sireId);
+                const damAnimal  = myAnimals.find(a => a.id_public === pair.damId);
+                const sireVariety = [sireAnimal?.color, sireAnimal?.phenotype, sireAnimal?.geneticCode].filter(Boolean).join(' · ') || 'No data recorded';
+                const damVariety  = [damAnimal?.color,  damAnimal?.phenotype,  damAnimal?.geneticCode ].filter(Boolean).join(' · ') || 'No data recorded';
+                const locusBreakdown = targetLoci.map(([locus, value]) => {
+                    const [a1, a2] = value.split('/');
+                    const sireHas = animalLocusStatus(sireAnimal, a1, a2);
+                    const damHas  = animalLocusStatus(damAnimal,  a1, a2);
+                    const isRecessiveHom = a1 === a2 && a1 === a1.toLowerCase();
+                    const isCompoundHetRec = a1 !== a2 && a1 === a1.toLowerCase() && a2 === a2.toLowerCase();
+                    // at/a and compound-het dominant (A/at, Ay/at, etc.) are split targets — both
+                    // parents contribute a different allele, so neither should ever show as '—'
+                    const isCompoundHetDom = COMPOUND_HET_DOMINANT.has(value);
+                    const isDominant = !isRecessiveHom && !isCompoundHetRec && !(a1 === 'at' && a2 === 'a') && !isCompoundHetDom;
+                    const locusLabel = locus === 'A' ? 'A-locus' : locus === 'B' ? 'B-locus (chocolate)' : locus === 'D' ? 'D-locus (blue dilute)' : locus === 'P' ? 'P-locus (pink-eyed dilute)' : locus === 'E' ? 'E-locus (extension)' : locus === 'C' ? 'C-locus (dilution)' : locus === 'Go' ? 'Go-locus (coat length)' : locus === 'S' ? 'S-locus (piebald)' : locus === 'W' ? 'W-locus (variegation)' : locus;
+                    return { locus: locusLabel, alleles: value, sireHas, damHas, isDominant };
+                });
+
+                return {
+                    ...pair,
+                    probability,
+                    sortScore,
+                    coiValue,
+                    warnings,
+                    phenotypeConfidence,
+                    assumptions: prototypeAssumptions,
+                    sireVariety,
+                    damVariety,
+                    locusBreakdown,
+                };
+        };
+
+        const results = tieredPairs.map(mapPair).filter(Boolean)
+            .sort((a, b) => b.sortScore - a.sortScore);
+
+        setTimeout(() => {
+            setTpMockResults(results);
+            setTpHasRun(true);
+            setTpGenerating(false);
+            setTpExpandedCard(null);
+        }, 350);
+    };
+
+    const usePairForPlannedMating = (pair) => {
+        const selectedTraitLabels = tpSelectedTraits
+            .map(id => getTargetTraitChipById(id))
+            .filter(Boolean)
+            .map(formatTargetTraitChip);
+
+        setMatingData(prev => ({
+            ...prev,
+            species: tpTargetSpecies,
+            sireId_public: pair.sireId,
+            damId_public: pair.damId,
+            notes: [
+                prev.notes || '',
+                `Target Outcome prototype: ${selectedTraitLabels.join(', ')}`,
+                `Predicted match: ${pair.probability.toFixed(2)}%`
+            ].filter(Boolean).join('\n')
+        }));
+
+        const sire = myAnimals.find(a => a.id_public === pair.sireId) || null;
+        const dam = myAnimals.find(a => a.id_public === pair.damId) || null;
+        setSelectedMatingSire(sire);
+        setSelectedMatingDam(dam);
+
+        setShowTestPairingModal(false);
+        setShowAddMatingForm(true);
     };
 
     useEffect(() => {
@@ -1048,8 +2007,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 setMyAnimals([...animalsData]);
             });
         } catch (error) {
-            console.error('Error fetching animals:', error);
+            console.error('[fetchMyAnimals] Error fetching animals:', error?.response?.status, error?.message);
             setMyAnimals([]);
+        } finally {
+            setMyAnimalsLoaded(true);
         }
     };
 
@@ -2150,7 +3111,24 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     </button>
                     {/* Test Pairing Button */}
                     <button
-                        onClick={() => { setShowTestPairingModal(true); setTpSireId(''); setTpDamId(''); setTpCOI(null); setTpError(null); setTpCalculating(false); }}
+                        onClick={() => {
+                            setShowTestPairingModal(true);
+                            setTpSireId('');
+                            setTpDamId('');
+                            setTpCOI(null);
+                            setTpError(null);
+                            setTpCalculating(false);
+                            setTpMode('coi');
+                            setTpSourceMode('mine');
+                            setTpTargetSpecies(TARGET_OUTCOME_PROTOTYPE_SPECIES);
+                            setTpSelectedTraits([]);
+                            setTpMockResults([]);
+                            setTpHasRun(false);
+                            setTpGenerating(false);
+                            setTpExpandedCard(null);
+                            // Ensure animals are loaded for the pairing pool
+                            if (!myAnimalsLoaded) fetchMyAnimals().catch(err => console.error('[TP] animal fetch failed:', err));
+                        }}
                         className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border shadow-sm bg-white border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
                         title="Test a sire/dam pairing to predict COI"
                     >
@@ -2555,7 +3533,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <p className="text-xs text-gray-500 mt-1">Optional — shows on calendar</p>
                                         </div>
 
-                                        {/* Birth Method */}
+                                        {/* Birth Method */}}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                                 Birth Method
@@ -2604,6 +3582,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 onChange={(e) => setFormData({...formData, weaningDate: e.target.value})}
                                                 className="px-3 py-2"
                                             />
+
                                         </div>
                                     </div>
 
@@ -3276,7 +4255,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     <button
                                         type="button"
                                         onClick={(e) => { e.stopPropagation(); toggleLitterPublic(litter); }}
-                                        title={litter.showOnPublicProfile ? 'Shown on public profile ? click to hide' : 'Hidden from public profile ? click to show'}
+                                        title={litter.showOnPublicProfile ? 'Shown on public profile — click to hide' : 'Hidden from public profile — click to show'}
                                         className={`flex-shrink-0 mr-2 p-1 rounded transition ${litter.showOnPublicProfile ? 'text-green-500 hover:text-green-600' : 'text-gray-400 hover:text-gray-600'}`}
                                     >
                                         {litter.showOnPublicProfile ? <Eye size={15} /> : <EyeOff size={15} />}
@@ -3914,8 +4893,24 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                 // Build event map: 'YYYY-MM-DD' -> [{type, litter}]
                 const eventMap = {};
+                const q = (calendarQuery || '').trim().toLowerCase();
+                const filteredLitters = litters.filter(l => {
+                    if (calendarPlannedOnly && !l.isPlanned) return false;
+                    if (!q) return true;
+                    const text = [
+                        l.breedingPairCodeName,
+                        l.litter_id_public,
+                        l.sire?.name,
+                        l.dam?.name,
+                        l.sireId_public,
+                        l.damId_public
+                    ].filter(Boolean).join(' ').toLowerCase();
+                    return text.includes(q);
+                });
+
                 const addEvent = (dateVal, type, litter) => {
                     if (!dateVal) return;
+                    if (!calendarEventFilters[type]) return;
                     let d;
                     try {
                         // Parse as local time to avoid UTC-offset date shifting
@@ -3925,16 +4920,31 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     } catch(e) { return; }
                     const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
                     if (!eventMap[k]) eventMap[k] = [];
-                    // Skip if this litter already has an event on this day (prevents duplicates when dates coincide)
-                    if (eventMap[k].some(e => e.litter._id === litter._id)) return;
+                    // Skip only duplicate same litter + same event type on same day.
+                    if (eventMap[k].some(e => e.litter._id === litter._id && e.type === type)) return;
                     eventMap[k].push({ type, litter });
                 };
-                litters.forEach(l => {
+                filteredLitters.forEach(l => {
                     addEvent(l.matingDate, 'mated', l);
                     addEvent(l.expectedDueDate, 'due', l);
                     addEvent(l.birthDate, 'born', l);
                     addEvent(l.weaningDate, 'weaned', l);
                 });
+
+                const monthStart = new Date(year, month, 1);
+                const monthEnd = new Date(year, month + 1, 0);
+                const monthEventList = Object.entries(eventMap)
+                    .flatMap(([dateKey, events]) => events.map(ev => ({ dateKey, ...ev })))
+                    .filter(ev => {
+                        const d = new Date(`${ev.dateKey}T00:00:00`);
+                        return d >= monthStart && d <= monthEnd;
+                    })
+                    .sort((a, b) => {
+                        if (a.dateKey < b.dateKey) return -1;
+                        if (a.dateKey > b.dateKey) return 1;
+                        const order = { mated: 0, due: 1, born: 2, weaned: 3 };
+                        return (order[a.type] ?? 99) - (order[b.type] ?? 99);
+                    });
 
                 const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
                 const allDayAbbr = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -4007,6 +5017,49 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             >
                                 <ChevronRight size={20} className="text-gray-600" />
                             </button>
+                        </div>
+
+                        <div className="px-4 py-3 bg-white border-b border-gray-200 space-y-3">
+                            <div className="flex flex-col md:flex-row md:items-center gap-2">
+                                <div className="flex items-center gap-2 w-full md:w-auto">
+                                    <Search size={14} className="text-gray-400" />
+                                    <input
+                                        value={calendarQuery}
+                                        onChange={(e) => setCalendarQuery(e.target.value)}
+                                        placeholder="Filter by pair, litter ID, sire or dam"
+                                        className="w-full md:w-80 p-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                    />
+                                </div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <button
+                                        onClick={() => {
+                                            const now = new Date();
+                                            setCalendarMonth(new Date(now.getFullYear(), now.getMonth(), 1));
+                                        }}
+                                        className="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+                                    >
+                                        Today
+                                    </button>
+                                    <button
+                                        onClick={() => setCalendarPlannedOnly(v => !v)}
+                                        className={`px-2.5 py-1.5 text-xs font-medium rounded-lg border ${calendarPlannedOnly ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+                                    >
+                                        Planned Only
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2">
+                                {Object.entries(typeStyles).map(([key, style]) => (
+                                    <button
+                                        key={key}
+                                        onClick={() => setCalendarEventFilters(prev => ({ ...prev, [key]: !prev[key] }))}
+                                        className={`px-2.5 py-1 text-xs font-medium rounded-full border transition ${calendarEventFilters[key] ? `${style.bg}` : 'border-gray-300 text-gray-500 bg-white hover:bg-gray-50'}`}
+                                    >
+                                        {style.label}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         {/* Day-of-week headers */}
@@ -4100,7 +5153,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${tooltipPillStyle.bg}`}>
                                                     {tooltipPillStyle.label}
                                                 </span>
-                                                <span className="font-bold text-gray-800 text-sm">{pairName} ? {sn} ? {dn}</span>
+                                                <span className="font-bold text-gray-800 text-sm">{pairName} · {sn} · {dn}</span>
                                             </div>
                                             {callId && <p className="text-xs text-gray-400 mt-0.5">{callId}</p>}
                                         </div>
@@ -4163,6 +5216,37 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             );
                         })()}
 
+                        <div className="mx-3 mb-3 p-3 bg-white border border-gray-200 rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                                <h4 className="text-sm font-semibold text-gray-800">Month Agenda</h4>
+                                <span className="text-xs text-gray-500">{monthEventList.length} event{monthEventList.length !== 1 ? 's' : ''}</span>
+                            </div>
+                            {monthEventList.length === 0 ? (
+                                <p className="text-xs text-gray-500">No events match the current month/filter selection.</p>
+                            ) : (
+                                <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+                                    {monthEventList.map((ev, idx) => {
+                                        const st = (ev.type === 'due' && ev.litter.birthDate)
+                                            ? { bg: 'bg-gray-100 text-gray-500 border border-gray-300', label: 'Due (Born)' }
+                                            : (typeStyles[ev.type] || typeStyles.born);
+                                        return (
+                                            <button
+                                                key={`${ev.dateKey}-${ev.type}-${ev.litter._id}-${idx}`}
+                                                onClick={() => setCalendarTooltip({ key: `${ev.dateKey}-${idx}`, litter: ev.litter, type: ev.type })}
+                                                className="w-full text-left px-2 py-1.5 rounded border border-gray-200 hover:bg-gray-50 transition"
+                                            >
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-semibold rounded-full ${st.bg}`}>{st.label}</span>
+                                                    <span className="text-[11px] text-gray-500">{fmtD(ev.dateKey)}</span>
+                                                </div>
+                                                <div className="text-xs text-gray-800 font-medium mt-1 truncate">{getPillLabel(ev)}</div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+
                         {/* Legend */}
                         <div className="px-4 py-2.5 bg-gray-50 border-t border-gray-200 flex flex-wrap gap-4 text-xs text-gray-600 items-center">
                             {Object.entries(typeStyles).map(([k, v]) => (
@@ -4171,8 +5255,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     {v.label}
                                 </span>
                             ))}
-                            {litters.length === 0 && (
-                                <span className="text-gray-400 italic ml-auto">No litters yet ? create one to see events here</span>
+                            {filteredLitters.length === 0 && (
+                                <span className="text-gray-400 italic ml-auto">No litters match current calendar filters</span>
                             )}
                             <span className="text-gray-400 ml-auto hidden sm:block">Click a pill for details</span>
                         </div>
@@ -4348,19 +5432,46 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
             {/* Test Pairing Modal */}
             {showTestPairingModal && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
-                        <div className="flex justify-between items-center border-b p-4">
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-6 z-50">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-7xl flex flex-col h-[90vh]">
+                        {/* Header */}
+                        <div className="flex justify-between items-center border-b border-gray-200 px-5 py-4 flex-shrink-0">
                             <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
                                 <Calculator size={18} className="text-primary" />
-                                Test Pairing ? Predict COI
+                                Test Pairing
                             </h3>
                             <button onClick={() => setShowTestPairingModal(false)} className="text-gray-500 hover:text-gray-800">
                                 <X size={22} />
                             </button>
                         </div>
-                        <div className="p-5 space-y-4">
+                        {/* Tab bar */}
+                        <div className="px-5 py-3 border-b border-gray-200 flex-shrink-0">
+                            <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
+                                <button
+                                    type="button"
+                                    onClick={() => setTpMode('coi')}
+                                    className={`px-3 py-1.5 text-sm font-medium ${tpMode === 'coi' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+                                >
+                                    COI Calculator
+                                </button>
+                                {canAccessTargetOutcome && (
+                                <button
+                                    type="button"
+                                    onClick={() => setTpMode('target')}
+                                    className={`px-3 py-1.5 text-sm font-medium border-l border-gray-200 ${tpMode === 'target' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+                                >
+                                    Target Outcome
+                                </button>
+                                )}
+                            </div>
+                        </div>
+                        {/* Scrollable body */}
+                        <div className="flex-1 min-h-0 overflow-hidden">
+
+                        {tpMode === 'coi' && (
+                        <div className="p-5 space-y-5 overflow-y-auto h-full">
                             <p className="text-sm text-gray-500">Pick a sire and dam to calculate the predicted Coefficient of Inbreeding (COI) for their offspring.</p>
+                            <hr className="border-gray-100" />
                             {/* Sire */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Sire (Father)</label>
@@ -4408,6 +5519,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 </button>
                             </div>
                             {/* Calculate Button */}
+                            <hr className="border-gray-100" />
                             <button
                                 onClick={handleCalculateTestPairing}
                                 disabled={!tpSireId || !tpDamId || tpCalculating}
@@ -4431,7 +5543,205 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">{tpError}</div>
                             )}
                         </div>
-                        <div className="border-t p-4 flex justify-end">
+                        )}
+
+                        {tpMode === 'target' && canAccessTargetOutcome && (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-200 h-full">
+                            <div className="divide-y divide-gray-200 overflow-y-auto min-h-0">
+
+                                {/* Pair Source + Species */}
+                                <div className="px-5 py-4">
+                                    <div className="flex items-end gap-6 flex-wrap">
+                                        <div>
+                                            <label className="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Pair Source</label>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setTpSourceMode('mine')}
+                                                    className={`px-3 py-1.5 text-sm rounded-lg border ${tpSourceMode === 'mine' ? 'bg-primary text-black border-primary' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                                                >
+                                                    My Animals
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setTpSourceMode('mine+favorited')}
+                                                    className={`px-3 py-1.5 text-sm rounded-lg border ${tpSourceMode === 'mine+favorited' ? 'bg-primary text-black border-primary' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                                                >
+                                                    My Animals + Favorited
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Species</label>
+                                            <div className="px-3 py-1.5 border border-gray-200 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 whitespace-nowrap">
+                                                {TARGET_OUTCOME_PROTOTYPE_SPECIES}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Live phenotype preview */}
+                                {tpSelectedTraits.length > 0 && (() => {
+                                    const preview = getPrototypePhenotypeInterpretation(tpSelectedTraits);
+                                    const conf = getPrototypePhenotypeConfidence(tpSelectedTraits);
+                                    const reqs = getMinimumParentCarrierRequirements(tpSelectedTraits);
+                                    const { assumptions } = buildPrototypeGenotypeFromTraits(tpSelectedTraits);
+                                    const isResolved = conf?.level === 'high' || conf?.level === 'medium';
+                                    return (
+                                        <div className={`px-5 py-4 border-b border-gray-200 text-xs ${isResolved ? 'bg-emerald-50' : 'bg-gray-50'}`}>
+                                            <div className={`flex items-center gap-1.5 ${isResolved ? 'text-emerald-800' : 'text-gray-500'}`}>
+                                                <span className={`inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 ${isResolved ? 'bg-emerald-500' : 'bg-gray-400'}`} />
+                                                <span className="font-semibold flex-shrink-0">Target phenotype:</span>
+                                                <span className="truncate">{preview || 'Select chips below to preview'}</span>
+                                            </div>
+                                            {assumptions.length > 0 && (
+                                                <div className="mt-1.5 pl-3 text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+                                                    Also select a <span className="font-semibold">Base Color</span> chip to fully specify this target.
+                                                </div>
+                                            )}
+                                            {(reqs.bothParents.length > 0 || reqs.oneParent.length > 0 || reqs.splitParents?.length > 0) && (
+                                                <div className="mt-2 pl-3 space-y-0.5 border-t border-gray-200 pt-2">
+                                                    {reqs.bothParents.length > 0 && (
+                                                        <div className="text-[10px] text-gray-500">
+                                                            <span className="font-medium text-gray-700">Both parents must carry:</span>{' '}
+                                                            <span className="font-mono">{reqs.bothParents.map(r => r.label).join(' · ')}</span>
+                                                        </div>
+                                                    )}
+                                                    {reqs.oneParent.length > 0 && (
+                                                        <div className="text-[10px] text-gray-500">
+                                                            <span className="font-medium text-gray-700">At least one parent needs:</span>{' '}
+                                                            <span className="font-mono">{reqs.oneParent.map(r => r.label).join(' · ')}</span>
+                                                        </div>
+                                                    )}
+                                                    {reqs.splitParents?.length > 0 && reqs.splitParents.map((r, i) => (
+                                                        <div key={i} className="text-[10px] text-indigo-700 bg-indigo-50 rounded px-1.5 py-0.5">
+                                                            <span className="font-medium">Split pair needed —</span>{' '}{r.label}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })()}
+
+                                {/* Trait Chips */}
+                                <div className="px-5 py-4">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <label className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                                            Trait Chips
+                                            {tpSelectedTraits.length > 0 && (
+                                                <span className="ml-1.5 px-1.5 py-0.5 text-[10px] rounded-full bg-primary/20 text-gray-700 font-semibold normal-case tracking-normal">
+                                                    {tpSelectedTraits.length} selected
+                                                </span>
+                                            )}
+                                        </label>
+                                        {tpSelectedTraits.length > 0 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => { setTpSelectedTraits([]); setTpMockResults([]); setTpHasRun(false); setTpExpandedCard(null); }}
+                                                className="text-xs text-gray-400 hover:text-red-500 transition"
+                                            >
+                                                Clear all
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="space-y-3">
+                                        {getTargetTraitChipGroups().map(({ group, chips }) => (
+                                            <div key={group}>
+                                                <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1.5">{group}</div>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {chips.map(chip => {
+                                                        const active = tpSelectedTraits.includes(chip.id);
+                                                        return (
+                                                            <button
+                                                                key={chip.id}
+                                                                type="button"
+                                                                onClick={() => toggleTargetTraitChip(chip.id)}
+                                                                className={`px-2.5 py-1.5 text-xs rounded-full border transition ${active ? 'bg-primary/20 border-primary text-gray-800' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                                                                title={formatTargetTraitChip(chip)}
+                                                            >
+                                                                {formatTargetTraitChip(chip)}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+{/* Run button */}
+                                <div className="px-5 py-4">
+                                {tpSelectedTraits.includes('fox') && !tpSelectedTraits.some(id => ['albino','himalayan','bone','siamese','burmese','stone','beige','colorpoint-beige','mock-choc'].includes(id)) && (
+                                    <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
+                                        Fox requires a C-locus dilution chip — please also select Himalayan, Siamese, Burmese, or similar.
+                                    </p>
+                                )}
+                                <button
+                                    type="button"
+                                    onClick={runTargetOutcomePrototype}
+                                    disabled={
+                                        tpSelectedTraits.length === 0 ||
+                                        tpGenerating ||
+                                        !myAnimalsLoaded ||
+                                        (tpSelectedTraits.includes('fox') && !tpSelectedTraits.some(id => ['albino','himalayan','bone','siamese','burmese','stone','beige','colorpoint-beige','mock-choc'].includes(id)))
+                                    }
+                                    className="w-full py-2 px-4 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors"
+                                >
+                                    {!myAnimalsLoaded ? <><Loader2 className="w-4 h-4 animate-spin" /> Loading Animals...</> : tpGenerating ? <><Loader2 className="w-4 h-4 animate-spin" /> Finding Best Pairings...</> : <><Star size={15} /> Find Best Pairings</>}
+                                </button>
+                            </div>{/* end Run button section */}
+
+                            </div>{/* end left divide-y column */}
+
+                            <div className="p-5 space-y-3 overflow-y-auto min-h-0">
+                                <div className="flex items-center justify-between">
+                                    <h4 className="text-sm font-semibold text-gray-700">Ranked Results Preview</h4>
+                                </div>
+                                {tpGenerating ? (
+                                    <div className="space-y-2">
+                                        {[1,2,3].map(i => (
+                                            <div key={i} className="rounded-lg border border-gray-200 bg-white p-3 animate-pulse">
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <div className="flex-1 space-y-2">
+                                                        <div className="h-3 bg-gray-200 rounded w-3/4" />
+                                                        <div className="h-2.5 bg-gray-100 rounded w-1/2" />
+                                                    </div>
+                                                    <div className="flex flex-col items-end gap-1.5">
+                                                        <div className="h-4 w-6 bg-gray-100 rounded-full" />
+                                                        <div className="h-4 w-20 bg-gray-200 rounded-full" />
+                                                    </div>
+                                                </div>
+                                                <div className="mt-3 flex justify-end">
+                                                    <div className="h-6 w-36 bg-gray-100 rounded-lg" />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : tpHasRun && tpMockResults.length === 0 ? (
+                                    <div className="p-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500">
+                                        <div className="font-medium text-gray-600 mb-1">No matching pairs found.</div>
+                                        <div>No animals in the pool carry enough of the required genetics to produce this target. Only animals with a genetic code entered are included.</div>
+                                    </div>
+                                ) : !tpHasRun ? (
+                                    <div className="p-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500">
+                                        Select traits and run the prototype to see ranked pair cards here.
+                                    </div>
+                                ) : (
+                                    <TpResultsList
+                                        results={tpMockResults}
+                                        expandedCard={tpExpandedCard}
+                                        setExpandedCard={setTpExpandedCard}
+                                        tpSourceMode={tpSourceMode}
+                                        onUsePair={usePairForPlannedMating}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                        )}
+
+                        </div>{/* end scrollable body */}
+                        <div className="border-t border-gray-200 px-5 py-3 flex justify-end flex-shrink-0">
                             <button onClick={() => setShowTestPairingModal(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Close</button>
                         </div>
                     </div>

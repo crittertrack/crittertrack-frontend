@@ -518,7 +518,7 @@ const UrgencyAlertsBanner = ({ authToken, API_BASE_URL }) => {
                                         <button
                                             onClick={() => dismissWeaningPermanently(item.litterId, item.key)}
                                             className="text-xs font-medium px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 hover:bg-pink-200"
-                                            title="Mark weaning complete ? stops this reminder permanently"
+                                            title="Mark weaning complete — stops this reminder permanently"
                                         >
                                             Done
                                         </button>

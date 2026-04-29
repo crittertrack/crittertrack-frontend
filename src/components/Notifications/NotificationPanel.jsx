@@ -17,6 +17,40 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
         fetchNotifications();
     }, []);
 
+    useEffect(() => {
+        const handleAnimalUpdated = (e) => {
+            const updated = e.detail;
+            if (!updated?.id_public) return;
+
+            setNotifications(prev => {
+                let changed = false;
+                const next = prev.map(notification => {
+                    const matchesAnimal =
+                        notification.animalId_public === updated.id_public ||
+                        notification.targetAnimalId_public === updated.id_public;
+
+                    if (!matchesAnimal) return notification;
+
+                    const patch = {};
+                    if (updated.name !== undefined) patch.animalName = updated.name;
+                    if (updated.prefix !== undefined) patch.animalPrefix = updated.prefix || '';
+                    if (updated.imageUrl !== undefined || updated.photoUrl !== undefined) {
+                        patch.animalImageUrl = updated.imageUrl || updated.photoUrl || notification.animalImageUrl;
+                    }
+
+                    if (Object.keys(patch).length === 0) return notification;
+                    changed = true;
+                    return { ...notification, ...patch };
+                });
+
+                return changed ? next : prev;
+            });
+        };
+
+        window.addEventListener('animal-updated', handleAnimalUpdated);
+        return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
+    }, []);
+
     const fetchNotifications = async () => {
         try {
             console.log('[Notifications] Fetching from:', `${API_BASE_URL}/notifications`);

@@ -103,6 +103,38 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
         fetchUsers();
     }, [fetchAnimals]);
 
+    useEffect(() => {
+        const handleAnimalUpdated = (e) => {
+            const updated = e.detail;
+            if (!updated?.id_public) return;
+
+            setAnimals(prev => {
+                let changed = false;
+                const next = prev.map(animal => {
+                    if (animal.id_public !== updated.id_public) return animal;
+                    changed = true;
+                    return { ...animal, ...updated };
+                });
+                return changed ? next : prev;
+            });
+
+            setSelectedAnimal(prev => {
+                if (!prev || prev.id_public !== updated.id_public) return prev;
+                return { ...prev, ...updated };
+            });
+
+            setEditForm(prev => {
+                if (!showEditModal || !selectedAnimal || selectedAnimal.id_public !== updated.id_public) {
+                    return prev;
+                }
+                return { ...prev, ...updated };
+            });
+        };
+
+        window.addEventListener('animal-updated', handleAnimalUpdated);
+        return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
+    }, [showEditModal, selectedAnimal]);
+
     const fetchUsers = async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/admin/users`, {

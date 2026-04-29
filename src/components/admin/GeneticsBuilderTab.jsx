@@ -5,7 +5,7 @@ import {
     Eye, EyeOff, Copy, Upload, Download, Play, Pause,
     GripVertical, AlertTriangle
 } from 'lucide-react';
-import { GENE_LOCI } from '../MouseGeneticsCalculator';
+import { GENE_LOCI } from '../GeneticsCalculator';
 import './GeneticsBuilderTab.css';
 
 const DOMINANCE_TYPES = [
@@ -315,7 +315,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                 genes: colorGenes,
                 markingGenes: markingGenes,
                 coatGenes: coatGenes,
-                adminNotes: (currentData.adminNotes || '') + '\n\nImported from MouseGeneticsCalculator on ' + new Date().toISOString()
+                adminNotes: (currentData.adminNotes || '') + '\n\nImported from GeneticsCalculator on ' + new Date().toISOString()
             };
             
             setCurrentData(updatedData);

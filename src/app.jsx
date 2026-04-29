@@ -14,7 +14,7 @@ import { getSpeciesDisplayName, getSpeciesLatinName } from './utils/speciesUtils
 import { getCountryFlag, getCountryName, US_STATES, getStateName, getCurrencySymbol } from './utils/locationUtils';
 import { getDonationBadge, DonationBadge } from './utils/donationUtils';
 import { getActionLabel, getActionColor } from './utils/activityUtils';
-import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
+import GeneticsCalculator from './components/GeneticsCalculator';
 import GeneticCodeBuilder from './components/GeneticCodeBuilder';
 import BudgetingTab from './components/BudgetingTab';
 import TermsOfService from './components/TermsOfService';
@@ -1314,7 +1314,13 @@ const App = () => {
                     
                     <PublicProfileView 
                         profile={viewingPublicProfile}
-                        onBack={() => { setViewingPublicProfile(null); navigate('/'); }}
+                        onBack={() => {
+                            setViewingPublicAnimal(null);
+                            setPublicAnimalViewHistory([]);
+                            setPublicAnimalInitialTab(1);
+                            setViewingPublicProfile(null);
+                            navigate('/');
+                        }}
                         onViewAnimal={handleViewPublicAnimal}
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
@@ -1398,7 +1404,7 @@ const App = () => {
                         />
                     )}
                     
-                    <MouseGeneticsCalculator
+                    <GeneticsCalculator
                         API_BASE_URL={API_BASE_URL}
                         authToken={null}
                         userRole={null}

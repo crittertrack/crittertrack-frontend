@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Info, HelpCircle } from 'lucide-react';
-import { calculatePhenotype, GENE_LOCI } from './MouseGeneticsCalculator';
+import { calculatePhenotype, GENE_LOCI } from './GeneticsCalculator';
 
 const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityForm }) => {
   const [showBuilderModal, setShowBuilderModal] = useState(false);

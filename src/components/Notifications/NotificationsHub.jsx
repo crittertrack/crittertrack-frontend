@@ -332,7 +332,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                                             {item.type === 'weaned' ? (
                                                 <div className="flex items-center gap-1.5 flex-shrink-0">
                                                     <button onClick={() => dismissBreeding(item.key)} className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 flex-shrink-0">Snooze</button>
-                                                    <button onClick={() => dismissWeaningPermanently(item.litterId, item.key)} className="text-xs font-medium px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 hover:bg-pink-200 flex-shrink-0" title="Mark weaning complete ? stops this reminder permanently">Done</button>
+                                                    <button onClick={() => dismissWeaningPermanently(item.litterId, item.key)} className="text-xs font-medium px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 hover:bg-pink-200 flex-shrink-0" title="Mark weaning complete — stops this reminder permanently">Done</button>
                                                 </div>
                                             ) : (
                                                 <button onClick={() => dismissBreeding(item.key)} className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 flex-shrink-0">Snooze</button>
