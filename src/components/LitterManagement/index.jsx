@@ -3099,8 +3099,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         <div className="w-full max-w-7xl bg-white p-3 sm:p-6 rounded-xl shadow-lg">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
                 <h2 className="text-xl sm:text-3xl font-bold text-gray-800 flex items-center">
-                    <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
-                    Litter Management
+                    {initialView === 'calendar'
+                        ? <><Calendar className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />Calendar</>
+                        : <><BookOpen className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />Litter Management</>}
                 </h2>
                 <div className="flex gap-2 flex-wrap">
                     {/* View Toggle */}
@@ -3128,7 +3129,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         <span className="hidden sm:inline">Alerts {urgencyEnabled ? 'On' : 'Off'}</span>
                     </button>
                     {/* Test Pairing Button */}
-                    <button
+                    {initialView !== 'calendar' && <button
                         onClick={() => {
                             setShowTestPairingModal(true);
                             setTpSireId('');
@@ -3152,16 +3153,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     >
                         <Calculator size={14} />
                         <span className="hidden sm:inline">Test Pairing</span>
-                    </button>
-                    <button
+                    </button>}
+                    {initialView !== 'calendar' && <button
                         onClick={handleRecalculateOffspringCounts}
                         className="bg-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg flex items-center"
                         title="Recalculate offspring counts for all litters"
                     >
                         <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                    {/* + Mating / + Litter ? grouped so they never split across rows */}
-                    <div className="flex rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+                    </button>}
+                    {/* + Mating / + Litter — grouped so they never split across rows */}
+                    {initialView !== 'calendar' && <div className="flex rounded-lg overflow-hidden border border-gray-200 shadow-sm">
                         {/* Mating button */}
                         <button
                             onClick={() => {
@@ -3206,11 +3207,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             {showAddForm ? <X size={14} /> : <Plus size={14} />}
                             <span>Litter</span>
                         </button>
-                    </div>
+                    </div>}
                 </div>
             </div>
 
-            {/* Stats bar */}
+            {/* Stats bar — hidden on standalone calendar page */}
+            {initialView !== 'calendar' && (
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 mb-4 sm:mb-6 pl-0.5">
                 <span><span className="font-semibold text-gray-700">{litterStats.litters}</span> Litters</span>
                 <span className="text-gray-300">|</span>
@@ -3220,6 +3222,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 <span className="text-gray-300">|</span>
                 <span><span className="font-semibold text-gray-500">{litterStats.unknown}</span> Unknown</span>
             </div>
+            )}
 
             {loading && litters.length === 0 && (
                 /* Skeleton litter cards ? shown only until first fetch completes */
