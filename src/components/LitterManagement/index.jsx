@@ -350,9 +350,9 @@ const getMinimumParentCarrierRequirements = (selectedTraits) => {
             oneParent.push({ label: 'tan gene (at)' });
             continue;
         }
-        // A-locus A/A — both parents need at least one dominant A
+        // A-locus A/A — dominant, one parent is sufficient
         if (locus === 'A' && value === 'A/A') {
-            bothParents.push({ label: 'agouti (A)' });
+            oneParent.push({ label: 'agouti (A)' });
             continue;
         }
         // Homozygous recessive: both alleles equal and lowercase — each parent must carry one copy
