@@ -285,12 +285,12 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                     {cells.map((day, idx) => {
                         const colIdx = idx % 7;
                         const isWeekend = isWeekendCol[colIdx];
-                        if (day === null) return <div key={`blank-${idx}`} className={`min-h-[72px] ${isWeekend ? 'bg-rose-50/40' : 'bg-gray-50/60'}`} />;
+                        if (day === null) return <div key={`blank-${idx}`} className={`min-h-[96px] ${isWeekend ? 'bg-rose-50/40' : 'bg-gray-50/60'}`} />;
                         const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
                         const events = eventMap[dateKey] || [];
                         const isToday = dateKey === todayStr;
                         return (
-                            <div key={dateKey} className={`min-h-[72px] p-1 ${isToday ? 'bg-blue-50' : isWeekend ? 'bg-rose-50/30 hover:bg-rose-50/60' : 'hover:bg-gray-50/80'}`}>
+                            <div key={dateKey} className={`min-h-[96px] p-1.5 ${isToday ? 'bg-blue-50' : isWeekend ? 'bg-rose-50/30 hover:bg-rose-50/60' : 'hover:bg-gray-50/80'}`}>
                                 <span className={`inline-flex items-center justify-center w-6 h-6 text-sm rounded-full font-medium ${isToday ? 'bg-primary text-black ring-2 ring-primary/40 font-bold' : 'text-gray-700'}`}>
                                     {day}
                                 </span>
@@ -303,7 +303,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                             <button
                                                 key={i}
                                                 onClick={() => setCalendarTooltip(t => (t?.key === `${dateKey}-${i}`) ? null : { key: `${dateKey}-${i}`, litter: ev.litter, animal: ev.animal, type: ev.type })}
-                                                className={`w-full text-left px-1.5 py-0.5 rounded text-xs truncate transition-colors ${st.bg}${ev.litter?.isPlanned ? ' border-dashed opacity-80' : ''}`}
+                                                className={`w-full text-left px-1.5 py-1 rounded text-[11px] leading-tight font-medium break-words transition-colors ${st.bg}${ev.litter?.isPlanned ? ' border-dashed opacity-80' : ''}`}
                                                 title={ev.animal ? `${st.label}: ${getAnimalDisplayName(ev.animal)}` : `${ev.litter?.isPlanned ? '[Planned] ' : ''}${st.label}: ${getLitterName(ev.litter)} (${getSireDam(ev.litter)})`}
                                             >
                                                 {ev.litter?.isPlanned && '~ '}{getPillLabel(ev)}
