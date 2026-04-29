@@ -10,6 +10,7 @@ const ProfileView = lazy(() => import('./components/Profile/ProfileView'));
 const CommunityPage = lazy(() => import('./components/Community/CommunityPage'));
 const BreederDirectory = lazy(() => import('./components/PublicProfile/BreederDirectory'));
 const LitterManagement = lazy(() => import('./components/LitterManagement'));
+const CalendarPage = lazy(() => import('./components/CalendarPage'));
 const BudgetingTab = lazy(() => import('./components/BudgetingTab'));
 const GeneticsCalculator = lazy(() => import('./components/GeneticsCalculator'));
 const SpeciesSelector = lazy(() => import('./components/Modals/SpeciesModals').then(m => ({ default: m.SpeciesSelector })));
@@ -277,23 +278,13 @@ export function AppRoutes({
         />
       } />
 
-      {/* Calendar — litter management opened directly in calendar view */}
+      {/* Calendar — standalone calendar page */}
       <Route path="/calendar" element={
-        <LitterManagement
-          key="calendar-route"
+        <CalendarPage
           authToken={authToken}
           API_BASE_URL={API_BASE_URL}
           userProfile={userProfile}
           showModalMessage={showModalMessage}
-          onViewAnimal={handleViewAnimal}
-          handleViewAnimal={handleViewAnimal}
-          handleEditAnimal={handleEditAnimal}
-          speciesOptions={speciesOptions}
-          cachedLitters={cachedLitters}
-          setCachedLitters={setCachedLitters}
-          litterCacheTimestamp={litterCacheTimestamp}
-          setLitterCacheTimestamp={setLitterCacheTimestamp}
-          initialView="calendar"
         />
       } />
 
