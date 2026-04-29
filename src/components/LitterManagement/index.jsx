@@ -223,6 +223,9 @@ const getPrototypePhenotypeInterpretation = (selectedTraits) => {
         'cinnamon-argente': ['cinnamon argente'],
         'silver-agouti': ['silver agouti'],
         'dom-hairless':  ['hairless'],
+        // When Pied + Splashed are both selected, the engine outputs "Tricolor" (replaces both)
+        'pied':         ['pied', 'tricolor'],
+        'splashed':     ['splashed', 'tricolor'],
     };
 
     // Build a list of all selected modifier chip labels
@@ -1102,7 +1105,10 @@ const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) =>
 };
 
 // Litter Management Component
+const TARGET_OUTCOME_ALLOWED_USERS = ['CTU1', 'CTU2', 'CTU5'];
+
 const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp }) => {
+    const canAccessTargetOutcome = TARGET_OUTCOME_ALLOWED_USERS.includes(userProfile?.id_public);
     const [litters, setLitters] = useState([]);
     const [myAnimals, setMyAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -5385,13 +5391,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 >
                                     COI Calculator
                                 </button>
+                                {canAccessTargetOutcome && (
                                 <button
                                     type="button"
                                     onClick={() => setTpMode('target')}
                                     className={`px-3 py-1.5 text-sm font-medium border-l border-gray-200 ${tpMode === 'target' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
                                 >
-                                    Target Outcome (Prototype)
+                                    Target Outcome
                                 </button>
+                                )}
                             </div>
                         </div>
                         {/* Scrollable body */}
@@ -5474,7 +5482,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         </div>
                         )}
 
-                        {tpMode === 'target' && (
+                        {tpMode === 'target' && canAccessTargetOutcome && (
                         <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-200 h-full">
                             <div className="divide-y divide-gray-200 overflow-y-auto min-h-0">
 

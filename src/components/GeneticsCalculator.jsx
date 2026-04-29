@@ -171,6 +171,14 @@ const GENE_LOCI = {
       'nu/nu',
       'Nu/nu', 'Nu/Nu'
     ]
+  },
+  Ln: {
+    name: 'Leaden',
+    description: 'Recessive. Dilutes black pigment to a blue-grey (leaden) colour, independent of the D locus. e.g. Leaden Black (ln/ln), Leaden Chocolate (ln/ln + b/b). Combined with d/d gives Blue Leaden.',
+    combinations: [
+      'ln/ln',
+      'Ln/ln', 'Ln/Ln'
+    ]
   }
 };
 
@@ -538,6 +546,9 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Si-locus carriers (Silvered)
   if (genotype.Si === 'Si/si' || genotype.Si === 'si/Si') carriers.push('Silvered');
   
+  // Ln-locus carriers (Leaden)
+  if (genotype.Ln === 'Ln/ln' || genotype.Ln === 'ln/Ln') carriers.push('Leaden');
+
   // Coat gene carriers
   if (genotype.Go === 'Go/go' || genotype.Go === 'go/Go') carriers.push('Longhair');
   if (genotype.Sa === 'Sa/sa' || genotype.Sa === 'sa/Sa') carriers.push('Satin');
@@ -1133,6 +1144,29 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     else if (color === 'Dove Tan') color = 'Silver Tan';
     else if (color === 'Champagne') color = 'Lavender';
     else if (color === 'Champagne Tan') color = 'Lavender Tan';
+  }
+
+  // Leaden dilution (ln/ln) — independent of D locus, dilutes black to blue-grey
+  if (genotype.Ln === 'ln/ln') {
+    if (color === 'Black')           color = 'Leaden';
+    else if (color === 'Extreme Black') color = 'Leaden';
+    else if (color === 'Blue')       color = 'Blue Leaden';
+    else if (color === 'Chocolate')  color = 'Leaden Chocolate';
+    else if (color === 'Lilac')      color = 'Leaden Lilac';
+    else if (color === 'Agouti')     color = 'Leaden Agouti';
+    else if (color === 'Blue Agouti') color = 'Blue Agouti Leaden';
+    else if (color === 'Cinnamon')   color = 'Leaden Cinnamon';
+    else if (color === 'Cinnamon Argente') color = 'Leaden Cinnamon Argente';
+    else if (color === 'Black Tan')  color = 'Leaden Tan';
+    else if (color === 'Blue Tan')   color = 'Blue Leaden Tan';
+    else if (color === 'Chocolate Tan') color = 'Leaden Chocolate Tan';
+    else if (color === 'Lilac Tan')  color = 'Leaden Lilac Tan';
+    else if (color === 'Agouti Tan') color = 'Leaden Agouti Tan';
+    else if (color === 'Dove')       color = 'Leaden Dove';
+    else if (color === 'Silver')     color = 'Leaden Silver';
+    else if (color === 'Champagne')  color = 'Leaden Champagne';
+    else if (color === 'Lavender')   color = 'Leaden Lavender';
+    else if (!color.startsWith('Leaden') && !color.startsWith('Blue Leaden')) color = `Leaden ${color}`;
   }
 
   // Lavender (b/b + d/d + p/p combination)
