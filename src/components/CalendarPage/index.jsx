@@ -11,7 +11,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
     const [calendarPlannedOnly, setCalendarPlannedOnly] = useState(false);
     const [calendarEventFilters, setCalendarEventFilters] = useState({
         mated: true, due: true, born: true, weaned: true,
-        birthday: true, feeding: true, maintenance: true, caretask: true, supply: true,
+        birthday: true, feeding: true, maintenance: true, caretask: true, supply: true, planned: true,
     });
 
     const [litters, setLitters] = useState([]);
@@ -56,6 +56,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         due:         { bg: 'bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300', dot: 'bg-amber-400', label: 'Due' },
         born:        { bg: 'bg-green-100 hover:bg-green-200 text-green-800 border border-green-500', dot: 'bg-green-500', label: 'Born' },
         weaned:      { bg: 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300', dot: 'bg-sky-400', label: 'Weaned' },
+        planned:     { bg: 'bg-indigo-100 hover:bg-indigo-200 text-indigo-800 border border-dashed border-indigo-400', dot: 'bg-indigo-400', label: 'Planned Mating' },
         birthday:    { bg: 'bg-pink-100 hover:bg-pink-200 text-pink-800 border border-pink-300', dot: 'bg-pink-400', label: 'Birthday' },
         feeding:     { bg: 'bg-orange-100 hover:bg-orange-200 text-orange-800 border border-orange-300', dot: 'bg-orange-400', label: 'Feeding Due' },
         maintenance: { bg: 'bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border border-yellow-400', dot: 'bg-yellow-400', label: 'Maintenance Due' },
@@ -109,7 +110,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         } catch(e) {}
     };
 
-    // Litter events
+    // Litter events — planned litters get their own 'planned' type
     const filteredLitters = litters.filter(l => {
         if (calendarPlannedOnly && !l.isPlanned) return false;
         if (!q) return true;
@@ -117,10 +118,16 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
             .filter(Boolean).join(' ').toLowerCase().includes(q);
     });
     filteredLitters.forEach(l => {
-        addLitterEvent(l.matingDate, 'mated', l);
-        addLitterEvent(l.expectedDueDate, 'due', l);
-        addLitterEvent(l.birthDate, 'born', l);
-        addLitterEvent(l.weaningDate, 'weaned', l);
+        if (l.isPlanned) {
+            // Planned litters: show under 'planned' type using matingDate (or expectedDueDate as fallback)
+            const dateToShow = l.matingDate || l.expectedDueDate;
+            addLitterEvent(dateToShow, 'planned', l);
+        } else {
+            addLitterEvent(l.matingDate, 'mated', l);
+            addLitterEvent(l.expectedDueDate, 'due', l);
+            addLitterEvent(l.birthDate, 'born', l);
+            addLitterEvent(l.weaningDate, 'weaned', l);
+        }
     });
 
     // Animal events
@@ -194,6 +201,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         const sn = l.sire?.name || l.sireId_public || '?';
         const dn = l.dam?.name || l.damId_public || '?';
         if (ev.type === 'due') return `${pairName} · ${dn}`;
+        if (ev.type === 'planned') return `📅 ${pairName} · ${sn} × ${dn}`;
         if (ev.type === 'born') { const total = l.litterSizeBorn ?? l.numberBorn ?? 0; const m = l.maleCount ?? 0; const f = l.femaleCount ?? 0; return `${pairName} · ${total} born (${m}M/${f}F)`; }
         if (ev.type === 'weaned') { const total = l.litterSizeWeaned ?? l.numberWeaned ?? (l.litterSizeBorn ?? l.numberBorn ?? 0); return `${pairName} · ${total} to wean`; }
         return `${pairName} · ${sn} · ${dn}`;
@@ -303,10 +311,10 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                             <button
                                                 key={i}
                                                 onClick={() => setCalendarTooltip(t => (t?.key === `${dateKey}-${i}`) ? null : { key: `${dateKey}-${i}`, litter: ev.litter, animal: ev.animal, type: ev.type })}
-                                                className={`w-full text-left px-1.5 py-1 rounded text-[11px] leading-tight font-medium break-words transition-colors ${st.bg}${ev.litter?.isPlanned ? ' border-dashed opacity-80' : ''}`}
-                                                title={ev.animal ? `${st.label}: ${getAnimalDisplayName(ev.animal)}` : `${ev.litter?.isPlanned ? '[Planned] ' : ''}${st.label}: ${getLitterName(ev.litter)} (${getSireDam(ev.litter)})`}
+                                                className={`w-full text-left px-1.5 py-1 rounded text-[11px] leading-tight font-medium break-words transition-colors ${st.bg}`}
+                                                title={ev.animal ? `${st.label}: ${getAnimalDisplayName(ev.animal)}` : `${st.label}: ${getLitterName(ev.litter)} (${getSireDam(ev.litter)})`}
                                             >
-                                                {ev.litter?.isPlanned && '~ '}{getPillLabel(ev)}
+                                                {getPillLabel(ev)}
                                             </button>
                                         );
                                     })}
@@ -447,8 +455,9 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                         {weanStatus && <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Status:</span><span className={weanStatus.cls}>{weanStatus.text}</span></div>}
                                     </>);
                                 })()}
-                                {type === 'mated' && (<>
-                                    <Row label="Mating Date:" value={fmtD(l.matingDate)} />
+                                {(type === 'mated' || type === 'planned') && (<>
+                                    <Row label="Planned Mating:" value={type === 'planned' ? fmtD(l.matingDate) : null} />
+                                    <Row label="Mating Date:" value={type === 'mated' ? fmtD(l.matingDate) : null} />
                                     <Row label="Expected Due:" value={fmtD(l.expectedDueDate)} />
                                     <Row label="Method:" value={l.breedingMethod && l.breedingMethod !== 'Unknown' ? l.breedingMethod : null} />
                                     <Row label="Condition:" value={l.breedingConditionAtTime || null} />
