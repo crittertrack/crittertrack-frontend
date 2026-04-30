@@ -635,7 +635,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                             { id: 8, label: 'Health', icon: Hospital, color: 'text-red-500' },
                             { id: 9, label: 'Care', icon: Home, color: 'text-teal-500' },
                             { id: 10, label: 'Behavior', icon: Brain, color: 'text-purple-500' },
-                            { id: 11, label: 'Notes', icon: FileText, color: 'text-indigo-500' },
+                            { id: 11, label: 'Notes & Milestones', icon: FileText, color: 'text-indigo-500' },
                             { id: 12, label: 'Show', icon: Trophy, color: 'text-yellow-600' },
                             { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' },
                             { id: 14, label: 'End of Life', icon: Scale, color: 'text-gray-500' },

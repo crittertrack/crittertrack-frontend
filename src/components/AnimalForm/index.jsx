@@ -7972,7 +7972,6 @@ const AnimalForm = ({
                             <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="5"
                                 className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                 placeholder="General notes, observations, and records..." />
-                            <p className="text-xs text-gray-500 mt-2">Future features: File attachments, change timeline, and detailed record keeping will be added here.</p>
                         </div>
                         )}
                     </div>
