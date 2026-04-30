@@ -144,8 +144,12 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         if (!dateVal || !calendarEventFilters[type]) return;
         try {
             const s = typeof dateVal === 'string' ? dateVal.substring(0,10) : null;
-            const d = s ? new Date(s + 'T00:00:00') : new Date(dateVal);
+            let d = s ? new Date(s + 'T00:00:00') : new Date(dateVal);
             if (isNaN(d.getTime())) return;
+            // For birthdays, show the anniversary in the current viewed year/month
+            if (type === 'birthday') {
+                d = new Date(year, d.getMonth(), d.getDate());
+            }
             const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
             if (!eventMap[k]) eventMap[k] = [];
             if (eventMap[k].some(e => e.animal?._id === animal._id && e.type === type)) return;
