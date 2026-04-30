@@ -7968,7 +7968,7 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {!isFieldHidden('remarks') && (
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="remarks-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><FileText size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Remarks & Notes</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><FileText size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Notes</h3>
                             <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="5"
                                 className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                 placeholder="General notes, observations, and records..." />

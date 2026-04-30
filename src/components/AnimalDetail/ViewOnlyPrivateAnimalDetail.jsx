@@ -1612,9 +1612,9 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                     {/* Tab 11: Notes */}
                     {detailViewTab === 11 && (
                         <div className="space-y-6">
-                            {/* 1st Section: Remarks & Notes */}
+                            {/* 1st Section: Notes */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><FileText size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Remarks & Notes</h3>
+                                <h3 className="text-lg font-semibold text-gray-700"><FileText size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Notes</h3>
                                 <strong className="block text-sm text-gray-700 whitespace-pre-wrap">{animal.remarks || ''}</strong>
                             </div>
                         </div>
