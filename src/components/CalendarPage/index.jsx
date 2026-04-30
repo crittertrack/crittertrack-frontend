@@ -273,7 +273,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
             }
             if (ev.type === 'feeding') {
                 const feedType = (a._calFeedType || '').trim();
-                return { prefix: 'Feed:', bold: animalName, rest: feedType ? `${feedType} Feed due` : 'Feed due' };
+                return { prefix: 'Feed:', bold: animalName, rest: feedType };
             }
             if (ev.type === 'maintenance') return { prefix: 'Maintenance:', bold: animalName, rest: '' };
             if (ev.type === 'caretask') {
