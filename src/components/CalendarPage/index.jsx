@@ -280,7 +280,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
             if (ev.type === 'birthday') {
                 const birthYear = new Date(String(a.birthDate).substring(0,10) + 'T00:00:00').getFullYear();
                 const turning = year - birthYear;
-                return { prefix: 'Birthdate:', bold: animalName, rest: turning > 0 ? `${turning}y` : '', restBold: true };
+                return { prefix: 'Birthdate:', bold: animalName, rest: turning > 0 ? `${turning} ${turning === 1 ? 'year' : 'years'}` : '', restBold: true };
             }
             if (ev.type === 'feeding') {
                 const feedType = (a._calFeedType || '').trim();
