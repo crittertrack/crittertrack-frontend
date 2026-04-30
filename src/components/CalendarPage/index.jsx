@@ -316,7 +316,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
     };
     const PillLabel = ({ ev }) => {
         const { prefix, bold, rest } = getPillParts(ev);
-        return <>{prefix && <span className="font-normal opacity-75">{prefix} </span>}<span className="font-bold">{bold}</span>{rest && <span className="font-normal opacity-75"> {rest}</span>}</>;
+        return <>{prefix && <span className="font-normal">{prefix} </span>}<span className="font-bold">{bold}</span>{rest && <span className="font-normal"> {rest}</span>}</>;
     };
 
     const TooltipRow = ({ label, value }) => value ? (
