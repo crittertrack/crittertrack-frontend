@@ -310,7 +310,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
             let weanedPastOrToday = false;
             if (wd && !isNaN(wd)) { wd.setHours(0, 0, 0, 0); weanedPastOrToday = wd <= now; }
             const verb = weanedPastOrToday ? 'weaned' : 'to wean';
-            return { bold: codeName || pairBase, rest: `${total} ${verb}` };
+            return { prefix: 'Wean:', bold: codeName || pairBase, rest: `${total} ${verb}` };
         }
         return { bold: pairBase, rest: '' };
     };
