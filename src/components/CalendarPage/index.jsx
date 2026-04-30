@@ -604,16 +604,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                     )}
                 </div>
 
-                {/* Legend */}
-                <div className="px-4 py-2.5 bg-gray-50 border-t border-gray-200 flex flex-wrap gap-4 text-xs text-gray-600 items-center">
-                    {Object.entries(typeStyles).map(([k, v]) => (
-                        <span key={k} className="flex items-center gap-1.5">
-                            {getEventIcon(k, 12)}
-                            {v.label}
-                        </span>
-                    ))}
-                    <span className="text-gray-400 ml-auto hidden sm:block">Click a pill for details</span>
-                </div>
+
             </div>
         </div>
     );
