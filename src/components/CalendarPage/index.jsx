@@ -285,7 +285,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                 const amount = (a._calAmount != null && a._calAmount !== '')
                     ? `${a._calAmount}${a._calUnit ? ` ${a._calUnit}` : ''}`
                     : '';
-                return { bold: a._calLabel || 'Supply', rest: amount };
+                return { prefix: 'Order:', bold: a._calLabel || 'Supply', rest: amount };
             }
             return { bold: getAnimalDisplayName(a), rest: '' };
         }
@@ -315,8 +315,8 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         return { bold: pairBase, rest: '' };
     };
     const PillLabel = ({ ev }) => {
-        const { bold, rest } = getPillParts(ev);
-        return <><span className="font-bold">{bold}</span>{rest && <span className="font-normal opacity-75"> {rest}</span>}</>;
+        const { prefix, bold, rest } = getPillParts(ev);
+        return <>{prefix && <span className="font-normal opacity-75">{prefix} </span>}<span className="font-bold">{bold}</span>{rest && <span className="font-normal opacity-75"> {rest}</span>}</>;
     };
 
     const TooltipRow = ({ label, value }) => value ? (
