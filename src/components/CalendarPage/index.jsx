@@ -188,7 +188,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
             ...a,
             _calLabel: a.name || a.id_public,
             _calDetail: `Feed every ${a.feedingFrequencyDays}d`,
-            _calFeedType: a.dietType || a.feedingSchedule || '',
+            _calFeedType: a.dietType || '',
         });
         const maintNext = nextDueDate(a.lastMaintenanceDate, a.maintenanceFrequencyDays);
         if (maintNext) addAnimalEvent(maintNext, 'maintenance', { ...a, _calLabel: a.name || a.id_public, _calDetail: `Maintenance every ${a.maintenanceFrequencyDays}d` });
