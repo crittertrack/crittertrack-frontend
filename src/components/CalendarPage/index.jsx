@@ -92,7 +92,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         const ageDays = Math.max(0, Math.round((now - born) / 86400000));
         const years = Math.floor(ageDays / 365);
         const months = Math.floor((ageDays % 365) / 30);
-        if (years > 0) return `${years}y ${months}m`;
+        if (years > 0) return `${years}y`;
         return `${months}m`;
     };
     const getDueStatusText = (expectedDueDate) => {
@@ -469,7 +469,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                         {a.species && <TooltipRow label="Species:" value={a.species} />}
                                         {a.gender && <TooltipRow label="Gender:" value={a.gender} />}
                                         {a.birthDate && (() => {
-                                            const born = new Date(a.birthDate + 'T00:00:00');
+                                            const born = new Date(String(a.birthDate).substring(0,10) + 'T00:00:00');
                                             const now = new Date(); now.setHours(0,0,0,0);
                                             const ageDays = Math.round((now - born) / 86400000);
                                             const years = Math.floor(ageDays / 365);
