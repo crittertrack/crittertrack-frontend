@@ -316,7 +316,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
     };
     const PillLabel = ({ ev }) => {
         const { prefix, bold, rest } = getPillParts(ev);
-        return <>{prefix && <span className="font-normal">{prefix} </span>}<span className="font-bold">{bold}</span>{rest && <span className="font-normal"> {rest}</span>}</>;
+        return <div className="flex flex-col gap-0"><div>{prefix && <span className="font-normal">{prefix} </span>}<span className="font-bold">{bold}</span></div>{rest && <div className="font-normal">{rest}</div>}</div>;
     };
 
     const TooltipRow = ({ label, value }) => value ? (
@@ -436,9 +436,9 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                                     className={`w-full text-left px-1.5 py-1 rounded text-[11px] leading-tight font-medium break-words transition-colors ${st.bg}`}
                                                     title={ev.animal ? `${st.label}: ${getAnimalDisplayName(ev.animal)}` : `${st.label}: ${getLitterName(ev.litter)} (${getSireDam(ev.litter)})`}
                                                 >
-                                                    <span className="inline-flex items-start gap-1.5">
+                                                    <span className="inline-flex items-start gap-1.5 w-full">
                                                         {getEventIcon(ev.type, 11, 'mt-[1px] flex-shrink-0')}
-                                                        <PillLabel ev={ev} />
+                                                        <span className="min-w-0 flex-1"><PillLabel ev={ev} /></span>
                                                     </span>
                                                 </button>
                                             );
