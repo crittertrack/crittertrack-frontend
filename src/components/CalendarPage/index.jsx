@@ -275,7 +275,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                 const feedType = (a._calFeedType || '').trim();
                 return { bold: animalName, rest: feedType ? `${feedType} Feed due` : 'Feed due' };
             }
-            if (ev.type === 'maintenance') return { bold: animalName, rest: 'Maintenance due' };
+            if (ev.type === 'maintenance') return { prefix: 'Maintenance:', bold: animalName, rest: '' };
             if (ev.type === 'caretask') {
                 const taskName = a._calLabel || 'Task';
                 const subject = (a._calSubject || '').trim();
