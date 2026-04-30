@@ -293,7 +293,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         const pairBase = getPairDisplayForPill(l);
         const codeName = l?.breedingPairCodeName;
         if (ev.type === 'planned') return { prefix: 'Mate:', bold: pairBase, rest: '' };
-        if (ev.type === 'mated') return { bold: pairBase, rest: '' };
+        if (ev.type === 'mated') return { prefix: 'Mated:', bold: pairBase, rest: '' };
         if (ev.type === 'due') {
             if (codeName) return { bold: codeName, rest: getDueStatusText(l.expectedDueDate) };
             return { bold: pairBase, rest: getDueStatusText(l.expectedDueDate) };
