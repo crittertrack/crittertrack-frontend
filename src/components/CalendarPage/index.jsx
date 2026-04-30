@@ -163,9 +163,15 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
     });
     filteredLitters.forEach(l => {
         if (l.isPlanned) {
-            // Planned litters: show under 'planned' type using matingDate (or expectedDueDate as fallback)
-            const dateToShow = l.matingDate || l.expectedDueDate;
-            addLitterEvent(dateToShow, 'planned', l);
+            if (l.matingDate) {
+                // Mated but not yet a full litter: show mated on matingDate + due on expectedDueDate
+                addLitterEvent(l.matingDate, 'mated', l);
+                addLitterEvent(l.expectedDueDate, 'due', l);
+            } else {
+                // Planned mating only: show under 'planned' using expectedDueDate
+                const dateToShow = l.expectedDueDate;
+                addLitterEvent(dateToShow, 'planned', l);
+            }
         } else {
             addLitterEvent(l.matingDate, 'mated', l);
             addLitterEvent(l.expectedDueDate, 'due', l);
