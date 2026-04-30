@@ -81,7 +81,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         if (litter?.breedingPairCodeName) return litter.breedingPairCodeName;
         const sireName = getParentDisplayName(litter?.sire, litter?.sireId_public);
         const damName = getParentDisplayName(litter?.dam, litter?.damId_public);
-        return `${sireName} + ${damName}`;
+        return `${sireName} × ${damName}`;
     };
     const getAgeShort = (birthDate) => {
         if (!birthDate) return null;
