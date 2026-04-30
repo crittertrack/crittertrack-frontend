@@ -279,7 +279,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
             if (ev.type === 'caretask') {
                 const taskName = a._calLabel || 'Task';
                 const subject = (a._calSubject || '').trim();
-                return { bold: animalName, rest: subject ? `${taskName} · ${subject}` : taskName };
+                return { prefix: 'Task:', bold: animalName, rest: subject ? `${taskName} · ${subject}` : taskName };
             }
             if (ev.type === 'supply') {
                 const amount = (a._calAmount != null && a._calAmount !== '')
