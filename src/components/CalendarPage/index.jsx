@@ -301,8 +301,17 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         if (ev.type === 'planned') return { prefix: 'Mate:', bold: pairBase, rest: '' };
         if (ev.type === 'mated') return { prefix: 'Mated:', bold: pairBase, rest: '' };
         if (ev.type === 'due') {
-            if (codeName) return { prefix: 'Birth:', bold: codeName, rest: getDueStatusText(l.expectedDueDate) };
-            return { prefix: 'Birth:', bold: pairBase, rest: getDueStatusText(l.expectedDueDate) };
+            let dueText;
+            if (l.birthDate && l.expectedDueDate) {
+                const due = new Date(l.expectedDueDate); due.setHours(0,0,0,0);
+                const born = new Date(l.birthDate); born.setHours(0,0,0,0);
+                const diff = Math.round((born - due) / 86400000);
+                dueText = diff > 0 ? `${diff}d overdue` : diff === 0 ? 'On time' : `${Math.abs(diff)}d early`;
+            } else {
+                dueText = getDueStatusText(l.expectedDueDate);
+            }
+            if (codeName) return { prefix: 'Birth:', bold: codeName, rest: dueText };
+            return { prefix: 'Birth:', bold: pairBase, rest: dueText };
         }
         if (ev.type === 'born') {
             const total = l.litterSizeBorn ?? l.numberBorn ?? 0;
