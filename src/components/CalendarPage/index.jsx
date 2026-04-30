@@ -316,7 +316,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
     };
     const PillLabel = ({ ev }) => {
         const { prefix, bold, rest } = getPillParts(ev);
-        return <div className="flex flex-col gap-0"><div>{prefix && <span className="font-normal">{prefix} </span>}<span className="font-bold">{bold}</span></div>{rest && <div className="font-normal">{rest}</div>}</div>;
+        return <div><div>{prefix && <span className="font-normal">{prefix} </span>}<span className="font-bold">{bold}</span></div>{rest && <div className="font-normal">{rest}</div>}</div>;
     };
 
     const TooltipRow = ({ label, value }) => value ? (
@@ -392,64 +392,41 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                         </div>
                     )}
                 <div className="grid grid-cols-7 divide-x divide-y divide-gray-300">
-                    {(() => {
-                        const rendered = [];
-                        let i = 0;
-                        while (i < cells.length) {
-                            const day = cells[i];
-                            const colIdx = i % 7;
-                            const isWeekend = isWeekendCol[colIdx];
-                            if (day === null) {
-                                rendered.push(<div key={`blank-${i}`} className={`min-h-[96px] ${isWeekend ? 'bg-rose-50/40' : 'bg-gray-50/60'}`} />);
-                                i++;
-                                continue;
-                            }
-                            const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-                            const events = eventMap[dateKey] || [];
-                            const isToday = dateKey === todayStr;
-                            // compute how many consecutive following cells in this row are empty
-                            const maxSpan = 7 - colIdx;
-                            let span = 1;
-                            if (events.length > 0) {
-                                for (let j = i + 1; j < cells.length && (j % 7) !== 0 && span < maxSpan; j++) {
-                                    const nextDay = cells[j];
-                                    const isEmpty = nextDay === null || (eventMap[`${year}-${String(month+1).padStart(2,'0')}-${String(nextDay).padStart(2,'0')}`] || []).length === 0;
-                                    if (isEmpty) span++;
-                                    else break;
-                                }
-                            }
-                            const spanClass = span === 2 ? 'col-span-2' : span === 3 ? 'col-span-3' : span === 4 ? 'col-span-4' : span === 5 ? 'col-span-5' : span === 6 ? 'col-span-6' : span === 7 ? 'col-span-7' : '';
-                            rendered.push(
-                                <div key={dateKey} className={`min-h-[96px] p-1.5 ${spanClass} ${isToday ? 'bg-blue-50' : isWeekend ? 'bg-rose-50/30 hover:bg-rose-50/60' : 'hover:bg-gray-50/80'}`}>
-                                    <span className={`inline-flex items-center justify-center w-6 h-6 text-sm rounded-full font-medium ${isToday ? 'bg-primary text-black ring-2 ring-primary/40 font-bold' : 'text-gray-700'}`}>
-                                        {day}
-                                    </span>
-                                    <div className="mt-0.5 space-y-0.5">
-                                        {events.map((ev, ei) => {
-                                            const st = (ev.type === 'due' && ev.litter?.birthDate)
-                                                ? { ...typeStyles.due, bg: 'bg-gray-100 hover:bg-gray-200 text-gray-500 border border-gray-300', label: 'Due (Born)' }
-                                                : (typeStyles[ev.type] || typeStyles.born);
-                                            return (
-                                                <button
-                                                    key={ei}
-                                                    onClick={() => setCalendarTooltip(t => (t?.key === `${dateKey}-${ei}`) ? null : { key: `${dateKey}-${ei}`, litter: ev.litter, animal: ev.animal, type: ev.type })}
-                                                    className={`w-full text-left px-1.5 py-1 rounded text-[11px] leading-tight font-medium break-words transition-colors ${st.bg}`}
-                                                    title={ev.animal ? `${st.label}: ${getAnimalDisplayName(ev.animal)}` : `${st.label}: ${getLitterName(ev.litter)} (${getSireDam(ev.litter)})`}
-                                                >
-                                                    <span className="inline-flex items-start gap-1.5 w-full">
-                                                        {getEventIcon(ev.type, 11, 'mt-[1px] flex-shrink-0')}
-                                                        <span className="min-w-0 flex-1"><PillLabel ev={ev} /></span>
-                                                    </span>
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
+                    {cells.map((day, idx) => {
+                        const colIdx = idx % 7;
+                        const isWeekend = isWeekendCol[colIdx];
+                        if (day === null) return <div key={`blank-${idx}`} className={`min-h-[96px] ${isWeekend ? 'bg-rose-50/40' : 'bg-gray-50/60'}`} />;
+                        const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                        const events = eventMap[dateKey] || [];
+                        const isToday = dateKey === todayStr;
+                        return (
+                            <div key={dateKey} className={`min-h-[96px] p-1.5 ${isToday ? 'bg-blue-50' : isWeekend ? 'bg-rose-50/30 hover:bg-rose-50/60' : 'hover:bg-gray-50/80'}`}>
+                                <span className={`inline-flex items-center justify-center w-6 h-6 text-sm rounded-full font-medium ${isToday ? 'bg-primary text-black ring-2 ring-primary/40 font-bold' : 'text-gray-700'}`}>
+                                    {day}
+                                </span>
+                                <div className="mt-0.5 space-y-0.5">
+                                    {events.map((ev, i) => {
+                                        const st = (ev.type === 'due' && ev.litter?.birthDate)
+                                            ? { ...typeStyles.due, bg: 'bg-gray-100 hover:bg-gray-200 text-gray-500 border border-gray-300', label: 'Due (Born)' }
+                                            : (typeStyles[ev.type] || typeStyles.born);
+                                        return (
+                                            <button
+                                                key={i}
+                                                onClick={() => setCalendarTooltip(t => (t?.key === `${dateKey}-${i}`) ? null : { key: `${dateKey}-${i}`, litter: ev.litter, animal: ev.animal, type: ev.type })}
+                                                className={`w-full text-left px-1.5 py-1 rounded text-[11px] leading-tight font-medium break-words transition-colors ${st.bg}`}
+                                                title={ev.animal ? `${st.label}: ${getAnimalDisplayName(ev.animal)}` : `${st.label}: ${getLitterName(ev.litter)} (${getSireDam(ev.litter)})`}
+                                            >
+                                                <span className="inline-flex items-start gap-1.5">
+                                                    {getEventIcon(ev.type, 11, 'mt-[1px] flex-shrink-0')}
+                                                    <PillLabel ev={ev} />
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
                                 </div>
-                            );
-                            i += span; // skip consumed empty cells
-                        }
-                        return rendered;
-                    })()}
+                            </div>
+                        );
+                    })}
                 </div>
                 </div>
 
