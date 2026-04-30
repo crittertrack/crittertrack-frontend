@@ -108,7 +108,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         return `${Math.abs(diff)}d overdue`;
     };
     const getLitterName = (l) => l.breedingPairCodeName || l.litter_id_public || 'Unnamed Litter';
-    const getSireDam = (l) => `${l.sire?.name || l.sireId_public || '?'} · ${l.dam?.name || l.damId_public || '?'}`;
+    const getSireDam = (l) => `${getParentDisplayName(l.sire, l.sireId_public)} · ${getParentDisplayName(l.dam, l.damId_public)}`;
     const nextDueDate = (lastDate, freqDays) => {
         if (!freqDays) return null;
         const base = lastDate ? new Date(lastDate.substring(0,10) + 'T00:00:00') : new Date();
@@ -156,7 +156,9 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
     // Litter events — planned litters get their own 'planned' type
     const filteredLitters = litters.filter(l => {
         if (!q) return true;
-        return [l.breedingPairCodeName, l.litter_id_public, l.sire?.name, l.dam?.name, l.sireId_public, l.damId_public]
+        return [l.breedingPairCodeName, l.litter_id_public,
+            getParentDisplayName(l.sire, l.sireId_public),
+            getParentDisplayName(l.dam, l.damId_public)]
             .filter(Boolean).join(' ').toLowerCase().includes(q);
     });
     filteredLitters.forEach(l => {
@@ -260,45 +262,45 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
     for (let d = 1; d <= daysInMonth; d++) cells.push(d);
     while (cells.length % 7 !== 0) cells.push(null);
 
-    const getPillLabel = (ev) => {
+    // Returns { bold, rest } — bold is the primary name, rest is the descriptor
+    const getPillParts = (ev) => {
         if (ev.animal) {
             const a = ev.animal;
             const animalName = a._calAnimalName || getAnimalDisplayName(a);
             if (ev.type === 'birthday') {
                 const age = getAgeShort(a.birthDate);
-                return age ? `${animalName} ${age}` : animalName;
+                return { bold: animalName, rest: age || '' };
             }
             if (ev.type === 'feeding') {
                 const feedType = (a._calFeedType || '').trim();
-                return feedType ? `${animalName} ${feedType} Feed due` : `${animalName} Feed due`;
+                return { bold: animalName, rest: feedType ? `${feedType} Feed due` : 'Feed due' };
             }
-            if (ev.type === 'maintenance') return `${animalName} Maintenance due`;
+            if (ev.type === 'maintenance') return { bold: animalName, rest: 'Maintenance due' };
             if (ev.type === 'caretask') {
                 const taskName = a._calLabel || 'Task';
                 const subject = (a._calSubject || '').trim();
-                return subject ? `${animalName} ${taskName} · ${subject}` : `${animalName} ${taskName}`;
+                return { bold: animalName, rest: subject ? `${taskName} · ${subject}` : taskName };
             }
             if (ev.type === 'supply') {
                 const amount = (a._calAmount != null && a._calAmount !== '')
                     ? `${a._calAmount}${a._calUnit ? ` ${a._calUnit}` : ''}`
                     : '';
-                return amount
-                    ? `Supply Order: ${a._calLabel || 'Supply'} ${amount}`
-                    : `Supply Order: ${a._calLabel || 'Supply'}`;
+                return { bold: a._calLabel || 'Supply', rest: amount };
             }
-            return getAnimalDisplayName(a);
+            return { bold: getAnimalDisplayName(a), rest: '' };
         }
         const l = ev.litter;
         const pairBase = getPairDisplayForPill(l);
-        if (ev.type === 'planned') return pairBase;
-        if (ev.type === 'mated') return pairBase;
+        const codeName = l?.breedingPairCodeName;
+        if (ev.type === 'planned') return { bold: pairBase, rest: '' };
+        if (ev.type === 'mated') return { bold: pairBase, rest: '' };
         if (ev.type === 'due') {
-            if (l?.breedingPairCodeName) return l.breedingPairCodeName;
-            return `${pairBase} ${getDueStatusText(l.expectedDueDate)}`;
+            if (codeName) return { bold: codeName, rest: getDueStatusText(l.expectedDueDate) };
+            return { bold: pairBase, rest: getDueStatusText(l.expectedDueDate) };
         }
         if (ev.type === 'born') {
             const total = l.litterSizeBorn ?? l.numberBorn ?? 0;
-            return l?.breedingPairCodeName ? l.breedingPairCodeName : `${pairBase} ${total} born`;
+            return { bold: codeName || pairBase, rest: `${total} born` };
         }
         if (ev.type === 'weaned') {
             const total = l.litterSizeWeaned ?? l.numberWeaned ?? (l.litterSizeBorn ?? l.numberBorn ?? 0);
@@ -306,14 +308,15 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
             const now = new Date();
             now.setHours(0, 0, 0, 0);
             let weanedPastOrToday = false;
-            if (wd && !isNaN(wd)) {
-                wd.setHours(0, 0, 0, 0);
-                weanedPastOrToday = wd <= now;
-            }
+            if (wd && !isNaN(wd)) { wd.setHours(0, 0, 0, 0); weanedPastOrToday = wd <= now; }
             const verb = weanedPastOrToday ? 'weaned' : 'to wean';
-            return l?.breedingPairCodeName ? l.breedingPairCodeName : `${pairBase} ${total} ${verb}`;
+            return { bold: codeName || pairBase, rest: `${total} ${verb}` };
         }
-        return pairBase;
+        return { bold: pairBase, rest: '' };
+    };
+    const PillLabel = ({ ev }) => {
+        const { bold, rest } = getPillParts(ev);
+        return <><span className="font-bold">{bold}</span>{rest && <span className="font-normal opacity-75"> {rest}</span>}</>;
     };
 
     const TooltipRow = ({ label, value }) => value ? (
@@ -415,7 +418,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                             >
                                                 <span className="inline-flex items-start gap-1.5">
                                                     {getEventIcon(ev.type, 11, 'mt-[1px] flex-shrink-0')}
-                                                    <span>{getPillLabel(ev)}</span>
+                                                    <PillLabel ev={ev} />
                                                 </span>
                                             </button>
                                         );
@@ -479,8 +482,8 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
 
                     const l = calendarTooltip.litter;
                     const type = calendarTooltip.type;
-                    const sn = l.sire?.name || l.sireId_public || '?';
-                    const dn = l.dam?.name || l.damId_public || '?';
+                    const sn = getParentDisplayName(l.sire, l.sireId_public);
+                    const dn = getParentDisplayName(l.dam, l.damId_public);
                     const pairName = l.breedingPairCodeName || l.litter_id_public || 'Unnamed Litter';
                     const callId = l.litter_id_public;
 
@@ -596,7 +599,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                             </span>
                                             <span className="text-[11px] text-gray-500">{fmtD(ev.dateKey)}</span>
                                         </div>
-                                        <div className="text-xs text-gray-800 font-medium mt-1 truncate">{getPillLabel(ev)}</div>
+                                        <div className="text-xs text-gray-800 mt-1 truncate"><PillLabel ev={ev} /></div>
                                     </button>
                                 );
                             })}
