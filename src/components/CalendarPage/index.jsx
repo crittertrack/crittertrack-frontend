@@ -301,8 +301,8 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         if (ev.type === 'planned') return { prefix: 'Mate:', bold: pairBase, rest: '' };
         if (ev.type === 'mated') return { prefix: 'Mated:', bold: pairBase, rest: '' };
         if (ev.type === 'due') {
-            if (codeName) return { bold: codeName, rest: getDueStatusText(l.expectedDueDate) };
-            return { bold: pairBase, rest: getDueStatusText(l.expectedDueDate) };
+            if (codeName) return { prefix: 'Birth:', bold: codeName, rest: getDueStatusText(l.expectedDueDate) };
+            return { prefix: 'Birth:', bold: pairBase, rest: getDueStatusText(l.expectedDueDate) };
         }
         if (ev.type === 'born') {
             const total = l.litterSizeBorn ?? l.numberBorn ?? 0;
