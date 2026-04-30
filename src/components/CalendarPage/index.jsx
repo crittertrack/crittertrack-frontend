@@ -280,7 +280,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
             if (ev.type === 'birthday') {
                 const birthYear = new Date(String(a.birthDate).substring(0,10) + 'T00:00:00').getFullYear();
                 const turning = year - birthYear;
-                return { bold: animalName, rest: turning > 0 ? `${turning}y` : '' };
+                return { prefix: 'Birthdate:', bold: animalName, rest: turning > 0 ? `${turning}y` : '', restBold: true };
             }
             if (ev.type === 'feeding') {
                 const feedType = (a._calFeedType || '').trim();
@@ -335,8 +335,8 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         return { bold: pairBase, rest: '' };
     };
     const PillLabel = ({ ev }) => {
-        const { prefix, bold, rest } = getPillParts(ev);
-        return <div><div>{prefix && <span className="font-normal">{prefix} </span>}<span className="font-bold">{bold}</span></div>{rest && <div className="font-normal">{rest}</div>}</div>;
+        const { prefix, bold, rest, restBold } = getPillParts(ev);
+        return <div><div>{prefix && <span className="font-normal">{prefix} </span>}<span className="font-bold">{bold}</span></div>{rest && <div className={restBold ? 'font-bold' : 'font-normal'}>{rest}</div>}</div>;
     };
 
     const TooltipRow = ({ label, value }) => value ? (
