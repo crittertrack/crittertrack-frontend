@@ -93,7 +93,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         const years = Math.floor(ageDays / 365);
         const months = Math.floor((ageDays % 365) / 30);
         if (years > 0) return `${years}y`;
-        return `${months}m`;
+        return null;
     };
     const getDueStatusText = (expectedDueDate) => {
         if (!expectedDueDate) return 'Due';
@@ -278,8 +278,9 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
             const a = ev.animal;
             const animalName = a._calAnimalName || getAnimalDisplayName(a);
             if (ev.type === 'birthday') {
-                const age = getAgeShort(a.birthDate);
-                return { bold: animalName, rest: age || '' };
+                const birthYear = new Date(String(a.birthDate).substring(0,10) + 'T00:00:00').getFullYear();
+                const turning = year - birthYear;
+                return { bold: animalName, rest: turning > 0 ? `${turning}y` : '' };
             }
             if (ev.type === 'feeding') {
                 const feedType = (a._calFeedType || '').trim();
