@@ -1108,7 +1108,7 @@ const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) =>
 // Litter Management Component
 const TARGET_OUTCOME_ALLOWED_USERS = ['CTU1', 'CTU2', 'CTU5', 'CTU9', 'CTU24'];
 
-const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp }) => {
+const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp, initialView = 'list' }) => {
     const canAccessTargetOutcome = TARGET_OUTCOME_ALLOWED_USERS.includes(userProfile?.id_public);
     const [litters, setLitters] = useState([]);
     const [myAnimals, setMyAnimals] = useState([]);
@@ -1183,6 +1183,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [searchQuery, setSearchQuery] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState('');
     const [yearFilter, setYearFilter] = useState('');
+    const [litterStatusFilter, setLitterStatusFilter] = useState('all'); // 'all' | 'planned' | 'mated' | 'born'
     // COI calculation state
     const [predictedCOI, setPredictedCOI] = useState(null);
     const [calculatingCOI, setCalculatingCOI] = useState(false);
@@ -1203,12 +1204,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [myAnimalsLoaded, setMyAnimalsLoaded] = useState(false);
     const [litterOffspringMap, setLitterOffspringMap] = useState({}); // litter._id ? offspring array (undefined = not yet loaded)
     const [offspringRefetchToken, setOffspringRefetchToken] = useState(0); // increment to force offspring re-fetch
-    const [viewMode, setViewMode] = useState('list'); // 'list' | 'calendar'
+    const [viewMode, setViewMode] = useState(initialView === 'calendar' ? 'calendar' : 'list'); // 'list' | 'calendar'
     const [calendarMonth, setCalendarMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
     const [calendarTooltip, setCalendarTooltip] = useState(null); // { litterId, eventType, litter, x, y }
     const [calendarQuery, setCalendarQuery] = useState('');
     const [calendarPlannedOnly, setCalendarPlannedOnly] = useState(false);
-    const [calendarEventFilters, setCalendarEventFilters] = useState({ mated: true, due: true, born: true, weaned: true });
+    const [calendarEventFilters, setCalendarEventFilters] = useState({ mated: true, due: true, born: true, weaned: true, birthday: true, feeding: true, maintenance: true, caretask: true, supply: true });
+    const [calendarAnimals, setCalendarAnimals] = useState([]);
+    const [calendarSupplies, setCalendarSupplies] = useState([]);
+    const [calendarEnclosures, setCalendarEnclosures] = useState([]);
     const [urgencyEnabled, setUrgencyEnabled] = useState(() => {
         try { return localStorage.getItem('ct_urgency_enabled') !== 'false'; } catch { return true; }
     });
@@ -1921,6 +1925,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             setLoading(false);
         }
     };
+
+    // Fetch animals, supplies, and enclosures for calendar view
+    useEffect(() => {
+        if (viewMode !== 'calendar' || !authToken) return;
+        const headers = { Authorization: `Bearer ${authToken}` };
+        axios.get(`${API_BASE_URL}/animals?isOwned=true`, { headers })
+            .then(r => setCalendarAnimals(Array.isArray(r.data) ? r.data : [])).catch(() => {});
+        axios.get(`${API_BASE_URL}/supplies`, { headers })
+            .then(r => setCalendarSupplies(Array.isArray(r.data) ? r.data : [])).catch(() => {});
+        axios.get(`${API_BASE_URL}/enclosures`, { headers })
+            .then(r => setCalendarEnclosures(Array.isArray(r.data) ? r.data : [])).catch(() => {});
+    }, [viewMode, authToken, API_BASE_URL]);
 
     const fetchLitters = async ({ preserveOffspring = false } = {}) => {
         try {
@@ -3058,7 +3074,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         // Use populated parent data first (covers transferred/hidden animals), fall back to myAnimals
         const sire = litter.sire || myAnimals.find(a => a.id_public === litter.sireId_public);
         const dam  = litter.dam  || myAnimals.find(a => a.id_public === litter.damId_public);
-        
+
+        // Status filter
+        if (litterStatusFilter !== 'all') {
+            const today = new Date();
+            const isMated = litter.isPlanned && litter.matingDate && new Date(litter.matingDate) <= today;
+            const isPlannedOnly = litter.isPlanned && !isMated;
+            const isBorn = !litter.isPlanned;
+            if (litterStatusFilter === 'planned' && !isPlannedOnly) return false;
+            if (litterStatusFilter === 'mated'   && !isMated)       return false;
+            if (litterStatusFilter === 'born'    && !isBorn)        return false;
+        }
+
         // Species filter
         if (speciesFilter) {
             if (sire?.species !== speciesFilter) return false;
@@ -3127,8 +3154,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         <div className="w-full max-w-7xl bg-white p-3 sm:p-6 rounded-xl shadow-lg">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
                 <h2 className="text-xl sm:text-3xl font-bold text-gray-800 flex items-center">
-                    <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
-                    Litter Management
+                    {initialView === 'calendar'
+                        ? <><Calendar className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />Calendar</>
+                        : <><BookOpen className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />Litter Management</>}
                 </h2>
                 <div className="flex gap-2 flex-wrap">
                     {/* View Toggle */}
@@ -3156,7 +3184,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         <span className="hidden sm:inline">Alerts {urgencyEnabled ? 'On' : 'Off'}</span>
                     </button>
                     {/* Test Pairing Button */}
-                    <button
+                    {initialView !== 'calendar' && <button
                         onClick={() => {
                             setShowTestPairingModal(true);
                             setTpSireId('');
@@ -3180,16 +3208,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     >
                         <Calculator size={14} />
                         <span className="hidden sm:inline">Test Pairing</span>
-                    </button>
-                    <button
+                    </button>}
+                    {initialView !== 'calendar' && <button
                         onClick={handleRecalculateOffspringCounts}
                         className="bg-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg flex items-center"
                         title="Recalculate offspring counts for all litters"
                     >
                         <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                    {/* + Mating / + Litter ? grouped so they never split across rows */}
-                    <div className="flex rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+                    </button>}
+                    {/* + Mating / + Litter — grouped so they never split across rows */}
+                    {initialView !== 'calendar' && <div className="flex rounded-lg overflow-hidden border border-gray-200 shadow-sm">
                         {/* Mating button */}
                         <button
                             onClick={() => {
@@ -3234,11 +3262,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             {showAddForm ? <X size={14} /> : <Plus size={14} />}
                             <span>Litter</span>
                         </button>
-                    </div>
+                    </div>}
                 </div>
             </div>
 
-            {/* Stats bar */}
+            {/* Stats bar — hidden on standalone calendar page */}
+            {initialView !== 'calendar' && (
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 mb-4 sm:mb-6 pl-0.5">
                 <span><span className="font-semibold text-gray-700">{litterStats.litters}</span> Litters</span>
                 <span className="text-gray-300">|</span>
@@ -3248,6 +3277,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 <span className="text-gray-300">|</span>
                 <span><span className="font-semibold text-gray-500">{litterStats.unknown}</span> Unknown</span>
             </div>
+            )}
 
             {loading && litters.length === 0 && (
                 /* Skeleton litter cards ? shown only until first fetch completes */
@@ -4212,6 +4242,26 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             />
                         </div>
                         
+                        {/* Status filter */}
+                        <div className="flex flex-wrap gap-1.5 items-center">
+                            <span className="text-xs font-medium text-gray-500 mr-0.5">Show:</span>
+                            {[['all','All'],['planned','Planned'],['mated','Mated'],['born','Born']].map(([val, label]) => (
+                                <button
+                                    key={val}
+                                    type="button"
+                                    onClick={() => setLitterStatusFilter(val)}
+                                    className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
+                                        litterStatusFilter === val
+                                            ? val === 'planned' ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
+                                            : val === 'mated'   ? 'bg-purple-100 border-purple-300 text-purple-700'
+                                            : val === 'born'    ? 'bg-green-100 border-green-300 text-green-700'
+                                            : 'bg-primary border-primary/50 text-black'
+                                            : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+                                    }`}
+                                >{label}</button>
+                            ))}
+                        </div>
+
                         {/* Species filter */}
                         <div className="flex flex-wrap gap-3 items-center pt-2 border-t border-gray-200">
                             <div className="flex items-center gap-2">
@@ -4977,6 +5027,66 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     addEvent(l.weaningDate, 'weaned', l);
                 });
 
+                // Animal events
+                const addAnimalEvent = (dateVal, type, animal) => {
+                    if (!dateVal || !calendarEventFilters[type]) return;
+                    let d;
+                    try {
+                        const s = typeof dateVal === 'string' ? dateVal.substring(0, 10) : null;
+                        d = s ? new Date(s + 'T00:00:00') : new Date(dateVal);
+                        if (isNaN(d.getTime())) return;
+                    } catch(e) { return; }
+                    const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                    if (!eventMap[k]) eventMap[k] = [];
+                    if (eventMap[k].some(e => e.animal?._id === animal._id && e.type === type)) return;
+                    eventMap[k].push({ type, animal });
+                };
+                // Helper: compute next due date from lastDoneDate + freqDays
+                const nextDueDate = (lastDate, freqDays) => {
+                    if (!freqDays) return null;
+                    const base = lastDate ? new Date(lastDate + 'T00:00:00') : new Date();
+                    if (isNaN(base.getTime())) return null;
+                    const next = new Date(base);
+                    next.setDate(next.getDate() + Number(freqDays));
+                    return `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-${String(next.getDate()).padStart(2,'0')}`;
+                };
+
+                calendarAnimals.forEach(a => {
+                    addAnimalEvent(a.birthDate, 'birthday', a);
+                    // Feeding due
+                    const feedNext = nextDueDate(a.lastFedDate?.substring?.(0,10) ?? a.lastFedDate, a.feedingFrequencyDays);
+                    if (feedNext) addAnimalEvent(feedNext, 'feeding', { ...a, _calLabel: a.name || a.id_public, _calDetail: `Feed every ${a.feedingFrequencyDays}d` });
+                    // Maintenance due
+                    const maintNext = nextDueDate(a.lastMaintenanceDate?.substring?.(0,10) ?? a.lastMaintenanceDate, a.maintenanceFrequencyDays);
+                    if (maintNext) addAnimalEvent(maintNext, 'maintenance', { ...a, _calLabel: a.name || a.id_public, _calDetail: `Maintenance every ${a.maintenanceFrequencyDays}d` });
+                    // Enclosure care tasks
+                    (a.careTasks || []).forEach(t => {
+                        const dn = nextDueDate(t.lastDoneDate?.substring?.(0,10) ?? t.lastDoneDate, t.frequencyDays);
+                        if (dn) addAnimalEvent(dn, 'caretask', { ...a, _calLabel: t.name || 'Enclosure Task', _calDetail: a.name || a.id_public });
+                    });
+                    // Animal care tasks
+                    (a.animalCareTasks || []).forEach(t => {
+                        const dn = nextDueDate(t.lastDoneDate?.substring?.(0,10) ?? t.lastDoneDate, t.frequencyDays);
+                        if (dn) addAnimalEvent(dn, 'caretask', { ...a, _calLabel: t.name || 'Animal Task', _calDetail: a.name || a.id_public });
+                    });
+                });
+
+                // Enclosure cleaning tasks
+                calendarEnclosures.forEach(enc => {
+                    (enc.cleaningTasks || []).forEach(t => {
+                        const dn = nextDueDate(t.lastDoneDate?.substring?.(0,10) ?? t.lastDoneDate, t.frequencyDays);
+                        if (dn && calendarEventFilters.caretask) {
+                            if (!eventMap[dn]) eventMap[dn] = [];
+                            eventMap[dn].push({ type: 'caretask', animal: { _id: enc._id, _calLabel: t.name || 'Cleaning Task', _calDetail: enc.name || 'Enclosure', id_public: enc._id } });
+                        }
+                    });
+                });
+
+                // Supply reorder dates
+                calendarSupplies.forEach(s => {
+                    if (s.nextOrderDate) addAnimalEvent(s.nextOrderDate.substring(0,10), 'supply', { _id: s._id, _calLabel: s.name || 'Supply', _calDetail: s.category || '', id_public: s._id });
+                });
+
                 const monthStart = new Date(year, month, 1);
                 const monthEnd = new Date(year, month + 1, 0);
                 const monthEventList = Object.entries(eventMap)
@@ -4988,7 +5098,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     .sort((a, b) => {
                         if (a.dateKey < b.dateKey) return -1;
                         if (a.dateKey > b.dateKey) return 1;
-                        const order = { mated: 0, due: 1, born: 2, weaned: 3 };
+                        const order = { mated: 0, due: 1, born: 2, weaned: 3, birthday: 4, feeding: 5, maintenance: 6, caretask: 7, supply: 8 };
                         return (order[a.type] ?? 99) - (order[b.type] ?? 99);
                     });
 
@@ -5008,10 +5118,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 while (cells.length % 7 !== 0) cells.push(null);
 
                 const typeStyles = {
-                    mated:  { bg: 'bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300', dot: 'bg-purple-400', label: 'Mated' },
-                    due:    { bg: 'bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300', dot: 'bg-amber-400', label: 'Due' },
-                    born:   { bg: 'bg-green-100 hover:bg-green-200 text-green-800 border border-green-500', dot: 'bg-green-500', label: 'Born' },
-                    weaned: { bg: 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300', dot: 'bg-sky-400', label: 'Weaned' },
+                    mated:       { bg: 'bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300', dot: 'bg-purple-400', label: 'Mated' },
+                    due:         { bg: 'bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300', dot: 'bg-amber-400', label: 'Due' },
+                    born:        { bg: 'bg-green-100 hover:bg-green-200 text-green-800 border border-green-500', dot: 'bg-green-500', label: 'Born' },
+                    weaned:      { bg: 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300', dot: 'bg-sky-400', label: 'Weaned' },
+                    birthday:    { bg: 'bg-pink-100 hover:bg-pink-200 text-pink-800 border border-pink-300', dot: 'bg-pink-400', label: 'Birthday' },
+                    feeding:     { bg: 'bg-orange-100 hover:bg-orange-200 text-orange-800 border border-orange-300', dot: 'bg-orange-400', label: 'Feeding Due' },
+                    maintenance: { bg: 'bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border border-yellow-400', dot: 'bg-yellow-400', label: 'Maintenance Due' },
+                    caretask:    { bg: 'bg-teal-100 hover:bg-teal-200 text-teal-800 border border-teal-300', dot: 'bg-teal-400', label: 'Care Task' },
+                    supply:      { bg: 'bg-red-100 hover:bg-red-200 text-red-800 border border-red-300', dot: 'bg-red-400', label: 'Supply Order' },
                 };
 
                 const getLitterName = (l) => l.breedingPairCodeName || l.litter_id_public || 'Unnamed Litter';
@@ -5026,7 +5141,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     try { const d = new Date(v); if (isNaN(d)) return null; return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }); } catch(e) { return null; }
                 };
                 // Type-specific pill label
+                const getAnimalDisplayName = (a) => [a.prefix, a.name, a.suffix].filter(Boolean).join(' ') || a.id_public || 'Unknown';
+
                 const getPillLabel = (ev) => {
+                    if (ev.animal) {
+                        const a = ev.animal;
+                        if (ev.type === 'birthday') return `🎂 ${getAnimalDisplayName(a)}`;
+                        if (ev.type === 'feeding') return `🍽️ ${a._calLabel || getAnimalDisplayName(a)}`;
+                        if (ev.type === 'maintenance') return `🔧 ${a._calLabel || getAnimalDisplayName(a)}`;
+                        if (ev.type === 'caretask') return `✅ ${a._calLabel || 'Task'} · ${a._calDetail || ''}`;
+                        if (ev.type === 'supply') return `📦 ${a._calLabel || 'Supply'}`;
+                        return getAnimalDisplayName(a);
+                    }
                     const l = ev.litter;
                     const pairName = l.breedingPairCodeName || l.litter_id_public || 'Unnamed';
                     const sn = l.sire?.name || l.sireId_public || '?';
@@ -5135,17 +5261,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </span>
                                         <div className="mt-0.5 space-y-0.5">
                                             {events.map((ev, i) => {
-                                                const st = (ev.type === 'due' && ev.litter.birthDate)
+                                                const st = (ev.type === 'due' && ev.litter?.birthDate)
                                                     ? { bg: 'bg-gray-100 hover:bg-gray-200 text-gray-500 border border-gray-300', label: 'Due (Born)' }
                                                     : (typeStyles[ev.type] || typeStyles.born);
                                                 return (
                                                     <button
                                                         key={i}
-                                                        onClick={() => setCalendarTooltip(t => (t && t.key === `${dateKey}-${i}`) ? null : { key: `${dateKey}-${i}`, litter: ev.litter, type: ev.type })}
-                                                        className={`w-full text-left px-1.5 py-0.5 rounded text-xs truncate transition-colors ${st.bg}${ev.litter.isPlanned ? ' border-dashed opacity-80' : ''}`}
-                                                        title={`${ev.litter.isPlanned ? '[Planned] ' : ''}${st.label}: ${getLitterName(ev.litter)} (${getSireDam(ev.litter)})`}
+                                                        onClick={() => setCalendarTooltip(t => (t && t.key === `${dateKey}-${i}`) ? null : { key: `${dateKey}-${i}`, litter: ev.litter, animal: ev.animal, type: ev.type })}
+                                                        className={`w-full text-left px-1.5 py-0.5 rounded text-xs truncate transition-colors ${st.bg}${ev.litter?.isPlanned ? ' border-dashed opacity-80' : ''}`}
+                                                        title={ev.animal ? `${st.label}: ${getAnimalDisplayName(ev.animal)}` : `${ev.litter?.isPlanned ? '[Planned] ' : ''}${st.label}: ${getLitterName(ev.litter)} (${getSireDam(ev.litter)})`}
                                                     >
-                                                        {ev.litter.isPlanned && '~ '}{getPillLabel(ev)}
+                                                        {ev.litter?.isPlanned && '~ '}{getPillLabel(ev)}
                                                     </button>
                                                 );
                                             })}
@@ -5157,6 +5283,58 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                         {/* Selected event detail */}
                         {calendarTooltip && (() => {
+                            // Animal / supply / task event tooltip
+                            if (calendarTooltip.animal) {
+                                const a = calendarTooltip.animal;
+                                const st = typeStyles[calendarTooltip.type] || typeStyles.born;
+                                const TooltipRow = ({ label, value }) => value ? (
+                                    <div className="flex gap-2 text-sm"><span className="text-gray-500 w-36 flex-shrink-0">{label}</span><span className="text-gray-800 font-medium">{value}</span></div>
+                                ) : null;
+                                return (
+                                    <div className="mx-3 mb-3 mt-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                                        <div className="flex justify-between items-start gap-2 mb-2">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${st.bg}`}>{st.label}</span>
+                                                <span className="font-bold text-gray-800 text-sm">{a._calLabel || getAnimalDisplayName(a)}</span>
+                                            </div>
+                                            <button onClick={() => setCalendarTooltip(null)} className="text-gray-400 hover:text-gray-600 flex-shrink-0"><X size={16} /></button>
+                                        </div>
+                                        <div className="space-y-1">
+                                            {calendarTooltip.type === 'birthday' && (<>
+                                                {a.id_public && <TooltipRow label="ID:" value={a.id_public} />}
+                                                {a.species && <TooltipRow label="Species:" value={a.species} />}
+                                                {a.gender && <TooltipRow label="Gender:" value={a.gender} />}
+                                                {a.birthDate && (() => {
+                                                    const born = new Date(a.birthDate + 'T00:00:00');
+                                                    const now = new Date(); now.setHours(0,0,0,0);
+                                                    const ageDays = Math.round((now - born) / 86400000);
+                                                    const years = Math.floor(ageDays / 365);
+                                                    const months = Math.floor((ageDays % 365) / 30);
+                                                    const ageStr = years > 0 ? `${years}y ${months}m` : `${months} month${months !== 1 ? 's' : ''}`;
+                                                    return (<>
+                                                        <TooltipRow label="Birthday:" value={fmtD(a.birthDate)} />
+                                                        <TooltipRow label="Age (today):" value={ageStr} />
+                                                    </>);
+                                                })()}
+                                            </>)}
+                                            {(calendarTooltip.type === 'feeding' || calendarTooltip.type === 'maintenance') && (<>
+                                                {a.id_public && <TooltipRow label="Animal:" value={getAnimalDisplayName(a)} />}
+                                                {a.species && <TooltipRow label="Species:" value={a.species} />}
+                                                <TooltipRow label="Schedule:" value={a._calDetail} />
+                                            </>)}
+                                            {calendarTooltip.type === 'caretask' && (<>
+                                                <TooltipRow label="Task:" value={a._calLabel} />
+                                                <TooltipRow label="Animal / Enclosure:" value={a._calDetail} />
+                                            </>)}
+                                            {calendarTooltip.type === 'supply' && (<>
+                                                <TooltipRow label="Supply:" value={a._calLabel} />
+                                                <TooltipRow label="Category:" value={a._calDetail} />
+                                            </>)}
+                                        </div>
+                                    </div>
+                                );
+                            }
+
                             const l = calendarTooltip.litter;
                             const type = calendarTooltip.type;
                             const sn = l.sire?.name || l.sireId_public || '?';
@@ -5272,13 +5450,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             ) : (
                                 <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
                                     {monthEventList.map((ev, idx) => {
-                                        const st = (ev.type === 'due' && ev.litter.birthDate)
+                                        const st = (ev.type === 'due' && ev.litter?.birthDate)
                                             ? { bg: 'bg-gray-100 text-gray-500 border border-gray-300', label: 'Due (Born)' }
                                             : (typeStyles[ev.type] || typeStyles.born);
                                         return (
                                             <button
-                                                key={`${ev.dateKey}-${ev.type}-${ev.litter._id}-${idx}`}
-                                                onClick={() => setCalendarTooltip({ key: `${ev.dateKey}-${idx}`, litter: ev.litter, type: ev.type })}
+                                                key={`${ev.dateKey}-${ev.type}-${ev.litter?._id ?? ev.animal?._id ?? idx}-${idx}`}
+                                                onClick={() => setCalendarTooltip({ key: `${ev.dateKey}-${idx}`, litter: ev.litter, animal: ev.animal, type: ev.type })}
                                                 className="w-full text-left px-2 py-1.5 rounded border border-gray-200 hover:bg-gray-50 transition"
                                             >
                                                 <div className="flex items-center justify-between gap-2">

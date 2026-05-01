@@ -10,6 +10,7 @@ const ProfileView = lazy(() => import('./components/Profile/ProfileView'));
 const CommunityPage = lazy(() => import('./components/Community/CommunityPage'));
 const BreederDirectory = lazy(() => import('./components/PublicProfile/BreederDirectory'));
 const LitterManagement = lazy(() => import('./components/LitterManagement'));
+const CalendarPage = lazy(() => import('./components/CalendarPage'));
 const BudgetingTab = lazy(() => import('./components/BudgetingTab'));
 const GeneticsCalculator = lazy(() => import('./components/GeneticsCalculator'));
 const SpeciesSelector = lazy(() => import('./components/Modals/SpeciesModals').then(m => ({ default: m.SpeciesSelector })));
@@ -263,6 +264,7 @@ export function AppRoutes({
       {/* Litters */}
       <Route path="/litters" element={
         <LitterManagement
+          key="litters-route"
           authToken={authToken}
           API_BASE_URL={API_BASE_URL}
           userProfile={userProfile}
@@ -275,6 +277,16 @@ export function AppRoutes({
           setCachedLitters={setCachedLitters}
           litterCacheTimestamp={litterCacheTimestamp}
           setLitterCacheTimestamp={setLitterCacheTimestamp}
+        />
+      } />
+
+      {/* Calendar — standalone calendar page */}
+      <Route path="/calendar" element={
+        <CalendarPage
+          authToken={authToken}
+          API_BASE_URL={API_BASE_URL}
+          userProfile={userProfile}
+          showModalMessage={showModalMessage}
         />
       } />
 
