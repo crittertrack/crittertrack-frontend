@@ -2244,7 +2244,13 @@ const App = () => {
                                 setEnlargedImageUrl={setEnlargedImageUrl}
                                 onUpdateAnimal={handleAnimalFieldUpdate}
                                 showModalMessage={showModalMessage}
-                                onTransfer={(animal) => { setTransferAnimal(animal); setShowTransferModal(true); }}
+                                onTransfer={(animal) => {
+                                    setTransferAnimal(animal);
+                                    setPreSelectedTransferAnimal(animal);
+                                    setPreSelectedTransactionType('animal-sale');
+                                    setShowTransferModal(false);
+                                    navigate('/budget');
+                                }}
                                 onViewAnimal={handleViewAnimal}
                                 onViewPublicAnimal={handleViewPublicAnimal}
                                 onToggleOwned={handleToggleAnimalOwned}
