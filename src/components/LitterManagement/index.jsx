@@ -215,7 +215,7 @@ const getPrototypePhenotypeInterpretation = (selectedTraits) => {
         'dom-red':      ['brindle', 'red', 'fawn', 'amber'],
         'dom-fawn':     ['fawn'],
         'dom-amber':    ['amber'],
-        'astrex':       ['astrex', 'texel'],
+        'astrex':       ['astrex'],
         'texel':        ['texel'],
         'mock-choc':    ['mock chocolate'],
         'colorpoint-beige': ['colorpoint'],
@@ -237,6 +237,12 @@ const getPrototypePhenotypeInterpretation = (selectedTraits) => {
     const phenoLower = basePheno ? basePheno.toLowerCase() : '';
     const missingModifiers = selectedModifierChips
         .filter(c => {
+            if ((c.id === 'longhair' || c.id === 'astrex')
+                && selectedTraits.includes('longhair')
+                && selectedTraits.includes('astrex')
+                && phenoLower.includes('texel')) {
+                return false;
+            }
             const keywords = CHIP_EXPRESSED_AS[c.id] || [c.label.toLowerCase()];
             return !keywords.some(kw => phenoLower.includes(kw));
         })
@@ -1343,6 +1349,51 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         setTpGenerating(true);
 
         const speciesForPairs = TARGET_OUTCOME_PROTOTYPE_SPECIES;
+        const parseGeneticCodeTokens = (animal) => {
+            if (!animal?.geneticCode) return [];
+            return animal.geneticCode
+                .replace(/,/g, ' ')
+                .replace(/\t/g, ' ')
+                .trim()
+                .split(/\s+/)
+                .filter(Boolean);
+        };
+        const shouldExcludeAstrexForLonghair = tpSelectedTraits.includes('longhair')
+            && !tpSelectedTraits.includes('astrex')
+            && !tpSelectedTraits.includes('texel');
+        const shouldExcludeLonghairForAstrex = tpSelectedTraits.includes('astrex')
+            && !tpSelectedTraits.includes('longhair')
+            && !tpSelectedTraits.includes('texel');
+        const animalHasAstrexEvidence = (animal) => {
+            if (!animal) return false;
+            for (const token of parseGeneticCodeTokens(animal)) {
+                const slash = token.indexOf('/');
+                if (slash < 0) continue;
+                const left = token.slice(0, slash).trim();
+                const right = token.slice(slash + 1).trim();
+                if (left === 'Re' || right === 'Re') return true;
+            }
+            const text = [animal.color, animal.phenotype, animal.coatPattern, animal.coat, animal.markings, animal.morph]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
+            return ['astrex', 'texel', 'rex'].some(keyword => text.includes(keyword));
+        };
+        const animalHasLonghairEvidence = (animal) => {
+            if (!animal) return false;
+            for (const token of parseGeneticCodeTokens(animal)) {
+                const slash = token.indexOf('/');
+                if (slash < 0) continue;
+                const left = token.slice(0, slash).trim();
+                const right = token.slice(slash + 1).trim();
+                if (left === 'go' && right === 'go') return true;
+            }
+            const text = [animal.color, animal.phenotype, animal.coatPattern, animal.coat, animal.markings, animal.morph]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
+            return ['longhair', 'angora', 'texel'].some(keyword => text.includes(keyword));
+        };
         const malePool = myAnimals.filter(a =>
             (a.species?.toLowerCase() === speciesForPairs.toLowerCase()) &&
             ['Male', 'Intersex', 'Unknown'].includes(a.gender) &&
@@ -1350,6 +1401,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             a.isOwned === true &&
             !a.isViewOnly &&
             !a.isTransferred &&
+            !(shouldExcludeAstrexForLonghair && animalHasAstrexEvidence(a)) &&
+            !(shouldExcludeLonghairForAstrex && animalHasLonghairEvidence(a)) &&
             !!a.geneticCode
         );
         const femalePool = myAnimals.filter(a =>
@@ -1360,6 +1413,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             !a.isViewOnly &&
             !a.isTransferred &&
             !!a.geneticCode &&
+            !(shouldExcludeAstrexForLonghair && animalHasAstrexEvidence(a)) &&
+            !(shouldExcludeLonghairForAstrex && animalHasLonghairEvidence(a)) &&
             !(tpHideActiveFemales && (a.isInMating || a.isPregnant || a.isNursing || a.status === 'Retired'))
         );
 
