@@ -1346,6 +1346,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             (a.species?.toLowerCase() === speciesForPairs.toLowerCase()) &&
             ['Male', 'Intersex', 'Unknown'].includes(a.gender) &&
             a.status !== 'Deceased' &&
+            a.isOwned === true &&
             !a.isViewOnly &&
             !a.isTransferred &&
             !!a.geneticCode
@@ -1354,6 +1355,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             (a.species?.toLowerCase() === speciesForPairs.toLowerCase()) &&
             ['Female', 'Intersex', 'Unknown'].includes(a.gender) &&
             a.status !== 'Deceased' &&
+            a.isOwned === true &&
             !a.isViewOnly &&
             !a.isTransferred &&
             !!a.geneticCode

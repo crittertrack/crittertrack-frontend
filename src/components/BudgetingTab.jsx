@@ -309,7 +309,33 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                     transactionData,
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
-                showModalMessage('Success', 'Transaction added successfully');
+
+                const isTransferModeSubmission =
+                    transactionData.mode === 'transfer' &&
+                    (transactionData.type === 'sale' || transactionData.type === 'purchase') &&
+                    !!selectedUser;
+
+                if (isTransferModeSubmission) {
+                    const recipientName =
+                        selectedUser.breederName ||
+                        selectedUser.personalName ||
+                        selectedUser.id_public ||
+                        'selected user';
+
+                    if (transactionData.type === 'sale') {
+                        showModalMessage(
+                            'Transfer Offer Sent',
+                            `Transaction added and ${transactionData.animalName || 'the animal'} was offered for transfer to ${recipientName}.`
+                        );
+                    } else {
+                        showModalMessage(
+                            'Seller Notified',
+                            `Transaction added and ${recipientName} was notified about this purchase transfer.`
+                        );
+                    }
+                } else {
+                    showModalMessage('Success', 'Transaction added successfully');
+                }
             }
 
             console.log('API call successful');
