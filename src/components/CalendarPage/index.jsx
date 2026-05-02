@@ -396,58 +396,62 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                     </div>
                 </div>
 
-                {/* Day-of-week headers */}
-                <div className="grid grid-cols-7 border-b-2 border-gray-300 bg-gray-50">
-                    {dayNames.map((d, i) => (
-                        <div key={d} className={`py-2 text-center text-xs font-bold uppercase tracking-wide ${isWeekendCol[i] ? 'text-rose-400' : 'text-gray-500'}`}>{d}</div>
-                    ))}
-                </div>
-
-                {/* Day Cells */}
-                <div className="relative">
-                    {loading && (
-                        <div className="absolute inset-0 z-10 bg-white/70 backdrop-blur-[2px] flex flex-col items-center justify-center gap-3 rounded-b-xl">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                            <span className="text-sm text-gray-500 font-medium">Loading events…</span>
+                <div className="overflow-x-auto">
+                    <div className="min-w-[42rem]">
+                        {/* Day-of-week headers */}
+                        <div className="grid grid-cols-7 border-b-2 border-gray-300 bg-gray-50">
+                            {dayNames.map((d, i) => (
+                                <div key={d} className={`py-2 text-center text-xs font-bold uppercase tracking-wide ${isWeekendCol[i] ? 'text-rose-400' : 'text-gray-500'}`}>{d}</div>
+                            ))}
                         </div>
-                    )}
-                <div className="grid grid-cols-7 divide-x divide-y divide-gray-300">
-                    {cells.map((day, idx) => {
-                        const colIdx = idx % 7;
-                        const isWeekend = isWeekendCol[colIdx];
-                        if (day === null) return <div key={`blank-${idx}`} className={`min-h-[96px] ${isWeekend ? 'bg-rose-50/40' : 'bg-gray-50/60'}`} />;
-                        const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-                        const events = eventMap[dateKey] || [];
-                        const isToday = dateKey === todayStr;
-                        return (
-                            <div key={dateKey} className={`min-h-[96px] p-1.5 overflow-hidden ${isToday ? 'bg-blue-50' : isWeekend ? 'bg-rose-50/30 hover:bg-rose-50/60' : 'hover:bg-gray-50/80'}`}>
-                                <span className={`inline-flex items-center justify-center w-6 h-6 text-sm rounded-full font-medium ${isToday ? 'bg-primary text-black ring-2 ring-primary/40 font-bold' : 'text-gray-700'}`}>
-                                    {day}
-                                </span>
-                                <div className="mt-0.5 space-y-0.5">
-                                    {events.map((ev, i) => {
-                                        const st = (ev.type === 'due' && ev.litter?.birthDate)
-                                            ? { ...typeStyles.due, bg: 'bg-gray-100 hover:bg-gray-200 text-gray-500 border border-gray-300', label: 'Due (Born)' }
-                                            : (typeStyles[ev.type] || typeStyles.born);
-                                        return (
-                                            <button
-                                                key={i}
-                                                onClick={() => setCalendarTooltip(t => (t?.key === `${dateKey}-${i}`) ? null : { key: `${dateKey}-${i}`, litter: ev.litter, animal: ev.animal, type: ev.type })}
-                                                className={`w-full text-left px-1.5 py-1 rounded text-[11px] leading-tight font-medium overflow-hidden transition-colors ${st.bg}`}
-                                                title={ev.animal ? `${st.label}: ${getAnimalDisplayName(ev.animal)}` : `${st.label}: ${getLitterName(ev.litter)} (${getSireDam(ev.litter)})`}
-                                            >
-                                                <span className="flex items-start gap-1 min-w-0 w-full">
-                                                    {getEventIcon(ev.type, 11, 'mt-[1px] flex-shrink-0')}
-                                                    <span className="min-w-0 overflow-hidden"><PillLabel ev={ev} /></span>
-                                                </span>
-                                            </button>
-                                        );
-                                    })}
+
+                        {/* Day Cells */}
+                        <div className="relative">
+                            {loading && (
+                                <div className="absolute inset-0 z-10 bg-white/70 backdrop-blur-[2px] flex flex-col items-center justify-center gap-3 rounded-b-xl">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                                    <span className="text-sm text-gray-500 font-medium">Loading events…</span>
                                 </div>
+                            )}
+                            <div className="grid grid-cols-7 divide-x divide-y divide-gray-300">
+                                {cells.map((day, idx) => {
+                                    const colIdx = idx % 7;
+                                    const isWeekend = isWeekendCol[colIdx];
+                                    if (day === null) return <div key={`blank-${idx}`} className={`min-h-[96px] ${isWeekend ? 'bg-rose-50/40' : 'bg-gray-50/60'}`} />;
+                                    const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                                    const events = eventMap[dateKey] || [];
+                                    const isToday = dateKey === todayStr;
+                                    return (
+                                        <div key={dateKey} className={`min-h-[96px] p-1.5 overflow-hidden ${isToday ? 'bg-blue-50' : isWeekend ? 'bg-rose-50/30 hover:bg-rose-50/60' : 'hover:bg-gray-50/80'}`}>
+                                            <span className={`inline-flex items-center justify-center w-6 h-6 text-sm rounded-full font-medium ${isToday ? 'bg-primary text-black ring-2 ring-primary/40 font-bold' : 'text-gray-700'}`}>
+                                                {day}
+                                            </span>
+                                            <div className="mt-0.5 space-y-0.5">
+                                                {events.map((ev, i) => {
+                                                    const st = (ev.type === 'due' && ev.litter?.birthDate)
+                                                        ? { ...typeStyles.due, bg: 'bg-gray-100 hover:bg-gray-200 text-gray-500 border border-gray-300', label: 'Due (Born)' }
+                                                        : (typeStyles[ev.type] || typeStyles.born);
+                                                    return (
+                                                        <button
+                                                            key={i}
+                                                            onClick={() => setCalendarTooltip(t => (t?.key === `${dateKey}-${i}`) ? null : { key: `${dateKey}-${i}`, litter: ev.litter, animal: ev.animal, type: ev.type })}
+                                                            className={`w-full text-left px-1.5 py-1 rounded text-[11px] leading-tight font-medium overflow-hidden transition-colors ${st.bg}`}
+                                                            title={ev.animal ? `${st.label}: ${getAnimalDisplayName(ev.animal)}` : `${st.label}: ${getLitterName(ev.litter)} (${getSireDam(ev.litter)})`}
+                                                        >
+                                                            <span className="flex items-start gap-1 min-w-0 w-full">
+                                                                {getEventIcon(ev.type, 11, 'mt-[1px] flex-shrink-0')}
+                                                                <span className="min-w-0 overflow-hidden"><PillLabel ev={ev} /></span>
+                                                            </span>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
-                        );
-                    })}
-                </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Selected event detail */}
