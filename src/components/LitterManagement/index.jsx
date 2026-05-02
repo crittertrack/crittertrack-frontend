@@ -1352,7 +1352,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             !a.isTransferred &&
             !!a.geneticCode
         );
-        const ACTIVE_FEMALE_STATUSES = ['Mating', 'Pregnant', 'Nursing'];
+        const ACTIVE_FEMALE_STATUSES = ['Mating', 'Pregnant', 'Nursing', 'Retired'];
         const femalePool = myAnimals.filter(a =>
             (a.species?.toLowerCase() === speciesForPairs.toLowerCase()) &&
             ['Female', 'Intersex', 'Unknown'].includes(a.gender) &&
@@ -5813,7 +5813,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 onClick={() => setTpHideActiveFemales(v => !v)}
                                                 className={`px-3 py-1.5 text-sm rounded-lg border transition ${tpHideActiveFemales ? 'bg-primary text-black border-primary' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
                                             >
-                                                Hide Mating / Pregnant / Nursing
+                                                Hide Mating / Pregnant / Nursing / Retired
                                             </button>
                                         </div>
                                     </div>
