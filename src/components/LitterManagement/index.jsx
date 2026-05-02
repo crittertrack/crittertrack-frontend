@@ -1253,6 +1253,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [tpHasRun, setTpHasRun] = useState(false);
     const [tpExpandedCard, setTpExpandedCard] = useState(null); // key = `${sireId}:${damId}:${idx}`
     const [tpShowResultsHelp, setTpShowResultsHelp] = useState(false);
+    const [tpHideActiveFemales, setTpHideActiveFemales] = useState(false);
     const handleCalculateTestPairing = async () => {
         if (!tpSireId || !tpDamId) return;
         const cacheKey = `${tpSireId}:${tpDamId}`;
@@ -1351,6 +1352,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             !a.isTransferred &&
             !!a.geneticCode
         );
+        const ACTIVE_FEMALE_STATUSES = ['Mating', 'Pregnant', 'Nursing'];
         const femalePool = myAnimals.filter(a =>
             (a.species?.toLowerCase() === speciesForPairs.toLowerCase()) &&
             ['Female', 'Intersex', 'Unknown'].includes(a.gender) &&
@@ -1358,7 +1360,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             a.isOwned === true &&
             !a.isViewOnly &&
             !a.isTransferred &&
-            !!a.geneticCode
+            !!a.geneticCode &&
+            !(tpHideActiveFemales && ACTIVE_FEMALE_STATUSES.includes(a.status))
         );
 
         const selectedSire = tpSireId ? (myAnimals.find(a => a.id_public === tpSireId) || selectedTpSireAnimal) : null;
@@ -5802,6 +5805,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <div className="px-3 py-1.5 border border-gray-200 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 whitespace-nowrap">
                                                 {TARGET_OUTCOME_PROTOTYPE_SPECIES}
                                             </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Female Filter</label>
+                                            <button
+                                                type="button"
+                                                onClick={() => setTpHideActiveFemales(v => !v)}
+                                                className={`px-3 py-1.5 text-sm rounded-lg border transition ${tpHideActiveFemales ? 'bg-primary text-black border-primary' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                                            >
+                                                Hide Mating / Pregnant / Nursing
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
