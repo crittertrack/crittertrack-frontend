@@ -840,7 +840,9 @@ const AnimalList = ({
                 const idPublic = (a.id_public || '').toString().toLowerCase();
                 const tags = (a.tags || []).map(t => t.toLowerCase());
                 const tagsMatch = tags.some(tag => tag.includes(term));
-                return name.includes(term) || registry.includes(term) || idPublic.includes(term.replace(/^ct-?/,'').toLowerCase()) || tagsMatch;
+                const variety = [a.color, a.phenotype, a.variety, a.coatPattern, a.coat, a.markings, a.morph]
+                    .filter(Boolean).join(' ').toLowerCase();
+                return name.includes(term) || registry.includes(term) || idPublic.includes(term.replace(/^ct-?/,'').toLowerCase()) || tagsMatch || variety.includes(term);
             });
         }
 
