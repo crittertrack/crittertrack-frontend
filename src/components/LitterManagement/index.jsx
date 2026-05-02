@@ -1352,7 +1352,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             !a.isTransferred &&
             !!a.geneticCode
         );
-        const ACTIVE_FEMALE_STATUSES = ['Mating', 'Pregnant', 'Nursing', 'Retired'];
         const femalePool = myAnimals.filter(a =>
             (a.species?.toLowerCase() === speciesForPairs.toLowerCase()) &&
             ['Female', 'Intersex', 'Unknown'].includes(a.gender) &&
@@ -1361,7 +1360,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             !a.isViewOnly &&
             !a.isTransferred &&
             !!a.geneticCode &&
-            !(tpHideActiveFemales && ACTIVE_FEMALE_STATUSES.includes(a.status))
+            !(tpHideActiveFemales && (a.isInMating || a.isPregnant || a.isNursing || a.status === 'Retired'))
         );
 
         const selectedSire = tpSireId ? (myAnimals.find(a => a.id_public === tpSireId) || selectedTpSireAnimal) : null;
