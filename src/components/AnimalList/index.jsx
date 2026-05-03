@@ -270,6 +270,28 @@ const AnimalList = ({
     }, [userProfile?.uiPreferences?.defaultAnimalView]);
     const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({ enclosures: true }); // { sectionKey: bool }
     const [collapsedMgmtGroups, setCollapsedMgmtGroups] = useState({}); // { groupKey: bool }
+    const [showUnownedInEnclosures, setShowUnownedInEnclosures] = useState(true);
+    const [showBookedInEnclosures, setShowBookedInEnclosures] = useState(true);
+    const [showRehomedInEnclosures, setShowRehomedInEnclosures] = useState(false);
+    useEffect(() => {
+        const prefs = userProfile?.uiPreferences || {};
+        setShowUnownedInEnclosures(prefs.enclosureShowUnowned !== false);
+        setShowBookedInEnclosures(prefs.enclosureShowBooked !== false);
+        setShowRehomedInEnclosures(prefs.enclosureShowRehomed === true);
+    }, [
+        userProfile?.uiPreferences?.enclosureShowUnowned,
+        userProfile?.uiPreferences?.enclosureShowBooked,
+        userProfile?.uiPreferences?.enclosureShowRehomed,
+    ]);
+    const saveEnclosurePreference = useCallback((key, value) => {
+        const safeBool = !!value;
+        if (key === 'enclosureShowUnowned') setShowUnownedInEnclosures(safeBool);
+        if (key === 'enclosureShowBooked') setShowBookedInEnclosures(safeBool);
+        if (key === 'enclosureShowRehomed') setShowRehomedInEnclosures(safeBool);
+        if (!authToken) return;
+        axios.patch(`${API_BASE_URL}/users/preferences`, { [key]: safeBool }, { headers: { Authorization: `Bearer ${authToken}` } })
+            .catch(err => console.warn('[prefs enclosure filters]', err));
+    }, [authToken]);
     // Undo state for cage-clean / maintenance "Done" actions
     // { type: 'maint'|'encTask'|'animalTask', key: string, prevValue: any, timer: TimeoutId }
     const [mgmtUndoState, setMgmtUndoState] = useState(null);
@@ -2869,10 +2891,19 @@ const AnimalList = ({
         const allAnimals = allAnimalsRaw.filter(
             a => a.status !== 'Deceased' && a.status !== 'Rehomed' && !a.isViewOnly
         );
+        // Enclosures can have their own visibility rules so users can control
+        // whether unowned/booked/rehomed animals appear and can be assigned.
+        const enclosureAnimals = allAnimalsRaw.filter(a => {
+            if (a.status === 'Deceased' || a.isViewOnly) return false;
+            if (!showRehomedInEnclosures && a.status === 'Rehomed') return false;
+            if (!showBookedInEnclosures && a.status === 'Booked') return false;
+            if (!showUnownedInEnclosures && a.isOwned === false) return false;
+            return true;
+        });
         // 1. Enclosures ? grouped by named enclosure (enclosureId)
         const enclosureAnimalMap = {}; // { enclosureId: [animals] }
         const unassignedAnimals = [];
-        allAnimals.forEach(a => {
+        enclosureAnimals.forEach(a => {
             if (a.enclosureId) {
                 if (!enclosureAnimalMap[a.enclosureId]) enclosureAnimalMap[a.enclosureId] = [];
                 enclosureAnimalMap[a.enclosureId].push(a);
@@ -3164,6 +3195,36 @@ const AnimalList = ({
 
                     {!collapsedMgmtSections['enclosures'] && (
                         <div className="p-3 space-y-2">
+                            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-blue-100 bg-blue-50/40 px-2 py-2">
+                                <span className="text-xs font-medium text-blue-700">Show in Enclosures:</span>
+                                <label className="inline-flex items-center gap-1 text-xs text-gray-700">
+                                    <input
+                                        type="checkbox"
+                                        checked={showUnownedInEnclosures}
+                                        onChange={(e) => saveEnclosurePreference('enclosureShowUnowned', e.target.checked)}
+                                        className="rounded border-gray-300"
+                                    />
+                                    Unowned
+                                </label>
+                                <label className="inline-flex items-center gap-1 text-xs text-gray-700">
+                                    <input
+                                        type="checkbox"
+                                        checked={showBookedInEnclosures}
+                                        onChange={(e) => saveEnclosurePreference('enclosureShowBooked', e.target.checked)}
+                                        className="rounded border-gray-300"
+                                    />
+                                    Booked
+                                </label>
+                                <label className="inline-flex items-center gap-1 text-xs text-gray-700">
+                                    <input
+                                        type="checkbox"
+                                        checked={showRehomedInEnclosures}
+                                        onChange={(e) => saveEnclosurePreference('enclosureShowRehomed', e.target.checked)}
+                                        className="rounded border-gray-300"
+                                    />
+                                    Rehomed
+                                </label>
+                            </div>
                             {enclosures.length === 0 && unassignedAnimals.length === 0 ? (
                                 <div className="text-sm text-gray-400 text-center py-4">No enclosures yet. Click Add to create your first enclosure.</div>
                             ) : (
