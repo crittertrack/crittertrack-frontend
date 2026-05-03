@@ -271,21 +271,25 @@ const AnimalList = ({
     const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({ enclosures: true }); // { sectionKey: bool }
     const [collapsedMgmtGroups, setCollapsedMgmtGroups] = useState({}); // { groupKey: bool }
     const [showUnownedInEnclosures, setShowUnownedInEnclosures] = useState(true);
+    const [showAvailableInEnclosures, setShowAvailableInEnclosures] = useState(true);
     const [showBookedInEnclosures, setShowBookedInEnclosures] = useState(true);
     const [showRehomedInEnclosures, setShowRehomedInEnclosures] = useState(false);
     useEffect(() => {
         const prefs = userProfile?.uiPreferences || {};
         setShowUnownedInEnclosures(prefs.enclosureShowUnowned !== false);
+        setShowAvailableInEnclosures(prefs.enclosureShowAvailable !== false);
         setShowBookedInEnclosures(prefs.enclosureShowBooked !== false);
         setShowRehomedInEnclosures(prefs.enclosureShowRehomed === true);
     }, [
         userProfile?.uiPreferences?.enclosureShowUnowned,
+        userProfile?.uiPreferences?.enclosureShowAvailable,
         userProfile?.uiPreferences?.enclosureShowBooked,
         userProfile?.uiPreferences?.enclosureShowRehomed,
     ]);
     const saveEnclosurePreference = useCallback((key, value) => {
         const safeBool = !!value;
         if (key === 'enclosureShowUnowned') setShowUnownedInEnclosures(safeBool);
+        if (key === 'enclosureShowAvailable') setShowAvailableInEnclosures(safeBool);
         if (key === 'enclosureShowBooked') setShowBookedInEnclosures(safeBool);
         if (key === 'enclosureShowRehomed') setShowRehomedInEnclosures(safeBool);
         if (!authToken) return;
@@ -2896,6 +2900,7 @@ const AnimalList = ({
         const enclosureAnimals = allAnimalsRaw.filter(a => {
             if (a.status === 'Deceased' || a.isViewOnly) return false;
             if (!showRehomedInEnclosures && a.status === 'Rehomed') return false;
+            if (!showAvailableInEnclosures && a.status === 'Available') return false;
             if (!showBookedInEnclosures && a.status === 'Booked') return false;
             if (!showUnownedInEnclosures && a.isOwned === false) return false;
             return true;
@@ -3214,6 +3219,15 @@ const AnimalList = ({
                                         className="rounded border-gray-300"
                                     />
                                     Booked
+                                </label>
+                                <label className="inline-flex items-center gap-1 text-xs text-gray-700">
+                                    <input
+                                        type="checkbox"
+                                        checked={showAvailableInEnclosures}
+                                        onChange={(e) => saveEnclosurePreference('enclosureShowAvailable', e.target.checked)}
+                                        className="rounded border-gray-300"
+                                    />
+                                    Available
                                 </label>
                                 <label className="inline-flex items-center gap-1 text-xs text-gray-700">
                                     <input
