@@ -2968,7 +2968,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 headers: { Authorization: `Bearer ${authToken}` }
             });
 
-            // Update all linked offspring to have the correct parents
+            // Update all linked offspring to have the correct parents.
+            // Use allSettled so that offspring the user no longer owns (transferred/sold)
+            // don't abort the litter save — those animals are skipped silently.
             const linkedOffspringIds = formData.linkedOffspringIds || [];
             if (linkedOffspringIds.length > 0) {
                 const parentPatch = { sireId_public: formData.sireId_public || null, damId_public: formData.damId_public || null };
@@ -2976,8 +2978,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     axios.put(`${API_BASE_URL}/animals/${offspringId}`, parentPatch, {
                         headers: { Authorization: `Bearer ${authToken}` }
                     }).then(() => window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: offspringId, ...parentPatch } })))
+                      .catch(err => console.warn(`[updateLitter] Could not update parent links for offspring ${offspringId} (may no longer be owned):`, err?.response?.data?.message || err?.message))
                 );
-                await Promise.all(updateOffspringPromises);
+                await Promise.allSettled(updateOffspringPromises);
             }
 
             showModalMessage('Success', 'Litter updated successfully!');

@@ -270,6 +270,17 @@ const AnimalList = ({
     }, [userProfile?.uiPreferences?.defaultAnimalView]);
     const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({ enclosures: true }); // { sectionKey: bool }
     const [collapsedMgmtGroups, setCollapsedMgmtGroups] = useState({}); // { groupKey: bool }
+    // Undo state for cage-clean / maintenance "Done" actions
+    // { type: 'maint'|'encTask'|'animalTask', key: string, prevValue: any, timer: TimeoutId }
+    const [mgmtUndoState, setMgmtUndoState] = useState(null);
+    const mgmtUndoStateRef = useRef(null);
+    mgmtUndoStateRef.current = mgmtUndoState;
+    const setMgmtUndo = useCallback((undoObj) => {
+        if (mgmtUndoStateRef.current?.timer) clearTimeout(mgmtUndoStateRef.current.timer);
+        if (!undoObj) { setMgmtUndoState(null); return; }
+        const timer = setTimeout(() => setMgmtUndoState(null), 8000);
+        setMgmtUndoState({ ...undoObj, timer });
+    }, []);
     const [mgmtAlertsEnabled, setMgmtAlertsEnabled] = useState(() => {
         try { return localStorage.getItem('ct_mgmt_urgency_enabled') !== 'false'; } catch { return true; }
     });
@@ -2824,8 +2835,22 @@ const AnimalList = ({
         const handleMarkMaintDone = (e, animal) => {
             e.stopPropagation();
             const now = new Date().toISOString();
+            const prevValue = animal.lastMaintenanceDate ?? null;
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastMaintenanceDate: now } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, lastMaintenanceDate: now } }));
+            setMgmtUndo({
+                type: 'maint',
+                key: `maint-${animal.id_public}`,
+                prevValue,
+                restore: () => {
+                    setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastMaintenanceDate: prevValue } : a));
+                    window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, lastMaintenanceDate: prevValue } }));
+                    axios.put(`${API_BASE_URL}/animals/${animal.id_public}`,
+                        { lastMaintenanceDate: prevValue },
+                        { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                        .catch(err => { console.error('Undo maintenance failed:', err); fetchAllAnimals(); });
+                },
+            });
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`,
                 { lastMaintenanceDate: now },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
@@ -2914,10 +2939,28 @@ const AnimalList = ({
 
         const handleMarkEnclosureTaskDone = async (e, enc, taskIdx) => {
             e.stopPropagation();
-            const updated = [...(enc.cleaningTasks || [])];
+            const prevTasks = [...(enc.cleaningTasks || [])];
+            const prevValue = prevTasks[taskIdx]?.lastDoneDate ?? null;
+            const updated = [...prevTasks];
             updated[taskIdx] = { ...updated[taskIdx], lastDoneDate: new Date().toISOString() };
             // Optimistic update
             setEnclosures(prev => prev.map(ex => ex._id === enc._id ? { ...ex, cleaningTasks: updated } : ex));
+            setMgmtUndo({
+                type: 'encTask',
+                key: `${enc._id}-${taskIdx}`,
+                encId: enc._id,
+                taskIdx,
+                prevValue,
+                restore: () => {
+                    const restored = [...updated];
+                    restored[taskIdx] = { ...restored[taskIdx], lastDoneDate: prevValue };
+                    setEnclosures(prev => prev.map(ex => ex._id === enc._id ? { ...ex, cleaningTasks: restored } : ex));
+                    axios.put(`${API_BASE_URL}/enclosures/${enc._id}`,
+                        { name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: restored },
+                        { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                        .catch(err => { console.error('Undo enclosure task failed:', err); fetchEnclosures(); });
+                },
+            });
             axios.put(`${API_BASE_URL}/enclosures/${enc._id}`,
                 { name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: updated },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
@@ -2942,11 +2985,27 @@ const AnimalList = ({
         const handleMarkAnimalCareTaskDone = (e, animal, taskIdx, taskType = 'enclosure') => {
             e.stopPropagation();
             const fieldName = taskType === 'animal' ? 'animalCareTasks' : 'careTasks';
-            const updated = [...(animal[fieldName] || [])];
+            const prevTasks = [...(animal[fieldName] || [])];
+            const prevValue = prevTasks[taskIdx]?.lastDoneDate ?? null;
+            const updated = [...prevTasks];
             updated[taskIdx] = { ...updated[taskIdx], lastDoneDate: new Date().toISOString() };
             // Optimistic update
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: updated } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: updated } }));
+            setMgmtUndo({
+                type: 'animalTask',
+                key: `${animal.id_public}-${fieldName}-${taskIdx}`,
+                prevValue,
+                restore: () => {
+                    const restored = [...updated];
+                    restored[taskIdx] = { ...restored[taskIdx], lastDoneDate: prevValue };
+                    setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: restored } : a));
+                    window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: restored } }));
+                    axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: restored },
+                        { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                        .catch(err => { console.error('Undo animal care task failed:', err); fetchAllAnimals(); });
+                },
+            });
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: updated },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
                 .then(() => logManagementActivity('care_task_done', animal.id_public, { name: animal.name, taskName: updated[taskIdx]?.taskName || 'Care task' }))
@@ -3524,6 +3583,12 @@ const AnimalList = ({
                                                                     className={`text-xs px-2 py-0.5 rounded font-medium border flex items-center gap-0.5 ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
                                                                     <Check size={10} /> Done
                                                                 </button>
+                                                                {mgmtUndoState?.key === `${a.id_public}-animalCareTasks-${idx}` && (
+                                                                    <button onClick={(e) => { e.stopPropagation(); mgmtUndoState.restore(); setMgmtUndo(null); }}
+                                                                        className="text-xs px-2 py-0.5 rounded font-medium border bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200 flex items-center gap-0.5">
+                                                                        ↩ Undo
+                                                                    </button>
+                                                                )}
                                                                 <button onClick={(e) => handleSkipAnimalCareTask(e, a, idx, 'animal')}
                                                                     className="text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200 flex items-center gap-0.5">
                                                                     <ChevronRight size={10} /> Skip
@@ -3587,10 +3652,16 @@ const AnimalList = ({
                                                                 {a.lastMaintenanceDate
                                                                     ? <span className="flex items-center gap-0.5 text-green-600"><Check size={10} /> Last: {formatDateShort(a.lastMaintenanceDate)}</span>
                                                                     : <span className="flex items-center gap-0.5 text-orange-500"><X size={10} /> Never done</span>}
-                                                                <button onClick={(e) => { e.stopPropagation(); const today = new Date().toISOString().split('T')[0]; setAllAnimalsRaw(prev => prev.map(x => x.id_public === a.id_public ? { ...x, lastMaintenanceDate: today } : x)); axios.put(`${API_BASE_URL}/animals/${a.id_public}`, { lastMaintenanceDate: today }, { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } }).catch(err => { console.error('Mark maintenance done failed:', err); fetchAllAnimals(); }); }}
+                                                                <button onClick={(e) => handleMarkMaintDone(e, a)}
                                                                     className={`text-xs px-2 py-0.5 rounded font-medium border flex items-center gap-0.5 ${maintDue ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
                                                                     <Check size={10} /> Done
                                                                 </button>
+                                                                {mgmtUndoState?.key === `maint-${a.id_public}` && (
+                                                                    <button onClick={(e) => { e.stopPropagation(); mgmtUndoState.restore(); setMgmtUndo(null); }}
+                                                                        className="text-xs px-2 py-0.5 rounded font-medium border bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200 flex items-center gap-0.5">
+                                                                        ↩ Undo
+                                                                    </button>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     )}
@@ -3615,6 +3686,12 @@ const AnimalList = ({
                                                                         className={`text-xs px-2 py-0.5 rounded font-medium border flex items-center gap-0.5 ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
                                                                         <Check size={10} /> Done
                                                                     </button>
+                                                                    {mgmtUndoState?.key === `${a.id_public}-careTasks-${idx}` && (
+                                                                        <button onClick={(e) => { e.stopPropagation(); mgmtUndoState.restore(); setMgmtUndo(null); }}
+                                                                            className="text-xs px-2 py-0.5 rounded font-medium border bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200 flex items-center gap-0.5">
+                                                                            ↩ Undo
+                                                                        </button>
+                                                                    )}
                                                                     <button onClick={(e) => handleSkipAnimalCareTask(e, a, idx, 'enclosure')}
                                                                         className="text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200 flex items-center gap-0.5">
                                                                         <ChevronRight size={10} /> Skip
@@ -3669,6 +3746,12 @@ const AnimalList = ({
                                                                         className={`ml-1 text-xs px-2 py-0.5 rounded font-medium border flex items-center gap-0.5 ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
                                                                         <Check size={10} /> Done
                                                                     </button>
+                                                                    {mgmtUndoState?.key === `${enc._id}-${idx}` && (
+                                                                        <button onClick={(e) => { e.stopPropagation(); mgmtUndoState.restore(); setMgmtUndo(null); }}
+                                                                            className="ml-1 text-xs px-2 py-0.5 rounded font-medium border bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200 flex items-center gap-0.5">
+                                                                            ↩ Undo
+                                                                        </button>
+                                                                    )}
                                                                     <button onClick={(e) => handleSkipEnclosureTask(e, enc, idx)}
                                                                         className="ml-1 text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200 flex items-center gap-0.5">
                                                                         <ChevronRight size={10} /> Skip
