@@ -2898,11 +2898,18 @@ const AnimalList = ({
         // Enclosures can have their own visibility rules so users can control
         // whether unowned/booked/rehomed animals appear and can be assigned.
         const enclosureAnimals = allAnimalsRaw.filter(a => {
-            if (a.status === 'Deceased' || a.isViewOnly) return false;
-            if (!showRehomedInEnclosures && a.status === 'Rehomed') return false;
-            if (!showAvailableInEnclosures && a.status === 'Available') return false;
-            if (!showBookedInEnclosures && a.status === 'Booked') return false;
-            if (!showUnownedInEnclosures && a.isOwned === false) return false;
+            const status = String(a.status || '').trim().toLowerCase();
+            const soldStatus = String(a.soldStatus || '').trim().toLowerCase();
+            const isOwned = typeof a.isOwned === 'string'
+                ? a.isOwned.toLowerCase() === 'true'
+                : !!a.isOwned;
+            const isBooked = status === 'booked' || soldStatus === 'booked';
+
+            if (status === 'deceased' || a.isViewOnly) return false;
+            if (!showRehomedInEnclosures && status === 'rehomed') return false;
+            if (!showAvailableInEnclosures && status === 'available') return false;
+            if (!showBookedInEnclosures && isBooked) return false;
+            if (!showUnownedInEnclosures && !isOwned) return false;
             return true;
         });
         // 1. Enclosures ? grouped by named enclosure (enclosureId)
