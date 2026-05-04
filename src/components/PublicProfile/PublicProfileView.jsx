@@ -1172,6 +1172,13 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         return new Date(l.birthDate).getFullYear().toString() === litterYearFilter;
                     });
                 }
+                // Sort by birthDate newest first
+                born = born.sort((a, b) => {
+                    if (!a.birthDate && !b.birthDate) return 0;
+                    if (!a.birthDate) return 1;
+                    if (!b.birthDate) return -1;
+                    return new Date(b.birthDate) - new Date(a.birthDate);
+                });
                 const ParentMiniCard = ({ role, animal }) => {
                     if (!animal) return null;
                     const imgUrl = animal.imageUrl || animal.photoUrl || null;

@@ -14,7 +14,7 @@ import {
     Shield, Microscope, Pill, Stethoscope, UtensilsCrossed, Droplets, Thermometer, Scissors, MessageSquare,
     Activity, AlertTriangle, Medal, Target, Key, Ban, Check, RefreshCw, Leaf, ArrowRight, Hourglass,
     Users, FolderOpen, Globe, Sparkles, Sprout, Ruler, Feather, Download, Loader2, Camera, Network,
-    TableOfContents, BookOpen, RotateCcw, ArrowLeftRight, Hash, User
+    TableOfContents, BookOpen, RotateCcw, ArrowLeftRight, Hash, User, Bell
 } from 'lucide-react';
 
 // Utilities
@@ -2352,13 +2352,37 @@ const PrivateAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, onEdit, 
                         </div>
                     )}
 
-                    {/* Tab 11: Notes */}
+                    {/* Tab 11: Notes & Milestones */}
                     {detailViewTab === 11 && (
                         <div className="space-y-6">
-                            {/* 1st Section: Notes */}
+                            {/* Notes */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700"><FileText size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Notes</h3>
                                 <strong className="block text-sm text-gray-700 whitespace-pre-wrap">{animal.remarks || ''}</strong>
+                            </div>
+
+                            {/* Milestones */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3">
+                                <h3 className="text-lg font-semibold text-gray-700"><Bell size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Milestones</h3>
+                                {(!animal.milestones || animal.milestones.length === 0) ? (
+                                    <p className="text-sm text-gray-400">No milestones recorded.</p>
+                                ) : (
+                                    <div className="space-y-2">
+                                        {animal.milestones.map((m, idx) => {
+                                            const d = m.startDate ? new Date(String(m.startDate).substring(0,10) + 'T00:00:00') : null;
+                                            const dateStr = d && !isNaN(d) ? d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : (m.startDate || '');
+                                            return (
+                                                <div key={idx} className="flex items-center gap-3 text-sm bg-white border border-gray-200 rounded px-3 py-2">
+                                                    <span className="flex-1 font-medium text-gray-800">{m.label}</span>
+                                                    <span className="text-xs text-gray-500">{dateStr}</span>
+                                                    {m.interval && m.intervalUnit && (
+                                                        <span className="text-xs text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">Every {m.interval} {m.intervalUnit}{m.interval > 1 ? 's' : ''}</span>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}                    {/* Tab 14: End of Life */}
