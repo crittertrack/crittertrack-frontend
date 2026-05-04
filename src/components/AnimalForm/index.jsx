@@ -2539,7 +2539,7 @@ const AnimalForm = ({
     const [newAnimalCareTaskFreq, setNewAnimalCareTaskFreq] = useState('');
     // Milestone add-entry states
     const [newMilestoneLabel, setNewMilestoneLabel] = useState('');
-    const [newMilestoneDate, setNewMilestoneDate] = useState('');
+    const [newMilestoneDate, setNewMilestoneDate] = useState(() => new Date().toISOString().split('T')[0]);
     const [newMilestoneInterval, setNewMilestoneInterval] = useState('');
     const [newMilestoneUnit, setNewMilestoneUnit] = useState('week');
     // Keeper History add-entry states
@@ -8040,7 +8040,7 @@ const AnimalForm = ({
                                             intervalUnit: newMilestoneInterval ? newMilestoneUnit : null,
                                         };
                                         setFormData(prev => ({ ...prev, milestones: [...(prev.milestones || []), entry] }));
-                                        setNewMilestoneLabel(''); setNewMilestoneDate(''); setNewMilestoneInterval(''); setNewMilestoneUnit('week');
+                                        setNewMilestoneLabel(''); setNewMilestoneDate(new Date().toISOString().split('T')[0]); setNewMilestoneInterval(''); setNewMilestoneUnit('week');
                                     }} className="ml-auto px-3 py-1.5 bg-primary text-black text-sm font-medium rounded-md hover:bg-primary/80 whitespace-nowrap flex-shrink-0">+ Add</button>
                                 </div>
                             </div>
