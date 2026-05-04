@@ -64,7 +64,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         maintenance: { bg: 'bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border border-yellow-400', dot: 'bg-yellow-400', label: 'Maintenance', Icon: Wrench },
         caretask:    { bg: 'bg-teal-100 hover:bg-teal-200 text-teal-800 border border-teal-300', dot: 'bg-teal-400', label: 'Care Task', Icon: HandCoins },
         supply:      { bg: 'bg-red-100 hover:bg-red-200 text-red-800 border border-red-300', dot: 'bg-red-400', label: 'Supply Order', Icon: Package },
-        milestone:   { bg: 'bg-violet-100 hover:bg-violet-200 text-violet-800 border border-violet-300', dot: 'bg-violet-400', label: 'Milestone', Icon: Bell },
+        milestone:   { bg: 'bg-lime-100 hover:bg-lime-200 text-lime-800 border border-lime-300', dot: 'bg-lime-400', label: 'Milestone', Icon: Bell },
     };
 
     const fmtD = (v) => {
