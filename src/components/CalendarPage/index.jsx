@@ -3,7 +3,7 @@ import axios from 'axios';
 import {
     Calendar, ChevronLeft, ChevronRight, Search, X,
     CalendarPlus, Hourglass, BellRing, Cake, Rainbow,
-    PartyPopper, UtensilsCrossed, Wrench, HandCoins, Package
+    PartyPopper, UtensilsCrossed, Wrench, HandCoins, Package, Bell
 } from 'lucide-react';
 
 const CalendarPage = ({ authToken, API_BASE_URL }) => {
@@ -13,7 +13,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
 
     const [calendarEventFilters, setCalendarEventFilters] = useState({
         planned: true, mated: true, due: true, born: true, weaned: true,
-        birthday: true, feeding: true, maintenance: true, caretask: true, supply: true,
+        birthday: true, feeding: true, maintenance: true, caretask: true, supply: true, milestone: true,
     });
 
     const [litters, setLitters] = useState([]);
@@ -64,6 +64,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         maintenance: { bg: 'bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border border-yellow-400', dot: 'bg-yellow-400', label: 'Maintenance', Icon: Wrench },
         caretask:    { bg: 'bg-teal-100 hover:bg-teal-200 text-teal-800 border border-teal-300', dot: 'bg-teal-400', label: 'Care Task', Icon: HandCoins },
         supply:      { bg: 'bg-red-100 hover:bg-red-200 text-red-800 border border-red-300', dot: 'bg-red-400', label: 'Supply Order', Icon: Package },
+        milestone:   { bg: 'bg-violet-100 hover:bg-violet-200 text-violet-800 border border-violet-300', dot: 'bg-violet-400', label: 'Milestone', Icon: Bell },
     };
 
     const fmtD = (v) => {
@@ -249,6 +250,69 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         });
     });
 
+    // Animal milestones
+    if (calendarEventFilters.milestone) {
+        animals.forEach(a => {
+            (a.milestones || []).forEach(m => {
+                if (!m.startDate || !m.label) return;
+                try {
+                    const start = new Date(String(m.startDate).substring(0, 10) + 'T00:00:00');
+                    if (isNaN(start.getTime())) return;
+                    const animalName = getAnimalDisplayName(a);
+                    if (m.interval && m.intervalUnit) {
+                        // Recurring: find occurrences that land in viewed month
+                        const intervalMs = (() => {
+                            const n = Number(m.interval);
+                            if (m.intervalUnit === 'day')   return n * 86400000;
+                            if (m.intervalUnit === 'week')  return n * 7 * 86400000;
+                            if (m.intervalUnit === 'month') return null; // handle separately
+                            if (m.intervalUnit === 'year')  return null; // handle separately
+                            return null;
+                        })();
+                        if (intervalMs) {
+                            // Fast path for day/week intervals
+                            const mStart = new Date(year, month, 1);
+                            const mEnd = new Date(year, month + 1, 0);
+                            let cur = new Date(start);
+                            // advance to first occurrence on or after start of month
+                            if (cur < mStart) {
+                                const steps = Math.ceil((mStart - cur) / intervalMs);
+                                cur = new Date(cur.getTime() + steps * intervalMs);
+                            }
+                            while (cur <= mEnd) {
+                                const k = `${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}-${String(cur.getDate()).padStart(2,'0')}`;
+                                if (!eventMap[k]) eventMap[k] = [];
+                                eventMap[k].push({ type: 'milestone', animal: { ...a, _calLabel: m.label, _calDetail: animalName, _milestoneInterval: m.interval, _milestoneUnit: m.intervalUnit } });
+                                cur = new Date(cur.getTime() + intervalMs);
+                            }
+                        } else {
+                            // Month/year intervals
+                            const n = Number(m.interval);
+                            let cur = new Date(start);
+                            while (cur.getFullYear() < year || (cur.getFullYear() === year && cur.getMonth() <= month)) {
+                                if (cur.getFullYear() === year && cur.getMonth() === month) {
+                                    const k = `${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}-${String(cur.getDate()).padStart(2,'0')}`;
+                                    if (!eventMap[k]) eventMap[k] = [];
+                                    eventMap[k].push({ type: 'milestone', animal: { ...a, _calLabel: m.label, _calDetail: animalName, _milestoneInterval: m.interval, _milestoneUnit: m.intervalUnit } });
+                                }
+                                const nextMonth = cur.getMonth() + (m.intervalUnit === 'year' ? n * 12 : n);
+                                cur = new Date(cur.getFullYear(), nextMonth, cur.getDate());
+                                if (cur.getFullYear() > year + 1) break; // safety guard
+                            }
+                        }
+                    } else {
+                        // One-time: only show in the exact month/year
+                        if (start.getFullYear() === year && start.getMonth() === month) {
+                            const k = `${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`;
+                            if (!eventMap[k]) eventMap[k] = [];
+                            eventMap[k].push({ type: 'milestone', animal: { ...a, _calLabel: m.label, _calDetail: animalName } });
+                        }
+                    }
+                } catch(e) {}
+            });
+        });
+    }
+
     const monthStart = new Date(year, month, 1);
     const monthEnd = new Date(year, month + 1, 0);
     const monthEventList = Object.entries(eventMap)
@@ -257,7 +321,7 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
         .sort((a, b) => {
             if (a.dateKey < b.dateKey) return -1;
             if (a.dateKey > b.dateKey) return 1;
-            const order = { planned: 0, mated: 1, due: 2, born: 3, weaned: 4, birthday: 5, feeding: 6, maintenance: 7, caretask: 8, supply: 9 };
+            const order = { planned: 0, mated: 1, due: 2, born: 3, weaned: 4, birthday: 5, feeding: 6, maintenance: 7, caretask: 8, supply: 9, milestone: 10 };
             return (order[a.type] ?? 99) - (order[b.type] ?? 99);
         });
 
@@ -297,6 +361,9 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                     ? `${a._calAmount}${a._calUnit ? ` ${a._calUnit}` : ''}`
                     : '';
                 return { prefix: 'Order:', bold: a._calLabel || 'Supply', rest: amount };
+            }
+            if (ev.type === 'milestone') {
+                return { prefix: 'Milestone:', bold: a._calLabel || 'Milestone', rest: a._calDetail || '' };
             }
             return { bold: getAnimalDisplayName(a), rest: '' };
         }
@@ -494,6 +561,13 @@ const CalendarPage = ({ authToken, API_BASE_URL }) => {
                                     {calendarTooltip.type === 'supply' && (<>
                                         <TooltipRow label="Supply:" value={a._calLabel} />
                                         <TooltipRow label="Category:" value={a._calDetail} />
+                                    </>)}
+                                    {calendarTooltip.type === 'milestone' && (<>
+                                        <TooltipRow label="Animal:" value={a._calDetail} />
+                                        {a._milestoneInterval && a._milestoneUnit && (
+                                            <TooltipRow label="Repeats:" value={`Every ${a._milestoneInterval} ${a._milestoneUnit}${a._milestoneInterval > 1 ? 's' : ''}`} />
+                                        )}
+                                        {!a._milestoneInterval && <TooltipRow label="Type:" value="One-time" />}
                                     </>)}
                                 </div>
                             </div>

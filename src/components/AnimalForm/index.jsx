@@ -2537,6 +2537,11 @@ const AnimalForm = ({
     const [newCareTaskFreq, setNewCareTaskFreq] = useState('');
     const [newAnimalCareTaskName, setNewAnimalCareTaskName] = useState('');
     const [newAnimalCareTaskFreq, setNewAnimalCareTaskFreq] = useState('');
+    // Milestone add-entry states
+    const [newMilestoneLabel, setNewMilestoneLabel] = useState('');
+    const [newMilestoneDate, setNewMilestoneDate] = useState('');
+    const [newMilestoneInterval, setNewMilestoneInterval] = useState('');
+    const [newMilestoneUnit, setNewMilestoneUnit] = useState('week');
     // Keeper History add-entry states
     const [khMode, setKhMode] = useState('manual'); // 'manual' | 'user'
     const [khName, setKhName] = useState('');
@@ -2654,6 +2659,10 @@ const AnimalForm = ({
             maintenanceFrequencyDays: animalToEdit.maintenanceFrequencyDays || '',
             careTasks: animalToEdit.careTasks || [],
             animalCareTasks: animalToEdit.animalCareTasks || [],
+            milestones: (animalToEdit.milestones || []).map(m => ({
+                ...m,
+                startDate: m.startDate ? new Date(m.startDate).toISOString().split('T')[0] : '',
+            })),
             isOwned: animalToEdit.isOwned ?? true,
             isDisplay: animalToEdit.isDisplay ?? false,
             // New fields for comprehensive mammal profile
@@ -2830,6 +2839,7 @@ const AnimalForm = ({
             maintenanceFrequencyDays: '',
             careTasks: [],
             animalCareTasks: [],
+            milestones: [],
             breedingRole: 'both',
             isOwned: true,
             isDisplay: true,
@@ -5330,7 +5340,7 @@ const AnimalForm = ({
                             { id: 8, label: 'Health', icon: Hospital, color: 'text-red-500' },
                             { id: 9, label: 'Care', icon: Home, color: 'text-teal-500' },
                             { id: 10, label: 'Behavior', icon: Brain, color: 'text-purple-500' },
-                            { id: 11, label: 'Notes', icon: FileText, color: 'text-indigo-500' },
+                            { id: 11, label: 'Notes & Milestones', icon: FileText, color: 'text-indigo-500' },
                             { id: 12, label: 'Show', icon: Trophy, color: 'text-yellow-600' },
                             { id: 13, label: 'Legal', icon: FileCheck, color: 'text-blue-600' },
                             { id: 14, label: 'End of Life', icon: Scale, color: 'text-gray-500' },
@@ -7963,7 +7973,7 @@ const AnimalForm = ({
                     </div>
                 )}
 
-                {/* Tab 11: Notes */}
+                {/* Tab 11: Notes & Milestones */}
                 {activeTab === 11 && (
                     <div className="space-y-6">
                         {!isFieldHidden('remarks') && (
@@ -7974,6 +7984,67 @@ const AnimalForm = ({
                                 placeholder="General notes, observations, and records..." />
                         </div>
                         )}
+
+                        {/* Milestones section */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700"><Bell size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Milestones</h3>
+                            <p className="text-sm text-gray-500">Track one-time or recurring events for this animal (e.g. neutered, weight check, vet visit).</p>
+
+                            {/* Existing milestones list */}
+                            {(formData.milestones || []).length === 0 ? (
+                                <p className="text-xs text-gray-400">No milestones yet.</p>
+                            ) : (
+                                <div className="space-y-1.5">
+                                    {(formData.milestones || []).map((m, idx) => (
+                                        <div key={idx} className="flex items-center gap-2 text-sm bg-white border border-gray-200 rounded px-3 py-2">
+                                            <span className="flex-1 font-medium text-gray-800">{m.label}</span>
+                                            <span className="text-xs text-gray-500">{m.startDate}</span>
+                                            {m.interval && m.intervalUnit && (
+                                                <span className="text-xs text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">Every {m.interval} {m.intervalUnit}{m.interval > 1 ? 's' : ''}</span>
+                                            )}
+                                            <button type="button" onClick={() => setFormData(prev => ({ ...prev, milestones: (prev.milestones || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 p-0.5" title="Remove"><Trash2 size={14} /></button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Add milestone form */}
+                            <div className="border border-gray-200 rounded-lg p-3 bg-white space-y-2">
+                                <p className="text-xs font-medium text-gray-600">Add milestone</p>
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                    <input type="text" value={newMilestoneLabel} onChange={e => setNewMilestoneLabel(e.target.value)}
+                                        placeholder="Label (e.g. Neutered, Weight check)"
+                                        className="flex-1 p-1.5 text-sm border border-gray-300 rounded-md focus:ring-primary focus:border-primary" />
+                                    <input type="date" value={newMilestoneDate} onChange={e => setNewMilestoneDate(e.target.value)}
+                                        className="p-1.5 text-sm border border-gray-300 rounded-md focus:ring-primary focus:border-primary" />
+                                </div>
+                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                                    <span className="text-xs text-gray-500 flex-shrink-0">Repeat every</span>
+                                    <input type="number" value={newMilestoneInterval} onChange={e => setNewMilestoneInterval(e.target.value)}
+                                        placeholder="—" min="1"
+                                        className="w-20 p-1.5 text-sm border border-gray-300 rounded-md focus:ring-primary focus:border-primary" />
+                                    <select value={newMilestoneUnit} onChange={e => setNewMilestoneUnit(e.target.value)}
+                                        className="p-1.5 text-sm border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                                        <option value="day">day(s)</option>
+                                        <option value="week">week(s)</option>
+                                        <option value="month">month(s)</option>
+                                        <option value="year">year(s)</option>
+                                    </select>
+                                    <span className="text-xs text-gray-400 italic">(leave blank for one-time)</span>
+                                    <button type="button" onClick={() => {
+                                        if (!newMilestoneLabel.trim() || !newMilestoneDate) return;
+                                        const entry = {
+                                            label: newMilestoneLabel.trim(),
+                                            startDate: newMilestoneDate,
+                                            interval: newMilestoneInterval ? Number(newMilestoneInterval) : null,
+                                            intervalUnit: newMilestoneInterval ? newMilestoneUnit : null,
+                                        };
+                                        setFormData(prev => ({ ...prev, milestones: [...(prev.milestones || []), entry] }));
+                                        setNewMilestoneLabel(''); setNewMilestoneDate(''); setNewMilestoneInterval(''); setNewMilestoneUnit('week');
+                                    }} className="ml-auto px-3 py-1.5 bg-primary text-black text-sm font-medium rounded-md hover:bg-primary/80 whitespace-nowrap flex-shrink-0">+ Add</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 )}
 
