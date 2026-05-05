@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Info, HelpCircle } from 'lucide-react';
 import { calculatePhenotype, GENE_LOCI } from './GeneticsCalculator';
+import { matchFancyRatPhenotype } from '../data/fancyRatPhenotypeRules';
 
 const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityForm }) => {
   const [showBuilderModal, setShowBuilderModal] = useState(false);
@@ -287,6 +288,88 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
     );
   }
   
+  // For Fancy Rat: manual entry + live phenotype preview
+  if (species === 'Fancy Rat') {
+    const parseRatGenotype = (codeString) => {
+      if (!codeString) return {};
+      const genotype = {};
+      codeString.trim().split(/[\s,]+/).forEach(part => {
+        const m = part.match(/^([A-Za-z]+)\/([A-Za-z]+)$/);
+        if (m) genotype[m[1].charAt(0).toUpperCase() + m[1].slice(1).replace(/^([A-Z])/, (_, c) => c)] = part;
+      });
+      return genotype;
+    };
+    // Build locus-keyed genotype: key is determined by matching the dominant allele symbol
+    const parseRatGenotypeKeyed = (codeString) => {
+      if (!codeString) return {};
+      const genotype = {};
+      const RAT_LOCUS_MAP = {
+        // color
+        'A': 'A', 'a': 'A',
+        'B': 'B', 'b': 'B',
+        'Bu': 'Bu', 'bu': 'Bu',
+        'C': 'C', 'c': 'C', 'ch': 'C', 'cm': 'C', 'ct': 'C',
+        'D': 'D', 'd': 'D',
+        'G': 'G', 'g': 'G',
+        'M': 'M', 'm': 'M',
+        'Me': 'Me', 'me': 'Me',
+        'P': 'P', 'p': 'P',
+        'Pe': 'Pe', 'pe': 'Pe',
+        'R': 'R', 'r': 'R',
+        // marking
+        'Dal': 'Dal', 'dal': 'Dal',
+        'H': 'H', 'Hre': 'H', 'hi': 'H', 'he': 'H', 'hn': 'H', 'h': 'H',
+        'Ma': 'Ma', 'ma': 'Ma',
+        'Ro': 'Ro', 'ro': 'Ro',
+        'Wh': 'Wh', 'wh': 'Wh',
+        'Ws': 'Ws', 'w': 'Ws',
+        // coat
+        'Re': 're_locus', 're': 're_locus',
+        'Ve': 'Ve', 've': 'Ve',
+        'Br': 'Br', 'br': 'Br',
+        'Wo': 'wo', 'wo': 'wo',
+        'Wa': 'Wa', 'wa': 'Wa',
+        'Ki': 'Ki', 'ki': 'Ki',
+        'Sh': 'Sh', 'sh': 'Sh',
+        // ear
+        'Du': 'Du', 'du': 'Du',
+      };
+      codeString.trim().split(/[\s,]+/).forEach(part => {
+        const m = part.match(/^([A-Za-z]+)\/([A-Za-z]+)$/);
+        if (!m) return;
+        const [a1, a2] = [m[1], m[2]];
+        // Try a1 first, then a2 for locus key
+        const locus = RAT_LOCUS_MAP[a1] || RAT_LOCUS_MAP[a2];
+        if (locus) {
+          const key = locus === 're_locus' ? 'Re' : locus;
+          genotype[key] = part;
+        }
+      });
+      return genotype;
+    };
+    const ratGenotype = parseRatGenotypeKeyed(value);
+    const ratResult = value ? matchFancyRatPhenotype(ratGenotype) : null;
+    return (
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Genetic Code</label>
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="e.g., a/a b/b C/C m/m h/h"
+          className="w-full p-2 border border-gray-300 rounded focus:ring-primary focus:border-primary font-mono text-sm"
+        />
+        {ratResult && (
+          <div className="bg-blue-50 p-3 rounded border border-blue-200">
+            <div className="text-xs font-medium text-blue-900 mb-0.5">Phenotype</div>
+            <div className="text-sm font-semibold text-blue-800">{ratResult.phenotype}</div>
+            {ratResult.notes && <div className="text-xs text-blue-600 mt-1">{ratResult.notes}</div>}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   // For other species: simple manual entry + community button
   return (
     <div className="space-y-2">

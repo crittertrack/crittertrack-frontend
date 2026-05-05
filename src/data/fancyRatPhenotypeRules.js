@@ -140,6 +140,13 @@ export const FANCY_RAT_PHENOTYPE_RULES = [
   // They append ' Pearl' / ' Merle' to any phenotype when m/m is also present.
 
   // =========================================================
+  // BASE COLOR FALLBACKS — catch-all when no dilutions present
+  // Must be last in the rules array.
+  // =========================================================
+  { match: { A: BLACK  }, phenotype: 'Black'  },
+  { match: { A: AGOUTI }, phenotype: 'Agouti' },
+
+  // =========================================================
   // 6-LOCUS COMPOUND DILUTIONS — must be before all others
   // =========================================================
   { match: { A: BLACK,  B: ['b/b'], D: ['d/d'], G: ['g/g'], M: ['m/m'], P: ['p/p'], R: ['r/r'] }, phenotype: 'Russian Lavender Chocolate Champagne Beige' },
