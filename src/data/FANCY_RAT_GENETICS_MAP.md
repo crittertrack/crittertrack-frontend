@@ -206,23 +206,89 @@
 | Pe/pe | m/m present | appends ' Pearl' to phenotype | ✅ |
 | Me/me | m/m present | appends ' Merle' to phenotype | ✅ |
 
-## Marking / Coat Genes — In DB (Phenotype Rules Not Yet Mapped)
+## Marking / Coat / Ear Genes
 
-These genes are live in the database but their phenotype derivation rules have not yet been implemented in the rule engine:
+All appended as suffixes to the color phenotype in order: `[color] [marking] [coat] [ear] [Pearl] [Merle]`
 
-| Symbol | Name | Category | Rules Mapped |
-|--------|------|----------|-------------|
-| Dal | Dalmatian | Marking | ❌ |
-| Du | Dumbo | Ear type | ❌ |
-| H | Hooded | Marking | ❌ |
-| Ma | Marble | Marking | ❌ |
-| Ro | Roan | Marking | ❌ |
-| Wh | Whiteside | Marking | ❌ |
-| Ws | Dominant White Spotting | Marking | ❌ |
-| Re | Rex | Coat | ❌ |
-| Ve | Velveteen | Coat | ❌ |
-| Br | Bristle | Coat | ❌ |
-| wo | Woolly | Coat | ❌ |
-| Wa | Wavy | Coat | ❌ |
-| Ki | Kinky | Coat | ❌ |
-| Sh | Shaggy | Coat | ❌ |
+### H — Hooded locus (6 alleles)
+
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| H/H | Self | ✅ |
+| H/Hre | Patched | ✅ |
+| H/hi | English Irish | ✅ |
+| H/he | Variberk | ✅ |
+| H/hn | Variberk | ✅ |
+| H/h | Berkshire | ✅ |
+| Hre/Hre | Restricted Hooded | ✅ |
+| Hre/hi | Bareback Headspot | ✅ |
+| Hre/he | Bareback | ✅ |
+| Hre/hn | Restricted Hooded | ✅ |
+| Hre/h | Masked | ✅ |
+| hi/hi | English Irish | ✅ |
+| hi/he | Variegated | ✅ |
+| hi/hn | Variegated | ✅ |
+| hi/h | Berkshire | ✅ |
+| he/he | Masked | ✅ |
+| he/hn | Capped | ✅ |
+| he/h | Variegated | ✅ |
+| hn/hn | Capped Notch | ✅ |
+| hn/h | Bareback | ✅ |
+| h/h | Hooded | ✅ |
+
+### Dal — Dalmatian
+
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| Dal/Dal | Double Dalmatian ⚠️ lethal | ✅ |
+| Dal/dal | Dalmatian | ✅ |
+| dal/dal | (no effect) | ✅ |
+
+### Ma — Marble
+
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| Ma/Ma | Double Marble ⚠️ lethal | ✅ |
+| Ma/ma | Marble | ✅ |
+| ma/ma | (no effect) | ✅ |
+
+### Ro — Roan
+
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| ro/ro | Roan | ✅ |
+| Ro/Ro, Ro/ro | (no effect / carrier) | ✅ |
+
+### Wh — Whiteside
+
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| wh/wh | Whiteside | ✅ |
+| Wh/Wh, Wh/wh | (no effect / carrier) | ✅ |
+
+### Ws — Dominant White Spotting
+
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| Ws/Ws | Double White Spot ⚠️ lethal | ✅ |
+| Ws/w | White Spot | ✅ |
+| w/w | (no effect) | ✅ |
+
+### Coat Genes
+
+| Symbol | Name | Homo dominant | Het | Mapped |
+|--------|------|---------------|-----|--------|
+| Re | Rex | Double Rex | Rex | ✅ |
+| Ve | Velveteen | Double Velveteen | Velveteen | ✅ |
+| Br | Bristle | Extreme Bristle | Bristle | ✅ |
+| wo | Woolly | Extreme Woolly | Woolly | ✅ |
+| Wa | Wavy | Extreme Wavy | Wavy | ✅ |
+| Ki | Kinky | Extreme Kinky | Kinky | ✅ |
+| Sh | Shaggy | Extreme Shaggy | Shaggy | ✅ |
+
+### Du — Dumbo (ear type, recessive)
+
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| du/du | Dumbo | ✅ |
+| Du/Du, Du/du | (standard / carrier) | ✅ |

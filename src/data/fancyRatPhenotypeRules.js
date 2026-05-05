@@ -10,9 +10,11 @@
  * A locus array means "any of these notations".
  *
  * Locus symbols match the geneLoci keys returned by the API (post symbol-override):
- *   A, B, Bu, C, D, G, M, P, R   (color genes — live DB)
- *   Dal, Du, H, Ma, Me, Pe, Ro, Wh, Ws    (marking genes)
- *   Re, Ve, Br, wo, Wa, Ki, Sh            (coat genes)
+ *   A, B, Bu, C, D, G, M, P, R               (color genes)
+ *   Dal, H, Ma, Ro, Wh, Ws                   (marking genes — appended as suffixes)
+ *   Re, Ve, Br, wo, Wa, Ki, Sh               (coat genes — appended as suffixes)
+ *   Du                                        (ear type — appended as suffix)
+ *   Me, Pe                                    (modifiers — append only when m/m present)
  *
  * A-locus shorthands used throughout:
  *   BLACK  = a/a   (self/black phenotype)
@@ -372,18 +374,110 @@ function deriveWithCLocus(basePhenotype, cType) {
   return `${basePhenotype} ${suffix}`;
 }
 
+// ---------------------------------------------------------------------------
+// MARKING / COAT / EAR GENE LOOKUP TABLES
+// ---------------------------------------------------------------------------
+
+const H_PHENOTYPES = {
+  'H/H':       'Self',
+  'H/Hre':     'Patched',
+  'H/hi':      'English Irish',
+  'H/he':      'Variberk',
+  'H/hn':      'Variberk',
+  'H/h':       'Berkshire',
+  'Hre/Hre':   'Restricted Hooded',
+  'Hre/hi':    'Bareback Headspot',
+  'Hre/he':    'Bareback',
+  'Hre/hn':    'Restricted Hooded',
+  'Hre/h':     'Masked',
+  'hi/hi':     'English Irish',
+  'hi/he':     'Variegated',
+  'hi/hn':     'Variegated',
+  'hi/h':      'Berkshire',
+  'he/he':     'Masked',
+  'he/hn':     'Capped',
+  'he/h':      'Variegated',
+  'hn/hn':     'Capped Notch',
+  'hn/h':      'Bareback',
+  'h/h':       'Hooded',
+};
+
+const DAL_PHENOTYPES = {
+  'Dal/Dal': 'Double Dalmatian',
+  'Dal/dal': 'Dalmatian',
+};
+
+const MA_PHENOTYPES = {
+  'Ma/Ma': 'Double Marble',
+  'Ma/ma': 'Marble',
+};
+
+const WS_PHENOTYPES = {
+  'Ws/Ws': 'Double White Spot',
+  'Ws/w':  'White Spot',
+};
+
+// Ro and Wh are recessive — only express when homozygous recessive
+const RO_PHENOTYPES  = { 'ro/ro': 'Roan' };
+const WH_PHENOTYPES  = { 'wh/wh': 'Whiteside' };
+
+// Coat gene lookup: keyed by locus symbol → notation → label
+const COAT_PHENOTYPES = {
+  Re: { 'Re/Re': 'Double Rex',       'Re/re': 'Rex'              },
+  Ve: { 'Ve/Ve': 'Double Velveteen', 'Ve/ve': 'Velveteen'        },
+  Br: { 'Br/Br': 'Extreme Bristle',  'Br/br': 'Bristle'          },
+  wo: { 'Wo/Wo': 'Extreme Woolly',   'Wo/wo': 'Woolly'           },
+  Wa: { 'Wa/Wa': 'Extreme Wavy',     'Wa/wa': 'Wavy'             },
+  Ki: { 'Ki/Ki': 'Extreme Kinky',    'Ki/ki': 'Kinky'            },
+  Sh: { 'Sh/Sh': 'Extreme Shaggy',   'Sh/sh': 'Shaggy'          },
+};
+
+// Ear gene (Dumbo is recessive — only du/du expresses)
+const DU_PHENOTYPES  = { 'du/du': 'Dumbo' };
+
 /**
- * Apply Pearl / Merle as post-match modifiers.
- * Both only visually express when m/m (Mink locus) is also present.
+ * Apply all post-color modifiers: marking, coat, ear, Pearl, Merle.
+ * Order: [color] [marking] [coat] [ear] [Pearl] [Merle]
  */
 function applyModifiers(rule, genotype) {
-  if (genotype.M !== 'm/m') return rule;
-  const pe = genotype.Pe === 'Pe/pe';
-  const me = genotype.Me === 'Me/me';
-  if (!pe && !me) return rule;
   let phenotype = rule.phenotype;
-  if (pe) phenotype += ' Pearl';
-  if (me) phenotype += ' Merle';
+
+  // --- Hooded locus ---
+  const hLabel = H_PHENOTYPES[genotype.H];
+  if (hLabel) phenotype += ` ${hLabel}`;
+
+  // --- Other marking genes ---
+  const dalLabel = DAL_PHENOTYPES[genotype.Dal];
+  if (dalLabel) phenotype += ` ${dalLabel}`;
+
+  const maLabel = MA_PHENOTYPES[genotype.Ma];
+  if (maLabel) phenotype += ` ${maLabel}`;
+
+  const roLabel = RO_PHENOTYPES[genotype.Ro];
+  if (roLabel) phenotype += ` ${roLabel}`;
+
+  const whLabel = WH_PHENOTYPES[genotype.Wh];
+  if (whLabel) phenotype += ` ${whLabel}`;
+
+  const wsLabel = WS_PHENOTYPES[genotype.Ws];
+  if (wsLabel) phenotype += ` ${wsLabel}`;
+
+  // --- Coat genes ---
+  for (const [locus, map] of Object.entries(COAT_PHENOTYPES)) {
+    const coatLabel = map[genotype[locus]];
+    if (coatLabel) phenotype += ` ${coatLabel}`;
+  }
+
+  // --- Ear type ---
+  const duLabel = DU_PHENOTYPES[genotype.Du];
+  if (duLabel) phenotype += ` ${duLabel}`;
+
+  // --- Pearl / Merle (only when m/m present) ---
+  if (genotype.M === 'm/m') {
+    if (genotype.Pe === 'Pe/pe') phenotype += ' Pearl';
+    if (genotype.Me === 'Me/me') phenotype += ' Merle';
+  }
+
   return { ...rule, phenotype };
 }
 
