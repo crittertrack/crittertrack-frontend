@@ -31,8 +31,6 @@
 | cm/c | Unknown (cm/c) | ✅ (flagged Unknown) |
 | C/C, C/ct, C/cm, C/ch, C/c | Full pigment / carrier | ✅ (no special phenotype, grouped as `FULL_C`) |
 
-> ⚠️ C-locus interactions with dilution genes (e.g. Chocolate Siamese, Mink Himalayan) — **not yet mapped**
-
 ---
 
 ### B — Brown locus
@@ -207,20 +205,6 @@
 |------|-----------|--------|--------|
 | Pe/pe | m/m present | appends ' Pearl' to phenotype | ✅ |
 | Me/me | m/m present | appends ' Merle' to phenotype | ✅ |
-
----
-
-## Genes Not Yet Added to DB
-
-These exist in the backup JSON or are planned but not yet live:
-
-| Symbol | Name | Notes |
-|--------|------|-------|
-| ~~Am~~ | American Mink | Removed — not adding |
-| ~~Mo~~ | Mock Mink | Removed — not adding |
-| Rb | Russian Blue (separate locus) | In backup JSON but not in live DB; D-locus covers Russian Blue for now |
-
----
 
 ## Marking / Coat Genes — Not in DB Yet
 
