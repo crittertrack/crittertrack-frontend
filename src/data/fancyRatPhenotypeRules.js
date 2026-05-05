@@ -59,6 +59,7 @@ export const FANCY_RAT_PHENOTYPE_RULES = [
   // =========================================================
   { match: { A: BLACK,  Bu: ['Bu/bu'], C: ['cm/cm', 'cm/ch', 'cm/c'] }, phenotype: 'Burmese Marten'  },
   { match: { A: AGOUTI, Bu: ['Bu/bu'], C: ['cm/cm', 'cm/ch', 'cm/c'] }, phenotype: 'Wheaten Marten'  },
+  { match: { Bu: ['Bu/Bu'],            C: ['cm/cm', 'cm/ch', 'cm/c'] }, phenotype: 'Ivory Marten'    },
 
   // =========================================================
   // SIAMESE (ch/ch) × DILUTION COMPOUNDS — most specific first

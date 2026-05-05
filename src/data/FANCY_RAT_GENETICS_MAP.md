@@ -100,10 +100,9 @@
 | Bu/Bu | Agouti (A/-) | ch/ch or ch/c | Wheaten Sable | ✅ |
 | Bu/bu | Black (a/a) | cm/cm, cm/ch, or cm/c | Burmese Marten | ✅ |
 | Bu/bu | Agouti (A/-) | cm/cm, cm/ch, or cm/c | Wheaten Marten | ✅ |
+| Bu/Bu | any | cm/cm, cm/ch, or cm/c | Ivory Marten | ✅ |
 | Bu/bu or Bu/Bu | Black (a/a) | c/c | Stone | ✅ |
 | Bu/bu or Bu/Bu | Agouti (A/-) | c/c | Wheaten Stone | ✅ |
-
-> **Note:** Bu/Bu on a Marten (cm) base is not yet mapped — phenotype unconfirmed.
 
 ---
 
