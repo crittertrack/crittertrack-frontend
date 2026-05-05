@@ -1,0 +1,294 @@
+# Fancy Rat Genetics — Phenotype Mapping Status
+
+> Live DB genes: **A, B, Br, Bu, C, D, Dal, Du, G, H, Ki, M, Ma, Me, P, Pe, R, Re, Ro, Sh, Ve, Wa, Wh, wo, Ws** (25 genes)
+> Removed / not added: ~~Am~~, ~~Mo~~, ~~Rb~~
+
+---
+
+## Color Genes in DB
+
+### A — Agouti locus
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| A/A | Agouti | ✅ (base constant `AGOUTI`) |
+| A/a | Agouti (carrier Black) | ✅ (base constant `AGOUTI`) |
+| a/a | Black | ✅ (base constant `BLACK`) |
+
+---
+
+### C — Color (dilution) locus
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| c/c | Albino | ✅ |
+| ch/c | Himalayan | ✅ (Black & Agouti base) |
+| ch/ch | Siamese | ✅ (Black & Agouti base) |
+| cm/ch | Pointed Marten | ✅ (Black & Agouti base) |
+| cm/cm | Marten | ✅ (Black & Agouti base) |
+| ct/ct | Tonkinese | ✅ (Black & Agouti base) |
+| ct/cm | Unknown (ct/cm) | ✅ (flagged Unknown) |
+| ct/ch | Unknown (ct/ch) | ✅ (flagged Unknown) |
+| ct/c | Unknown (ct/c) | ✅ (flagged Unknown) |
+| cm/c | Unknown (cm/c) | ✅ (flagged Unknown) |
+| C/C, C/ct, C/cm, C/ch, C/c | Full pigment / carrier | ✅ (no special phenotype, grouped as `FULL_C`) |
+
+---
+
+### B — Brown locus
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| B/B, B/b | No effect | ✅ (falls through to base) |
+| b/b + Black base (a/a) | Chocolate | ✅ |
+| b/b + Agouti base (A/-) | Chocolate Agouti | ✅ |
+
+---
+
+### D — Dilute locus (English/Russian Blue)
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| D/D, D/d | No effect | ✅ |
+| d/d + Black base | Russian Blue | ✅ |
+| d/d + Agouti base | Russian Blue Agouti | ✅ |
+
+---
+
+### G — Gray locus (American Blue)
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| G/G, G/g | No effect | ✅ |
+| g/g + Black base | American Blue | ✅ |
+| g/g + Agouti base | American Blue Agouti (Opal) | ✅ |
+
+---
+
+### M — Mink locus
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| M/M, M/m | No effect | ✅ |
+| m/m + Black base | Mink | ✅ |
+| m/m + Agouti base | Cinnamon | ✅ |
+
+---
+
+### P — Pink-eyed Dilution locus
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| P/P, P/p | No effect | ✅ |
+| p/p + Black base | Champagne | ✅ |
+| p/p + Agouti base | Silver Fawn | ✅ |
+
+---
+
+### R — Red-eye Dilution locus
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| R/R, R/r | No effect | ✅ |
+| r/r + Black base | Beige | ✅ |
+| r/r + Agouti base | Topaz | ✅ |
+
+---
+
+### Bu — Burmese locus
+| Notation | Base | C-locus | Phenotype | Mapped |
+|----------|------|---------|-----------|--------|
+| bu/bu | any | any | No effect | ✅ |
+| Bu/bu or Bu/Bu | any | C/C, C/ct, C/cm, C/ch, C/c (full) | Base color (note: Bu doesn’t express) | ✅ |
+| Bu/bu | Black (a/a) | ch/ch or ch/c | Burmese | ✅ |
+| Bu/Bu | Black (a/a) | ch/ch or ch/c | Sable | ✅ |
+| Bu/bu | Agouti (A/-) | ch/ch or ch/c | Wheaten Burmese | ✅ |
+| Bu/Bu | Agouti (A/-) | ch/ch or ch/c | Wheaten Sable | ✅ |
+| Bu/bu | Black (a/a) | cm/cm, cm/ch, or cm/c | Burmese Marten | ✅ |
+| Bu/bu | Agouti (A/-) | cm/cm, cm/ch, or cm/c | Wheaten Marten | ✅ |
+| Bu/Bu | any | cm/cm, cm/ch, or cm/c | Ivory Marten | ✅ |
+| Bu/bu or Bu/Bu | Black (a/a) | c/c | Stone | ✅ |
+| Bu/bu or Bu/Bu | Agouti (A/-) | c/c | Wheaten Stone | ✅ |
+
+---
+
+## Compound Dilutions
+
+| Genes | Black base (a/a) | Agouti base (A/-) | Mapped |
+|-------|-----------------|-------------------|--------|
+| D + R | Russian Beige | Russian Topaz | ✅ |
+| D + P | Russian Champagne | Russian Silver Fawn | ✅ |
+| D + G | Russian Silver | Russian Silver Agouti | ✅ |
+| D + M | Russian Dove | Russian Cinnamon | ✅ |
+| B + D | Russian Chocolate | Russian Chocolate Agouti | ✅ |
+| G + R | Blue Silver | Opal Fawn | ✅ |
+| G + P | Apricot | Apricot Agouti | ✅ |
+| B + G | Platinum | Platinum Agouti | ✅ |
+| G + M | Lavender | Lavender Agouti | ✅ |
+| R + M | Mocha | Argente | ✅ |
+| P + M | Honey | Honey Agouti | ✅ |
+| B + M | Coffee | Coffee Agouti | ✅ |
+| B + R | Caramel | Saffron | ✅ |
+| B + P | Creme | Creme Agouti | ✅ |
+| P + R | Champagne Beige | Silver Topaz | ✅ |
+| D + G + M | Russian Lavender | Russian Lavender Agouti | ✅ |
+| B + D + G | Russian Platinum | Russian Platinum Agouti | ✅ |
+| D + R + M | Russian Mocha | Russian Argente | ✅ |
+| B + D + M | Russian Coffee | Russian Coffee Agouti | ✅ |
+| B + D + R | Russian Caramel | Russian Saffron | ✅ |
+| B + D + P | Russian Creme | Russian Creme Agouti | ✅ |
+| D + G + R | Russian Silver Beige | Russian Silver Fawn | ✅ |
+| D + G + P | Russian Apricot | Russian Apricot Agouti | ✅ |
+| D + P + M | Russian Honey | Russian Honey Agouti | ✅ |
+| G + R + M | Lavender Beige | Lavender Fawn | ✅ |
+| G + P + M | Lavender Champagne | Lavender Silver Fawn | ✅ |
+| B + G + R | Blue Caramel | Blue Saffron | ✅ |
+| B + G + P | Blue Creme | Blue Creme Agouti | ✅ |
+| B + R + M | Chocolate Mocha | Cinnamon Argente | ✅ |
+| B + P + M | Chocolate Honey | Cinnamon Honey | ✅ |
+| B + G + M | Lavender Chocolate | Lavender Chocolate Agouti | ✅ |
+| B + P + R | Caramel Champagne | Saffron Silver Fawn | ✅ |
+| D + P + R | Russian Champagne Beige | Russian Silver Topaz | ✅ |
+| G + P + R | Apricot Beige | Apricot Topaz | ✅ |
+| M + P + R | Honey Beige | Honey Topaz | ✅ |
+| B + D + G + M | Russian Lavender Chocolate | Russian Lavender Chocolate Agouti | ✅ |
+| B + D + G + P | Russian Blue Creme | Russian Blue Creme Agouti | ✅ |
+| B + D + G + R | Russian Blue Caramel | Russian Blue Saffron | ✅ |
+| B + D + M + P | Russian Chocolate Honey | Russian Cinnamon Honey | ✅ |
+| B + D + M + R | Russian Chocolate Mocha | Russian Cinnamon Argente | ✅ |
+| B + D + P + R | Russian Caramel Champagne | Russian Saffron Silver Fawn | ✅ |
+| D + G + M + P | Russian Lavender Champagne | Russian Lavender Silver Fawn | ✅ |
+| D + G + M + R | Russian Lavender Beige | Russian Lavender Fawn | ✅ |
+| D + G + P + R | Russian Apricot Beige | Russian Apricot Topaz | ✅ |
+| D + M + P + R | Russian Honey Beige | Russian Honey Topaz | ✅ |
+| B + G + M + P | Lavender Chocolate Champagne | Lavender Chocolate Silver Fawn | ✅ |
+| B + G + M + R | Lavender Caramel | Lavender Saffron | ✅ |
+| B + G + P + R | Apricot Caramel | Apricot Saffron | ✅ |
+| B + M + P + R | Honey Caramel | Honey Saffron | ✅ |
+| G + M + P + R | Lavender Champagne Beige | Lavender Silver Topaz | ✅ |
+| B + D + G + M + P | Russian Lavender Chocolate Champagne | Russian Lavender Chocolate Silver Fawn | ✅ |
+| B + D + G + M + R | Russian Lavender Caramel | Russian Lavender Saffron | ✅ |
+| B + D + G + P + R | Russian Apricot Caramel | Russian Apricot Saffron | ✅ |
+| B + D + M + P + R | Russian Honey Caramel | Russian Honey Saffron | ✅ |
+| D + G + M + P + R | Russian Lavender Champagne Beige | Russian Lavender Silver Topaz | ✅ |
+| B + G + M + P + R | Lavender Chocolate Champagne Beige | Lavender Chocolate Silver Topaz | ✅ |
+| B + D + G + M + P + R | Russian Lavender Chocolate Champagne Beige | Russian Lavender Chocolate Silver Topaz | ✅ |
+
+---
+
+## C-locus × Dilution Interactions
+
+| C genotype | Dilution | Phenotype | Mapped |
+|------------|----------|-----------|--------|
+| ch/ch | d/d + m/m | Dove Point Siamese | ✅ |
+| ch/ch | d/d | Russian Point Siamese | ✅ |
+| ch/ch | m/m | Mink Point Siamese | ✅ |
+| ch/c | d/d | Russian Point Himalayan | ✅ |
+| cm/* (Black) | d/d | Russian Marten | ✅ |
+| cm/* (Black) | m/m | Mink Marten | ✅ |
+| ch/ch + b/b | Chocolate Siamese | Chocolate Agouti Siamese | ✅ |
+| ch/c + b/b | Chocolate Himalayan | Chocolate Agouti Himalayan | ✅ |
+| cm/ch + b/b | Chocolate Pointed Marten | Chocolate Agouti Pointed Marten | ✅ |
+| cm/* + b/b | Chocolate Marten | Chocolate Agouti Marten | ✅ |
+| ch/ch + g/g | American Blue Siamese | American Blue Agouti Siamese | ✅ |
+| ch/c + g/g | American Blue Himalayan | American Blue Agouti Himalayan | ✅ |
+| cm/ch + g/g | American Blue Pointed Marten | American Blue Agouti Pointed Marten | ✅ |
+| cm/* + g/g | American Blue Marten | American Blue Agouti Marten | ✅ |
+| ch/ch + p/p | Champagne Siamese | Silver Fawn Siamese | ✅ |
+| ch/c + p/p | Champagne Himalayan | Silver Fawn Himalayan | ✅ |
+| cm/ch + p/p | Champagne Pointed Marten | Silver Fawn Pointed Marten | ✅ |
+| cm/* + p/p | Champagne Marten | Silver Fawn Marten | ✅ |
+| ch/ch + r/r | Beige Siamese | Topaz Siamese | ✅ |
+| ch/c + r/r | Beige Himalayan | Topaz Himalayan | ✅ |
+| cm/ch + r/r | Beige Pointed Marten | Topaz Pointed Marten | ✅ |
+| cm/* + r/r | Beige Marten | Topaz Marten | ✅ |
+
+---
+
+## Pearl (Pe) & Merle (Me)
+
+> Both only visually alter phenotype when `m/m` is also present — they append as modifiers to any base color.
+
+| Gene | Condition | Effect | Mapped |
+|------|-----------|--------|--------|
+| Pe/pe | m/m present | appends ' Pearl' to phenotype | ✅ |
+| Me/me | m/m present | appends ' Merle' to phenotype | ✅ |
+
+## Marking / Coat / Ear Genes
+
+All appended as suffixes to the color phenotype in order: `[color] [marking] [coat] [ear] [Pearl] [Merle]`
+
+### H — Hooded locus (6 alleles)
+
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| H/H | Self | ✅ |
+| H/Hre | Patched | ✅ |
+| H/hi | English Irish | ✅ |
+| H/he | Variberk | ✅ |
+| H/hn | Variberk | ✅ |
+| H/h | Berkshire | ✅ |
+| Hre/Hre | Restricted Hooded | ✅ |
+| Hre/hi | Bareback Headspot | ✅ |
+| Hre/he | Bareback | ✅ |
+| Hre/hn | Restricted Hooded | ✅ |
+| Hre/h | Masked | ✅ |
+| hi/hi | English Irish | ✅ |
+| hi/he | Variegated | ✅ |
+| hi/hn | Variegated | ✅ |
+| hi/h | Berkshire | ✅ |
+| he/he | Masked | ✅ |
+| he/hn | Capped | ✅ |
+| he/h | Variegated | ✅ |
+| hn/hn | Capped Notch | ✅ |
+| hn/h | Bareback | ✅ |
+| h/h | Hooded | ✅ |
+
+### Dal — Dalmatian
+
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| Dal/Dal | Double Dalmatian ⚠️ lethal | ✅ |
+| Dal/dal | Dalmatian | ✅ |
+| dal/dal | (no effect) | ✅ |
+
+### Ma — Marble
+
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| Ma/Ma | Double Marble ⚠️ lethal | ✅ |
+| Ma/ma | Marble | ✅ |
+| ma/ma | (no effect) | ✅ |
+
+### Ro — Roan
+
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| ro/ro | Roan | ✅ |
+| Ro/Ro, Ro/ro | (no effect / carrier) | ✅ |
+
+### Wh — Whiteside
+
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| wh/wh | Whiteside | ✅ |
+| Wh/Wh, Wh/wh | (no effect / carrier) | ✅ |
+
+### Ws — Dominant White Spotting
+
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| Ws/Ws | Double White Spot ⚠️ lethal | ✅ |
+| Ws/w | White Spot | ✅ |
+| w/w | (no effect) | ✅ |
+
+### Coat Genes
+
+| Symbol | Name | Homo dominant | Het | Mapped |
+|--------|------|---------------|-----|--------|
+| Re | Rex | Double Rex | Rex | ✅ |
+| Ve | Velveteen | Double Velveteen | Velveteen | ✅ |
+| Br | Bristle | Extreme Bristle | Bristle | ✅ |
+| wo | Woolly | Extreme Woolly | Woolly | ✅ |
+| Wa | Wavy | Extreme Wavy | Wavy | ✅ |
+| Ki | Kinky | Extreme Kinky | Kinky | ✅ |
+| Sh | Shaggy | Extreme Shaggy | Shaggy | ✅ |
+
+### Du — Dumbo (ear type, recessive)
+
+| Notation | Phenotype | Mapped |
+|----------|-----------|--------|
+| du/du | Dumbo | ✅ |
+| Du/Du, Du/du | (standard / carrier) | ✅ |
