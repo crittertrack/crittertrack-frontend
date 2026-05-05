@@ -143,14 +143,9 @@ export const FANCY_RAT_PHENOTYPE_RULES = [
   { match: { A: AGOUTI, Bu: ['Bu/bu'] }, phenotype: 'Agouti', notes: 'Bu present but does not visually express — requires a restrictive C allele (ch, cm, or c)' },
   { match: { A: AGOUTI, Bu: ['Bu/Bu'] }, phenotype: 'Agouti', notes: 'Bu/Bu present but does not visually express — requires a restrictive C allele (ch, cm, or c)' },
 
-  // =========================================================
-  // PEARL (Pe) & MERLE (Me) — only alter phenotype on m/m base
-  // Pe and Me are not yet in the live DB; rules ready for when added.
-  // =========================================================
-  { match: { A: AGOUTI, M: ['m/m'], Pe: ['Pe/pe'] }, phenotype: 'Cinnamon Pearl', notes: 'Pe gene not yet in DB' },
-  { match: { A: BLACK,  M: ['m/m'], Pe: ['Pe/pe'] }, phenotype: 'Pearl',          notes: 'Pe gene not yet in DB' },
-  { match: { A: AGOUTI, M: ['m/m'], Me: ['Me/me'] }, phenotype: 'Cinnamon Merle', notes: 'Me gene not yet in DB' },
-  { match: { A: BLACK,  M: ['m/m'], Me: ['Me/me'] }, phenotype: 'Merle',          notes: 'Me gene not yet in DB' },
+  // PEARL (Pe) & MERLE (Me): handled as modifiers in matchFancyRatPhenotype.
+  // They append ' Pearl' / ' Merle' to any phenotype when m/m is also present.
+  // Pe and Me genes are not yet in the live DB.
 
   // =========================================================
   // 6-LOCUS COMPOUND DILUTIONS — must be before all others
@@ -320,20 +315,133 @@ export const FANCY_RAT_PHENOTYPE_RULES = [
 
 ];
 
+// ---------------------------------------------------------------------------
+// C-LOCUS DERIVATION HELPERS
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns an internal cType key for the C-locus allele combination, or null
+ * if the allele does not restrict pigment (full color or Albino — handled
+ * by explicit rules earlier in the array).
+ */
+function getCType(C) {
+  if (!C || FULL_C.includes(C) || C === 'c/c') return null;
+  if (C === 'ch/ch') return 'siamese';
+  if (C === 'ch/c')  return 'himalayan';
+  if (C === 'cm/ch') return 'pointed_marten';
+  if (C === 'cm/cm' || C === 'cm/c') return 'marten';
+  if (C === 'ct/ct') return 'tonkinese';
+  return null; // ct/* Unknown combos — handled by explicit rules
+}
+
+/** Display suffix for each cType. */
+const C_SUFFIX = {
+  siamese:        'Siamese',
+  himalayan:      'Himalayan',
+  pointed_marten: 'Pointed Marten',
+  marten:         'Marten',
+  tonkinese:      'Tonkinese',
+};
+
+/**
+ * Traditional name overrides: `${basePhenotype}|${cType}` → final phenotype.
+ * Applied before the generic "base + suffix" concatenation.
+ */
+const C_OVERRIDES = {
+  'Russian Blue|siamese':            'Russian Point Siamese',
+  'Russian Blue Agouti|siamese':     'Russian Point Siamese',
+  'Mink|siamese':                    'Mink Point Siamese',
+  'Cinnamon|siamese':                'Mink Point Siamese',
+  'Russian Dove|siamese':            'Dove Point Siamese',
+  'Russian Cinnamon|siamese':        'Dove Point Siamese',
+  'Russian Blue|himalayan':          'Russian Point Himalayan',
+  'Russian Blue Agouti|himalayan':   'Russian Point Himalayan',
+  'Russian Blue|marten':             'Russian Marten',
+  'Mink|marten':                     'Mink Marten',
+};
+
+/**
+ * Build the final phenotype name from a base dilution name + C-locus type.
+ * - Siamese / Himalayan: base color is implicit — drop bare "Black" / "Agouti".
+ * - Marten / Pointed Marten / Tonkinese: "Agouti" becomes a prefix; "Black" is dropped.
+ * - Compound dilution bases are prepended to the suffix as-is.
+ */
+function deriveWithCLocus(basePhenotype, cType) {
+  const key = `${basePhenotype}|${cType}`;
+  if (C_OVERRIDES[key]) return C_OVERRIDES[key];
+
+  const suffix = C_SUFFIX[cType];
+
+  if (cType === 'siamese' || cType === 'himalayan') {
+    if (basePhenotype === 'Black' || basePhenotype === 'Agouti') return suffix;
+  } else {
+    if (basePhenotype === 'Black')  return suffix;
+    if (basePhenotype === 'Agouti') return `Agouti ${suffix}`;
+  }
+
+  return `${basePhenotype} ${suffix}`;
+}
+
+/**
+ * Apply Pearl / Merle as post-match modifiers.
+ * Both only visually express when m/m (Mink locus) is also present.
+ * Pe and Me genes are not yet in the live DB.
+ */
+function applyModifiers(rule, genotype) {
+  if (genotype.M !== 'm/m') return rule;
+  const pe = genotype.Pe === 'Pe/pe';
+  const me = genotype.Me === 'Me/me';
+  if (!pe && !me) return rule;
+  let phenotype = rule.phenotype;
+  if (pe) phenotype += ' Pearl';
+  if (me) phenotype += ' Merle';
+  return { ...rule, phenotype };
+}
+
+// ---------------------------------------------------------------------------
+
 /**
  * Evaluate FANCY_RAT_PHENOTYPE_RULES against a genotype object.
- * Returns the first matching rule, or null if none match.
  *
- * @param {Object} genotype  - e.g. { A: 'a/a', C: 'C/C', M: 'm/m', ... }
- * @returns {{ phenotype: string, notes?: string, unconfirmed?: true } | null}
+ * Pass 1 — explicit rules (Albino, Unknown C, Bu × C, Stone, compound/single dilutions).
+ * Pass 2 — C-locus derivation: when a restrictive C allele is present and Pass 1 found
+ *           no match, treat C as full (C/C) and re-run to identify the base dilution
+ *           phenotype, then append the C-locus suffix with traditional-name overrides.
+ * Modifiers — Pearl (Pe/pe) and Merle (Me/me) append ' Pearl' / ' Merle' to any
+ *             phenotype when m/m is also present.
+ *
+ * @param {Object} genotype  - e.g. { A: 'a/a', C: 'ch/ch', M: 'm/m', D: 'd/d', ... }
+ * @returns {{ phenotype: string, notes?: string } | null}
  */
 export function matchFancyRatPhenotype(genotype) {
+  // Pass 1: explicit rules
   for (const rule of FANCY_RAT_PHENOTYPE_RULES) {
     const allMatch = Object.entries(rule.match).every(([locus, allowed]) => {
       const notation = genotype[locus];
-      return notation && allowed.includes(notation);
+      return notation != null && allowed.includes(notation);
     });
-    if (allMatch) return rule;
+    if (allMatch) return applyModifiers(rule, genotype);
   }
+
+  // Pass 2: C-locus derivation
+  const cType = getCType(genotype.C);
+  if (cType) {
+    const baseGenotype = { ...genotype, C: 'C/C' };
+    for (const rule of FANCY_RAT_PHENOTYPE_RULES) {
+      if (rule.match.C || rule.match.Bu) continue; // skip C-specific and Bu-specific rules
+      const allMatch = Object.entries(rule.match).every(([locus, allowed]) => {
+        const notation = baseGenotype[locus];
+        return notation != null && allowed.includes(notation);
+      });
+      if (allMatch) {
+        const derived = deriveWithCLocus(rule.phenotype, cType);
+        return applyModifiers({ ...rule, phenotype: derived }, genotype);
+      }
+    }
+    // No dilution rule matched — return plain C-locus phenotype
+    const baseLabel = genotype.A === 'a/a' ? 'Black' : 'Agouti';
+    return applyModifiers({ phenotype: deriveWithCLocus(baseLabel, cType) }, genotype);
+  }
+
   return null;
 }
