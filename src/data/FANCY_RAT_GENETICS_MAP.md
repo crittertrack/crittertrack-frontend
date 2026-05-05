@@ -1,6 +1,6 @@
 # Fancy Rat Genetics — Phenotype Mapping Status
 
-> Live DB genes: **A, B, Bu, C, D, G, M, P, R** (9 genes)
+> Live DB genes: **A, B, Bu, C, D, G, M, Me, P, Pe, R** (11 genes)
 > Removed / not added: ~~Am~~, ~~Mo~~, ~~Rb~~
 
 ---
@@ -199,17 +199,14 @@
 
 ---
 
-## Pearl (Pe) & Merle (Me) × Mink
+## Pearl (Pe) & Merle (Me)
 
-> Pe and Me are **not yet in the live DB**. Rules are pre-written and will activate once the genes are added.
-> Both only visually alter phenotype on `m/m` — they have no effect on other base colors.
+> Both only visually alter phenotype when `m/m` is also present — they append as modifiers to any base color.
 
-| Gene | Base | Phenotype | Mapped |
-|------|------|-----------|--------|
-| Pe/pe | Agouti + m/m | Cinnamon Pearl | ✅ (pending DB) |
-| Pe/pe | Black + m/m | Pearl | ✅ (pending DB) |
-| Me/me | Agouti + m/m | Cinnamon Merle | ✅ (pending DB) |
-| Me/me | Black + m/m | Merle | ✅ (pending DB) |
+| Gene | Condition | Effect | Mapped |
+|------|-----------|--------|--------|
+| Pe/pe | m/m present | appends ' Pearl' to phenotype | ✅ |
+| Me/me | m/m present | appends ' Merle' to phenotype | ✅ |
 
 ---
 
@@ -235,8 +232,6 @@ These are planned for a future phase:
 | Du | Dumbo | Ear type |
 | H | Hooded | Marking |
 | Ma | Marble | Marking |
-| Me | Merle | Marking |
-| Pe | Pearl | Marking |
 | Ro | Roan | Marking |
 | Wh | Whiteside | Marking |
 | Ws | Dominant White Spotting | Marking |
