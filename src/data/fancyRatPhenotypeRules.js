@@ -116,7 +116,44 @@ export const FANCY_RAT_PHENOTYPE_RULES = [
   { match: { A: BLACK,  M: ['m/m'], Me: ['Me/me'] }, phenotype: 'Merle',          notes: 'Me gene not yet in DB' },
 
   // =========================================================
-  // TRIPLE COMPOUND DILUTIONS — most specific first
+  // 3-LOCUS COMPOUND DILUTIONS — must be before 2-locus pairs
+  // =========================================================
+
+  // Russian (D) × two other dilutions
+  { match: { A: BLACK,  D: ['d/d'], G: ['g/g'], M: ['m/m'] }, phenotype: 'Russian Lavender'         },
+  { match: { A: AGOUTI, D: ['d/d'], G: ['g/g'], M: ['m/m'] }, phenotype: 'Russian Lavender Agouti'  },
+  { match: { A: BLACK,  B: ['b/b'], D: ['d/d'], G: ['g/g'] }, phenotype: 'Russian Platinum'         },
+  { match: { A: AGOUTI, B: ['b/b'], D: ['d/d'], G: ['g/g'] }, phenotype: 'Russian Platinum Agouti'  },
+  { match: { A: BLACK,  D: ['d/d'], R: ['r/r'], M: ['m/m'] }, phenotype: 'Russian Mocha'            },
+  { match: { A: AGOUTI, D: ['d/d'], R: ['r/r'], M: ['m/m'] }, phenotype: 'Russian Argente'          },
+  { match: { A: BLACK,  B: ['b/b'], D: ['d/d'], M: ['m/m'] }, phenotype: 'Russian Coffee'           },
+  { match: { A: AGOUTI, B: ['b/b'], D: ['d/d'], M: ['m/m'] }, phenotype: 'Russian Coffee Agouti'    },
+  { match: { A: BLACK,  B: ['b/b'], D: ['d/d'], R: ['r/r'] }, phenotype: 'Russian Caramel'          },
+  { match: { A: AGOUTI, B: ['b/b'], D: ['d/d'], R: ['r/r'] }, phenotype: 'Russian Saffron'          },
+  { match: { A: BLACK,  B: ['b/b'], D: ['d/d'], P: ['p/p'] }, phenotype: 'Russian Creme'            },
+  { match: { A: AGOUTI, B: ['b/b'], D: ['d/d'], P: ['p/p'] }, phenotype: 'Russian Creme Agouti'     },
+  { match: { A: BLACK,  D: ['d/d'], G: ['g/g'], R: ['r/r'] }, phenotype: 'Russian Silver Beige'     },
+  { match: { A: AGOUTI, D: ['d/d'], G: ['g/g'], R: ['r/r'] }, phenotype: 'Russian Silver Fawn'      },
+  { match: { A: BLACK,  D: ['d/d'], G: ['g/g'], P: ['p/p'] }, phenotype: 'Russian Apricot'          },
+  { match: { A: AGOUTI, D: ['d/d'], G: ['g/g'], P: ['p/p'] }, phenotype: 'Russian Apricot Agouti'   },
+  { match: { A: BLACK,  D: ['d/d'], P: ['p/p'], M: ['m/m'] }, phenotype: 'Russian Honey'            },
+  { match: { A: AGOUTI, D: ['d/d'], P: ['p/p'], M: ['m/m'] }, phenotype: 'Russian Honey Agouti'     },
+
+  // Non-Russian 3-dilution combos
+  { match: { A: BLACK,  G: ['g/g'], R: ['r/r'], M: ['m/m'] }, phenotype: 'Lavender Beige'           },
+  { match: { A: AGOUTI, G: ['g/g'], R: ['r/r'], M: ['m/m'] }, phenotype: 'Lavender Fawn'            },
+  { match: { A: AGOUTI, G: ['g/g'], P: ['p/p'], M: ['m/m'] }, phenotype: 'Lavender Silver Fawn'     },
+  { match: { A: BLACK,  B: ['b/b'], G: ['g/g'], R: ['r/r'] }, phenotype: 'Blue Caramel'             },
+  { match: { A: AGOUTI, B: ['b/b'], G: ['g/g'], R: ['r/r'] }, phenotype: 'Blue Saffron'             },
+  { match: { A: BLACK,  B: ['b/b'], G: ['g/g'], P: ['p/p'] }, phenotype: 'Blue Creme'               },
+  { match: { A: AGOUTI, B: ['b/b'], G: ['g/g'], P: ['p/p'] }, phenotype: 'Blue Creme Agouti'        },
+  { match: { A: BLACK,  B: ['b/b'], R: ['r/r'], M: ['m/m'] }, phenotype: 'Chocolate Mocha'          },
+  { match: { A: AGOUTI, B: ['b/b'], R: ['r/r'], M: ['m/m'] }, phenotype: 'Cinnamon Argente'         },
+  { match: { A: BLACK,  B: ['b/b'], P: ['p/p'], M: ['m/m'] }, phenotype: 'Chocolate Honey'          },
+  { match: { A: AGOUTI, B: ['b/b'], P: ['p/p'], M: ['m/m'] }, phenotype: 'Cinnamon Honey'           },
+
+  // =========================================================
+  // 2-LOCUS COMPOUND DILUTIONS
   // =========================================================
   { match: { A: BLACK,  D: ['d/d'], R: ['r/r'] }, phenotype: 'Russian Beige'            },
   { match: { A: AGOUTI, D: ['d/d'], R: ['r/r'] }, phenotype: 'Russian Topaz'            },
