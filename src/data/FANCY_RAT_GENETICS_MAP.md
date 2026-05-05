@@ -125,6 +125,7 @@
 | B + M | Coffee | Coffee Agouti | ✅ |
 | B + R | Caramel | Saffron | ✅ |
 | B + P | Creme | Creme Agouti | ✅ |
+| P + R | Champagne Beige | Silver Topaz | ✅ |
 | D + G + M | Russian Lavender | Russian Lavender Agouti | ✅ |
 | B + D + G | Russian Platinum | Russian Platinum Agouti | ✅ |
 | D + R + M | Russian Mocha | Russian Argente | ✅ |
@@ -135,11 +136,16 @@
 | D + G + P | Russian Apricot | Russian Apricot Agouti | ✅ |
 | D + P + M | Russian Honey | Russian Honey Agouti | ✅ |
 | G + R + M | Lavender Beige | Lavender Fawn | ✅ |
-| G + P + M | — | Lavender Silver Fawn | ✅ |
+| G + P + M | Lavender Champagne | Lavender Silver Fawn | ✅ |
 | B + G + R | Blue Caramel | Blue Saffron | ✅ |
 | B + G + P | Blue Creme | Blue Creme Agouti | ✅ |
 | B + R + M | Chocolate Mocha | Cinnamon Argente | ✅ |
 | B + P + M | Chocolate Honey | Cinnamon Honey | ✅ |
+| B + G + M | Lavender Chocolate | Lavender Chocolate Agouti | ✅ |
+| B + P + R | Caramel Champagne | Saffron Silver Fawn | ✅ |
+| D + P + R | Russian Champagne Beige | Russian Silver Topaz | ✅ |
+| G + P + R | Apricot Beige | Apricot Topaz | ✅ |
+| M + P + R | Honey Beige | Honey Topaz | ✅ |
 
 ---
 

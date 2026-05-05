@@ -142,6 +142,7 @@ export const FANCY_RAT_PHENOTYPE_RULES = [
   // Non-Russian 3-dilution combos
   { match: { A: BLACK,  G: ['g/g'], R: ['r/r'], M: ['m/m'] }, phenotype: 'Lavender Beige'           },
   { match: { A: AGOUTI, G: ['g/g'], R: ['r/r'], M: ['m/m'] }, phenotype: 'Lavender Fawn'            },
+  { match: { A: BLACK,  G: ['g/g'], P: ['p/p'], M: ['m/m'] }, phenotype: 'Lavender Champagne'       },
   { match: { A: AGOUTI, G: ['g/g'], P: ['p/p'], M: ['m/m'] }, phenotype: 'Lavender Silver Fawn'     },
   { match: { A: BLACK,  B: ['b/b'], G: ['g/g'], R: ['r/r'] }, phenotype: 'Blue Caramel'             },
   { match: { A: AGOUTI, B: ['b/b'], G: ['g/g'], R: ['r/r'] }, phenotype: 'Blue Saffron'             },
@@ -151,6 +152,16 @@ export const FANCY_RAT_PHENOTYPE_RULES = [
   { match: { A: AGOUTI, B: ['b/b'], R: ['r/r'], M: ['m/m'] }, phenotype: 'Cinnamon Argente'         },
   { match: { A: BLACK,  B: ['b/b'], P: ['p/p'], M: ['m/m'] }, phenotype: 'Chocolate Honey'          },
   { match: { A: AGOUTI, B: ['b/b'], P: ['p/p'], M: ['m/m'] }, phenotype: 'Cinnamon Honey'           },
+  { match: { A: BLACK,  B: ['b/b'], G: ['g/g'], M: ['m/m'] }, phenotype: 'Lavender Chocolate'       },
+  { match: { A: AGOUTI, B: ['b/b'], G: ['g/g'], M: ['m/m'] }, phenotype: 'Lavender Chocolate Agouti'},
+  { match: { A: BLACK,  B: ['b/b'], P: ['p/p'], R: ['r/r'] }, phenotype: 'Caramel Champagne'        },
+  { match: { A: AGOUTI, B: ['b/b'], P: ['p/p'], R: ['r/r'] }, phenotype: 'Saffron Silver Fawn'      },
+  { match: { A: BLACK,  D: ['d/d'], P: ['p/p'], R: ['r/r'] }, phenotype: 'Russian Champagne Beige'  },
+  { match: { A: AGOUTI, D: ['d/d'], P: ['p/p'], R: ['r/r'] }, phenotype: 'Russian Silver Topaz'     },
+  { match: { A: BLACK,  G: ['g/g'], P: ['p/p'], R: ['r/r'] }, phenotype: 'Apricot Beige'            },
+  { match: { A: AGOUTI, G: ['g/g'], P: ['p/p'], R: ['r/r'] }, phenotype: 'Apricot Topaz'            },
+  { match: { A: BLACK,  M: ['m/m'], P: ['p/p'], R: ['r/r'] }, phenotype: 'Honey Beige'              },
+  { match: { A: AGOUTI, M: ['m/m'], P: ['p/p'], R: ['r/r'] }, phenotype: 'Honey Topaz'              },
 
   // =========================================================
   // 2-LOCUS COMPOUND DILUTIONS
@@ -183,6 +194,8 @@ export const FANCY_RAT_PHENOTYPE_RULES = [
   { match: { A: AGOUTI, B: ['b/b'], R: ['r/r'] }, phenotype: 'Saffron'                 },
   { match: { A: BLACK,  B: ['b/b'], P: ['p/p'] }, phenotype: 'Creme'                   },
   { match: { A: AGOUTI, B: ['b/b'], P: ['p/p'] }, phenotype: 'Creme Agouti'            },
+  { match: { A: BLACK,  P: ['p/p'], R: ['r/r'] }, phenotype: 'Champagne Beige'         },
+  { match: { A: AGOUTI, P: ['p/p'], R: ['r/r'] }, phenotype: 'Silver Topaz'            },
 
   // =========================================================
   // SINGLE DILUTION — BLACK BASE (a/a)
