@@ -11,8 +11,8 @@
  *
  * Locus symbols match the geneLoci keys returned by the API (post symbol-override):
  *   A, B, Bu, C, D, G, M, P, R   (color genes — live DB)
- *   Dal, Du, H, Ma, Me, Pe, Ro, Wh, Ws    (marking genes — not yet in DB)
- *   Re, Ve, Br, wo, Wa, Ki, Sh            (coat genes — not yet in DB)
+ *   Dal, Du, H, Ma, Me, Pe, Ro, Wh, Ws    (marking genes)
+ *   Re, Ve, Br, wo, Wa, Ki, Sh            (coat genes)
  *
  * A-locus shorthands used throughout:
  *   BLACK  = a/a   (self/black phenotype)
@@ -136,7 +136,6 @@ export const FANCY_RAT_PHENOTYPE_RULES = [
 
   // PEARL (Pe) & MERLE (Me): handled as modifiers in matchFancyRatPhenotype.
   // They append ' Pearl' / ' Merle' to any phenotype when m/m is also present.
-  // Pe and Me genes are not yet in the live DB.
 
   // =========================================================
   // 6-LOCUS COMPOUND DILUTIONS — must be before all others
@@ -376,7 +375,6 @@ function deriveWithCLocus(basePhenotype, cType) {
 /**
  * Apply Pearl / Merle as post-match modifiers.
  * Both only visually express when m/m (Mink locus) is also present.
- * Pe and Me genes are not yet in the live DB.
  */
 function applyModifiers(rule, genotype) {
   if (genotype.M !== 'm/m') return rule;
