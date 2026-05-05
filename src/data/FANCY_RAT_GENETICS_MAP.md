@@ -76,7 +76,7 @@
 |----------|-----------|--------|
 | P/P, P/p | No effect | ✅ |
 | p/p + Black base | Champagne | ✅ |
-| p/p + Agouti base | Silver Fawn (Amber) | ✅ |
+| p/p + Agouti base | Silver Fawn | ✅ |
 
 ---
 

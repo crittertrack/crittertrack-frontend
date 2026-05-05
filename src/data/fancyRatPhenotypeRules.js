@@ -44,7 +44,6 @@ export const FANCY_RAT_PHENOTYPE_RULES = [
   { match: { C: ['ct/cm'] }, phenotype: 'Unknown (ct/cm)' },
   { match: { C: ['ct/ch'] }, phenotype: 'Unknown (ct/ch)' },
   { match: { C: ['ct/c']  }, phenotype: 'Unknown (ct/c)'  },
-  { match: { C: ['cm/c']  }, phenotype: 'Unknown (cm/c)'  },
 
   // =========================================================
   // BURMESE × SIAMESE / HIMALAYAN — Bu + ch allele
@@ -62,22 +61,40 @@ export const FANCY_RAT_PHENOTYPE_RULES = [
   { match: { A: AGOUTI, Bu: ['Bu/bu'], C: ['cm/cm', 'cm/ch', 'cm/c'] }, phenotype: 'Wheaten Marten'  },
 
   // =========================================================
+  // SIAMESE (ch/ch) × DILUTION COMPOUNDS — most specific first
+  // =========================================================
+  { match: { C: ['ch/ch'], D: ['d/d'], M: ['m/m'] }, phenotype: 'Dove Point Siamese'    },
+  { match: { C: ['ch/ch'], D: ['d/d'] },              phenotype: 'Russian Point Siamese' },
+  { match: { C: ['ch/ch'], M: ['m/m'] },              phenotype: 'Mink Point Siamese'    },
+
+  // =========================================================
+  // HIMALAYAN (ch/c) × DILUTION COMPOUNDS
+  // =========================================================
+  { match: { C: ['ch/c'], D: ['d/d'] }, phenotype: 'Russian Point Himalayan' },
+
+  // =========================================================
+  // MARTEN (cm/*) × DILUTION COMPOUNDS — Black base only
+  // =========================================================
+  { match: { A: BLACK, C: ['cm/cm', 'cm/ch', 'cm/c'], D: ['d/d'] }, phenotype: 'Russian Marten' },
+  { match: { A: BLACK, C: ['cm/cm', 'cm/ch', 'cm/c'], M: ['m/m'] }, phenotype: 'Mink Marten'    },
+
+  // =========================================================
   // BLACK BASE (a/a) + C-LOCUS EXPRESSIONS
   // =========================================================
-  { match: { A: BLACK, C: ['ch/c']  }, phenotype: 'Himalayan'     },
-  { match: { A: BLACK, C: ['ch/ch'] }, phenotype: 'Siamese'       },
-  { match: { A: BLACK, C: ['cm/ch'] }, phenotype: 'Pointed Marten'},
-  { match: { A: BLACK, C: ['cm/cm'] }, phenotype: 'Marten'        },
-  { match: { A: BLACK, C: ['ct/ct'] }, phenotype: 'Tonkinese'     },
+  { match: { A: BLACK, C: ['ch/c']            }, phenotype: 'Himalayan'      },
+  { match: { A: BLACK, C: ['ch/ch']           }, phenotype: 'Siamese'        },
+  { match: { A: BLACK, C: ['cm/ch']           }, phenotype: 'Pointed Marten' },
+  { match: { A: BLACK, C: ['cm/cm', 'cm/c']   }, phenotype: 'Marten'         },
+  { match: { A: BLACK, C: ['ct/ct']           }, phenotype: 'Tonkinese'      },
 
   // =========================================================
   // AGOUTI BASE (A/-) + C-LOCUS EXPRESSIONS
   // =========================================================
-  { match: { A: AGOUTI, C: ['ch/c']  }, phenotype: 'Himalayan'              },
-  { match: { A: AGOUTI, C: ['ch/ch'] }, phenotype: 'Siamese'                },
-  { match: { A: AGOUTI, C: ['cm/ch'] }, phenotype: 'Agouti Pointed Marten'  },
-  { match: { A: AGOUTI, C: ['cm/cm'] }, phenotype: 'Agouti Marten'          },
-  { match: { A: AGOUTI, C: ['ct/ct'] }, phenotype: 'Agouti Tonkinese'       },
+  { match: { A: AGOUTI, C: ['ch/c']           }, phenotype: 'Himalayan'              },
+  { match: { A: AGOUTI, C: ['ch/ch']          }, phenotype: 'Siamese'                },
+  { match: { A: AGOUTI, C: ['cm/ch']          }, phenotype: 'Agouti Pointed Marten'  },
+  { match: { A: AGOUTI, C: ['cm/cm', 'cm/c']  }, phenotype: 'Agouti Marten'          },
+  { match: { A: AGOUTI, C: ['ct/ct']          }, phenotype: 'Agouti Tonkinese'       },
 
   // =========================================================
   // BURMESE — Bu present but no restrictive C allele (does not visually express)
@@ -95,7 +112,7 @@ export const FANCY_RAT_PHENOTYPE_RULES = [
   { match: { A: BLACK, B:  ['b/b']    }, phenotype: 'Chocolate'                                       },
   { match: { A: BLACK, D:  ['d/d']    }, phenotype: 'Russian Blue'                                    },
   { match: { A: BLACK, G:  ['g/g']    }, phenotype: 'American Blue'                                   },
-  { match: { A: BLACK, M:  ['m/m']    }, phenotype: 'Mink',           unconfirmed: true, notes: 'Mink (m/m) is typically not visually distinct on a black (a/a) base — no separate phenotype name' },
+  { match: { A: BLACK, M:  ['m/m']    }, phenotype: 'Mink' },
   { match: { A: BLACK, P:  ['p/p']    }, phenotype: 'Champagne'                                       },
   { match: { A: BLACK, R:  ['r/r']    }, phenotype: 'Beige'                                           },
 
@@ -106,7 +123,7 @@ export const FANCY_RAT_PHENOTYPE_RULES = [
   { match: { A: AGOUTI, D:  ['d/d']   }, phenotype: 'Russian Blue Agouti'                           },
   { match: { A: AGOUTI, G:  ['g/g']   }, phenotype: 'American Blue Agouti (Opal)'                   },
   { match: { A: AGOUTI, M:  ['m/m']   }, phenotype: 'Cinnamon'                                       },
-  { match: { A: AGOUTI, P:  ['p/p']   }, phenotype: 'Silver Fawn (Amber)'                            },
+  { match: { A: AGOUTI, P:  ['p/p']   }, phenotype: 'Silver Fawn'                                    },
   { match: { A: AGOUTI, R:  ['r/r']   }, phenotype: 'Topaz'                                          },
 
 ];
