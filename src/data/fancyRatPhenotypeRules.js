@@ -442,9 +442,9 @@ const DU_PHENOTYPES  = { 'du/du': 'Dumbo' };
 function applyModifiers(rule, genotype) {
   let phenotype = rule.phenotype;
 
-  // --- Hooded locus ---
+  // --- Hooded locus (Self = no marking, skip) ---
   const hLabel = H_PHENOTYPES[genotype.H];
-  if (hLabel) phenotype += ` ${hLabel}`;
+  if (hLabel && hLabel !== 'Self') phenotype += ` ${hLabel}`;
 
   // --- Other marking genes ---
   const dalLabel = DAL_PHENOTYPES[genotype.Dal];
