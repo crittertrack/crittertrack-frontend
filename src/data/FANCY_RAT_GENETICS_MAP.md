@@ -90,12 +90,20 @@
 ---
 
 ### Bu — Burmese locus
-| Notation | Phenotype | Mapped |
-|----------|-----------|--------|
-| bu/bu | No effect | ✅ |
-| Bu/bu + full C | Burmese | ✅ (Black & Agouti base, requires FULL_C) |
-| Bu/Bu + full C | Double Burmese | ✅ (Black & Agouti base, requires FULL_C) |
-| Bu/- + non-full C | C-locus phenotype takes priority | ✅ (falls through to C-locus rule) |
+| Notation | Base | C-locus | Phenotype | Mapped |
+|----------|------|---------|-----------|--------|
+| bu/bu | any | any | No effect | ✅ |
+| Bu/bu or Bu/Bu | any | C/C, C/ct, C/cm, C/ch, C/c (full) | Base color (note: Bu doesn’t express) | ✅ |
+| Bu/bu | Black (a/a) | ch/ch or ch/c | Burmese | ✅ |
+| Bu/Bu | Black (a/a) | ch/ch or ch/c | Sable | ✅ |
+| Bu/bu | Agouti (A/-) | ch/ch or ch/c | Wheaten Burmese | ✅ |
+| Bu/Bu | Agouti (A/-) | ch/ch or ch/c | Wheaten Sable | ✅ |
+| Bu/bu | Black (a/a) | cm/cm, cm/ch, or cm/c | Burmese Marten | ✅ |
+| Bu/bu | Agouti (A/-) | cm/cm, cm/ch, or cm/c | Wheaten Marten | ✅ |
+| Bu/bu or Bu/Bu | Black (a/a) | c/c | Stone | ✅ |
+| Bu/bu or Bu/Bu | Agouti (A/-) | c/c | Wheaten Stone | ✅ |
+
+> **Note:** Bu/Bu on a Marten (cm) base is not yet mapped — phenotype unconfirmed.
 
 ---
 

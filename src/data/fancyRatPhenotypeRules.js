@@ -28,6 +28,12 @@ const FULL_C = ['C/C', 'C/ct', 'C/cm', 'C/ch', 'C/c'];
 export const FANCY_RAT_PHENOTYPE_RULES = [
 
   // =========================================================
+  // STONE & WHEATEN STONE — Bu + Albino (must precede plain Albino rule)
+  // =========================================================
+  { match: { A: AGOUTI, Bu: ['Bu/bu', 'Bu/Bu'], C: ['c/c'] }, phenotype: 'Wheaten Stone' },
+  { match: { A: BLACK,  Bu: ['Bu/bu', 'Bu/Bu'], C: ['c/c'] }, phenotype: 'Stone'         },
+
+  // =========================================================
   // ALBINO — masks all other color/pattern expression
   // =========================================================
   { match: { C: ['c/c'] }, phenotype: 'Albino' },
@@ -39,6 +45,21 @@ export const FANCY_RAT_PHENOTYPE_RULES = [
   { match: { C: ['ct/ch'] }, phenotype: 'Unknown (ct/ch)' },
   { match: { C: ['ct/c']  }, phenotype: 'Unknown (ct/c)'  },
   { match: { C: ['cm/c']  }, phenotype: 'Unknown (cm/c)'  },
+
+  // =========================================================
+  // BURMESE × SIAMESE / HIMALAYAN — Bu + ch allele
+  // Must come before plain C-locus rules
+  // =========================================================
+  { match: { A: BLACK,  Bu: ['Bu/bu'], C: ['ch/ch', 'ch/c'] }, phenotype: 'Burmese'         },
+  { match: { A: BLACK,  Bu: ['Bu/Bu'], C: ['ch/ch', 'ch/c'] }, phenotype: 'Sable'           },
+  { match: { A: AGOUTI, Bu: ['Bu/bu'], C: ['ch/ch', 'ch/c'] }, phenotype: 'Wheaten Burmese' },
+  { match: { A: AGOUTI, Bu: ['Bu/Bu'], C: ['ch/ch', 'ch/c'] }, phenotype: 'Wheaten Sable'   },
+
+  // =========================================================
+  // BURMESE × MARTEN — Bu + cm allele
+  // =========================================================
+  { match: { A: BLACK,  Bu: ['Bu/bu'], C: ['cm/cm', 'cm/ch', 'cm/c'] }, phenotype: 'Burmese Marten'  },
+  { match: { A: AGOUTI, Bu: ['Bu/bu'], C: ['cm/cm', 'cm/ch', 'cm/c'] }, phenotype: 'Wheaten Marten'  },
 
   // =========================================================
   // BLACK BASE (a/a) + C-LOCUS EXPRESSIONS
@@ -59,14 +80,14 @@ export const FANCY_RAT_PHENOTYPE_RULES = [
   { match: { A: AGOUTI, C: ['ct/ct'] }, phenotype: 'Agouti Tonkinese'       },
 
   // =========================================================
-  // BURMESE — hypostatic to C-locus
-  // Bu only expresses when C is full color (C/C or carrier).
-  // Any non-full C allele pairing takes visual priority over Bu.
+  // BURMESE — Bu present but no restrictive C allele (does not visually express)
+  // Bu only shows a phenotype when paired with ch, cm, or c.
+  // Without those, the animal shows its base color — note is attached.
   // =========================================================
-  { match: { A: BLACK,  Bu: ['Bu/bu'], C: FULL_C }, phenotype: 'Burmese',        notes: 'Burmese is hypostatic to C-locus; C-locus phenotype takes priority if C is non-full' },
-  { match: { A: BLACK,  Bu: ['Bu/Bu'], C: FULL_C }, phenotype: 'Double Burmese', notes: 'Burmese is hypostatic to C-locus' },
-  { match: { A: AGOUTI, Bu: ['Bu/bu'], C: FULL_C }, phenotype: 'Burmese',        notes: 'Burmese is hypostatic to C-locus' },
-  { match: { A: AGOUTI, Bu: ['Bu/Bu'], C: FULL_C }, phenotype: 'Double Burmese', notes: 'Burmese is hypostatic to C-locus' },
+  { match: { A: BLACK,  Bu: ['Bu/bu'] }, phenotype: 'Black',  notes: 'Bu present but does not visually express — requires a restrictive C allele (ch, cm, or c)' },
+  { match: { A: BLACK,  Bu: ['Bu/Bu'] }, phenotype: 'Black',  notes: 'Bu/Bu present but does not visually express — requires a restrictive C allele (ch, cm, or c)' },
+  { match: { A: AGOUTI, Bu: ['Bu/bu'] }, phenotype: 'Agouti', notes: 'Bu present but does not visually express — requires a restrictive C allele (ch, cm, or c)' },
+  { match: { A: AGOUTI, Bu: ['Bu/Bu'] }, phenotype: 'Agouti', notes: 'Bu/Bu present but does not visually express — requires a restrictive C allele (ch, cm, or c)' },
 
   // =========================================================
   // BLACK BASE + DILUTION / MODIFIER GENES
