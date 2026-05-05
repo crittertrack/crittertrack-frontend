@@ -161,6 +161,13 @@
 | B + G + P + R | Apricot Caramel | Apricot Saffron | ✅ |
 | B + M + P + R | Honey Caramel | Honey Saffron | ✅ |
 | G + M + P + R | Lavender Champagne Beige | Lavender Silver Topaz | ✅ |
+| B + D + G + M + P | Russian Lavender Chocolate Champagne | Russian Lavender Chocolate Silver Fawn | ✅ |
+| B + D + G + M + R | Russian Lavender Caramel | Russian Lavender Saffron | ✅ |
+| B + D + G + P + R | Russian Apricot Caramel | Russian Apricot Saffron | ✅ |
+| B + D + M + P + R | Russian Honey Caramel | Russian Honey Saffron | ✅ |
+| D + G + M + P + R | Russian Lavender Champagne Beige | Russian Lavender Silver Topaz | ✅ |
+| B + G + M + P + R | Lavender Chocolate Champagne Beige | Lavender Chocolate Silver Topaz | ✅ |
+| B + D + G + M + P + R | Russian Lavender Chocolate Champagne Beige | Russian Lavender Chocolate Silver Topaz | ✅ |
 
 ---
 
