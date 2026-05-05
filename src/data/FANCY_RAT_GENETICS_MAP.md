@@ -66,7 +66,7 @@
 | Notation | Phenotype | Mapped |
 |----------|-----------|--------|
 | M/M, M/m | No effect | ✅ |
-| m/m + Black base | Mink ⚠️ | ✅ (flagged unconfirmed — may not be visually distinct) |
+| m/m + Black base | Mink | ✅ |
 | m/m + Agouti base | Cinnamon | ✅ |
 
 ---
@@ -107,42 +107,59 @@
 
 ---
 
-## Compound Dilutions — TODO
+## Compound Dilutions
 
-Two or more recessive dilutions expressed together. These are **not yet mapped** and fall through to unresolved.
-
-| Genes | Notation | Expected Phenotype | Status |
-|-------|----------|--------------------|--------|
-| B + D | b/b + d/d | Lilac (Black base) | ❌ |
-| B + D | b/b + d/d | Lilac Agouti (Agouti base) | ❌ |
-| B + P | b/b + p/p | Buff (Black base) | ❌ |
-| B + P | b/b + p/p | Buff Agouti (Agouti base) | ❌ |
-| D + P | d/d + p/p | Russian Blue Champagne (Black base) | ❌ |
-| D + P | d/d + p/p | Russian Blue Silver Fawn (Agouti base) | ❌ |
-| G + P | g/g + p/p | ? | ❌ |
-| M + B | m/m + b/b | Chocolate Mink (Agouti base) | ❌ |
-| M + D | m/m + d/d | Mink Russian Blue? | ❌ |
-| M + P | m/m + p/p | ? | ❌ |
-| B + D + P | b/b + d/d + p/p | Lilac Champagne | ❌ |
-| B + R | b/b + r/r | ? | ❌ |
-| D + R | d/d + r/r | ? | ❌ |
-| P + R | p/p + r/r | ? | ❌ |
+| Genes | Black base (a/a) | Agouti base (A/-) | Mapped |
+|-------|-----------------|-------------------|--------|
+| D + R | Russian Beige | Russian Topaz | ✅ |
+| D + P | Russian Champagne | Russian Silver Fawn | ✅ |
+| D + G | Russian Silver | Russian Silver Agouti | ✅ |
+| D + M | Russian Dove | Russian Cinnamon | ✅ |
+| B + D | Russian Chocolate | Russian Chocolate Agouti | ✅ |
+| G + R | Blue Silver | Opal Fawn | ✅ |
+| G + P | Apricot | Apricot Agouti | ✅ |
+| B + G | Platinum | Platinum Agouti | ✅ |
+| G + M | Lavender | Lavender Agouti | ✅ |
+| R + M | Mocha | Argente | ✅ |
+| P + M | Honey | Honey Agouti | ✅ |
+| B + M | Coffee | Coffee Agouti | ✅ |
+| B + R | Caramel | Saffron | ✅ |
+| B + P | Creme | Creme Agouti | ✅ |
+| B + D + P | ? | ? | ❌ |
+| D + G + P | ? | ? | ❌ |
+| D + G + R | ? | ? | ❌ |
+| D + G + M | ? | ? | ❌ |
 
 ---
 
-## C-locus × Dilution Interactions — TODO
+## C-locus × Dilution Interactions
 
-C-locus phenotypes (Siamese, Himalayan, Marten etc.) combined with dilution genes.
+| C genotype | Dilution | Phenotype | Mapped |
+|------------|----------|-----------|--------|
+| ch/ch | d/d + m/m | Dove Point Siamese | ✅ |
+| ch/ch | d/d | Russian Point Siamese | ✅ |
+| ch/ch | m/m | Mink Point Siamese | ✅ |
+| ch/c | d/d | Russian Point Himalayan | ✅ |
+| cm/* (Black) | d/d | Russian Marten | ✅ |
+| cm/* (Black) | m/m | Mink Marten | ✅ |
+| ch/* + b/b | — | Chocolate Point / Chocolate Siamese | ❌ |
+| cm/* + b/b | — | Chocolate Marten | ❌ |
+| ch/* + p/p | — | Champagne Point | ❌ |
+| ch/* + g/g | — | Blue Point | ❌ |
 
-| Example | Expected Phenotype | Status |
-|---------|--------------------|--------|
-| Siamese + Chocolate (b/b) | Chocolate Siamese / Chocolate Point | ❌ |
-| Siamese + Russian Blue (d/d) | Blue Point Siamese | ❌ |
-| Himalayan + Chocolate (b/b) | Chocolate Himalayan | ❌ |
-| Marten + Chocolate (b/b) | Chocolate Marten | ❌ |
-| Siamese + Mink (m/m) | Mink Siamese | ❌ |
-| Himalayan + Champagne (p/p) | Champagne Point | ❌ |
-| ... | ... | ❌ |
+---
+
+## Pearl (Pe) & Merle (Me) × Mink
+
+> Pe and Me are **not yet in the live DB**. Rules are pre-written and will activate once the genes are added.
+> Both only visually alter phenotype on `m/m` — they have no effect on other base colors.
+
+| Gene | Base | Phenotype | Mapped |
+|------|------|-----------|--------|
+| Pe/pe | Agouti + m/m | Cinnamon Pearl | ✅ (pending DB) |
+| Pe/pe | Black + m/m | Pearl | ✅ (pending DB) |
+| Me/me | Agouti + m/m | Cinnamon Merle | ✅ (pending DB) |
+| Me/me | Black + m/m | Merle | ✅ (pending DB) |
 
 ---
 

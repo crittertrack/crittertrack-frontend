@@ -107,24 +107,65 @@ export const FANCY_RAT_PHENOTYPE_RULES = [
   { match: { A: AGOUTI, Bu: ['Bu/Bu'] }, phenotype: 'Agouti', notes: 'Bu/Bu present but does not visually express — requires a restrictive C allele (ch, cm, or c)' },
 
   // =========================================================
-  // BLACK BASE + DILUTION / MODIFIER GENES
+  // PEARL (Pe) & MERLE (Me) — only alter phenotype on m/m base
+  // Pe and Me are not yet in the live DB; rules ready for when added.
   // =========================================================
-  { match: { A: BLACK, B:  ['b/b']    }, phenotype: 'Chocolate'                                       },
-  { match: { A: BLACK, D:  ['d/d']    }, phenotype: 'Russian Blue'                                    },
-  { match: { A: BLACK, G:  ['g/g']    }, phenotype: 'American Blue'                                   },
-  { match: { A: BLACK, M:  ['m/m']    }, phenotype: 'Mink' },
-  { match: { A: BLACK, P:  ['p/p']    }, phenotype: 'Champagne'                                       },
-  { match: { A: BLACK, R:  ['r/r']    }, phenotype: 'Beige'                                           },
+  { match: { A: AGOUTI, M: ['m/m'], Pe: ['Pe/pe'] }, phenotype: 'Cinnamon Pearl', notes: 'Pe gene not yet in DB' },
+  { match: { A: BLACK,  M: ['m/m'], Pe: ['Pe/pe'] }, phenotype: 'Pearl',          notes: 'Pe gene not yet in DB' },
+  { match: { A: AGOUTI, M: ['m/m'], Me: ['Me/me'] }, phenotype: 'Cinnamon Merle', notes: 'Me gene not yet in DB' },
+  { match: { A: BLACK,  M: ['m/m'], Me: ['Me/me'] }, phenotype: 'Merle',          notes: 'Me gene not yet in DB' },
 
   // =========================================================
-  // AGOUTI BASE + DILUTION / MODIFIER GENES
+  // TRIPLE COMPOUND DILUTIONS — most specific first
   // =========================================================
-  { match: { A: AGOUTI, B:  ['b/b']   }, phenotype: 'Chocolate Agouti'                               },
-  { match: { A: AGOUTI, D:  ['d/d']   }, phenotype: 'Russian Blue Agouti'                           },
-  { match: { A: AGOUTI, G:  ['g/g']   }, phenotype: 'American Blue Agouti (Opal)'                   },
-  { match: { A: AGOUTI, M:  ['m/m']   }, phenotype: 'Cinnamon'                                       },
-  { match: { A: AGOUTI, P:  ['p/p']   }, phenotype: 'Silver Fawn'                                    },
-  { match: { A: AGOUTI, R:  ['r/r']   }, phenotype: 'Topaz'                                          },
+  { match: { A: BLACK,  D: ['d/d'], R: ['r/r'] }, phenotype: 'Russian Beige'            },
+  { match: { A: AGOUTI, D: ['d/d'], R: ['r/r'] }, phenotype: 'Russian Topaz'            },
+  { match: { A: BLACK,  D: ['d/d'], P: ['p/p'] }, phenotype: 'Russian Champagne'        },
+  { match: { A: AGOUTI, D: ['d/d'], P: ['p/p'] }, phenotype: 'Russian Silver Fawn'      },
+  { match: { A: BLACK,  D: ['d/d'], G: ['g/g'] }, phenotype: 'Russian Silver'           },
+  { match: { A: AGOUTI, D: ['d/d'], G: ['g/g'] }, phenotype: 'Russian Silver Agouti'    },
+  { match: { A: BLACK,  D: ['d/d'], M: ['m/m'] }, phenotype: 'Russian Dove'             },
+  { match: { A: AGOUTI, D: ['d/d'], M: ['m/m'] }, phenotype: 'Russian Cinnamon'         },
+  { match: { A: BLACK,  B: ['b/b'], D: ['d/d'] }, phenotype: 'Russian Chocolate'        },
+  { match: { A: AGOUTI, B: ['b/b'], D: ['d/d'] }, phenotype: 'Russian Chocolate Agouti' },
+  { match: { A: BLACK,  G: ['g/g'], R: ['r/r'] }, phenotype: 'Blue Silver'              },
+  { match: { A: AGOUTI, G: ['g/g'], R: ['r/r'] }, phenotype: 'Opal Fawn'               },
+  { match: { A: BLACK,  G: ['g/g'], P: ['p/p'] }, phenotype: 'Apricot'                 },
+  { match: { A: AGOUTI, G: ['g/g'], P: ['p/p'] }, phenotype: 'Apricot Agouti'          },
+  { match: { A: BLACK,  B: ['b/b'], G: ['g/g'] }, phenotype: 'Platinum'                },
+  { match: { A: AGOUTI, B: ['b/b'], G: ['g/g'] }, phenotype: 'Platinum Agouti'         },
+  { match: { A: BLACK,  G: ['g/g'], M: ['m/m'] }, phenotype: 'Lavender'                },
+  { match: { A: AGOUTI, G: ['g/g'], M: ['m/m'] }, phenotype: 'Lavender Agouti'         },
+  { match: { A: BLACK,  R: ['r/r'], M: ['m/m'] }, phenotype: 'Mocha'                   },
+  { match: { A: AGOUTI, R: ['r/r'], M: ['m/m'] }, phenotype: 'Argente'                 },
+  { match: { A: BLACK,  P: ['p/p'], M: ['m/m'] }, phenotype: 'Honey'                   },
+  { match: { A: AGOUTI, P: ['p/p'], M: ['m/m'] }, phenotype: 'Honey Agouti'            },
+  { match: { A: BLACK,  B: ['b/b'], M: ['m/m'] }, phenotype: 'Coffee'                  },
+  { match: { A: AGOUTI, B: ['b/b'], M: ['m/m'] }, phenotype: 'Coffee Agouti'           },
+  { match: { A: BLACK,  B: ['b/b'], R: ['r/r'] }, phenotype: 'Caramel'                 },
+  { match: { A: AGOUTI, B: ['b/b'], R: ['r/r'] }, phenotype: 'Saffron'                 },
+  { match: { A: BLACK,  B: ['b/b'], P: ['p/p'] }, phenotype: 'Creme'                   },
+  { match: { A: AGOUTI, B: ['b/b'], P: ['p/p'] }, phenotype: 'Creme Agouti'            },
+
+  // =========================================================
+  // SINGLE DILUTION — BLACK BASE (a/a)
+  // =========================================================
+  { match: { A: BLACK, B: ['b/b'] }, phenotype: 'Chocolate'    },
+  { match: { A: BLACK, D: ['d/d'] }, phenotype: 'Russian Blue' },
+  { match: { A: BLACK, G: ['g/g'] }, phenotype: 'American Blue'},
+  { match: { A: BLACK, M: ['m/m'] }, phenotype: 'Mink'         },
+  { match: { A: BLACK, P: ['p/p'] }, phenotype: 'Champagne'    },
+  { match: { A: BLACK, R: ['r/r'] }, phenotype: 'Beige'        },
+
+  // =========================================================
+  // SINGLE DILUTION — AGOUTI BASE (A/-)
+  // =========================================================
+  { match: { A: AGOUTI, B: ['b/b'] }, phenotype: 'Chocolate Agouti'          },
+  { match: { A: AGOUTI, D: ['d/d'] }, phenotype: 'Russian Blue Agouti'       },
+  { match: { A: AGOUTI, G: ['g/g'] }, phenotype: 'American Blue Agouti (Opal)'},
+  { match: { A: AGOUTI, M: ['m/m'] }, phenotype: 'Cinnamon'                  },
+  { match: { A: AGOUTI, P: ['p/p'] }, phenotype: 'Silver Fawn'               },
+  { match: { A: AGOUTI, R: ['r/r'] }, phenotype: 'Topaz'                     },
 
 ];
 
