@@ -130,6 +130,7 @@ export const FANCY_RAT_PHENOTYPE_RULES = [
   // BURMESE — Bu present but no restrictive C allele (does not visually express)
   // Bu only shows a phenotype when paired with ch, cm, or c.
   // Without those, the animal shows its base color — note is attached.
+  // C absent entirely = same as full-C: no expression.
   // =========================================================
   { match: { A: BLACK,  Bu: ['Bu/bu'], C: FULL_C }, phenotype: 'Black',  notes: 'Bu present but does not visually express — requires a restrictive C allele (ch, cm, or c)' },
   { match: { A: BLACK,  Bu: ['Bu/Bu'], C: FULL_C }, phenotype: 'Black',  notes: 'Bu/Bu present but does not visually express — requires a restrictive C allele (ch, cm, or c)' },
@@ -506,7 +507,7 @@ function deriveBuPhenotype(genotype) {
   if (Bu === 'Bu/Bu' && ['cm/cm', 'cm/ch', 'cm/c'].includes(C)) return null; // Ivory Marten: explicit
 
   const cType = getCType(C);
-  if (!cType) return null;
+  if (!cType) return null; // no restrictive C type — no Burmese expression
 
   const isAgouti = AGOUTI.includes(A);
   const isMarten = cType === 'marten';
