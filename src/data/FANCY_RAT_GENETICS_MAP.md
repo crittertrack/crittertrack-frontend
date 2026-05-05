@@ -181,10 +181,22 @@
 | ch/c | d/d | Russian Point Himalayan | ✅ |
 | cm/* (Black) | d/d | Russian Marten | ✅ |
 | cm/* (Black) | m/m | Mink Marten | ✅ |
-| ch/* + b/b | — | Chocolate Point / Chocolate Siamese | ❌ |
-| cm/* + b/b | — | Chocolate Marten | ❌ |
-| ch/* + p/p | — | Champagne Point | ❌ |
-| ch/* + g/g | — | Blue Point | ❌ |
+| ch/ch + b/b | Chocolate Siamese | Chocolate Agouti Siamese | ✅ |
+| ch/c + b/b | Chocolate Himalayan | Chocolate Agouti Himalayan | ✅ |
+| cm/ch + b/b | Chocolate Pointed Marten | Chocolate Agouti Pointed Marten | ✅ |
+| cm/* + b/b | Chocolate Marten | Chocolate Agouti Marten | ✅ |
+| ch/ch + g/g | American Blue Siamese | American Blue Agouti Siamese | ✅ |
+| ch/c + g/g | American Blue Himalayan | American Blue Agouti Himalayan | ✅ |
+| cm/ch + g/g | American Blue Pointed Marten | American Blue Agouti Pointed Marten | ✅ |
+| cm/* + g/g | American Blue Marten | American Blue Agouti Marten | ✅ |
+| ch/ch + p/p | Champagne Siamese | Silver Fawn Siamese | ✅ |
+| ch/c + p/p | Champagne Himalayan | Silver Fawn Himalayan | ✅ |
+| cm/ch + p/p | Champagne Pointed Marten | Silver Fawn Pointed Marten | ✅ |
+| cm/* + p/p | Champagne Marten | Silver Fawn Marten | ✅ |
+| ch/ch + r/r | Beige Siamese | Topaz Siamese | ✅ |
+| ch/c + r/r | Beige Himalayan | Topaz Himalayan | ✅ |
+| cm/ch + r/r | Beige Pointed Marten | Topaz Pointed Marten | ✅ |
+| cm/* + r/r | Beige Marten | Topaz Marten | ✅ |
 
 ---
 

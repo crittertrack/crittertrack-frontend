@@ -66,17 +66,53 @@ export const FANCY_RAT_PHENOTYPE_RULES = [
   { match: { C: ['ch/ch'], D: ['d/d'], M: ['m/m'] }, phenotype: 'Dove Point Siamese'    },
   { match: { C: ['ch/ch'], D: ['d/d'] },              phenotype: 'Russian Point Siamese' },
   { match: { C: ['ch/ch'], M: ['m/m'] },              phenotype: 'Mink Point Siamese'    },
+  { match: { A: BLACK,  C: ['ch/ch'], B: ['b/b'] },   phenotype: 'Chocolate Siamese'               },
+  { match: { A: AGOUTI, C: ['ch/ch'], B: ['b/b'] },   phenotype: 'Chocolate Agouti Siamese'        },
+  { match: { A: BLACK,  C: ['ch/ch'], G: ['g/g'] },   phenotype: 'American Blue Siamese'           },
+  { match: { A: AGOUTI, C: ['ch/ch'], G: ['g/g'] },   phenotype: 'American Blue Agouti Siamese'    },
+  { match: { A: BLACK,  C: ['ch/ch'], P: ['p/p'] },   phenotype: 'Champagne Siamese'               },
+  { match: { A: AGOUTI, C: ['ch/ch'], P: ['p/p'] },   phenotype: 'Silver Fawn Siamese'             },
+  { match: { A: BLACK,  C: ['ch/ch'], R: ['r/r'] },   phenotype: 'Beige Siamese'                   },
+  { match: { A: AGOUTI, C: ['ch/ch'], R: ['r/r'] },   phenotype: 'Topaz Siamese'                   },
 
   // =========================================================
   // HIMALAYAN (ch/c) × DILUTION COMPOUNDS
   // =========================================================
   { match: { C: ['ch/c'], D: ['d/d'] }, phenotype: 'Russian Point Himalayan' },
+  { match: { A: BLACK,  C: ['ch/c'], B: ['b/b'] },    phenotype: 'Chocolate Himalayan'             },
+  { match: { A: AGOUTI, C: ['ch/c'], B: ['b/b'] },    phenotype: 'Chocolate Agouti Himalayan'      },
+  { match: { A: BLACK,  C: ['ch/c'], G: ['g/g'] },    phenotype: 'American Blue Himalayan'         },
+  { match: { A: AGOUTI, C: ['ch/c'], G: ['g/g'] },    phenotype: 'American Blue Agouti Himalayan'  },
+  { match: { A: BLACK,  C: ['ch/c'], P: ['p/p'] },    phenotype: 'Champagne Himalayan'             },
+  { match: { A: AGOUTI, C: ['ch/c'], P: ['p/p'] },    phenotype: 'Silver Fawn Himalayan'           },
+  { match: { A: BLACK,  C: ['ch/c'], R: ['r/r'] },    phenotype: 'Beige Himalayan'                 },
+  { match: { A: AGOUTI, C: ['ch/c'], R: ['r/r'] },    phenotype: 'Topaz Himalayan'                 },
+
+  // =========================================================
+  // POINTED MARTEN (cm/ch) × DILUTION COMPOUNDS
+  // =========================================================
+  { match: { A: BLACK,  C: ['cm/ch'], B: ['b/b'] },   phenotype: 'Chocolate Pointed Marten'             },
+  { match: { A: AGOUTI, C: ['cm/ch'], B: ['b/b'] },   phenotype: 'Chocolate Agouti Pointed Marten'      },
+  { match: { A: BLACK,  C: ['cm/ch'], G: ['g/g'] },   phenotype: 'American Blue Pointed Marten'         },
+  { match: { A: AGOUTI, C: ['cm/ch'], G: ['g/g'] },   phenotype: 'American Blue Agouti Pointed Marten'  },
+  { match: { A: BLACK,  C: ['cm/ch'], P: ['p/p'] },   phenotype: 'Champagne Pointed Marten'             },
+  { match: { A: AGOUTI, C: ['cm/ch'], P: ['p/p'] },   phenotype: 'Silver Fawn Pointed Marten'           },
+  { match: { A: BLACK,  C: ['cm/ch'], R: ['r/r'] },   phenotype: 'Beige Pointed Marten'                 },
+  { match: { A: AGOUTI, C: ['cm/ch'], R: ['r/r'] },   phenotype: 'Topaz Pointed Marten'                 },
 
   // =========================================================
   // MARTEN (cm/*) × DILUTION COMPOUNDS — Black base only
   // =========================================================
   { match: { A: BLACK, C: ['cm/cm', 'cm/ch', 'cm/c'], D: ['d/d'] }, phenotype: 'Russian Marten' },
   { match: { A: BLACK, C: ['cm/cm', 'cm/ch', 'cm/c'], M: ['m/m'] }, phenotype: 'Mink Marten'    },
+  { match: { A: BLACK,  C: ['cm/cm', 'cm/c'], B: ['b/b'] },   phenotype: 'Chocolate Marten'             },
+  { match: { A: AGOUTI, C: ['cm/cm', 'cm/c'], B: ['b/b'] },   phenotype: 'Chocolate Agouti Marten'      },
+  { match: { A: BLACK,  C: ['cm/cm', 'cm/c'], G: ['g/g'] },   phenotype: 'American Blue Marten'         },
+  { match: { A: AGOUTI, C: ['cm/cm', 'cm/c'], G: ['g/g'] },   phenotype: 'American Blue Agouti Marten'  },
+  { match: { A: BLACK,  C: ['cm/cm', 'cm/c'], P: ['p/p'] },   phenotype: 'Champagne Marten'             },
+  { match: { A: AGOUTI, C: ['cm/cm', 'cm/c'], P: ['p/p'] },   phenotype: 'Silver Fawn Marten'           },
+  { match: { A: BLACK,  C: ['cm/cm', 'cm/c'], R: ['r/r'] },   phenotype: 'Beige Marten'                 },
+  { match: { A: AGOUTI, C: ['cm/cm', 'cm/c'], R: ['r/r'] },   phenotype: 'Topaz Marten'                 },
 
   // =========================================================
   // BLACK BASE (a/a) + C-LOCUS EXPRESSIONS
