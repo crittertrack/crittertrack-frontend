@@ -10,10 +10,9 @@
  * A locus array means "any of these notations".
  *
  * Locus symbols match the geneLoci keys returned by the API (post symbol-override):
- *   A, Am, B, Bu, C, D, G, M, Mo, P, R, Rb   (color genes)
- *   Dal, Du, H, Ma, Me, Pe, Ro, Wh, Ws        (marking genes)
- *   Re, Ve, Br, wo, Wa, Ki, Sh                (coat genes)
- *   Du (otherGenes — Dumbo)
+ *   A, B, Bu, C, D, G, M, P, R   (color genes — live DB)
+ *   Dal, Du, H, Ma, Me, Pe, Ro, Wh, Ws    (marking genes — not yet in DB)
+ *   Re, Ve, Br, wo, Wa, Ki, Sh            (coat genes — not yet in DB)
  *
  * A-locus shorthands used throughout:
  *   BLACK  = a/a   (self/black phenotype)
