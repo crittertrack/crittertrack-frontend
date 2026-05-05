@@ -10,6 +10,7 @@ import {
 import { formatDate, formatDateShort } from '../../utils/dateFormatter';
 import DatePicker from '../DatePicker';
 import { calculatePhenotype } from '../GeneticsCalculator';
+import { matchFancyRatPhenotype } from '../../data/fancyRatPhenotypeRules';
 
 const AnimalImage = ({ src, alt = 'Animal', className = 'w-full h-full object-cover', iconSize = 24 }) => {
     const [imageError, setImageError] = React.useState(false);
@@ -21,7 +22,8 @@ const AnimalImage = ({ src, alt = 'Animal', className = 'w-full h-full object-co
 
 const DEFAULT_SPECIES_OPTIONS = ['Fancy Mouse', 'Fancy Rat', 'Russian Dwarf Hamster', 'Campbells Dwarf Hamster', 'Chinese Dwarf Hamster', 'Syrian Hamster', 'Guinea Pig'];
 const TARGET_OUTCOME_PROTOTYPE_SPECIES = 'Fancy Mouse';
-const TARGET_OUTCOME_PENDING_SPECIES = DEFAULT_SPECIES_OPTIONS.filter(species => species !== TARGET_OUTCOME_PROTOTYPE_SPECIES);
+const TARGET_OUTCOME_SUPPORTED_SPECIES = ['Fancy Mouse', 'Fancy Rat'];
+const TARGET_OUTCOME_PENDING_SPECIES = DEFAULT_SPECIES_OPTIONS.filter(species => !TARGET_OUTCOME_SUPPORTED_SPECIES.includes(species));
 
 const TARGET_OUTCOME_TRAIT_CHIPS = {
     'Fancy Mouse': [
@@ -78,12 +80,61 @@ const TARGET_OUTCOME_TRAIT_CHIPS = {
         { id: 'fuzz',               label: 'Fuzz',              code: 'fz/fz',          group: 'Coat & Texture' },
         { id: 'dom-hairless',       label: 'Dominant Hairless', code: 'Nu/-',           group: 'Coat & Texture' },
     ],
+    'Fancy Rat': [
+        // Base Color — Black series
+        { id: 'rat-black',         label: 'Black',               code: 'a/a',          group: 'Base Color — Black' },
+        { id: 'rat-chocolate',     label: 'Chocolate',           code: 'a/a b/b',      group: 'Base Color — Black' },
+        { id: 'rat-russian-blue',  label: 'Russian Blue',        code: 'a/a d/d',      group: 'Base Color — Black' },
+        { id: 'rat-american-blue', label: 'American Blue',       code: 'a/a g/g',      group: 'Base Color — Black' },
+        { id: 'rat-mink',          label: 'Mink',                code: 'a/a m/m',      group: 'Base Color — Black' },
+        { id: 'rat-champagne',     label: 'Champagne',           code: 'a/a p/p',      group: 'Base Color — Black' },
+        { id: 'rat-beige',         label: 'Beige',               code: 'a/a r/r',      group: 'Base Color — Black' },
+        // Base Color — Agouti series
+        { id: 'rat-agouti',        label: 'Agouti',              code: 'A/A',          group: 'Base Color — Agouti' },
+        { id: 'rat-choc-agouti',   label: 'Chocolate Agouti',   code: 'A/A b/b',      group: 'Base Color — Agouti' },
+        { id: 'rat-rub-agouti',    label: 'Russian Blue Agouti', code: 'A/A d/d',     group: 'Base Color — Agouti' },
+        { id: 'rat-opal',          label: 'Opal',                code: 'A/A g/g',      group: 'Base Color — Agouti' },
+        { id: 'rat-cinnamon',      label: 'Cinnamon',            code: 'A/A m/m',      group: 'Base Color — Agouti' },
+        { id: 'rat-silver-fawn',   label: 'Silver Fawn',         code: 'A/A p/p',      group: 'Base Color — Agouti' },
+        { id: 'rat-topaz',         label: 'Topaz',               code: 'A/A r/r',      group: 'Base Color — Agouti' },
+        // C-locus & Color Modifier
+        { id: 'rat-albino',        label: 'Albino',              code: 'c/c',          group: 'C-locus & Color Modifier' },
+        { id: 'rat-himalayan',     label: 'Himalayan',           code: 'ch/c',         group: 'C-locus & Color Modifier' },
+        { id: 'rat-siamese',       label: 'Siamese',             code: 'ch/ch',        group: 'C-locus & Color Modifier' },
+        { id: 'rat-tonkinese',     label: 'Tonkinese',           code: 'ct/ct',        group: 'C-locus & Color Modifier' },
+        { id: 'rat-marten',        label: 'Ivory Marten',        code: 'cm/c',         group: 'C-locus & Color Modifier' },
+        { id: 'rat-burmese',       label: 'Burmese',             code: 'Bu/bu + ct',   group: 'C-locus & Color Modifier' },
+        { id: 'rat-sable',         label: 'Sable',               code: 'Bu/Bu + ct',   group: 'C-locus & Color Modifier' },
+        // Marking
+        { id: 'rat-self',          label: 'Self',                code: 'H/H',          group: 'Marking' },
+        { id: 'rat-berkshire',     label: 'Berkshire',           code: 'H/h',          group: 'Marking' },
+        { id: 'rat-bareback',      label: 'Bareback',            code: 'H/hi',         group: 'Marking' },
+        { id: 'rat-capped',        label: 'Capped',              code: 'Hre/h',        group: 'Marking' },
+        { id: 'rat-variegated',    label: 'Variegated',          code: 'H/he',         group: 'Marking' },
+        { id: 'rat-hooded',        label: 'Hooded',              code: 'h/h',          group: 'Marking' },
+        { id: 'rat-dalmatian',     label: 'Dalmatian',           code: 'Dal/dal',      group: 'Marking' },
+        { id: 'rat-roan',          label: 'Roan',                code: 'ro/ro',        group: 'Marking' },
+        { id: 'rat-whiteside',     label: 'Whiteside',           code: 'wh/wh',        group: 'Marking' },
+        { id: 'rat-white-spot',    label: 'White Spot',          code: 'Ws/w',         group: 'Marking' },
+        { id: 'rat-marble',        label: 'Marble',              code: 'Ma/ma',        group: 'Marking' },
+        // Pearl & Merle
+        { id: 'rat-pearl',         label: 'Pearl',               code: 'Pe/pe + m/m',  group: 'Pearl & Merle' },
+        { id: 'rat-merle',         label: 'Merle',               code: 'Me/me + m/m',  group: 'Pearl & Merle' },
+        // Coat & Texture
+        { id: 'rat-rex',           label: 'Rex',                 code: 'Re/re',        group: 'Coat & Texture' },
+        { id: 'rat-double-rex',    label: 'Double Rex',          code: 'Re/Re',        group: 'Coat & Texture' },
+        { id: 'rat-velveteen',     label: 'Velveteen',           code: 'Ve/ve',        group: 'Coat & Texture' },
+        { id: 'rat-bristle',       label: 'Bristle',             code: 'Br/br',        group: 'Coat & Texture' },
+        // Ear Type
+        { id: 'rat-dumbo',         label: 'Dumbo',               code: 'du/du',        group: 'Ear Type' },
+    ],
 };
 
-const getTargetTraitChipCatalog = () => TARGET_OUTCOME_TRAIT_CHIPS[TARGET_OUTCOME_PROTOTYPE_SPECIES];
+const getTargetTraitChipCatalog = (species = TARGET_OUTCOME_PROTOTYPE_SPECIES) =>
+    TARGET_OUTCOME_TRAIT_CHIPS[species] || TARGET_OUTCOME_TRAIT_CHIPS[TARGET_OUTCOME_PROTOTYPE_SPECIES];
 
-const getTargetTraitChipGroups = () => {
-    const chips = getTargetTraitChipCatalog();
+const getTargetTraitChipGroups = (species = TARGET_OUTCOME_PROTOTYPE_SPECIES) => {
+    const chips = getTargetTraitChipCatalog(species);
     const order = [];
     const map = {};
     chips.forEach(chip => {
@@ -93,16 +144,78 @@ const getTargetTraitChipGroups = () => {
     return order.map(g => ({ group: g, chips: map[g] }));
 };
 
-const getTargetTraitChipById = (chipId) => getTargetTraitChipCatalog().find(c => c.id === chipId);
+const getTargetTraitChipById = (chipId, species = TARGET_OUTCOME_PROTOTYPE_SPECIES) =>
+    getTargetTraitChipCatalog(species).find(c => c.id === chipId);
 
 const formatTargetTraitChip = (chip) => {
     if (!chip) return '';
     return `${chip.label} (${chip.code})`;
 };
 
-const buildPrototypeGenotypeFromTraits = (selectedTraits) => {
+const buildPrototypeGenotypeFromTraits = (selectedTraits, species = TARGET_OUTCOME_PROTOTYPE_SPECIES) => {
     const genotype = {};
     const assumptions = [];
+
+    if (species === 'Fancy Rat') {
+        selectedTraits.forEach((id) => {
+            switch (id) {
+                // Black series
+                case 'rat-black':         genotype.A = 'a/a'; break;
+                case 'rat-chocolate':     genotype.A = 'a/a'; genotype.B = 'b/b'; break;
+                case 'rat-russian-blue':  genotype.A = 'a/a'; genotype.D = 'd/d'; break;
+                case 'rat-american-blue': genotype.A = 'a/a'; genotype.G = 'g/g'; break;
+                case 'rat-mink':          genotype.A = 'a/a'; genotype.M = 'm/m'; break;
+                case 'rat-champagne':     genotype.A = 'a/a'; genotype.P = 'p/p'; break;
+                case 'rat-beige':         genotype.A = 'a/a'; genotype.R = 'r/r'; break;
+                // Agouti series
+                case 'rat-agouti':        genotype.A = 'A/A'; break;
+                case 'rat-choc-agouti':   genotype.A = 'A/A'; genotype.B = 'b/b'; break;
+                case 'rat-rub-agouti':    genotype.A = 'A/A'; genotype.D = 'd/d'; break;
+                case 'rat-opal':          genotype.A = 'A/A'; genotype.G = 'g/g'; break;
+                case 'rat-cinnamon':      genotype.A = 'A/A'; genotype.M = 'm/m'; break;
+                case 'rat-silver-fawn':   genotype.A = 'A/A'; genotype.P = 'p/p'; break;
+                case 'rat-topaz':         genotype.A = 'A/A'; genotype.R = 'r/r'; break;
+                // C-locus
+                case 'rat-albino':        genotype.C = 'c/c'; break;
+                case 'rat-himalayan':     genotype.C = 'ch/c'; break;
+                case 'rat-siamese':       genotype.C = 'ch/ch'; break;
+                case 'rat-tonkinese':     genotype.C = 'ct/ct'; break;
+                case 'rat-marten':        genotype.C = 'cm/c'; break;
+                case 'rat-burmese':       genotype.Bu = 'Bu/bu'; genotype.C = 'ct/ct'; break;
+                case 'rat-sable':         genotype.Bu = 'Bu/Bu'; genotype.C = 'ct/ct'; break;
+                // Marking — H locus
+                case 'rat-self':          genotype.H = 'H/H'; break;
+                case 'rat-berkshire':     genotype.H = 'H/h'; break;
+                case 'rat-bareback':      genotype.H = 'H/hi'; break;
+                case 'rat-capped':        genotype.H = 'Hre/h'; break;
+                case 'rat-variegated':    genotype.H = 'H/he'; break;
+                case 'rat-hooded':        genotype.H = 'h/h'; break;
+                // Marking — other
+                case 'rat-dalmatian':     genotype.Dal = 'Dal/dal'; break;
+                case 'rat-roan':          genotype.Ro = 'ro/ro'; break;
+                case 'rat-whiteside':     genotype.Wh = 'wh/wh'; break;
+                case 'rat-white-spot':    genotype.Ws = 'Ws/w'; break;
+                case 'rat-marble':        genotype.Ma = 'Ma/ma'; break;
+                // Pearl / Merle (require m/m)
+                case 'rat-pearl':         genotype.Pe = 'Pe/pe'; genotype.M = 'm/m'; break;
+                case 'rat-merle':         genotype.Me = 'Me/me'; genotype.M = 'm/m'; break;
+                // Coat
+                case 'rat-rex':           genotype.Re = 'Re/re'; break;
+                case 'rat-double-rex':    genotype.Re = 'Re/Re'; break;
+                case 'rat-velveteen':     genotype.Ve = 'Ve/ve'; break;
+                case 'rat-bristle':       genotype.Br = 'Br/br'; break;
+                // Ear
+                case 'rat-dumbo':         genotype.Du = 'du/du'; break;
+                default: break;
+            }
+        });
+        const ratCChips = ['rat-albino','rat-himalayan','rat-siamese','rat-tonkinese','rat-marten','rat-burmese','rat-sable'];
+        if (selectedTraits.some(id => ratCChips.includes(id)) && !genotype.A) {
+            genotype.A = 'a/a';
+            assumptions.push('C-locus phenotype assumed on black base (a/a) — add a Base Color chip to override.');
+        }
+        return { genotype, assumptions };
+    }
 
     selectedTraits.forEach((id) => {
         switch (id) {
@@ -195,16 +308,25 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits) => {
     return { genotype, assumptions };
 };
 
-const getPrototypePhenotypeInterpretation = (selectedTraits) => {
-    const { genotype, assumptions } = buildPrototypeGenotypeFromTraits(selectedTraits);
+const getPrototypePhenotypeInterpretation = (selectedTraits, species = TARGET_OUTCOME_PROTOTYPE_SPECIES) => {
+    const { genotype, assumptions } = buildPrototypeGenotypeFromTraits(selectedTraits, species);
     if (!Object.keys(genotype).length) return null;
+
+    if (species === 'Fancy Rat') {
+        const ratResult = matchFancyRatPhenotype(genotype);
+        const phenotype = ratResult?.phenotype || null;
+        const catalog = getTargetTraitChipCatalog(species);
+        if (phenotype) return phenotype;
+        const allLabels = selectedTraits.map(id => catalog.find(c => c.id === id)).filter(Boolean).map(c => c.label);
+        return allLabels.length ? allLabels.join(' ') : 'Select more trait chips to resolve a named phenotype.';
+    }
 
     const result = calculatePhenotype(genotype, genotype);
     const basePheno = result?.phenotype && result.phenotype !== 'Standard' && result.phenotype !== 'Unknown' && result.phenotype !== ''
         ? result.phenotype
         : null;
 
-    const catalog = getTargetTraitChipCatalog();
+    const catalog = getTargetTraitChipCatalog(species);
     const MODIFIER_GROUPS = new Set(['Pattern & Markings', 'Coat & Texture']);
 
     // Some chip labels don't literally appear in the resolved phenotype — map to what the engine actually outputs
@@ -259,10 +381,12 @@ const getPrototypePhenotypeInterpretation = (selectedTraits) => {
     return 'Select more trait chips to resolve a named phenotype.';
 };
 
-const getPrototypePhenotypeConfidence = (selectedTraits) => {
-    const { genotype, assumptions } = buildPrototypeGenotypeFromTraits(selectedTraits);
+const getPrototypePhenotypeConfidence = (selectedTraits, species = TARGET_OUTCOME_PROTOTYPE_SPECIES) => {
+    const { genotype, assumptions } = buildPrototypeGenotypeFromTraits(selectedTraits, species);
     const lociSelected = Object.keys(genotype).length;
-    const result = lociSelected ? calculatePhenotype(genotype, genotype) : null;
+    const result = lociSelected
+        ? (species === 'Fancy Rat' ? matchFancyRatPhenotype(genotype) : calculatePhenotype(genotype, genotype))
+        : null;
     const hasResolvedPhenotype = Boolean(result?.phenotype && result.phenotype !== 'Standard');
     const phenotypeLabel = hasResolvedPhenotype ? result.phenotype : 'unresolved';
     const assumptionCount = assumptions.length;
@@ -296,9 +420,69 @@ const getPrototypePhenotypeConfidence = (selectedTraits) => {
     };
 };
 
-const getMinimumParentCarrierRequirements = (selectedTraits) => {
-    const { genotype } = buildPrototypeGenotypeFromTraits(selectedTraits);
+const getMinimumParentCarrierRequirements = (selectedTraits, species = TARGET_OUTCOME_PROTOTYPE_SPECIES) => {
+    const { genotype } = buildPrototypeGenotypeFromTraits(selectedTraits, species);
     if (!Object.keys(genotype).length) return { bothParents: [], oneParent: [] };
+
+    if (species === 'Fancy Rat') {
+        const RAT_BLACK_CHIPS = ['rat-black','rat-chocolate','rat-russian-blue','rat-american-blue','rat-mink','rat-champagne','rat-beige'];
+        const RAT_CHIP_REQS = {
+            'rat-chocolate':     [{ type: 'both', label: 'chocolate (b)' }],
+            'rat-russian-blue':  [{ type: 'both', label: 'Russian Blue dilute (d)' }],
+            'rat-american-blue': [{ type: 'both', label: 'American Blue (g)' }],
+            'rat-mink':          [{ type: 'both', label: 'Mink (m)' }],
+            'rat-champagne':     [{ type: 'both', label: 'pink-eyed dilute (p)' }],
+            'rat-beige':         [{ type: 'both', label: 'red-eye dilute (r)' }],
+            'rat-choc-agouti':   [{ type: 'both', label: 'chocolate (b)' }],
+            'rat-rub-agouti':    [{ type: 'both', label: 'Russian Blue dilute (d)' }],
+            'rat-opal':          [{ type: 'both', label: 'American Blue (g)' }],
+            'rat-cinnamon':      [{ type: 'both', label: 'Mink (m)' }],
+            'rat-silver-fawn':   [{ type: 'both', label: 'pink-eyed dilute (p)' }],
+            'rat-topaz':         [{ type: 'both', label: 'red-eye dilute (r)' }],
+            'rat-albino':        [{ type: 'both', label: 'albino (c)' }],
+            'rat-himalayan':     [{ type: 'split', label: 'one parent: Siamese/ch \u00b7 other parent: albino carrier (c)' }],
+            'rat-siamese':       [{ type: 'both', label: 'Siamese (ch)' }],
+            'rat-tonkinese':     [{ type: 'both', label: 'Tonkinese (ct)' }],
+            'rat-marten':        [{ type: 'split', label: 'one parent: Marten (cm) \u00b7 other parent: albino carrier (c)' }],
+            'rat-burmese':       [{ type: 'one', label: 'Burmese gene (Bu) + Tonkinese C (ct)' }],
+            'rat-sable':         [{ type: 'both', label: 'Burmese gene (Bu) + Tonkinese C (ct)' }],
+            'rat-berkshire':     [{ type: 'one', label: 'Berkshire H allele' }],
+            'rat-bareback':      [{ type: 'one', label: 'Bareback (hi) allele' }],
+            'rat-capped':        [{ type: 'one', label: 'Capped (Hre) allele' }],
+            'rat-variegated':    [{ type: 'one', label: 'Variegated (he) allele' }],
+            'rat-hooded':        [{ type: 'both', label: 'hooded (h)' }],
+            'rat-dalmatian':     [{ type: 'one', label: 'Dalmatian gene (Dal)' }],
+            'rat-roan':          [{ type: 'both', label: 'Roan (ro)' }],
+            'rat-whiteside':     [{ type: 'both', label: 'Whiteside (wh)' }],
+            'rat-white-spot':    [{ type: 'one', label: 'White Spotting gene (Ws)' }],
+            'rat-marble':        [{ type: 'one', label: 'Marble gene (Ma)' }],
+            'rat-pearl':         [{ type: 'one', label: 'Pearl gene (Pe)' }, { type: 'both', label: 'Mink (m)' }],
+            'rat-merle':         [{ type: 'one', label: 'Merle gene (Me)' }, { type: 'both', label: 'Mink (m)' }],
+            'rat-rex':           [{ type: 'one', label: 'Rex gene (Re)' }],
+            'rat-double-rex':    [{ type: 'both', label: 'Rex gene (Re)' }],
+            'rat-velveteen':     [{ type: 'one', label: 'Velveteen gene (Ve)' }],
+            'rat-bristle':       [{ type: 'one', label: 'Bristle gene (Br)' }],
+            'rat-dumbo':         [{ type: 'both', label: 'Dumbo (du)' }],
+        };
+        const bothSet = new Map();
+        const oneSet = new Map();
+        const splitArr = [];
+        if (selectedTraits.some(id => RAT_BLACK_CHIPS.includes(id))) {
+            bothSet.set('non-agouti (a)', true);
+        }
+        selectedTraits.forEach(id => {
+            (RAT_CHIP_REQS[id] || []).forEach(req => {
+                if (req.type === 'both') bothSet.set(req.label, true);
+                else if (req.type === 'one') oneSet.set(req.label, true);
+                else if (req.type === 'split') splitArr.push({ label: req.label });
+            });
+        });
+        return {
+            bothParents: [...bothSet.keys()].map(label => ({ label })),
+            oneParent:   [...oneSet.keys()].map(label => ({ label })),
+            splitParents: splitArr,
+        };
+    }
 
     const bothParents = [];
     const oneParent = [];
@@ -1304,6 +1488,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const CHIP_C_EXCLUSIVE  = new Set(['albino','himalayan','bone','siamese','burmese','stone','beige','colorpoint-beige','mock-choc','sepia','silver-agouti']);
     const CHIP_GO_EXCLUSIVE = new Set(['shorthair','longhair','texel']);
     const CHIP_W_EXCLUSIVE  = new Set(['variegated','banded']);
+    // Rat-specific exclusivity sets
+    const RAT_CHIP_C_EXCLUSIVE    = new Set(['rat-albino','rat-himalayan','rat-siamese','rat-tonkinese','rat-marten','rat-burmese','rat-sable']);
+    const RAT_CHIP_H_EXCLUSIVE    = new Set(['rat-self','rat-berkshire','rat-bareback','rat-capped','rat-variegated','rat-hooded']);
+    const RAT_CHIP_BASE_EXCLUSIVE = new Set(['rat-black','rat-chocolate','rat-russian-blue','rat-american-blue','rat-mink','rat-champagne','rat-beige','rat-agouti','rat-choc-agouti','rat-rub-agouti','rat-opal','rat-cinnamon','rat-silver-fawn','rat-topaz']);
 
     const toggleTargetTraitChip = (chipId) => {
         setTpMockResults([]); setTpHasRun(false); // clear stale results whenever chip selection changes
@@ -1332,6 +1520,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             if (CHIP_GO_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_GO_EXCLUSIVE.has(id));
             // W-locus: mutually exclusive
             if (CHIP_W_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_W_EXCLUSIVE.has(id));
+            // Rat C-locus: mutually exclusive
+            if (RAT_CHIP_C_EXCLUSIVE.has(chipId)) next = next.filter(id => !RAT_CHIP_C_EXCLUSIVE.has(id));
+            // Rat H-locus marking: mutually exclusive
+            if (RAT_CHIP_H_EXCLUSIVE.has(chipId)) next = next.filter(id => !RAT_CHIP_H_EXCLUSIVE.has(id));
+            // Rat base color: mutually exclusive
+            if (RAT_CHIP_BASE_EXCLUSIVE.has(chipId)) next = next.filter(id => !RAT_CHIP_BASE_EXCLUSIVE.has(id));
             return [...next, chipId];
         });
     };
@@ -1340,7 +1534,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         if (tpSelectedTraits.length === 0) return;
         setTpGenerating(true);
 
-        const speciesForPairs = TARGET_OUTCOME_PROTOTYPE_SPECIES;
+        const speciesForPairs = tpTargetSpecies;
         const malePool = myAnimals.filter(a =>
             (a.species?.toLowerCase() === speciesForPairs.toLowerCase()) &&
             ['Male', 'Intersex', 'Unknown'].includes(a.gender) &&
@@ -1362,7 +1556,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         const selectedDam = tpDamId ? (myAnimals.find(a => a.id_public === tpDamId) || selectedTpDamAnimal) : null;
 
         // Derive per-locus requirements from the target chip selection
-        const { genotype: targetGenotype } = buildPrototypeGenotypeFromTraits(tpSelectedTraits);
+        const { genotype: targetGenotype } = buildPrototypeGenotypeFromTraits(tpSelectedTraits, tpTargetSpecies);
         const eLociActive = tpSelectedTraits.some(id => id === 'rec-red');
         const aLociExplicit = tpSelectedTraits.some(id => ['black','tan','chocolate','blue','dove','lilac','champagne','silver','lavender','agouti','cinnamon','blue-agouti','argente','cinnamon-argente','silver-agouti','dom-red','fox','am-brindle','sepia'].includes(id));
         // e/e is epistatic over A-locus — exclude A from scoring only when no explicit base color chip selected
@@ -1771,7 +1965,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
     const usePairForPlannedMating = (pair) => {
         const selectedTraitLabels = tpSelectedTraits
-            .map(id => getTargetTraitChipById(id))
+            .map(id => getTargetTraitChipById(id, tpTargetSpecies))
             .filter(Boolean)
             .map(formatTargetTraitChip);
 
@@ -5771,8 +5965,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </div>
                                         <div>
                                             <label className="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Species</label>
-                                            <div className="px-3 py-1.5 border border-gray-200 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 whitespace-nowrap">
-                                                {TARGET_OUTCOME_PROTOTYPE_SPECIES}
+                                            <div className="flex gap-2">
+                                                {TARGET_OUTCOME_SUPPORTED_SPECIES.map(sp => (
+                                                    <button
+                                                        key={sp}
+                                                        type="button"
+                                                        onClick={() => { setTpTargetSpecies(sp); setTpSelectedTraits([]); setTpMockResults([]); setTpHasRun(false); setTpExpandedCard(null); }}
+                                                        className={`px-3 py-1.5 text-sm rounded-lg border ${tpTargetSpecies === sp ? 'bg-primary text-black border-primary' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                                                    >
+                                                        {sp}
+                                                    </button>
+                                                ))}
                                             </div>
                                         </div>
                                     </div>
@@ -5780,10 +5983,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                 {/* Live phenotype preview */}
                                 {tpSelectedTraits.length > 0 && (() => {
-                                    const preview = getPrototypePhenotypeInterpretation(tpSelectedTraits);
-                                    const conf = getPrototypePhenotypeConfidence(tpSelectedTraits);
-                                    const reqs = getMinimumParentCarrierRequirements(tpSelectedTraits);
-                                    const { assumptions } = buildPrototypeGenotypeFromTraits(tpSelectedTraits);
+                                    const preview = getPrototypePhenotypeInterpretation(tpSelectedTraits, tpTargetSpecies);
+                                    const conf = getPrototypePhenotypeConfidence(tpSelectedTraits, tpTargetSpecies);
+                                    const reqs = getMinimumParentCarrierRequirements(tpSelectedTraits, tpTargetSpecies);
+                                    const { assumptions } = buildPrototypeGenotypeFromTraits(tpSelectedTraits, tpTargetSpecies);
                                     const isResolved = conf?.level === 'high' || conf?.level === 'medium';
                                     return (
                                         <div className={`px-5 py-4 border-b border-gray-200 text-xs ${isResolved ? 'bg-emerald-50' : 'bg-gray-50'}`}>
@@ -5844,7 +6047,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         )}
                                     </div>
                                     <div className="space-y-3">
-                                        {getTargetTraitChipGroups().map(({ group, chips }) => (
+                                        {getTargetTraitChipGroups(tpTargetSpecies).map(({ group, chips }) => (
                                             <div key={group}>
                                                 <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1.5">{group}</div>
                                                 <div className="flex flex-wrap gap-2">

@@ -613,7 +613,7 @@ export const RAT_GENE_LOCI = {
   H:   { name: 'Hooded',              description: 'Multi-allele. H/H = Self (no marking), h/h = Hooded.', combinations: ['H/H', 'H/Hre', 'H/hi', 'H/he', 'H/hn', 'H/h', 'Hre/Hre', 'Hre/hi', 'Hre/he', 'Hre/hn', 'Hre/h', 'hi/hi', 'hi/he', 'hi/hn', 'hi/h', 'he/he', 'he/hn', 'he/h', 'hn/hn', 'hn/h', 'h/h'] },
   Ma:  { name: 'Marble',              description: 'Dominant. Ma/ma = Marble. Ma/Ma is lethal.', combinations: ['Ma/Ma', 'Ma/ma', 'ma/ma'] },
   Ro:  { name: 'Roan',                description: 'Recessive. ro/ro = Roan (progressive white hairs).', combinations: ['Ro/Ro', 'Ro/ro', 'ro/ro'] },
-  Wh:  { name: 'Whiteside',           description: 'Recessive. wh/wh = Whiteside (one-sided white patterning).', combinations: ['Wh/Wh', 'Wh/wh', 'wh/wh'] },
+  Wh:  { name: 'Whiteside',           description: 'Recessive. wh/wh = Whiteside (both white flanks).', combinations: ['Wh/Wh', 'Wh/wh', 'wh/wh'] },
   Ws:  { name: 'Dominant White Spotting', description: 'Dominant. Ws/w = White Spot. Ws/Ws is lethal.', combinations: ['Ws/Ws', 'Ws/w', 'w/w'] },
   // --- Coat genes ---
   Re:  { name: 'Rex',                 description: 'Dominant. Re/re = Rex, Re/Re = Double Rex.', combinations: ['Re/Re', 'Re/re', 're/re'] },
