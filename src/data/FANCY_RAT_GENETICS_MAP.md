@@ -1,6 +1,6 @@
 # Fancy Rat Genetics — Phenotype Mapping Status
 
-> Live DB genes: **A, B, Bu, C, D, G, M, Me, P, Pe, R** (11 genes)
+> Live DB genes: **A, B, Br, Bu, C, D, Dal, Du, G, H, Ki, M, Ma, Me, P, Pe, R, Re, Ro, Sh, Ve, Wa, Wh, wo, Ws** (25 genes)
 > Removed / not added: ~~Am~~, ~~Mo~~, ~~Rb~~
 
 ---
@@ -206,23 +206,23 @@
 | Pe/pe | m/m present | appends ' Pearl' to phenotype | ✅ |
 | Me/me | m/m present | appends ' Merle' to phenotype | ✅ |
 
-## Marking / Coat Genes — Not in DB Yet
+## Marking / Coat Genes — In DB (Phenotype Rules Not Yet Mapped)
 
-These are planned for a future phase:
+These genes are live in the database but their phenotype derivation rules have not yet been implemented in the rule engine:
 
-| Symbol | Name | Category |
-|--------|------|----------|
-| Dal | Dalmatian | Marking |
-| Du | Dumbo | Ear type |
-| H | Hooded | Marking |
-| Ma | Marble | Marking |
-| Ro | Roan | Marking |
-| Wh | Whiteside | Marking |
-| Ws | Dominant White Spotting | Marking |
-| Re | Rex | Coat |
-| Ve | Velveteen | Coat |
-| Br | Bristle | Coat |
-| wo | Woolly | Coat |
-| Wa | Wavy | Coat |
-| Ki | Kinky | Coat |
-| Sh | Shaggy | Coat |
+| Symbol | Name | Category | Rules Mapped |
+|--------|------|----------|-------------|
+| Dal | Dalmatian | Marking | ❌ |
+| Du | Dumbo | Ear type | ❌ |
+| H | Hooded | Marking | ❌ |
+| Ma | Marble | Marking | ❌ |
+| Ro | Roan | Marking | ❌ |
+| Wh | Whiteside | Marking | ❌ |
+| Ws | Dominant White Spotting | Marking | ❌ |
+| Re | Rex | Coat | ❌ |
+| Ve | Velveteen | Coat | ❌ |
+| Br | Bristle | Coat | ❌ |
+| wo | Woolly | Coat | ❌ |
+| Wa | Wavy | Coat | ❌ |
+| Ki | Kinky | Coat | ❌ |
+| Sh | Shaggy | Coat | ❌ |
