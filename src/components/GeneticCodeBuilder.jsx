@@ -1,7 +1,28 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Info, HelpCircle } from 'lucide-react';
 import { calculatePhenotype, GENE_LOCI } from './GeneticsCalculator';
-import { matchFancyRatPhenotype } from '../data/fancyRatPhenotypeRules';
+import { matchFancyRatPhenotype, RAT_GENE_LOCI } from '../data/fancyRatPhenotypeRules';
+
+const RAT_GENE_ORDER = ['A', 'B', 'Bu', 'C', 'D', 'G', 'M', 'P', 'Pe', 'R', 'Me', 'Dal', 'H', 'Ma', 'Ro', 'Wh', 'Ws', 'Re', 'Ve', 'Br', 'wo', 'Wa', 'Ki', 'Sh', 'Du'];
+
+function parseRatGeneticCode(codeString) {
+  if (!codeString) return {};
+  const genotype = {};
+  codeString.trim().split(/[\s,]+/).forEach(part => {
+    if (!part.match(/^[A-Za-z]+\/[A-Za-z]+$/)) return;
+    for (const [locus, data] of Object.entries(RAT_GENE_LOCI)) {
+      if (data.combinations.includes(part)) { genotype[locus] = part; return; }
+    }
+  });
+  return genotype;
+}
+
+function buildRatGeneticCode(genotype) {
+  return RAT_GENE_ORDER
+    .filter(locus => genotype[locus] && genotype[locus] !== '')
+    .map(locus => genotype[locus])
+    .join(' ');
+}
 
 const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityForm }) => {
   const [showBuilderModal, setShowBuilderModal] = useState(false);
@@ -74,7 +95,10 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
   };
   
   const [genotype, setGenotype] = useState(() => parseGeneticCode(value));
-  
+  const [showRatBuilderModal, setShowRatBuilderModal] = useState(false);
+  const [ratMode, setRatMode] = useState('visual');
+  const [ratGenotype, setRatGenotype] = useState(() => parseRatGeneticCode(value));
+
   // Get valid combinations for a locus based on gender
   const getValidCombinations = (locus) => {
     const geneData = GENE_LOCI[locus];
@@ -288,85 +312,178 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
     );
   }
   
-  // For Fancy Rat: manual entry + live phenotype preview
+  // For Fancy Rat: full visual builder (mirrors Fancy Mouse)
   if (species === 'Fancy Rat') {
-    const parseRatGenotype = (codeString) => {
-      if (!codeString) return {};
-      const genotype = {};
-      codeString.trim().split(/[\s,]+/).forEach(part => {
-        const m = part.match(/^([A-Za-z]+)\/([A-Za-z]+)$/);
-        if (m) genotype[m[1].charAt(0).toUpperCase() + m[1].slice(1).replace(/^([A-Z])/, (_, c) => c)] = part;
-      });
-      return genotype;
+    const RAT_GENE_GROUPS = [
+      { label: 'Color Genes',   loci: ['A', 'B', 'Bu', 'C', 'D', 'G', 'M', 'P', 'Pe', 'R', 'Me'] },
+      { label: 'Marking Genes', loci: ['Dal', 'H', 'Ma', 'Ro', 'Wh', 'Ws'] },
+      { label: 'Coat Genes',    loci: ['Re', 'Ve', 'Br', 'wo', 'Wa', 'Ki', 'Sh'] },
+      { label: 'Ear Type',      loci: ['Du'] },
+    ];
+
+    const handleRatGeneChange = (locus, combination) => {
+      setRatGenotype(prev => ({ ...prev, [locus]: combination }));
     };
-    // Build locus-keyed genotype: key is determined by matching the dominant allele symbol
-    const parseRatGenotypeKeyed = (codeString) => {
-      if (!codeString) return {};
-      const genotype = {};
-      const RAT_LOCUS_MAP = {
-        // color
-        'A': 'A', 'a': 'A',
-        'B': 'B', 'b': 'B',
-        'Bu': 'Bu', 'bu': 'Bu',
-        'C': 'C', 'c': 'C', 'ch': 'C', 'cm': 'C', 'ct': 'C',
-        'D': 'D', 'd': 'D',
-        'G': 'G', 'g': 'G',
-        'M': 'M', 'm': 'M',
-        'Me': 'Me', 'me': 'Me',
-        'P': 'P', 'p': 'P',
-        'Pe': 'Pe', 'pe': 'Pe',
-        'R': 'R', 'r': 'R',
-        // marking
-        'Dal': 'Dal', 'dal': 'Dal',
-        'H': 'H', 'Hre': 'H', 'hi': 'H', 'he': 'H', 'hn': 'H', 'h': 'H',
-        'Ma': 'Ma', 'ma': 'Ma',
-        'Ro': 'Ro', 'ro': 'Ro',
-        'Wh': 'Wh', 'wh': 'Wh',
-        'Ws': 'Ws', 'w': 'Ws',
-        // coat
-        'Re': 're_locus', 're': 're_locus',
-        'Ve': 'Ve', 've': 'Ve',
-        'Br': 'Br', 'br': 'Br',
-        'Wo': 'wo', 'wo': 'wo',
-        'Wa': 'Wa', 'wa': 'Wa',
-        'Ki': 'Ki', 'ki': 'Ki',
-        'Sh': 'Sh', 'sh': 'Sh',
-        // ear
-        'Du': 'Du', 'du': 'Du',
-      };
-      codeString.trim().split(/[\s,]+/).forEach(part => {
-        const m = part.match(/^([A-Za-z]+)\/([A-Za-z]+)$/);
-        if (!m) return;
-        const [a1, a2] = [m[1], m[2]];
-        // Try a1 first, then a2 for locus key
-        const locus = RAT_LOCUS_MAP[a1] || RAT_LOCUS_MAP[a2];
-        if (locus) {
-          const key = locus === 're_locus' ? 'Re' : locus;
-          genotype[key] = part;
-        }
-      });
-      return genotype;
+
+    const handleRatSave = () => {
+      onChange(buildRatGeneticCode(ratGenotype));
+      setShowRatBuilderModal(false);
     };
-    const ratGenotype = parseRatGenotypeKeyed(value);
-    const ratResult = value ? matchFancyRatPhenotype(ratGenotype) : null;
+
+    const handleRatManualChange = (e) => {
+      setRatGenotype(parseRatGeneticCode(e.target.value));
+    };
+
     return (
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">Genetic Code</label>
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="e.g., a/a b/b C/C m/m h/h"
-          className="w-full p-2 border border-gray-300 rounded focus:ring-primary focus:border-primary font-mono text-sm"
-        />
-        {ratResult && (
-          <div className="bg-blue-50 p-3 rounded border border-blue-200">
-            <div className="text-xs font-medium text-blue-900 mb-0.5">Phenotype</div>
-            <div className="text-sm font-semibold text-blue-800">{ratResult.phenotype}</div>
-            {ratResult.notes && <div className="text-xs text-blue-600 mt-1">{ratResult.notes}</div>}
+      <>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Genetic Code</label>
+          <div className="flex gap-2">
+            <div className="flex-1 p-2 border border-gray-300 rounded bg-gray-50 font-mono text-sm min-h-[42px] flex items-center">
+              {value || <span className="text-gray-400">Not set</span>}
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowRatBuilderModal(true)}
+              className="px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded font-medium transition whitespace-nowrap"
+            >
+              {value ? 'Edit Genes' : 'Add'}
+            </button>
+          </div>
+          <p className="text-xs text-gray-500">Click the button to use the visual gene selector</p>
+        </div>
+
+        {showRatBuilderModal && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col">
+
+              {/* Header */}
+              <div className="flex justify-between items-center border-b p-6">
+                <h2 className="text-2xl font-bold text-gray-800">Genetic Code Builder — Fancy Rat</h2>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setRatMode(ratMode === 'visual' ? 'manual' : 'visual')}
+                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition"
+                  >
+                    {ratMode === 'visual' ? 'Switch to Manual' : 'Switch to Visual'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowRatBuilderModal(false)}
+                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRatSave}
+                    className="px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded-lg font-semibold transition"
+                  >
+                    Save Genetics
+                  </button>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 overflow-y-auto p-6">
+                {ratMode === 'visual' ? (
+                  <div className="space-y-6">
+
+                    {/* Phenotype preview */}
+                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-2">
+                      {(() => {
+                        const ratCode = buildRatGeneticCode(ratGenotype);
+                        const result = ratCode ? matchFancyRatPhenotype(ratGenotype) : null;
+                        return (
+                          <>
+                            {result?.phenotype && (
+                              <div>
+                                <div className="text-sm font-medium text-blue-900">Phenotype:</div>
+                                <div className="text-base font-semibold text-blue-800">{result.phenotype}</div>
+                              </div>
+                            )}
+                            <div>
+                              <div className="text-sm font-medium text-blue-900">Genotype:</div>
+                              <div className="font-mono text-base text-blue-800">{ratCode || 'Select genes below…'}</div>
+                            </div>
+                            {result?.notes && (
+                              <div className="text-xs text-orange-600 italic">Note: {result.notes}</div>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Gene groups */}
+                    {RAT_GENE_GROUPS.map(group => (
+                      <div key={group.label}>
+                        <h3 className="text-lg font-semibold text-gray-800 mb-3">{group.label}</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                          {group.loci.map(locus => (
+                            <div key={locus} className="bg-white p-3 rounded border border-gray-200 h-48 flex flex-col">
+                              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                                {RAT_GENE_LOCI[locus].name} ({locus})
+                              </label>
+                              {RAT_GENE_LOCI[locus].description && (
+                                <p className="text-xs text-gray-500 mb-2 leading-snug flex-1 overflow-hidden">
+                                  {RAT_GENE_LOCI[locus].description}
+                                </p>
+                              )}
+                              <select
+                                value={ratGenotype[locus] || ''}
+                                onChange={(e) => handleRatGeneChange(locus, e.target.value)}
+                                className="w-full p-2 border border-gray-300 rounded focus:ring-accent focus:border-accent mt-auto"
+                              >
+                                <option value="">—</option>
+                                {RAT_GENE_LOCI[locus].combinations.map(combo => (
+                                  <option key={combo} value={combo}>{combo}</option>
+                                ))}
+                              </select>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+
+                    <div className="bg-blue-50 p-4 rounded text-sm text-blue-800">
+                      <div className="flex items-start gap-2">
+                        <Info size={18} className="flex-shrink-0 mt-0.5" />
+                        <div>
+                          <strong>Tip:</strong> Select the genotype for each gene that applies to your animal.
+                          Leave genes blank if unknown or not applicable. The genetic code is generated automatically.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Manual Entry</label>
+                      <textarea
+                        value={buildRatGeneticCode(ratGenotype)}
+                        onChange={handleRatManualChange}
+                        placeholder="e.g., a/a m/m h/h Re/re du/du"
+                        className="w-full p-3 border border-gray-300 rounded focus:ring-accent focus:border-accent font-mono text-sm"
+                        rows="4"
+                      />
+                    </div>
+                    <div className="bg-amber-50 p-4 rounded text-sm text-amber-800">
+                      <div className="flex items-start gap-2">
+                        <Info size={18} className="flex-shrink-0 mt-0.5" />
+                        <div>
+                          Enter genetic code manually in format: <code className="bg-white px-1 rounded">a/a m/m h/h</code>
+                          <br />Use the Visual mode for easier selection with dropdowns.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
-      </div>
+      </>
     );
   }
 

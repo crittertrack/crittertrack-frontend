@@ -590,3 +590,39 @@ export function matchFancyRatPhenotype(genotype) {
 
   return null;
 }
+
+// ---------------------------------------------------------------------------
+// RAT GENE LOCI — metadata for GeneticCodeBuilder visual selector
+// ---------------------------------------------------------------------------
+
+export const RAT_GENE_LOCI = {
+  // --- Color genes ---
+  A:   { name: 'Agouti',              description: 'A/- = Agouti, a/a = Black', combinations: ['A/A', 'A/a', 'a/a'] },
+  B:   { name: 'Brown',               description: 'b/b = Chocolate (Black) or Chocolate Agouti', combinations: ['B/B', 'B/b', 'b/b'] },
+  Bu:  { name: 'Burmese',             description: 'Requires restrictive C to express. Bu/bu = Burmese, Bu/Bu = Sable', combinations: ['Bu/Bu', 'Bu/bu', 'bu/bu'] },
+  C:   { name: 'C-locus',             description: 'c/c = Albino, ch/ch = Siamese, ch/c = Himalayan, cm/* = Marten, ct/ct = Tonkinese', combinations: ['C/C', 'C/ct', 'C/cm', 'C/ch', 'C/c', 'ct/ct', 'ct/cm', 'ct/ch', 'ct/c', 'cm/cm', 'cm/ch', 'cm/c', 'ch/ch', 'ch/c', 'c/c'] },
+  D:   { name: 'Dilute (Russian Blue)', description: 'd/d = Russian Blue (Black) or Russian Blue Agouti', combinations: ['D/D', 'D/d', 'd/d'] },
+  G:   { name: 'Gray (American Blue)', description: 'g/g = American Blue (Black) or Opal (Agouti)', combinations: ['G/G', 'G/g', 'g/g'] },
+  M:   { name: 'Mink',                description: 'm/m = Mink (Black) or Cinnamon (Agouti). Required for Pearl/Merle to express.', combinations: ['M/M', 'M/m', 'm/m'] },
+  P:   { name: 'Pink-eyed Dilution',  description: 'p/p = Champagne (Black) or Silver Fawn (Agouti)', combinations: ['P/P', 'P/p', 'p/p'] },
+  Pe:  { name: 'Pearl',               description: 'Pe/pe appends Pearl when m/m present. Pe/Pe is lethal.', combinations: ['Pe/Pe', 'Pe/pe', 'pe/pe'] },
+  R:   { name: 'Red-eye Dilution',    description: 'r/r = Beige (Black) or Topaz (Agouti)', combinations: ['R/R', 'R/r', 'r/r'] },
+  Me:  { name: 'Merle',               description: 'Me/me appends Merle when m/m present. Me/Me is lethal.', combinations: ['Me/Me', 'Me/me', 'me/me'] },
+  // --- Marking genes ---
+  Dal: { name: 'Dalmatian',           description: 'Dominant. Dal/dal = Dalmatian. Dal/Dal is lethal.', combinations: ['Dal/Dal', 'Dal/dal', 'dal/dal'] },
+  H:   { name: 'Hooded',              description: 'Multi-allele. H/H = Self (no marking), h/h = Hooded.', combinations: ['H/H', 'H/Hre', 'H/hi', 'H/he', 'H/hn', 'H/h', 'Hre/Hre', 'Hre/hi', 'Hre/he', 'Hre/hn', 'Hre/h', 'hi/hi', 'hi/he', 'hi/hn', 'hi/h', 'he/he', 'he/hn', 'he/h', 'hn/hn', 'hn/h', 'h/h'] },
+  Ma:  { name: 'Marble',              description: 'Dominant. Ma/ma = Marble. Ma/Ma is lethal.', combinations: ['Ma/Ma', 'Ma/ma', 'ma/ma'] },
+  Ro:  { name: 'Roan',                description: 'Recessive. ro/ro = Roan (progressive white hairs).', combinations: ['Ro/Ro', 'Ro/ro', 'ro/ro'] },
+  Wh:  { name: 'Whiteside',           description: 'Recessive. wh/wh = Whiteside (one-sided white patterning).', combinations: ['Wh/Wh', 'Wh/wh', 'wh/wh'] },
+  Ws:  { name: 'Dominant White Spotting', description: 'Dominant. Ws/w = White Spot. Ws/Ws is lethal.', combinations: ['Ws/Ws', 'Ws/w', 'w/w'] },
+  // --- Coat genes ---
+  Re:  { name: 'Rex',                 description: 'Dominant. Re/re = Rex, Re/Re = Double Rex.', combinations: ['Re/Re', 'Re/re', 're/re'] },
+  Ve:  { name: 'Velveteen',           description: 'Dominant. Ve/ve = Velveteen, Ve/Ve = Double Velveteen.', combinations: ['Ve/Ve', 'Ve/ve', 've/ve'] },
+  Br:  { name: 'Bristle',             description: 'Dominant. Br/br = Bristle, Br/Br = Extreme Bristle.', combinations: ['Br/Br', 'Br/br', 'br/br'] },
+  wo:  { name: 'Woolly',              description: 'Dominant. Wo/wo = Woolly, Wo/Wo = Extreme Woolly.', combinations: ['Wo/Wo', 'Wo/wo', 'wo/wo'] },
+  Wa:  { name: 'Wavy',                description: 'Dominant. Wa/wa = Wavy, Wa/Wa = Extreme Wavy.', combinations: ['Wa/Wa', 'Wa/wa', 'wa/wa'] },
+  Ki:  { name: 'Kinky',               description: 'Dominant. Ki/ki = Kinky, Ki/Ki = Extreme Kinky.', combinations: ['Ki/Ki', 'Ki/ki', 'ki/ki'] },
+  Sh:  { name: 'Shaggy',              description: 'Dominant. Sh/sh = Shaggy, Sh/Sh = Extreme Shaggy.', combinations: ['Sh/Sh', 'Sh/sh', 'sh/sh'] },
+  // --- Ear type ---
+  Du:  { name: 'Dumbo',               description: 'Recessive. du/du = Dumbo (low-set ears).', combinations: ['Du/Du', 'Du/du', 'du/du'] },
+};
