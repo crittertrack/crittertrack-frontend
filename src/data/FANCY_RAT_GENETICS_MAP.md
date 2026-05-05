@@ -146,6 +146,21 @@
 | D + P + R | Russian Champagne Beige | Russian Silver Topaz | ✅ |
 | G + P + R | Apricot Beige | Apricot Topaz | ✅ |
 | M + P + R | Honey Beige | Honey Topaz | ✅ |
+| B + D + G + M | Russian Lavender Chocolate | Russian Lavender Chocolate Agouti | ✅ |
+| B + D + G + P | Russian Blue Creme | Russian Blue Creme Agouti | ✅ |
+| B + D + G + R | Russian Blue Caramel | Russian Blue Saffron | ✅ |
+| B + D + M + P | Russian Chocolate Honey | Russian Cinnamon Honey | ✅ |
+| B + D + M + R | Russian Chocolate Mocha | Russian Cinnamon Argente | ✅ |
+| B + D + P + R | Russian Caramel Champagne | Russian Saffron Silver Fawn | ✅ |
+| D + G + M + P | Russian Lavender Champagne | Russian Lavender Silver Fawn | ✅ |
+| D + G + M + R | Russian Lavender Beige | Russian Lavender Fawn | ✅ |
+| D + G + P + R | Russian Apricot Beige | Russian Apricot Topaz | ✅ |
+| D + M + P + R | Russian Honey Beige | Russian Honey Topaz | ✅ |
+| B + G + M + P | Lavender Chocolate Champagne | Lavender Chocolate Silver Fawn | ✅ |
+| B + G + M + R | Lavender Caramel | Lavender Saffron | ✅ |
+| B + G + P + R | Apricot Caramel | Apricot Saffron | ✅ |
+| B + M + P + R | Honey Caramel | Honey Saffron | ✅ |
+| G + M + P + R | Lavender Champagne Beige | Lavender Silver Topaz | ✅ |
 
 ---
 

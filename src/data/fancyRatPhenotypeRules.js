@@ -116,6 +116,44 @@ export const FANCY_RAT_PHENOTYPE_RULES = [
   { match: { A: BLACK,  M: ['m/m'], Me: ['Me/me'] }, phenotype: 'Merle',          notes: 'Me gene not yet in DB' },
 
   // =========================================================
+  // 4-LOCUS COMPOUND DILUTIONS — must be before 3-locus pairs
+  // =========================================================
+
+  // Russian (D) × three other dilutions
+  { match: { A: BLACK,  B: ['b/b'], D: ['d/d'], G: ['g/g'], M: ['m/m'] }, phenotype: 'Russian Lavender Chocolate'       },
+  { match: { A: AGOUTI, B: ['b/b'], D: ['d/d'], G: ['g/g'], M: ['m/m'] }, phenotype: 'Russian Lavender Chocolate Agouti'},
+  { match: { A: BLACK,  B: ['b/b'], D: ['d/d'], G: ['g/g'], P: ['p/p'] }, phenotype: 'Russian Blue Creme'               },
+  { match: { A: AGOUTI, B: ['b/b'], D: ['d/d'], G: ['g/g'], P: ['p/p'] }, phenotype: 'Russian Blue Creme Agouti'        },
+  { match: { A: BLACK,  B: ['b/b'], D: ['d/d'], G: ['g/g'], R: ['r/r'] }, phenotype: 'Russian Blue Caramel'             },
+  { match: { A: AGOUTI, B: ['b/b'], D: ['d/d'], G: ['g/g'], R: ['r/r'] }, phenotype: 'Russian Blue Saffron'             },
+  { match: { A: BLACK,  B: ['b/b'], D: ['d/d'], M: ['m/m'], P: ['p/p'] }, phenotype: 'Russian Chocolate Honey'          },
+  { match: { A: AGOUTI, B: ['b/b'], D: ['d/d'], M: ['m/m'], P: ['p/p'] }, phenotype: 'Russian Cinnamon Honey'           },
+  { match: { A: BLACK,  B: ['b/b'], D: ['d/d'], M: ['m/m'], R: ['r/r'] }, phenotype: 'Russian Chocolate Mocha'          },
+  { match: { A: AGOUTI, B: ['b/b'], D: ['d/d'], M: ['m/m'], R: ['r/r'] }, phenotype: 'Russian Cinnamon Argente'         },
+  { match: { A: BLACK,  B: ['b/b'], D: ['d/d'], P: ['p/p'], R: ['r/r'] }, phenotype: 'Russian Caramel Champagne'        },
+  { match: { A: AGOUTI, B: ['b/b'], D: ['d/d'], P: ['p/p'], R: ['r/r'] }, phenotype: 'Russian Saffron Silver Fawn'      },
+  { match: { A: BLACK,  D: ['d/d'], G: ['g/g'], M: ['m/m'], P: ['p/p'] }, phenotype: 'Russian Lavender Champagne'       },
+  { match: { A: AGOUTI, D: ['d/d'], G: ['g/g'], M: ['m/m'], P: ['p/p'] }, phenotype: 'Russian Lavender Silver Fawn'     },
+  { match: { A: BLACK,  D: ['d/d'], G: ['g/g'], M: ['m/m'], R: ['r/r'] }, phenotype: 'Russian Lavender Beige'           },
+  { match: { A: AGOUTI, D: ['d/d'], G: ['g/g'], M: ['m/m'], R: ['r/r'] }, phenotype: 'Russian Lavender Fawn'            },
+  { match: { A: BLACK,  D: ['d/d'], G: ['g/g'], P: ['p/p'], R: ['r/r'] }, phenotype: 'Russian Apricot Beige'            },
+  { match: { A: AGOUTI, D: ['d/d'], G: ['g/g'], P: ['p/p'], R: ['r/r'] }, phenotype: 'Russian Apricot Topaz'            },
+  { match: { A: BLACK,  D: ['d/d'], M: ['m/m'], P: ['p/p'], R: ['r/r'] }, phenotype: 'Russian Honey Beige'              },
+  { match: { A: AGOUTI, D: ['d/d'], M: ['m/m'], P: ['p/p'], R: ['r/r'] }, phenotype: 'Russian Honey Topaz'              },
+
+  // Non-Russian 4-dilution combos
+  { match: { A: BLACK,  B: ['b/b'], G: ['g/g'], M: ['m/m'], P: ['p/p'] }, phenotype: 'Lavender Chocolate Champagne'     },
+  { match: { A: AGOUTI, B: ['b/b'], G: ['g/g'], M: ['m/m'], P: ['p/p'] }, phenotype: 'Lavender Chocolate Silver Fawn'   },
+  { match: { A: BLACK,  B: ['b/b'], G: ['g/g'], M: ['m/m'], R: ['r/r'] }, phenotype: 'Lavender Caramel'                 },
+  { match: { A: AGOUTI, B: ['b/b'], G: ['g/g'], M: ['m/m'], R: ['r/r'] }, phenotype: 'Lavender Saffron'                 },
+  { match: { A: BLACK,  B: ['b/b'], G: ['g/g'], P: ['p/p'], R: ['r/r'] }, phenotype: 'Apricot Caramel'                  },
+  { match: { A: AGOUTI, B: ['b/b'], G: ['g/g'], P: ['p/p'], R: ['r/r'] }, phenotype: 'Apricot Saffron'                  },
+  { match: { A: BLACK,  B: ['b/b'], M: ['m/m'], P: ['p/p'], R: ['r/r'] }, phenotype: 'Honey Caramel'                    },
+  { match: { A: AGOUTI, B: ['b/b'], M: ['m/m'], P: ['p/p'], R: ['r/r'] }, phenotype: 'Honey Saffron'                    },
+  { match: { A: BLACK,  G: ['g/g'], M: ['m/m'], P: ['p/p'], R: ['r/r'] }, phenotype: 'Lavender Champagne Beige'         },
+  { match: { A: AGOUTI, G: ['g/g'], M: ['m/m'], P: ['p/p'], R: ['r/r'] }, phenotype: 'Lavender Silver Topaz'            },
+
+  // =========================================================
   // 3-LOCUS COMPOUND DILUTIONS — must be before 2-locus pairs
   // =========================================================
 
