@@ -315,10 +315,8 @@ const getPrototypePhenotypeInterpretation = (selectedTraits, species = TARGET_OU
     if (species === 'Fancy Rat') {
         const ratResult = matchFancyRatPhenotype(genotype);
         const phenotype = ratResult?.phenotype || null;
-        const catalog = getTargetTraitChipCatalog(species);
         if (phenotype) return phenotype;
-        const allLabels = selectedTraits.map(id => catalog.find(c => c.id === id)).filter(Boolean).map(c => c.label);
-        return allLabels.length ? allLabels.join(' ') : 'Select more trait chips to resolve a named phenotype.';
+        return 'Select more trait chips to resolve a named phenotype.';
     }
 
     const result = calculatePhenotype(genotype, genotype);
