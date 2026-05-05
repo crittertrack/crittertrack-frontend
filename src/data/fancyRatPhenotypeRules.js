@@ -46,20 +46,11 @@ export const FANCY_RAT_PHENOTYPE_RULES = [
   { match: { C: ['ct/c']  }, phenotype: 'Unknown (ct/c)'  },
 
   // =========================================================
-  // BURMESE × SIAMESE / HIMALAYAN — Bu + ch allele
-  // Must come before plain C-locus rules
+  // BURMESE × C-LOCUS — all Bu + restrictive-C combos (with or without dilutions)
+  // are derived dynamically by deriveBuPhenotype() in matchFancyRatPhenotype.
+  // Only Ivory Marten (Bu/Bu + cm) is kept explicit as a stable name override.
   // =========================================================
-  { match: { A: BLACK,  Bu: ['Bu/bu'], C: ['ch/ch', 'ch/c'] }, phenotype: 'Burmese'         },
-  { match: { A: BLACK,  Bu: ['Bu/Bu'], C: ['ch/ch', 'ch/c'] }, phenotype: 'Sable'           },
-  { match: { A: AGOUTI, Bu: ['Bu/bu'], C: ['ch/ch', 'ch/c'] }, phenotype: 'Wheaten Burmese' },
-  { match: { A: AGOUTI, Bu: ['Bu/Bu'], C: ['ch/ch', 'ch/c'] }, phenotype: 'Wheaten Sable'   },
-
-  // =========================================================
-  // BURMESE × MARTEN — Bu + cm allele
-  // =========================================================
-  { match: { A: BLACK,  Bu: ['Bu/bu'], C: ['cm/cm', 'cm/ch', 'cm/c'] }, phenotype: 'Burmese Marten'  },
-  { match: { A: AGOUTI, Bu: ['Bu/bu'], C: ['cm/cm', 'cm/ch', 'cm/c'] }, phenotype: 'Wheaten Marten'  },
-  { match: { Bu: ['Bu/Bu'],            C: ['cm/cm', 'cm/ch', 'cm/c'] }, phenotype: 'Ivory Marten'    },
+  { match: { Bu: ['Bu/Bu'], C: ['cm/cm', 'cm/ch', 'cm/c'] }, phenotype: 'Ivory Marten' },
 
   // =========================================================
   // SIAMESE (ch/ch) × DILUTION COMPOUNDS — most specific first
@@ -138,10 +129,10 @@ export const FANCY_RAT_PHENOTYPE_RULES = [
   // Bu only shows a phenotype when paired with ch, cm, or c.
   // Without those, the animal shows its base color — note is attached.
   // =========================================================
-  { match: { A: BLACK,  Bu: ['Bu/bu'] }, phenotype: 'Black',  notes: 'Bu present but does not visually express — requires a restrictive C allele (ch, cm, or c)' },
-  { match: { A: BLACK,  Bu: ['Bu/Bu'] }, phenotype: 'Black',  notes: 'Bu/Bu present but does not visually express — requires a restrictive C allele (ch, cm, or c)' },
-  { match: { A: AGOUTI, Bu: ['Bu/bu'] }, phenotype: 'Agouti', notes: 'Bu present but does not visually express — requires a restrictive C allele (ch, cm, or c)' },
-  { match: { A: AGOUTI, Bu: ['Bu/Bu'] }, phenotype: 'Agouti', notes: 'Bu/Bu present but does not visually express — requires a restrictive C allele (ch, cm, or c)' },
+  { match: { A: BLACK,  Bu: ['Bu/bu'], C: FULL_C }, phenotype: 'Black',  notes: 'Bu present but does not visually express — requires a restrictive C allele (ch, cm, or c)' },
+  { match: { A: BLACK,  Bu: ['Bu/Bu'], C: FULL_C }, phenotype: 'Black',  notes: 'Bu/Bu present but does not visually express — requires a restrictive C allele (ch, cm, or c)' },
+  { match: { A: AGOUTI, Bu: ['Bu/bu'], C: FULL_C }, phenotype: 'Agouti', notes: 'Bu present but does not visually express — requires a restrictive C allele (ch, cm, or c)' },
+  { match: { A: AGOUTI, Bu: ['Bu/Bu'], C: FULL_C }, phenotype: 'Agouti', notes: 'Bu/Bu present but does not visually express — requires a restrictive C allele (ch, cm, or c)' },
 
   // PEARL (Pe) & MERLE (Me): handled as modifiers in matchFancyRatPhenotype.
   // They append ' Pearl' / ' Merle' to any phenotype when m/m is also present.
@@ -399,16 +390,67 @@ function applyModifiers(rule, genotype) {
 }
 
 // ---------------------------------------------------------------------------
+// BU DERIVATION
+// ---------------------------------------------------------------------------
+
+/**
+ * Derive phenotype when Bu is present with a fully-restrictive C allele.
+ * Pipeline: [Wheaten if Agouti] [base dilution] [C-locus label] [Bu modifier]
+ *
+ * Ivory Marten (Bu/Bu + cm) is handled by an explicit rule and skipped here.
+ * Bu fallback (Bu + full C) is handled by explicit rules and skipped here.
+ */
+function deriveBuPhenotype(genotype) {
+  const { Bu, C, A } = genotype;
+  if (!Bu || Bu === 'bu/bu') return null;
+  if (!C || FULL_C.includes(C) || C === 'c/c') return null; // full-C or Albino: explicit rules
+  if (Bu === 'Bu/Bu' && ['cm/cm', 'cm/ch', 'cm/c'].includes(C)) return null; // Ivory Marten: explicit
+
+  const cType = getCType(C);
+  if (!cType) return null;
+
+  const isAgouti = AGOUTI.includes(A);
+  const isMarten = cType === 'marten';
+
+  // Base dilution name using Black-base rules (avoids 'Agouti' suffix)
+  const baseGenotype = { ...genotype, A: 'a/a', C: 'C/C', Bu: 'bu/bu' };
+  let dilution = '';
+  for (const rule of FANCY_RAT_PHENOTYPE_RULES) {
+    if (rule.match.C || rule.match.Bu) continue;
+    const allMatch = Object.entries(rule.match).every(([locus, allowed]) =>
+      baseGenotype[locus] != null && allowed.includes(baseGenotype[locus])
+    );
+    if (allMatch && rule.phenotype !== 'Black') { dilution = rule.phenotype; break; }
+  }
+
+  // C-locus label (marten handled via Bu suffix)
+  const cLabel = isMarten ? '' : (C_SUFFIX[cType] ?? '');
+
+  // Bu suffix
+  const buDosage = Bu === 'Bu/Bu' ? 'Sable' : 'Burmese';
+  const buSuffix = isMarten ? `${buDosage} Marten` : buDosage;
+
+  // Assemble: Wheaten (if Agouti) + dilution + C-label + Bu-suffix
+  const parts = [];
+  if (isAgouti) parts.push('Wheaten');
+  if (dilution) parts.push(dilution);
+  if (cLabel)   parts.push(cLabel);
+  parts.push(buSuffix);
+  return parts.join(' ');
+}
+
+// ---------------------------------------------------------------------------
 
 /**
  * Evaluate FANCY_RAT_PHENOTYPE_RULES against a genotype object.
  *
- * Pass 1 — explicit rules (Albino, Unknown C, Bu × C, Stone, compound/single dilutions).
- * Pass 2 — C-locus derivation: when a restrictive C allele is present and Pass 1 found
- *           no match, treat C as full (C/C) and re-run to identify the base dilution
- *           phenotype, then append the C-locus suffix with traditional-name overrides.
- * Modifiers — Pearl (Pe/pe) and Merle (Me/me) append ' Pearl' / ' Merle' to any
- *             phenotype when m/m is also present.
+ * Pass 1 — explicit rules (Albino, Stone, Unknown C, Ivory Marten, Bu fallbacks,
+ *           compound/single dilutions).
+ * Pass 2 — Bu derivation: Bu present with restrictive C — derives base dilution
+ *           then builds [C-locus] [Bu modifier] name.
+ * Pass 3 — C-locus derivation: restrictive C with no Bu — derives base then appends
+ *           C-locus suffix with traditional-name overrides.
+ * Modifiers — Pearl / Merle append to any phenotype when m/m is present.
  *
  * @param {Object} genotype  - e.g. { A: 'a/a', C: 'ch/ch', M: 'm/m', D: 'd/d', ... }
  * @returns {{ phenotype: string, notes?: string } | null}
@@ -423,12 +465,16 @@ export function matchFancyRatPhenotype(genotype) {
     if (allMatch) return applyModifiers(rule, genotype);
   }
 
-  // Pass 2: C-locus derivation
+  // Pass 2: Bu derivation (Bu + restrictive C, with or without dilutions)
+  const buPhenotype = deriveBuPhenotype(genotype);
+  if (buPhenotype != null) return applyModifiers({ phenotype: buPhenotype }, genotype);
+
+  // Pass 3: C-locus derivation (restrictive C, no Bu)
   const cType = getCType(genotype.C);
   if (cType) {
     const baseGenotype = { ...genotype, C: 'C/C' };
     for (const rule of FANCY_RAT_PHENOTYPE_RULES) {
-      if (rule.match.C || rule.match.Bu) continue; // skip C-specific and Bu-specific rules
+      if (rule.match.C || rule.match.Bu) continue;
       const allMatch = Object.entries(rule.match).every(([locus, allowed]) => {
         const notation = baseGenotype[locus];
         return notation != null && allowed.includes(notation);
