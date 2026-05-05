@@ -2367,7 +2367,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                   <option value="">{locus} - {data.name}</option>
                   {validCombinations.map((combo) => (
                     <option key={combo} value={combo}>
-                      {combo}{data.phenotypeMap?.[combo]?.phenotype ? ` – ${data.phenotypeMap[combo].phenotype}` : ''}
+                      {combo}
                     </option>
                   ))}
                 </select>
@@ -2434,7 +2434,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
                   <option value="">{locus} - {data.name}</option>
                   {data.combinations.map((combo) => (
                     <option key={combo} value={combo}>
-                      {combo}{data.phenotypeMap?.[combo]?.phenotype ? ` – ${data.phenotypeMap[combo].phenotype}` : ''}
+                      {combo}
                     </option>
                   ))}
                 </select>
