@@ -20,7 +20,7 @@ const normalizeAnimalView = (value) => (
     ['collections', 'enclosures', 'reproduction', 'health', 'feeding', 'supplies'].includes(value) ? value : 'list'
 );
 
-const DEFAULT_LIST_COLUMNS = { genderIcon: true, ctId: true, identification: true, name: true, variety: true, birthdate: true, age: true, sireName: true, damName: true };
+const DEFAULT_LIST_COLUMNS = { genderIcon: true, ctId: true, identification: true, name: true, variety: true, coat: true, birthdate: true, age: true, status: true, sireName: true, damName: true };
 
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
@@ -252,7 +252,7 @@ const AnimalList = ({
             return normalizeAnimalView(saved || initialAnimalView);
         } catch { return normalizeAnimalView(initialAnimalView); }
     }); // 'list' | 'collections' | 'management'
-    const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({ enclosures: true }); // { sectionKey: bool }
+    const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({ enclosures: false }); // { sectionKey: bool }
     const [collapsedMgmtGroups, setCollapsedMgmtGroups] = useState({}); // { groupKey: bool }
     const [mgmtAlertsEnabled, setMgmtAlertsEnabled] = useState(() => {
         try { return localStorage.getItem('ct_mgmt_urgency_enabled') !== 'false'; } catch { return true; }
@@ -713,7 +713,7 @@ const AnimalList = ({
 
     // Reset log screen when navigating away from management view
     useEffect(() => {
-        if (animalView !== 'management') { setShowActivityLogScreen(false); setShowSuppliesScreen(false); setSupplyFormVisible(false); setShowDuplicatesScreen(false); }
+        if (animalView !== 'management') { setShowActivityLogScreen(false); setSupplyFormVisible(false); setShowDuplicatesScreen(false); }
     }, [animalView]);
     
     // Auto-fetch duplicates when duplicates screen opens for the first time
@@ -1843,11 +1843,11 @@ const AnimalList = ({
                 {/* Back + Refresh */}
                 <div className="flex items-center justify-between">
                     <button
-                        onClick={() => { setShowSuppliesScreen(false); setSupplyFormVisible(false); setEditingSupplyId(null); }}
+                        onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); setAnimalView('feeding'); }}
                         className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-800 transition"
                     >
                         <ChevronLeft size={16} />
-                        Back to Management
+                        Back to Feeding & Care
                     </button>
                     <button onClick={fetchSupplies} disabled={suppliesLoading}
                         className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition disabled:opacity-50">
@@ -2360,8 +2360,9 @@ const AnimalList = ({
         </div>
     );
 
-    const SectionHeader = ({ sectionKey, icon, title, count, bgClass, onClick }) => {
+    const SectionHeader = ({ sectionKey, icon, title, count, bgClass, onClick, hideHeader }) => {
         const collapsed = collapsedMgmtSections[sectionKey] || false;
+        if (hideHeader) return null;
         return (
             <div
                 className={`relative flex items-center justify-between ${bgClass} px-3 py-2.5 sm:px-4 sm:py-3 border-b cursor-pointer`}
@@ -2987,7 +2988,7 @@ const AnimalList = ({
                 {/* -- 1. ENCLOSURES ------------------------------------------ */}
                 {(!view || view === 'enclosures') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     {/* Section header ? collapse on click, Add button on right */}
-                    <div className="relative flex items-center justify-between bg-blue-50 px-3 py-2.5 sm:px-4 sm:py-3 border-b cursor-pointer" onClick={() => toggleSection('enclosures')}>
+                    {!view && <div className="relative flex items-center justify-between bg-blue-50 px-3 py-2.5 sm:px-4 sm:py-3 border-b cursor-pointer" onClick={() => toggleSection('enclosures')}>
                         <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
                             {collapsedMgmtSections['enclosures']
                                 ? <ChevronDown className="w-4 h-4 text-gray-400" />
@@ -3008,10 +3009,19 @@ const AnimalList = ({
                         >
                             <Plus size={13} /> {enclosureFormVisible && !editingEnclosureId ? 'Cancel' : 'Add'}
                         </button>
-                    </div>
+                    </div>}
+                    {/* Add button shown standalone when on dedicated tab */}
+                    {view && <div className="flex justify-end px-3 py-2 border-b bg-blue-50/40">
+                        <button
+                            onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setEnclosureFormVisible(false); } else { setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [] }); setEnclosureFormVisible(v => !v); } }}
+                            className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 bg-white border border-blue-200 px-2 py-1 rounded-lg"
+                        >
+                            <Plus size={13} /> {enclosureFormVisible && !editingEnclosureId ? 'Cancel' : 'Add Enclosure'}
+                        </button>
+                    </div>}
 
                     {/* Inline create / edit form */}
-                    {enclosureFormVisible && !collapsedMgmtSections['enclosures'] && (
+                    {enclosureFormVisible && (!collapsedMgmtSections['enclosures'] || !!view) && (
                         <div className="p-3 border-b bg-blue-50/40 space-y-2">
                             <div className="text-xs font-semibold text-blue-700 mb-1">{editingEnclosureId ? 'Edit Enclosure' : 'New Enclosure'}</div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -3085,7 +3095,7 @@ const AnimalList = ({
                         </div>
                     )}
 
-                    {!collapsedMgmtSections['enclosures'] && (
+                    {(!collapsedMgmtSections['enclosures'] || !!view) && (
                         <div className="p-3 space-y-2">
                             {enclosures.length === 0 && unassignedAnimals.length === 0 ? (
                                 <div className="text-sm text-gray-400 text-center py-4">No enclosures yet. Click Add to create your first enclosure.</div>
@@ -3209,8 +3219,8 @@ const AnimalList = ({
                 {(!view || view === 'feeding') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="feeding"
                         icon={<Utensils size={18} className="text-green-600" />}
-                        title="Feeding" count={animalCareDue > 0 ? `${animalCareDue} due` : animals.length} bgClass="bg-green-50" />
-                    {!collapsedMgmtSections['feeding'] && (
+                        title="Feeding" count={animalCareDue > 0 ? `${animalCareDue} due` : animals.length} bgClass="bg-green-50" hideHeader={!!view} />
+                    {(!collapsedMgmtSections['feeding'] || !!view) && (
                         <div className="p-3 space-y-4">
                             {feedDue.length > 0 && (
                                 <div>
@@ -3292,8 +3302,8 @@ const AnimalList = ({
                 {(!view || view === 'reproduction') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="reproduction"
                         icon={<Bean size={18} className="text-pink-600" />}
-                        title="Reproduction" count={reproTotal} bgClass="bg-pink-50" />
-                    {!collapsedMgmtSections['reproduction'] && (
+                        title="Reproduction" count={reproTotal} bgClass="bg-pink-50" hideHeader={!!view} />
+                    {(!collapsedMgmtSections['reproduction'] || !!view) && (
                         <div className="p-3 space-y-4">
                             {reproTotal === 0
                                 ? <div className="text-sm text-gray-400 text-center py-4">No animals currently in a reproductive state.</div>
@@ -3369,8 +3379,8 @@ const AnimalList = ({
                 {(!view || view === 'health') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="medical"
                         icon={<Activity size={18} className="text-red-600" />}
-                        title="Medical / Quarantine" count={quarantineList.length + treatmentList.length} bgClass="bg-red-50" />
-                    {!collapsedMgmtSections['medical'] && (
+                        title="Medical / Quarantine" count={quarantineList.length + treatmentList.length} bgClass="bg-red-50" hideHeader={!!view} />
+                    {(!collapsedMgmtSections['medical'] || !!view) && (
                         <div className="p-3 space-y-4">
                             {quarantineList.length === 0 && treatmentList.length === 0
                                 ? <div className="text-sm text-gray-400 text-center py-4">No animals in quarantine or under treatment.</div>
@@ -3461,8 +3471,8 @@ const AnimalList = ({
                 {(!view || view === 'feeding') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="scheduledcare"
                         icon={<ClipboardList size={18} className="text-teal-600" />}
-                        title="Scheduled Care" count={animalsWithAnimalTasks.reduce((s, a) => s + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0) > 0 ? `${animalsWithAnimalTasks.reduce((s, a) => s + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0)} due` : animalsWithAnimalTasks.length} bgClass="bg-teal-50" />
-                    {!collapsedMgmtSections['scheduledcare'] && (
+                        title="Scheduled Care" count={animalsWithAnimalTasks.reduce((s, a) => s + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0) > 0 ? `${animalsWithAnimalTasks.reduce((s, a) => s + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0)} due` : animalsWithAnimalTasks.length} bgClass="bg-teal-50" hideHeader={!!view} />
+                    {(!collapsedMgmtSections['scheduledcare'] || !!view) && (
                         <div className="divide-y divide-gray-100">
                             {animalsWithAnimalTasks.length === 0 ? (
                                 <div className="px-3 py-4 text-xs text-gray-400 text-center">No animal care tasks. Edit an animal and add tasks in the Animal Care tab.</div>
@@ -3527,8 +3537,8 @@ const AnimalList = ({
                 {(!view || view === 'feeding') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="maintenance"
                         icon={<Wrench size={18} className="text-amber-600" />}
-                        title="Maintenance" count={`${maintTotalDue} due`} bgClass="bg-amber-50" />
-                    {!collapsedMgmtSections['maintenance'] && (
+                        title="Maintenance" count={`${maintTotalDue} due`} bgClass="bg-amber-50" hideHeader={!!view} />
+                    {(!collapsedMgmtSections['maintenance'] || !!view) && (
                         <div className="divide-y divide-gray-100">
                             {/* -- Housing Maintenance (animal enclosure care tasks + maintenance schedule) -- */}
                             <div>
@@ -3681,7 +3691,7 @@ const AnimalList = ({
                                 {supplies.length === 0 ? (
                                     <div className="px-3 py-3 flex items-center justify-between">
                                         <span className="text-xs text-gray-400">No items tracked yet.</span>
-                                        <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); setShowSuppliesScreen(true); }} className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-800 font-medium transition"><Package size={12} /> View All</button>
+                                        <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); setAnimalView('supplies'); }} className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-800 font-medium transition"><Package size={12} /> View All</button>
                                     </div>
                                 ) : (
                                     <div className="px-3 py-2 space-y-1.5">
@@ -3699,7 +3709,7 @@ const AnimalList = ({
                                                         <div className="flex items-center gap-1.5 shrink-0">
                                                             {isStock && <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">Low stock: {s.currentStock}</span>}
                                                             {isDate && <span className="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full">Order due</span>}
-                                                            <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); setShowSuppliesScreen(true); }} className="text-xs px-2 py-0.5 rounded font-medium border bg-amber-500 text-white hover:bg-amber-600 border-amber-500">Reorder</button>
+                                                            <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); setAnimalView('supplies'); }} className="text-xs px-2 py-0.5 rounded font-medium border bg-amber-500 text-white hover:bg-amber-600 border-amber-500">Reorder</button>
                                                         </div>
                                                     </div>
                                                 );
@@ -3708,7 +3718,7 @@ const AnimalList = ({
                                             <p className="text-xs text-gray-400 py-1">{supplies.length} item{supplies.length !== 1 ? 's' : ''} tracked • all stocked</p>
                                         )}
                                         <div className="flex justify-end pt-0.5">
-                                            <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); setShowSuppliesScreen(true); }} className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-800 font-medium transition"><Package size={12} /> View All</button>
+                                            <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); setAnimalView('supplies'); }} className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-800 font-medium transition"><Package size={12} /> View All</button>
                                         </div>
                                     </div>
                                 )}
@@ -4288,8 +4298,10 @@ const AnimalList = ({
                                 {listViewColumns.identification && <th className="px-3 py-2 text-left">ID</th>}
                                 {listViewColumns.name && <th className="px-3 py-2 text-left">Name</th>}
                                 {listViewColumns.variety && <th className="px-3 py-2 text-left">Variety</th>}
+                                {listViewColumns.coat && <th className="px-3 py-2 text-left">Coat</th>}
                                 {listViewColumns.birthdate && <th className="px-3 py-2 text-left whitespace-nowrap">Birth Date</th>}
                                 {listViewColumns.age && <th className="px-3 py-2 text-left">Age</th>}
+                                {listViewColumns.status && <th className="px-3 py-2 text-left">Status</th>}
                                 {listViewColumns.sireName && <th className="px-3 py-2 text-left">Sire</th>}
                                 {listViewColumns.damName && <th className="px-3 py-2 text-left">Dam</th>}
                                 <th className="px-3 py-2 text-right">
@@ -4307,26 +4319,33 @@ const AnimalList = ({
                             {speciesNames.flatMap(species => (groupedAnimals[species] || []).map(animal => {
                                 const sire = allAnimalsRaw.find(a => a.id_public === (animal.fatherId_public || animal.sireId_public));
                                 const dam = allAnimalsRaw.find(a => a.id_public === (animal.motherId_public || animal.damId_public));
-                                const sireName = sire ? [sire.prefix, sire.name, sire.suffix].filter(Boolean).join(' ') : (animal.fatherId_public || animal.sireId_public ? '(external)' : '—');
-                                const damName = dam ? [dam.prefix, dam.name, dam.suffix].filter(Boolean).join(' ') : (animal.motherId_public || animal.damId_public ? '(external)' : '—');
+                                const sireName = sire ? [sire.prefix, sire.name, sire.suffix].filter(Boolean).join(' ') : '—';
+                                const damName = dam ? [dam.prefix, dam.name, dam.suffix].filter(Boolean).join(' ') : '—';
                                 const birthDateObj = animal.birthDate ? new Date(animal.birthDate) : null;
                                 const ageStr = birthDateObj ? (() => {
-                                    const diff = Date.now() - birthDateObj.getTime();
-                                    const days = Math.floor(diff / 86400000);
-                                    if (days < 30) return `${days}d`;
-                                    const months = Math.floor(days / 30.44);
-                                    if (months < 24) return `${months}mo`;
-                                    return `${(months / 12).toFixed(1)}y`;
+                                    const birth = birthDateObj;
+                                    const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
+                                    let years = endDate.getFullYear() - birth.getFullYear();
+                                    let months = endDate.getMonth() - birth.getMonth();
+                                    let days = endDate.getDate() - birth.getDate();
+                                    if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
+                                    if (months < 0) { years--; months += 12; }
+                                    return years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
                                 })() : '—';
+                                const varietyStr = [animal.color, animal.coatPattern, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
+                                const coatStr = animal.coat || '—';
+                                const statusBadges = [animal.isQuarantine && { label: 'Quarantine', cls: 'bg-red-100 text-red-700' }, animal.isInMating && { label: 'Mating', cls: 'bg-yellow-100 text-yellow-700' }, animal.isPregnant && { label: 'Pregnant', cls: 'bg-pink-100 text-pink-700' }, animal.isNursing && { label: 'Nursing', cls: 'bg-purple-100 text-purple-700' }, animal.isForSale && { label: 'For Sale', cls: 'bg-green-100 text-green-700' }].filter(Boolean);
                                 return (
                                     <tr key={animal.id_public || animal._id} className="hover:bg-gray-50 cursor-pointer" onClick={() => onViewAnimal(animal)}>
-                                        {listViewColumns.genderIcon && <td className="px-2 py-1.5 text-center">{animal.gender === 'Male' ? '♂' : animal.gender === 'Female' ? '♀' : '?'}</td>}
+                                        {listViewColumns.genderIcon && <td className="px-2 py-1.5 text-center">{animal.gender === 'Male' ? <Mars className="w-4 h-4 mx-auto" strokeWidth={2.5} style={{color:'var(--color-primary,#9ED4E0)'}} /> : animal.gender === 'Female' ? <Venus className="w-4 h-4 mx-auto" strokeWidth={2.5} style={{color:'var(--color-accent,#D27096)'}} /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-4 h-4 mx-auto text-purple-500" strokeWidth={2.5} /> : <Circle className="w-4 h-4 mx-auto text-gray-400" strokeWidth={2.5} />}</td>}
                                         {listViewColumns.ctId && <td className="px-3 py-1.5 font-mono text-xs text-gray-500">{animal.id_public || '—'}</td>}
                                         {listViewColumns.identification && <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.breederAssignedId || '—'}</td>}
                                         {listViewColumns.name && <td className="px-3 py-1.5 font-medium text-gray-800">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</td>}
-                                        {listViewColumns.variety && <td className="px-3 py-1.5 text-gray-600">{animal.color || '—'}</td>}
+                                        {listViewColumns.variety && <td className="px-3 py-1.5 text-gray-600">{varietyStr}</td>}
+                                        {listViewColumns.coat && <td className="px-3 py-1.5 text-gray-600">{coatStr}</td>}
                                         {listViewColumns.birthdate && <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">{birthDateObj ? birthDateObj.toLocaleDateString() : '—'}</td>}
-                                        {listViewColumns.age && <td className="px-3 py-1.5 text-gray-600">{ageStr}</td>}
+                                        {listViewColumns.age && <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">{ageStr}</td>}
+                                        {listViewColumns.status && <td className="px-3 py-1.5"><div className="flex flex-wrap gap-1">{statusBadges.length ? statusBadges.map(b => <span key={b.label} className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${b.cls}`}>{b.label}</span>) : <span className="text-gray-400">—</span>}</div></td>}
                                         {listViewColumns.sireName && <td className="px-3 py-1.5 text-gray-500 text-xs">{sireName}</td>}
                                         {listViewColumns.damName && <td className="px-3 py-1.5 text-gray-500 text-xs">{damName}</td>}
                                         <td />
@@ -4339,7 +4358,7 @@ const AnimalList = ({
                     {showListColumnConfig && (
                         <div className="border-t border-gray-200 bg-gray-50 px-4 py-3 flex flex-wrap gap-3 items-center">
                             <span className="text-xs font-semibold text-gray-600 mr-2">Show columns:</span>
-                            {Object.entries({ genderIcon: 'Gender', ctId: 'CT ID', identification: 'ID', name: 'Name', variety: 'Variety', birthdate: 'Birthdate', age: 'Age', sireName: 'Sire', damName: 'Dam' }).map(([key, label]) => (
+                            {Object.entries({ genderIcon: 'Gender', ctId: 'CT ID', identification: 'ID', name: 'Name', variety: 'Variety', coat: 'Coat', birthdate: 'Birthdate', age: 'Age', status: 'Status', sireName: 'Sire', damName: 'Dam' }).map(([key, label]) => (
                                 <label key={key} className="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
                                     <input
                                         type="checkbox"
