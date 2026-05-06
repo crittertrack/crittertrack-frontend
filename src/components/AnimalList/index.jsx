@@ -1865,15 +1865,8 @@ const AnimalList = ({
 
         return (
             <div className="mt-4 space-y-4">
-                {/* Back + Refresh */}
-                <div className="flex items-center justify-between">
-                    <button
-                        onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); setAnimalView('feeding'); }}
-                        className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-800 transition"
-                    >
-                        <ChevronLeft size={16} />
-                        Back to Feeding & Care
-                    </button>
+                {/* Refresh */}
+                <div className="flex items-center justify-end">
                     <button onClick={fetchSupplies} disabled={suppliesLoading}
                         className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition disabled:opacity-50">
                         <RefreshCw size={12} /> Refresh
