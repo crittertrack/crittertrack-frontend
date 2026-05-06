@@ -3224,11 +3224,12 @@ const AnimalList = ({
                         <div className="p-3 space-y-4">
                             {feedDue.length > 0 && (
                                 <div>
-                                    <div className="flex items-center gap-2 px-1 pb-2">
+                                    <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('feed_due')}>
+                                        {collapsedMgmtGroups['feed_due'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
                                         <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" />
                                         <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Due Today / Overdue ({feedDue.length})</span>
                                     </div>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                    {!collapsedMgmtGroups['feed_due'] && <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
                                         {feedDue.map(a => (
                                             <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                 hideControls hideBreedingLines
@@ -3247,16 +3248,17 @@ const AnimalList = ({
                                                 </>}
                                             />
                                         ))}
-                                    </div>
+                                    </div>}
                                 </div>
                             )}
                             {feedOk.length > 0 && (
                                 <div>
-                                    <div className="flex items-center gap-2 px-1 pb-2">
+                                    <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('feed_ok')}>
+                                        {collapsedMgmtGroups['feed_ok'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
                                         <span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" />
                                         <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Up to Date ({feedOk.length})</span>
                                     </div>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                    {!collapsedMgmtGroups['feed_ok'] && <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
                                         {feedOk.map(a => (
                                             <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                 hideControls hideBreedingLines
@@ -3270,16 +3272,17 @@ const AnimalList = ({
                                                 </>}
                                             />
                                         ))}
-                                    </div>
+                                    </div>}
                                 </div>
                             )}
                             {feedNone.length > 0 && (
                                 <div>
-                                    <div className="flex items-center gap-2 px-1 pb-2">
+                                    <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('feed_none')}>
+                                        {collapsedMgmtGroups['feed_none'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
                                         <span className="w-2.5 h-2.5 rounded-full bg-gray-300 inline-block" />
                                         <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">No Schedule Set ({feedNone.length})</span>
                                     </div>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                    {!collapsedMgmtGroups['feed_none'] && <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
                                         {feedNone.map(a => (
                                             <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                 hideControls hideBreedingLines
@@ -3288,7 +3291,7 @@ const AnimalList = ({
                                                     : undefined}
                                             />
                                         ))}
-                                    </div>
+                                    </div>}
                                 </div>
                             )}
                             {feedDue.length === 0 && feedOk.length === 0 && feedNone.length === 0 && (
@@ -3310,11 +3313,12 @@ const AnimalList = ({
                                 : <>
                                     {matingList.length > 0 && (
                                         <div>
-                                            <div className="flex items-center gap-2 px-1 pb-2">
+                                            <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('repro_mating')}>
+                                                {collapsedMgmtGroups['repro_mating'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
                                                 <span className="w-2.5 h-2.5 rounded-full bg-purple-400 inline-block" />
                                                 <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">In Mating ({matingList.length})</span>
                                             </div>
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                            {!collapsedMgmtGroups['repro_mating'] && <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
                                                 {matingList.map(a => (
                                                     <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                         hideControls hideBreedingLines
@@ -3326,16 +3330,17 @@ const AnimalList = ({
                                                         </>}
                                                     />
                                                 ))}
-                                            </div>
+                                            </div>}
                                         </div>
                                     )}
                                     {pregnantList.length > 0 && (
                                         <div>
-                                            <div className="flex items-center gap-2 px-1 pb-2">
+                                            <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('repro_pregnant')}>
+                                                {collapsedMgmtGroups['repro_pregnant'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
                                                 <span className="w-2.5 h-2.5 rounded-full bg-pink-400 inline-block" />
                                                 <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Pregnant / Gravid ({pregnantList.length})</span>
                                             </div>
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                            {!collapsedMgmtGroups['repro_pregnant'] && <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
                                                 {pregnantList.map(a => (
                                                     <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                         hideControls hideBreedingLines
@@ -3347,16 +3352,17 @@ const AnimalList = ({
                                                         </>}
                                                     />
                                                 ))}
-                                            </div>
+                                            </div>}
                                         </div>
                                     )}
                                     {nursingList.length > 0 && (
                                         <div>
-                                            <div className="flex items-center gap-2 px-1 pb-2">
+                                            <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('repro_nursing')}>
+                                                {collapsedMgmtGroups['repro_nursing'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
                                                 <span className="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block" />
                                                 <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Nursing / Brooding ({nursingList.length})</span>
                                             </div>
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                            {!collapsedMgmtGroups['repro_nursing'] && <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
                                                 {nursingList.map(a => (
                                                     <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                         hideControls hideBreedingLines
@@ -3366,7 +3372,7 @@ const AnimalList = ({
                                                         }
                                                     />
                                                 ))}
-                                            </div>
+                                            </div>}
                                         </div>
                                     )}
                                 </>
@@ -3542,8 +3548,11 @@ const AnimalList = ({
                         <div className="divide-y divide-gray-100">
                             {/* -- Housing Maintenance (animal enclosure care tasks + maintenance schedule) -- */}
                             <div>
-                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide">Housing Maintenance</div>
-                                {animalsWithEnclosureCareTasks.length === 0 ? (
+                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide flex items-center gap-2 cursor-pointer" onClick={() => toggleGroup('maint_housing')}>
+                                    {collapsedMgmtGroups['maint_housing'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
+                                    Housing Maintenance
+                                </div>
+                                {!collapsedMgmtGroups['maint_housing'] && (animalsWithEnclosureCareTasks.length === 0 ? (
                                     <div className="px-3 py-4 text-xs text-gray-400 text-center">No housing maintenance tasks. Edit an animal and add tasks in the Housing tab.</div>
                                 ) : animalsWithEnclosureCareTasks.map(a => {
                                     const grpKey = `housingmaint_${a.id_public}`;
@@ -3619,13 +3628,16 @@ const AnimalList = ({
                                             )}
                                         </div>
                                     );
-                                })}
+                                }))}
                             </div>
 
                             {/* -- Enclosure Cleaning -- */}
                             <div>
-                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide">Enclosure Cleaning</div>
-                                {enclosuresWithCleaningTasks.length === 0 ? (
+                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide flex items-center gap-2 cursor-pointer" onClick={() => toggleGroup('maint_cleaning')}>
+                                    {collapsedMgmtGroups['maint_cleaning'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
+                                    Enclosure Cleaning
+                                </div>
+                                {!collapsedMgmtGroups['maint_cleaning'] && (enclosuresWithCleaningTasks.length === 0 ? (
                                     <div className="px-3 py-4 text-xs text-gray-400 text-center">No cleaning tasks defined. Edit an enclosure above and add tasks.</div>
                                 ) : enclosuresWithCleaningTasks.map(enc => {
                                     const grpKey = `maint_enc_${enc._id}`;
@@ -3673,55 +3685,7 @@ const AnimalList = ({
                                             )}
                                         </div>
                                     );
-                                })}
-                            </div>
-
-                            {/* -- Supplies & Inventory -- */}
-                            <div>
-                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide flex items-center justify-between">
-                                    <span>Supplies &amp; Inventory</span>
-                                    {suppliesLoading
-                                        ? <Loader2 size={11} className="animate-spin text-gray-400" />
-                                        : <span className="text-gray-400 font-normal normal-case">
-                                            {supplies.length} item{supplies.length !== 1 ? 's' : ''}
-                                            {supplyReorderDue.length > 0 && <span className="ml-1 text-amber-600 font-semibold"><AlertCircle size={12} className="inline-block align-middle mr-0.5" /> {supplyReorderDue.length} to reorder</span>}
-                                          </span>
-                                    }
-                                </div>
-                                {supplies.length === 0 ? (
-                                    <div className="px-3 py-3 flex items-center justify-between">
-                                        <span className="text-xs text-gray-400">No items tracked yet.</span>
-                                        <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); setAnimalView('supplies'); }} className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-800 font-medium transition"><Package size={12} /> View All</button>
-                                    </div>
-                                ) : (
-                                    <div className="px-3 py-2 space-y-1.5">
-                                        {supplyReorderDue.length > 0 ? (
-                                            supplyReorderDue.map(s => {
-                                                const isDate = s.nextOrderDate && new Date(s.nextOrderDate) < todayMaint;
-                                                const isStock = s.reorderThreshold != null && s.currentStock <= s.reorderThreshold;
-                                                return (
-                                                    <div key={s._id} className="flex items-center justify-between gap-2 text-sm">
-                                                        <div className="flex items-center gap-2 min-w-0">
-                                                            <span className="w-2 h-2 rounded-full flex-shrink-0 bg-red-500" />
-                                                            <span className="text-gray-700 truncate">{s.name}</span>
-                                                            {s.unit && <span className="text-gray-400 text-xs">{s.unit}</span>}
-                                                        </div>
-                                                        <div className="flex items-center gap-1.5 shrink-0">
-                                                            {isStock && <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">Low stock: {s.currentStock}</span>}
-                                                            {isDate && <span className="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full">Order due</span>}
-                                                            <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); setAnimalView('supplies'); }} className="text-xs px-2 py-0.5 rounded font-medium border bg-amber-500 text-white hover:bg-amber-600 border-amber-500">Reorder</button>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })
-                                        ) : (
-                                            <p className="text-xs text-gray-400 py-1">{supplies.length} item{supplies.length !== 1 ? 's' : ''} tracked • all stocked</p>
-                                        )}
-                                        <div className="flex justify-end pt-0.5">
-                                            <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); setAnimalView('supplies'); }} className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-800 font-medium transition"><Package size={12} /> View All</button>
-                                        </div>
-                                    </div>
-                                )}
+                                }))}
                             </div>
                         </div>
                     )}
