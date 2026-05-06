@@ -20,7 +20,7 @@ const normalizeAnimalView = (value) => (
     ['collections', 'enclosures', 'reproduction', 'health', 'feeding', 'supplies'].includes(value) ? value : 'list'
 );
 
-const DEFAULT_LIST_COLUMNS = { genderIcon: true, ctId: true, identification: true, name: true, variety: true, coat: true, birthdate: true, age: true, status: true, sireName: true, damName: true };
+const DEFAULT_LIST_COLUMNS = { genderIcon: true, ctId: true, identification: true, name: true, variety: true, birthdate: true, age: true, status: true, reproduction: true, sireName: true, damName: true };
 
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
@@ -4290,75 +4290,11 @@ const AnimalList = ({
             ) : myAnimalsViewMode === 'list' ? (
                 /* Flat list / table view */
                 <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
-                    <table className="min-w-full text-sm">
-                        <thead className="bg-gray-100 text-gray-600 text-xs uppercase">
-                            <tr>
-                                {listViewColumns.genderIcon && <th className="px-2 py-2 text-center w-8"></th>}
-                                {listViewColumns.ctId && <th className="px-3 py-2 text-left whitespace-nowrap">CT ID</th>}
-                                {listViewColumns.identification && <th className="px-3 py-2 text-left">ID</th>}
-                                {listViewColumns.name && <th className="px-3 py-2 text-left">Name</th>}
-                                {listViewColumns.variety && <th className="px-3 py-2 text-left">Variety</th>}
-                                {listViewColumns.coat && <th className="px-3 py-2 text-left">Coat</th>}
-                                {listViewColumns.birthdate && <th className="px-3 py-2 text-left whitespace-nowrap">Birth Date</th>}
-                                {listViewColumns.age && <th className="px-3 py-2 text-left">Age</th>}
-                                {listViewColumns.status && <th className="px-3 py-2 text-left">Status</th>}
-                                {listViewColumns.sireName && <th className="px-3 py-2 text-left">Sire</th>}
-                                {listViewColumns.damName && <th className="px-3 py-2 text-left">Dam</th>}
-                                <th className="px-3 py-2 text-right">
-                                    <button
-                                        onClick={() => setShowListColumnConfig(v => !v)}
-                                        className="text-gray-400 hover:text-gray-700 transition"
-                                        title="Configure columns"
-                                    >
-                                        <SlidersHorizontal size={13} />
-                                    </button>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {speciesNames.flatMap(species => (groupedAnimals[species] || []).map(animal => {
-                                const sire = allAnimalsRaw.find(a => a.id_public === (animal.fatherId_public || animal.sireId_public));
-                                const dam = allAnimalsRaw.find(a => a.id_public === (animal.motherId_public || animal.damId_public));
-                                const sireName = sire ? [sire.prefix, sire.name, sire.suffix].filter(Boolean).join(' ') : '—';
-                                const damName = dam ? [dam.prefix, dam.name, dam.suffix].filter(Boolean).join(' ') : '—';
-                                const birthDateObj = animal.birthDate ? new Date(animal.birthDate) : null;
-                                const ageStr = birthDateObj ? (() => {
-                                    const birth = birthDateObj;
-                                    const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
-                                    let years = endDate.getFullYear() - birth.getFullYear();
-                                    let months = endDate.getMonth() - birth.getMonth();
-                                    let days = endDate.getDate() - birth.getDate();
-                                    if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
-                                    if (months < 0) { years--; months += 12; }
-                                    return years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
-                                })() : '—';
-                                const varietyStr = [animal.color, animal.coatPattern, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
-                                const coatStr = animal.coat || '—';
-                                const statusBadges = [animal.isQuarantine && { label: 'Quarantine', cls: 'bg-red-100 text-red-700' }, animal.isInMating && { label: 'Mating', cls: 'bg-yellow-100 text-yellow-700' }, animal.isPregnant && { label: 'Pregnant', cls: 'bg-pink-100 text-pink-700' }, animal.isNursing && { label: 'Nursing', cls: 'bg-purple-100 text-purple-700' }, animal.isForSale && { label: 'For Sale', cls: 'bg-green-100 text-green-700' }].filter(Boolean);
-                                return (
-                                    <tr key={animal.id_public || animal._id} className="hover:bg-gray-50 cursor-pointer" onClick={() => onViewAnimal(animal)}>
-                                        {listViewColumns.genderIcon && <td className="px-2 py-1.5 text-center">{animal.gender === 'Male' ? <Mars className="w-4 h-4 mx-auto" strokeWidth={2.5} style={{color:'var(--color-primary,#9ED4E0)'}} /> : animal.gender === 'Female' ? <Venus className="w-4 h-4 mx-auto" strokeWidth={2.5} style={{color:'var(--color-accent,#D27096)'}} /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-4 h-4 mx-auto text-purple-500" strokeWidth={2.5} /> : <Circle className="w-4 h-4 mx-auto text-gray-400" strokeWidth={2.5} />}</td>}
-                                        {listViewColumns.ctId && <td className="px-3 py-1.5 font-mono text-xs text-gray-500">{animal.id_public || '—'}</td>}
-                                        {listViewColumns.identification && <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.breederAssignedId || '—'}</td>}
-                                        {listViewColumns.name && <td className="px-3 py-1.5 font-medium text-gray-800">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</td>}
-                                        {listViewColumns.variety && <td className="px-3 py-1.5 text-gray-600">{varietyStr}</td>}
-                                        {listViewColumns.coat && <td className="px-3 py-1.5 text-gray-600">{coatStr}</td>}
-                                        {listViewColumns.birthdate && <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">{birthDateObj ? birthDateObj.toLocaleDateString() : '—'}</td>}
-                                        {listViewColumns.age && <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">{ageStr}</td>}
-                                        {listViewColumns.status && <td className="px-3 py-1.5"><div className="flex flex-wrap gap-1">{statusBadges.length ? statusBadges.map(b => <span key={b.label} className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${b.cls}`}>{b.label}</span>) : <span className="text-gray-400">—</span>}</div></td>}
-                                        {listViewColumns.sireName && <td className="px-3 py-1.5 text-gray-500 text-xs">{sireName}</td>}
-                                        {listViewColumns.damName && <td className="px-3 py-1.5 text-gray-500 text-xs">{damName}</td>}
-                                        <td />
-                                    </tr>
-                                );
-                            }))}
-                        </tbody>
-                    </table>
-                    {/* Column config popover */}
+                    {/* Column config panel — above the table */}
                     {showListColumnConfig && (
-                        <div className="border-t border-gray-200 bg-gray-50 px-4 py-3 flex flex-wrap gap-3 items-center">
+                        <div className="border-b border-gray-200 bg-gray-50 px-4 py-3 flex flex-wrap gap-3 items-center">
                             <span className="text-xs font-semibold text-gray-600 mr-2">Show columns:</span>
-                            {Object.entries({ genderIcon: 'Gender', ctId: 'CT ID', identification: 'ID', name: 'Name', variety: 'Variety', coat: 'Coat', birthdate: 'Birthdate', age: 'Age', status: 'Status', sireName: 'Sire', damName: 'Dam' }).map(([key, label]) => (
+                            {Object.entries({ genderIcon: 'Gender', ctId: 'CT ID', identification: 'ID', name: 'Name', variety: 'Variety', birthdate: 'Birthdate', age: 'Age', status: 'Status', reproduction: 'Reproduction', sireName: 'Sire', damName: 'Dam' }).map(([key, label]) => (
                                 <label key={key} className="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
                                     <input
                                         type="checkbox"
@@ -4375,6 +4311,79 @@ const AnimalList = ({
                             ))}
                         </div>
                     )}
+                    <table className="min-w-full text-sm">
+                        <thead className="bg-gray-100 text-gray-600 text-xs uppercase">
+                            <tr>
+                                {listViewColumns.genderIcon && <th className="px-2 py-2 text-center w-8"></th>}
+                                {listViewColumns.ctId && <th className="px-3 py-2 text-left whitespace-nowrap">CT ID</th>}
+                                {listViewColumns.identification && <th className="px-3 py-2 text-left">ID</th>}
+                                {listViewColumns.name && <th className="px-3 py-2 text-left">Name</th>}
+                                {listViewColumns.variety && <th className="px-3 py-2 text-left">Variety</th>}
+                                {listViewColumns.birthdate && <th className="px-3 py-2 text-left whitespace-nowrap">Birth Date</th>}
+                                {listViewColumns.age && <th className="px-3 py-2 text-left">Age</th>}
+                                {listViewColumns.status && <th className="px-3 py-2 text-left">Status</th>}
+                                {listViewColumns.reproduction && <th className="px-3 py-2 text-left">Reproduction</th>}
+                                {listViewColumns.sireName && <th className="px-3 py-2 text-left">Sire</th>}
+                                {listViewColumns.damName && <th className="px-3 py-2 text-left">Dam</th>}
+                                <th className="px-3 py-2 text-right">
+                                    <button
+                                        onClick={() => setShowListColumnConfig(v => !v)}
+                                        className="text-gray-400 hover:text-gray-700 transition"
+                                        title="Configure columns"
+                                    >
+                                        <SlidersHorizontal size={13} />
+                                    </button>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {(() => {
+                                const parentLookup = {};
+                                [...allAnimalsRaw, ...soldTransferredRaw].forEach(a => { if (a.id_public) parentLookup[a.id_public] = a; });
+                                const resolveParent = (id) => {
+                                    if (!id) return '—';
+                                    const a = parentLookup[id];
+                                    if (a) return [a.prefix, a.name, a.suffix].filter(Boolean).join(' ') || id;
+                                    return id; // show raw ID as fallback for truly external animals
+                                };
+                                return speciesNames.flatMap(species => (groupedAnimals[species] || []).map(animal => {
+                                const sireId = animal.fatherId_public || animal.sireId_public;
+                                const damId = animal.motherId_public || animal.damId_public;
+                                const sireName = resolveParent(sireId);
+                                const damName = resolveParent(damId);
+                                const birthDateObj = animal.birthDate ? new Date(animal.birthDate) : null;
+                                const ageStr = birthDateObj ? (() => {
+                                    const birth = birthDateObj;
+                                    const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
+                                    let years = endDate.getFullYear() - birth.getFullYear();
+                                    let months = endDate.getMonth() - birth.getMonth();
+                                    let days = endDate.getDate() - birth.getDate();
+                                    if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
+                                    if (months < 0) { years--; months += 12; }
+                                    return years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
+                                })() : '—';
+                                const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
+                                const reproBadges = [animal.isQuarantine && { label: 'Quarantine', cls: 'bg-red-100 text-red-700' }, animal.isInMating && { label: 'Mating', cls: 'bg-yellow-100 text-yellow-700' }, animal.isPregnant && { label: 'Pregnant', cls: 'bg-pink-100 text-pink-700' }, animal.isNursing && { label: 'Nursing', cls: 'bg-purple-100 text-purple-700' }].filter(Boolean);
+                                return (
+                                    <tr key={animal.id_public || animal._id} className="hover:bg-gray-50 cursor-pointer" onClick={() => onViewAnimal(animal)}>
+                                        {listViewColumns.genderIcon && <td className="px-2 py-1.5 text-center">{animal.gender === 'Male' ? <Mars className="w-4 h-4 mx-auto" strokeWidth={2.5} style={{color:'var(--color-primary,#9ED4E0)'}} /> : animal.gender === 'Female' ? <Venus className="w-4 h-4 mx-auto" strokeWidth={2.5} style={{color:'var(--color-accent,#D27096)'}} /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-4 h-4 mx-auto text-purple-500" strokeWidth={2.5} /> : <Circle className="w-4 h-4 mx-auto text-gray-400" strokeWidth={2.5} />}</td>}
+                                        {listViewColumns.ctId && <td className="px-3 py-1.5 font-mono text-xs text-gray-500">{animal.id_public || '—'}</td>}
+                                        {listViewColumns.identification && <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.breederAssignedId || '—'}</td>}
+                                        {listViewColumns.name && <td className="px-3 py-1.5 font-medium text-gray-800">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</td>}
+                                        {listViewColumns.variety && <td className="px-3 py-1.5 text-gray-600">{varietyStr}</td>}
+                                        {listViewColumns.birthdate && <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">{birthDateObj ? birthDateObj.toLocaleDateString() : '—'}</td>}
+                                        {listViewColumns.age && <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">{ageStr}</td>}
+                                        {listViewColumns.status && <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.status || '—'}</td>}
+                                        {listViewColumns.reproduction && <td className="px-3 py-1.5"><div className="flex flex-wrap gap-1">{reproBadges.length ? reproBadges.map(b => <span key={b.label} className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${b.cls}`}>{b.label}</span>) : <span className="text-gray-400">—</span>}</div></td>}
+                                        {listViewColumns.sireName && <td className="px-3 py-1.5 text-gray-500 text-xs">{sireName}</td>}
+                                        {listViewColumns.damName && <td className="px-3 py-1.5 text-gray-500 text-xs">{damName}</td>}
+                                        <td />
+                                    </tr>
+                                );
+                            }));
+                            })()}
+                        </tbody>
+                    </table>
                 </div>
             ) : (
                 <div className="space-y-3 sm:space-y-4">
