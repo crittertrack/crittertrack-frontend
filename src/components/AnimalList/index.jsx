@@ -17,8 +17,10 @@ const API_BASE_URL = '/api';
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'];
 const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
 const normalizeAnimalView = (value) => (
-    value === 'management' || value === 'collections' ? value : 'list'
+    ['collections', 'enclosures', 'reproduction', 'health', 'feeding', 'supplies'].includes(value) ? value : 'list'
 );
+
+const DEFAULT_LIST_COLUMNS = { genderIcon: true, ctId: true, identification: true, name: true, variety: true, birthdate: true, age: true, sireName: true, damName: true };
 
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
@@ -264,6 +266,19 @@ const AnimalList = ({
         } catch {}
     };
 
+    // ---- For Sale screen & My Animals list view ----
+    const [showForSaleScreen, setShowForSaleScreen] = useState(false);
+    const [myAnimalsViewMode, setMyAnimalsViewMode] = useState(() => {
+        try { return localStorage.getItem('ct_my_animals_view_mode') || 'cards'; } catch { return 'cards'; }
+    });
+    const [listViewColumns, setListViewColumns] = useState(() => {
+        try {
+            const saved = localStorage.getItem('ct_list_view_columns');
+            return saved ? { ...DEFAULT_LIST_COLUMNS, ...JSON.parse(saved) } : DEFAULT_LIST_COLUMNS;
+        } catch { return DEFAULT_LIST_COLUMNS; }
+    });
+    const [showListColumnConfig, setShowListColumnConfig] = useState(false);
+
     // ---- Collection CRUD helpers ----
     const _syncToApi = (cols, map) => {
         if (!authToken) return;
@@ -353,6 +368,7 @@ const AnimalList = ({
     const [assigningCollectionAnimalId, setAssigningCollectionAnimalId] = useState(null);
 
     const isCollectionsView = animalView === 'collections';
+    const isMgmtTab = ['enclosures', 'reproduction', 'health', 'feeding', 'supplies'].includes(animalView);
     const isListLikeView = animalView === 'list' || isCollectionsView;
 
     useEffect(() => {
@@ -2576,8 +2592,53 @@ const AnimalList = ({
         );
     };
 
-    // -- Management View ----------------------------------------------------------
-    const renderManagementView = () => {
+    // -- For Sale Screen ----------------------------------------------------------
+    const renderForSaleScreen = () => {
+        const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly);
+        const handleMarkRehomed = (e, animal) => {
+            e.stopPropagation();
+            if (!window.confirm(`Mark ${animal.name || 'this animal'} as Rehomed? This will change their status to "Rehomed".`)) return;
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, status: 'Rehomed' } : a));
+            setAvailableAnimalsRaw(prev => prev.filter(a => a.id_public !== animal.id_public));
+            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { status: 'Rehomed' },
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .catch(err => { console.error('Mark rehomed failed:', err); fetchAnimals(); });
+        };
+        return (
+            <div className="space-y-4 mt-4">
+                <div className="flex items-center gap-2 mb-2">
+                    <ShoppingBag size={18} className="text-purple-600" />
+                    <h3 className="text-base font-semibold text-gray-800">For Sale / Available</h3>
+                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">{availableList.length}</span>
+                </div>
+                {availableList.length === 0
+                    ? <div className="text-sm text-gray-400 text-center py-8">No animals currently marked as Available.</div>
+                    : <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                        {availableList.map(a => (
+                            <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species}
+                                isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                hideControls hideBreedingLines
+                                cardActions={<>
+                                    {a.isForSale && a.salePriceAmount && (
+                                        <div className="text-[10px] text-purple-600 font-medium truncate w-full text-center">
+                                            {a.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${a.salePriceCurrency || ''} ${a.salePriceAmount}`.trim()}
+                                        </div>
+                                    )}
+                                    <button onClick={(e) => handleMarkRehomed(e, a)}
+                                        className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500 text-white hover:bg-indigo-600 w-full flex items-center justify-center gap-0.5">
+                                        <Check size={9} /> Rehomed
+                                    </button>
+                                </>}
+                            />
+                        ))}
+                    </div>
+                }
+            </div>
+        );
+    };
+
+    // -- Management View (view = 'enclosures' | 'reproduction' | 'health' | 'feeding') --
+    const renderManagementView = (view = null) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -2924,7 +2985,7 @@ const AnimalList = ({
             <div className="space-y-3 sm:space-y-4 mt-4">
 
                 {/* -- 1. ENCLOSURES ------------------------------------------ */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {(!view || view === 'enclosures') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     {/* Section header ? collapse on click, Add button on right */}
                     <div className="relative flex items-center justify-between bg-blue-50 px-3 py-2.5 sm:px-4 sm:py-3 border-b cursor-pointer" onClick={() => toggleSection('enclosures')}>
                         <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
@@ -3142,10 +3203,10 @@ const AnimalList = ({
                             )}
                         </div>
                     )}
-                </div>
+                </div>)}
 
                 {/* -- 2. FEEDING -------------------------------------------- */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {(!view || view === 'feeding') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="feeding"
                         icon={<Utensils size={18} className="text-green-600" />}
                         title="Feeding" count={animalCareDue > 0 ? `${animalCareDue} due` : animals.length} bgClass="bg-green-50" />
@@ -3225,10 +3286,10 @@ const AnimalList = ({
                             )}
                         </div>
                     )}
-                </div>
+                </div>)}
 
                 {/* -- 3. REPRODUCTION ---------------------------------------- */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {(!view || view === 'reproduction') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="reproduction"
                         icon={<Bean size={18} className="text-pink-600" />}
                         title="Reproduction" count={reproTotal} bgClass="bg-pink-50" />
@@ -3302,10 +3363,10 @@ const AnimalList = ({
                             }
                         </div>
                     )}
-                </div>
+                </div>)}
 
                 {/* -- 4. MEDICAL / QUARANTINE -------------------------------- */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {(!view || view === 'health') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="medical"
                         icon={<Activity size={18} className="text-red-600" />}
                         title="Medical / Quarantine" count={quarantineList.length + treatmentList.length} bgClass="bg-red-50" />
@@ -3362,10 +3423,10 @@ const AnimalList = ({
                             }
                         </div>
                     )}
-                </div>
+                </div>)}
 
-                {/* -- 5. FOR SALE / AVAILABLE -------------------------------- */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {/* -- 5. FOR SALE / AVAILABLE (moved to top-bar button) ------ */}
+                {!view && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="available"
                         icon={<ShoppingBag size={18} className="text-purple-600" />}
                         title="For Sale / Available" count={availableList.length} bgClass="bg-purple-50" />
@@ -3394,10 +3455,10 @@ const AnimalList = ({
                             }
                         </div>
                     )}
-                </div>
+                </div>)}
 
                 {/* -- 6. SCHEDULED CARE ------------------------------------- */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {(!view || view === 'feeding') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="scheduledcare"
                         icon={<ClipboardList size={18} className="text-teal-600" />}
                         title="Scheduled Care" count={animalsWithAnimalTasks.reduce((s, a) => s + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0) > 0 ? `${animalsWithAnimalTasks.reduce((s, a) => s + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0)} due` : animalsWithAnimalTasks.length} bgClass="bg-teal-50" />
@@ -3460,10 +3521,10 @@ const AnimalList = ({
                             })}
                         </div>
                     )}
-                </div>
+                </div>)}
 
                 {/* -- 7. MAINTENANCE ----------------------------------------- */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {(!view || view === 'feeding') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="maintenance"
                         icon={<Wrench size={18} className="text-amber-600" />}
                         title="Maintenance" count={`${maintTotalDue} due`} bgClass="bg-amber-50" />
@@ -3654,7 +3715,7 @@ const AnimalList = ({
                             </div>
                         </div>
                     )}
-                </div>
+                </div>)}
 
                 {/* -- 8. ACTIVITY LOG ? now a separate screen, accessed via button in header -- */}
 
@@ -3761,131 +3822,107 @@ const AnimalList = ({
     return (
         <div className="w-full max-w-7xl bg-white p-6 rounded-xl shadow-lg">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div className='flex items-center gap-2'>
+                <div className='flex items-center gap-2 flex-wrap'>
                     <ClipboardList size={20} className="sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
-                    {animalView === 'list' ? `My Animals (${displayedAnimalCount})` : animalView === 'collections' ? 'Collections' : showActivityLogScreen ? 'Activity Log' : showSuppliesScreen ? 'Supplies & Inventory' : 'Management View'}
+                    {animalView === 'list' ? `My Animals (${displayedAnimalCount})` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : showActivityLogScreen ? 'Activity Log' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
                     {isListLikeView && hasActiveFilters && (
                         <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
                             Filtered
                         </span>
                     )}
-                    <button 
-                        onClick={handleRefresh}
-                        disabled={loading}
-                        className="text-gray-500 hover:text-primary transition disabled:opacity-50 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-medium"
-                        title="Refresh List"
-                    >
-                        {loading ? <Loader2 size={14} className="sm:w-4 sm:h-4 animate-spin" /> : <RefreshCw size={14} className="sm:w-4 sm:h-4" />}
-                        <span className="hidden sm:inline">Refresh</span>
-                    </button>
                 </div>
-                <div className="flex items-center gap-1 sm:gap-2 flex-wrap" data-tutorial-target="bulk-privacy-controls">
-                    {isListLikeView && (<>
-                    {isListLikeView && !showDuplicatesScreen && (
+                {/* Universal top-bar action buttons */}
+                <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap" data-tutorial-target="bulk-privacy-controls">
+                    {/* For Sale */}
+                    {!showArchiveScreen && !showDuplicatesScreen && (
                         <button
-                            onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(true); }}
-                            className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-amber-600 hover:text-amber-800 hover:bg-amber-50 border border-amber-200 rounded-lg transition font-medium"
-                            title="Find Duplicate Animals"
+                            onClick={() => { setShowForSaleScreen(v => !v); setShowActivityLogScreen(false); }}
+                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showForSaleScreen ? 'bg-purple-600 text-white border-purple-600' : 'text-purple-600 hover:text-purple-800 hover:bg-purple-50 border-purple-200'}`}
+                            title="For Sale / Available"
                         >
-                            <Search size={14} className="sm:w-4 sm:h-4" />
-                            <span className="font-medium">Find Duplicates</span>
+                            <ShoppingBag size={14} className="sm:w-4 sm:h-4" />
+                            <span className="font-medium hidden sm:inline">For Sale</span>
                         </button>
                     )}
-                    {isListLikeView && (
-                    <button
-                        onClick={() => setShowArchiveScreen(true)}
-                        className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-purple-600 hover:text-purple-800 hover:bg-purple-50 border border-purple-200 rounded-lg transition font-medium"
-                        title="Archive"
-                    >
-                        <Archive size={14} className="sm:w-4 sm:h-4" />
-                        <span className="font-medium">Archive</span>
-                    </button>
-                    )}
-                    <button 
-                        onClick={() => navigate('/select-species')} 
-                        className="bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
-                        data-tutorial-target="add-animal-btn"
-                    >
-                        <PlusCircle size={14} className="sm:w-4 sm:h-4" /> <span>Add Animal</span>
-                    </button>
-
-                    </>)}
-                    {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
+                    {/* Activity Log */}
+                    {!showArchiveScreen && !showDuplicatesScreen && (
                         <button
-                            onClick={() => {
-                                setActivityLogs([]);
-                                setLogsLoaded(false);
-                                setShowActivityLogScreen(true);
-                            }}
-                            className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 border border-indigo-200 rounded-lg transition font-medium"
-                            title="View Activity Log"
+                            onClick={() => { setShowActivityLogScreen(v => { if (!v) { setActivityLogs([]); setLogsLoaded(false); } return !v; }); setShowForSaleScreen(false); }}
+                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showActivityLogScreen ? 'bg-indigo-600 text-white border-indigo-600' : 'text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 border-indigo-200'}`}
+                            title="Activity Log"
                         >
                             <ScrollText size={14} className="sm:w-4 sm:h-4" />
-                            <span className="font-medium">Activity Log</span>
+                            <span className="font-medium hidden sm:inline">Activity Log</span>
                         </button>
                     )}
-                    {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
+                    {/* Archive */}
+                    {!showDuplicatesScreen && (
                         <button
-                            onClick={() => { setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months' }); setEditingSupplyId(null); setSupplyFormVisible(false); setShowSuppliesScreen(true); }}
-                            className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 border border-emerald-200 rounded-lg transition font-medium"
-                            title="Supplies & Inventory"
-                        >
-                            <Package size={14} className="sm:w-4 sm:h-4" />
-                            <span className="font-medium">Supplies</span>
-                        </button>
-                    )}
-                    {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
-                        <button
-                            onClick={() => setShowArchiveScreen(true)}
-                            className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-purple-600 hover:text-purple-800 hover:bg-purple-50 border border-purple-200 rounded-lg transition font-medium"
+                            onClick={() => { setShowArchiveScreen(v => !v); setShowForSaleScreen(false); setShowActivityLogScreen(false); }}
+                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showArchiveScreen ? 'bg-purple-600 text-white border-purple-600' : 'text-purple-600 hover:text-purple-800 hover:bg-purple-50 border-purple-200'}`}
                             title="Archive"
                         >
                             <Archive size={14} className="sm:w-4 sm:h-4" />
-                            <span className="font-medium">Archive</span>
+                            <span className="font-medium hidden sm:inline">Archive</span>
                         </button>
                     )}
-                    {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
+                    {/* Find Duplicates */}
+                    {!showArchiveScreen && (
                         <button
-                            onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(true); }}
-                            className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-amber-600 hover:text-amber-800 hover:bg-amber-50 border border-amber-200 rounded-lg transition font-medium"
+                            onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(v => !v); setShowForSaleScreen(false); setShowActivityLogScreen(false); }}
+                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showDuplicatesScreen ? 'bg-amber-500 text-white border-amber-500' : 'text-amber-600 hover:text-amber-800 hover:bg-amber-50 border-amber-200'}`}
                             title="Find Duplicate Animals"
                         >
                             <Search size={14} className="sm:w-4 sm:h-4" />
-                            <span className="font-medium">Find Duplicates</span>
+                            <span className="font-medium hidden sm:inline">Find Duplicates</span>
                         </button>
                     )}
-                    {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
-                        <button
-                            onClick={toggleMgmtAlerts}
-                            title={mgmtAlertsEnabled ? 'Management alerts on ? click to disable' : 'Management alerts off ? click to enable'}
-                            className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border shadow-sm transition-colors ${
-                                mgmtAlertsEnabled ? 'bg-orange-50 border-orange-300 text-orange-700 hover:bg-orange-100' : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50'
-                            }`}
-                        >
-                            <Bell size={14} className="sm:w-4 sm:h-4" />
-                            <span className="font-medium hidden sm:inline">Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
-                        </button>
-                    )}
-                    {animalView === 'management' && (
-                    <button 
-                        onClick={handleRefresh} 
+                    {/* Alerts On/Off */}
+                    <button
+                        onClick={toggleMgmtAlerts}
+                        title={mgmtAlertsEnabled ? 'Alerts on — click to disable' : 'Alerts off — click to enable'}
+                        className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${mgmtAlertsEnabled ? 'bg-orange-50 border-orange-300 text-orange-700 hover:bg-orange-100' : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50'}`}
+                    >
+                        <Bell size={14} className="sm:w-4 sm:h-4" />
+                        <span className="font-medium hidden sm:inline">Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
+                    </button>
+                    {/* Refresh */}
+                    <button
+                        onClick={handleRefresh}
                         disabled={loading}
                         className="text-gray-500 hover:text-primary transition disabled:opacity-50 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-medium"
-                        title="Refresh List"
+                        title="Refresh"
                     >
                         {loading ? <Loader2 size={14} className="sm:w-4 sm:h-4 animate-spin" /> : <RefreshCw size={14} className="sm:w-4 sm:h-4" />}
                         <span className="hidden sm:inline">Refresh</span>
                     </button>
+                    {/* Add Animal (only on list/collections views) */}
+                    {isListLikeView && !showArchiveScreen && (
+                        <button
+                            onClick={() => navigate('/select-species')}
+                            className="bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
+                            data-tutorial-target="add-animal-btn"
+                        >
+                            <PlusCircle size={14} className="sm:w-4 sm:h-4" /> <span>Add Animal</span>
+                        </button>
+                    )}
+                    {/* Bulk privacy controls (list view only) */}
+                    {isListLikeView && !showArchiveScreen && !showDuplicatesScreen && (
+                        <></> /* placeholder — privacy buttons moved to filter bar below */
                     )}
                 </div>
             </h2>
 
-            {/* View Toggle: My Animals / Collections / Management */}
+            {/* View Toggle: My Animals / Collections / Enclosures / Reproduction / Health / Feeding & Care / Supplies */}
             {!showArchiveScreen && (
-            <div className="flex border border-gray-200 rounded-xl overflow-hidden shadow-sm mb-4">
-                {[{key:'list', icon:<ClipboardList size={16} className="shrink-0" />, label:'My Animals'},
-                  {key:'collections', icon:<FolderOpen size={16} className="shrink-0" />, label:'Collections'},
-                  {key:'management', icon:<LayoutGrid size={16} className="shrink-0" />, label:'Management'}
+            <div className="flex border border-gray-200 rounded-xl overflow-hidden shadow-sm mb-4 flex-wrap">
+                {[{key:'list', icon:<ClipboardList size={14} className="shrink-0" />, label:'My Animals'},
+                  {key:'collections', icon:<FolderOpen size={14} className="shrink-0" />, label:'Collections'},
+                  {key:'enclosures', icon:<Home size={14} className="shrink-0" />, label:'Enclosures'},
+                  {key:'reproduction', icon:<Bean size={14} className="shrink-0" />, label:'Reproduction'},
+                  {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
+                  {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'},
+                  {key:'supplies', icon:<Package size={14} className="shrink-0" />, label:'Supplies'},
                 ].map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
@@ -3993,7 +4030,7 @@ const AnimalList = ({
                     </button>
                 </div>
 
-                {/* Search + Filters toggle + Add */}
+                {/* Search + Filters toggle + View mode toggle */}
                 <div className="flex items-center gap-2 p-2 sm:p-3 border-t border-gray-200">
                     <input
                         type="text"
@@ -4027,6 +4064,23 @@ const AnimalList = ({
                             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-pink-500 rounded-full" />
                         )}
                     </button>
+                    {/* Card / List view toggle */}
+                    <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
+                        <button
+                            onClick={() => { setMyAnimalsViewMode('cards'); try { localStorage.setItem('ct_my_animals_view_mode', 'cards'); } catch {} }}
+                            className={`p-2 transition text-xs font-medium flex items-center gap-1 ${myAnimalsViewMode === 'cards' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                            title="Card view"
+                        >
+                            <LayoutGrid size={14} />
+                        </button>
+                        <button
+                            onClick={() => { setMyAnimalsViewMode('list'); try { localStorage.setItem('ct_my_animals_view_mode', 'list'); } catch {} }}
+                            className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${myAnimalsViewMode === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                            title="List view"
+                        >
+                            <ClipboardList size={14} />
+                        </button>
+                    </div>
                 </div>
 
                 {/* Collapsible filter panel */}
@@ -4199,9 +4253,7 @@ const AnimalList = ({
             </div>
             )}
 
-            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : animalView === 'management' ? (
-                showActivityLogScreen ? renderActivityLogScreen() : showSuppliesScreen ? renderSuppliesScreen() : renderManagementView()
-            ) : animalView === 'collections' ? renderCollectionsView() : (loading && animals.length === 0) ? (
+            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : showActivityLogScreen ? renderActivityLogScreen() : showForSaleScreen ? renderForSaleScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'supplies' ? renderSuppliesScreen() : animalView === 'collections' ? renderCollectionsView() : (loading && animals.length === 0) ? (
                 /* Skeleton grid ? only on very first load before any animals arrive */
                 <div className="space-y-3 sm:space-y-4">
                     {[0,1,2].map(gi => (
@@ -4224,6 +4276,86 @@ const AnimalList = ({
                     <Cat size={48} className="text-gray-400 mx-auto mb-4" />
                     <p className="text-xl font-semibold text-gray-600">No animals found.</p>
                     <p className="text-gray-500">Try adjusting your filters or add a new animal!</p>
+                </div>
+            ) : myAnimalsViewMode === 'list' ? (
+                /* Flat list / table view */
+                <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+                    <table className="min-w-full text-sm">
+                        <thead className="bg-gray-100 text-gray-600 text-xs uppercase">
+                            <tr>
+                                {listViewColumns.genderIcon && <th className="px-2 py-2 text-center w-8"></th>}
+                                {listViewColumns.ctId && <th className="px-3 py-2 text-left whitespace-nowrap">CT ID</th>}
+                                {listViewColumns.identification && <th className="px-3 py-2 text-left">ID</th>}
+                                {listViewColumns.name && <th className="px-3 py-2 text-left">Name</th>}
+                                {listViewColumns.variety && <th className="px-3 py-2 text-left">Variety</th>}
+                                {listViewColumns.birthdate && <th className="px-3 py-2 text-left whitespace-nowrap">Birth Date</th>}
+                                {listViewColumns.age && <th className="px-3 py-2 text-left">Age</th>}
+                                {listViewColumns.sireName && <th className="px-3 py-2 text-left">Sire</th>}
+                                {listViewColumns.damName && <th className="px-3 py-2 text-left">Dam</th>}
+                                <th className="px-3 py-2 text-right">
+                                    <button
+                                        onClick={() => setShowListColumnConfig(v => !v)}
+                                        className="text-gray-400 hover:text-gray-700 transition"
+                                        title="Configure columns"
+                                    >
+                                        <SlidersHorizontal size={13} />
+                                    </button>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {speciesNames.flatMap(species => (groupedAnimals[species] || []).map(animal => {
+                                const sire = allAnimalsRaw.find(a => a.id_public === (animal.fatherId_public || animal.sireId_public));
+                                const dam = allAnimalsRaw.find(a => a.id_public === (animal.motherId_public || animal.damId_public));
+                                const sireName = sire ? [sire.prefix, sire.name, sire.suffix].filter(Boolean).join(' ') : (animal.fatherId_public || animal.sireId_public ? '(external)' : '—');
+                                const damName = dam ? [dam.prefix, dam.name, dam.suffix].filter(Boolean).join(' ') : (animal.motherId_public || animal.damId_public ? '(external)' : '—');
+                                const birthDateObj = animal.birthDate ? new Date(animal.birthDate) : null;
+                                const ageStr = birthDateObj ? (() => {
+                                    const diff = Date.now() - birthDateObj.getTime();
+                                    const days = Math.floor(diff / 86400000);
+                                    if (days < 30) return `${days}d`;
+                                    const months = Math.floor(days / 30.44);
+                                    if (months < 24) return `${months}mo`;
+                                    return `${(months / 12).toFixed(1)}y`;
+                                })() : '—';
+                                return (
+                                    <tr key={animal.id_public || animal._id} className="hover:bg-gray-50 cursor-pointer" onClick={() => onViewAnimal(animal)}>
+                                        {listViewColumns.genderIcon && <td className="px-2 py-1.5 text-center">{animal.gender === 'Male' ? '♂' : animal.gender === 'Female' ? '♀' : '?'}</td>}
+                                        {listViewColumns.ctId && <td className="px-3 py-1.5 font-mono text-xs text-gray-500">{animal.id_public || '—'}</td>}
+                                        {listViewColumns.identification && <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.breederAssignedId || '—'}</td>}
+                                        {listViewColumns.name && <td className="px-3 py-1.5 font-medium text-gray-800">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</td>}
+                                        {listViewColumns.variety && <td className="px-3 py-1.5 text-gray-600">{animal.color || '—'}</td>}
+                                        {listViewColumns.birthdate && <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">{birthDateObj ? birthDateObj.toLocaleDateString() : '—'}</td>}
+                                        {listViewColumns.age && <td className="px-3 py-1.5 text-gray-600">{ageStr}</td>}
+                                        {listViewColumns.sireName && <td className="px-3 py-1.5 text-gray-500 text-xs">{sireName}</td>}
+                                        {listViewColumns.damName && <td className="px-3 py-1.5 text-gray-500 text-xs">{damName}</td>}
+                                        <td />
+                                    </tr>
+                                );
+                            }))}
+                        </tbody>
+                    </table>
+                    {/* Column config popover */}
+                    {showListColumnConfig && (
+                        <div className="border-t border-gray-200 bg-gray-50 px-4 py-3 flex flex-wrap gap-3 items-center">
+                            <span className="text-xs font-semibold text-gray-600 mr-2">Show columns:</span>
+                            {Object.entries({ genderIcon: 'Gender', ctId: 'CT ID', identification: 'ID', name: 'Name', variety: 'Variety', birthdate: 'Birthdate', age: 'Age', sireName: 'Sire', damName: 'Dam' }).map(([key, label]) => (
+                                <label key={key} className="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={!!listViewColumns[key]}
+                                        onChange={() => setListViewColumns(prev => {
+                                            const next = { ...prev, [key]: !prev[key] };
+                                            try { localStorage.setItem('ct_list_view_columns', JSON.stringify(next)); } catch {}
+                                            return next;
+                                        })}
+                                        className="rounded"
+                                    />
+                                    {label}
+                                </label>
+                            ))}
+                        </div>
+                    )}
                 </div>
             ) : (
                 <div className="space-y-3 sm:space-y-4">
