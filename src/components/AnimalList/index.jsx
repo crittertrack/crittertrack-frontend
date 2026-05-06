@@ -278,6 +278,31 @@ const AnimalList = ({
         } catch { return DEFAULT_LIST_COLUMNS; }
     });
     const [showListColumnConfig, setShowListColumnConfig] = useState(false);
+    const [externalParentsCache, setExternalParentsCache] = useState({});
+
+    // Fetch names for external parent IDs (animals not in the user's own collection)
+    // Runs whenever the animal list or view mode changes
+    useEffect(() => {
+        if (myAnimalsViewMode !== 'list' || !authToken || allAnimalsRaw.length === 0) return;
+        const localIds = new Set([...allAnimalsRaw, ...soldTransferredRaw].map(a => a.id_public).filter(Boolean));
+        const unresolvedIds = [];
+        allAnimalsRaw.forEach(a => {
+            const sireId = a.fatherId_public || a.sireId_public;
+            const damId  = a.motherId_public  || a.damId_public;
+            if (sireId && !localIds.has(sireId) && !externalParentsCache[sireId]) unresolvedIds.push(sireId);
+            if (damId  && !localIds.has(damId)  && !externalParentsCache[damId])  unresolvedIds.push(damId);
+        });
+        const uniqueIds = [...new Set(unresolvedIds)];
+        if (uniqueIds.length === 0) return;
+        axios.post(`${API_BASE_URL}/animals/parents-batch`, { ids: uniqueIds }, {
+            headers: { Authorization: `Bearer ${authToken}` }
+        }).then(res => {
+            const map = {};
+            (res.data || []).forEach(a => { if (a.id_public) map[a.id_public] = a; });
+            setExternalParentsCache(prev => ({ ...prev, ...map }));
+        }).catch(err => console.warn('[parents-batch]', err));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [myAnimalsViewMode, allAnimalsRaw, authToken]);
 
     // ---- Collection CRUD helpers ----
     const _syncToApi = (cols, map) => {
@@ -4304,6 +4329,7 @@ const AnimalList = ({
                             {(() => {
                                 const parentLookup = {};
                                 [...allAnimalsRaw, ...soldTransferredRaw].forEach(a => { if (a.id_public) parentLookup[a.id_public] = a; });
+                                Object.assign(parentLookup, externalParentsCache);
                                 const resolveParent = (id) => {
                                     if (!id) return '—';
                                     const a = parentLookup[id];
