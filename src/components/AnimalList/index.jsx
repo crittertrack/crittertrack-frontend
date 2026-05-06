@@ -3240,6 +3240,10 @@ const AnimalList = ({
                         title="Feeding" count={animalCareDue > 0 ? `${animalCareDue} due` : animals.length} bgClass="bg-green-50" hideHeader={!!view} />
                     {(!collapsedMgmtSections['feeding'] || !!view) && (
                         <div className="p-3 space-y-4">
+                            {!!view && <div className="flex items-center gap-2 pb-2 mb-1 border-b border-green-100">
+                                <Utensils size={15} className="text-green-600 flex-shrink-0" />
+                                <span className="text-sm font-bold text-green-700 uppercase tracking-wide">Feeding Schedule</span>
+                            </div>}
                             {feedDue.length > 0 && (
                                 <div>
                                     <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('feed_due')}>
@@ -3498,6 +3502,10 @@ const AnimalList = ({
                         title="Scheduled Care" count={animalsWithAnimalTasks.reduce((s, a) => s + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0) > 0 ? `${animalsWithAnimalTasks.reduce((s, a) => s + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0)} due` : animalsWithAnimalTasks.length} bgClass="bg-teal-50" hideHeader={!!view} />
                     {(!collapsedMgmtSections['scheduledcare'] || !!view) && (
                         <div className="divide-y divide-gray-100">
+                            {!!view && <div className="flex items-center gap-2 px-3 py-2 bg-teal-50 border-b border-teal-100">
+                                <ClipboardList size={15} className="text-teal-600 flex-shrink-0" />
+                                <span className="text-sm font-bold text-teal-700 uppercase tracking-wide">Scheduled Animal Care</span>
+                            </div>}
                             {animalsWithAnimalTasks.length === 0 ? (
                                 <div className="px-3 py-4 text-xs text-gray-400 text-center">No animal care tasks. Edit an animal and add tasks in the Animal Care tab.</div>
                             ) : animalsWithAnimalTasks.map(a => {
@@ -3564,6 +3572,10 @@ const AnimalList = ({
                         title="Maintenance" count={`${maintTotalDue} due`} bgClass="bg-amber-50" hideHeader={!!view} />
                     {(!collapsedMgmtSections['maintenance'] || !!view) && (
                         <div className="divide-y divide-gray-100">
+                            {!!view && <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border-b border-amber-100">
+                                <Wrench size={15} className="text-amber-600 flex-shrink-0" />
+                                <span className="text-sm font-bold text-amber-700 uppercase tracking-wide">Maintenance</span>
+                            </div>}
                             {/* -- Housing Maintenance (animal enclosure care tasks + maintenance schedule) -- */}
                             <div>
                                 <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide flex items-center gap-2 cursor-pointer" onClick={() => toggleGroup('maint_housing')}>
