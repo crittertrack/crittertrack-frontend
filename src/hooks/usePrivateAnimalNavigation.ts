@@ -73,9 +73,20 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
         // When editing from a nested detail context (for example offspring cards),
         // close the view overlay and leave only the edit modal visible.
         setAnimalToView(null);
-        setAnimalToEdit(animal);
+        setAnimalToEdit(animal); // set immediately so form opens without delay
         setViewAnimalBreederInfo(null);
-    }, []);
+
+        // Fetch full record in background (list uses slim projection which omits many fields)
+        if (animal.id_public && authToken) {
+            axios.get(`${API_BASE_URL}/animals/${animal.id_public}`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            }).then(res => {
+                setAnimalToEdit(res.data);
+            }).catch(err => {
+                console.warn('[handleEditAnimal] Failed to fetch full animal data:', err.message);
+            });
+        }
+    }, [authToken, API_BASE_URL]);
 
     /**
      * Close the edit overlay and return to the currently edited animal
@@ -354,8 +365,28 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
     useEffect(() => {
         if (!animalToView) {
             setAnimalViewHistory([]);
+            lastFetchedIdRef.current = null;
         }
     }, [animalToView]);
+
+    /**
+     * Fetch full animal data whenever a new animal is opened.
+     * The list uses a slim projection, so we always refresh with the complete record.
+     */
+    const lastFetchedIdRef = useRef<string | null>(null);
+    useEffect(() => {
+        if (!animalToView?.id_public || !authToken) return;
+        // Skip if we already fetched full data for this animal id
+        if (lastFetchedIdRef.current === animalToView.id_public) return;
+        lastFetchedIdRef.current = animalToView.id_public;
+        axios.get(`${API_BASE_URL}/animals/${animalToView.id_public}`, {
+            headers: { Authorization: `Bearer ${authToken}` }
+        }).then(res => {
+            setAnimalToView(res.data);
+        }).catch(err => {
+            console.warn('[usePrivateAnimalNavigation] Failed to fetch full animal data:', err.message);
+        });
+    }, [animalToView?.id_public, authToken, API_BASE_URL]);
 
     /**
      * Fetch pedigree data when viewing an animal
