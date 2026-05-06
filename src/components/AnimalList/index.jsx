@@ -4283,7 +4283,7 @@ const AnimalList = ({
                     {showListColumnConfig && (
                         <div className="border-b border-gray-200 bg-gray-50 px-4 py-3 flex flex-wrap gap-3 items-center">
                             <span className="text-xs font-semibold text-gray-600 mr-2">Show columns:</span>
-                            {Object.entries({ genderIcon: 'Gender', ctId: 'CT ID', identification: 'ID', name: 'Name', variety: 'Variety', birthdate: 'Birthdate', age: 'Age', status: 'Status', reproduction: 'Reproduction', sireName: 'Sire', damName: 'Dam' }).map(([key, label]) => (
+                            {Object.entries({ genderIcon: 'Gender', ctId: 'CT ID', identification: 'ID', name: 'Name', variety: 'Variety', birthdate: 'Birthdate', age: 'Age', status: 'Status', reproduction: 'Repro', sireName: 'Sire', damName: 'Dam' }).map(([key, label]) => (
                                 <label key={key} className="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
                                     <input
                                         type="checkbox"
@@ -4305,13 +4305,13 @@ const AnimalList = ({
                             <tr>
                                 {listViewColumns.genderIcon && <th className="px-2 py-2 text-center w-8"></th>}
                                 {listViewColumns.ctId && <th className="px-3 py-2 text-left whitespace-nowrap">CT ID</th>}
-                                {listViewColumns.identification && <th className="px-3 py-2 text-left">ID</th>}
+                                {listViewColumns.identification && <th className="px-3 py-2 text-left min-w-[8rem]">ID</th>}
                                 {listViewColumns.name && <th className="px-3 py-2 text-left">Name</th>}
                                 {listViewColumns.variety && <th className="px-3 py-2 text-left">Variety</th>}
                                 {listViewColumns.birthdate && <th className="px-3 py-2 text-left whitespace-nowrap">Birth Date</th>}
                                 {listViewColumns.age && <th className="px-3 py-2 text-left">Age</th>}
                                 {listViewColumns.status && <th className="px-3 py-2 text-left">Status</th>}
-                                {listViewColumns.reproduction && <th className="px-3 py-2 text-left">Reproduction</th>}
+                                {listViewColumns.reproduction && <th className="px-3 py-2 text-left w-px whitespace-nowrap">Repro</th>}
                                 {listViewColumns.sireName && <th className="px-3 py-2 text-left">Sire</th>}
                                 {listViewColumns.damName && <th className="px-3 py-2 text-left">Dam</th>}
                                 <th className="px-3 py-2 text-right">
@@ -4358,13 +4358,13 @@ const AnimalList = ({
                                     <tr key={animal.id_public || animal._id} className="hover:bg-gray-50 cursor-pointer" onClick={() => onViewAnimal(animal)}>
                                         {listViewColumns.genderIcon && <td className="px-2 py-1.5 text-center">{animal.gender === 'Male' ? <Mars className="w-4 h-4 mx-auto" strokeWidth={2.5} style={{color:'var(--color-primary,#9ED4E0)'}} /> : animal.gender === 'Female' ? <Venus className="w-4 h-4 mx-auto" strokeWidth={2.5} style={{color:'var(--color-accent,#D27096)'}} /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-4 h-4 mx-auto text-purple-500" strokeWidth={2.5} /> : <Circle className="w-4 h-4 mx-auto text-gray-400" strokeWidth={2.5} />}</td>}
                                         {listViewColumns.ctId && <td className="px-3 py-1.5 font-mono text-xs text-gray-500">{animal.id_public || '—'}</td>}
-                                        {listViewColumns.identification && <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.breederAssignedId || '—'}</td>}
+                                        {listViewColumns.identification && <td className="px-3 py-1.5 text-gray-600 text-xs min-w-[8rem]">{animal.breederAssignedId || '—'}</td>}
                                         {listViewColumns.name && <td className="px-3 py-1.5 font-medium text-gray-800">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</td>}
                                         {listViewColumns.variety && <td className="px-3 py-1.5 text-gray-600">{varietyStr}</td>}
                                         {listViewColumns.birthdate && <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">{birthDateObj ? birthDateObj.toLocaleDateString() : '—'}</td>}
                                         {listViewColumns.age && <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">{ageStr}</td>}
                                         {listViewColumns.status && <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.status || '—'}</td>}
-                                        {listViewColumns.reproduction && <td className="px-3 py-1.5"><div className="flex flex-wrap gap-1">{reproBadges.length ? reproBadges.map(b => <span key={b.label} className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${b.cls}`}>{b.label}</span>) : <span className="text-gray-400">—</span>}</div></td>}
+                                        {listViewColumns.reproduction && <td className="px-3 py-1.5 w-px whitespace-nowrap"><div className="flex gap-1">{reproBadges.length ? reproBadges.map(b => <span key={b.label} className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${b.cls}`}>{b.label}</span>) : <span className="text-gray-400">—</span>}</div></td>}
                                         {listViewColumns.sireName && <td className="px-3 py-1.5 text-gray-500 text-xs">{sireName}</td>}
                                         {listViewColumns.damName && <td className="px-3 py-1.5 text-gray-500 text-xs">{damName}</td>}
                                         <td />
