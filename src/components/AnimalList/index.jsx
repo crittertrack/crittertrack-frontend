@@ -4202,18 +4202,15 @@ const AnimalList = ({
 
             {/* View Toggle: My Animals / Collections / Enclosures / Reproduction / Health / Feeding & Care / Supplies */}
             {!showArchiveScreen && (
-            <div className="flex border border-gray-200 rounded-xl overflow-hidden shadow-sm mb-4 flex-wrap">
+            <div className="mb-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                <div className="grid grid-cols-3 sm:hidden">
                 {[{key:'list', icon:<ClipboardList size={14} className="shrink-0" />, label:'My Animals'},
                   {key:'collections', icon:<FolderOpen size={14} className="shrink-0" />, label:'Collections'},
                   {key:'enclosures', icon:<Home size={14} className="shrink-0" />, label:'Enclosures'},
-                  {key:'reproduction', icon:<Bean size={14} className="shrink-0" />, label:'Reproduction'},
-                  {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
-                  {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'},
-                  {key:'supplies', icon:<Package size={14} className="shrink-0" />, label:'Supplies'},
                 ].map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
-                        className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 sm:py-2 px-2 sm:px-4 text-[10px] sm:text-sm font-semibold transition ${
+                        className={`relative flex flex-col items-center justify-center gap-0.5 py-1.5 px-2 text-[10px] font-semibold transition ${
                             animalView === tab.key ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'
                         }`}
                     >
@@ -4226,11 +4223,66 @@ const AnimalList = ({
                                 defaultAnimalView === tab.key ? 'text-red-500' : 'text-gray-300 hover:text-gray-500'
                             }`}
                         >
-                            <Pin size={13} className="sm:hidden" fill={defaultAnimalView === tab.key ? 'currentColor' : 'none'} strokeWidth={2} />
-                            <Pin size={18} className="hidden sm:block" fill={defaultAnimalView === tab.key ? 'currentColor' : 'none'} strokeWidth={2} />
+                            <Pin size={13} fill={defaultAnimalView === tab.key ? 'currentColor' : 'none'} strokeWidth={2} />
                         </span>
                     </button>
                 ))}
+                </div>
+                <div className="grid grid-cols-4 sm:hidden border-t border-gray-200">
+                {[{key:'reproduction', icon:<Bean size={14} className="shrink-0" />, label:'Reproduction'},
+                  {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
+                  {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'},
+                  {key:'supplies', icon:<Package size={14} className="shrink-0" />, label:'Supplies'},
+                ].map(tab => (
+                    <button key={tab.key}
+                        onClick={() => setAnimalView(tab.key)}
+                        className={`relative flex flex-col items-center justify-center gap-0.5 py-1.5 px-2 text-[10px] font-semibold transition ${
+                            animalView === tab.key ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'
+                        }`}
+                    >
+                        {tab.icon}
+                        <span>{tab.label}</span>
+                        <span
+                            onClick={e => { e.stopPropagation(); const next = tab.key; setDefaultAnimalView(next); try { localStorage.setItem('ct_default_animal_view', next); } catch {} }}
+                            title={defaultAnimalView === tab.key ? 'Default view' : 'Set as default'}
+                            className={`absolute top-1 right-1.5 transition-colors ${
+                                defaultAnimalView === tab.key ? 'text-red-500' : 'text-gray-300 hover:text-gray-500'
+                            }`}
+                        >
+                            <Pin size={13} fill={defaultAnimalView === tab.key ? 'currentColor' : 'none'} strokeWidth={2} />
+                        </span>
+                    </button>
+                ))}
+                </div>
+                <div className="hidden sm:flex">
+                {[{key:'list', icon:<ClipboardList size={14} className="shrink-0" />, label:'My Animals'},
+                  {key:'collections', icon:<FolderOpen size={14} className="shrink-0" />, label:'Collections'},
+                  {key:'enclosures', icon:<Home size={14} className="shrink-0" />, label:'Enclosures'},
+                  {key:'reproduction', icon:<Bean size={14} className="shrink-0" />, label:'Reproduction'},
+                  {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
+                  {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'},
+                  {key:'supplies', icon:<Package size={14} className="shrink-0" />, label:'Supplies'},
+                ].map(tab => (
+                    <button key={tab.key}
+                        onClick={() => setAnimalView(tab.key)}
+                        className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 py-2 px-4 text-sm font-semibold transition ${
+                            animalView === tab.key ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'
+                        }`}
+                    >
+                        {tab.icon}
+                        <span>{tab.label}</span>
+                        <span
+                            onClick={e => { e.stopPropagation(); const next = tab.key; setDefaultAnimalView(next); try { localStorage.setItem('ct_default_animal_view', next); } catch {} }}
+                            title={defaultAnimalView === tab.key ? 'Default view' : 'Set as default'}
+                            className={`absolute top-1 right-1.5 transition-colors ${
+                                defaultAnimalView === tab.key ? 'text-red-500' : 'text-gray-300 hover:text-gray-500'
+                            }`}
+                        >
+                            <Pin size={18} fill={defaultAnimalView === tab.key ? 'currentColor' : 'none'} strokeWidth={2} />
+                        </span>
+                    </button>
+                ))}
+                </div>
             </div>
             )}
 
