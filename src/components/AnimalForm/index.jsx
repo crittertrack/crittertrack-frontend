@@ -1079,7 +1079,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     const slot = slotsAtGen[slotIdx];
                     const animal = getAncestor(subject, slot.path);
                     cells.push(
-                        <td key={g} rowSpan={rowsPerSlot} style={{ padding: 2, verticalAlign: 'top', width: `${100 / gens}%` }}>
+                        <td key={g} rowSpan={rowsPerSlot} style={{ padding: 2, verticalAlign: 'middle', width: `${100 / gens}%` }}>
                             <div style={{ minHeight: rowMinH * rowsPerSlot, height: '100%' }}>
                                 {renderCertCell(animal, slot.isSire, handleCardClick)}
                             </div>
