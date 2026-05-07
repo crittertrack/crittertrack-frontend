@@ -4125,11 +4125,11 @@ const AnimalList = ({
                     {isListLikeView && !showArchiveScreen && (
                         <button
                             onClick={() => navigate('/select-species')}
-                            className="sm:hidden bg-accent hover:bg-accent/90 text-white p-1.5 rounded-lg transition duration-150 shadow-md flex items-center justify-center shrink-0"
+                            className="sm:hidden bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 px-2.5 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 shrink-0 text-xs"
                             data-tutorial-target="add-animal-btn"
                             title="Add Animal"
                         >
-                            <PlusCircle size={20} />
+                            <PlusCircle size={14} /> Add
                         </button>
                     )}
                 </div>
