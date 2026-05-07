@@ -647,17 +647,26 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             setLoading(true);
             try {
                 // Enhanced recursive function to fetch animal, ancestors, and descendants
-                // resultCache: Map<id, data> ? avoids redundant API calls but allows the same
-                //   ancestor to appear in *multiple* pedigree positions (inbreeding).
-                // pathIds: Set of IDs in the current call-chain ? detects true circular loops only.
+                // resultCache: Map<id, {fetchedAtDepth, data}> — caches results but only reuses
+                //   them when the cached version was fetched at the same or shallower depth
+                //   (shallower = more ancestors available). This prevents offspring-fetching
+                //   from poisoning the cache with depth=4 entries that have null parents,
+                //   which would then be reused when the ancestor chain needs them at depth=3.
+                // pathIds: Set of IDs in the current call-chain — detects true circular loops only.
                 const resultCache = new Map();
                 const fetchAnimalWithFamily = async (id, depth = 0, pathIds = new Set()) => {
                     if (!id || depth > 4) return null;
-                    if (pathIds.has(id)) return null; // circular reference ? stop this branch
+                    if (pathIds.has(id)) return null; // circular reference — stop this branch
 
-                    // Return cached result so the same ancestor shows in multiple pedigree
-                    // positions (inbreeding) without redundant API calls
-                    if (resultCache.has(id)) return resultCache.get(id);
+                    // Return cached result only if it was fetched at the same or shallower depth
+                    // (cached.fetchedAtDepth <= depth means the cache has at least as many
+                    //  ancestor levels as we need right now).
+                    if (resultCache.has(id)) {
+                        const cached = resultCache.get(id);
+                        if (cached.fetchedAtDepth <= depth) return cached.data;
+                        // else: cache was built at a deeper position — fewer ancestors stored.
+                        // Fall through and re-fetch so we get the full ancestor chain.
+                    }
 
                     let animalInfo = null;
                     let foundViaOwned = false;
@@ -791,7 +800,10 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                         mother,
                         offspring: offspring.length > 0 ? offspring : undefined
                     };
-                    resultCache.set(id, result);
+                    // Store in cache only if not already cached at an equal or shallower depth
+                    if (!resultCache.has(id) || resultCache.get(id).fetchedAtDepth > depth) {
+                        resultCache.set(id, { fetchedAtDepth: depth, data: result });
+                    }
                     return result;
                 };
 
