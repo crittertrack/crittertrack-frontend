@@ -1372,7 +1372,7 @@ const AnimalList = ({
             <div className="w-full flex justify-center">
                 <div
                     onClick={handleClick}
-                    className={`relative bg-white rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-44 sm:h-48 md:h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${
+                    className={`relative bg-white rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] min-h-44 sm:min-h-48 md:min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${
                         isSelected ? 'border-red-500' : animal.isViewOnly ? 'border-gray-400 bg-gray-50' : 'border-gray-300'
                     }`}
                 >
@@ -1500,7 +1500,7 @@ const AnimalList = ({
                     })()}
                     {/* Management action buttons slot */}
                     {cardActions && (
-                        <div className="w-full px-1 pb-1 flex flex-wrap gap-1 justify-center" onClick={e => e.stopPropagation()}>
+                        <div className="w-full px-1 pt-1 pb-1 border-t border-gray-100 flex flex-wrap gap-1 justify-center shrink-0" onClick={e => e.stopPropagation()}>
                             {cardActions}
                         </div>
                     )}
