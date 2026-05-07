@@ -2890,10 +2890,13 @@ const AnimalList = ({
         });
 
         // 2. Reproduction
-        const matingList = allAnimals.filter(a => a.isInMating);
-        const pregnantList = allAnimals.filter(a => a.isPregnant && !a.isInMating);
-        const nursingList = allAnimals.filter(a => a.isNursing);
-        const reproTotal = allAnimals.filter(a => a.isInMating || a.isPregnant || a.isNursing).length;
+        // Animals in a repro enclosure are shown inside the enclosure card — exclude from section groups
+        const reproEnclosureIds = new Set(reproEnclosures.map(e => e._id));
+        const inReproEnclosure = a => a.enclosureId && reproEnclosureIds.has(a.enclosureId);
+        const matingList = allAnimals.filter(a => a.isInMating && !inReproEnclosure(a));
+        const pregnantList = allAnimals.filter(a => a.isPregnant && !a.isInMating && !inReproEnclosure(a));
+        const nursingList = allAnimals.filter(a => a.isNursing && !inReproEnclosure(a));
+        const reproTotal = allAnimals.filter(a => (a.isInMating || a.isPregnant || a.isNursing) && !inReproEnclosure(a)).length;
 
         // 3. Feeding
         const feedDue = allAnimals.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays));
@@ -3437,12 +3440,33 @@ const AnimalList = ({
                                                                         {occupants.map(a => (
                                                                             <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                                                 hideControls hideBreedingLines
-                                                                                cardActions={
+                                                                                cardActions={<>
+                                                                                    {/* State badge */}
+                                                                                    {(a.isInMating || a.isPregnant || a.isNursing) && (
+                                                                                        <div className={`text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full ${a.isNursing ? 'bg-blue-100 text-blue-700' : a.isPregnant ? 'bg-pink-100 text-pink-700' : 'bg-purple-100 text-purple-700'}`}>
+                                                                                            {a.isNursing ? 'Nursing' : a.isPregnant ? 'Pregnant' : 'Mating'}
+                                                                                        </div>
+                                                                                    )}
+                                                                                    {/* Advance state */}
+                                                                                    {a.isInMating && !a.isPregnant && !a.isNursing && a.gender !== 'Male' && (
+                                                                                        <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: true })}
+                                                                                            className="text-[10px] px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 w-full flex items-center justify-center gap-0.5"><Bean size={9} /> Pregnant</button>
+                                                                                    )}
+                                                                                    {a.isPregnant && !a.isNursing && a.gender !== 'Male' && (
+                                                                                        <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false, isNursing: true })}
+                                                                                            className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 w-full flex items-center justify-center gap-0.5"><Milk size={9} /> Nursing</button>
+                                                                                    )}
+                                                                                    {a.isNursing && (
+                                                                                        <button onClick={(e) => handleReproStatusUpdate(e, a, { isNursing: false })}
+                                                                                            className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 w-full flex items-center justify-center gap-0.5"><Check size={9} /> Done</button>
+                                                                                    )}
+                                                                                    {(a.isInMating || a.isPregnant || a.isNursing) && (
+                                                                                        <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: false, isNursing: false })}
+                                                                                            className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
+                                                                                    )}
                                                                                     <button onClick={(e) => { e.stopPropagation(); handleAssignAnimalToEnclosure(a.id_public, ''); }}
-                                                                                        className="text-[10px] text-gray-400 hover:text-red-500 border border-gray-200 hover:border-red-200 rounded px-1.5 py-0.5 w-full">
-                                                                                        Remove
-                                                                                    </button>
-                                                                                }
+                                                                                        className="text-[10px] text-gray-400 hover:text-red-500 border border-gray-200 hover:border-red-200 rounded px-1.5 py-0.5 w-full">Remove</button>
+                                                                                </>}
                                                                             />
                                                                         ))}
                                                                     </div>
@@ -3456,84 +3480,51 @@ const AnimalList = ({
                                     }
                                 </div>
                             </div>
-                            {reproTotal === 0
-                                ? <div className="text-sm text-gray-400 text-center py-4">No animals currently in a reproductive state.</div>
-                                : <>
-                                    {matingList.length > 0 && (
-                                        <div>
-                                            <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('repro_mating')}>
-                                                {collapsedMgmtGroups['repro_mating'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
-                                                <span className="w-2.5 h-2.5 rounded-full bg-purple-400 inline-block" />
-                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">In Mating ({matingList.length})</span>
-                                            </div>
-                                            {!collapsedMgmtGroups['repro_mating'] && <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                                {matingList.map(a => (
+                            {(() => {
+                                const unassignedReproAnimals = [...matingList, ...pregnantList, ...nursingList];
+                                return unassignedReproAnimals.length === 0 ? null : (
+                                    <div>
+                                        <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('repro_unassigned')}>
+                                            {collapsedMgmtGroups['repro_unassigned'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
+                                            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Unassigned ({unassignedReproAnimals.length})</span>
+                                        </div>
+                                        {!collapsedMgmtGroups['repro_unassigned'] && (
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                                {unassignedReproAnimals.map(a => (
                                                     <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                         hideControls hideBreedingLines
                                                         cardActions={<>
-                                                            {a.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: true })}
-                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 w-full flex items-center justify-center gap-0.5"><Bean size={9} /> Pregnant</button>}
-                                                            <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false })}
-                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
+                                                            {/* State badge */}
+                                                            <div className={`text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full ${a.isNursing ? 'bg-blue-100 text-blue-700' : a.isPregnant ? 'bg-pink-100 text-pink-700' : 'bg-purple-100 text-purple-700'}`}>
+                                                                {a.isNursing ? 'Nursing' : a.isPregnant ? 'Pregnant' : 'Mating'}
+                                                            </div>
+                                                            {/* Advance state */}
+                                                            {a.isInMating && !a.isPregnant && !a.isNursing && a.gender !== 'Male' && (
+                                                                <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: true })}
+                                                                    className="text-[10px] px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 w-full flex items-center justify-center gap-0.5"><Bean size={9} /> Pregnant</button>
+                                                            )}
+                                                            {a.isPregnant && !a.isNursing && a.gender !== 'Male' && (
+                                                                <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false, isNursing: true })}
+                                                                    className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 w-full flex items-center justify-center gap-0.5"><Milk size={9} /> Nursing</button>
+                                                            )}
+                                                            {a.isNursing && (
+                                                                <button onClick={(e) => handleReproStatusUpdate(e, a, { isNursing: false })}
+                                                                    className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 w-full flex items-center justify-center gap-0.5"><Check size={9} /> Done</button>
+                                                            )}
+                                                            <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: false, isNursing: false })}
+                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
                                                             {reproEnclosures.length > 0 && (assigningAnimalId === a.id_public
                                                                 ? <select autoFocus defaultValue="" onChange={e => { if (e.target.value) handleAssignAnimalToEnclosure(a.id_public, e.target.value); setAssigningAnimalId(null); }} onBlur={() => setAssigningAnimalId(null)} className="text-[10px] border border-blue-300 rounded p-1 w-full"><option value="" disabled>Select enclosure...</option>{reproEnclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}</select>
-                                                                : <>{a.enclosureId && <div className="text-[10px] text-blue-600 truncate w-full text-center">{reproEnclosures.find(e => e._id === a.enclosureId)?.name}</div>}<button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }} className="text-[10px] text-blue-500 hover:text-blue-700 border border-blue-200 rounded px-1.5 py-0.5 w-full">{a.enclosureId ? 'Move enclosure' : 'Assign enclosure'}</button></>)}
+                                                                : <button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }} className="text-[10px] text-blue-500 hover:text-blue-700 border border-blue-200 rounded px-1.5 py-0.5 w-full">Assign enclosure</button>
+                                                            )}
                                                         </>}
                                                     />
                                                 ))}
-                                            </div>}
-                                        </div>
-                                    )}
-                                    {pregnantList.length > 0 && (
-                                        <div>
-                                            <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('repro_pregnant')}>
-                                                {collapsedMgmtGroups['repro_pregnant'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
-                                                <span className="w-2.5 h-2.5 rounded-full bg-pink-400 inline-block" />
-                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Pregnant / Gravid ({pregnantList.length})</span>
                                             </div>
-                                            {!collapsedMgmtGroups['repro_pregnant'] && <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                                {pregnantList.map(a => (
-                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
-                                                        hideControls hideBreedingLines
-                                                        cardActions={<>
-                                                            {a.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false, isNursing: true })}
-                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 w-full flex items-center justify-center gap-0.5"><Milk size={9} /> Nursing</button>}
-                                                            <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false })}
-                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
-                                                            {reproEnclosures.length > 0 && (assigningAnimalId === a.id_public
-                                                                ? <select autoFocus defaultValue="" onChange={e => { if (e.target.value) handleAssignAnimalToEnclosure(a.id_public, e.target.value); setAssigningAnimalId(null); }} onBlur={() => setAssigningAnimalId(null)} className="text-[10px] border border-blue-300 rounded p-1 w-full"><option value="" disabled>Select enclosure...</option>{reproEnclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}</select>
-                                                                : <>{a.enclosureId && <div className="text-[10px] text-blue-600 truncate w-full text-center">{reproEnclosures.find(e => e._id === a.enclosureId)?.name}</div>}<button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }} className="text-[10px] text-blue-500 hover:text-blue-700 border border-blue-200 rounded px-1.5 py-0.5 w-full">{a.enclosureId ? 'Move enclosure' : 'Assign enclosure'}</button></>)}
-                                                        </>}
-                                                    />
-                                                ))}
-                                            </div>}
-                                        </div>
-                                    )}
-                                    {nursingList.length > 0 && (
-                                        <div>
-                                            <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('repro_nursing')}>
-                                                {collapsedMgmtGroups['repro_nursing'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
-                                                <span className="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block" />
-                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Nursing / Brooding ({nursingList.length})</span>
-                                            </div>
-                                            {!collapsedMgmtGroups['repro_nursing'] && <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                                {nursingList.map(a => (
-                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
-                                                        hideControls hideBreedingLines
-                                                        cardActions={<>
-                                                            <button onClick={(e) => handleReproStatusUpdate(e, a, { isNursing: false })}
-                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 w-full flex items-center justify-center gap-0.5"><Check size={9} /> Done</button>
-                                                            {reproEnclosures.length > 0 && (assigningAnimalId === a.id_public
-                                                                ? <select autoFocus defaultValue="" onChange={e => { if (e.target.value) handleAssignAnimalToEnclosure(a.id_public, e.target.value); setAssigningAnimalId(null); }} onBlur={() => setAssigningAnimalId(null)} className="text-[10px] border border-blue-300 rounded p-1 w-full"><option value="" disabled>Select enclosure...</option>{reproEnclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}</select>
-                                                                : <>{a.enclosureId && <div className="text-[10px] text-blue-600 truncate w-full text-center">{reproEnclosures.find(e => e._id === a.enclosureId)?.name}</div>}<button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }} className="text-[10px] text-blue-500 hover:text-blue-700 border border-blue-200 rounded px-1.5 py-0.5 w-full">{a.enclosureId ? 'Move enclosure' : 'Assign enclosure'}</button></>)}
-                                                        </>}
-                                                    />
-                                                ))}
-                                            </div>}
-                                        </div>
-                                    )}
-                                </>
-                            }
+                                        )}
+                                    </div>
+                                );
+                            })()}
                         </div>
                     )}
                 </div>)}
