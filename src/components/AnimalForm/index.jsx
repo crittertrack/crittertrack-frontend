@@ -866,7 +866,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         try {
             const el = pedigreeRef.current;
             const orig = { w: el.style.width, h: el.style.height, mh: el.style.minHeight, ov: el.style.overflow, p: el.style.padding };
-            el.style.width = '2000px';
+            el.style.width = vertical ? '900px' : '2000px';
             el.style.height = 'auto';
             el.style.minHeight = 'unset';
             el.style.overflow = 'visible';
@@ -878,14 +878,14 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             const srcCanvas = await html2canvas(el, {
                 scale: 2, backgroundColor: '#ffffff', logging: false,
                 useCORS: true, allowTaint: true, letterRendering: true,
-                windowWidth: 2000, windowHeight: 9999,
+                windowWidth: vertical ? 900 : 2000, windowHeight: 9999,
                 imageTimeout: 15000, scrollX: 0, scrollY: 0
             });
             document.head.removeChild(ggpStyle);
             Object.assign(el.style, { width: orig.w, height: orig.h, minHeight: orig.mh, overflow: orig.ov, padding: orig.p });
-            // Fit into A4 landscape (297 × 210mm) with 4mm padding using mm-based jsPDF
-            const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-            const pageW = 297, pageH = 210, pad_mm = 4;
+            // Fit into A4 (portrait for vertical cert, landscape otherwise) with 4mm padding
+            const pdf = new jsPDF({ orientation: vertical ? 'portrait' : 'landscape', unit: 'mm', format: 'a4' });
+            const pageW = vertical ? 210 : 297, pageH = vertical ? 297 : 210, pad_mm = 4;
             const maxW = pageW - pad_mm * 2, maxH = pageH - pad_mm * 2;
             pdf.addImage(srcCanvas.toDataURL('image/png'), 'PNG',
                 (pageW - maxW) / 2, (pageH - maxH) / 2, maxW, maxH);
@@ -903,7 +903,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         try {
             const el = pedigreeRef.current;
             const orig = { w: el.style.width, h: el.style.height, mh: el.style.minHeight, ov: el.style.overflow, p: el.style.padding };
-            el.style.width = '2000px';
+            el.style.width = vertical ? '900px' : '2000px';
             el.style.height = 'auto';
             el.style.minHeight = 'unset';
             el.style.overflow = 'visible';
@@ -915,13 +915,13 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             const srcCanvas = await html2canvas(el, {
                 scale: 2, backgroundColor: '#ffffff', logging: false,
                 useCORS: true, allowTaint: true, letterRendering: true,
-                windowWidth: 2000, windowHeight: 9999,
+                windowWidth: vertical ? 900 : 2000, windowHeight: 9999,
                 imageTimeout: 15000, scrollX: 0, scrollY: 0
             });
             document.head.removeChild(ggpStyle2);
             Object.assign(el.style, { width: orig.w, height: orig.h, minHeight: orig.mh, overflow: orig.ov, padding: orig.p });
-            // Fit into A4 landscape canvas at 200dpi (2339 × 1654) with 30px padding
-            const a4W = 2339, a4H = 1654, pad = 30;
+            // Fit into A4 canvas at 200dpi — portrait for vertical cert, landscape otherwise
+            const a4W = vertical ? 1654 : 2339, a4H = vertical ? 2339 : 1654, pad = 30;
             const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
             const out = document.createElement('canvas');
             out.width = a4W; out.height = a4H;
@@ -960,9 +960,11 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
     // Render one certificate cell (compact, text-only label+value rows)
     // genIndex: 0 = parents (largest), 1 = grandparents, 2 = great-grandparents, 3 = great-great (smallest)
-    const renderCertCell = (animal, isSire, onClick = null, genIndex = 0) => {
+    const renderCertCell = (animal, isSire, onClick = null, genIndex = 0, stacked = false) => {
         // Scale text and image per generation column
-        const imgSize  = genIndex === 0 ? 90 : genIndex === 1 ? 60 : genIndex === 2 ? 38 : 20;
+        const imgSize  = stacked
+            ? (genIndex === 0 ? 70 : genIndex === 1 ? 50 : genIndex === 2 ? 28 : 0)
+            : (genIndex === 0 ? 90 : genIndex === 1 ? 60 : genIndex === 2 ? 38 : 20);
         const nameSize = genIndex === 0 ? '0.90rem' : genIndex === 1 ? '0.78rem' : genIndex === 2 ? '0.66rem' : '0.58rem';
         const metaSize = genIndex === 0 ? '0.76rem' : genIndex === 1 ? '0.68rem' : genIndex === 2 ? '0.58rem' : '0.51rem';
         const smallSize= genIndex === 0 ? '0.66rem' : genIndex === 1 ? '0.58rem' : genIndex === 2 ? '0.51rem' : '0.46rem';
@@ -1016,15 +1018,15 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
         return (
             <div style={baseStyle} onClick={handleClick}>
-                <div style={{ display: 'flex', gap: imgSize > 0 ? 4 : 0, alignItems: 'center', height: '100%' }}>
-                    {/* Thumbnail — hidden at gen 4 */}
+                <div style={{ display: 'flex', flexDirection: stacked ? 'column' : 'row', gap: imgSize > 0 ? 4 : 0, alignItems: 'center', height: '100%' }}>
+                    {/* Thumbnail — hidden at gen 4 or when imgSize=0 */}
                     {imgSrc && imgSize > 0 && (
                         <div className="hide-for-pdf" style={{ width: imgSize, height: imgSize, flexShrink: 0, borderRadius: 4, overflow: 'hidden', border: `1px solid ${certBorderColor}` }}>
                             <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={Math.round(imgSize * 0.4)} />
                         </div>
                     )}
                     {/* Text */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ flex: stacked ? undefined : 1, minWidth: 0, textAlign: stacked ? 'center' : undefined }}>
                         <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.25, wordBreak: 'break-word' }}>{fullName}</div>
                         {variety && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{variety}</div>}
                         {animal.geneticCode && genIndex <= 2 && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{animal.geneticCode}</div>}
@@ -1118,7 +1120,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             }
         }
         const totalCols = Math.pow(2, gens);
-        const rowHeights = [170, 120, 90];
+        const rowHeights = [200, 155, 100];
         const rows = [];
         for (let g = 0; g < gens; g++) {
             const slots = vGenSlots[g];
@@ -1323,7 +1325,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
             <div className="min-h-screen flex justify-center pt-2 sm:pt-4 pb-2 sm:pb-4 px-2 sm:px-4">
-                <div className="bg-white rounded-xl shadow-2xl h-fit w-full max-w-[98vw] sm:max-w-[95vw]">
+                <div className={`bg-white rounded-xl shadow-2xl h-fit w-full ${vertical ? 'max-w-[720px]' : 'max-w-[98vw] sm:max-w-[95vw]'}`}>
                     {/* Header */}
                     <div className="flex justify-between items-center px-3 sm:px-6 py-2 sm:py-4 border-b border-gray-200 bg-gray-50 rounded-t-xl flex-wrap gap-2">
                         <h2 className="text-base sm:text-xl font-bold text-gray-800 flex items-center gap-1">
@@ -1382,7 +1384,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                                 onClick={downloadImage}
                                 disabled={!imagesLoaded || isSaving}
                                 className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 font-semibold rounded-lg transition text-xs sm:text-base ${imagesLoaded && !isSaving ? 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 cursor-pointer' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
-                                title={!imagesLoaded ? 'Waiting for images to load...' : 'Save as Image (A4 Landscape)'}
+                                title={!imagesLoaded ? 'Waiting for images to load...' : `Save as Image (A4 ${vertical ? 'Portrait' : 'Landscape'})`}
                             >
                                 <Images size={16} />
                                 <span className="hidden sm:inline">{isSaving ? 'Saving...' : imagesLoaded ? 'Save Image' : 'Loading...'}</span>
@@ -1439,8 +1441,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     )}
 
                     {/* Content */}
-                    <div className="p-3 sm:p-6 overflow-x-auto" style={{ paddingBottom: window.innerWidth < 640 ? '80px' : '1.5rem' }}>
-                        <div style={{ minWidth: vertical ? 800 : 700 }}>{certJsx}</div>
+                    <div className={`p-3 sm:p-6 ${vertical ? '' : 'overflow-x-auto'}`} style={{ paddingBottom: window.innerWidth < 640 ? '80px' : '1.5rem' }}>
+                        <div style={vertical ? { width: '100%' } : { minWidth: 700 }}>{certJsx}</div>
                     </div>
                 </div>
             </div>
