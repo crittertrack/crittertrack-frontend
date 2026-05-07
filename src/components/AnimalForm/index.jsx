@@ -1014,8 +1014,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 <div style={{ display: 'flex', gap: 3, alignItems: 'flex-start', height: '100%' }}>
                     {/* Thumbnail */}
                     {imgSrc && (
-                        <div className="hide-for-pdf" style={{ width: 28, height: 28, flexShrink: 0, borderRadius: 3, overflow: 'hidden', border: `1px solid ${certBorderColor}` }}>
-                            <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={12} />
+                        <div className="hide-for-pdf" style={{ width: 44, height: 44, flexShrink: 0, borderRadius: 4, overflow: 'hidden', border: `1px solid ${certBorderColor}` }}>
+                            <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={18} />
                         </div>
                     )}
                     {/* Text */}
@@ -1104,10 +1104,13 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         const variety = [animal.color, animal.coatPattern, animal.coat].filter(Boolean).join(', ') || animal.variety || '';
         const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
         const isMale = animal.gender === 'Male';
+        const isFemale = animal.gender === 'Female';
         const GenderIcon = isMale ? Mars : Venus;
+        const cardBg = isMale ? '#dbeafe' : isFemale ? '#fce7f3' : '#f3f4f6';
+        const cardBorder = isMale ? '#3b82f6' : isFemale ? '#ec4899' : certBorderColor;
 
         return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, height: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, height: '100%', backgroundColor: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 6, padding: '6px 8px', boxSizing: 'border-box' }}>
                 {/* Photo */}
                 <div className="hide-for-pdf" style={{ width: '100%', aspectRatio: '1/1', maxHeight: 120, overflow: 'hidden', borderRadius: 8, border: `2px solid ${certBorderColor}`, backgroundColor: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {imgSrc ? (
