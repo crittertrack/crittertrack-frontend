@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
+﻿import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import axios from 'axios';
 import {
     Activity, AlertCircle, AlertTriangle, ArrowLeft, Ban, Camera, Cat,
@@ -564,8 +564,19 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     const [ownerProfile, setOwnerProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [imagesLoaded, setImagesLoaded] = useState(false);
-    const [stackedPedigree, setStackedPedigree] = useState(null); // For nested pedigree viewing
+    const [stackedPedigree, setStackedPedigree] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [generations, setGenerations] = useState(3); // 1–4
+    const [certText, setCertText] = useState('');
+    const [certTextTopRight, setCertTextTopRight] = useState('Certificate of Origin');
+    const [certTextBottomLeft, setCertTextBottomLeft] = useState('This pedigree is not recognized by the state');
+    const [certTextSignature, setCertTextSignature] = useState('Signature');
+    const [certFontColor, setCertFontColor] = useState('#1a1a1a');
+    const [certBorderColor, setCertBorderColor] = useState('#374151');
+    const [certBgColor, setCertBgColor] = useState('#ffffff');
+    const [certLogoUrl, setCertLogoUrl] = useState(null);
+    const [showCustomPanel, setShowCustomPanel] = useState(false);
+    const certLogoInputRef = useRef(null);
     const pedigreeRef = useRef(null);
 
     // Merge manual ancestors into fetched pedigree tree wherever API returned nothing
@@ -938,502 +949,209 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         get isSaving() { return isSaving; },
     }), [downloadPDF, downloadImage, imagesLoaded, isSaving]);
 
-    // Render card for main animal (larger with image)
-    const renderMainAnimalCard = (animal) => {
-        if (!animal) return null;
-        
-        const imgSrc = animal.imageUrl || animal.photoUrl || null;
-        const colorCoat = [animal.color, animal.coatPattern, animal.coat].filter(Boolean).join(' ') || 'N/A';
-        
-        // Determine gender-based styling
-        const isMale = animal.gender === 'Male';
-        const bgColor = isMale ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
-        const GenderIcon = isMale ? Mars : Venus;
-        
-        return (
-            <div className={`border border-gray-700 rounded-lg p-2 ${bgColor} relative flex gap-3 items-center`} style={{height: window.innerWidth < 640 ? '140px' : '160px'}}>
-                {/* Image */}
-                <div className="hide-for-pdf w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border-2 border-gray-900">
-                    {imgSrc ? (
-                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={window.innerWidth < 640 ? 24 : 32} />
-                    ) : (
-                        <Cat size={window.innerWidth < 640 ? 24 : 32} className="text-gray-400" />
-                    )}
-                </div>
-                
-                {/* Info */}
-                <div className="flex-1 min-w-0 flex flex-col justify-start gap-2 py-2">
-                    {/* Name */}
-                    <div className="text-sm text-gray-900 font-bold leading-tight" style={{lineHeight: '1.2'}}>
-                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
-                    </div>
-                    
-                    {/* Variety */}
-                    <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        {colorCoat}
-                    </div>
-                    
-                    {/* Genetic Code */}
-                    {animal.geneticCode && (
-                        <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                            {animal.geneticCode}
-                        </div>
-                    )}
-                    
-                    {/* Birth Date */}
-                    <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        {animal.birthDate ? formatDate(animal.birthDate) : 'N/A'}
-                    </div>
-                    
-                    {/* Deceased Date */}
-                    {animal.deceasedDate ? (
-                        <div className="text-red-600 leading-tight font-semibold text-xs" style={{lineHeight: '1.2'}}>
-                            ? {formatDate(animal.deceasedDate)}
-                        </div>
-                    ) : null}
-                    
-                    {/* Breeder Info */}
-                    <div className="text-xs text-gray-700 leading-tight italic" style={{lineHeight: '1.2'}}>
-                        {animal.breederName || 'N/A'}
-                    </div>
-                </div>
-                
-                {/* Gender Icon - Top Right */}
-                <div className="absolute top-2 right-2">
-                    <GenderIcon size={24} className="text-gray-900" strokeWidth={2.5} />
-                </div>
-                
-                {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-2 right-2 text-xs font-mono text-gray-700">
-                    {animal.id_public}
-                </div>
-            </div>
-        );
+    // ── Certificate helpers ─────────────────────────────────────────────────
+
+    // Extract flat ancestor at a given path. path is an array of 'father'|'mother' strings.
+    const getAncestor = (root, path) => {
+        let node = root;
+        for (const step of path) {
+            if (!node) return null;
+            node = node[step];
+        }
+        return node || null;
     };
 
-    // Render card for parents (medium with image)
-    const renderParentCard = (animal, isSire, onClick = null) => {
-        const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
-        const GenderIcon = isSire ? Mars : Venus;
-        
-        // Get border color based on actual gender
-        const getBorderColor = (animal) => {
-            if (!animal || !animal.gender) return 'border-gray-700';
-            return animal.gender === 'Male' ? 'border-blue-500' : 'border-pink-500';
+    // Render one certificate cell (compact, text-only label+value rows)
+    const renderCertCell = (animal, isSire, onClick = null) => {
+        const borderColor = !animal ? certBorderColor
+            : animal.gender === 'Male' ? '#3b82f6'
+            : animal.gender === 'Female' ? '#ec4899'
+            : certBorderColor;
+
+        const bgColor = !animal || (!animal.isHidden && !animal.gender) ? (isSire ? '#e0f2fe' : '#fce7f3')
+            : animal.gender === 'Male' ? '#dbeafe'
+            : animal.gender === 'Female' ? '#fce7f3'
+            : (isSire ? '#e0f2fe' : '#fce7f3');
+
+        const baseStyle = {
+            border: `1px solid ${borderColor}`,
+            backgroundColor: bgColor,
+            padding: '3px 5px',
+            position: 'relative',
+            height: '100%',
+            boxSizing: 'border-box',
+            cursor: onClick && animal && !animal.isHidden && animal.id_public ? 'pointer' : 'default',
         };
-        
-        // Direct parents always show - either full data, "Unknown", or "Hidden" (private)
+
+        const GenderIcon = isSire ? Mars : Venus;
+
         if (!animal) {
             return (
-                <div className={`border ${getBorderColor(null)} rounded p-2 ${bgColor} relative h-full flex items-center justify-center`}>
-                    <div className="text-center">
-                        <Cat size={32} className="hide-for-pdf text-gray-300 mx-auto mb-2" />
-                        <div className="text-xs text-gray-400">Unknown</div>
-                    </div>
-                    <div className="absolute top-2 right-2">
-                        <GenderIcon size={24} className="text-gray-900" strokeWidth={2.5} />
-                    </div>
+                <div style={baseStyle}>
+                    <div style={{ fontSize: '0.6rem', color: '#9ca3af', textAlign: 'center', paddingTop: 8 }}>Unknown</div>
+                    <div style={{ position: 'absolute', top: 2, right: 2 }}><GenderIcon size={10} color={certBorderColor} /></div>
                 </div>
             );
         }
-        
+
         if (animal.isHidden) {
             return (
-                <div className={`border ${getBorderColor(animal)} rounded p-2 ${bgColor} relative h-full flex items-center justify-center`}>
-                    <div className="text-center">
-                        <EyeOff size={32} className="hide-for-pdf text-gray-500 mx-auto mb-2" />
-                        <div className="text-xs text-gray-600 font-semibold">Hidden</div>
-                        <div className="text-xs text-gray-500 mt-1">Private Profile</div>
-                    </div>
-                    <div className="absolute top-2 right-2">
-                        <GenderIcon size={24} className="text-gray-900" strokeWidth={2.5} />
-                    </div>
+                <div style={baseStyle}>
+                    <div style={{ fontSize: '0.6rem', color: '#6b7280', fontWeight: 600, textAlign: 'center', paddingTop: 8 }}>Hidden</div>
+                    <div style={{ fontSize: '0.55rem', color: '#9ca3af', textAlign: 'center' }}>Private</div>
+                    <div style={{ position: 'absolute', top: 2, right: 2 }}><GenderIcon size={10} color={certBorderColor} /></div>
                 </div>
             );
         }
-        
+
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
-        const colorCoat = [animal.color, animal.coatPattern, animal.coat].filter(Boolean).join(' ') || 'N/A';
-        
+        const variety = [animal.color, animal.coatPattern, animal.coat].filter(Boolean).join(', ') || animal.variety || '';
+        const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+        const handleClick = onClick && animal.id_public ? () => onClick(animal) : undefined;
+
         return (
-            <div 
-                className={`border ${getBorderColor(animal)} rounded p-1.5 ${bgColor} relative flex gap-2 h-full items-center ${onClick ? 'cursor-pointer hover:opacity-80 transition' : ''}`}
-                onClick={onClick ? () => onClick(animal) : undefined}
-            >
-                {/* Image - 1/3 width */}
-                <div className="hide-for-pdf w-1/4 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
-                    {imgSrc ? (
-                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={window.innerWidth < 640 ? 24 : 32} />
-                    ) : (
-                        <Cat size={window.innerWidth < 640 ? 24 : 32} className="text-gray-400" />
-                    )}
-                </div>
-                
-                {/* Info */}
-                <div className="flex-1 min-w-0 flex flex-col justify-start gap-1.5 py-1 pointer-events-none">
-                    {/* Name */}
-                    <div className="text-xs text-gray-900 font-bold leading-tight" style={{lineHeight: '1.2'}}>
-                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
-                    </div>
-                    
-                    {/* Variety */}
-                    <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        {colorCoat}
-                    </div>
-                    
-                    {/* Genetic Code */}
-                    {animal.geneticCode && (
-                        <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                            {animal.geneticCode}
+            <div style={baseStyle} onClick={handleClick}>
+                <div style={{ display: 'flex', gap: 3, alignItems: 'flex-start', height: '100%' }}>
+                    {/* Thumbnail */}
+                    {imgSrc && (
+                        <div className="hide-for-pdf" style={{ width: 28, height: 28, flexShrink: 0, borderRadius: 3, overflow: 'hidden', border: `1px solid ${certBorderColor}` }}>
+                            <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={12} />
                         </div>
                     )}
-                    
-                    {/* Birth Date */}
-                    <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        {animal.birthDate ? formatDate(animal.birthDate) : 'N/A'}
-                    </div>
-                    
-                    {/* Deceased Date */}
-                    {animal.deceasedDate && (
-                        <div className="text-red-600 leading-tight font-semibold text-xs" style={{lineHeight: '1.2'}}>
-                            ? {formatDate(animal.deceasedDate)}
-                        </div>
-                    )}
-                    
-                    {/* Breeder */}
-                    <div className="text-xs text-gray-700 leading-tight italic" style={{lineHeight: '1.2'}}>
-                        {animal.breederName || 'N/A'}
+                    {/* Text */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '0.62rem', fontWeight: 700, color: certFontColor, lineHeight: 1.25, wordBreak: 'break-word' }}>{fullName}</div>
+                        {variety && <div style={{ fontSize: '0.55rem', color: certFontColor, lineHeight: 1.2 }}>{variety}</div>}
+                        {animal.geneticCode && <div style={{ fontSize: '0.55rem', color: certFontColor, lineHeight: 1.2 }}>{animal.geneticCode}</div>}
+                        {animal.birthDate && <div style={{ fontSize: '0.55rem', color: certFontColor, lineHeight: 1.2 }}>{formatDate(animal.birthDate)}</div>}
+                        {animal.breederName && <div style={{ fontSize: '0.5rem', color: certFontColor, fontStyle: 'italic', lineHeight: 1.2 }}>{animal.breederName}</div>}
+                        {animal.id_public && <div style={{ fontSize: '0.5rem', color: certFontColor, fontFamily: 'monospace', lineHeight: 1.2 }}>#{animal.id_public.replace(/^CTC/, '')}</div>}
                     </div>
                 </div>
-                
-                {/* Gender Icon - Top Right */}
-                <div className="absolute top-2 right-2 pointer-events-none">
-                    <GenderIcon size={20} className="text-gray-900" strokeWidth={2.5} />
-                </div>
-                
-                {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-2 right-2 text-xs font-mono text-gray-700 pointer-events-none">
-                    {animal.id_public}
-                </div>
+                <div style={{ position: 'absolute', top: 2, right: 2 }}><GenderIcon size={10} color={certBorderColor} /></div>
             </div>
         );
     };
 
-    // Render card for grandparents (with image)
-    const renderGrandparentCard = (animal, isSire, onClick = null) => {
-        const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
-        const GenderIcon = isSire ? Mars : Venus;
-        
-        // Get border color based on actual gender
-        const getBorderColor = (animal) => {
-            if (!animal || !animal.gender) return 'border-gray-700';
-            return animal.gender === 'Male' ? 'border-blue-500' : 'border-pink-500';
-        };
-        
-        if (!animal) {
-            return (
-                <div className={`border ${getBorderColor(null)} rounded p-1.5 ${bgColor} flex gap-1.5 h-full items-center relative`}>
-                    {/* Image placeholder - 1/4 width */}
-                    <div className="hide-for-pdf w-1/4 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
-                        <Cat size={18} className="text-gray-400" />
-                    </div>
-                    {/* Text */}
-                    <div className="flex-1 flex items-center justify-start">
-                        <span className="text-xs text-gray-400">Unknown</span>
-                    </div>
-                    <div className="absolute top-1 right-1">
-                        <GenderIcon size={14} className="text-gray-900" strokeWidth={2.5} />
-                    </div>
-                </div>
-            );
-        }
-        
-        if (animal.isHidden) {
-            return (
-                <div className={`border ${getBorderColor(animal)} rounded p-1.5 ${bgColor} flex gap-1.5 h-full items-center relative`}>
-                    {/* Icon placeholder - 1/4 width */}
-                    <div className="hide-for-pdf w-1/4 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
-                        <EyeOff size={18} className="text-gray-500" />
-                    </div>
-                    {/* Text */}
-                    <div className="flex-1 flex items-center justify-start">
-                        <span className="text-xs text-gray-600 font-semibold">Hidden</span>
-                    </div>
-                    <div className="absolute top-1 right-1">
-                        <GenderIcon size={14} className="text-gray-900" strokeWidth={2.5} />
-                    </div>
-                </div>
-            );
-        }
-        
-        const imgSrc = animal.imageUrl || animal.photoUrl || null;
-        const colorCoat = [animal.color, animal.coatPattern, animal.coat].filter(Boolean).join(' ') || 'N/A';
-        
-        return (
-            <div 
-                className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} relative flex gap-1.5 h-full items-center ${onClick ? 'cursor-pointer hover:opacity-80 transition' : ''}`}
-                onClick={onClick ? () => onClick(animal) : undefined}
-            >
-                {/* Image - 1/4 width */}
-                <div className="hide-for-pdf w-1/4 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
-                    {imgSrc ? (
-                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={18} />
-                    ) : (
-                        <Cat size={20} className="text-gray-400" />
-                    )}
-                </div>
-                
-                {/* Info */}
-                <div className="flex-1 min-w-0 flex flex-col justify-start gap-1 py-0.5 pointer-events-none">
-                    {/* Name */}
-                    <div className="text-gray-900 font-bold leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
-                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
-                    </div>
-                    
-                    {/* Variety */}
-                    <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
-                        {colorCoat}
-                    </div>
-                    
-                    {/* Genetic Code */}
-                    {animal.geneticCode && (
-                        <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
-                            {animal.geneticCode}
-                        </div>
-                    )}
-                    
-                    {/* Birth Date */}
-                    <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
-                        {animal.birthDate ? formatDate(animal.birthDate) : 'N/A'}
-                    </div>
-                    
-                    {/* Deceased Date */}
-                    {animal.deceasedDate ? (
-                        <div className="text-red-600 leading-tight font-semibold" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
-                            ? {formatDate(animal.deceasedDate)}
-                        </div>
-                    ) : null}
-                    
-                    {/* Breeder */}
-                    <div className="text-gray-700 leading-tight italic" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
-                        {animal.breederName || 'N/A'}
-                    </div>
-                </div>
-                
-                {/* Gender Icon - Top Right */}
-                <div className="absolute top-1 right-1 pointer-events-none">
-                    <GenderIcon size={14} className="text-gray-900" strokeWidth={2.5} />
-                </div>
-                
-                {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-2 right-1 text-xs font-mono text-gray-700 pointer-events-none">
-                    {animal.id_public}
-                </div>
-            </div>
-        );
-    };
+    // Build the HTML table for the pedigree (subject = displayData, gens = 1..4)
+    const renderCertificateTable = (subject, gens, handleCardClick) => {
+        if (!subject) return null;
+        // Paths for each generation level. Each entry is [path, isSire].
+        // Gen 1 (parents): 2 rows
+        // Gen 2 (grandparents): 4 rows — each spans 2 of the 8 rows (if gens=3) etc.
+        // We always build 2^(gens-1) leaf rows and use rowspan.
 
-    // Render card for great-grandparents (text only, no image)
-    const renderGreatGrandparentCard = (animal, isSire, onClick = null) => {
-        const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
-        const GenderIcon = isSire ? Mars : Venus;
-        
-        // Get border color based on actual gender
-        const getBorderColor = (animal) => {
-            if (!animal || !animal.gender) return 'border-gray-700';
-            return animal.gender === 'Male' ? 'border-blue-500' : 'border-pink-500';
-        };
-        
-        if (!animal) {
-            return (
-                <div className={`border ${getBorderColor(null)} rounded p-1 ${bgColor} flex items-center justify-center h-full relative`}>
-                    <span className="text-xs text-gray-400">Unknown</span>
-                    <div className="absolute top-0.5 right-0.5">
-                        <GenderIcon size={12} className="text-gray-900" strokeWidth={2.5} />
-                    </div>
-                </div>
-            );
-        }
-        
-        if (animal.isHidden) {
-            return (
-                <div className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} flex gap-1 h-full items-center relative`}>
-                    {/* Icon placeholder */}
-                    <div className="hide-for-pdf ggp-chart-img w-8 h-8 bg-gray-100 rounded-lg border border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
-                        <EyeOff size={12} className="text-gray-500" />
-                    </div>
-                    {/* Text */}
-                    <div className="flex-1 flex items-center justify-start">
-                        <span className="text-xs text-gray-600 font-semibold">Hidden</span>
-                    </div>
-                    <div className="absolute top-0.5 right-0.5">
-                        <GenderIcon size={12} className="text-gray-900" strokeWidth={2.5} />
-                    </div>
-                </div>
-            );
-        }
-        
-        const imgSrc = animal.imageUrl || animal.photoUrl || null;
-        const colorCoat = [animal.color, animal.coatPattern, animal.coat].filter(Boolean).join(' ') || 'N/A';
-        
-        return (
-            <div 
-                className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} relative h-full flex gap-1 items-center ${onClick ? 'cursor-pointer hover:opacity-80 transition' : ''}`}
-                onClick={onClick ? () => onClick(animal) : undefined}
-            >
-                {/* Image */}
-                <div className="hide-for-pdf ggp-chart-img w-8 h-8 bg-gray-100 rounded-lg border border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
-                    {imgSrc ? (
-                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={12} />
-                    ) : (
-                        <Cat size={12} className="text-gray-400" />
-                    )}
-                </div>
-                
-                {/* Info */}
-                <div className="flex-1 min-w-0 flex flex-col justify-start gap-0.5 py-0.5 pointer-events-none">
-                    {/* Name */}
-                    <div className="text-gray-900 font-bold leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
-                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
-                    </div>
-                
-                    {/* Variety */}
-                    <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
-                        {colorCoat}
-                    </div>
-                    
-                    {/* Birth Date */}
-                    <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
-                        {animal.birthDate ? formatDate(animal.birthDate) : 'N/A'}
-                    </div>
-                    
-                    {/* Deceased Date */}
-                    {animal.deceasedDate ? (
-                        <div className="text-red-600 leading-tight font-semibold" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
-                            ? {formatDate(animal.deceasedDate)}
-                        </div>
-                    ) : null}
-                    
-                    {/* Breeder */}
-                    <div className="text-gray-700 leading-tight italic" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
-                        {animal.breederName || 'N/A'}
-                    </div>
-                </div>
-                
-                {/* Gender Icon - Top Right */}
-                <div className="absolute top-0.5 right-0.5 pointer-events-none">
-                    <GenderIcon size={12} className="text-gray-900" strokeWidth={2.5} />
-                </div>
-                
-                {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-1.5 right-0.5 text-xs font-mono text-gray-700 pointer-events-none">
-                    {animal.id_public}
-                </div>
-            </div>
-        );
-    };
+        const totalRows = Math.pow(2, gens - 1); // gen1→1 row per parent, gen2→2, gen3→4, gen4→8
 
-    const renderPedigreeTree = (animal) => {
-        if (!animal) return null;
+        // Build rows. Each row has one cell per generation.
+        // For gen g (1-indexed), rowspan = totalRows / 2^(g-1)
+        // And each group repeats every rowspan rows starting at the block's top.
 
-        // Handler for clicking on pedigree cards
-        const handleCardClick = (clickedAnimal) => {
-            if (clickedAnimal && clickedAnimal.id_public) {
-                if (onViewAnimal) {
-                    onViewAnimal(clickedAnimal, 16, 'chart');
-                } else {
-                    setStackedPedigree(clickedAnimal);
+        // Paths structure: build all 2^(g-1) slots for each generation g
+        const genSlots = []; // genSlots[g] = array of { path, isSire }
+        // g=1: father, mother
+        genSlots[0] = [
+            { path: ['father'], isSire: true },
+            { path: ['mother'], isSire: false },
+        ];
+        for (let g = 1; g < gens; g++) {
+            genSlots[g] = [];
+            for (const slot of genSlots[g - 1]) {
+                genSlots[g].push({ path: [...slot.path, 'father'], isSire: true });
+                genSlots[g].push({ path: [...slot.path, 'mother'], isSire: false });
+            }
+        }
+
+        // Build table rows. Number of rows = genSlots[gens-1].length
+        const rowCount = genSlots[gens - 1].length;
+        const rows = [];
+
+        for (let row = 0; row < rowCount; row++) {
+            const cells = [];
+            for (let g = 0; g < gens; g++) {
+                const slotsAtGen = genSlots[g];
+                const rowsPerSlot = rowCount / slotsAtGen.length; // rowspan for this gen
+                // Only render this cell at the start of each block
+                if (row % rowsPerSlot === 0) {
+                    const slotIdx = Math.floor(row / rowsPerSlot);
+                    const slot = slotsAtGen[slotIdx];
+                    const animal = getAncestor(subject, slot.path);
+                    cells.push(
+                        <td key={g} rowSpan={rowsPerSlot} style={{ padding: 2, verticalAlign: 'top', width: `${100 / gens}%` }}>
+                            <div style={{ height: '100%' }}>
+                                {renderCertCell(animal, slot.isSire, handleCardClick)}
+                            </div>
+                        </td>
+                    );
                 }
             }
-        };
-
-        // Generation 1 (parents)
-        const father = animal.father;
-        const mother = animal.mother;
-
-        // Generation 2 (grandparents)
-        const paternalGrandfather = father?.father;
-        const paternalGrandmother = father?.mother;
-        const maternalGrandfather = mother?.father;
-        const maternalGrandmother = mother?.mother;
-
-        // Generation 3 (great-grandparents)
-        const pgfFather = paternalGrandfather?.father;
-        const pgfMother = paternalGrandfather?.mother;
-        const pgmFather = paternalGrandmother?.father;
-        const pgmMother = paternalGrandmother?.mother;
-        const mgfFather = maternalGrandfather?.father;
-        const mgfMother = maternalGrandfather?.mother;
-        const mgmFather = maternalGrandmother?.father;
-        const mgmMother = maternalGrandmother?.mother;
-
-        // Responsive heights - reasonable mobile sizing
-        const isMobile = window.innerWidth < 640; // sm breakpoint
-        const contentHeight = isMobile ? 600 : 900; // Increased height to fit text
-        const gap = isMobile ? 4 : 8; // gap-1 = 4px, gap-2 = 8px
-        const gapClass = isMobile ? 'gap-1' : 'gap-2';
-        
-        // Calculate card heights accounting for gaps to ensure equal total column heights
-        const parentHeight = (contentHeight - gap) / 2; // 2 cards, 1 gap
-        const grandparentHeight = (contentHeight - (3 * gap)) / 4; // 4 cards, 3 gaps
-        const greatGrandparentHeight = (contentHeight - (7 * gap)) / 8; // 8 cards, 7 gaps
+            rows.push(<tr key={row} style={{ height: `${100 / rowCount}%` }}>{cells}</tr>);
+        }
 
         return (
-            <div className={`flex ${gapClass} w-full`} style={{height: `${contentHeight}px`, minWidth: isMobile ? '600px' : 'auto'}}>
-                    {/* Column 1: Parents (2 rows, each takes 1/2 height) */}
-                    <div className={`w-1/3 flex flex-col ${gapClass}`}>
-                        <div style={{height: `${parentHeight}px`}}>
-                            {renderParentCard(father, true, handleCardClick)}
-                        </div>
-                        <div style={{height: `${parentHeight}px`}}>
-                            {renderParentCard(mother, false, handleCardClick)}
-                        </div>
-                    </div>
+            <table style={{ width: '100%', height: '100%', borderCollapse: 'separate', borderSpacing: 3, tableLayout: 'fixed' }}>
+                <tbody>{rows}</tbody>
+            </table>
+        );
+    };
 
-                    {/* Column 2: Grandparents (4 rows, each takes 1/4 height) */}
-                    <div className={`w-1/3 flex flex-col ${gapClass}`}>
-                        <div style={{height: `${grandparentHeight}px`}}>
-                            {renderGrandparentCard(paternalGrandfather, true, handleCardClick)}
-                        </div>
-                        <div style={{height: `${grandparentHeight}px`}}>
-                            {renderGrandparentCard(paternalGrandmother, false, handleCardClick)}
-                        </div>
-                        <div style={{height: `${grandparentHeight}px`}}>
-                            {renderGrandparentCard(maternalGrandfather, true, handleCardClick)}
-                        </div>
-                        <div style={{height: `${grandparentHeight}px`}}>
-                            {renderGrandparentCard(maternalGrandmother, false, handleCardClick)}
-                        </div>
-                    </div>
+    // ── Main animal card (left column of certificate) ───────────────────────
+    const renderCertMainCard = (animal) => {
+        if (!animal) return null;
+        const imgSrc = animal.imageUrl || animal.photoUrl || null;
+        const variety = [animal.color, animal.coatPattern, animal.coat].filter(Boolean).join(', ') || animal.variety || '';
+        const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+        const isMale = animal.gender === 'Male';
+        const GenderIcon = isMale ? Mars : Venus;
 
-                    {/* Column 3: Great-Grandparents (8 rows, each takes 1/8 height) */}
-                    <div className={`w-1/3 flex flex-col ${gapClass}`}>
-                        <div style={{height: `${greatGrandparentHeight}px`}}>
-                            {renderGreatGrandparentCard(pgfFather, true, handleCardClick)}
-                        </div>
-                        <div style={{height: `${greatGrandparentHeight}px`}}>
-                            {renderGreatGrandparentCard(pgfMother, false, handleCardClick)}
-                        </div>
-                        <div style={{height: `${greatGrandparentHeight}px`}}>
-                            {renderGreatGrandparentCard(pgmFather, true, handleCardClick)}
-                        </div>
-                        <div style={{height: `${greatGrandparentHeight}px`}}>
-                            {renderGreatGrandparentCard(pgmMother, false, handleCardClick)}
-                        </div>
-                        <div style={{height: `${greatGrandparentHeight}px`}}>
-                            {renderGreatGrandparentCard(mgfFather, true, handleCardClick)}
-                        </div>
-                        <div style={{height: `${greatGrandparentHeight}px`}}>
-                            {renderGreatGrandparentCard(mgfMother, false, handleCardClick)}
-                        </div>
-                        <div style={{height: `${greatGrandparentHeight}px`}}>
-                            {renderGreatGrandparentCard(mgmFather, true, handleCardClick)}
-                        </div>
-                        <div style={{height: `${greatGrandparentHeight}px`}}>
-                            {renderGreatGrandparentCard(mgmMother, false, handleCardClick)}
-                        </div>
-                    </div>
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, height: '100%' }}>
+                {/* Photo */}
+                <div className="hide-for-pdf" style={{ width: '100%', aspectRatio: '1/1', maxHeight: 120, overflow: 'hidden', borderRadius: 8, border: `2px solid ${certBorderColor}`, backgroundColor: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {imgSrc ? (
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={32} />
+                    ) : (
+                        <Cat size={32} style={{ color: '#9ca3af' }} />
+                    )}
                 </div>
+                {/* Details table */}
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.7rem' }}>
+                    <tbody>
+                        <tr>
+                            <td style={{ color: '#6b7280', paddingRight: 4, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Name:</td>
+                            <td style={{ color: certFontColor, fontWeight: 700, wordBreak: 'break-word' }}>
+                                {fullName}
+                                <GenderIcon size={10} style={{ display: 'inline', marginLeft: 3, verticalAlign: 'middle' }} />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style={{ color: '#6b7280', paddingRight: 4, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Variation:</td>
+                            <td style={{ color: certFontColor, wordBreak: 'break-word' }}>{variety || '—'}</td>
+                        </tr>
+                        {animal.geneticCode && (
+                            <tr>
+                                <td style={{ color: '#6b7280', paddingRight: 4, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Genotype:</td>
+                                <td style={{ color: certFontColor, fontFamily: 'monospace', wordBreak: 'break-word' }}>{animal.geneticCode}</td>
+                            </tr>
+                        )}
+                        <tr>
+                            <td style={{ color: '#6b7280', paddingRight: 4, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Birth:</td>
+                            <td style={{ color: certFontColor }}>{animal.birthDate ? formatDate(animal.birthDate) : '—'}</td>
+                        </tr>
+                        {animal.deceasedDate && (
+                            <tr>
+                                <td style={{ color: '#dc2626', paddingRight: 4, fontWeight: 600, paddingBottom: 2 }}>Deceased:</td>
+                                <td style={{ color: '#dc2626' }}>{formatDate(animal.deceasedDate)}</td>
+                            </tr>
+                        )}
+                        <tr>
+                            <td style={{ color: '#6b7280', paddingRight: 4, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Breeder:</td>
+                            <td style={{ color: certFontColor, wordBreak: 'break-word' }}>{animal.breederName || '—'}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style={{ fontSize: '0.6rem', color: '#6b7280', fontFamily: 'monospace', marginTop: 'auto' }}>{animal.id_public}</div>
+            </div>
         );
     };
 
@@ -1450,93 +1168,107 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         );
     }
 
-    // Top right - 3 lines (Personal Name, Breeder Name, CTID)
-    const getOwnerDisplayInfoTopRight = () => {
-        if (!ownerProfile) return null;
-        
-        const userId = ownerProfile.id_public;
-        const lines = [];
-        
-        const showPersonalName = ownerProfile.showPersonalName ?? false;
-        const showBreederName = ownerProfile.showBreederName ?? false;
-        
-        if (showPersonalName && ownerProfile.personalName) {
-            lines.push(ownerProfile.personalName);
-        }
-        if (showBreederName && ownerProfile.breederName) {
-            lines.push(ownerProfile.breederName);
-        }
-        
-        return { 
-            lines: lines.length > 0 ? lines : [userId || 'Anonymous Breeder'], 
-            userId 
-        };
-    };
-    
-    // Bottom left - 1 line (CTID - Personal Name - Breeder Name)
-    const getOwnerDisplayInfoBottomLeft = () => {
+    // ── Owner display helpers ──────────────────────────────────────────────
+    const getOwnerDisplayName = () => {
         if (!ownerProfile) return '';
-        
-        const userId = ownerProfile.id_public;
+        const { showPersonalName, showBreederName, personalName, breederName, id_public } = ownerProfile;
         const parts = [];
-        
-        const showPersonalName = ownerProfile.showPersonalName ?? false;
-        const showBreederName = ownerProfile.showBreederName ?? false;
-        
-        // Add CTID first
-        if (userId) {
-            parts.push(userId);
-        }
-        
-        // Add personal name if privacy allows and available
-        if (showPersonalName && ownerProfile.personalName) {
-            parts.push(ownerProfile.personalName);
-        }
-        
-        // Add breeder name if it's public and available
-        if (showBreederName && ownerProfile.breederName) {
-            parts.push(ownerProfile.breederName);
-        }
-        
-        return parts.length > 0 ? parts.join(' - ') : 'Anonymous Breeder';
+        if (showPersonalName && personalName) parts.push(personalName);
+        if (showBreederName && breederName) parts.push(breederName);
+        return parts.join(' · ') || id_public || 'Anonymous Breeder';
     };
+
+    // ── Shared Certificate JSX ─────────────────────────────────────────────
+    const handleCardClick = (clickedAnimal) => {
+        if (!clickedAnimal?.id_public) return;
+        if (onViewAnimal) { onViewAnimal(clickedAnimal, 16, 'chart'); }
+        else { setStackedPedigree(clickedAnimal); }
+    };
+
+    const certBgStyle = { backgroundColor: certBgColor };
+    const subject = displayData || pedigreeData;
+
+    // Derive the cert height for a given gen count
+    // For inline: fixed-ish; for modal: taller
+    const certTableHeight = inline ? 260 : 380;
+
+    const certJsx = (
+        <div
+            ref={pedigreeRef}
+            style={{
+                backgroundColor: certBgColor,
+                border: `1.5px solid ${certBorderColor}`,
+                borderRadius: 8,
+                padding: '12px 14px 10px 14px',
+                position: 'relative',
+                width: '100%',
+                boxSizing: 'border-box',
+                fontFamily: 'Georgia, serif',
+            }}
+        >
+            {/* ── Header row: Species | Title ──────────────────────── */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, borderBottom: `1px solid ${certBorderColor}`, paddingBottom: 6 }}>
+                <div>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 700, color: certFontColor, lineHeight: 1.2 }}>{subject?.species || 'Unknown Species'}</div>
+                    {subject?.species && getSpeciesLatinName(subject.species) && (
+                        <div style={{ fontSize: '0.75rem', fontStyle: 'italic', color: '#6b7280' }}>{getSpeciesLatinName(subject.species)}</div>
+                    )}
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '1.1rem', fontStyle: 'italic', fontWeight: 600, color: certFontColor }}>{certTextTopRight}</div>
+                    {ownerProfile && (
+                        <div style={{ fontSize: '0.65rem', color: '#6b7280', marginTop: 2 }}>{getOwnerDisplayName()}</div>
+                    )}
+                </div>
+            </div>
+
+            {/* ── Body: main animal card (left) + pedigree table (right) ── */}
+            <div style={{ display: 'flex', gap: 10, height: certTableHeight }}>
+                {/* Left: main animal */}
+                <div style={{ width: '18%', flexShrink: 0, borderRight: `1px dashed ${certBorderColor}`, paddingRight: 10 }}>
+                    {subject && renderCertMainCard(subject)}
+                </div>
+
+                {/* Right: generation table */}
+                <div style={{ flex: 1, overflow: 'hidden' }}>
+                    {subject ? renderCertificateTable(subject, generations, handleCardClick) : null}
+                </div>
+
+                {/* Signature column (only if space, hidden on 1-gen) */}
+                {generations >= 2 && (
+                    <div style={{ width: 80, flexShrink: 0, borderLeft: `1px dashed ${certBorderColor}`, paddingLeft: 8, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        {/* Optional logo */}
+                        {certLogoUrl && (
+                            <div style={{ width: '100%', height: 48, overflow: 'hidden', borderRadius: 4, marginBottom: 4 }}>
+                                <img src={certLogoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                            </div>
+                        )}
+                        {/* Cert text (main center-right) */}
+                        {certText && (
+                            <div style={{ fontSize: '0.55rem', color: certFontColor, lineHeight: 1.4, flex: 1, overflow: 'hidden', marginBottom: 4 }}>{certText}</div>
+                        )}
+                        {/* Signature */}
+                        <div style={{ borderTop: `1px solid ${certBorderColor}`, paddingTop: 4, textAlign: 'center' }}>
+                            <div style={{ fontSize: '0.55rem', color: '#9ca3af' }}>{certTextSignature}</div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* ── Footer ─────────────────────────────────────────── */}
+            <div style={{ marginTop: 8, paddingTop: 6, borderTop: `1px solid ${certBorderColor}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontSize: '0.6rem', color: '#9ca3af', fontStyle: 'italic' }}>{certTextBottomLeft}</div>
+                <div style={{ fontSize: '0.6rem', color: '#6b7280' }}>{formatDate(new Date())}</div>
+                <div style={{ fontSize: '0.6rem', color: '#9ca3af' }}>Created by CritterTrack</div>
+            </div>
+        </div>
+    );
 
     if (inline) {
         return (
             <>
-                <div ref={pedigreeRef} className="bg-white rounded-xl border border-gray-200 relative w-full overflow-x-auto">
-                    <div style={{minWidth: '700px'}}>
-                        <div className="flex gap-0.5 sm:gap-2 mb-0.5 sm:mb-2 items-start">
-                            <div className="w-1/3">{pedigreeData && renderMainAnimalCard(pedigreeData)}</div>
-                            <div className="w-1/3 flex items-center justify-center">
-                                <div className="text-center">
-                                    <h3 className="text-xs sm:text-lg font-bold text-gray-800">{pedigreeData?.species || 'Unknown Species'}</h3>
-                                    {pedigreeData?.species && getSpeciesLatinName(pedigreeData.species) && (
-                                        <p className="text-xs sm:text-sm italic text-gray-600">{getSpeciesLatinName(pedigreeData.species)}</p>
-                                    )}
-                                </div>
-                            </div>
-                            {ownerProfile && (
-                            <div className="w-1/3 flex items-center justify-end gap-0.5 sm:gap-3">
-                                <div className="text-right">
-                                    {(() => {
-                                        const ownerInfo = getOwnerDisplayInfoTopRight();
-                                        if (!ownerInfo) return null;
-                                        return (<>{ownerInfo.lines.map((line, idx) => (<div key={idx} className="text-xs sm:text-base font-semibold text-gray-800 leading-tight">{line}</div>))}{ownerInfo.userId && <div className="text-xs text-gray-600 mt-1">{ownerInfo.userId}</div>}</>);
-                                    })()}
-                                </div>
-                                <div className="w-6 h-6 sm:w-16 sm:h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
-                                    {(ownerProfile?.profileImage || ownerProfile?.profileImageUrl) ? <img src={ownerProfile.profileImage || ownerProfile.profileImageUrl} alt="Breeder" className="w-full h-full object-cover" /> : <User size={12} className="text-gray-400 sm:w-8 sm:h-8" />}
-                                </div>
-                            </div>
-                            )}
-                        </div>
-                        <div>{renderPedigreeTree(displayData)}</div>
-                        <div className="mt-4 pt-3 pb-2 border-t border-gray-200 flex justify-between items-center text-xs text-gray-500">
-                            <div>{getOwnerDisplayInfoBottomLeft()}</div>
-                            <div>{formatDate(new Date())}</div>
-                        </div>
-                    </div>
+                <div className="overflow-x-auto">
+                    <div style={{ minWidth: 600 }}>{certJsx}</div>
                 </div>
                 {stackedPedigree && (
                     <div className="fixed inset-0 z-[90]">
@@ -1552,22 +1284,39 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             <div className="min-h-screen flex justify-center pt-2 sm:pt-4 pb-2 sm:pb-4 px-2 sm:px-4">
                 <div className="bg-white rounded-xl shadow-2xl h-fit w-full max-w-[98vw] sm:max-w-[95vw]">
                     {/* Header */}
-                    <div className="flex justify-between items-center px-2 sm:px-6 py-2 sm:py-4 border-b border-gray-200 bg-gray-50 rounded-t-xl">
-                        <h2 className="text-lg sm:text-2xl font-bold text-gray-800 flex items-center">
-                            <FileText className="mr-1 sm:mr-2" size={18} />
-                            <span className="hidden sm:inline">Pedigree Chart</span>
-                            <span className="sm:hidden"><TreeDeciduous size={14} className="inline-block align-middle mr-1 flex-shrink-0" /> Pedigree</span>
+                    <div className="flex justify-between items-center px-3 sm:px-6 py-2 sm:py-4 border-b border-gray-200 bg-gray-50 rounded-t-xl flex-wrap gap-2">
+                        <h2 className="text-base sm:text-xl font-bold text-gray-800 flex items-center gap-1">
+                            <ScrollText size={16} />
+                            <span>Pedigree Certificate</span>
                         </h2>
+
+                        {/* Generation slider */}
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Network size={14} className="flex-shrink-0" />
+                            <span className="text-xs hidden sm:inline">Generations:</span>
+                            <input
+                                type="range" min={1} max={4} step={1}
+                                value={generations}
+                                onChange={e => setGenerations(Number(e.target.value))}
+                                className="w-20 accent-primary cursor-pointer"
+                            />
+                            <span className="text-xs font-bold w-4">{generations}</span>
+                        </div>
+
+                        {/* Customise toggle */}
+                        <button
+                            onClick={() => setShowCustomPanel(p => !p)}
+                            className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border transition ${showCustomPanel ? 'bg-primary/10 border-primary text-primary' : 'border-gray-300 text-gray-600 hover:bg-gray-100'}`}
+                        >
+                            <Palette size={13} /> Customise
+                        </button>
+
                         <div className="flex items-center gap-1 sm:gap-2">
                             <button
                                 onClick={downloadPDF}
                                 disabled={!imagesLoaded}
                                 data-tutorial-target="download-pdf-btn"
-                                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 font-semibold rounded-lg transition text-xs sm:text-base ${
-                                    imagesLoaded 
-                                        ? 'bg-primary hover:bg-primary/90 text-black cursor-pointer' 
-                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                }`}
+                                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 font-semibold rounded-lg transition text-xs sm:text-base ${imagesLoaded ? 'bg-primary hover:bg-primary/90 text-black cursor-pointer' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
                                 title={!imagesLoaded ? 'Waiting for images to load...' : 'Download PDF'}
                             >
                                 <Download size={16} />
@@ -1577,100 +1326,84 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                             <button
                                 onClick={downloadImage}
                                 disabled={!imagesLoaded || isSaving}
-                                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 font-semibold rounded-lg transition text-xs sm:text-base ${
-                                    imagesLoaded && !isSaving
-                                        ? 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 cursor-pointer'
-                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                }`}
+                                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 font-semibold rounded-lg transition text-xs sm:text-base ${imagesLoaded && !isSaving ? 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 cursor-pointer' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
                                 title={!imagesLoaded ? 'Waiting for images to load...' : 'Save as Image (A4 Landscape)'}
                             >
                                 <Images size={16} />
                                 <span className="hidden sm:inline">{isSaving ? 'Saving...' : imagesLoaded ? 'Save Image' : 'Loading...'}</span>
                                 <span className="sm:hidden">{isSaving ? '...' : imagesLoaded ? 'Img' : '...'}</span>
                             </button>
-                            <button
-                                onClick={onClose}
-                                className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition"
-                            >
+                            <button onClick={onClose} className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition">
                                 <X size={20} />
                             </button>
                         </div>
                     </div>
 
-                    {/* Content */}
-                    <div className="p-1 sm:p-6" style={{paddingBottom: window.innerWidth < 640 ? '80px' : '1.5rem'}}>
-
-                {/* Pedigree Chart - Responsive on mobile, fixed aspect ratio for PDF */}
-                <div ref={pedigreeRef} className="bg-white p-1 sm:p-6 rounded-lg border-2 border-gray-300 relative w-full" style={{minHeight: window.innerWidth < 640 ? '320px' : '400px'}}>
-                    {/* Entire content scrollable horizontally inside the white container */}
-                    <div className="overflow-x-auto overflow-y-visible sm:overflow-hidden" style={{minWidth: 'auto'}}>
-                        <div style={{minWidth: window.innerWidth < 640 ? '800px' : 'auto'}}>
-                            {/* Top Row: 3 columns - Main Animal | Species | Owner */}
-                            <div className="flex gap-0.5 sm:gap-2 mb-0.5 sm:mb-2 items-start">
-                                {/* Left: Main Animal - Same width as parent cards */}
-                                <div className="w-1/3">
-                                    {pedigreeData && renderMainAnimalCard(pedigreeData)}
+                    {/* Customise panel */}
+                    {showCustomPanel && (
+                        <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 text-xs">
+                            <label className="flex flex-col gap-1">
+                                <span className="text-gray-500 font-medium">Top-right title</span>
+                                <input className="border rounded px-2 py-1" value={certTextTopRight} onChange={e => setCertTextTopRight(e.target.value)} />
+                            </label>
+                            <label className="flex flex-col gap-1">
+                                <span className="text-gray-500 font-medium">Centre text</span>
+                                <textarea className="border rounded px-2 py-1 resize-none" rows={2} value={certText} onChange={e => setCertText(e.target.value)} />
+                            </label>
+                            <label className="flex flex-col gap-1">
+                                <span className="text-gray-500 font-medium">Bottom-left text</span>
+                                <input className="border rounded px-2 py-1" value={certTextBottomLeft} onChange={e => setCertTextBottomLeft(e.target.value)} />
+                            </label>
+                            <label className="flex flex-col gap-1">
+                                <span className="text-gray-500 font-medium">Signature label</span>
+                                <input className="border rounded px-2 py-1" value={certTextSignature} onChange={e => setCertTextSignature(e.target.value)} />
+                            </label>
+                            <label className="flex flex-col gap-1">
+                                <span className="text-gray-500 font-medium">Font colour</span>
+                                <div className="flex gap-1 items-center">
+                                    <input type="color" className="w-8 h-7 cursor-pointer rounded border" value={certFontColor} onChange={e => setCertFontColor(e.target.value)} />
+                                    <input className="border rounded px-2 py-1 flex-1" value={certFontColor} onChange={e => setCertFontColor(e.target.value)} />
                                 </div>
-
-                                {/* Species */}
-                                <div className="w-1/3 flex items-center justify-center">
-                                    <div className="text-center">
-                                        <h3 className="text-xs sm:text-lg font-bold text-gray-800">{pedigreeData?.species || 'Unknown Species'}</h3>
-                                        {pedigreeData?.species && getSpeciesLatinName(pedigreeData.species) && (
-                                            <p className="text-xs sm:text-sm italic text-gray-600">{getSpeciesLatinName(pedigreeData.species)}</p>
-                                        )}
-                                    </div>
+                            </label>
+                            <label className="flex flex-col gap-1">
+                                <span className="text-gray-500 font-medium">Border colour</span>
+                                <div className="flex gap-1 items-center">
+                                    <input type="color" className="w-8 h-7 cursor-pointer rounded border" value={certBorderColor} onChange={e => setCertBorderColor(e.target.value)} />
+                                    <input className="border rounded px-2 py-1 flex-1" value={certBorderColor} onChange={e => setCertBorderColor(e.target.value)} />
                                 </div>
-
-                                {/* Breeder Profile */}
-                                {ownerProfile && (
-                                    <div className="w-1/3 flex items-center justify-end gap-0.5 sm:gap-3">
-                                        <div className="text-right">
-                                            {(() => {
-                                                const ownerInfo = getOwnerDisplayInfoTopRight();
-                                                if (!ownerInfo) return null;
-                                                return (
-                                                    <>
-                                                        {ownerInfo.lines.map((line, idx) => (
-                                                            <div key={idx} className="text-xs sm:text-base font-semibold text-gray-800 leading-tight">{line}</div>
-                                                        ))}
-                                                        {ownerInfo.userId && (
-                                                            <div className="text-xs text-gray-600 mt-1">{ownerInfo.userId}</div>
-                                                        )}
-                                                    </>
-                                                );
-                                            })()}
-                                        </div>
-                                        <div className="hide-for-pdf w-6 h-6 sm:w-16 sm:h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
-                                            {(ownerProfile?.profileImage || ownerProfile?.profileImageUrl) ? (
-                                                <img src={ownerProfile.profileImage || ownerProfile.profileImageUrl} alt="Breeder" className="w-full h-full object-cover" />
-                                            ) : (
-                                                <User size={12} className="text-gray-400 sm:w-8 sm:h-8" />
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Pedigree Tree */}
-                            <div>
-                                {renderPedigreeTree(displayData)}
-                            </div>
-
-                            {/* Footer - Inside scrollable content */}
-                            <div className="mt-4 pt-3 pb-4 border-t-2 border-gray-300 flex justify-between items-center text-sm text-gray-600">
-                                <div>
-                                    {getOwnerDisplayInfoBottomLeft()}
+                            </label>
+                            <label className="flex flex-col gap-1">
+                                <span className="text-gray-500 font-medium">Background colour</span>
+                                <div className="flex gap-1 items-center">
+                                    <input type="color" className="w-8 h-7 cursor-pointer rounded border" value={certBgColor} onChange={e => setCertBgColor(e.target.value)} />
+                                    <input className="border rounded px-2 py-1 flex-1" value={certBgColor} onChange={e => setCertBgColor(e.target.value)} />
                                 </div>
-                                <div>{formatDate(new Date())}</div>
-                            </div>
+                            </label>
+                            <label className="flex flex-col gap-1">
+                                <span className="text-gray-500 font-medium">Logo image</span>
+                                <input ref={certLogoInputRef} type="file" accept="image/*" className="hidden" onChange={e => {
+                                    const file = e.target.files?.[0];
+                                    if (!file) return;
+                                    const reader = new FileReader();
+                                    reader.onload = ev => setCertLogoUrl(ev.target.result);
+                                    reader.readAsDataURL(file);
+                                }} />
+                                <button className="border rounded px-2 py-1 bg-white hover:bg-gray-100 text-left" onClick={() => certLogoInputRef.current?.click()}>
+                                    {certLogoUrl ? 'Change logo' : 'Upload logo'}
+                                </button>
+                                {certLogoUrl && <button className="text-red-500 text-left" onClick={() => setCertLogoUrl(null)}>Remove</button>}
+                            </label>
                         </div>
-                    </div>
-                </div>
-                    </div>
-                </div>
+                    )}
 
-            {/* Stacked Pedigree Modal - Higher z-index to appear above main pedigree */}
+                    {/* Content */}
+                    <div className="p-3 sm:p-6 overflow-x-auto" style={{ paddingBottom: window.innerWidth < 640 ? '80px' : '1.5rem' }}>
+                        <div style={{ minWidth: 700 }}>{certJsx}</div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Stacked Pedigree Modal */}
             {stackedPedigree && (
                 <div className="fixed inset-0 z-[90]">
                     <PedigreeChart
@@ -1683,7 +1416,6 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     />
                 </div>
             )}
-        </div>
         </div>
     );
 });
