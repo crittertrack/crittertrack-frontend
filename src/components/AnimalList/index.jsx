@@ -2871,6 +2871,34 @@ const AnimalList = ({
             try { return JSON.parse(val); } catch { return [{ name: String(val) }]; }
         };
 
+        const calcNextDose = (med) => {
+            if (!med.startDate || !med.intervalValue || !med.intervalUnit) return null;
+            const v = Number(med.intervalValue);
+            const unitMs = med.intervalUnit === 'hours' ? 3600000
+                : med.intervalUnit === 'days' ? 86400000
+                : med.intervalUnit === 'weeks' ? 604800000
+                : med.intervalUnit === 'months' ? 2592000000 : null;
+            if (!unitMs) return null;
+            const start = new Date(med.startDate).getTime();
+            if (isNaN(start)) return null;
+            const intervalMs = v * unitMs;
+            const now = Date.now();
+            const elapsed = now - start;
+            if (elapsed < 0) return new Date(start);
+            const nextDose = new Date(start + (Math.floor(elapsed / intervalMs) + 1) * intervalMs);
+            return nextDose;
+        };
+
+        const formatNextDose = (date) => {
+            const today = new Date(); today.setHours(0,0,0,0);
+            const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+            const d = new Date(date); d.setHours(0,0,0,0);
+            if (date <= Date.now()) return 'due now';
+            if (d.getTime() === today.getTime()) return 'today';
+            if (d.getTime() === tomorrow.getTime()) return 'tomorrow';
+            return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        };
+
         // -- Section data ---------------------------------------------------------
         // Exclude deceased and view-only (transferred/sold) animals from all management sections
         const allAnimals = allAnimalsRaw.filter(a => a.status !== 'Deceased' && !a.isViewOnly);
@@ -3622,7 +3650,17 @@ const AnimalList = ({
                                                                                             </div>
                                                                                         )}
                                                                                         {isTreatment && conds.length > 0 && <div className="text-[10px] text-gray-500 truncate w-full text-center">{conds.map(c => c.name || c).join(', ')}</div>}
-                                                                                        {isTreatment && meds.length > 0 && <div className="text-[10px] text-blue-500 truncate w-full text-center">{meds.map(m => m.name || m).join(', ')}</div>}
+                                                                                        {isTreatment && meds.length > 0 && meds.slice(0, 2).map((m, i) => {
+                                                                                            const next = calcNextDose(m);
+                                                                                            const nextLabel = next ? formatNextDose(next) : null;
+                                                                                            const intervalLabel = m.intervalValue ? `every ${m.intervalValue}${m.intervalUnit === 'hours' ? 'h' : m.intervalUnit === 'days' ? 'd' : m.intervalUnit === 'weeks' ? 'w' : 'mo'}` : null;
+                                                                                            return (
+                                                                                                <div key={i} className="text-[10px] text-blue-600 w-full text-center leading-tight">
+                                                                                                    <span className="font-medium truncate block">{m.name || m}</span>
+                                                                                                    <span className="text-blue-400">{[m.dose, intervalLabel].filter(Boolean).join(' · ')}{nextLabel ? <span className="text-orange-400 ml-1">· {nextLabel}</span> : null}</span>
+                                                                                                </div>
+                                                                                            );
+                                                                                        })}
                                                                                         {a.isQuarantine
                                                                                             ? <button onClick={(e) => handleUnquarantine(e, a)} className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5"><LockOpen size={9} /> Release</button>
                                                                                             : isTreatment && <button onClick={(e) => handleDischargeTreatment(e, a)} className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5"><LockOpen size={9} /> Discharge</button>
@@ -3673,7 +3711,17 @@ const AnimalList = ({
                                                                     </div>
                                                                 )}
                                                                 {isTreatment && conds.length > 0 && <div className="text-[10px] text-gray-500 truncate w-full text-center">{conds.map(c => c.name || c).join(', ')}</div>}
-                                                                {isTreatment && meds.length > 0 && <div className="text-[10px] text-blue-500 truncate w-full text-center">{meds.map(m => m.name || m).join(', ')}</div>}
+                                                                {isTreatment && meds.length > 0 && meds.slice(0, 2).map((m, i) => {
+                                                                    const next = calcNextDose(m);
+                                                                    const nextLabel = next ? formatNextDose(next) : null;
+                                                                    const intervalLabel = m.intervalValue ? `every ${m.intervalValue}${m.intervalUnit === 'hours' ? 'h' : m.intervalUnit === 'days' ? 'd' : m.intervalUnit === 'weeks' ? 'w' : 'mo'}` : null;
+                                                                    return (
+                                                                        <div key={i} className="text-[10px] text-blue-600 w-full text-center leading-tight">
+                                                                            <span className="font-medium truncate block">{m.name || m}</span>
+                                                                            <span className="text-blue-400">{[m.dose, intervalLabel].filter(Boolean).join(' · ')}{nextLabel ? <span className="text-orange-400 ml-1">· {nextLabel}</span> : null}</span>
+                                                                        </div>
+                                                                    );
+                                                                })}
                                                                 {a.isQuarantine
                                                                     ? <button onClick={(e) => handleUnquarantine(e, a)} className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5"><LockOpen size={9} /> Release</button>
                                                                     : isTreatment && <button onClick={(e) => handleDischargeTreatment(e, a)} className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5"><LockOpen size={9} /> Discharge</button>

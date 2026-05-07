@@ -3005,11 +3005,12 @@ const AnimalForm = ({
     });
     const [newMedication, setNewMedication] = useState({
         name: '',
+        dose: '',
         notes: '',
         startDate: '',
         stopDate: '',
         intervalValue: '',
-        intervalUnit: 'days'
+        intervalUnit: 'hours'
     });
     
     const [vetVisitsArray, setVetVisitsArray] = useState(() => {
@@ -4292,14 +4293,15 @@ const AnimalForm = ({
         const record = {
             id: Date.now().toString(),
             name: newMedication.name,
+            dose: newMedication.dose || '',
             notes: newMedication.notes || '',
             startDate: newMedication.startDate || null,
             stopDate: newMedication.stopDate || null,
             intervalValue: newMedication.intervalValue ? Number(newMedication.intervalValue) : null,
-            intervalUnit: newMedication.intervalUnit || 'days'
+            intervalUnit: newMedication.intervalUnit || 'hours'
         };
         setMedicationsArray([...medicationsArray, record]);
-        setNewMedication({ name: '', notes: '', startDate: '', stopDate: '', intervalValue: '', intervalUnit: 'days' });
+        setNewMedication({ name: '', dose: '', notes: '', startDate: '', stopDate: '', intervalValue: '', intervalUnit: 'hours' });
     };
     
     const addVetVisit = () => {
@@ -7039,12 +7041,12 @@ const AnimalForm = ({
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-700">Medication Name</label>
                                                 <input type="text" value={newMedication.name} onChange={(e) => setNewMedication({...newMedication, name: e.target.value})}
-                                                    placeholder="e.g., Antibiotic, Pain reliever" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    placeholder="e.g., Baytril, Metacam" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Notes (optional)</label>
-                                                <input type="text" value={newMedication.notes} onChange={(e) => setNewMedication({...newMedication, notes: e.target.value})}
-                                                    placeholder="e.g., With food, special instructions" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                <label className="block text-xs font-medium text-gray-700">Dose</label>
+                                                <input type="text" value={newMedication.dose} onChange={(e) => setNewMedication({...newMedication, dose: e.target.value})}
+                                                    placeholder="e.g., 0.1ml, 5mg/kg" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -7061,12 +7063,12 @@ const AnimalForm = ({
                                         </div>
                                         <div className="grid grid-cols-2 gap-3">
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Dose Interval (optional)</label>
+                                                <label className="block text-xs font-medium text-gray-700">Give every</label>
                                                 <input type="number" min="1" value={newMedication.intervalValue} onChange={(e) => setNewMedication({...newMedication, intervalValue: e.target.value})}
-                                                    placeholder="e.g., 8" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    placeholder="e.g., 12" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Unit</label>
+                                                <label className="block text-xs font-medium text-gray-700">&nbsp;</label>
                                                 <select value={newMedication.intervalUnit} onChange={(e) => setNewMedication({...newMedication, intervalUnit: e.target.value})}
                                                     className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                                     <option value="hours">Hours</option>
@@ -7075,6 +7077,11 @@ const AnimalForm = ({
                                                     <option value="months">Months</option>
                                                 </select>
                                             </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Notes (optional)</label>
+                                            <input type="text" value={newMedication.notes} onChange={(e) => setNewMedication({...newMedication, notes: e.target.value})}
+                                                placeholder="e.g., Give with food, special instructions" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                         </div>
                                         <button type="button" onClick={addMedication} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">
                                             Add Medication
@@ -7086,11 +7093,12 @@ const AnimalForm = ({
                                                 <div key={record.id} className="flex items-start justify-between p-2 bg-gray-50 rounded border border-gray-100 text-sm gap-2">
                                                     <div className="flex-1 min-w-0">
                                                         <strong>{record.name}</strong>
-                                                        {record.notes && <span className="text-xs text-gray-500 ml-2">— {record.notes}</span>}
-                                                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-xs text-gray-500">
+                                                        {record.dose && <span className="text-xs text-gray-600 ml-2">{record.dose}</span>}
+                                                        {record.intervalValue && <span className="text-xs text-gray-500 ml-2">· every {record.intervalValue} {record.intervalUnit}</span>}
+                                                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-xs text-gray-400">
                                                             {record.startDate && <span>Start: {record.startDate}</span>}
                                                             {record.stopDate && <span>Stop: {record.stopDate}</span>}
-                                                            {record.intervalValue && <span>Every {record.intervalValue} {record.intervalUnit}</span>}
+                                                            {record.notes && <span>{record.notes}</span>}
                                                         </div>
                                                     </div>
                                                     <button type="button" onClick={() => setMedicationsArray(medicationsArray.filter(r => r.id !== record.id))}
