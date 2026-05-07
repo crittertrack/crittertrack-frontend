@@ -558,7 +558,7 @@ const LitterSyncConflictModal = ({ items, onResolve, onSkip }) => {
 };
 
 // Pedigree Chart Component
-const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BASE_URL, authToken = null, inline = false, manualData = null, onViewAnimal = null }, ref) => {
+const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BASE_URL, authToken = null, inline = false, vertical = false, manualData = null, onViewAnimal = null }, ref) => {
     const [pedigreeData, setPedigreeData] = useState(null);
     const [displayData, setDisplayData] = useState(null);
     const [ownerProfile, setOwnerProfile] = useState(null);
@@ -1101,7 +1101,46 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         );
     };
 
-    // ── Main animal card (horizontal top strip of certificate) ───────────────────────
+    // ── Vertical certificate table (top-down layout) ──────────────────────────────
+    const renderVerticalCertTable = (subject, gens, handleCardClick) => {
+        if (!subject) return null;
+        const vGenSlots = [];
+        vGenSlots[0] = [
+            { path: ['father'], isSire: true },
+            { path: ['mother'], isSire: false },
+        ];
+        for (let g = 1; g < gens; g++) {
+            vGenSlots[g] = [];
+            for (const slot of vGenSlots[g - 1]) {
+                vGenSlots[g].push({ path: [...slot.path, 'father'], isSire: true });
+                vGenSlots[g].push({ path: [...slot.path, 'mother'], isSire: false });
+            }
+        }
+        const totalCols = Math.pow(2, gens);
+        const rowHeights = [150, 110, 85, 60];
+        const rows = [];
+        for (let g = 0; g < gens; g++) {
+            const slots = vGenSlots[g];
+            const colspan = totalCols / slots.length;
+            const cellH = rowHeights[g] || 60;
+            const cells = slots.map((slot, idx) => {
+                const animal = getAncestor(subject, slot.path);
+                return (
+                    <td key={idx} colSpan={colspan} style={{ padding: 2, verticalAlign: 'middle', height: cellH }}>
+                        <div style={{ height: '100%' }}>
+                            {renderCertCell(animal, slot.isSire, handleCardClick, g)}
+                        </div>
+                    </td>
+                );
+            });
+            rows.push(<tr key={g}>{cells}</tr>);
+        }
+        return (
+            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 3, tableLayout: 'fixed' }}>
+                <tbody>{rows}</tbody>
+            </table>
+        );
+    };
     const renderCertMainCard = (animal) => {
         if (!animal) return null;
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
@@ -1253,7 +1292,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
             {/* ── Ancestor table ── */}
             <div style={{ overflow: 'visible' }}>
-                {subject ? renderCertificateTable(subject, generations, handleCardClick) : null}
+                {subject ? (vertical ? renderVerticalCertTable(subject, generations, handleCardClick) : renderCertificateTable(subject, generations, handleCardClick)) : null}
             </div>
 
             {/* ── Footer ─────────────────────────────────────────── */}

@@ -28,6 +28,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
     const chartRef = useRef(null);
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
     const [betaPedigreeView, setBetaPedigreeView] = useState('vertical');
+    const [showHorizCert, setShowHorizCert] = useState(false);
+    const [showVertCert, setShowVertCert] = useState(false);
     useEffect(() => {
         if (detailViewTab !== 5) return;
         let cancelled = false;
@@ -2074,11 +2076,15 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     <h3 className="text-base font-semibold text-gray-700">Pedigree</h3>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <div className="flex rounded border border-gray-300 overflow-hidden text-xs">
-                                        <button onClick={() => setBetaPedigreeView('vertical')} className={`px-2 py-1 transition-colors ${betaPedigreeView === 'vertical' ? 'bg-gray-200 font-semibold text-gray-800' : 'text-gray-400 hover:bg-gray-100'}`}>Vertical</button>
-                                        <button onClick={() => setBetaPedigreeView('chart')} className={`px-2 py-1 transition-colors ${betaPedigreeView === 'chart' ? 'bg-primary font-semibold text-black' : 'text-gray-400 hover:bg-gray-100'}`}>Chart</button>
-                                    </div>
-                                    {hasAnyData && betaPedigreeView === 'vertical' && (
+                                    <div className="flex items-center gap-2">
+                                    <button onClick={() => setShowHorizCert(true)} className="px-3 py-1.5 text-xs border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-600 flex items-center gap-1.5">
+                                        <ScrollText size={13} /> Certificate
+                                    </button>
+                                    <button onClick={() => setShowVertCert(true)} className="px-3 py-1.5 text-xs border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-600 flex items-center gap-1.5">
+                                        <ScrollText size={13} /> Vertical Cert
+                                    </button>
+                                </div>
+                                    {hasAnyData && (
                                         <>
                                         <button onClick={handleDownloadMPPDF} disabled={mpDownloading}
                                             className="px-3 py-1.5 text-sm bg-primary hover:bg-primary/90 text-black rounded-lg border border-primary/40 transition flex items-center gap-1.5 disabled:opacity-60 font-semibold">
@@ -2090,25 +2096,14 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                         </button>
                                         </>
                                     )}
-                                    {betaPedigreeView === 'chart' && (
-                                        <>
-                                        <button onClick={() => chartRef.current?.downloadPDF()} disabled={!chartRef.current?.imagesLoaded || chartRef.current?.isSaving}
-                                            className="px-3 py-1.5 text-sm bg-primary hover:bg-primary/90 text-black rounded-lg border border-primary/40 transition flex items-center gap-1.5 disabled:opacity-60 font-semibold">
-                                            <Download size={14} /> Save PDF
-                                        </button>
-                                        <button onClick={() => chartRef.current?.downloadImage()} disabled={!chartRef.current?.imagesLoaded || chartRef.current?.isSaving}
-                                            className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
-                                            <Images size={14} /> Save Image
-                                        </button>
-                                        </>
-                                    )}
                                 </div>
                             </div>
                             <p className="text-xs text-gray-400 -mt-3">This pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations (shown on Overview tab). Manual entries are for display/reference only and do not affect COI.</p>
                             <div className={betaPedigreeView === 'chart' ? '' : 'hidden'}>
-                                <PedigreeChart ref={chartRef} animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => setBetaPedigreeView('vertical')} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />
+                                {showHorizCert && <PedigreeChart animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => setShowHorizCert(false)} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />}
+                                {showVertCert && <PedigreeChart vertical animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => setShowVertCert(false)} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />}
                             </div>
-                            <div className={betaPedigreeView === 'vertical' ? '' : 'hidden'}>
+                            <div>
                             <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
                                 {(() => {
                                     const subjectVariety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => animal[k]).filter(Boolean).join(' ');
