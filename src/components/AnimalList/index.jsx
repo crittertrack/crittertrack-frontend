@@ -3013,6 +3013,19 @@ const AnimalList = ({
                 .catch(err => { console.error('Unquarantine failed:', err); setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, isQuarantine: true } : a)); });
         };
 
+        const handleDischargeTreatment = (e, animal) => {
+            e.stopPropagation();
+            if (!window.confirm(`Discharge ${animal.name || 'this animal'} from treatment? This will clear all recorded conditions and medications.`)) return;
+            const patch = { medicalConditions: null, medications: null };
+            const prev = { medicalConditions: animal.medicalConditions, medications: animal.medications };
+            setAllAnimalsRaw(prevArr => prevArr.map(a => a.id_public === animal.id_public ? { ...a, ...patch } : a));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, ...patch } }));
+            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, patch,
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => logManagementActivity('treatment_discharged', animal.id_public, { name: animal.name, species: animal.species }))
+                .catch(err => { console.error('Discharge failed:', err); setAllAnimalsRaw(prevArr => prevArr.map(a => a.id_public === animal.id_public ? { ...a, ...prev } : a)); });
+        };
+
         const handleReproStatusUpdate = (e, animal, patch) => {
             e.stopPropagation();
             // Optimistic update
@@ -3588,6 +3601,10 @@ const AnimalList = ({
                                                             cardActions={<>
                                                                 {conds.length > 0 && <div className="text-[10px] text-gray-500 truncate w-full text-center">{conds.map(c => c.name || c).join(', ')}</div>}
                                                                 {meds.length > 0 && <div className="text-[10px] text-blue-500 truncate w-full text-center">{meds.map(m => m.name || m).join(', ')}</div>}
+                                                                <button onClick={(e) => handleDischargeTreatment(e, a)}
+                                                                    className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5">
+                                                                    <LockOpen size={9} /> Discharge
+                                                                </button>
                                                             </>}
                                                         />
                                                     );
