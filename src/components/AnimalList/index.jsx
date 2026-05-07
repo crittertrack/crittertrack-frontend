@@ -4109,24 +4109,27 @@ const AnimalList = ({
     return (
         <div className="w-full max-w-7xl bg-white p-6 rounded-xl shadow-lg">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div className="flex items-center justify-between w-full sm:w-auto gap-2">
-                    <div className='flex items-center gap-2 flex-wrap'>
-                        <ClipboardList size={20} className="sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
-                        {animalView === 'list' ? `My Animals (${displayedAnimalCount})` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : showActivityLogScreen ? 'Activity Log' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
+                <div className="flex items-center justify-between w-full sm:w-auto gap-2 min-w-0">
+                    <div className='flex items-center gap-2 min-w-0 flex-1'>
+                        <ClipboardList size={20} className="sm:w-6 sm:h-6 shrink-0 text-primary-dark" />
+                        <span className="truncate">
+                            {animalView === 'list' ? `My Animals (${displayedAnimalCount})` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : showActivityLogScreen ? 'Activity Log' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
+                        </span>
                         {isListLikeView && hasActiveFilters && (
-                            <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                            <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full shrink-0">
                                 Filtered
                             </span>
                         )}
                     </div>
-                    {/* Add Animal — shown next to title on mobile only */}
+                    {/* Add Animal — icon-only on mobile, hidden on sm+ (desktop has full button in buttons row) */}
                     {isListLikeView && !showArchiveScreen && (
                         <button
                             onClick={() => navigate('/select-species')}
-                            className="sm:hidden bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 whitespace-nowrap text-xs"
+                            className="sm:hidden bg-accent hover:bg-accent/90 text-white p-1.5 rounded-lg transition duration-150 shadow-md flex items-center justify-center shrink-0"
                             data-tutorial-target="add-animal-btn"
+                            title="Add Animal"
                         >
-                            <PlusCircle size={14} /> <span>Add Animal</span>
+                            <PlusCircle size={20} />
                         </button>
                     )}
                 </div>
