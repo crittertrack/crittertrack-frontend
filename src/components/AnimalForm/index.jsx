@@ -2427,6 +2427,7 @@ const AnimalForm = ({
             isNursing: animalToEdit.isNursing || false,
             isInMating: animalToEdit.isInMating || false,
             isQuarantine: animalToEdit.isQuarantine || false,
+            isInTreatment: animalToEdit.isInTreatment || false,
             enclosureId: animalToEdit.enclosureId || '',
             lastFedDate: animalToEdit.lastFedDate ? new Date(animalToEdit.lastFedDate).toISOString().split('T')[0] : '',
             feedingFrequencyDays: animalToEdit.feedingFrequencyDays || '',
@@ -2607,6 +2608,7 @@ const AnimalForm = ({
             isNursing: false,
             isInMating: false,
             isQuarantine: false,
+            isInTreatment: false,
             enclosureId: '',
             lastFedDate: '',
             feedingFrequencyDays: '',
@@ -3003,7 +3005,11 @@ const AnimalForm = ({
     });
     const [newMedication, setNewMedication] = useState({
         name: '',
-        notes: ''
+        notes: '',
+        startDate: '',
+        stopDate: '',
+        intervalValue: '',
+        intervalUnit: 'days'
     });
     
     const [vetVisitsArray, setVetVisitsArray] = useState(() => {
@@ -4286,10 +4292,14 @@ const AnimalForm = ({
         const record = {
             id: Date.now().toString(),
             name: newMedication.name,
-            notes: newMedication.notes || ''
+            notes: newMedication.notes || '',
+            startDate: newMedication.startDate || null,
+            stopDate: newMedication.stopDate || null,
+            intervalValue: newMedication.intervalValue ? Number(newMedication.intervalValue) : null,
+            intervalUnit: newMedication.intervalUnit || 'days'
         };
         setMedicationsArray([...medicationsArray, record]);
-        setNewMedication({ name: '', notes: '' });
+        setNewMedication({ name: '', notes: '', startDate: '', stopDate: '', intervalValue: '', intervalUnit: 'days' });
     };
     
     const addVetVisit = () => {
@@ -6937,6 +6947,17 @@ const AnimalForm = ({
                                 />
                                 <span className="text-sm font-medium text-gray-700">In Quarantine / Isolation</span>
                             </label>
+                            {/* In Treatment toggle */}
+                            <label className="flex items-center gap-3 cursor-pointer p-3 border rounded-lg bg-white hover:bg-blue-50 transition">
+                                <input
+                                    type="checkbox"
+                                    name="isInTreatment"
+                                    checked={formData.isInTreatment || false}
+                                    onChange={handleChange}
+                                    className="form-checkbox h-5 w-5 text-blue-500 rounded focus:ring-blue-400"
+                                />
+                                <span className="text-sm font-medium text-gray-700">In Active Treatment</span>
+                            </label>
                             <div className="space-y-4">
                                 {/* Medical Conditions */}
                                 <div className="space-y-3">
@@ -7023,7 +7044,36 @@ const AnimalForm = ({
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-700">Notes (optional)</label>
                                                 <input type="text" value={newMedication.notes} onChange={(e) => setNewMedication({...newMedication, notes: e.target.value})}
-                                                    placeholder="e.g., Dosage, frequency" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                    placeholder="e.g., With food, special instructions" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Start Date (optional)</label>
+                                                <input type="date" value={newMedication.startDate} onChange={(e) => setNewMedication({...newMedication, startDate: e.target.value})}
+                                                    className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Stop Date (optional)</label>
+                                                <input type="date" value={newMedication.stopDate} onChange={(e) => setNewMedication({...newMedication, stopDate: e.target.value})}
+                                                    className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Dose Interval (optional)</label>
+                                                <input type="number" min="1" value={newMedication.intervalValue} onChange={(e) => setNewMedication({...newMedication, intervalValue: e.target.value})}
+                                                    placeholder="e.g., 8" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Unit</label>
+                                                <select value={newMedication.intervalUnit} onChange={(e) => setNewMedication({...newMedication, intervalUnit: e.target.value})}
+                                                    className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                    <option value="hours">Hours</option>
+                                                    <option value="days">Days</option>
+                                                    <option value="weeks">Weeks</option>
+                                                    <option value="months">Months</option>
+                                                </select>
                                             </div>
                                         </div>
                                         <button type="button" onClick={addMedication} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">
@@ -7031,15 +7081,20 @@ const AnimalForm = ({
                                         </button>
                                     </div>
                                     {medicationsArray.length > 0 && (
-                                        <div className="space-y-2 bg-white p-3 rounded-lg border border-gray-200 max-h-48 overflow-y-auto">
+                                        <div className="space-y-2 bg-white p-3 rounded-lg border border-gray-200 max-h-64 overflow-y-auto">
                                             {medicationsArray.map((record) => (
-                                                <div key={record.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-sm">
-                                                    <div className="flex-1">
+                                                <div key={record.id} className="flex items-start justify-between p-2 bg-gray-50 rounded border border-gray-100 text-sm gap-2">
+                                                    <div className="flex-1 min-w-0">
                                                         <strong>{record.name}</strong>
-                                                        {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
+                                                        {record.notes && <span className="text-xs text-gray-500 ml-2">— {record.notes}</span>}
+                                                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-xs text-gray-500">
+                                                            {record.startDate && <span>Start: {record.startDate}</span>}
+                                                            {record.stopDate && <span>Stop: {record.stopDate}</span>}
+                                                            {record.intervalValue && <span>Every {record.intervalValue} {record.intervalUnit}</span>}
+                                                        </div>
                                                     </div>
                                                     <button type="button" onClick={() => setMedicationsArray(medicationsArray.filter(r => r.id !== record.id))}
-                                                        className="text-red-500 hover:text-red-700 p-1" title="Delete record"><Trash2 size={14} /></button>
+                                                        className="text-red-500 hover:text-red-700 p-1 flex-shrink-0" title="Delete record"><Trash2 size={14} /></button>
                                                 </div>
                                             ))}
                                         </div>

@@ -2921,9 +2921,7 @@ const AnimalList = ({
         const healthEnclosureIds = new Set(healthEnclosures.map(e => e._id));
         const inHealthEnclosure = a => a.enclosureId && healthEnclosureIds.has(a.enclosureId);
         const quarantineList = allAnimals.filter(a => a.isQuarantine && !inHealthEnclosure(a));
-        const treatmentList = allAnimals.filter(a => !a.isQuarantine && !inHealthEnclosure(a) && (
-            parseArrayField(a.medicalConditions).length > 0 || parseArrayField(a.medications).length > 0
-        ));
+        const treatmentList = allAnimals.filter(a => a.isInTreatment && !a.isQuarantine && !inHealthEnclosure(a));
 
         // 6. Available for sale/rehoming ? all user-created animals with status=Available (no ownership filter)
         const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly);
@@ -3020,8 +3018,8 @@ const AnimalList = ({
         const handleDischargeTreatment = (e, animal) => {
             e.stopPropagation();
             if (!window.confirm(`Discharge ${animal.name || 'this animal'} from treatment? This will clear all recorded conditions and medications.`)) return;
-            const patch = { medicalConditions: null, medications: null };
-            const prev = { medicalConditions: animal.medicalConditions, medications: animal.medications };
+            const patch = { medicalConditions: null, medications: null, isInTreatment: false };
+            const prev = { medicalConditions: animal.medicalConditions, medications: animal.medications, isInTreatment: animal.isInTreatment };
             setAllAnimalsRaw(prevArr => prevArr.map(a => a.id_public === animal.id_public ? { ...a, ...patch } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, ...patch } }));
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, patch,
@@ -3573,7 +3571,10 @@ const AnimalList = ({
                                     {healthEnclosures.length === 0
                                         ? <div className="text-xs text-gray-400 text-center py-2">No enclosures yet. Click Add to create one.</div>
                                         : healthEnclosures.map(enc => {
-                                            const occupants = enclosureAnimalMap[enc._id] || [];
+                                            const occupants = (enclosureAnimalMap[enc._id] || []).filter(a => {
+                                                const isTreatment = a.isInTreatment && !a.isQuarantine;
+                                                return a.isQuarantine || isTreatment;
+                                            });
                                             const isGrpCollapsed = collapsedMgmtGroups[`enc_${enc._id}`] || false;
                                             return (
                                                 <div key={enc._id} className="border border-gray-200 rounded-lg overflow-hidden">
@@ -3604,7 +3605,7 @@ const AnimalList = ({
                                                                         {occupants.map(a => {
                                                                             const conds = parseArrayField(a.medicalConditions);
                                                                             const meds = parseArrayField(a.medications);
-                                                                            const isTreatment = !a.isQuarantine && (conds.length > 0 || meds.length > 0);
+                                                                            const isTreatment = a.isInTreatment && !a.isQuarantine;
                                                                             const hasHealthState = a.isQuarantine || isTreatment;
                                                                             return (
                                                                                 <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
@@ -3644,9 +3645,7 @@ const AnimalList = ({
                                 </div>
                             </div>
                             {(() => {
-                                const healthStateAnimalIds = new Set([...quarantineList, ...treatmentList].map(a => a.id_public));
-                                const noStatusUnassignedHealthCandidates = allAnimals.filter(a => !a.enclosureId && !healthStateAnimalIds.has(a.id_public));
-                                const unassignedHealthAnimals = [...quarantineList, ...treatmentList, ...noStatusUnassignedHealthCandidates];
+                                const unassignedHealthAnimals = [...quarantineList, ...treatmentList];
                                 return unassignedHealthAnimals.length === 0 ? null : (
                                     <div>
                                         <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('health_unassigned')}>
@@ -3658,7 +3657,7 @@ const AnimalList = ({
                                                 {unassignedHealthAnimals.map(a => {
                                                     const conds = parseArrayField(a.medicalConditions);
                                                     const meds = parseArrayField(a.medications);
-                                                    const isTreatment = !a.isQuarantine && (conds.length > 0 || meds.length > 0);
+                                                    const isTreatment = a.isInTreatment && !a.isQuarantine;
                                                     const hasHealthState = a.isQuarantine || isTreatment;
                                                     return (
                                                         <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
