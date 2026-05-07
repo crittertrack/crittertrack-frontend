@@ -1011,7 +1011,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
         return (
             <div style={baseStyle} onClick={handleClick}>
-                <div style={{ display: 'flex', gap: 3, alignItems: 'flex-start', height: '100%' }}>
+                <div style={{ display: 'flex', gap: 3, alignItems: 'center', height: '100%' }}>
                     {/* Thumbnail */}
                     {imgSrc && (
                         <div className="hide-for-pdf" style={{ width: 44, height: 44, flexShrink: 0, borderRadius: 4, overflow: 'hidden', border: `1px solid ${certBorderColor}` }}>
@@ -1065,7 +1065,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         // Build table rows. Number of rows = genSlots[gens-1].length
         const rowCount = genSlots[gens - 1].length;
         // Min row height shrinks as more rows appear
-        const rowMinH = gens <= 1 ? 90 : gens === 2 ? 75 : gens === 3 ? 60 : 45;
+        const rowMinH = gens <= 1 ? 110 : gens === 2 ? 95 : gens === 3 ? 75 : 58;
         const rows = [];
 
         for (let row = 0; row < rowCount; row++) {
@@ -1079,8 +1079,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     const slot = slotsAtGen[slotIdx];
                     const animal = getAncestor(subject, slot.path);
                     cells.push(
-                        <td key={g} rowSpan={rowsPerSlot} style={{ padding: 2, verticalAlign: 'middle', width: `${100 / gens}%` }}>
-                            <div style={{ minHeight: rowMinH * rowsPerSlot, height: '100%' }}>
+                        <td key={g} rowSpan={rowsPerSlot} style={{ padding: 2, verticalAlign: 'middle', width: `${100 / gens}%`, height: rowMinH * rowsPerSlot }}>
+                            <div style={{ height: '100%' }}>
                                 {renderCertCell(animal, slot.isSire, handleCardClick)}
                             </div>
                         </td>
@@ -1097,7 +1097,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         );
     };
 
-    // ── Main animal card (left column of certificate) ───────────────────────
+    // ── Main animal card (horizontal top strip of certificate) ───────────────────────
     const renderCertMainCard = (animal) => {
         if (!animal) return null;
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
@@ -1110,52 +1110,51 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         const cardBorder = isMale ? '#3b82f6' : isFemale ? '#ec4899' : certBorderColor;
 
         return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, height: '100%', backgroundColor: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 6, padding: '6px 8px', boxSizing: 'border-box' }}>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center', backgroundColor: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 6, padding: '8px 12px', boxSizing: 'border-box', height: '100%' }}>
                 {/* Photo */}
-                <div className="hide-for-pdf" style={{ width: '100%', aspectRatio: '1/1', maxHeight: 120, overflow: 'hidden', borderRadius: 8, border: `2px solid ${certBorderColor}`, backgroundColor: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="hide-for-pdf" style={{ width: 90, height: 90, flexShrink: 0, overflow: 'hidden', borderRadius: 8, border: `2px solid ${cardBorder}`, backgroundColor: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {imgSrc ? (
-                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={32} />
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={36} />
                     ) : (
-                        <Cat size={32} style={{ color: '#9ca3af' }} />
+                        <Cat size={36} style={{ color: '#9ca3af' }} />
                     )}
                 </div>
-                {/* Details table */}
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.7rem' }}>
-                    <tbody>
-                        <tr>
-                            <td style={{ color: '#6b7280', paddingRight: 4, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Name:</td>
-                            <td style={{ color: certFontColor, fontWeight: 700, wordBreak: 'break-word' }}>
-                                {fullName}
-                                <GenderIcon size={10} style={{ display: 'inline', marginLeft: 3, verticalAlign: 'middle' }} />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style={{ color: '#6b7280', paddingRight: 4, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Variation:</td>
-                            <td style={{ color: certFontColor, wordBreak: 'break-word' }}>{variety || '—'}</td>
-                        </tr>
-                        {animal.geneticCode && (
+                {/* Details */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+                        <span style={{ fontSize: '0.9rem', fontWeight: 700, color: certFontColor }}>{fullName}</span>
+                        <GenderIcon size={13} style={{ flexShrink: 0 }} />
+                    </div>
+                    <table style={{ borderCollapse: 'collapse', fontSize: '0.7rem' }}>
+                        <tbody>
                             <tr>
-                                <td style={{ color: '#6b7280', paddingRight: 4, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Genotype:</td>
-                                <td style={{ color: certFontColor, fontFamily: 'monospace', wordBreak: 'break-word' }}>{animal.geneticCode}</td>
+                                <td style={{ color: '#6b7280', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Variation:</td>
+                                <td style={{ color: certFontColor, wordBreak: 'break-word' }}>{variety || '—'}</td>
                             </tr>
-                        )}
-                        <tr>
-                            <td style={{ color: '#6b7280', paddingRight: 4, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Birth:</td>
-                            <td style={{ color: certFontColor }}>{animal.birthDate ? formatDate(animal.birthDate) : '—'}</td>
-                        </tr>
-                        {animal.deceasedDate && (
+                            {animal.geneticCode && (
+                                <tr>
+                                    <td style={{ color: '#6b7280', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Genotype:</td>
+                                    <td style={{ color: certFontColor, fontFamily: 'monospace', wordBreak: 'break-word' }}>{animal.geneticCode}</td>
+                                </tr>
+                            )}
                             <tr>
-                                <td style={{ color: '#dc2626', paddingRight: 4, fontWeight: 600, paddingBottom: 2 }}>Deceased:</td>
-                                <td style={{ color: '#dc2626' }}>{formatDate(animal.deceasedDate)}</td>
+                                <td style={{ color: '#6b7280', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Birth:</td>
+                                <td style={{ color: certFontColor }}>{animal.birthDate ? formatDate(animal.birthDate) : '—'}</td>
                             </tr>
-                        )}
-                        <tr>
-                            <td style={{ color: '#6b7280', paddingRight: 4, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Breeder:</td>
-                            <td style={{ color: certFontColor, wordBreak: 'break-word' }}>{animal.breederName || '—'}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div style={{ fontSize: '0.6rem', color: '#6b7280', fontFamily: 'monospace', marginTop: 'auto' }}>{animal.id_public}</div>
+                            {animal.deceasedDate && (
+                                <tr>
+                                    <td style={{ color: '#dc2626', paddingRight: 6, fontWeight: 600, paddingBottom: 2 }}>Deceased:</td>
+                                    <td style={{ color: '#dc2626' }}>{formatDate(animal.deceasedDate)}</td>
+                                </tr>
+                            )}
+                            <tr>
+                                <td style={{ color: '#6b7280', paddingRight: 6, whiteSpace: 'nowrap', fontWeight: 600, paddingBottom: 2 }}>Breeder:</td>
+                                <td style={{ color: certFontColor, wordBreak: 'break-word' }}>{animal.breederName || '—'}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div style={{ fontSize: '0.6rem', color: '#6b7280', fontFamily: 'monospace', marginTop: 4 }}>{animal.id_public}</div>
+                </div>
             </div>
         );
     };
@@ -1222,37 +1221,31 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 </div>
             </div>
 
-            {/* ── Body: main animal card (left) + pedigree table (right) ── */}
-            <div style={{ display: 'flex', gap: 10, alignItems: 'stretch' }}>
-                {/* Left: main animal */}
-                <div style={{ width: '18%', flexShrink: 0, borderRight: `1px dashed ${certBorderColor}`, paddingRight: 10 }}>
+            {/* ── Top strip: main animal (50%) + text/signature (50%) ── */}
+            <div style={{ display: 'flex', gap: 10, marginBottom: 10, paddingBottom: 10, borderBottom: `1px dashed ${certBorderColor}` }}>
+                {/* Left 50%: main animal card */}
+                <div style={{ width: '50%' }}>
                     {subject && renderCertMainCard(subject)}
                 </div>
-
-                {/* Right: generation table */}
-                <div style={{ flex: 1, overflow: 'visible' }}>
-                    {subject ? renderCertificateTable(subject, generations, handleCardClick) : null}
-                </div>
-
-                {/* Signature column (only if space, hidden on 1-gen) */}
-                {generations >= 2 && (
-                    <div style={{ width: 80, flexShrink: 0, borderLeft: `1px dashed ${certBorderColor}`, paddingLeft: 8, display: 'flex', flexDirection: 'column' }}>
-                        {/* Optional logo */}
-                        {certLogoUrl && (
-                            <div style={{ width: '100%', height: 48, overflow: 'hidden', borderRadius: 4, marginBottom: 4 }}>
-                                <img src={certLogoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                            </div>
-                        )}
-                        {/* Cert text (main center-right) */}
-                        {certText && (
-                            <div style={{ fontSize: '0.55rem', color: certFontColor, lineHeight: 1.4, flex: 1, marginBottom: 4 }}>{certText}</div>
-                        )}
-                        {/* Signature — pinned to bottom */}
-                        <div style={{ marginTop: 'auto', borderTop: `1px solid ${certBorderColor}`, paddingTop: 4, textAlign: 'center' }}>
-                            <div style={{ fontSize: '0.55rem', color: '#9ca3af' }}>{certTextSignature}</div>
+                {/* Right 50%: cert text + logo + signature */}
+                <div style={{ width: '50%', paddingLeft: 10, borderLeft: `1px dashed ${certBorderColor}`, display: 'flex', flexDirection: 'column' }}>
+                    {certLogoUrl && (
+                        <div style={{ width: '100%', maxHeight: 48, overflow: 'hidden', borderRadius: 4, marginBottom: 6 }}>
+                            <img src={certLogoUrl} alt="Logo" style={{ maxHeight: 48, objectFit: 'contain' }} />
                         </div>
+                    )}
+                    {certText && (
+                        <div style={{ fontSize: '0.7rem', color: certFontColor, lineHeight: 1.6, flex: 1 }}>{certText}</div>
+                    )}
+                    <div style={{ marginTop: 'auto', borderTop: `1px solid ${certBorderColor}`, paddingTop: 4, textAlign: 'right' }}>
+                        <div style={{ fontSize: '0.6rem', color: '#9ca3af' }}>{certTextSignature}</div>
                     </div>
-                )}
+                </div>
+            </div>
+
+            {/* ── Ancestor table ── */}
+            <div style={{ overflow: 'visible' }}>
+                {subject ? renderCertificateTable(subject, generations, handleCardClick) : null}
             </div>
 
             {/* ── Footer ─────────────────────────────────────────── */}
