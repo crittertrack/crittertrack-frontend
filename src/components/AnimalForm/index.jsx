@@ -567,17 +567,24 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     const [stackedPedigree, setStackedPedigree] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
     const [generations, setGenerations] = useState(4); // 1–4
-    const [certText, setCertText] = useState('');
-    const [certTextTopRight, setCertTextTopRight] = useState('Certificate of Origin');
-    const [certTextBottomLeft, setCertTextBottomLeft] = useState('This pedigree is not recognized by the state');
-    const [certTextSignature, setCertTextSignature] = useState('Signature');
-    const [certFontColor, setCertFontColor] = useState('#1a1a1a');
-    const [certBorderColor, setCertBorderColor] = useState('#374151');
-    const [certBgColor, setCertBgColor] = useState('#ffffff');
-    const [certLogoUrl, setCertLogoUrl] = useState(null);
+    // Load persisted cert prefs from localStorage (shared across all animals for this user)
+    const _savedPrefs = (() => { try { return JSON.parse(localStorage.getItem('ct_cert_prefs') || '{}'); } catch { return {}; } })();
+    const [certText, setCertText] = useState(_savedPrefs.certText ?? '');
+    const [certTextTopRight, setCertTextTopRight] = useState(_savedPrefs.certTextTopRight ?? 'Certificate of Origin');
+    const [certTextBottomLeft, setCertTextBottomLeft] = useState(_savedPrefs.certTextBottomLeft ?? 'This pedigree is not recognized by the state');
+    const [certTextSignature, setCertTextSignature] = useState(_savedPrefs.certTextSignature ?? 'Signature');
+    const [certFontColor, setCertFontColor] = useState(_savedPrefs.certFontColor ?? '#1a1a1a');
+    const [certBorderColor, setCertBorderColor] = useState(_savedPrefs.certBorderColor ?? '#374151');
+    const [certBgColor, setCertBgColor] = useState(_savedPrefs.certBgColor ?? '#ffffff');
     const [showCustomPanel, setShowCustomPanel] = useState(false);
-    const certLogoInputRef = useRef(null);
     const pedigreeRef = useRef(null);
+
+    // Persist cert prefs to localStorage whenever they change
+    useEffect(() => {
+        try {
+            localStorage.setItem('ct_cert_prefs', JSON.stringify({ certText, certTextTopRight, certTextBottomLeft, certTextSignature, certFontColor, certBorderColor, certBgColor }));
+        } catch {}
+    }, [certText, certTextTopRight, certTextBottomLeft, certTextSignature, certFontColor, certBorderColor, certBgColor]);
 
     // Merge manual ancestors into fetched pedigree tree wherever API returned nothing
     useEffect(() => {
@@ -1235,11 +1242,6 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 </div>
                 {/* Right 50%: cert text + logo + signature */}
                 <div style={{ width: '50%', paddingLeft: 10, borderLeft: `1px dashed ${certBorderColor}`, display: 'flex', flexDirection: 'column' }}>
-                    {certLogoUrl && (
-                        <div style={{ width: '100%', maxHeight: 48, overflow: 'hidden', borderRadius: 4, marginBottom: 6 }}>
-                            <img src={certLogoUrl} alt="Logo" style={{ maxHeight: 48, objectFit: 'contain' }} />
-                        </div>
-                    )}
                     {certText && (
                         <div style={{ fontSize: '0.7rem', color: certFontColor, lineHeight: 1.6, flex: 1 }}>{certText}</div>
                     )}
@@ -1378,20 +1380,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                                     <input className="border rounded px-2 py-1 flex-1" value={certBgColor} onChange={e => setCertBgColor(e.target.value)} />
                                 </div>
                             </label>
-                            <label className="flex flex-col gap-1">
-                                <span className="text-gray-500 font-medium">Logo image</span>
-                                <input ref={certLogoInputRef} type="file" accept="image/*" className="hidden" onChange={e => {
-                                    const file = e.target.files?.[0];
-                                    if (!file) return;
-                                    const reader = new FileReader();
-                                    reader.onload = ev => setCertLogoUrl(ev.target.result);
-                                    reader.readAsDataURL(file);
-                                }} />
-                                <button className="border rounded px-2 py-1 bg-white hover:bg-gray-100 text-left" onClick={() => certLogoInputRef.current?.click()}>
-                                    {certLogoUrl ? 'Change logo' : 'Upload logo'}
-                                </button>
-                                {certLogoUrl && <button className="text-red-500 text-left" onClick={() => setCertLogoUrl(null)}>Remove</button>}
-                            </label>
+
                         </div>
                     )}
 
@@ -1414,8 +1403,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                         onViewAnimal={onViewAnimal}
                     />
                 </div>
-            )}
-        </div>
+            )}\n        </div>
     );
 });
 
