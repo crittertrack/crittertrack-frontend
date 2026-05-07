@@ -3605,14 +3605,21 @@ const AnimalList = ({
                                                                             const conds = parseArrayField(a.medicalConditions);
                                                                             const meds = parseArrayField(a.medications);
                                                                             const isTreatment = !a.isQuarantine && (conds.length > 0 || meds.length > 0);
+                                                                            const hasHealthState = a.isQuarantine || isTreatment;
                                                                             return (
                                                                                 <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                                                     hideControls hideBreedingLines
                                                                                     cardActions={<>
                                                                                         {/* State badge */}
-                                                                                        <div className={`text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full ${isTreatment ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                                                                                            {isTreatment ? 'Treatment' : 'Quarantine'}
-                                                                                        </div>
+                                                                                        {hasHealthState ? (
+                                                                                            <div className={`text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full ${isTreatment ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                                                                {isTreatment ? 'Treatment' : 'Quarantine'}
+                                                                                            </div>
+                                                                                        ) : (
+                                                                                            <div className="text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full bg-gray-100 text-gray-500">
+                                                                                                No health status
+                                                                                            </div>
+                                                                                        )}
                                                                                         {isTreatment && conds.length > 0 && <div className="text-[10px] text-gray-500 truncate w-full text-center">{conds.map(c => c.name || c).join(', ')}</div>}
                                                                                         {isTreatment && meds.length > 0 && <div className="text-[10px] text-blue-500 truncate w-full text-center">{meds.map(m => m.name || m).join(', ')}</div>}
                                                                                         {a.isQuarantine
@@ -3637,7 +3644,9 @@ const AnimalList = ({
                                 </div>
                             </div>
                             {(() => {
-                                const unassignedHealthAnimals = [...quarantineList, ...treatmentList];
+                                const healthStateAnimalIds = new Set([...quarantineList, ...treatmentList].map(a => a.id_public));
+                                const noStatusUnassignedHealthCandidates = allAnimals.filter(a => !a.enclosureId && !healthStateAnimalIds.has(a.id_public));
+                                const unassignedHealthAnimals = [...quarantineList, ...treatmentList, ...noStatusUnassignedHealthCandidates];
                                 return unassignedHealthAnimals.length === 0 ? null : (
                                     <div>
                                         <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('health_unassigned')}>
@@ -3650,13 +3659,20 @@ const AnimalList = ({
                                                     const conds = parseArrayField(a.medicalConditions);
                                                     const meds = parseArrayField(a.medications);
                                                     const isTreatment = !a.isQuarantine && (conds.length > 0 || meds.length > 0);
+                                                    const hasHealthState = a.isQuarantine || isTreatment;
                                                     return (
                                                         <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                             hideControls hideBreedingLines
                                                             cardActions={<>
-                                                                <div className={`text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full ${isTreatment ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                                                                    {isTreatment ? 'Treatment' : 'Quarantine'}
-                                                                </div>
+                                                                {hasHealthState ? (
+                                                                    <div className={`text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full ${isTreatment ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                                        {isTreatment ? 'Treatment' : 'Quarantine'}
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full bg-gray-100 text-gray-500">
+                                                                        No health status
+                                                                    </div>
+                                                                )}
                                                                 {isTreatment && conds.length > 0 && <div className="text-[10px] text-gray-500 truncate w-full text-center">{conds.map(c => c.name || c).join(', ')}</div>}
                                                                 {isTreatment && meds.length > 0 && <div className="text-[10px] text-blue-500 truncate w-full text-center">{meds.map(m => m.name || m).join(', ')}</div>}
                                                                 {a.isQuarantine
