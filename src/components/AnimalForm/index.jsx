@@ -954,12 +954,12 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     // genIndex: 0 = parents (largest), 1 = grandparents, 2 = great-grandparents, 3 = great-great (smallest)
     const renderCertCell = (animal, isSire, onClick = null, genIndex = 0) => {
         // Scale text and image per generation column
-        const imgSize  = genIndex === 0 ? 52 : genIndex === 1 ? 40 : genIndex === 2 ? 30 : 0;
-        const nameSize = genIndex === 0 ? '0.78rem' : genIndex === 1 ? '0.68rem' : genIndex === 2 ? '0.60rem' : '0.55rem';
-        const metaSize = genIndex === 0 ? '0.68rem' : genIndex === 1 ? '0.60rem' : genIndex === 2 ? '0.54rem' : '0.50rem';
-        const smallSize= genIndex === 0 ? '0.62rem' : genIndex === 1 ? '0.55rem' : genIndex === 2 ? '0.50rem' : '0.46rem';
-        const iconSize = genIndex === 0 ? 11 : genIndex === 1 ? 10 : 9;
-        const pad      = genIndex === 0 ? '5px 7px' : genIndex === 1 ? '4px 6px' : '3px 5px';
+        const imgSize  = genIndex === 0 ? 90 : genIndex === 1 ? 60 : genIndex === 2 ? 38 : 20;
+        const nameSize = genIndex === 0 ? '0.90rem' : genIndex === 1 ? '0.78rem' : genIndex === 2 ? '0.66rem' : '0.58rem';
+        const metaSize = genIndex === 0 ? '0.76rem' : genIndex === 1 ? '0.68rem' : genIndex === 2 ? '0.58rem' : '0.51rem';
+        const smallSize= genIndex === 0 ? '0.66rem' : genIndex === 1 ? '0.58rem' : genIndex === 2 ? '0.51rem' : '0.46rem';
+        const iconSize = genIndex === 0 ? 13 : genIndex === 1 ? 11 : genIndex === 2 ? 10 : 9;
+        const pad      = genIndex === 0 ? '6px 8px' : genIndex === 1 ? '5px 7px' : genIndex === 2 ? '4px 6px' : '3px 5px';
         const borderColor = !animal ? certBorderColor
             : animal.gender === 'Male' ? '#3b82f6'
             : animal.gender === 'Female' ? '#ec4899'
