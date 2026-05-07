@@ -1154,9 +1154,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                         </tbody>
                     </table>
                 </div>
+                {animal.id_public && <div style={{ position: 'absolute', bottom: 4, right: 8, fontSize: '0.55rem', color: '#9ca3af', fontFamily: 'monospace' }}>{animal.id_public}</div>}
             </div>
-            {animal.id_public && <div style={{ position: 'absolute', bottom: 4, right: 8, fontSize: '0.55rem', color: '#9ca3af', fontFamily: 'monospace' }}>{animal.id_public}</div>}
-        </div>
         );
     };
 
