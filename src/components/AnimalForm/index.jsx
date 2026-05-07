@@ -1025,7 +1025,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                         {animal.geneticCode && <div style={{ fontSize: '0.55rem', color: certFontColor, lineHeight: 1.2 }}>{animal.geneticCode}</div>}
                         {animal.birthDate && <div style={{ fontSize: '0.55rem', color: certFontColor, lineHeight: 1.2 }}>{formatDate(animal.birthDate)}</div>}
                         {animal.breederName && <div style={{ fontSize: '0.5rem', color: certFontColor, fontStyle: 'italic', lineHeight: 1.2 }}>{animal.breederName}</div>}
-                        {animal.id_public && <div style={{ fontSize: '0.5rem', color: certFontColor, fontFamily: 'monospace', lineHeight: 1.2 }}>#{animal.id_public.replace(/^CTC/, '')}</div>}
+                        {animal.id_public && <div style={{ fontSize: '0.5rem', color: certFontColor, fontFamily: 'monospace', lineHeight: 1.2 }}>{animal.id_public}</div>}
                     </div>
                 </div>
                 <div style={{ position: 'absolute', top: 2, right: 2 }}><GenderIcon size={10} color={certBorderColor} /></div>
