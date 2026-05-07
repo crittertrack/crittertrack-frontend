@@ -762,7 +762,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                         }
                     }
 
-                    // Recursively fetch parents ? each branch gets its own path copy so that
+                    // Recursively fetch parents — each branch gets its own path copy so that
                     // an ancestor appearing on BOTH sides (inbreeding) isn't blocked.
                     const fatherId = animalInfo.fatherId_public || animalInfo.sireId_public;
                     const motherId = animalInfo.motherId_public || animalInfo.damId_public;
@@ -771,36 +771,12 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     const father = fatherId ? await fetchAnimalWithFamily(fatherId, depth + 1, childPath) : null;
                     const mother = motherId ? await fetchAnimalWithFamily(motherId, depth + 1, childPath) : null;
 
-                    // Fetch offspring (children) if user is authenticated and depth allows
-                    let offspring = [];
-                    if (authToken && depth < 3) { // Limit offspring fetching to prevent too deep trees
-                        try {
-                            const offspringResponse = await axios.get(
-                                `${API_BASE_URL}/animals/${id}/offspring`,
-                                { headers: { Authorization: `Bearer ${authToken}` } }
-                            );
-                            
-                            if (offspringResponse.data && offspringResponse.data.length > 0) {
-                                // Recursively fetch offspring details but limit depth to prevent infinite expansion
-                                for (const child of offspringResponse.data.slice(0, 15)) { // Limit to first 15 offspring per animal to accommodate larger mouse litters
-                                    const childData = await fetchAnimalWithFamily(child.id_public, depth + 1, childPath);
-                                    if (childData) {
-                                        offspring.push(childData);
-                                    }
-                                }
-                            }
-                        } catch (error) {
-                            console.log(`No offspring data available for ${id}:`, error.message);
-                        }
-                    }
-
                     const result = {
                         ...animalInfo,
                         father,
                         mother,
-                        offspring: offspring.length > 0 ? offspring : undefined
                     };
-                    // Store in cache only if not already cached at an equal or shallower depth
+                    // Cache — always overwrite with the shallowest-depth version (most ancestors available)
                     if (!resultCache.has(id) || resultCache.get(id).fetchedAtDepth > depth) {
                         resultCache.set(id, { fetchedAtDepth: depth, data: result });
                     }
@@ -974,7 +950,15 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     };
 
     // Render one certificate cell (compact, text-only label+value rows)
-    const renderCertCell = (animal, isSire, onClick = null) => {
+    // genIndex: 0 = parents (largest), 1 = grandparents, 2 = great-grandparents, 3 = great-great (smallest)
+    const renderCertCell = (animal, isSire, onClick = null, genIndex = 0) => {
+        // Scale text and image per generation column
+        const imgSize  = genIndex === 0 ? 52 : genIndex === 1 ? 40 : genIndex === 2 ? 30 : 0;
+        const nameSize = genIndex === 0 ? '0.78rem' : genIndex === 1 ? '0.68rem' : genIndex === 2 ? '0.60rem' : '0.55rem';
+        const metaSize = genIndex === 0 ? '0.68rem' : genIndex === 1 ? '0.60rem' : genIndex === 2 ? '0.54rem' : '0.50rem';
+        const smallSize= genIndex === 0 ? '0.62rem' : genIndex === 1 ? '0.55rem' : genIndex === 2 ? '0.50rem' : '0.46rem';
+        const iconSize = genIndex === 0 ? 11 : genIndex === 1 ? 10 : 9;
+        const pad      = genIndex === 0 ? '5px 7px' : genIndex === 1 ? '4px 6px' : '3px 5px';
         const borderColor = !animal ? certBorderColor
             : animal.gender === 'Male' ? '#3b82f6'
             : animal.gender === 'Female' ? '#ec4899'
@@ -988,7 +972,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         const baseStyle = {
             border: `1px solid ${borderColor}`,
             backgroundColor: bgColor,
-            padding: '3px 5px',
+            padding: pad,
             position: 'relative',
             height: '100%',
             boxSizing: 'border-box',
@@ -1000,8 +984,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         if (!animal) {
             return (
                 <div style={baseStyle}>
-                    <div style={{ fontSize: '0.6rem', color: '#9ca3af', textAlign: 'center', paddingTop: 8 }}>Unknown</div>
-                    <div style={{ position: 'absolute', top: 2, right: 2 }}><GenderIcon size={10} color={certBorderColor} /></div>
+                    <div style={{ fontSize: metaSize, color: '#9ca3af', textAlign: 'center', paddingTop: 8 }}>Unknown</div>
+                    <div style={{ position: 'absolute', top: 2, right: 2 }}><GenderIcon size={iconSize} color={certBorderColor} /></div>
                 </div>
             );
         }
@@ -1009,9 +993,9 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         if (animal.isHidden) {
             return (
                 <div style={baseStyle}>
-                    <div style={{ fontSize: '0.6rem', color: '#6b7280', fontWeight: 600, textAlign: 'center', paddingTop: 8 }}>Hidden</div>
-                    <div style={{ fontSize: '0.55rem', color: '#9ca3af', textAlign: 'center' }}>Private</div>
-                    <div style={{ position: 'absolute', top: 2, right: 2 }}><GenderIcon size={10} color={certBorderColor} /></div>
+                    <div style={{ fontSize: metaSize, color: '#6b7280', fontWeight: 600, textAlign: 'center', paddingTop: 8 }}>Hidden</div>
+                    <div style={{ fontSize: smallSize, color: '#9ca3af', textAlign: 'center' }}>Private</div>
+                    <div style={{ position: 'absolute', top: 2, right: 2 }}><GenderIcon size={iconSize} color={certBorderColor} /></div>
                 </div>
             );
         }
@@ -1023,24 +1007,24 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
         return (
             <div style={baseStyle} onClick={handleClick}>
-                <div style={{ display: 'flex', gap: 3, alignItems: 'center', height: '100%' }}>
-                    {/* Thumbnail */}
-                    {imgSrc && (
-                        <div className="hide-for-pdf" style={{ width: 44, height: 44, flexShrink: 0, borderRadius: 4, overflow: 'hidden', border: `1px solid ${certBorderColor}` }}>
-                            <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={18} />
+                <div style={{ display: 'flex', gap: imgSize > 0 ? 4 : 0, alignItems: 'center', height: '100%' }}>
+                    {/* Thumbnail — hidden at gen 4 */}
+                    {imgSrc && imgSize > 0 && (
+                        <div className="hide-for-pdf" style={{ width: imgSize, height: imgSize, flexShrink: 0, borderRadius: 4, overflow: 'hidden', border: `1px solid ${certBorderColor}` }}>
+                            <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={Math.round(imgSize * 0.4)} />
                         </div>
                     )}
                     {/* Text */}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '0.62rem', fontWeight: 700, color: certFontColor, lineHeight: 1.25, wordBreak: 'break-word' }}>{fullName}</div>
-                        {variety && <div style={{ fontSize: '0.55rem', color: certFontColor, lineHeight: 1.2 }}>{variety}</div>}
-                        {animal.geneticCode && <div style={{ fontSize: '0.55rem', color: certFontColor, lineHeight: 1.2 }}>{animal.geneticCode}</div>}
-                        {animal.birthDate && <div style={{ fontSize: '0.55rem', color: certFontColor, lineHeight: 1.2 }}>{formatDate(animal.birthDate)}</div>}
-                        {animal.breederName && <div style={{ fontSize: '0.5rem', color: certFontColor, fontStyle: 'italic', lineHeight: 1.2 }}>{animal.breederName}</div>}
+                        <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.25, wordBreak: 'break-word' }}>{fullName}</div>
+                        {variety && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{variety}</div>}
+                        {animal.geneticCode && genIndex <= 2 && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{animal.geneticCode}</div>}
+                        {animal.birthDate && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{formatDate(animal.birthDate)}</div>}
+                        {animal.breederName && genIndex <= 1 && <div style={{ fontSize: smallSize, color: certFontColor, fontStyle: 'italic', lineHeight: 1.2 }}>{animal.breederName}</div>}
                     </div>
                 </div>
-                <div style={{ position: 'absolute', top: 2, right: 2 }}><GenderIcon size={10} color={certBorderColor} /></div>
-                {animal.id_public && <div style={{ position: 'absolute', bottom: 2, right: 4, fontSize: '0.48rem', color: '#9ca3af', fontFamily: 'monospace', lineHeight: 1 }}>{animal.id_public}</div>}
+                <div style={{ position: 'absolute', top: 2, right: 2 }}><GenderIcon size={iconSize} color={certBorderColor} /></div>
+                {animal.id_public && <div style={{ position: 'absolute', bottom: 2, right: 4, fontSize: smallSize, color: '#9ca3af', fontFamily: 'monospace', lineHeight: 1 }}>{animal.id_public}</div>}
             </div>
         );
     };
@@ -1093,7 +1077,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     cells.push(
                         <td key={g} rowSpan={rowsPerSlot} style={{ padding: 2, verticalAlign: 'middle', width: `${100 / gens}%`, height: rowMinH * rowsPerSlot }}>
                             <div style={{ height: '100%' }}>
-                                {renderCertCell(animal, slot.isSire, handleCardClick)}
+                                {renderCertCell(animal, slot.isSire, handleCardClick, g)}
                             </div>
                         </td>
                     );
