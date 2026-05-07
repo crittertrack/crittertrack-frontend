@@ -3532,7 +3532,7 @@ const AnimalList = ({
                                 <span className="text-sm font-bold text-teal-700 uppercase tracking-wide">Scheduled Animal Care</span>
                             </div>}
                             {animalsWithAnimalTasks.length === 0 ? (
-                                <div className="px-3 py-4 text-xs text-gray-400 text-center">No animal care tasks. Edit an animal and add tasks in the Animal Care tab.</div>
+                                <div className="px-3 py-4 text-xs text-gray-400 text-center">No animal care tasks. Edit an animal and add tasks in the Care tab.</div>
                             ) : animalsWithAnimalTasks.map(a => {
                                 const grpKey = `animalcare_${a.id_public}`;
                                 const isGrpCollapsed = collapsedMgmtGroups[grpKey] || false;
@@ -3608,7 +3608,7 @@ const AnimalList = ({
                                     Housing Maintenance
                                 </div>
                                 {!collapsedMgmtGroups['maint_housing'] && (animalsWithEnclosureCareTasks.length === 0 ? (
-                                    <div className="px-3 py-4 text-xs text-gray-400 text-center">No housing maintenance tasks. Edit an animal and add tasks in the Housing tab.</div>
+                                    <div className="px-3 py-4 text-xs text-gray-400 text-center">No housing maintenance tasks. Edit an animal and add tasks in the Care tab.</div>
                                 ) : animalsWithEnclosureCareTasks.map(a => {
                                     const grpKey = `housingmaint_${a.id_public}`;
                                     const isGrpCollapsed = collapsedMgmtGroups[grpKey] || false;
