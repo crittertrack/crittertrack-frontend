@@ -766,6 +766,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     // an ancestor appearing on BOTH sides (inbreeding) isn't blocked.
                     const fatherId = animalInfo.fatherId_public || animalInfo.sireId_public;
                     const motherId = animalInfo.motherId_public || animalInfo.damId_public;
+                    console.log(`[PEDIGREE] depth=${depth} id=${id} name=${animalInfo.name} | fatherId=${fatherId} motherId=${motherId} | raw: sireId_public=${animalInfo.sireId_public} damId_public=${animalInfo.damId_public} fatherId_public=${animalInfo.fatherId_public} motherId_public=${animalInfo.motherId_public}`);
                     const childPath = new Set([...pathIds, id]);
 
                     const father = fatherId ? await fetchAnimalWithFamily(fatherId, depth + 1, childPath) : null;
