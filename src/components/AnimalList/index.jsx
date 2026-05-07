@@ -2918,9 +2918,10 @@ const AnimalList = ({
         const animalCareDue = feedDue.length + animalsWithAnimalTasks.reduce((sum, a) => sum + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
 
         // 5. Medical ? quarantine and treatment
-        const quarantineList = allAnimals.filter(a => a.isQuarantine);
-        const treatmentList = allAnimals.filter(a => !a.isQuarantine && (
-
+        const healthEnclosureIds = new Set(healthEnclosures.map(e => e._id));
+        const inHealthEnclosure = a => a.enclosureId && healthEnclosureIds.has(a.enclosureId);
+        const quarantineList = allAnimals.filter(a => a.isQuarantine && !inHealthEnclosure(a));
+        const treatmentList = allAnimals.filter(a => !a.isQuarantine && !inHealthEnclosure(a) && (
             parseArrayField(a.medicalConditions).length > 0 || parseArrayField(a.medications).length > 0
         ));
 
@@ -3595,17 +3596,30 @@ const AnimalList = ({
                                                                 ? <div className="text-xs text-gray-400 text-center py-2">No animals assigned yet</div>
                                                                 : (
                                                                     <div className="p-1.5 sm:p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                                                        {occupants.map(a => (
-                                                                            <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
-                                                                                hideControls hideBreedingLines
-                                                                                cardActions={
-                                                                                    <button onClick={(e) => { e.stopPropagation(); handleAssignAnimalToEnclosure(a.id_public, ''); }}
-                                                                                        className="text-[10px] text-gray-400 hover:text-red-500 border border-gray-200 hover:border-red-200 rounded px-1.5 py-0.5 w-full">
-                                                                                        Remove
-                                                                                    </button>
-                                                                                }
-                                                                            />
-                                                                        ))}
+                                                                        {occupants.map(a => {
+                                                                            const conds = parseArrayField(a.medicalConditions);
+                                                                            const meds = parseArrayField(a.medications);
+                                                                            const isTreatment = !a.isQuarantine && (conds.length > 0 || meds.length > 0);
+                                                                            return (
+                                                                                <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                                                    hideControls hideBreedingLines
+                                                                                    cardActions={<>
+                                                                                        {/* State badge */}
+                                                                                        <div className={`text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full ${isTreatment ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                                                            {isTreatment ? 'Treatment' : 'Quarantine'}
+                                                                                        </div>
+                                                                                        {isTreatment && conds.length > 0 && <div className="text-[10px] text-gray-500 truncate w-full text-center">{conds.map(c => c.name || c).join(', ')}</div>}
+                                                                                        {isTreatment && meds.length > 0 && <div className="text-[10px] text-blue-500 truncate w-full text-center">{meds.map(m => m.name || m).join(', ')}</div>}
+                                                                                        {a.isQuarantine
+                                                                                            ? <button onClick={(e) => handleUnquarantine(e, a)} className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5"><LockOpen size={9} /> Release</button>
+                                                                                            : isTreatment && <button onClick={(e) => handleDischargeTreatment(e, a)} className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5"><LockOpen size={9} /> Discharge</button>
+                                                                                        }
+                                                                                        <button onClick={(e) => { e.stopPropagation(); handleAssignAnimalToEnclosure(a.id_public, ''); }}
+                                                                                            className="text-[10px] text-gray-400 hover:text-red-500 border border-gray-200 hover:border-red-200 rounded px-1.5 py-0.5 w-full">Remove</button>
+                                                                                    </>}
+                                                                                />
+                                                                            );
+                                                                        })}
                                                                     </div>
                                                                 )
                                                             }
@@ -3617,62 +3631,46 @@ const AnimalList = ({
                                     }
                                 </div>
                             </div>
-                            {quarantineList.length === 0 && treatmentList.length === 0
-                                ? <div className="text-sm text-gray-400 text-center py-4">No animals in quarantine or under treatment.</div>
-                                : <>
-                                    {quarantineList.length > 0 && (
-                                        <div>
-                                            <div className="flex items-center gap-2 px-1 pb-2">
-                                                <span className="w-2.5 h-2.5 rounded-full bg-orange-400 inline-block" />
-                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Quarantine / Isolation ({quarantineList.length})</span>
-                                            </div>
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                                {quarantineList.map(a => (
-                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
-                                                        hideControls hideBreedingLines
-                                                        cardActions={<>
-                                                            <button onClick={(e) => handleUnquarantine(e, a)}
-                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5">
-                                                                <LockOpen size={9} /> Release
-                                                            </button>
-                                                            {healthEnclosures.length > 0 && (assigningAnimalId === a.id_public
-                                                                ? <select autoFocus defaultValue="" onChange={e => { if (e.target.value) handleAssignAnimalToEnclosure(a.id_public, e.target.value); setAssigningAnimalId(null); }} onBlur={() => setAssigningAnimalId(null)} className="text-[10px] border border-orange-300 rounded p-1 w-full"><option value="" disabled>Select enclosure...</option>{healthEnclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}</select>
-                                                                : <>{a.enclosureId && <div className="text-[10px] text-orange-600 truncate w-full text-center">{healthEnclosures.find(e => e._id === a.enclosureId)?.name}</div>}<button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }} className="text-[10px] text-orange-500 hover:text-orange-700 border border-orange-200 rounded px-1.5 py-0.5 w-full">{a.enclosureId ? 'Move enclosure' : 'Assign enclosure'}</button></>)}
-                                                        </>}
-                                                    />
-                                                ))}
-                                            </div>
+                            {(() => {
+                                const unassignedHealthAnimals = [...quarantineList, ...treatmentList];
+                                return unassignedHealthAnimals.length === 0 ? null : (
+                                    <div>
+                                        <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('health_unassigned')}>
+                                            {collapsedMgmtGroups['health_unassigned'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
+                                            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Unassigned ({unassignedHealthAnimals.length})</span>
                                         </div>
-                                    )}
-                                    {treatmentList.length > 0 && (
-                                        <div>
-                                            <div className="flex items-center gap-2 px-1 pb-2">
-                                                <span className="w-2.5 h-2.5 rounded-full bg-red-400 inline-block" />
-                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Under Treatment ({treatmentList.length})</span>
-                                            </div>
+                                        {!collapsedMgmtGroups['health_unassigned'] && (
                                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                                {treatmentList.map(a => {
+                                                {unassignedHealthAnimals.map(a => {
                                                     const conds = parseArrayField(a.medicalConditions);
                                                     const meds = parseArrayField(a.medications);
+                                                    const isTreatment = !a.isQuarantine && (conds.length > 0 || meds.length > 0);
                                                     return (
                                                         <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                             hideControls hideBreedingLines
                                                             cardActions={<>
-                                                                {conds.length > 0 && <div className="text-[10px] text-gray-500 truncate w-full text-center">{conds.map(c => c.name || c).join(', ')}</div>}
-                                                                {meds.length > 0 && <div className="text-[10px] text-blue-500 truncate w-full text-center">{meds.map(m => m.name || m).join(', ')}</div>}
-                                                                <button onClick={(e) => handleDischargeTreatment(e, a)}
-                                                                    className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5">
-                                                                    <LockOpen size={9} /> Discharge
-                                                                </button>
+                                                                <div className={`text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full ${isTreatment ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                                    {isTreatment ? 'Treatment' : 'Quarantine'}
+                                                                </div>
+                                                                {isTreatment && conds.length > 0 && <div className="text-[10px] text-gray-500 truncate w-full text-center">{conds.map(c => c.name || c).join(', ')}</div>}
+                                                                {isTreatment && meds.length > 0 && <div className="text-[10px] text-blue-500 truncate w-full text-center">{meds.map(m => m.name || m).join(', ')}</div>}
+                                                                {a.isQuarantine
+                                                                    ? <button onClick={(e) => handleUnquarantine(e, a)} className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5"><LockOpen size={9} /> Release</button>
+                                                                    : isTreatment && <button onClick={(e) => handleDischargeTreatment(e, a)} className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5"><LockOpen size={9} /> Discharge</button>
+                                                                }
+                                                                {healthEnclosures.length > 0 && (assigningAnimalId === a.id_public
+                                                                    ? <select autoFocus defaultValue="" onChange={e => { if (e.target.value) handleAssignAnimalToEnclosure(a.id_public, e.target.value); setAssigningAnimalId(null); }} onBlur={() => setAssigningAnimalId(null)} className="text-[10px] border border-orange-300 rounded p-1 w-full"><option value="" disabled>Select enclosure...</option>{healthEnclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}</select>
+                                                                    : <button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }} className="text-[10px] text-orange-500 hover:text-orange-700 border border-orange-200 rounded px-1.5 py-0.5 w-full">Assign enclosure</button>
+                                                                )}
                                                             </>}
                                                         />
                                                     );
                                                 })}
                                             </div>
-                                        </div>
-                                    )}
-                                </>
-                            }
+                                        )}
+                                    </div>
+                                );
+                            })()}
                         </div>
                     )}
                 </div>)}
