@@ -577,6 +577,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     const [certBorderColor, setCertBorderColor] = useState(_savedPrefs.certBorderColor ?? '#374151');
     const [certBgColor, setCertBgColor] = useState(_savedPrefs.certBgColor ?? '#ffffff');
     const [showCustomPanel, setShowCustomPanel] = useState(false);
+    const [vertGenerations, setVertGenerations] = useState(3);
     const pedigreeRef = useRef(null);
 
     // Persist cert prefs to localStorage whenever they change
@@ -1117,7 +1118,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             }
         }
         const totalCols = Math.pow(2, gens);
-        const rowHeights = [150, 110, 85, 60];
+        const rowHeights = [170, 120, 90];
         const rows = [];
         for (let g = 0; g < gens; g++) {
             const slots = vGenSlots[g];
@@ -1292,7 +1293,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
             {/* ── Ancestor table ── */}
             <div style={{ overflow: 'visible' }}>
-                {subject ? (vertical ? renderVerticalCertTable(subject, generations, handleCardClick) : renderCertificateTable(subject, generations, handleCardClick)) : null}
+                {subject ? (vertical ? renderVerticalCertTable(subject, vertGenerations, handleCardClick) : renderCertificateTable(subject, generations, handleCardClick)) : null}
             </div>
 
             {/* ── Footer ─────────────────────────────────────────── */}
@@ -1334,13 +1335,27 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Network size={14} className="flex-shrink-0" />
                             <span className="text-xs hidden sm:inline">Generations:</span>
-                            <input
-                                type="range" min={1} max={4} step={1}
-                                value={generations}
-                                onChange={e => setGenerations(Number(e.target.value))}
-                                className="w-20 accent-primary cursor-pointer"
-                            />
-                            <span className="text-xs font-bold w-4">{generations}</span>
+                            {vertical ? (
+                                <>
+                                <input
+                                    type="range" min={1} max={3} step={1}
+                                    value={vertGenerations}
+                                    onChange={e => setVertGenerations(Number(e.target.value))}
+                                    className="w-20 accent-primary cursor-pointer"
+                                />
+                                <span className="text-xs font-bold w-4">{vertGenerations}</span>
+                                </>
+                            ) : (
+                                <>
+                                <input
+                                    type="range" min={1} max={4} step={1}
+                                    value={generations}
+                                    onChange={e => setGenerations(Number(e.target.value))}
+                                    className="w-20 accent-primary cursor-pointer"
+                                />
+                                <span className="text-xs font-bold w-4">{generations}</span>
+                                </>
+                            )}
                         </div>
 
                         {/* Customise toggle */}
@@ -1425,7 +1440,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
                     {/* Content */}
                     <div className="p-3 sm:p-6 overflow-x-auto" style={{ paddingBottom: window.innerWidth < 640 ? '80px' : '1.5rem' }}>
-                        <div style={{ minWidth: 700 }}>{certJsx}</div>
+                        <div style={{ minWidth: vertical ? 800 : 700 }}>{certJsx}</div>
                     </div>
                 </div>
             </div>
