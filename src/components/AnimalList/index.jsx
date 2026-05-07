@@ -433,7 +433,7 @@ const AnimalList = ({
     const [enclosureFormVisible, setEnclosureFormVisible] = useState(false);
     const [reproEncFormVisible, setReproEncFormVisible] = useState(false);
     const [healthEncFormVisible, setHealthEncFormVisible] = useState(false);
-    const [enclosureFormData, setEnclosureFormData] = useState({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [] });
+    const [enclosureFormData, setEnclosureFormData] = useState({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'general' });
     const [editingEnclosureId, setEditingEnclosureId] = useState(null);
     const [enclosureSaving, setEnclosureSaving] = useState(false);
     const [assigningAnimalId, setAssigningAnimalId] = useState(null);
@@ -2753,7 +2753,7 @@ const AnimalList = ({
                 setReproEncFormVisible(false);
                 setHealthEncFormVisible(false);
                 setEditingEnclosureId(null);
-                setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [] });
+                setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'general' });
                 fetchEnclosures();
             } catch (err) {
                 showModalMessage('Error', err.response?.data?.message || 'Failed to save enclosure');
@@ -2875,6 +2875,9 @@ const AnimalList = ({
         // Exclude deceased and view-only (transferred/sold) animals from all management sections
         const allAnimals = allAnimalsRaw.filter(a => a.status !== 'Deceased' && !a.isViewOnly);
         // 1. Enclosures ? grouped by named enclosure (enclosureId)
+        const generalEnclosures = enclosures.filter(e => !e.purpose || e.purpose === 'general');
+        const reproEnclosures = enclosures.filter(e => e.purpose === 'reproduction');
+        const healthEnclosures = enclosures.filter(e => e.purpose === 'health');
         const enclosureAnimalMap = {}; // { enclosureId: [animals] }
         const unassignedAnimals = [];
         allAnimals.forEach(a => {
@@ -3050,7 +3053,7 @@ const AnimalList = ({
                             onClick={(e) => {
                                 e.stopPropagation();
                                 if (editingEnclosureId) { setEditingEnclosureId(null); setEnclosureFormVisible(false); }
-                                else { setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [] }); setEnclosureFormVisible(v => !v); }
+                                else { setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'general' }); setEnclosureFormVisible(v => !v); }
                             }}
                             className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 bg-white border border-blue-200 px-2 py-1 rounded-lg"
                         >
@@ -3060,7 +3063,7 @@ const AnimalList = ({
                     {/* Add button shown standalone when on dedicated tab */}
                     {view && <div className="flex justify-end px-3 py-2 border-b bg-blue-50/40">
                         <button
-                            onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setEnclosureFormVisible(false); } else { setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [] }); setEnclosureFormVisible(v => !v); } }}
+                            onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setEnclosureFormVisible(false); } else { setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'general' }); setEnclosureFormVisible(v => !v); } }}
                             className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 bg-white border border-blue-200 px-2 py-1 rounded-lg"
                         >
                             <Plus size={13} /> {enclosureFormVisible && !editingEnclosureId ? 'Cancel' : 'Add Enclosure'}
@@ -3144,12 +3147,12 @@ const AnimalList = ({
 
                     {(!collapsedMgmtSections['enclosures'] || !!view) && (
                         <div className="p-3 space-y-2">
-                            {enclosures.length === 0 && unassignedAnimals.length === 0 ? (
+                            {generalEnclosures.length === 0 && unassignedAnimals.length === 0 ? (
                                 <div className="text-sm text-gray-400 text-center py-4">No enclosures yet. Click Add to create your first enclosure.</div>
                             ) : (
                                 <>
                                     {/* Named enclosures */}
-                                    {enclosures.map(enc => {
+                                    {generalEnclosures.map(enc => {
                                         const occupants = enclosureAnimalMap[enc._id] || [];
                                         const isGrpCollapsed = collapsedMgmtGroups[`enc_${enc._id}`] || false;
                                         return (
@@ -3172,7 +3175,7 @@ const AnimalList = ({
                                                     <div className="flex items-center gap-1 ml-2 shrink-0" onClick={e => e.stopPropagation()}>
                                                         <button
                                                             onClick={() => {
-                                                                setEnclosureFormData({ name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: enc.cleaningTasks || [] });
+                                                                setEnclosureFormData({ name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: enc.cleaningTasks || [], purpose: enc.purpose || 'general' });
                                                                 setEditingEnclosureId(enc._id);
                                                                 setEnclosureFormVisible(true);
                                                                 setCollapsedMgmtSections(p => ({...p, enclosures: false}));
@@ -3233,14 +3236,14 @@ const AnimalList = ({
                                                         <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                             hideControls hideBreedingLines
                                                             cardActions={
-                                                                enclosures.length > 0 ? (
+                                                                generalEnclosures.length > 0 ? (
                                                                     assigningAnimalId === a.id_public ? (
                                                                         <select autoFocus defaultValue=""
                                                                             onChange={e => { if (e.target.value) { handleAssignAnimalToEnclosure(a.id_public, e.target.value); } setAssigningAnimalId(null); }}
                                                                             onBlur={() => setAssigningAnimalId(null)}
                                                                             className="text-[10px] border border-blue-300 rounded p-1 w-full">
                                                                             <option value="" disabled>Select enclosure...</option>
-                                                                            {enclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}
+                                                                            {generalEnclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}
                                                                         </select>
                                                                     ) : (
                                                                         <button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }}
@@ -3365,9 +3368,9 @@ const AnimalList = ({
                                     <div className="flex items-center gap-2">
                                         <Home size={13} className="text-blue-600" />
                                         <span className="text-xs font-semibold text-gray-700">Enclosures</span>
-                                        <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full">{enclosures.length}</span>
+                                        <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full">{reproEnclosures.length}</span>
                                     </div>
-                                    <button onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setReproEncFormVisible(false); } else { setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [] }); setReproEncFormVisible(v => !v); } }} className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 bg-white border border-blue-200 px-2 py-1 rounded-lg">
+                                    <button onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setReproEncFormVisible(false); } else { setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'reproduction' }); setReproEncFormVisible(v => !v); } }} className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 bg-white border border-blue-200 px-2 py-1 rounded-lg">
                                         <Plus size={11} /> {reproEncFormVisible && !editingEnclosureId ? 'Cancel' : 'Add'}
                                     </button>
                                 </div>
@@ -3387,9 +3390,9 @@ const AnimalList = ({
                                     </div>
                                 )}
                                 <div className="p-2 space-y-1.5 max-h-48 overflow-y-auto">
-                                    {enclosures.length === 0
+                                    {reproEnclosures.length === 0
                                         ? <div className="text-xs text-gray-400 text-center py-2">No enclosures yet. Click Add to create one.</div>
-                                        : enclosures.map(enc => {
+                                        : reproEnclosures.map(enc => {
                                             const occupants = enclosureAnimalMap[enc._id] || [];
                                             return (
                                                 <div key={enc._id} className="flex items-center gap-2 bg-white border border-gray-200 rounded px-2 py-1.5">
@@ -3397,7 +3400,7 @@ const AnimalList = ({
                                                     {enc.enclosureType && <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full whitespace-nowrap shrink-0 hidden sm:inline">{enc.enclosureType}</span>}
                                                     <span className="text-xs text-gray-400 shrink-0">{occupants.length} animal{occupants.length !== 1 ? 's' : ''}</span>
                                                     <div className="flex items-center gap-1 shrink-0">
-                                                        <button onClick={() => { setEnclosureFormData({ name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: enc.cleaningTasks || [] }); setEditingEnclosureId(enc._id); setReproEncFormVisible(true); }} className="p-0.5 text-gray-400 hover:text-blue-600 rounded" title="Edit"><Edit size={11} /></button>
+                                                        <button onClick={() => { setEnclosureFormData({ name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: enc.cleaningTasks || [], purpose: enc.purpose || 'reproduction' }); setEditingEnclosureId(enc._id); setReproEncFormVisible(true); }} className="p-0.5 text-gray-400 hover:text-blue-600 rounded" title="Edit"><Edit size={11} /></button>
                                                         <button onClick={() => handleDeleteEnclosure(enc._id)} className="p-0.5 text-gray-400 hover:text-red-500 rounded" title="Delete"><Trash2 size={11} /></button>
                                                     </div>
                                                 </div>
@@ -3425,9 +3428,9 @@ const AnimalList = ({
                                                                 className="text-[10px] px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 w-full flex items-center justify-center gap-0.5"><Bean size={9} /> Pregnant</button>}
                                                             <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false })}
                                                                 className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
-                                                            {enclosures.length > 0 && (assigningAnimalId === a.id_public
-                                                                ? <select autoFocus defaultValue="" onChange={e => { if (e.target.value) handleAssignAnimalToEnclosure(a.id_public, e.target.value); setAssigningAnimalId(null); }} onBlur={() => setAssigningAnimalId(null)} className="text-[10px] border border-blue-300 rounded p-1 w-full"><option value="" disabled>Select enclosure...</option>{enclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}</select>
-                                                                : <>{a.enclosureId && <div className="text-[10px] text-blue-600 truncate w-full text-center">{enclosures.find(e => e._id === a.enclosureId)?.name}</div>}<button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }} className="text-[10px] text-blue-500 hover:text-blue-700 border border-blue-200 rounded px-1.5 py-0.5 w-full">{a.enclosureId ? 'Move enclosure' : 'Assign enclosure'}</button></>)}
+                                                            {reproEnclosures.length > 0 && (assigningAnimalId === a.id_public
+                                                                ? <select autoFocus defaultValue="" onChange={e => { if (e.target.value) handleAssignAnimalToEnclosure(a.id_public, e.target.value); setAssigningAnimalId(null); }} onBlur={() => setAssigningAnimalId(null)} className="text-[10px] border border-blue-300 rounded p-1 w-full"><option value="" disabled>Select enclosure...</option>{reproEnclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}</select>
+                                                                : <>{a.enclosureId && <div className="text-[10px] text-blue-600 truncate w-full text-center">{reproEnclosures.find(e => e._id === a.enclosureId)?.name}</div>}<button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }} className="text-[10px] text-blue-500 hover:text-blue-700 border border-blue-200 rounded px-1.5 py-0.5 w-full">{a.enclosureId ? 'Move enclosure' : 'Assign enclosure'}</button></>)}
                                                         </>}
                                                     />
                                                 ))}
@@ -3450,9 +3453,9 @@ const AnimalList = ({
                                                                 className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 w-full flex items-center justify-center gap-0.5"><Milk size={9} /> Nursing</button>}
                                                             <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false })}
                                                                 className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
-                                                            {enclosures.length > 0 && (assigningAnimalId === a.id_public
-                                                                ? <select autoFocus defaultValue="" onChange={e => { if (e.target.value) handleAssignAnimalToEnclosure(a.id_public, e.target.value); setAssigningAnimalId(null); }} onBlur={() => setAssigningAnimalId(null)} className="text-[10px] border border-blue-300 rounded p-1 w-full"><option value="" disabled>Select enclosure...</option>{enclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}</select>
-                                                                : <>{a.enclosureId && <div className="text-[10px] text-blue-600 truncate w-full text-center">{enclosures.find(e => e._id === a.enclosureId)?.name}</div>}<button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }} className="text-[10px] text-blue-500 hover:text-blue-700 border border-blue-200 rounded px-1.5 py-0.5 w-full">{a.enclosureId ? 'Move enclosure' : 'Assign enclosure'}</button></>)}
+                                                            {reproEnclosures.length > 0 && (assigningAnimalId === a.id_public
+                                                                ? <select autoFocus defaultValue="" onChange={e => { if (e.target.value) handleAssignAnimalToEnclosure(a.id_public, e.target.value); setAssigningAnimalId(null); }} onBlur={() => setAssigningAnimalId(null)} className="text-[10px] border border-blue-300 rounded p-1 w-full"><option value="" disabled>Select enclosure...</option>{reproEnclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}</select>
+                                                                : <>{a.enclosureId && <div className="text-[10px] text-blue-600 truncate w-full text-center">{reproEnclosures.find(e => e._id === a.enclosureId)?.name}</div>}<button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }} className="text-[10px] text-blue-500 hover:text-blue-700 border border-blue-200 rounded px-1.5 py-0.5 w-full">{a.enclosureId ? 'Move enclosure' : 'Assign enclosure'}</button></>)}
                                                         </>}
                                                     />
                                                 ))}
@@ -3473,9 +3476,9 @@ const AnimalList = ({
                                                         cardActions={<>
                                                             <button onClick={(e) => handleReproStatusUpdate(e, a, { isNursing: false })}
                                                                 className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 w-full flex items-center justify-center gap-0.5"><Check size={9} /> Done</button>
-                                                            {enclosures.length > 0 && (assigningAnimalId === a.id_public
-                                                                ? <select autoFocus defaultValue="" onChange={e => { if (e.target.value) handleAssignAnimalToEnclosure(a.id_public, e.target.value); setAssigningAnimalId(null); }} onBlur={() => setAssigningAnimalId(null)} className="text-[10px] border border-blue-300 rounded p-1 w-full"><option value="" disabled>Select enclosure...</option>{enclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}</select>
-                                                                : <>{a.enclosureId && <div className="text-[10px] text-blue-600 truncate w-full text-center">{enclosures.find(e => e._id === a.enclosureId)?.name}</div>}<button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }} className="text-[10px] text-blue-500 hover:text-blue-700 border border-blue-200 rounded px-1.5 py-0.5 w-full">{a.enclosureId ? 'Move enclosure' : 'Assign enclosure'}</button></>)}
+                                                            {reproEnclosures.length > 0 && (assigningAnimalId === a.id_public
+                                                                ? <select autoFocus defaultValue="" onChange={e => { if (e.target.value) handleAssignAnimalToEnclosure(a.id_public, e.target.value); setAssigningAnimalId(null); }} onBlur={() => setAssigningAnimalId(null)} className="text-[10px] border border-blue-300 rounded p-1 w-full"><option value="" disabled>Select enclosure...</option>{reproEnclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}</select>
+                                                                : <>{a.enclosureId && <div className="text-[10px] text-blue-600 truncate w-full text-center">{reproEnclosures.find(e => e._id === a.enclosureId)?.name}</div>}<button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }} className="text-[10px] text-blue-500 hover:text-blue-700 border border-blue-200 rounded px-1.5 py-0.5 w-full">{a.enclosureId ? 'Move enclosure' : 'Assign enclosure'}</button></>)}
                                                         </>}
                                                     />
                                                 ))}
@@ -3501,9 +3504,9 @@ const AnimalList = ({
                                     <div className="flex items-center gap-2">
                                         <Home size={13} className="text-orange-600" />
                                         <span className="text-xs font-semibold text-gray-700">Enclosures</span>
-                                        <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full">{enclosures.length}</span>
+                                        <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full">{healthEnclosures.length}</span>
                                     </div>
-                                    <button onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setHealthEncFormVisible(false); } else { setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [] }); setHealthEncFormVisible(v => !v); } }} className="flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-800 bg-white border border-orange-200 px-2 py-1 rounded-lg">
+                                    <button onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setHealthEncFormVisible(false); } else { setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'health' }); setHealthEncFormVisible(v => !v); } }} className="flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-800 bg-white border border-orange-200 px-2 py-1 rounded-lg">
                                         <Plus size={11} /> {healthEncFormVisible && !editingEnclosureId ? 'Cancel' : 'Add'}
                                     </button>
                                 </div>
@@ -3523,9 +3526,9 @@ const AnimalList = ({
                                     </div>
                                 )}
                                 <div className="p-2 space-y-1.5 max-h-48 overflow-y-auto">
-                                    {enclosures.length === 0
+                                    {healthEnclosures.length === 0
                                         ? <div className="text-xs text-gray-400 text-center py-2">No enclosures yet. Click Add to create one.</div>
-                                        : enclosures.map(enc => {
+                                        : healthEnclosures.map(enc => {
                                             const occupants = enclosureAnimalMap[enc._id] || [];
                                             return (
                                                 <div key={enc._id} className="flex items-center gap-2 bg-white border border-gray-200 rounded px-2 py-1.5">
@@ -3533,7 +3536,7 @@ const AnimalList = ({
                                                     {enc.enclosureType && <span className="text-xs bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-full whitespace-nowrap shrink-0 hidden sm:inline">{enc.enclosureType}</span>}
                                                     <span className="text-xs text-gray-400 shrink-0">{occupants.length} animal{occupants.length !== 1 ? 's' : ''}</span>
                                                     <div className="flex items-center gap-1 shrink-0">
-                                                        <button onClick={() => { setEnclosureFormData({ name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: enc.cleaningTasks || [] }); setEditingEnclosureId(enc._id); setHealthEncFormVisible(true); }} className="p-0.5 text-gray-400 hover:text-orange-600 rounded" title="Edit"><Edit size={11} /></button>
+                                                        <button onClick={() => { setEnclosureFormData({ name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: enc.cleaningTasks || [], purpose: enc.purpose || 'health' }); setEditingEnclosureId(enc._id); setHealthEncFormVisible(true); }} className="p-0.5 text-gray-400 hover:text-orange-600 rounded" title="Edit"><Edit size={11} /></button>
                                                         <button onClick={() => handleDeleteEnclosure(enc._id)} className="p-0.5 text-gray-400 hover:text-red-500 rounded" title="Delete"><Trash2 size={11} /></button>
                                                     </div>
                                                 </div>
@@ -3560,9 +3563,9 @@ const AnimalList = ({
                                                                 className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5">
                                                                 <LockOpen size={9} /> Release
                                                             </button>
-                                                            {enclosures.length > 0 && (assigningAnimalId === a.id_public
-                                                                ? <select autoFocus defaultValue="" onChange={e => { if (e.target.value) handleAssignAnimalToEnclosure(a.id_public, e.target.value); setAssigningAnimalId(null); }} onBlur={() => setAssigningAnimalId(null)} className="text-[10px] border border-orange-300 rounded p-1 w-full"><option value="" disabled>Select enclosure...</option>{enclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}</select>
-                                                                : <>{a.enclosureId && <div className="text-[10px] text-orange-600 truncate w-full text-center">{enclosures.find(e => e._id === a.enclosureId)?.name}</div>}<button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }} className="text-[10px] text-orange-500 hover:text-orange-700 border border-orange-200 rounded px-1.5 py-0.5 w-full">{a.enclosureId ? 'Move enclosure' : 'Assign enclosure'}</button></>)}
+                                                            {healthEnclosures.length > 0 && (assigningAnimalId === a.id_public
+                                                                ? <select autoFocus defaultValue="" onChange={e => { if (e.target.value) handleAssignAnimalToEnclosure(a.id_public, e.target.value); setAssigningAnimalId(null); }} onBlur={() => setAssigningAnimalId(null)} className="text-[10px] border border-orange-300 rounded p-1 w-full"><option value="" disabled>Select enclosure...</option>{healthEnclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}</select>
+                                                                : <>{a.enclosureId && <div className="text-[10px] text-orange-600 truncate w-full text-center">{healthEnclosures.find(e => e._id === a.enclosureId)?.name}</div>}<button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }} className="text-[10px] text-orange-500 hover:text-orange-700 border border-orange-200 rounded px-1.5 py-0.5 w-full">{a.enclosureId ? 'Move enclosure' : 'Assign enclosure'}</button></>)}
                                                         </>}
                                                     />
                                                 ))}
