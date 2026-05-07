@@ -98,6 +98,15 @@ const formatDateDisplay = (dateStr) => {
 };
 
 ﻿
+// -- Decode JWT payload to get a stable per-user key for localStorage scoping --
+const getUserKey = (token) => {
+    try {
+        if (!token) return 'anon';
+        const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+        return payload.sub || payload.id || payload.userId || 'anon';
+    } catch { return 'anon'; }
+};
+
 // -- Module-level cache so AnimalList survives unmount/remount without refetching --
 let _alCache = null;       // last animals array
 
@@ -135,6 +144,10 @@ const AnimalList = ({
 }) => {
     // Stable ref so showModalMessage (inline prop) doesn't destabilise useCallbacks
     const showModalMessageRef = useRef(showModalMessage);
+
+    // Per-user localStorage key prefix — scopes all persistent state to the logged-in user
+    // so that switching accounts never leaks one user's collections/prefs into another's.
+    const userKey = useMemo(() => getUserKey(authToken), [authToken]);
     useEffect(() => { showModalMessageRef.current = showModalMessage; });
 
     const [animals, setAnimalsRaw] = useState(() => _alCache || []);
@@ -268,15 +281,8 @@ const AnimalList = ({
 
     // ---- For Sale screen & My Animals list view ----
     const [showForSaleScreen, setShowForSaleScreen] = useState(false);
-    const [myAnimalsViewMode, setMyAnimalsViewMode] = useState(() => {
-        try { return localStorage.getItem('ct_my_animals_view_mode') || 'cards'; } catch { return 'cards'; }
-    });
-    const [listViewColumns, setListViewColumns] = useState(() => {
-        try {
-            const saved = localStorage.getItem('ct_list_view_columns');
-            return saved ? { ...DEFAULT_LIST_COLUMNS, ...JSON.parse(saved) } : DEFAULT_LIST_COLUMNS;
-        } catch { return DEFAULT_LIST_COLUMNS; }
-    });
+    const [myAnimalsViewMode, setMyAnimalsViewMode] = useState('cards'); // populated from user-scoped key below
+    const [listViewColumns, setListViewColumns] = useState(DEFAULT_LIST_COLUMNS); // populated from user-scoped key below
     const [showListColumnConfig, setShowListColumnConfig] = useState(false);
     const [externalParentsCache, setExternalParentsCache] = useState({});
 
@@ -314,12 +320,12 @@ const AnimalList = ({
     const _saveCollections = (cols, mapOverride) => {
         const map = mapOverride !== undefined ? mapOverride : animalCollections;
         setUserCollections(cols);
-        try { localStorage.setItem('ct_collections', JSON.stringify(cols)); } catch {}
+        try { localStorage.setItem(`ct_collections_${userKey}`, JSON.stringify(cols)); } catch {}
         _syncToApi(cols, map);
     };
     const _saveAnimalCollections = (map) => {
         setAnimalCollections(map);
-        try { localStorage.setItem('ct_animal_collections', JSON.stringify(map)); } catch {}
+        try { localStorage.setItem(`ct_animal_collections_${userKey}`, JSON.stringify(map)); } catch {}
         _syncToApi(userCollections, map);
     };
     const createCollection = (name) => {
@@ -333,8 +339,8 @@ const AnimalList = ({
         Object.keys(next).forEach(aid => { next[aid] = next[aid].filter(cid => cid !== id); });
         setUserCollections(newCols);
         setAnimalCollections(next);
-        try { localStorage.setItem('ct_collections', JSON.stringify(newCols)); } catch {}
-        try { localStorage.setItem('ct_animal_collections', JSON.stringify(next)); } catch {}
+        try { localStorage.setItem(`ct_collections_${userKey}`, JSON.stringify(newCols)); } catch {}
+        try { localStorage.setItem(`ct_animal_collections_${userKey}`, JSON.stringify(next)); } catch {}
         _syncToApi(newCols, next);
     };
     const renameCollection = (id, name) => {
@@ -378,19 +384,37 @@ const AnimalList = ({
     const [restockForm, setRestockForm] = useState({ qty: '', cost: '', date: new Date().toISOString().slice(0, 10), notes: '' });
     const [restockSaving, setRestockSaving] = useState(false);
 
-    // ---- Collections state (localStorage-backed; backend sync TBD) ----
-    const [userCollections, setUserCollections] = useState(() => {
-        try { return JSON.parse(localStorage.getItem('ct_collections') || '[]'); } catch { return []; }
-    });
-    const [animalCollections, setAnimalCollections] = useState(() => {
-        try { return JSON.parse(localStorage.getItem('ct_animal_collections') || '{}'); } catch { return {}; }
-    });
+    // ---- Collections state (user-scoped localStorage + backend sync) ----
+    const [userCollections, setUserCollections] = useState([]); // populated from user-scoped key below
+    const [animalCollections, setAnimalCollections] = useState({}); // populated from user-scoped key below
     const [showCollectionManager, setShowCollectionManager] = useState(false);
     const [newCollectionName, setNewCollectionName] = useState('');
     const [renamingCollectionId, setRenamingCollectionId] = useState(null);
     const [renamingCollectionName, setRenamingCollectionName] = useState('');
     const [collapsedCollections, setCollapsedCollections] = useState({});
     const [assigningCollectionAnimalId, setAssigningCollectionAnimalId] = useState(null);
+
+    // ---- Re-load user-scoped prefs & collections whenever the logged-in user changes ----
+    // This prevents one user's data from leaking into another account after switching.
+    useEffect(() => {
+        if (!userKey || userKey === 'anon') return;
+        // Collections
+        try {
+            const cols = JSON.parse(localStorage.getItem(`ct_collections_${userKey}`) || '[]');
+            const map  = JSON.parse(localStorage.getItem(`ct_animal_collections_${userKey}`) || '{}');
+            setUserCollections(cols);
+            setAnimalCollections(map);
+        } catch { setUserCollections([]); setAnimalCollections({}); }
+        // View mode & column config
+        try {
+            const vm = localStorage.getItem(`ct_my_animals_view_mode_${userKey}`);
+            if (vm) setMyAnimalsViewMode(vm);
+        } catch {}
+        try {
+            const saved = localStorage.getItem(`ct_list_view_columns_${userKey}`);
+            if (saved) setListViewColumns({ ...DEFAULT_LIST_COLUMNS, ...JSON.parse(saved) });
+        } catch {}
+    }, [userKey]);
 
     const isCollectionsView = animalView === 'collections';
     const isMgmtTab = ['enclosures', 'reproduction', 'health', 'feeding', 'supplies'].includes(animalView);
@@ -681,20 +705,21 @@ const AnimalList = ({
     useEffect(() => { fetchAvailableAnimals(); }, [fetchAvailableAnimals]);
     useEffect(() => { fetchSoldTransferred(); }, [fetchSoldTransferred]);
 
-    // Load collections from API on mount; fall back to localStorage cache already in state
+    // Load collections from API on auth change — always overwrite state from server to prevent cross-user leakage
     useEffect(() => {
         if (!authToken) return;
+        // Reset to empty immediately so a user with no collections doesn't see a previous user's data
+        setUserCollections([]);
+        setAnimalCollections({});
         axios.get(`${API_BASE_URL}/collections`, { headers: { Authorization: `Bearer ${authToken}` } })
             .then(res => {
                 const { collections, animalMap } = res.data || {};
-                if (Array.isArray(collections) && collections.length > 0) {
-                    setUserCollections(collections);
-                    try { localStorage.setItem('ct_collections', JSON.stringify(collections)); } catch {}
-                }
-                if (animalMap && typeof animalMap === 'object' && Object.keys(animalMap).length > 0) {
-                    setAnimalCollections(animalMap);
-                    try { localStorage.setItem('ct_animal_collections', JSON.stringify(animalMap)); } catch {}
-                }
+                const cols = Array.isArray(collections) ? collections : [];
+                const map  = (animalMap && typeof animalMap === 'object') ? animalMap : {};
+                setUserCollections(cols);
+                setAnimalCollections(map);
+                try { localStorage.setItem(`ct_collections_${userKey}`, JSON.stringify(cols)); } catch {}
+                try { localStorage.setItem(`ct_animal_collections_${userKey}`, JSON.stringify(map)); } catch {}
             })
             .catch(err => console.warn('[collections load]', err));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -4071,14 +4096,14 @@ const AnimalList = ({
                     {/* Card / List view toggle */}
                     <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
                         <button
-                            onClick={() => { setMyAnimalsViewMode('cards'); try { localStorage.setItem('ct_my_animals_view_mode', 'cards'); } catch {} }}
+                            onClick={() => { setMyAnimalsViewMode('cards'); try { localStorage.setItem(`ct_my_animals_view_mode_${userKey}`, 'cards'); } catch {} }}
                             className={`p-2 transition text-xs font-medium flex items-center gap-1 ${myAnimalsViewMode === 'cards' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
                             title="Card view"
                         >
                             <LayoutGrid size={14} />
                         </button>
                         <button
-                            onClick={() => { setMyAnimalsViewMode('list'); try { localStorage.setItem('ct_my_animals_view_mode', 'list'); } catch {} }}
+                            onClick={() => { setMyAnimalsViewMode('list'); try { localStorage.setItem(`ct_my_animals_view_mode_${userKey}`, 'list'); } catch {} }}
                             className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${myAnimalsViewMode === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
                             title="List view"
                         >
@@ -4295,7 +4320,7 @@ const AnimalList = ({
                                         checked={!!listViewColumns[key]}
                                         onChange={() => setListViewColumns(prev => {
                                             const next = { ...prev, [key]: !prev[key] };
-                                            try { localStorage.setItem('ct_list_view_columns', JSON.stringify(next)); } catch {}
+                                            try { localStorage.setItem(`ct_list_view_columns_${userKey}`, JSON.stringify(next)); } catch {}
                                             return next;
                                         })}
                                         className="rounded"

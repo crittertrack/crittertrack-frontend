@@ -316,7 +316,14 @@ const getPrototypePhenotypeInterpretation = (selectedTraits, species = TARGET_OU
         const ratResult = matchFancyRatPhenotype(genotype);
         const phenotype = ratResult?.phenotype || null;
         if (phenotype) return phenotype;
-        return 'Select more trait chips to resolve a named phenotype.';
+        // Explain what's missing based on what IS selected
+        const hasPe = genotype.Pe === 'Pe/pe';
+        const hasMerle = genotype.Me === 'Me/me';
+        if (hasPe || hasMerle) {
+            const genes = [hasPe && 'Pearl', hasMerle && 'Merle'].filter(Boolean).join(' and ');
+            return `${genes} only express on a Mink base — add a Base Color chip (e.g. Mink or Cinnamon).`;
+        }
+        return 'Add a Base Color chip (e.g. Black or Agouti) to see the phenotype.';
     }
 
     const result = calculatePhenotype(genotype, genotype);
