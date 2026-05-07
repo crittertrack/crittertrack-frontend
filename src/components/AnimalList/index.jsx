@@ -3453,16 +3453,16 @@ const AnimalList = ({
                                                                                         <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: true })}
                                                                                             className="text-[10px] px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 w-full flex items-center justify-center gap-0.5"><Bean size={9} /> Pregnant</button>
                                                                                     )}
-                                                                                    {a.isPregnant && !a.isNursing && a.gender !== 'Male' && (
+                                                                                    {a.isInMating && !a.isPregnant && !a.isNursing && a.gender === 'Male' && (
+                                                                                        <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false })}
+                                                                                            className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
+                                                                                    )}
+                                                                                    {a.isPregnant && !a.isNursing && (
                                                                                         <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false, isNursing: true })}
                                                                                             className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 w-full flex items-center justify-center gap-0.5"><Milk size={9} /> Nursing</button>
                                                                                     )}
                                                                                     {a.isNursing && (
                                                                                         <button onClick={(e) => handleReproStatusUpdate(e, a, { isNursing: false })}
-                                                                                            className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 w-full flex items-center justify-center gap-0.5"><Check size={9} /> Done</button>
-                                                                                    )}
-                                                                                    {(a.isInMating || a.isPregnant || a.isNursing) && (
-                                                                                        <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: false, isNursing: false })}
                                                                                             className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
                                                                                     )}
                                                                                     <button onClick={(e) => { e.stopPropagation(); handleAssignAnimalToEnclosure(a.id_public, ''); }}
@@ -3504,16 +3504,18 @@ const AnimalList = ({
                                                                 <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: true })}
                                                                     className="text-[10px] px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 w-full flex items-center justify-center gap-0.5"><Bean size={9} /> Pregnant</button>
                                                             )}
-                                                            {a.isPregnant && !a.isNursing && a.gender !== 'Male' && (
+                                                            {a.isInMating && !a.isPregnant && !a.isNursing && a.gender === 'Male' && (
+                                                                <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false })}
+                                                                    className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
+                                                            )}
+                                                            {a.isPregnant && !a.isNursing && (
                                                                 <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false, isNursing: true })}
                                                                     className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 w-full flex items-center justify-center gap-0.5"><Milk size={9} /> Nursing</button>
                                                             )}
                                                             {a.isNursing && (
                                                                 <button onClick={(e) => handleReproStatusUpdate(e, a, { isNursing: false })}
-                                                                    className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 w-full flex items-center justify-center gap-0.5"><Check size={9} /> Done</button>
+                                                                    className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
                                                             )}
-                                                            <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: false, isNursing: false })}
-                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
                                                             {reproEnclosures.length > 0 && (assigningAnimalId === a.id_public
                                                                 ? <select autoFocus defaultValue="" onChange={e => { if (e.target.value) handleAssignAnimalToEnclosure(a.id_public, e.target.value); setAssigningAnimalId(null); }} onBlur={() => setAssigningAnimalId(null)} className="text-[10px] border border-blue-300 rounded p-1 w-full"><option value="" disabled>Select enclosure...</option>{reproEnclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}</select>
                                                                 : <button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }} className="text-[10px] text-blue-500 hover:text-blue-700 border border-blue-200 rounded px-1.5 py-0.5 w-full">Assign enclosure</button>
