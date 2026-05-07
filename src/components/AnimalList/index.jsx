@@ -4109,13 +4109,25 @@ const AnimalList = ({
     return (
         <div className="w-full max-w-7xl bg-white p-6 rounded-xl shadow-lg">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div className='flex items-center gap-2 flex-wrap'>
-                    <ClipboardList size={20} className="sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
-                    {animalView === 'list' ? `My Animals (${displayedAnimalCount})` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : showActivityLogScreen ? 'Activity Log' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
-                    {isListLikeView && hasActiveFilters && (
-                        <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
-                            Filtered
-                        </span>
+                <div className="flex items-center justify-between w-full sm:w-auto gap-2">
+                    <div className='flex items-center gap-2 flex-wrap'>
+                        <ClipboardList size={20} className="sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
+                        {animalView === 'list' ? `My Animals (${displayedAnimalCount})` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : showActivityLogScreen ? 'Activity Log' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
+                        {isListLikeView && hasActiveFilters && (
+                            <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                                Filtered
+                            </span>
+                        )}
+                    </div>
+                    {/* Add Animal — shown next to title on mobile only */}
+                    {isListLikeView && !showArchiveScreen && (
+                        <button
+                            onClick={() => navigate('/select-species')}
+                            className="sm:hidden bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 whitespace-nowrap text-xs"
+                            data-tutorial-target="add-animal-btn"
+                        >
+                            <PlusCircle size={14} /> <span>Add Animal</span>
+                        </button>
                     )}
                 </div>
                 {/* Universal top-bar action buttons */}
@@ -4183,11 +4195,11 @@ const AnimalList = ({
                         {loading ? <Loader2 size={14} className="sm:w-4 sm:h-4 animate-spin" /> : <RefreshCw size={14} className="sm:w-4 sm:h-4" />}
                         <span className="hidden sm:inline">Refresh</span>
                     </button>
-                    {/* Add Animal (only on list/collections views) */}
+                    {/* Add Animal (only on list/collections views) — desktop only, mobile is in title row */}
                     {isListLikeView && !showArchiveScreen && (
                         <button
                             onClick={() => navigate('/select-species')}
-                            className="bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
+                            className="hidden sm:flex bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
                             data-tutorial-target="add-animal-btn"
                         >
                             <PlusCircle size={14} className="sm:w-4 sm:h-4" /> <span>Add Animal</span>
