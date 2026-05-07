@@ -1025,10 +1025,10 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                         {animal.geneticCode && <div style={{ fontSize: '0.55rem', color: certFontColor, lineHeight: 1.2 }}>{animal.geneticCode}</div>}
                         {animal.birthDate && <div style={{ fontSize: '0.55rem', color: certFontColor, lineHeight: 1.2 }}>{formatDate(animal.birthDate)}</div>}
                         {animal.breederName && <div style={{ fontSize: '0.5rem', color: certFontColor, fontStyle: 'italic', lineHeight: 1.2 }}>{animal.breederName}</div>}
-                        {animal.id_public && <div style={{ fontSize: '0.5rem', color: certFontColor, fontFamily: 'monospace', lineHeight: 1.2 }}>{animal.id_public}</div>}
                     </div>
                 </div>
                 <div style={{ position: 'absolute', top: 2, right: 2 }}><GenderIcon size={10} color={certBorderColor} /></div>
+                {animal.id_public && <div style={{ position: 'absolute', bottom: 2, right: 4, fontSize: '0.48rem', color: '#9ca3af', fontFamily: 'monospace', lineHeight: 1 }}>{animal.id_public}</div>}
             </div>
         );
     };
@@ -1110,7 +1110,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         const cardBorder = isMale ? '#3b82f6' : isFemale ? '#ec4899' : certBorderColor;
 
         return (
-            <div style={{ display: 'flex', gap: 10, alignItems: 'center', backgroundColor: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 6, padding: '8px 12px', boxSizing: 'border-box', height: '100%' }}>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center', backgroundColor: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 6, padding: '8px 12px 20px 12px', boxSizing: 'border-box', height: '100%', position: 'relative' }}>
                 {/* Photo */}
                 <div className="hide-for-pdf" style={{ width: 90, height: 90, flexShrink: 0, overflow: 'hidden', borderRadius: 8, border: `2px solid ${cardBorder}`, backgroundColor: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {imgSrc ? (
@@ -1153,9 +1153,10 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                             </tr>
                         </tbody>
                     </table>
-                    <div style={{ fontSize: '0.6rem', color: '#6b7280', fontFamily: 'monospace', marginTop: 4 }}>{animal.id_public}</div>
                 </div>
             </div>
+            {animal.id_public && <div style={{ position: 'absolute', bottom: 4, right: 8, fontSize: '0.55rem', color: '#9ca3af', fontFamily: 'monospace' }}>{animal.id_public}</div>}
+        </div>
         );
     };
 
@@ -1198,7 +1199,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 backgroundColor: certBgColor,
                 border: `1.5px solid ${certBorderColor}`,
                 borderRadius: 8,
-                padding: '12px 14px 10px 14px',
+                padding: '6px 14px 10px 14px',
                 position: 'relative',
                 width: '100%',
                 boxSizing: 'border-box',
@@ -1206,17 +1207,26 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             }}
         >
             {/* ── Header row: Species | Title ──────────────────────── */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, borderBottom: `1px solid ${certBorderColor}`, paddingBottom: 6 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4, borderBottom: `1px solid ${certBorderColor}`, paddingBottom: 4 }}>
                 <div>
                     <div style={{ fontSize: '1.4rem', fontWeight: 700, color: certFontColor, lineHeight: 1.2 }}>{subject?.species || 'Unknown Species'}</div>
                     {subject?.species && getSpeciesLatinName(subject.species) && (
                         <div style={{ fontSize: '0.75rem', fontStyle: 'italic', color: '#6b7280' }}>{getSpeciesLatinName(subject.species)}</div>
                     )}
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '1.1rem', fontStyle: 'italic', fontWeight: 600, color: certFontColor }}>{certTextTopRight}</div>
-                    {ownerProfile && (
-                        <div style={{ fontSize: '0.65rem', color: '#6b7280', marginTop: 2 }}>{getOwnerDisplayName()}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '1.1rem', fontStyle: 'italic', fontWeight: 600, color: certFontColor }}>{certTextTopRight}</div>
+                        {ownerProfile && (
+                            <div style={{ fontSize: '0.65rem', color: '#6b7280', marginTop: 2 }}>{getOwnerDisplayName()}</div>
+                        )}
+                    </div>
+                    {ownerProfile && (ownerProfile.profileImage || ownerProfile.profileImageUrl || ownerProfile.imageUrl || ownerProfile.avatarUrl || ownerProfile.avatar || ownerProfile.profile_image) && (
+                        <img
+                            src={ownerProfile.profileImage || ownerProfile.profileImageUrl || ownerProfile.imageUrl || ownerProfile.avatarUrl || ownerProfile.avatar || ownerProfile.profile_image}
+                            alt={getOwnerDisplayName()}
+                            style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${certBorderColor}`, flexShrink: 0 }}
+                        />
                     )}
                 </div>
             </div>
