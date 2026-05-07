@@ -1064,6 +1064,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
         // Build table rows. Number of rows = genSlots[gens-1].length
         const rowCount = genSlots[gens - 1].length;
+        // Min row height shrinks as more rows appear
+        const rowMinH = gens <= 1 ? 90 : gens === 2 ? 75 : gens === 3 ? 60 : 45;
         const rows = [];
 
         for (let row = 0; row < rowCount; row++) {
@@ -1078,18 +1080,18 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     const animal = getAncestor(subject, slot.path);
                     cells.push(
                         <td key={g} rowSpan={rowsPerSlot} style={{ padding: 2, verticalAlign: 'top', width: `${100 / gens}%` }}>
-                            <div style={{ height: '100%' }}>
+                            <div style={{ minHeight: rowMinH * rowsPerSlot, height: '100%' }}>
                                 {renderCertCell(animal, slot.isSire, handleCardClick)}
                             </div>
                         </td>
                     );
                 }
             }
-            rows.push(<tr key={row} style={{ height: `${100 / rowCount}%` }}>{cells}</tr>);
+            rows.push(<tr key={row} style={{ minHeight: rowMinH }}>{cells}</tr>);
         }
 
         return (
-            <table style={{ width: '100%', height: '100%', borderCollapse: 'separate', borderSpacing: 3, tableLayout: 'fixed' }}>
+            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 3, tableLayout: 'fixed' }}>
                 <tbody>{rows}</tbody>
             </table>
         );
@@ -1185,12 +1187,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         else { setStackedPedigree(clickedAnimal); }
     };
 
-    const certBgStyle = { backgroundColor: certBgColor };
     const subject = displayData || pedigreeData;
-
-    // Derive the cert height for a given gen count
-    // For inline: fixed-ish; for modal: taller
-    const certTableHeight = inline ? 260 : 380;
 
     const certJsx = (
         <div
@@ -1223,20 +1220,20 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             </div>
 
             {/* ── Body: main animal card (left) + pedigree table (right) ── */}
-            <div style={{ display: 'flex', gap: 10, height: certTableHeight }}>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'stretch' }}>
                 {/* Left: main animal */}
                 <div style={{ width: '18%', flexShrink: 0, borderRight: `1px dashed ${certBorderColor}`, paddingRight: 10 }}>
                     {subject && renderCertMainCard(subject)}
                 </div>
 
                 {/* Right: generation table */}
-                <div style={{ flex: 1, overflow: 'hidden' }}>
+                <div style={{ flex: 1, overflow: 'visible' }}>
                     {subject ? renderCertificateTable(subject, generations, handleCardClick) : null}
                 </div>
 
                 {/* Signature column (only if space, hidden on 1-gen) */}
                 {generations >= 2 && (
-                    <div style={{ width: 80, flexShrink: 0, borderLeft: `1px dashed ${certBorderColor}`, paddingLeft: 8, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div style={{ width: 80, flexShrink: 0, borderLeft: `1px dashed ${certBorderColor}`, paddingLeft: 8, display: 'flex', flexDirection: 'column' }}>
                         {/* Optional logo */}
                         {certLogoUrl && (
                             <div style={{ width: '100%', height: 48, overflow: 'hidden', borderRadius: 4, marginBottom: 4 }}>
@@ -1245,10 +1242,10 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                         )}
                         {/* Cert text (main center-right) */}
                         {certText && (
-                            <div style={{ fontSize: '0.55rem', color: certFontColor, lineHeight: 1.4, flex: 1, overflow: 'hidden', marginBottom: 4 }}>{certText}</div>
+                            <div style={{ fontSize: '0.55rem', color: certFontColor, lineHeight: 1.4, flex: 1, marginBottom: 4 }}>{certText}</div>
                         )}
-                        {/* Signature */}
-                        <div style={{ borderTop: `1px solid ${certBorderColor}`, paddingTop: 4, textAlign: 'center' }}>
+                        {/* Signature — pinned to bottom */}
+                        <div style={{ marginTop: 'auto', borderTop: `1px solid ${certBorderColor}`, paddingTop: 4, textAlign: 'center' }}>
                             <div style={{ fontSize: '0.55rem', color: '#9ca3af' }}>{certTextSignature}</div>
                         </div>
                     </div>
