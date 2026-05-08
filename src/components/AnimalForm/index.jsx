@@ -996,7 +996,9 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         if (!animal) {
             return (
                 <div style={baseStyle}>
-                    <div style={{ fontSize: metaSize, color: '#9ca3af', textAlign: 'center', paddingTop: 8 }}>Unknown</div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                        <div style={{ fontSize: metaSize, color: '#9ca3af', textAlign: 'center' }}>Unknown</div>
+                    </div>
                     <div style={{ position: 'absolute', top: 2, right: 2 }}><GenderIcon size={iconSize} color={certBorderColor} /></div>
                 </div>
             );
@@ -1005,7 +1007,9 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         if (animal.isHidden) {
             return (
                 <div style={baseStyle}>
-                    <div style={{ fontSize: metaSize, color: '#9ca3af', textAlign: 'center', paddingTop: 8 }}>Unknown</div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                        <div style={{ fontSize: metaSize, color: '#9ca3af', textAlign: 'center' }}>Unknown</div>
+                    </div>
                     <div style={{ position: 'absolute', top: 2, right: 2 }}><GenderIcon size={iconSize} color={certBorderColor} /></div>
                 </div>
             );
@@ -1106,8 +1110,10 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             rows.push(<tr key={row} style={{ minHeight: rowMinH }}>{cells}</tr>);
         }
 
+        const tableWidthPct = `${(gens / 4) * 100}%`;
+
         return (
-            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 3, tableLayout: 'fixed' }}>
+            <table style={{ width: tableWidthPct, borderCollapse: 'separate', borderSpacing: 3, tableLayout: 'fixed' }}>
                 <tbody>{rows}</tbody>
             </table>
         );
