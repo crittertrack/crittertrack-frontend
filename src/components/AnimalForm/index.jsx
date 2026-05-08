@@ -871,7 +871,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         const captureW = Math.max(el.scrollWidth, 1400);
         Object.assign(clone.style, {
             position: 'fixed',
-            top: '-99999px',
+            top: '0',
             left: '0',
             width: captureW + 'px',
             zIndex: '-9999',
