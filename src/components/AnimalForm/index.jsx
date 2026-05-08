@@ -860,35 +860,57 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         };
     }, [loading, pedigreeData]);
 
+    const capturePedigreeCanvas = async () => {
+        const el = pedigreeRef.current;
+        if (!el) return null;
+
+        const ggpStyle = document.createElement('style');
+        ggpStyle.textContent = '.ggp-chart-img { display: none !important; }';
+        document.head.appendChild(ggpStyle);
+
+        try {
+            await new Promise(r => setTimeout(r, 100));
+            return await html2canvas(el, {
+                scale: 2,
+                backgroundColor: '#ffffff',
+                logging: false,
+                useCORS: true,
+                allowTaint: true,
+                letterRendering: true,
+                windowWidth: el.scrollWidth,
+                windowHeight: el.scrollHeight,
+                imageTimeout: 15000,
+                scrollX: 0,
+                scrollY: 0,
+            });
+        } finally {
+            if (document.head.contains(ggpStyle)) {
+                document.head.removeChild(ggpStyle);
+            }
+        }
+    };
+
     const downloadPDF = async () => {
         if (!pedigreeRef.current) return;
         setIsSaving(true);
         try {
-            const el = pedigreeRef.current;
-            const orig = { w: el.style.width, h: el.style.height, mh: el.style.minHeight, ov: el.style.overflow, p: el.style.padding };
-            el.style.width = vertical ? '900px' : '2000px';
-            el.style.height = 'auto';
-            el.style.minHeight = 'unset';
-            el.style.overflow = 'visible';
-            el.style.padding = '40px 20px 32px 20px';
-            const ggpStyle = document.createElement('style');
-            ggpStyle.textContent = '.ggp-chart-img { display: none !important; }';
-            document.head.appendChild(ggpStyle);
-            await new Promise(r => setTimeout(r, 500));
-            const srcCanvas = await html2canvas(el, {
-                scale: 2, backgroundColor: '#ffffff', logging: false,
-                useCORS: true, allowTaint: true, letterRendering: true,
-                windowWidth: vertical ? 900 : 2000, windowHeight: 9999,
-                imageTimeout: 15000, scrollX: 0, scrollY: 0
-            });
-            document.head.removeChild(ggpStyle);
-            Object.assign(el.style, { width: orig.w, height: orig.h, minHeight: orig.mh, overflow: orig.ov, padding: orig.p });
-            // Fit into A4 (portrait for vertical cert, landscape otherwise) with 4mm padding
+            const srcCanvas = await capturePedigreeCanvas();
+            if (!srcCanvas) return;
+
+            // Fit into A4 (portrait for vertical cert, landscape otherwise) with aspect ratio preserved
             const pdf = new jsPDF({ orientation: vertical ? 'portrait' : 'landscape', unit: 'mm', format: 'a4' });
-            const pageW = vertical ? 210 : 297, pageH = vertical ? 297 : 210, pad_mm = 4;
-            const maxW = pageW - pad_mm * 2, maxH = pageH - pad_mm * 2;
-            pdf.addImage(srcCanvas.toDataURL('image/png'), 'PNG',
-                (pageW - maxW) / 2, (pageH - maxH) / 2, maxW, maxH);
+            const pageW = vertical ? 210 : 297;
+            const pageH = vertical ? 297 : 210;
+            const padMm = 4;
+            const maxW = pageW - padMm * 2;
+            const maxH = pageH - padMm * 2;
+            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height);
+            const drawW = srcCanvas.width * ratio;
+            const drawH = srcCanvas.height * ratio;
+            const x = (pageW - drawW) / 2;
+            const y = (pageH - drawH) / 2;
+
+            pdf.addImage(srcCanvas.toDataURL('image/png'), 'PNG', x, y, drawW, drawH);
             pdf.save(`pedigree-${pedigreeData?.name || 'chart'}.pdf`);
         } catch (error) {
             console.error('Error generating PDF:', error);
@@ -901,33 +923,26 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         if (!pedigreeRef.current) return;
         setIsSaving(true);
         try {
-            const el = pedigreeRef.current;
-            const orig = { w: el.style.width, h: el.style.height, mh: el.style.minHeight, ov: el.style.overflow, p: el.style.padding };
-            el.style.width = vertical ? '900px' : '2000px';
-            el.style.height = 'auto';
-            el.style.minHeight = 'unset';
-            el.style.overflow = 'visible';
-            el.style.padding = '40px 20px 32px 20px';
-            const ggpStyle2 = document.createElement('style');
-            ggpStyle2.textContent = '.ggp-chart-img { display: none !important; }';
-            document.head.appendChild(ggpStyle2);
-            await new Promise(r => setTimeout(r, 500));
-            const srcCanvas = await html2canvas(el, {
-                scale: 2, backgroundColor: '#ffffff', logging: false,
-                useCORS: true, allowTaint: true, letterRendering: true,
-                windowWidth: vertical ? 900 : 2000, windowHeight: 9999,
-                imageTimeout: 15000, scrollX: 0, scrollY: 0
-            });
-            document.head.removeChild(ggpStyle2);
-            Object.assign(el.style, { width: orig.w, height: orig.h, minHeight: orig.mh, overflow: orig.ov, padding: orig.p });
-            // Fit into A4 canvas at 200dpi — portrait for vertical cert, landscape otherwise
-            const a4W = vertical ? 1654 : 2339, a4H = vertical ? 2339 : 1654, pad = 30;
-            const maxW = a4W - pad * 2, maxH = a4H - pad * 2;
+            const srcCanvas = await capturePedigreeCanvas();
+            if (!srcCanvas) return;
+
+            // Fit into A4 canvas at 200dpi with aspect ratio preserved.
+            const a4W = vertical ? 1654 : 2339;
+            const a4H = vertical ? 2339 : 1654;
+            const pad = 30;
+            const maxW = a4W - pad * 2;
+            const maxH = a4H - pad * 2;
+            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height);
+            const drawW = srcCanvas.width * ratio;
+            const drawH = srcCanvas.height * ratio;
             const out = document.createElement('canvas');
-            out.width = a4W; out.height = a4H;
+            out.width = a4W;
+            out.height = a4H;
             const ctx = out.getContext('2d');
-            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, a4W, a4H);
-            ctx.drawImage(srcCanvas, (a4W - maxW) / 2, (a4H - maxH) / 2, maxW, maxH);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, a4W, a4H);
+            ctx.drawImage(srcCanvas, (a4W - drawW) / 2, (a4H - drawH) / 2, drawW, drawH);
+
             const link = document.createElement('a');
             link.download = `pedigree-${pedigreeData?.name || 'chart'}.png`;
             link.href = out.toDataURL('image/png');
