@@ -1000,7 +1000,6 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             border: `1px solid ${borderColor}`,
             backgroundColor: bgColor,
             padding: pad,
-            paddingBottom: '18px',
             position: 'relative',
             height: '100%',
             boxSizing: 'border-box',
