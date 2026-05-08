@@ -1073,7 +1073,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     const renderCertificateTable = (subject, gens, handleCardClick) => {
         if (!subject) return null;
 
-        const maxRows = 16; // 2^(maxGenerations) = fixed grid height for consistent sizing
+        const maxRows = 24; // Fixed grid height; gen 4 will get more space this way
         const rowMinH = 46;
 
         const genSlots = [];
@@ -1092,7 +1092,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         const cells = [];
         for (let g = 0; g < gens; g++) {
             const slots = genSlots[g];
-            const rowsPerSlot = maxRows / slots.length;
+            const rowsPerSlot = Math.ceil(maxRows / slots.length);
             slots.forEach((slot, i) => {
                 const rowStart = i * rowsPerSlot + 1;
                 const animal = getAncestor(subject, slot.path);
