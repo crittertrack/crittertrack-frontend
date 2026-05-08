@@ -566,6 +566,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     const [imagesLoaded, setImagesLoaded] = useState(false);
     const [stackedPedigree, setStackedPedigree] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [isCapturing, setIsCapturing] = useState(false);
     const [generations, setGenerations] = useState(4); // 1–4
     // Load persisted cert prefs from localStorage (shared across all animals for this user)
     const _savedPrefs = (() => { try { return JSON.parse(localStorage.getItem('ct_cert_prefs') || '{}'); } catch { return {}; } })();
@@ -868,8 +869,9 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         ggpStyle.textContent = '.ggp-chart-img { display: none !important; }';
         document.head.appendChild(ggpStyle);
 
+        setIsCapturing(true);
         try {
-            await new Promise(r => setTimeout(r, 100));
+            await new Promise(r => setTimeout(r, 150));
             return await html2canvas(el, {
                 scale: 3,
                 backgroundColor: '#ffffff',
@@ -884,6 +886,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 scrollY: 0,
             });
         } finally {
+            setIsCapturing(false);
             if (document.head.contains(ggpStyle)) {
                 document.head.removeChild(ggpStyle);
             }
@@ -1037,7 +1040,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
         return (
             <div style={baseStyle} onClick={handleClick}>
-                <div style={{ display: 'flex', flexDirection: genIndex === 2 ? 'row' : 'column', gap: imgSize > 0 ? 4 : 0, alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: genIndex === 2 ? 'row' : 'column', gap: imgSize > 0 ? 4 : 0, alignItems: 'center', justifyContent: isCapturing ? 'flex-start' : 'center', height: '100%', width: '100%' }}>
                     {/* Thumbnail — hidden at gen 4 or when imgSize=0 */}
                     {imgSrc && imgSize > 0 && (
                         <div className="hide-for-pdf" style={{ width: imgSize, height: imgSize, flexShrink: 0, borderRadius: 4, overflow: 'hidden', border: `1px solid ${certBorderColor}` }}>
