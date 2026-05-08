@@ -963,8 +963,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     const renderCertCell = (animal, isSire, onClick = null, genIndex = 0, stacked = false) => {
         // Scale text and image per generation column
         const imgSize  = stacked
-            ? (genIndex === 0 ? 70 : genIndex === 1 ? 50 : genIndex === 2 ? 28 : 0)
-            : (genIndex === 0 ? 90 : genIndex === 1 ? 60 : genIndex === 2 ? 38 : 0);
+            ? (genIndex === 0 ? 60 : genIndex === 1 ? 44 : genIndex === 2 ? 24 : 0)
+            : (genIndex === 0 ? 72 : genIndex === 1 ? 50 : genIndex === 2 ? 30 : 0);
         const nameSize = genIndex === 0 ? '0.90rem' : genIndex === 1 ? '0.78rem' : genIndex === 2 ? '0.66rem' : '0.58rem';
         const metaSize = genIndex === 0 ? '0.76rem' : genIndex === 1 ? '0.68rem' : genIndex === 2 ? '0.58rem' : '0.51rem';
         const smallSize= genIndex === 0 ? '0.66rem' : genIndex === 1 ? '0.58rem' : genIndex === 2 ? '0.51rem' : '0.46rem';
@@ -1081,7 +1081,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         // Build table rows. Number of rows = genSlots[gens-1].length
         const rowCount = genSlots[gens - 1].length;
         // Min row height shrinks as more rows appear
-        const rowMinH = gens <= 1 ? 110 : gens === 2 ? 95 : gens === 3 ? 75 : 58;
+        const rowMinH = gens <= 1 ? 95 : gens === 2 ? 78 : gens === 3 ? 60 : 46;
         const rows = [];
 
         for (let row = 0; row < rowCount; row++) {
@@ -1167,11 +1167,11 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         return (
             <div style={{ display: 'flex', gap: 10, alignItems: 'center', backgroundColor: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 6, padding: '8px 12px 20px 12px', boxSizing: 'border-box', height: '100%', position: 'relative' }}>
                 {/* Photo */}
-                <div className="hide-for-pdf" style={{ width: 90, height: 90, flexShrink: 0, overflow: 'hidden', borderRadius: 8, border: `2px solid ${cardBorder}`, backgroundColor: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="hide-for-pdf" style={{ width: 115, height: 115, flexShrink: 0, overflow: 'hidden', borderRadius: 8, border: `2px solid ${cardBorder}`, backgroundColor: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {imgSrc ? (
-                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={36} />
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={46} />
                     ) : (
-                        <Cat size={36} style={{ color: '#9ca3af' }} />
+                        <Cat size={46} style={{ color: '#9ca3af' }} />
                     )}
                 </div>
                 {/* Details */}
