@@ -1003,7 +1003,6 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             position: 'relative',
             height: '100%',
             boxSizing: 'border-box',
-            overflow: 'hidden',
             cursor: onClick && animal && !animal.isHidden && animal.id_public ? 'pointer' : 'default',
         };
 
