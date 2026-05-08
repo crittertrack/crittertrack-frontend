@@ -1003,6 +1003,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             position: 'relative',
             height: '100%',
             boxSizing: 'border-box',
+            overflow: 'hidden',
             cursor: onClick && animal && !animal.isHidden && animal.id_public ? 'pointer' : 'default',
         };
 
@@ -1037,7 +1038,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
         return (
             <div style={baseStyle} onClick={handleClick}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: imgSize > 0 ? 4 : 0, alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: imgSize > 0 ? 4 : 0, alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
                     {/* Thumbnail — hidden at gen 4 or when imgSize=0 */}
                     {imgSrc && imgSize > 0 && (
                         <div className="hide-for-pdf" style={{ width: imgSize, height: imgSize, flexShrink: 0, borderRadius: 4, overflow: 'hidden', border: `1px solid ${certBorderColor}` }}>
@@ -1045,19 +1046,19 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                         </div>
                     )}
                     {/* Text */}
-                    <div style={{ minWidth: 0, textAlign: 'center' }}>
+                    <div style={{ minWidth: 0, width: '100%', textAlign: 'center' }}>
                         {genIndex === 3 ? (
                             <>
-                                <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.25, wordBreak: 'break-word' }}>{fullName}{variety ? <span style={{ fontWeight: 400, marginLeft: 4 }}>· {variety}</span> : null}</div>
-                                <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{[animal.birthDate ? formatDate(animal.birthDate) : null, animal.breederName !== 'Anonymous Breeder' ? animal.breederName : null].filter(Boolean).join(' · ')}</div>
+                                <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', padding: '0 16px 0 4px' }}>{fullName}{variety ? <span style={{ fontWeight: 400, marginLeft: 4 }}>· {variety}</span> : null}</div>
+                                <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.15, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', padding: '0 16px 0 4px' }}>{[animal.birthDate ? formatDate(animal.birthDate) : null, animal.breederName !== 'Anonymous Breeder' ? animal.breederName : null].filter(Boolean).join(' · ')}</div>
                             </>
                         ) : (
                             <>
-                                <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.25, wordBreak: 'break-word' }}>{fullName}</div>
-                                {variety && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{variety}</div>}
-                                {animal.geneticCode && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{animal.geneticCode}</div>}
+                                <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.2, overflowWrap: 'anywhere' }}>{fullName}</div>
+                                {variety && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.15, overflowWrap: 'anywhere' }}>{variety}</div>}
+                                {animal.geneticCode && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.15, overflowWrap: 'anywhere' }}>{animal.geneticCode}</div>}
                                 {animal.birthDate && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{formatDate(animal.birthDate)}</div>}
-                                {animal.breederName && animal.breederName !== 'Anonymous Breeder' && <div style={{ fontSize: smallSize, color: certFontColor, fontStyle: 'italic', lineHeight: 1.2 }}>{animal.breederName}</div>}
+                                {animal.breederName && animal.breederName !== 'Anonymous Breeder' && <div style={{ fontSize: smallSize, color: certFontColor, fontStyle: 'italic', lineHeight: 1.15, overflowWrap: 'anywhere' }}>{animal.breederName}</div>}
                             </>
                         )}
                     </div>
