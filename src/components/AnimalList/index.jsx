@@ -184,7 +184,7 @@ const AnimalList = ({
     });
     const [selectedGenders, setSelectedGenders] = useState(() => {
         try {
-            const saved = localStorage.getItem('animalList_selectedGenders');
+            const saved = localStorage.getItem('animalList_selectedGenders_v2');
             // Default to all genders if not previously saved
             return saved ? JSON.parse(saved) : ['Male', 'Female', 'Intersex', 'Unknown'];
         } catch { return ['Male', 'Female', 'Intersex', 'Unknown']; }
@@ -221,7 +221,7 @@ const AnimalList = ({
     // Applied filter snapshot ? groupedAnimals reads from this, only updated on "Apply Filters" click
     const [appliedFilters, setAppliedFilters] = useState(() => ({
         statusFilter: (function() { try { return localStorage.getItem('animalList_statusFilter') || ''; } catch { return ''; } })(),
-        selectedGenders: (function() { try { const s = localStorage.getItem('animalList_selectedGenders'); return s ? JSON.parse(s) : ['Male', 'Female', 'Intersex', 'Unknown']; } catch { return ['Male', 'Female', 'Intersex', 'Unknown']; } })(),
+        selectedGenders: (function() { try { const s = localStorage.getItem('animalList_selectedGenders_v2'); return s ? JSON.parse(s) : ['Male', 'Female', 'Intersex', 'Unknown']; } catch { return ['Male', 'Female', 'Intersex', 'Unknown']; } })(),
         selectedSpecies: [], // will be filled on first species load
         statusFilterPregnant: (function() { try { return localStorage.getItem('animalList_statusFilterPregnant') === 'true'; } catch { return false; } })(),
         statusFilterNursing: (function() { try { return localStorage.getItem('animalList_statusFilterNursing') === 'true'; } catch { return false; } })(),
@@ -486,7 +486,7 @@ const AnimalList = ({
     
     useEffect(() => {
         try {
-            localStorage.setItem('animalList_selectedGenders', JSON.stringify(selectedGenders));
+            localStorage.setItem('animalList_selectedGenders_v2', JSON.stringify(selectedGenders));
         } catch (e) { console.warn('Failed to save selectedGenders', e); }
     }, [selectedGenders]);
     
