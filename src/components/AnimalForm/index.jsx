@@ -1070,23 +1070,14 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         );
     };
 
-    // Build the HTML table for the pedigree (subject = displayData, gens = 1..4)
+    // Build the pedigree grid (CSS Grid instead of table to fix html2canvas rowspan issues)
     const renderCertificateTable = (subject, gens, handleCardClick) => {
         if (!subject) return null;
-        // Paths for each generation level. Each entry is [path, isSire].
-        // Gen 1 (parents): 2 rows
-        // Gen 2 (grandparents): 4 rows — each spans 2 of the 8 rows (if gens=3) etc.
-        // We always build 2^(gens-1) leaf rows and use rowspan.
 
-        const maxGenerations = 4;
+        const maxRows = 16; // 2^(maxGenerations) = fixed grid height for consistent sizing
+        const rowMinH = 46;
 
-        // Build rows. Each row has one cell per generation.
-        // For gen g (1-indexed), rowspan = totalRows / 2^(g-1)
-        // And each group repeats every rowspan rows starting at the block's top.
-
-        // Paths structure: build all 2^(g-1) slots for each generation g
-        const genSlots = []; // genSlots[g] = array of { path, isSire }
-        // g=1: father, mother
+        const genSlots = [];
         genSlots[0] = [
             { path: ['father'], isSire: true },
             { path: ['mother'], isSire: false },
@@ -1099,38 +1090,39 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             }
         }
 
-        // Keep a fixed vertical grid so heights stay evenly distributed
-        // even when viewing fewer columns (1-3 generations).
-        const rowCount = Math.pow(2, maxGenerations);
-        const rowMinH = 46;
-        const rows = [];
-
-        for (let row = 0; row < rowCount; row++) {
-            const cells = [];
-            for (let g = 0; g < gens; g++) {
-                const slotsAtGen = genSlots[g];
-                const rowsPerSlot = rowCount / slotsAtGen.length; // rowspan for this gen
-                // Only render this cell at the start of each block
-                if (row % rowsPerSlot === 0) {
-                    const slotIdx = Math.floor(row / rowsPerSlot);
-                    const slot = slotsAtGen[slotIdx];
-                    const animal = getAncestor(subject, slot.path);
-                    cells.push(
-                        <td key={g} rowSpan={rowsPerSlot} style={{ padding: 2, verticalAlign: 'middle', width: `${100 / gens}%`, height: rowMinH * rowsPerSlot }}>
-                            <div style={{ height: '100%' }}>
-                                {renderCertCell(animal, slot.isSire, handleCardClick, g)}
-                            </div>
-                        </td>
-                    );
-                }
-            }
-            rows.push(<tr key={row} style={{ minHeight: rowMinH }}>{cells}</tr>);
+        const cells = [];
+        for (let g = 0; g < gens; g++) {
+            const slots = genSlots[g];
+            const rowsPerSlot = maxRows / slots.length;
+            slots.forEach((slot, i) => {
+                const rowStart = i * rowsPerSlot + 1;
+                const animal = getAncestor(subject, slot.path);
+                cells.push(
+                    <div key={`${g}-${i}`} style={{
+                        gridColumn: g + 1,
+                        gridRow: `${rowStart} / span ${rowsPerSlot}`,
+                        padding: 2,
+                        boxSizing: 'border-box',
+                        minHeight: 0,
+                    }}>
+                        <div style={{ height: '100%' }}>
+                            {renderCertCell(animal, slot.isSire, handleCardClick, g)}
+                        </div>
+                    </div>
+                );
+            });
         }
 
         return (
-            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 3, tableLayout: 'fixed' }}>
-                <tbody>{rows}</tbody>
-            </table>
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(${gens}, 1fr)`,
+                gridTemplateRows: `repeat(${maxRows}, ${rowMinH}px)`,
+                gap: 3,
+                width: '100%',
+            }}>
+                {cells}
+            </div>
         );
     };
 
