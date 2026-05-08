@@ -1081,8 +1081,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
         // Build table rows. Number of rows = genSlots[gens-1].length
         const rowCount = genSlots[gens - 1].length;
-        // Min row height shrinks as more rows appear
-        const rowMinH = gens <= 1 ? 95 : gens === 2 ? 78 : gens === 3 ? 60 : 46;
+        // Keep box sizing consistent when switching generation count
+        const rowMinH = 46;
         const rows = [];
 
         for (let row = 0; row < rowCount; row++) {
