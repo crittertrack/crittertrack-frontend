@@ -1000,11 +1000,11 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             border: `1px solid ${borderColor}`,
             backgroundColor: bgColor,
             padding: pad,
+            paddingBottom: '18px',
             position: 'relative',
             height: '100%',
             boxSizing: 'border-box',
             overflow: 'hidden',
-            paddingBottom: genIndex === 3 ? '20px' : pad,
             cursor: onClick && animal && !animal.isHidden && animal.id_public ? 'pointer' : 'default',
         };
 
@@ -1065,7 +1065,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     </div>
                 </div>
                 <div style={{ position: 'absolute', top: 2, right: 2 }}><GenderIcon size={iconSize} color={certBorderColor} /></div>
-                {animal.id_public && <div style={{ position: 'absolute', bottom: 2, right: 4, fontSize: smallSize, color: '#6b7280', fontFamily: 'monospace', fontWeight: 600, lineHeight: 1 }}>{animal.id_public}</div>}
+                {animal.id_public && <div style={{ position: 'absolute', bottom: 10, right: 4, fontSize: smallSize, color: '#6b7280', fontFamily: 'monospace', fontWeight: 600, lineHeight: 1 }}>{animal.id_public}</div>}
             </div>
         );
     };
