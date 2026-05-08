@@ -1018,7 +1018,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
         return (
             <div style={baseStyle} onClick={handleClick}>
-                <div style={{ display: 'flex', flexDirection: stacked ? 'column' : 'row', gap: imgSize > 0 ? 4 : 0, alignItems: 'center', height: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: imgSize > 0 ? 4 : 0, alignItems: 'center', height: '100%' }}>
                     {/* Thumbnail — hidden at gen 4 or when imgSize=0 */}
                     {imgSrc && imgSize > 0 && (
                         <div className="hide-for-pdf" style={{ width: imgSize, height: imgSize, flexShrink: 0, borderRadius: 4, overflow: 'hidden', border: `1px solid ${certBorderColor}` }}>
@@ -1026,20 +1026,19 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                         </div>
                     )}
                     {/* Text */}
-                    <div style={{ flex: stacked ? undefined : 1, minWidth: 0, textAlign: stacked ? 'center' : undefined }}>
+                    <div style={{ minWidth: 0, textAlign: 'center' }}>
                         {genIndex === 3 ? (
                             <>
-                                <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.25, wordBreak: 'break-word', paddingRight: 14 }}>{fullName}{animal.birthDate ? <span style={{ fontWeight: 400, marginLeft: 4 }}>· {formatDate(animal.birthDate)}</span> : null}</div>
-                                {variety && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{variety}</div>}
-                                {animal.breederName && <div style={{ fontSize: smallSize, color: certFontColor, fontStyle: 'italic', lineHeight: 1.2 }}>{animal.breederName}</div>}
+                                <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.25, wordBreak: 'break-word' }}>{fullName}{animal.birthDate ? <span style={{ fontWeight: 400, marginLeft: 4 }}>· {formatDate(animal.birthDate)}</span> : null}</div>
+                                <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{[variety, animal.breederName].filter(Boolean).join(' · ')}</div>
                             </>
                         ) : (
                             <>
                                 <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.25, wordBreak: 'break-word' }}>{fullName}</div>
                                 {variety && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{variety}</div>}
-                                {animal.geneticCode && genIndex <= 2 && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{animal.geneticCode}</div>}
+                                {animal.geneticCode && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{animal.geneticCode}</div>}
                                 {animal.birthDate && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{formatDate(animal.birthDate)}</div>}
-                                {animal.breederName && genIndex <= 1 && <div style={{ fontSize: smallSize, color: certFontColor, fontStyle: 'italic', lineHeight: 1.2 }}>{animal.breederName}</div>}
+                                {animal.breederName && <div style={{ fontSize: smallSize, color: certFontColor, fontStyle: 'italic', lineHeight: 1.2 }}>{animal.breederName}</div>}
                             </>
                         )}
                     </div>
