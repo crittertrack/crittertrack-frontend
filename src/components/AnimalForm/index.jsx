@@ -566,7 +566,6 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     const [imagesLoaded, setImagesLoaded] = useState(false);
     const [stackedPedigree, setStackedPedigree] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
-    const [isCapturing, setIsCapturing] = useState(false);
     const [generations, setGenerations] = useState(4); // 1–4
     // Load persisted cert prefs from localStorage (shared across all animals for this user)
     const _savedPrefs = (() => { try { return JSON.parse(localStorage.getItem('ct_cert_prefs') || '{}'); } catch { return {}; } })();
@@ -869,9 +868,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         ggpStyle.textContent = '.ggp-chart-img { display: none !important; }';
         document.head.appendChild(ggpStyle);
 
-        setIsCapturing(true);
         try {
-            await new Promise(r => setTimeout(r, 150));
+            await new Promise(r => setTimeout(r, 100));
             return await html2canvas(el, {
                 scale: 3,
                 backgroundColor: '#ffffff',
@@ -886,7 +884,6 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 scrollY: 0,
             });
         } finally {
-            setIsCapturing(false);
             if (document.head.contains(ggpStyle)) {
                 document.head.removeChild(ggpStyle);
             }
@@ -1040,7 +1037,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
         return (
             <div style={baseStyle} onClick={handleClick}>
-                <div style={{ display: 'flex', flexDirection: genIndex === 2 ? 'row' : 'column', gap: imgSize > 0 ? 4 : 0, alignItems: 'center', justifyContent: isCapturing ? 'flex-start' : 'center', height: '100%', width: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: genIndex === 2 ? 'row' : 'column', gap: imgSize > 0 ? 4 : 0, alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
                     {/* Thumbnail — hidden at gen 4 or when imgSize=0 */}
                     {imgSrc && imgSize > 0 && (
                         <div className="hide-for-pdf" style={{ width: imgSize, height: imgSize, flexShrink: 0, borderRadius: 4, overflow: 'hidden', border: `1px solid ${certBorderColor}` }}>
@@ -1091,6 +1088,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             }
         }
 
+        const rowGap = 3;
         const cells = [];
         for (let g = 0; g < gens; g++) {
             const slots = genSlots[g];
@@ -1098,15 +1096,18 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             slots.forEach((slot, i) => {
                 const rowStart = i * rowsPerSlot + 1;
                 const animal = getAncestor(subject, slot.path);
+                // Explicit pixel height so html2canvas resolves height:100% correctly
+                // (html2canvas can't infer height from CSS Grid row-span)
+                const cellH = rowsPerSlot * rowMinH + (rowsPerSlot - 1) * rowGap;
                 cells.push(
                     <div key={`${g}-${i}`} style={{
                         gridColumn: g + 1,
                         gridRow: `${rowStart} / span ${rowsPerSlot}`,
                         padding: 2,
                         boxSizing: 'border-box',
-                        minHeight: 0,
+                        height: cellH,
                     }}>
-                        <div style={{ height: '100%' }}>
+                        <div style={{ height: cellH - 4 }}>
                             {renderCertCell(animal, slot.isSire, handleCardClick, g)}
                         </div>
                     </div>
