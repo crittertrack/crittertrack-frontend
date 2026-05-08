@@ -871,12 +871,13 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         const captureW = Math.max(el.scrollWidth, 1400);
         Object.assign(clone.style, {
             position: 'fixed',
-            top: '0',
+            top: '-99999px',
             left: '0',
             width: captureW + 'px',
             zIndex: '-9999',
             pointerEvents: 'none',
-            opacity: '0',
+            opacity: '1',
+            visibility: 'visible',
         });
         // Hide ggp chart images
         clone.querySelectorAll('.ggp-chart-img').forEach(img => { img.style.display = 'none'; });
