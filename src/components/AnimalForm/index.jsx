@@ -868,6 +868,27 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         ggpStyle.textContent = '.ggp-chart-img { display: none !important; }';
         document.head.appendChild(ggpStyle);
 
+        // html2canvas clips at overflow:hidden/auto/scroll ancestor boundaries.
+        // Temporarily override every overflow-clipped ancestor to visible so the
+        // full pedigree renders without being cut off.
+        const overflowEls = [];
+        let node = el.parentElement;
+        while (node && node !== document.body) {
+            const cs = window.getComputedStyle(node);
+            if (cs.overflow !== 'visible' || cs.overflowX !== 'visible' || cs.overflowY !== 'visible') {
+                overflowEls.push({
+                    node,
+                    overflow: node.style.overflow,
+                    overflowX: node.style.overflowX,
+                    overflowY: node.style.overflowY,
+                });
+                node.style.overflow = 'visible';
+                node.style.overflowX = 'visible';
+                node.style.overflowY = 'visible';
+            }
+            node = node.parentElement;
+        }
+
         try {
             await new Promise(r => setTimeout(r, 100));
             return await html2canvas(el, {
@@ -884,6 +905,12 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 scrollY: 0,
             });
         } finally {
+            // Restore overflow on all ancestors
+            overflowEls.forEach(({ node: n, overflow, overflowX, overflowY }) => {
+                n.style.overflow = overflow;
+                n.style.overflowX = overflowX;
+                n.style.overflowY = overflowY;
+            });
             if (document.head.contains(ggpStyle)) {
                 document.head.removeChild(ggpStyle);
             }
