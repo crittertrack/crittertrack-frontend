@@ -1167,9 +1167,9 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         return (
             <div style={{ display: 'flex', gap: 10, alignItems: 'center', backgroundColor: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 6, padding: '8px 12px 20px 12px', boxSizing: 'border-box', height: '100%', position: 'relative' }}>
                 {/* Gender icon top-right */}
-                <div style={{ position: 'absolute', top: 4, right: 6 }}><GenderIcon size={22} color={cardBorder} /></div>
+                <div style={{ position: 'absolute', top: 4, right: 6 }}><GenderIcon size={22} color={certBorderColor} /></div>
                 {/* Photo */}
-                <div className="hide-for-pdf" style={{ width: 115, height: 115, flexShrink: 0, overflow: 'hidden', borderRadius: 8, border: `2px solid ${cardBorder}`, backgroundColor: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="hide-for-pdf" style={{ width: 115, height: 115, flexShrink: 0, overflow: 'hidden', borderRadius: 8, border: `2px solid ${certBorderColor}`, backgroundColor: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {imgSrc ? (
                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={46} />
                     ) : (
