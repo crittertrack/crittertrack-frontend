@@ -1038,10 +1038,10 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
         return (
             <div style={baseStyle} onClick={handleClick}>
-                <div style={{ display: 'flex', flexDirection: genIndex === 2 ? 'row' : 'column', gap: imgSize > 0 ? 4 : 0, alignItems: genIndex === 2 ? 'flex-start' : 'center', justifyContent: genIndex === 2 ? 'flex-start' : 'center', height: '100%', width: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: genIndex === 2 ? 'row' : 'column', gap: imgSize > 0 ? 4 : 0, alignItems: 'center', justifyContent: genIndex === 2 ? 'flex-start' : 'center', height: '100%', width: '100%' }}>
                     {/* Thumbnail — hidden at gen 4 or when imgSize=0 */}
                     {imgSrc && imgSize > 0 && (
-                        <div className="hide-for-pdf" style={{ width: imgSize, height: imgSize, flexShrink: 0, borderRadius: 4, overflow: 'hidden', border: `1px solid ${certBorderColor}`, marginTop: genIndex === 2 ? 2 : 0 }}>
+                        <div className="hide-for-pdf" style={{ width: imgSize, height: imgSize, flexShrink: 0, borderRadius: 4, overflow: 'hidden', border: `1px solid ${certBorderColor}` }}>
                             <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={Math.round(imgSize * 0.4)} />
                         </div>
                     )}
