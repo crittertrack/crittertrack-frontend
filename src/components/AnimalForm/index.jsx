@@ -970,7 +970,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         const smallSize= genIndex === 0 ? '0.66rem' : genIndex === 1 ? '0.58rem' : genIndex === 2 ? '0.51rem' : '0.46rem';
         const iconSize = genIndex === 0 ? 13 : genIndex === 1 ? 11 : genIndex === 2 ? 10 : 9;
         const pad      = genIndex === 0 ? '6px 8px' : genIndex === 1 ? '5px 7px' : genIndex === 2 ? '4px 6px' : '3px 5px';
-        const borderColor = !animal ? certBorderColor
+        const borderColor = !animal ? (isSire ? '#3b82f6' : '#ec4899')
             : animal.gender === 'Male' ? '#3b82f6'
             : animal.gender === 'Female' ? '#ec4899'
             : certBorderColor;
