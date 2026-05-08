@@ -864,55 +864,42 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         const el = pedigreeRef.current;
         if (!el) return null;
 
-        const ggpStyle = document.createElement('style');
-        ggpStyle.textContent = '.ggp-chart-img { display: none !important; }';
-        document.head.appendChild(ggpStyle);
-
-        // html2canvas clips at overflow:hidden/auto/scroll ancestor boundaries.
-        // Temporarily override every overflow-clipped ancestor to visible so the
-        // full pedigree renders without being cut off.
-        const overflowEls = [];
-        let node = el.parentElement;
-        while (node && node !== document.body) {
-            const cs = window.getComputedStyle(node);
-            if (cs.overflow !== 'visible' || cs.overflowX !== 'visible' || cs.overflowY !== 'visible') {
-                overflowEls.push({
-                    node,
-                    overflow: node.style.overflow,
-                    overflowX: node.style.overflowX,
-                    overflowY: node.style.overflowY,
-                });
-                node.style.overflow = 'visible';
-                node.style.overflowX = 'visible';
-                node.style.overflowY = 'visible';
-            }
-            node = node.parentElement;
-        }
+        // Clone and mount directly on body so html2canvas sees no ancestor
+        // overflow/scroll clipping — the only reliable way to capture content
+        // that lives inside a scrollable modal.
+        const clone = el.cloneNode(true);
+        const captureW = Math.max(el.scrollWidth, 1400);
+        Object.assign(clone.style, {
+            position: 'fixed',
+            top: '0',
+            left: '0',
+            width: captureW + 'px',
+            zIndex: '-9999',
+            pointerEvents: 'none',
+            opacity: '0',
+        });
+        // Hide ggp chart images
+        clone.querySelectorAll('.ggp-chart-img').forEach(img => { img.style.display = 'none'; });
+        document.body.appendChild(clone);
 
         try {
-            await new Promise(r => setTimeout(r, 100));
-            return await html2canvas(el, {
+            await new Promise(r => setTimeout(r, 150));
+            return await html2canvas(clone, {
                 scale: 3,
                 backgroundColor: '#ffffff',
                 logging: false,
                 useCORS: true,
                 allowTaint: true,
                 letterRendering: true,
-                windowWidth: Math.max(el.scrollWidth, 1400),
-                windowHeight: el.scrollHeight,
+                windowWidth: captureW,
+                windowHeight: clone.scrollHeight,
                 imageTimeout: 15000,
                 scrollX: 0,
                 scrollY: 0,
             });
         } finally {
-            // Restore overflow on all ancestors
-            overflowEls.forEach(({ node: n, overflow, overflowX, overflowY }) => {
-                n.style.overflow = overflow;
-                n.style.overflowX = overflowX;
-                n.style.overflowY = overflowY;
-            });
-            if (document.head.contains(ggpStyle)) {
-                document.head.removeChild(ggpStyle);
+            if (document.body.contains(clone)) {
+                document.body.removeChild(clone);
             }
         }
     };
