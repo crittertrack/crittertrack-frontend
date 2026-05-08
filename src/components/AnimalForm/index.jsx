@@ -964,7 +964,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         // Scale text and image per generation column
         const imgSize  = stacked
             ? (genIndex === 0 ? 70 : genIndex === 1 ? 50 : genIndex === 2 ? 28 : 0)
-            : (genIndex === 0 ? 90 : genIndex === 1 ? 60 : genIndex === 2 ? 38 : 20);
+            : (genIndex === 0 ? 90 : genIndex === 1 ? 60 : genIndex === 2 ? 38 : 0);
         const nameSize = genIndex === 0 ? '0.90rem' : genIndex === 1 ? '0.78rem' : genIndex === 2 ? '0.66rem' : '0.58rem';
         const metaSize = genIndex === 0 ? '0.76rem' : genIndex === 1 ? '0.68rem' : genIndex === 2 ? '0.58rem' : '0.51rem';
         const smallSize= genIndex === 0 ? '0.66rem' : genIndex === 1 ? '0.58rem' : genIndex === 2 ? '0.51rem' : '0.46rem';
@@ -1027,11 +1027,21 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     )}
                     {/* Text */}
                     <div style={{ flex: stacked ? undefined : 1, minWidth: 0, textAlign: stacked ? 'center' : undefined }}>
-                        <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.25, wordBreak: 'break-word' }}>{fullName}</div>
-                        {variety && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{variety}</div>}
-                        {animal.geneticCode && genIndex <= 2 && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{animal.geneticCode}</div>}
-                        {animal.birthDate && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{formatDate(animal.birthDate)}</div>}
-                        {animal.breederName && genIndex <= 1 && <div style={{ fontSize: smallSize, color: certFontColor, fontStyle: 'italic', lineHeight: 1.2 }}>{animal.breederName}</div>}
+                        {genIndex === 3 ? (
+                            <>
+                                <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.25, wordBreak: 'break-word', paddingRight: 14 }}>{fullName}{animal.birthDate ? <span style={{ fontWeight: 400, marginLeft: 4 }}>· {formatDate(animal.birthDate)}</span> : null}</div>
+                                {variety && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{variety}</div>}
+                                {animal.breederName && <div style={{ fontSize: smallSize, color: certFontColor, fontStyle: 'italic', lineHeight: 1.2 }}>{animal.breederName}</div>}
+                            </>
+                        ) : (
+                            <>
+                                <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.25, wordBreak: 'break-word' }}>{fullName}</div>
+                                {variety && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{variety}</div>}
+                                {animal.geneticCode && genIndex <= 2 && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{animal.geneticCode}</div>}
+                                {animal.birthDate && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2 }}>{formatDate(animal.birthDate)}</div>}
+                                {animal.breederName && genIndex <= 1 && <div style={{ fontSize: smallSize, color: certFontColor, fontStyle: 'italic', lineHeight: 1.2 }}>{animal.breederName}</div>}
+                            </>
+                        )}
                     </div>
                 </div>
                 <div style={{ position: 'absolute', top: 2, right: 2 }}><GenderIcon size={iconSize} color={certBorderColor} /></div>
