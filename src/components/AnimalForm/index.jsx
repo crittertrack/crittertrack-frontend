@@ -975,10 +975,11 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             : animal.gender === 'Female' ? '#ec4899'
             : certBorderColor;
 
-        const bgColor = !animal || (!animal.isHidden && !animal.gender) ? (isSire ? '#e0f2fe' : '#fce7f3')
+        const bgColor = !animal ? (isSire ? '#dbeafe' : '#fce7f3')
+            : (!animal.isHidden && !animal.gender) ? (isSire ? '#dbeafe' : '#fce7f3')
             : animal.gender === 'Male' ? '#dbeafe'
             : animal.gender === 'Female' ? '#fce7f3'
-            : (isSire ? '#e0f2fe' : '#fce7f3');
+            : (isSire ? '#dbeafe' : '#fce7f3');
 
         const baseStyle = {
             border: `1px solid ${borderColor}`,
