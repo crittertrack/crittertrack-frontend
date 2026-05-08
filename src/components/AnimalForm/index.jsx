@@ -1074,7 +1074,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         if (!subject) return null;
 
         const maxRows = 16; // Fixed grid preserves 4-gen structure
-        const rowMinH = 46;
+        const rowMinH = 62;
 
         const genSlots = [];
         genSlots[0] = [
