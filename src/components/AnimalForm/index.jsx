@@ -912,20 +912,14 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             const srcCanvas = await capturePedigreeCanvas();
             if (!srcCanvas) return;
 
-            // Fit into A4 (portrait for vertical cert, landscape otherwise) with aspect ratio preserved
-            const pdf = new jsPDF({ orientation: vertical ? 'portrait' : 'landscape', unit: 'mm', format: 'a4' });
+            // Scale to fill full page width, height follows aspect ratio (custom page size)
             const pageW = vertical ? 210 : 297;
-            const pageH = vertical ? 297 : 210;
             const padMm = 4;
-            const maxW = pageW - padMm * 2;
-            const maxH = pageH - padMm * 2;
-            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height);
-            const drawW = srcCanvas.width * ratio;
+            const drawW = pageW - padMm * 2;
+            const ratio = drawW / srcCanvas.width;
             const drawH = srcCanvas.height * ratio;
-            const x = (pageW - drawW) / 2;
-            const y = (pageH - drawH) / 2;
-
-            pdf.addImage(srcCanvas.toDataURL('image/png'), 'PNG', x, y, drawW, drawH);
+            const pdf = new jsPDF({ orientation: vertical ? 'portrait' : 'landscape', unit: 'mm', format: [pageW, drawH + padMm * 2] });
+            pdf.addImage(srcCanvas.toDataURL('image/png'), 'PNG', padMm, padMm, drawW, drawH);
             pdf.save(`pedigree-${pedigreeData?.name || 'chart'}.pdf`);
         } catch (error) {
             console.error('Error generating PDF:', error);
@@ -941,22 +935,19 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             const srcCanvas = await capturePedigreeCanvas();
             if (!srcCanvas) return;
 
-            // Fit into A4 canvas at 300dpi with aspect ratio preserved.
+            // Scale to fill full paper width at 300dpi, height follows aspect ratio.
             const a4W = vertical ? 2480 : 3508;
-            const a4H = vertical ? 3508 : 2480;
             const pad = 60;
-            const maxW = a4W - pad * 2;
-            const maxH = a4H - pad * 2;
-            const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height);
-            const drawW = srcCanvas.width * ratio;
-            const drawH = srcCanvas.height * ratio;
+            const drawW = a4W - pad * 2;
+            const ratio = drawW / srcCanvas.width;
+            const drawH = Math.round(srcCanvas.height * ratio);
             const out = document.createElement('canvas');
             out.width = a4W;
-            out.height = a4H;
+            out.height = drawH + pad * 2;
             const ctx = out.getContext('2d');
             ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, a4W, a4H);
-            ctx.drawImage(srcCanvas, (a4W - drawW) / 2, (a4H - drawH) / 2, drawW, drawH);
+            ctx.fillRect(0, 0, out.width, out.height);
+            ctx.drawImage(srcCanvas, pad, pad, drawW, drawH);
 
             const link = document.createElement('a');
             link.download = `pedigree-${pedigreeData?.name || 'chart'}.png`;
