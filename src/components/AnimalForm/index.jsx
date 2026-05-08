@@ -1018,7 +1018,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
         return (
             <div style={baseStyle} onClick={handleClick}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: imgSize > 0 ? 4 : 0, alignItems: 'center', height: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: imgSize > 0 ? 4 : 0, alignItems: 'center', justifyContent: 'center', height: '100%' }}>
                     {/* Thumbnail — hidden at gen 4 or when imgSize=0 */}
                     {imgSrc && imgSize > 0 && (
                         <div className="hide-for-pdf" style={{ width: imgSize, height: imgSize, flexShrink: 0, borderRadius: 4, overflow: 'hidden', border: `1px solid ${certBorderColor}` }}>
