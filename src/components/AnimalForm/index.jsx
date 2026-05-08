@@ -963,8 +963,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     const renderCertCell = (animal, isSire, onClick = null, genIndex = 0, stacked = false) => {
         // Scale text and image per generation column
         const imgSize  = stacked
-            ? (genIndex === 0 ? 60 : genIndex === 1 ? 44 : genIndex === 2 ? 24 : 0)
-            : (genIndex === 0 ? 72 : genIndex === 1 ? 50 : genIndex === 2 ? 30 : 0);
+            ? (genIndex === 0 ? 70 : genIndex === 1 ? 50 : genIndex === 2 ? 28 : 0)
+            : (genIndex === 0 ? 90 : genIndex === 1 ? 60 : genIndex === 2 ? 38 : 0);
         const nameSize = genIndex === 0 ? '0.90rem' : genIndex === 1 ? '0.78rem' : genIndex === 2 ? '0.66rem' : '0.58rem';
         const metaSize = genIndex === 0 ? '0.76rem' : genIndex === 1 ? '0.68rem' : genIndex === 2 ? '0.58rem' : '0.51rem';
         const smallSize= genIndex === 0 ? '0.66rem' : genIndex === 1 ? '0.58rem' : genIndex === 2 ? '0.51rem' : '0.46rem';
