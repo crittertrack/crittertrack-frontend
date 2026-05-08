@@ -968,7 +968,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         const nameSize = genIndex === 0 ? '0.90rem' : genIndex === 1 ? '0.78rem' : genIndex === 2 ? '0.66rem' : '0.58rem';
         const metaSize = genIndex === 0 ? '0.76rem' : genIndex === 1 ? '0.68rem' : genIndex === 2 ? '0.58rem' : '0.51rem';
         const smallSize= genIndex === 0 ? '0.66rem' : genIndex === 1 ? '0.58rem' : genIndex === 2 ? '0.51rem' : '0.46rem';
-        const iconSize = genIndex === 0 ? 13 : genIndex === 1 ? 11 : genIndex === 2 ? 10 : 9;
+        const iconSize = genIndex === 0 ? 26 : genIndex === 1 ? 22 : genIndex === 2 ? 20 : 18;
         const pad      = genIndex === 0 ? '6px 8px' : genIndex === 1 ? '5px 7px' : genIndex === 2 ? '4px 6px' : '3px 5px';
         const borderColor = !animal ? (isSire ? '#3b82f6' : '#ec4899')
             : animal.gender === 'Male' ? '#3b82f6'
@@ -1044,7 +1044,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     </div>
                 </div>
                 <div style={{ position: 'absolute', top: 2, right: 2 }}><GenderIcon size={iconSize} color={certBorderColor} /></div>
-                {animal.id_public && <div style={{ position: 'absolute', bottom: 2, right: 4, fontSize: smallSize, color: '#9ca3af', fontFamily: 'monospace', lineHeight: 1 }}>{animal.id_public}</div>}
+                {animal.id_public && <div style={{ position: 'absolute', bottom: 2, right: 4, fontSize: smallSize, color: '#6b7280', fontFamily: 'monospace', fontWeight: 600, lineHeight: 1 }}>{animal.id_public}</div>}
             </div>
         );
     };
@@ -1166,6 +1166,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
         return (
             <div style={{ display: 'flex', gap: 10, alignItems: 'center', backgroundColor: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 6, padding: '8px 12px 20px 12px', boxSizing: 'border-box', height: '100%', position: 'relative' }}>
+                {/* Gender icon top-right */}
+                <div style={{ position: 'absolute', top: 4, right: 6 }}><GenderIcon size={22} color={cardBorder} /></div>
                 {/* Photo */}
                 <div className="hide-for-pdf" style={{ width: 115, height: 115, flexShrink: 0, overflow: 'hidden', borderRadius: 8, border: `2px solid ${cardBorder}`, backgroundColor: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {imgSrc ? (
@@ -1176,9 +1178,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 </div>
                 {/* Details */}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+                    <div style={{ marginBottom: 4 }}>
                         <span style={{ fontSize: '0.9rem', fontWeight: 700, color: certFontColor }}>{fullName}</span>
-                        <GenderIcon size={13} style={{ flexShrink: 0 }} />
                     </div>
                     <table style={{ borderCollapse: 'collapse', fontSize: '0.7rem' }}>
                         <tbody>
@@ -1209,7 +1210,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                         </tbody>
                     </table>
                 </div>
-                {animal.id_public && <div style={{ position: 'absolute', bottom: 4, right: 8, fontSize: '0.55rem', color: '#9ca3af', fontFamily: 'monospace' }}>{animal.id_public}</div>}
+                {animal.id_public && <div style={{ position: 'absolute', bottom: 4, right: 8, fontSize: '0.62rem', color: '#6b7280', fontFamily: 'monospace', fontWeight: 600 }}>{animal.id_public}</div>}
             </div>
         );
     };
