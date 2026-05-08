@@ -1038,15 +1038,15 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
         return (
             <div style={baseStyle} onClick={handleClick}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: imgSize > 0 ? 4 : 0, alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: genIndex === 2 ? 'row' : 'column', gap: imgSize > 0 ? 4 : 0, alignItems: genIndex === 2 ? 'flex-start' : 'center', justifyContent: genIndex === 2 ? 'flex-start' : 'center', height: '100%', width: '100%' }}>
                     {/* Thumbnail — hidden at gen 4 or when imgSize=0 */}
                     {imgSrc && imgSize > 0 && (
-                        <div className="hide-for-pdf" style={{ width: imgSize, height: imgSize, flexShrink: 0, borderRadius: 4, overflow: 'hidden', border: `1px solid ${certBorderColor}` }}>
+                        <div className="hide-for-pdf" style={{ width: imgSize, height: imgSize, flexShrink: 0, borderRadius: 4, overflow: 'hidden', border: `1px solid ${certBorderColor}`, marginTop: genIndex === 2 ? 2 : 0 }}>
                             <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={Math.round(imgSize * 0.4)} />
                         </div>
                     )}
                     {/* Text */}
-                    <div style={{ minWidth: 0, width: '100%', textAlign: 'center' }}>
+                    <div style={{ minWidth: 0, width: genIndex === 2 ? `calc(100% - ${imgSize}px - 4px)` : '100%', textAlign: genIndex === 2 ? 'left' : 'center', paddingLeft: genIndex === 2 ? 4 : 0, fontSize: genIndex === 2 ? '0.62rem' : 'inherit', overflowWrap: 'break-word' }}>
                         {genIndex === 3 ? (
                             <>
                                 <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', padding: '0 16px 0 4px' }}>{fullName}{variety ? <span style={{ fontWeight: 400, marginLeft: 4 }}>· {variety}</span> : null}</div>
