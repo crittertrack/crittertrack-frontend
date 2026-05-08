@@ -1072,8 +1072,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     <div style={{ minWidth: 0, width: genIndex === 2 ? `calc(100% - ${imgSize}px - 4px)` : '100%', textAlign: 'center', paddingLeft: genIndex === 2 ? 4 : 0, fontSize: genIndex === 2 ? '0.62rem' : 'inherit', overflowWrap: 'break-word' }}>
                         {genIndex === 3 ? (
                             <>
-                                <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', padding: '0 16px 0 4px' }}>{fullName}{variety ? <span style={{ fontWeight: 400, marginLeft: 4 }}>· {variety}</span> : null}</div>
-                                <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.15, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', padding: '0 16px 0 4px' }}>{[animal.birthDate ? formatDate(animal.birthDate) : null, animal.breederName !== 'Anonymous Breeder' ? animal.breederName : null].filter(Boolean).join(' · ')}</div>
+                                <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.4, whiteSpace: 'nowrap', overflowX: 'hidden', overflowY: 'visible', textOverflow: 'ellipsis', padding: '0 16px 0 4px' }}>{fullName}{variety ? <span style={{ fontWeight: 400, marginLeft: 4 }}>· {variety}</span> : null}</div>
+                                <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.4, whiteSpace: 'nowrap', overflowX: 'hidden', overflowY: 'visible', textOverflow: 'ellipsis', padding: '0 16px 0 4px' }}>{[animal.birthDate ? formatDate(animal.birthDate) : null, animal.breederName !== 'Anonymous Breeder' ? animal.breederName : null].filter(Boolean).join(' · ')}</div>
                             </>
                         ) : (
                             <>
