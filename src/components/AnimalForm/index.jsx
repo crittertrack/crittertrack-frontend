@@ -970,12 +970,12 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         const smallSize= genIndex === 0 ? '0.66rem' : genIndex === 1 ? '0.58rem' : genIndex === 2 ? '0.51rem' : '0.46rem';
         const iconSize = genIndex === 0 ? 26 : genIndex === 1 ? 22 : genIndex === 2 ? 20 : 18;
         const pad      = genIndex === 0 ? '6px 8px' : genIndex === 1 ? '5px 7px' : genIndex === 2 ? '4px 6px' : '3px 5px';
-        const borderColor = !animal ? (isSire ? '#3b82f6' : '#ec4899')
+        const borderColor = (!animal || animal.isHidden) ? (isSire ? '#3b82f6' : '#ec4899')
             : animal.gender === 'Male' ? '#3b82f6'
             : animal.gender === 'Female' ? '#ec4899'
             : certBorderColor;
 
-        const bgColor = !animal ? (isSire ? '#dbeafe' : '#fce7f3')
+        const bgColor = (!animal || animal.isHidden) ? (isSire ? '#dbeafe' : '#fce7f3')
             : (!animal.isHidden && !animal.gender) ? (isSire ? '#dbeafe' : '#fce7f3')
             : animal.gender === 'Male' ? '#dbeafe'
             : animal.gender === 'Female' ? '#fce7f3'
@@ -1005,8 +1005,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         if (animal.isHidden) {
             return (
                 <div style={baseStyle}>
-                    <div style={{ fontSize: metaSize, color: '#6b7280', fontWeight: 600, textAlign: 'center', paddingTop: 8 }}>Hidden</div>
-                    <div style={{ fontSize: smallSize, color: '#9ca3af', textAlign: 'center' }}>Private</div>
+                    <div style={{ fontSize: metaSize, color: '#9ca3af', textAlign: 'center', paddingTop: 8 }}>Unknown</div>
                     <div style={{ position: 'absolute', top: 2, right: 2 }}><GenderIcon size={iconSize} color={certBorderColor} /></div>
                 </div>
             );
