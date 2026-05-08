@@ -871,13 +871,13 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         try {
             await new Promise(r => setTimeout(r, 100));
             return await html2canvas(el, {
-                scale: 2,
+                scale: 3,
                 backgroundColor: '#ffffff',
                 logging: false,
                 useCORS: true,
                 allowTaint: true,
                 letterRendering: true,
-                windowWidth: el.scrollWidth,
+                windowWidth: Math.max(el.scrollWidth, 1400),
                 windowHeight: el.scrollHeight,
                 imageTimeout: 15000,
                 scrollX: 0,
@@ -926,10 +926,10 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             const srcCanvas = await capturePedigreeCanvas();
             if (!srcCanvas) return;
 
-            // Fit into A4 canvas at 200dpi with aspect ratio preserved.
-            const a4W = vertical ? 1654 : 2339;
-            const a4H = vertical ? 2339 : 1654;
-            const pad = 30;
+            // Fit into A4 canvas at 300dpi with aspect ratio preserved.
+            const a4W = vertical ? 2480 : 3508;
+            const a4H = vertical ? 3508 : 2480;
+            const pad = 60;
             const maxW = a4W - pad * 2;
             const maxH = a4H - pad * 2;
             const ratio = Math.min(maxW / srcCanvas.width, maxH / srcCanvas.height);
