@@ -881,6 +881,15 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         });
         // Hide ggp chart images
         clone.querySelectorAll('.ggp-chart-img').forEach(img => { img.style.display = 'none'; });
+        // Remove all height constraints inside cells so html2canvas never clips text.
+        // The grid provides row sizing; inner divs just need to show all content.
+        clone.querySelectorAll('div').forEach(div => {
+            const h = div.style.height;
+            if (h === '100%') {
+                div.style.height = 'auto';
+                div.style.minHeight = h;
+            }
+        });
         document.body.appendChild(clone);
 
         try {
