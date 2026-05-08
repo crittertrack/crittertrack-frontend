@@ -1061,7 +1061,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         // Gen 2 (grandparents): 4 rows — each spans 2 of the 8 rows (if gens=3) etc.
         // We always build 2^(gens-1) leaf rows and use rowspan.
 
-        const totalRows = Math.pow(2, gens - 1); // gen1→1 row per parent, gen2→2, gen3→4, gen4→8
+        const maxGenerations = 4;
 
         // Build rows. Each row has one cell per generation.
         // For gen g (1-indexed), rowspan = totalRows / 2^(g-1)
@@ -1082,9 +1082,9 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             }
         }
 
-        // Build table rows. Number of rows = genSlots[gens-1].length
-        const rowCount = genSlots[gens - 1].length;
-        // Keep box sizing consistent when switching generation count
+        // Keep a fixed vertical grid so heights stay evenly distributed
+        // even when viewing fewer columns (1-3 generations).
+        const rowCount = Math.pow(2, maxGenerations);
         const rowMinH = 46;
         const rows = [];
 
@@ -1110,10 +1110,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             rows.push(<tr key={row} style={{ minHeight: rowMinH }}>{cells}</tr>);
         }
 
-        const tableWidthPct = `${(gens / 4) * 100}%`;
-
         return (
-            <table style={{ width: tableWidthPct, borderCollapse: 'separate', borderSpacing: 3, tableLayout: 'fixed' }}>
+            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 3, tableLayout: 'fixed' }}>
                 <tbody>{rows}</tbody>
             </table>
         );
