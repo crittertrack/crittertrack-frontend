@@ -1583,7 +1583,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     // ── Shared Certificate JSX ─────────────────────────────────────────────
     const handleCardClick = (clickedAnimal) => {
         if (!clickedAnimal?.id_public) return;
-        if (onViewAnimal) { onViewAnimal(clickedAnimal, 16, 'chart'); }
+        if (onViewAnimal) { onViewAnimal(clickedAnimal, 1, 5); }
         else {
             // Stay in modal: update the viewing animal and re-fetch its pedigree
             setCurrentViewingAnimal(clickedAnimal);

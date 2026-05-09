@@ -398,7 +398,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             >
                                 <ArrowLeft size={16} className="mr-1" /> Back
                             </button>
-                            <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={24} />
                             </button>
                         </div>
@@ -466,7 +466,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                 authToken={authToken}
                                 tooltipText="Report this animal"
                             />
-                            <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={28} />
                             </button>
                         </div>

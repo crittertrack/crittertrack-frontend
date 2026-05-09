@@ -456,7 +456,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                             >
                                 <ArrowLeft size={16} className="mr-1" /> Back
                             </button>
-                            <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={24} />
                             </button>
                         </div>
@@ -616,7 +616,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                                     Add Sibling
                                 </button>
                             )}
-                            <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={28} />
                             </button>
                         </div>

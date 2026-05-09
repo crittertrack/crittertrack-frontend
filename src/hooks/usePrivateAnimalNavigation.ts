@@ -48,20 +48,24 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
      * Handles fetching latest data and setting up return paths
      */
     const handleViewAnimal = useCallback(
-        (animal) => {
+        (animal, targetTab = 1, returnTab = null) => {
             if (!animal) return;
 
             // Add current animal to history before viewing new one
             if (animalToView) {
-                setAnimalViewHistory(prev => [...prev, animalToView]);
+                setAnimalViewHistory(prev => [...prev, {
+                    animal: animalToView,
+                    tab: Number.isFinite(returnTab) ? Number(returnTab) : privateAnimalInitialTab,
+                }]);
             }
 
             // Set the new animal to view
+            setPrivateAnimalInitialTab(Number.isFinite(targetTab) ? Number(targetTab) : 1);
             setAnimalToView(animal);
             setAnimalToEdit(null);
             setViewAnimalBreederInfo(null);
         },
-        [animalToView]
+        [animalToView, privateAnimalInitialTab]
     );
 
     /**
@@ -109,15 +113,17 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
         if (animalViewHistory.length > 0) {
             // Pop from history
             const newHistory = [...animalViewHistory];
-            const previousAnimal = newHistory.pop();
+            const previousEntry = newHistory.pop();
             setAnimalViewHistory(newHistory);
-            setAnimalToView(previousAnimal);
+            setAnimalToView(previousEntry?.animal || previousEntry || null);
+            setPrivateAnimalInitialTab(Number.isFinite(previousEntry?.tab) ? Number(previousEntry.tab) : 1);
             setSireData(null);
             setDamData(null);
             setOffspringData([]);
         } else {
             // No history - close view
             setAnimalToView(null);
+            setPrivateAnimalInitialTab(1);
             setSireData(null);
             setDamData(null);
             setOffspringData([]);
@@ -131,6 +137,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
         setAnimalToView(null);
         setAnimalToEdit(null);
         setAnimalViewHistory([]);
+        setPrivateAnimalInitialTab(1);
         setSireData(null);
         setDamData(null);
         setOffspringData([]);
