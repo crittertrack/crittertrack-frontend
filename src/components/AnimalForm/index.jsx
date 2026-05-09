@@ -558,6 +558,8 @@ const LitterSyncConflictModal = ({ items, onResolve, onSkip }) => {
 };
 
 // Pedigree Chart Component
+const pedigreeTreeCache = new Map(); // key: `${authScope}:${animalId}` => { data, ownerProfile }
+
 const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BASE_URL, authToken = null, inline = false, vertical = false, manualData = null, onViewAnimal = null, inlineGenerations = null }, ref) => {
     const [pedigreeData, setPedigreeData] = useState(null);
     const [displayData, setDisplayData] = useState(null);
@@ -659,6 +661,17 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         // Note: inline mode still does the full recursive fetch so all ancestor generations load.
 
         const fetchPedigreeData = async () => {
+            const rootId = animalId || animalData?.id_public;
+            const authScope = authToken ? 'auth' : 'public';
+            const cacheKey = rootId ? `${authScope}:${rootId}` : null;
+            if (cacheKey && pedigreeTreeCache.has(cacheKey)) {
+                const cached = pedigreeTreeCache.get(cacheKey);
+                setPedigreeData(cached?.data || null);
+                setOwnerProfile(cached?.ownerProfile || null);
+                setLoading(false);
+                return;
+            }
+
             setLoading(true);
             try {
                 // Enhanced recursive function to fetch animal, ancestors, and descendants
@@ -799,10 +812,11 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     return result;
                 };
 
-                const data = await fetchAnimalWithFamily(animalId || animalData?.id_public);
+                const data = await fetchAnimalWithFamily(rootId);
                 setPedigreeData(data);
 
                 // Fetch breeder profile for the main animal
+                let fetchedOwnerProfile = null;
                 if (data?.breederId_public) {
                     try {
                         const breederId = data.breederId_public;
@@ -822,10 +836,15 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                                 id_public: profile.id_public
                             });
                             setOwnerProfile(profile);
+                            fetchedOwnerProfile = profile;
                         }
                     } catch (error) {
                         console.error('Failed to fetch owner profile:', error);
                     }
+                }
+
+                if (cacheKey) {
+                    pedigreeTreeCache.set(cacheKey, { data, ownerProfile: fetchedOwnerProfile });
                 }
             } catch (error) {
                 console.error('Error fetching pedigree data:', error);
@@ -840,6 +859,17 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     // Re-fetch pedigree when clicking an ancestor (currentViewingAnimal changes)
     useEffect(() => {
         if (!currentViewingAnimal?.id_public) return;
+
+        const rootId = currentViewingAnimal.id_public;
+        const authScope = authToken ? 'auth' : 'public';
+        const cacheKey = `${authScope}:${rootId}`;
+        if (pedigreeTreeCache.has(cacheKey)) {
+            const cached = pedigreeTreeCache.get(cacheKey);
+            setPedigreeData(cached?.data || null);
+            setOwnerProfile(cached?.ownerProfile || null);
+            setLoading(false);
+            return;
+        }
         
         setLoading(true);
         const resultCache = new Map();
@@ -923,15 +953,23 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             return result;
         };
 
-        const ancestorId = currentViewingAnimal.id_public;
-        fetchAnimalWithFamily(ancestorId).then(data => {
+        fetchAnimalWithFamily(rootId).then(data => {
             setPedigreeData(data);
             setLoading(false);
+            let fetchedOwnerProfile = null;
             // Fetch breeder profile for the ancestor
             if (data?.breederId_public) {
                 axios.get(`${API_BASE_URL}/public/profiles/search?query=${data.breederId_public}&limit=1`)
-                    .then(r => { if (r.data?.[0]) setOwnerProfile(r.data[0]); })
+                    .then(r => {
+                        if (r.data?.[0]) {
+                            fetchedOwnerProfile = r.data[0];
+                            setOwnerProfile(r.data[0]);
+                        }
+                        pedigreeTreeCache.set(cacheKey, { data, ownerProfile: fetchedOwnerProfile });
+                    })
                     .catch(() => {});
+            } else {
+                pedigreeTreeCache.set(cacheKey, { data, ownerProfile: null });
             }
         }).catch(error => {
             console.error('Error fetching ancestor pedigree:', error);
