@@ -2745,8 +2745,18 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
 
                             {showHorizCert && <PedigreeChart animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => setShowHorizCert(false)} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />}
                                 {showVertCert && <PedigreeChart vertical animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => setShowVertCert(false)} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />}
-                            <div>
-                            <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
+                            <div ref={mpTreeRef} className="bg-white p-2 rounded-xl">
+                                <PedigreeChart
+                                    inline
+                                    inlineGenerations={3}
+                                    animalId={animal.id_public}
+                                    animalData={animal}
+                                    API_BASE_URL={API_BASE_URL}
+                                    authToken={authToken}
+                                    manualData={mpEnrichedData}
+                                />
+                            </div>
+                            <div className="hidden">
 
                             {(() => {
                                 const subjectVariety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => animal[k]).filter(Boolean).join(' ');

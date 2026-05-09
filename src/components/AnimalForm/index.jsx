@@ -558,7 +558,7 @@ const LitterSyncConflictModal = ({ items, onResolve, onSkip }) => {
 };
 
 // Pedigree Chart Component
-const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BASE_URL, authToken = null, inline = false, vertical = false, manualData = null, onViewAnimal = null }, ref) => {
+const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BASE_URL, authToken = null, inline = false, vertical = false, manualData = null, onViewAnimal = null, inlineGenerations = null }, ref) => {
     const [pedigreeData, setPedigreeData] = useState(null);
     const [displayData, setDisplayData] = useState(null);
     const [currentViewingAnimal, setCurrentViewingAnimal] = useState(null);
@@ -567,7 +567,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     const [imagesLoaded, setImagesLoaded] = useState(false);
     const [stackedPedigree, setStackedPedigree] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
-    const [generations, setGenerations] = useState(4); // 1–4
+    const [generations, setGenerations] = useState(inline && inlineGenerations ? inlineGenerations : 4); // 1–4
     // Load persisted cert prefs from localStorage (shared across all animals for this user)
     const _savedPrefs = (() => { try { return JSON.parse(localStorage.getItem('ct_cert_prefs') || '{}'); } catch { return {}; } })();
     const [certText, setCertText] = useState(_savedPrefs.certText ?? '');
@@ -578,12 +578,12 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     const [certBorderColor, setCertBorderColor] = useState(_savedPrefs.certBorderColor ?? '#374151');
     const [certBgColor, setCertBgColor] = useState(_savedPrefs.certBgColor ?? '#ffffff');
     const [showCustomPanel, setShowCustomPanel] = useState(false);
-    const [vertGenerations, setVertGenerations] = useState(3);
+    const [vertGenerations, setVertGenerations] = useState(inline && inlineGenerations ? inlineGenerations : 3);
     const pedigreeRef = useRef(null);
 
     useEffect(() => {
-        if (vertical) setVertGenerations(4);
-    }, [vertical]);
+        if (vertical) setVertGenerations(inline && inlineGenerations ? inlineGenerations : 4);
+    }, [vertical, inline, inlineGenerations]);
 
     // Persist cert prefs to localStorage whenever they change
     useEffect(() => {
@@ -1492,8 +1492,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     if (inline) {
         return (
             <>
-                <div className="overflow-x-auto">
-                    <div style={{ minWidth: 600 }}>{certJsx}</div>
+                <div className="w-full">
+                    {certJsx}
                 </div>
                 {stackedPedigree && (
                     <div className="fixed inset-0 z-[90]">
