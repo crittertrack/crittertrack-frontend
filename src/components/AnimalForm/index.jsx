@@ -1150,7 +1150,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             }
         }
         const totalCols = Math.pow(2, gens);
-        const rowHeights = [200, 155, 112];
+        // Compact profile for 4-gen vertical view so all rows fit portrait cleanly.
+        const rowHeights = gens >= 4 ? [188, 146, 108, 84] : [200, 155, 112];
         const rows = [];
         for (let g = 0; g < gens; g++) {
             const slots = vGenSlots[g];
@@ -1371,7 +1372,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                             {vertical ? (
                                 <>
                                 <input
-                                    type="range" min={1} max={3} step={1}
+                                    type="range" min={1} max={4} step={1}
                                     value={vertGenerations}
                                     onChange={e => setVertGenerations(Number(e.target.value))}
                                     className="w-20 accent-primary cursor-pointer"
