@@ -1430,99 +1430,99 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         if (!rootAnimal) return null;
 
         const autoDepth = getInlineAncestorDepth(rootAnimal);
-        let effectiveGens = Math.max(0, autoDepth);
-
-        // Build slots and filter out generations with no real (non-null, non-hidden) ancestors
-        const slots = [];
-        slots[0] = [{ path: [], isSire: null }];
-        for (let g = 1; g <= effectiveGens; g++) {
-            slots[g] = [];
-            for (const slot of slots[g - 1]) {
-                slots[g].push({ path: [...slot.path, 'father'], isSire: true });
-                slots[g].push({ path: [...slot.path, 'mother'], isSire: false });
-            }
-        }
-
-        // Find the last generation with at least one real ancestor
-        for (let g = effectiveGens; g > 0; g--) {
-            const hasRealAncestor = slots[g].some(slot => {
-                const animal = getAncestor(rootAnimal, slot.path);
-                return animal && !animal.isHidden;
-            });
-            if (hasRealAncestor) {
-                effectiveGens = g;
-                break;
-            }
-            // If no real ancestors in this gen, truncate slots
-            if (g === 1) effectiveGens = 0;
-        }
+        const maxRequestedGens = Number.isFinite(gens) ? Math.max(0, gens) : autoDepth;
+        const effectiveGens = Math.max(0, Math.min(autoDepth, maxRequestedGens));
 
         const nodeSize = 86;
         const nodeHalf = nodeSize / 2;
         const rowGap = 170;
         const padX = 120;
         const padY = 70;
-        const maxLeaves = Math.max(1, Math.pow(2, effectiveGens));
         const leafGap = 120;
-        const worldW = Math.max(900, padX * 2 + maxLeaves * leafGap);
-        const worldH = Math.max(520, padY * 2 + nodeSize + effectiveGens * rowGap);
 
         const nodes = [];
-        const nodePos = new Map();
-
-        for (let g = 0; g <= effectiveGens; g++) {
-            const genSlots = slots[g];
-            const leavesPerNode = Math.pow(2, effectiveGens - g);
-            const y = worldH - padY - nodeHalf - g * rowGap;
-            genSlots.forEach((slot, idx) => {
-                const animal = g === 0 ? rootAnimal : getAncestor(rootAnimal, slot.path);
-                const key = `${g}-${idx}`;
-                const centerLeaf = idx * leavesPerNode + leavesPerNode / 2;
-                const x = padX + centerLeaf * leafGap;
-                nodes.push({ key, g, idx, x, y, slot, animal });
-                nodePos.set(key, { x, y });
-            });
-        }
-
         const edges = [];
-        for (let g = 1; g <= effectiveGens; g++) {
-            const genSlots = slots[g];
-            genSlots.forEach((_, idx) => {
-                const parentKey = `${g}-${idx}`;
-                const childKey = `${g - 1}-${Math.floor(idx / 2)}`;
-                const parent = nodePos.get(parentKey);
-                const child = nodePos.get(childKey);
-                if (!parent || !child) return;
-                const startX = child.x;
-                const startY = child.y - nodeHalf;
-                const endX = parent.x;
-                const endY = parent.y + nodeHalf;
-                const midY = (startY + endY) / 2;
-                edges.push(`M ${startX} ${startY} L ${startX} ${midY} L ${endX} ${midY} L ${endX} ${endY}`);
-            });
-        }
+        let leafIndex = 0;
+        let maxDepth = 0;
+
+        const buildSparse = (animal, depth, isSire, key) => {
+            if (!animal) return null;
+
+            maxDepth = Math.max(maxDepth, depth);
+            const canExpand = depth < effectiveGens;
+
+            const fatherLayout = canExpand && animal.father
+                ? buildSparse(animal.father, depth + 1, true, `${key}-f`)
+                : null;
+            const motherLayout = canExpand && animal.mother
+                ? buildSparse(animal.mother, depth + 1, false, `${key}-m`)
+                : null;
+
+            let xLeaf;
+            if (fatherLayout && motherLayout) xLeaf = (fatherLayout.xLeaf + motherLayout.xLeaf) / 2;
+            else if (fatherLayout) xLeaf = fatherLayout.xLeaf;
+            else if (motherLayout) xLeaf = motherLayout.xLeaf;
+            else {
+                xLeaf = leafIndex;
+                leafIndex += 1;
+            }
+
+            nodes.push({ key, animal, depth, isSire, xLeaf });
+
+            if (fatherLayout) edges.push({ childKey: key, parentKey: fatherLayout.key });
+            if (motherLayout) edges.push({ childKey: key, parentKey: motherLayout.key });
+
+            return { key, xLeaf };
+        };
+
+        buildSparse(rootAnimal, 0, null, 'root');
+
+        const leafCount = Math.max(1, leafIndex);
+        const worldW = Math.max(900, padX * 2 + Math.max(0, leafCount - 1) * leafGap + nodeSize);
+        const worldH = Math.max(520, padY * 2 + nodeSize + maxDepth * rowGap);
+
+        const nodePos = new Map();
+        nodes.forEach((n) => {
+            const x = padX + n.xLeaf * leafGap + nodeHalf;
+            const y = worldH - padY - nodeHalf - n.depth * rowGap;
+            nodePos.set(n.key, { x, y });
+        });
+
+        const edgePaths = edges.map(({ childKey, parentKey }) => {
+            const child = nodePos.get(childKey);
+            const parent = nodePos.get(parentKey);
+            if (!child || !parent) return null;
+            const startX = child.x;
+            const startY = child.y - nodeHalf;
+            const endX = parent.x;
+            const endY = parent.y + nodeHalf;
+            const midY = (startY + endY) / 2;
+            return `M ${startX} ${startY} L ${startX} ${midY} L ${endX} ${midY} L ${endX} ${endY}`;
+        }).filter(Boolean);
 
         return (
             <div style={{ position: 'relative', width: worldW, height: worldH }}>
                 <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
-                    {edges.map((d, i) => (
+                    {edgePaths.map((d, i) => (
                         <path key={i} d={d} fill="none" stroke="#8ea0ba" strokeWidth="2" strokeLinecap="round" />
                     ))}
                 </svg>
 
                 {nodes.map((n) => {
                     const a = n.animal;
+                    const p = nodePos.get(n.key);
+                    if (!p) return null;
                     const isUnknown = !a || a.isHidden;
                     const imgSrc = a && !a.isHidden ? (a.imageUrl || a.photoUrl || null) : null;
-                    const isMale = a?.gender === 'Male' || (a?.gender !== 'Female' && n.slot.isSire === true);
-                    const isFemale = a?.gender === 'Female' || (a?.gender !== 'Male' && n.slot.isSire === false);
+                    const isMale = a?.gender === 'Male' || (a?.gender !== 'Female' && n.isSire === true);
+                    const isFemale = a?.gender === 'Female' || (a?.gender !== 'Male' && n.isSire === false);
                     const borderColor = isUnknown ? '#94a3b8' : isMale ? '#3b82f6' : isFemale ? '#ec4899' : '#64748b';
                     const bgColor = isUnknown ? '#e5e7eb' : '#f8fafc';
                     const fullName = a && !a.isHidden ? [a.prefix, a.name, a.suffix].filter(Boolean).join(' ') : 'Unknown';
                     const clickable = !!(a && !a.isHidden && a.id_public);
 
                     return (
-                        <div key={n.key} style={{ position: 'absolute', left: n.x - nodeHalf, top: n.y - nodeHalf, width: nodeSize, transform: 'translate(0, 0)' }}>
+                        <div key={n.key} style={{ position: 'absolute', left: p.x - nodeHalf, top: p.y - nodeHalf, width: nodeSize, transform: 'translate(0, 0)' }}>
                             <div
                                 onClick={clickable ? () => handleCardClick(a) : undefined}
                                 style={{
