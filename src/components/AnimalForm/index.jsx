@@ -1041,7 +1041,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
         const handleClick = onClick && animal.id_public ? () => onClick(animal) : undefined;
 
-        const isRowLayout = (genIndex === 2 && !stacked) || (stacked && genIndex === 0);
+        const isRowLayout = (genIndex === 2 && !stacked) || (stacked && (genIndex === 0 || genIndex === 1));
 
         return (
             <div style={baseStyle} onClick={handleClick}>
@@ -1053,7 +1053,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                         </div>
                     )}
                     {/* Text */}
-                    <div style={{ minWidth: 0, width: isRowLayout ? `calc(100% - ${imgSize}px - 6px)` : '100%', textAlign: (stacked && genIndex === 0) ? 'left' : 'center', paddingLeft: isRowLayout ? 4 : 0, fontSize: (genIndex === 2 && !stacked) ? '0.62rem' : 'inherit', overflowWrap: 'break-word' }}>
+                    <div style={{ minWidth: 0, width: isRowLayout ? `calc(100% - ${imgSize}px - 6px)` : '100%', textAlign: (stacked && (genIndex === 0 || genIndex === 1)) ? 'left' : 'center', paddingLeft: isRowLayout ? 4 : 0, fontSize: (genIndex === 2 && !stacked) ? '0.62rem' : 'inherit', overflowWrap: 'break-word' }}>
                         {genIndex === 3 ? (
                             <>
                                 <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.4, whiteSpace: 'nowrap', padding: '0 20px 0 4px' }}>{fullName}{variety ? <span style={{ fontWeight: 400, marginLeft: 4 }}>· {variety}</span> : null}</div>
@@ -1153,7 +1153,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         }
         const totalCols = Math.pow(2, gens);
         // Compact profile for 4-gen vertical view so all rows fit portrait cleanly.
-        const rowHeights = gens >= 4 ? [156, 172, 138, 160] : [170, 176, 138];
+        const rowHeights = gens >= 4 ? [148, 162, 138, 160] : [160, 166, 138];
         const rows = [];
         const directGenCount = Math.min(gens, 3);
         for (let g = 0; g < directGenCount; g++) {
