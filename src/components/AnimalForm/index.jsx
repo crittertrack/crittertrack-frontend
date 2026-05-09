@@ -1571,19 +1571,6 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         );
     };
 
-    if (loading) {
-        if (inline) {
-            return <div className="flex items-center justify-center py-12 gap-2 text-gray-400"><Loader2 size={18} className="animate-spin" /><span className="text-sm">Loading Family Tree...</span></div>;
-        }
-        return (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-xl p-6 max-w-6xl w-full">
-                    <LoadingSpinner />
-                </div>
-            </div>
-        );
-    }
-
     // ── Owner display helpers ──────────────────────────────────────────────
     const getOwnerDisplayName = () => {
         if (!ownerProfile) return '';
@@ -1717,6 +1704,19 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         if (!Number.isFinite(nextX) || !Number.isFinite(nextY)) return;
         setEnlargedPan({ x: nextX, y: nextY });
     }, [inlineEnlarged, subject?.id_public]);
+
+    if (loading) {
+        if (inline) {
+            return <div className="flex items-center justify-center py-12 gap-2 text-gray-400"><Loader2 size={18} className="animate-spin" /><span className="text-sm">Loading Family Tree...</span></div>;
+        }
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-xl p-6 max-w-6xl w-full">
+                    <LoadingSpinner />
+                </div>
+            </div>
+        );
+    }
 
     if (inline) {
         const inlineGens = resolvedInlineGens;
