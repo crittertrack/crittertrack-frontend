@@ -1089,6 +1089,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     // Render one certificate cell (compact, text-only label+value rows)
     // genIndex: 0 = parents (largest), 1 = grandparents, 2 = great-grandparents, 3 = great-great (smallest)
     const renderCertCell = (animal, isSire, onClick = null, genIndex = 0, stacked = false) => {
+        const inlineMode = inline;
         // Scale text and image per generation column
         const imgSize  = stacked
             ? (genIndex === 0 ? 70 : genIndex === 1 ? 50 : genIndex === 2 ? 0 : 0)
@@ -1102,16 +1103,16 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
           iconSize = genIndex === 2 ? 18 : 16;
         }
         const pad      = genIndex === 0 ? '6px 8px' : genIndex === 1 ? '5px 7px' : genIndex === 2 ? '4px 6px' : '3px 5px';
-        const borderColor = (!animal || animal.isHidden) ? (isSire ? '#3b82f6' : '#ec4899')
+        const borderColor = (!animal || animal.isHidden) ? (isSire ? '#76a7ff' : '#f48abf')
             : animal.gender === 'Male' ? '#3b82f6'
             : animal.gender === 'Female' ? '#ec4899'
-            : certBorderColor;
+            : (inlineMode ? '#94a3b8' : certBorderColor);
 
-        const bgColor = (!animal || animal.isHidden) ? (isSire ? '#dbeafe' : '#fce7f3')
-            : (!animal.isHidden && !animal.gender) ? (isSire ? '#dbeafe' : '#fce7f3')
-            : animal.gender === 'Male' ? '#dbeafe'
-            : animal.gender === 'Female' ? '#fce7f3'
-            : (isSire ? '#dbeafe' : '#fce7f3');
+        const bgColor = (!animal || animal.isHidden) ? (isSire ? '#e8f1ff' : '#fdeef6')
+            : (!animal.isHidden && !animal.gender) ? (isSire ? '#e8f1ff' : '#fdeef6')
+            : animal.gender === 'Male' ? '#e8f1ff'
+            : animal.gender === 'Female' ? '#fdeef6'
+            : (isSire ? '#e8f1ff' : '#fdeef6');
 
         const baseStyle = {
             border: `1px solid ${borderColor}`,
@@ -1120,6 +1121,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             position: 'relative',
             height: '100%',
             boxSizing: 'border-box',
+            borderRadius: inlineMode ? 8 : 0,
             cursor: onClick && animal && !animal.isHidden && animal.id_public ? 'pointer' : 'default',
         };
 
@@ -1384,6 +1386,39 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         );
     };
 
+    const renderInlineSubjectCard = (animal) => {
+        if (!animal) return null;
+        const imgSrc = animal.imageUrl || animal.photoUrl || null;
+        const variety = [animal.color, animal.coatPattern, animal.coat].filter(Boolean).join(', ') || animal.variety || '';
+        const fullName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
+        const isMale = animal.gender === 'Male';
+        const isFemale = animal.gender === 'Female';
+        const GenderIcon = isMale ? Mars : Venus;
+        const cardBg = isMale ? '#e8f1ff' : isFemale ? '#fdeef6' : '#f3f6fb';
+        const cardBorder = isMale ? '#79a9ff' : isFemale ? '#f48abf' : '#b9c7db';
+
+        return (
+            <div style={{ backgroundColor: cardBg, border: `1.5px solid ${cardBorder}`, borderRadius: 10, padding: '10px', boxSizing: 'border-box', position: 'relative' }}>
+                <div style={{ position: 'absolute', top: 8, right: 8 }}><GenderIcon size={18} color={isMale ? '#3b82f6' : isFemale ? '#ec4899' : '#64748b'} /></div>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                    <div style={{ width: 86, height: 86, flexShrink: 0, overflow: 'hidden', borderRadius: 10, border: '1px solid #c9d5e6', backgroundColor: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {imgSrc ? (
+                            <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={34} />
+                        ) : (
+                            <Cat size={34} style={{ color: '#94a3b8' }} />
+                        )}
+                    </div>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.15, overflowWrap: 'anywhere', paddingRight: 20 }}>{fullName || 'Unknown'}</div>
+                        {variety && <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: 2, lineHeight: 1.2, overflowWrap: 'anywhere' }}>{variety}</div>}
+                        {animal.birthDate && <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 3 }}>{formatDate(animal.birthDate)}</div>}
+                        {animal.id_public && <div style={{ fontSize: '0.7rem', color: '#334155', fontFamily: 'monospace', marginTop: 4 }}>{animal.id_public}</div>}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     if (loading) {
         if (inline) {
             return <div className="flex items-center justify-center py-12 gap-2 text-gray-400"><Loader2 size={18} className="animate-spin" /><span className="text-sm">Loading pedigree chart…</span></div>;
@@ -1490,10 +1525,35 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     );
 
     if (inline) {
+        const inlineGens = inlineGenerations || (vertical ? vertGenerations : generations) || 3;
+        const inlineJsx = (
+            <div
+                ref={pedigreeRef}
+                style={{
+                    background: 'linear-gradient(180deg, #f8fbff 0%, #f2f7ff 100%)',
+                    border: '1px solid #d7e2f2',
+                    borderRadius: 12,
+                    padding: 10,
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    fontFamily: 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
+                }}
+            >
+                <div style={{ display: 'grid', gridTemplateColumns: vertical ? '1fr' : 'minmax(220px, 1.1fr) minmax(0, 3fr)', gap: 8, alignItems: 'start' }}>
+                    <div>
+                        {subject ? renderInlineSubjectCard(subject) : null}
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                        {subject ? (vertical ? renderVerticalCertTable(subject, inlineGens, handleCardClick) : renderCertificateTable(subject, inlineGens, handleCardClick)) : null}
+                    </div>
+                </div>
+            </div>
+        );
+
         return (
             <>
                 <div className="w-full">
-                    {certJsx}
+                    {inlineJsx}
                 </div>
                 {stackedPedigree && (
                     <div className="fixed inset-0 z-[90]">
