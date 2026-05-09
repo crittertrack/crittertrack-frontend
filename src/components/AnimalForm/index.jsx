@@ -1904,7 +1904,13 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 )}
                 {stackedPedigree && (
                     <div className="fixed inset-0 z-[90]">
-                        <PedigreeChart animalId={stackedPedigree.id_public} animalData={stackedPedigree} onClose={() => setStackedPedigree(null)} API_BASE_URL={API_BASE_URL} authToken={authToken} />
+                        <PedigreeChart 
+                            animalId={stackedPedigree.id_public} 
+                            animalData={stackedPedigree} 
+                            onClose={() => { setStackedPedigree(null); setCurrentViewingAnimal(null); }} 
+                            API_BASE_URL={API_BASE_URL} 
+                            authToken={authToken} 
+                        />
                     </div>
                 )}
             </>
