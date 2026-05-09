@@ -1573,7 +1573,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
     if (loading) {
         if (inline) {
-            return <div className="flex items-center justify-center py-12 gap-2 text-gray-400"><Loader2 size={18} className="animate-spin" /><span className="text-sm">Loading pedigree chart…</span></div>;
+            return <div className="flex items-center justify-center py-12 gap-2 text-gray-400"><Loader2 size={18} className="animate-spin" /><span className="text-sm">Loading Family Tree...</span></div>;
         }
         return (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -1689,14 +1689,16 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         const layout = inlineTreeLayoutRef.current;
         const viewport = inlineViewportRef.current;
         if (!layout || !viewport) return;
+        if (!Number.isFinite(layout.subjectX) || !Number.isFinite(layout.subjectY)) return;
+        if (viewport.clientWidth <= 0 || viewport.clientHeight <= 0) return;
 
         const scale = Math.max(0.2, Math.min(2, inlineZoomPct / 100));
         const targetX = viewport.clientWidth / 2;
         const targetY = viewport.clientHeight - 80;
-        setInlinePan({
-            x: targetX - layout.subjectX * scale,
-            y: targetY - layout.subjectY * scale,
-        });
+        const nextX = targetX - layout.subjectX * scale;
+        const nextY = targetY - layout.subjectY * scale;
+        if (!Number.isFinite(nextX) || !Number.isFinite(nextY)) return;
+        setInlinePan({ x: nextX, y: nextY });
     }, [inline, loading, subject?.id_public]);
 
     useEffect(() => {
@@ -1704,14 +1706,16 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         const layout = enlargedTreeLayoutRef.current;
         const viewport = enlargedViewportRef.current;
         if (!layout || !viewport) return;
+        if (!Number.isFinite(layout.subjectX) || !Number.isFinite(layout.subjectY)) return;
+        if (viewport.clientWidth <= 0 || viewport.clientHeight <= 0) return;
 
         const scale = Math.max(0.2, Math.min(2, enlargedZoomPct / 100));
         const targetX = viewport.clientWidth / 2;
         const targetY = viewport.clientHeight - 100;
-        setEnlargedPan({
-            x: targetX - layout.subjectX * scale,
-            y: targetY - layout.subjectY * scale,
-        });
+        const nextX = targetX - layout.subjectX * scale;
+        const nextY = targetY - layout.subjectY * scale;
+        if (!Number.isFinite(nextX) || !Number.isFinite(nextY)) return;
+        setEnlargedPan({ x: nextX, y: nextY });
     }, [inlineEnlarged, subject?.id_public]);
 
     if (inline) {
