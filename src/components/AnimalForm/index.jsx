@@ -993,7 +993,11 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         const nameSize = genIndex === 0 ? '0.90rem' : genIndex === 1 ? '0.78rem' : genIndex === 2 ? '0.66rem' : '0.58rem';
         const metaSize = genIndex === 0 ? '0.76rem' : genIndex === 1 ? '0.68rem' : genIndex === 2 ? '0.58rem' : '0.51rem';
         const smallSize= genIndex === 0 ? '0.66rem' : genIndex === 1 ? '0.58rem' : genIndex === 2 ? '0.51rem' : '0.46rem';
-        const iconSize = genIndex === 0 ? 26 : genIndex === 1 ? 22 : genIndex === 2 ? 20 : 18;
+        let iconSize = genIndex === 0 ? 26 : genIndex === 1 ? 22 : genIndex === 2 ? 20 : 18;
+        // Reduce icon size on vertical stacked layout (gen3 & gen4) to free text space
+        if (stacked && genIndex >= 2) {
+          iconSize = genIndex === 2 ? 18 : 16;
+        }
         const pad      = genIndex === 0 ? '6px 8px' : genIndex === 1 ? '5px 7px' : genIndex === 2 ? '4px 6px' : '3px 5px';
         const borderColor = (!animal || animal.isHidden) ? (isSire ? '#3b82f6' : '#ec4899')
             : animal.gender === 'Male' ? '#3b82f6'
