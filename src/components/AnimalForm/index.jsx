@@ -677,7 +677,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 // pathIds: Set of IDs in the current call-chain — detects true circular loops only.
                 const resultCache = new Map();
                 const fetchAnimalWithFamily = async (id, depth = 0, pathIds = new Set()) => {
-                    if (!id || depth > 5) return null;
+                    if (!id) return null;
                     if (pathIds.has(id)) return null; // circular reference — stop this branch
 
                     // Return cached result only if it was fetched at the same or shallower depth
@@ -851,7 +851,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         setLoading(true);
         const resultCache = new Map();
         const fetchAnimalWithFamily = async (id, depth = 0, pathIds = new Set()) => {
-            if (!id || depth > 5) return null;
+            if (!id) return null;
             if (pathIds.has(id)) return null;
             if (resultCache.has(id)) {
                 const cached = resultCache.get(id);
