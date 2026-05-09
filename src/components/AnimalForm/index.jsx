@@ -1057,10 +1057,9 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                         {genIndex === 3 ? (
                             stacked ? (
                                 <>
-                                    <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.2, overflowWrap: 'anywhere', padding: '0 20px 0 4px' }}>{fullName}</div>
-                                    {variety && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.15, overflowWrap: 'anywhere', padding: '0 20px 0 4px' }}>{variety}</div>}
-                                    {animal.geneticCode && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.15, overflowWrap: 'anywhere', padding: '0 20px 0 4px' }}>{animal.geneticCode}</div>}
-                                    {animal.birthDate && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2, padding: '0 20px 0 4px' }}>{formatDate(animal.birthDate)}</div>}
+                                    <div style={{ fontSize: '0.54rem', fontWeight: 700, color: certFontColor, lineHeight: 1.05, overflowWrap: 'anywhere', padding: '0 18px 0 4px' }}>{fullName}</div>
+                                    {variety && <div style={{ fontSize: '0.47rem', color: certFontColor, lineHeight: 1.05, overflowWrap: 'anywhere', padding: '0 18px 0 4px' }}>{variety}</div>}
+                                    {animal.birthDate && <div style={{ fontSize: '0.47rem', color: certFontColor, lineHeight: 1.05, padding: '0 18px 0 4px' }}>{formatDate(animal.birthDate)}</div>}
                                 </>
                             ) : (
                                 <>
