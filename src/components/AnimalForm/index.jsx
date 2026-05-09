@@ -1151,9 +1151,10 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         }
         const totalCols = Math.pow(2, gens);
         // Compact profile for 4-gen vertical view so all rows fit portrait cleanly.
-        const rowHeights = gens >= 4 ? [188, 146, 108, 84] : [200, 155, 112];
+        const rowHeights = gens >= 4 ? [188, 146, 108, 132] : [200, 155, 112];
         const rows = [];
-        for (let g = 0; g < gens; g++) {
+        const directGenCount = Math.min(gens, 3);
+        for (let g = 0; g < directGenCount; g++) {
             const slots = vGenSlots[g];
             const colspan = totalCols / slots.length;
             const cellH = rowHeights[g] || 60;
@@ -1168,6 +1169,31 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 );
             });
             rows.push(<tr key={g}>{cells}</tr>);
+        }
+
+        // For 4th generation in vertical view: render each gen3 ancestor's parents
+        // stacked top/bottom (sire/dam) instead of 16 tiny left/right cells.
+        if (gens >= 4) {
+            const gen3Slots = vGenSlots[2] || [];
+            const stackedColSpan = totalCols / gen3Slots.length;
+            const rowH = rowHeights[3] || 132;
+            const stackedCells = gen3Slots.map((slot, idx) => {
+                const sire = getAncestor(subject, [...slot.path, 'father']);
+                const dam = getAncestor(subject, [...slot.path, 'mother']);
+                return (
+                    <td key={idx} colSpan={stackedColSpan} style={{ padding: 2, verticalAlign: 'middle', height: rowH }}>
+                        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <div style={{ flex: 1, minHeight: 0 }}>
+                                {renderCertCell(sire, true, handleCardClick, 3, true)}
+                            </div>
+                            <div style={{ flex: 1, minHeight: 0 }}>
+                                {renderCertCell(dam, false, handleCardClick, 3, true)}
+                            </div>
+                        </div>
+                    </td>
+                );
+            });
+            rows.push(<tr key={3}>{stackedCells}</tr>);
         }
         return (
             <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 3, tableLayout: 'fixed' }}>
