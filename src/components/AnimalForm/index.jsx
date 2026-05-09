@@ -1430,17 +1430,9 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         if (!rootAnimal) return null;
 
         const autoDepth = getInlineAncestorDepth(rootAnimal);
-        const effectiveGens = Math.max(0, autoDepth);
-        const nodeSize = 86;
-        const nodeHalf = nodeSize / 2;
-        const rowGap = 170;
-        const padX = 120;
-        const padY = 70;
-        const maxLeaves = Math.max(1, Math.pow(2, effectiveGens));
-        const leafGap = 120;
-        const worldW = Math.max(900, padX * 2 + maxLeaves * leafGap);
-        const worldH = Math.max(520, padY * 2 + nodeSize + effectiveGens * rowGap);
+        let effectiveGens = Math.max(0, autoDepth);
 
+        // Build slots and filter out generations with no real (non-null, non-hidden) ancestors
         const slots = [];
         slots[0] = [{ path: [], isSire: null }];
         for (let g = 1; g <= effectiveGens; g++) {
@@ -1450,6 +1442,30 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 slots[g].push({ path: [...slot.path, 'mother'], isSire: false });
             }
         }
+
+        // Find the last generation with at least one real ancestor
+        for (let g = effectiveGens; g > 0; g--) {
+            const hasRealAncestor = slots[g].some(slot => {
+                const animal = getAncestor(rootAnimal, slot.path);
+                return animal && !animal.isHidden;
+            });
+            if (hasRealAncestor) {
+                effectiveGens = g;
+                break;
+            }
+            // If no real ancestors in this gen, truncate slots
+            if (g === 1) effectiveGens = 0;
+        }
+
+        const nodeSize = 86;
+        const nodeHalf = nodeSize / 2;
+        const rowGap = 170;
+        const padX = 120;
+        const padY = 70;
+        const maxLeaves = Math.max(1, Math.pow(2, effectiveGens));
+        const leafGap = 120;
+        const worldW = Math.max(900, padX * 2 + maxLeaves * leafGap);
+        const worldH = Math.max(520, padY * 2 + nodeSize + effectiveGens * rowGap);
 
         const nodes = [];
         const nodePos = new Map();
