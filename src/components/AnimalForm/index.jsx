@@ -561,6 +561,7 @@ const LitterSyncConflictModal = ({ items, onResolve, onSkip }) => {
 const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BASE_URL, authToken = null, inline = false, vertical = false, manualData = null, onViewAnimal = null }, ref) => {
     const [pedigreeData, setPedigreeData] = useState(null);
     const [displayData, setDisplayData] = useState(null);
+    const [currentViewingAnimal, setCurrentViewingAnimal] = useState(null);
     const [ownerProfile, setOwnerProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [imagesLoaded, setImagesLoaded] = useState(false);
@@ -833,6 +834,108 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
         fetchPedigreeData();
     }, [animalId, animalData, API_BASE_URL, authToken]);
+
+    // Re-fetch pedigree when clicking an ancestor (currentViewingAnimal changes)
+    useEffect(() => {
+        if (!currentViewingAnimal?.id_public) return;
+        
+        setLoading(true);
+        const resultCache = new Map();
+        const fetchAnimalWithFamily = async (id, depth = 0, pathIds = new Set()) => {
+            if (!id || depth > 5) return null;
+            if (pathIds.has(id)) return null;
+            if (resultCache.has(id)) {
+                const cached = resultCache.get(id);
+                if (cached.fetchedAtDepth <= depth) return cached.data;
+            }
+
+            let animalInfo = null;
+            let foundViaOwned = false;
+            if (authToken) {
+                const isPublicId = /^CTC\d+|^\d+$/.test(id);
+                if (!isPublicId) {
+                    try {
+                        const response = await axios.get(`${API_BASE_URL}/animals/${id}`, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        });
+                        animalInfo = response.data;
+                        foundViaOwned = true;
+                    } catch (error) {}
+                }
+                if (!animalInfo) {
+                    try {
+                        const response = await axios.get(`${API_BASE_URL}/animals/any/${id}`, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        });
+                        animalInfo = response.data;
+                    } catch (error2) {}
+                }
+            }
+            if (!animalInfo) {
+                try {
+                    const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${id}`);
+                    if (publicResponse.data && publicResponse.data.length > 0) {
+                        animalInfo = publicResponse.data[0];
+                    }
+                } catch (error) {}
+            }
+            if (!animalInfo && id) return { isHidden: true, id_public: id };
+            if (!animalInfo) return null;
+            if (!foundViaOwned && !animalInfo.showOnPublicProfile) return { isHidden: true, id_public: id };
+
+            if (animalInfo.manualBreederName) {
+                animalInfo.breederName = animalInfo.manualBreederName;
+            } else if (animalInfo.breederId_public) {
+                try {
+                    const breederResponse = await axios.get(
+                        `${API_BASE_URL}/public/profiles/search?query=${animalInfo.breederId_public}&limit=1`
+                    );
+                    if (breederResponse.data && breederResponse.data.length > 0) {
+                        const breeder = breederResponse.data[0];
+                        const showPersonalName = breeder.showPersonalName ?? false;
+                        const showBreederName = breeder.showBreederName ?? false;
+                        let breederName;
+                        if (showBreederName && showPersonalName && breeder.personalName && breeder.breederName) {
+                            breederName = `${breeder.personalName} (${breeder.breederName})`;
+                        } else if (showBreederName && breeder.breederName) {
+                            breederName = breeder.breederName;
+                        } else if (showPersonalName && breeder.personalName) {
+                            breederName = breeder.personalName;
+                        } else {
+                            breederName = 'Anonymous Breeder';
+                        }
+                        animalInfo.breederName = breederName;
+                    }
+                } catch (error) {}
+            }
+
+            const fatherId = animalInfo.fatherId_public || animalInfo.sireId_public;
+            const motherId = animalInfo.motherId_public || animalInfo.damId_public;
+            const childPath = new Set([...pathIds, id]);
+            const father = fatherId ? await fetchAnimalWithFamily(fatherId, depth + 1, childPath) : null;
+            const mother = motherId ? await fetchAnimalWithFamily(motherId, depth + 1, childPath) : null;
+            const result = { ...animalInfo, father, mother };
+            if (!resultCache.has(id) || resultCache.get(id).fetchedAtDepth > depth) {
+                resultCache.set(id, { fetchedAtDepth: depth, data: result });
+            }
+            return result;
+        };
+
+        const ancestorId = currentViewingAnimal.id_public;
+        fetchAnimalWithFamily(ancestorId).then(data => {
+            setPedigreeData(data);
+            setLoading(false);
+            // Fetch breeder profile for the ancestor
+            if (data?.breederId_public) {
+                axios.get(`${API_BASE_URL}/public/profiles/search?query=${data.breederId_public}&limit=1`)
+                    .then(r => { if (r.data?.[0]) setOwnerProfile(r.data[0]); })
+                    .catch(() => {});
+            }
+        }).catch(error => {
+            console.error('Error fetching ancestor pedigree:', error);
+            setLoading(false);
+        });
+    }, [currentViewingAnimal, API_BASE_URL, authToken]);
 
     // Check when all images are loaded
     useEffect(() => {
@@ -1308,10 +1411,13 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     const handleCardClick = (clickedAnimal) => {
         if (!clickedAnimal?.id_public) return;
         if (onViewAnimal) { onViewAnimal(clickedAnimal, 16, 'chart'); }
-        else { setStackedPedigree(clickedAnimal); }
+        else {
+            // Stay in modal: update the viewing animal and re-fetch its pedigree
+            setCurrentViewingAnimal(clickedAnimal);
+        }
     };
 
-    const subject = displayData || pedigreeData;
+    const subject = currentViewingAnimal || displayData || pedigreeData;
 
     const certJsx = (
         <div
