@@ -831,7 +831,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         };
 
         fetchPedigreeData();
-    }, [animalId, animalData, API_BASE_URL, authToken]);
+    }, [animalId, animalData?.id_public, API_BASE_URL, authToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Re-fetch pedigree when clicking an ancestor (currentViewingAnimal changes)
     useEffect(() => {
