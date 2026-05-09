@@ -567,7 +567,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     const [imagesLoaded, setImagesLoaded] = useState(false);
     const [stackedPedigree, setStackedPedigree] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
-    const [generations, setGenerations] = useState(3); // 1–3
+    const [generations, setGenerations] = useState(4); // 1–4
     // Load persisted cert prefs from localStorage (shared across all animals for this user)
     const _savedPrefs = (() => { try { return JSON.parse(localStorage.getItem('ct_cert_prefs') || '{}'); } catch { return {}; } })();
     const [certText, setCertText] = useState(_savedPrefs.certText ?? '');
@@ -582,7 +582,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     const pedigreeRef = useRef(null);
 
     useEffect(() => {
-        if (vertical) setVertGenerations(3);
+        if (vertical) setVertGenerations(4);
     }, [vertical]);
 
     // Persist cert prefs to localStorage whenever they change
@@ -1522,7 +1522,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                             {vertical ? (
                                 <>
                                 <input
-                                    type="range" min={1} max={3} step={1}
+                                    type="range" min={1} max={4} step={1}
                                     value={vertGenerations}
                                     onChange={e => setVertGenerations(Number(e.target.value))}
                                     className="w-20 accent-primary cursor-pointer"
@@ -1532,7 +1532,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                             ) : (
                                 <>
                                 <input
-                                    type="range" min={1} max={3} step={1}
+                                    type="range" min={1} max={4} step={1}
                                     value={generations}
                                     onChange={e => setGenerations(Number(e.target.value))}
                                     className="w-20 accent-primary cursor-pointer"
