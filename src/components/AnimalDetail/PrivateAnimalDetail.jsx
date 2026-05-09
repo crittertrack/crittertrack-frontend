@@ -2754,6 +2754,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
                                     manualData={mpEnrichedData}
+                                    onViewAnimal={onViewAnimal}
                                 />
                             </div>
                             <div className="hidden">

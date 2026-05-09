@@ -1918,6 +1918,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
                                     manualData={mpEnrichedData}
+                                    onViewAnimal={onViewAnimal}
                                 />
                             </div>
                             <div className="hidden">
