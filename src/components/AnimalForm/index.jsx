@@ -652,18 +652,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     useEffect(() => {
         // Inline mode with animalData already supplied: skip the expensive recursive fetch.
         // The merge useEffect will overlay manualData ancestors on top.
-        if (inline && animalData) {
-            setPedigreeData(animalData);
-            setLoading(false);
-            // Still fetch the breeder profile for display purposes
-            const breederId = animalData.breederId_public;
-            if (breederId) {
-                axios.get(`${API_BASE_URL}/public/profiles/search?query=${breederId}&limit=1`)
-                    .then(r => { if (r.data?.[0]) setOwnerProfile(r.data[0]); })
-                    .catch(() => {});
-            }
-            return;
-        }
+        // Note: inline mode still does the full recursive fetch so all ancestor generations load.
 
         const fetchPedigreeData = async () => {
             setLoading(true);
@@ -1538,7 +1527,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                                     {imgSrc ? (
                                         <AnimalImage src={imgSrc} alt={fullName} className="w-full h-full object-cover" iconSize={24} />
                                     ) : (
-                                        <span style={{ fontSize: '0.68rem', color: '#64748b', textAlign: 'center', padding: 4, lineHeight: 1.1 }}>?</span>
+                                        <Cat size={32} style={{ color: '#94a3b8' }} />
                                     )}
                                 </div>
                                 <div style={{ width: '100%', background: 'rgba(255,255,255,0.95)', borderTop: '1px solid #cbd5e1', fontSize: '0.60rem', color: '#0f172a', fontWeight: 700, textAlign: 'center', padding: '2px 4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
