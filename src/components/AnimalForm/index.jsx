@@ -737,8 +737,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     
                     if (!animalInfo) return null;
 
-                    // If not the user's own animal and not publicly visible, hide it and all its ancestors
-                    if (!foundViaOwned && !animalInfo.showOnPublicProfile) {
+                    // If not authenticated and animal is not publicly visible, hide it
+                    if (!authToken && !animalInfo.showOnPublicProfile) {
                         return { isHidden: true, id_public: id };
                     }
 
@@ -879,7 +879,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             }
             if (!animalInfo && id) return { isHidden: true, id_public: id };
             if (!animalInfo) return null;
-            if (!foundViaOwned && !animalInfo.showOnPublicProfile) return { isHidden: true, id_public: id };
+            if (!authToken && !animalInfo.showOnPublicProfile) return { isHidden: true, id_public: id };
 
             if (animalInfo.manualBreederName) {
                 animalInfo.breederName = animalInfo.manualBreederName;
