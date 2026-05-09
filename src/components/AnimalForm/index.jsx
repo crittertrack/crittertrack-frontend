@@ -580,6 +580,10 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     const [vertGenerations, setVertGenerations] = useState(3);
     const pedigreeRef = useRef(null);
 
+    useEffect(() => {
+        if (vertical) setVertGenerations(4);
+    }, [vertical]);
+
     // Persist cert prefs to localStorage whenever they change
     useEffect(() => {
         try {
