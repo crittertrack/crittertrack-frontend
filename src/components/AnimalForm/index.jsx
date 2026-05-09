@@ -1055,10 +1055,19 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     {/* Text */}
                     <div style={{ minWidth: 0, width: isRowLayout ? `calc(100% - ${imgSize}px - 6px)` : '100%', textAlign: (stacked && (genIndex === 0 || genIndex === 1)) ? 'left' : 'center', paddingLeft: isRowLayout ? 4 : 0, fontSize: (genIndex === 2 && !stacked) ? '0.62rem' : 'inherit', overflowWrap: 'break-word' }}>
                         {genIndex === 3 ? (
-                            <>
-                                <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.4, whiteSpace: 'nowrap', padding: '0 20px 0 4px' }}>{fullName}{variety ? <span style={{ fontWeight: 400, marginLeft: 4 }}>· {variety}</span> : null}</div>
-                                <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.4, whiteSpace: 'nowrap', padding: '0 20px 0 4px' }}>{animal.birthDate ? formatDate(animal.birthDate) : ''}</div>
-                            </>
+                            stacked ? (
+                                <>
+                                    <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.2, overflowWrap: 'anywhere', padding: '0 20px 0 4px' }}>{fullName}</div>
+                                    {variety && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.15, overflowWrap: 'anywhere', padding: '0 20px 0 4px' }}>{variety}</div>}
+                                    {animal.geneticCode && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.15, overflowWrap: 'anywhere', padding: '0 20px 0 4px' }}>{animal.geneticCode}</div>}
+                                    {animal.birthDate && <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.2, padding: '0 20px 0 4px' }}>{formatDate(animal.birthDate)}</div>}
+                                </>
+                            ) : (
+                                <>
+                                    <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.4, whiteSpace: 'nowrap', padding: '0 20px 0 4px' }}>{fullName}{variety ? <span style={{ fontWeight: 400, marginLeft: 4 }}>· {variety}</span> : null}</div>
+                                    <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.4, whiteSpace: 'nowrap', padding: '0 20px 0 4px' }}>{[animal.birthDate ? formatDate(animal.birthDate) : null, animal.breederName !== 'Anonymous Breeder' ? animal.breederName : null].filter(Boolean).join(' · ')}</div>
+                                </>
+                            )
                         ) : (
                             <>
                                 <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.2, overflowWrap: 'anywhere' }}>{fullName}</div>
