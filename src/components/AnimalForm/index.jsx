@@ -583,7 +583,11 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     const [inlinePan, setInlinePan] = useState({ x: 12, y: 12 });
     const [inlineDragging, setInlineDragging] = useState(false);
     const [inlineEnlarged, setInlineEnlarged] = useState(false);
+    const [enlargedZoomPct, setEnlargedZoomPct] = useState(60);
+    const [enlargedPan, setEnlargedPan] = useState({ x: 12, y: 12 });
+    const [enlargedDragging, setEnlargedDragging] = useState(false);
     const inlineDragRef = useRef({ active: false, startX: 0, startY: 0, originX: 0, originY: 0 });
+    const enlargedDragRef = useRef({ active: false, startX: 0, startY: 0, originX: 0, originY: 0 });
     const pedigreeRef = useRef(null);
 
     useEffect(() => {
@@ -1653,8 +1657,14 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         </div>
     );
 
+    const getTreeDepth = (node, d = 0) => {
+        if (!node || node.isHidden) return d;
+        return Math.max(getTreeDepth(node.father, d + 1), getTreeDepth(node.mother, d + 1));
+    };
+
     if (inline) {
-        const inlineGens = inlineGenerations || (vertical ? vertGenerations : generations) || 3;
+        const rawDepth = subject ? getTreeDepth(subject) : 0;
+        const inlineGens = rawDepth > 0 ? rawDepth : (inlineGenerations || 3);
         const inlineScale = Math.max(0.2, Math.min(2, inlineZoomPct / 100));
         const previewHeight = vertical ? 620 : 440;
 
@@ -1738,7 +1748,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
                         <button
                             type="button"
-                            onClick={() => setInlineEnlarged(true)}
+                            onClick={() => { setInlineEnlarged(true); setEnlargedZoomPct(60); setEnlargedPan({ x: 12, y: 12 }); }}
                             className="mt-2 text-2xl text-gray-800 hover:underline"
                         >
                             View it enlarged
@@ -1747,16 +1757,55 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 </div>
 
                 {inlineEnlarged && (
-                    <PedigreeChart
-                        animalId={subject?.id_public || animalId}
-                        animalData={subject || animalData}
-                        onClose={() => setInlineEnlarged(false)}
-                        API_BASE_URL={API_BASE_URL}
-                        authToken={authToken}
-                        vertical={vertical}
-                        manualData={manualData}
-                        onViewAnimal={onViewAnimal}
-                    />
+                    <div className="fixed inset-0 z-[200] bg-black bg-opacity-80 flex flex-col">
+                        <div className="flex items-center justify-between px-4 py-2 bg-gray-900 text-white flex-shrink-0">
+                            <span className="font-semibold text-sm">Full Pedigree Tree</span>
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="range"
+                                    min={20}
+                                    max={150}
+                                    step={1}
+                                    value={enlargedZoomPct}
+                                    onChange={(e) => setEnlargedZoomPct(Number(e.target.value))}
+                                    className="w-40 accent-primary"
+                                />
+                                <span className="text-sm font-bold min-w-[48px] text-center">{enlargedZoomPct}%</span>
+                                <button
+                                    type="button"
+                                    onClick={() => setInlineEnlarged(false)}
+                                    className="ml-4 text-white hover:text-red-400 text-2xl leading-none"
+                                >&times;</button>
+                            </div>
+                        </div>
+                        <div
+                            className="flex-1 overflow-hidden"
+                            style={{ cursor: enlargedDragging ? 'grabbing' : 'grab' }}
+                            onMouseDown={(e) => {
+                                enlargedDragRef.current = { active: true, startX: e.clientX, startY: e.clientY, originX: enlargedPan.x, originY: enlargedPan.y };
+                                setEnlargedDragging(true);
+                            }}
+                            onMouseMove={(e) => {
+                                if (!enlargedDragRef.current.active) return;
+                                setEnlargedPan({ x: enlargedDragRef.current.originX + e.clientX - enlargedDragRef.current.startX, y: enlargedDragRef.current.originY + e.clientY - enlargedDragRef.current.startY });
+                            }}
+                            onMouseUp={() => { enlargedDragRef.current.active = false; setEnlargedDragging(false); }}
+                            onMouseLeave={() => { enlargedDragRef.current.active = false; setEnlargedDragging(false); }}
+                        >
+                            <div
+                                style={{
+                                    transform: `translate(${enlargedPan.x}px, ${enlargedPan.y}px) scale(${Math.max(0.2, Math.min(2, enlargedZoomPct / 100))})`,
+                                    transformOrigin: 'top left',
+                                    padding: 8,
+                                    boxSizing: 'border-box',
+                                }}
+                            >
+                                <div style={{ background: '#ffffff', borderRadius: 12, padding: 10, width: 'max-content', fontFamily: 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif' }}>
+                                    {subject ? renderInlineRoundTree(subject, inlineGens) : null}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 )}
                 {stackedPedigree && (
                     <div className="fixed inset-0 z-[90]">
