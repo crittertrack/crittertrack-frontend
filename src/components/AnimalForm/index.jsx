@@ -1151,7 +1151,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         }
         const totalCols = Math.pow(2, gens);
         // Compact profile for 4-gen vertical view so all rows fit portrait cleanly.
-        const rowHeights = gens >= 4 ? [188, 146, 108, 132] : [200, 155, 112];
+        const rowHeights = gens >= 4 ? [188, 160, 124, 150] : [200, 168, 126];
         const rows = [];
         const directGenCount = Math.min(gens, 3);
         for (let g = 0; g < directGenCount; g++) {
