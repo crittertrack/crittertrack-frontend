@@ -2851,7 +2851,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                                 </div>
                             </div>
                             </div>
-                            </div>
                         </div>
                     );
                 })()}

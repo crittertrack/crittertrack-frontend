@@ -2198,7 +2198,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     </div>
                                 </div>
                             </div>
-                            </div>
                         </div>
                     );
                 })()}

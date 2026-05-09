@@ -2006,7 +2006,6 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL
                                 </div>
                             </div>
                             </div>
-                            </div>
                         </div>
                     );
                 })()}
