@@ -872,7 +872,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         // overflow/scroll clipping — the only reliable way to capture content
         // that lives inside a scrollable modal.
         const clone = el.cloneNode(true);
-        const captureW = vertical ? Math.max(el.scrollWidth, 820) : Math.max(el.scrollWidth, 1400);
+        const captureW = vertical ? Math.max(el.scrollWidth, 860) : Math.max(el.scrollWidth, 1400);
         Object.assign(clone.style, {
             position: 'fixed',
             top: '0',
@@ -1397,7 +1397,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
             <div className="min-h-screen flex justify-center pt-2 sm:pt-4 pb-2 sm:pb-4 px-2 sm:px-4">
-                <div className={`relative bg-white rounded-xl shadow-2xl h-fit w-full ${vertical ? 'max-w-[760px]' : 'max-w-[98vw] sm:max-w-[95vw]'}`}>
+                <div className={`relative bg-white rounded-xl shadow-2xl h-fit w-full ${vertical ? 'max-w-[800px]' : 'max-w-[98vw] sm:max-w-[95vw]'}`}>
                     {/* Header */}
                     <div className="flex justify-between items-center px-3 sm:px-6 pr-12 sm:pr-14 py-2 sm:py-4 border-b border-gray-200 bg-gray-50 rounded-t-xl flex-wrap gap-2">
                         <h2 className="text-base sm:text-xl font-bold text-gray-800 flex items-center gap-1">
