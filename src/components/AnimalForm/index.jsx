@@ -1055,7 +1055,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                         {genIndex === 3 ? (
                             <>
                                 <div style={{ fontSize: nameSize, fontWeight: 700, color: certFontColor, lineHeight: 1.4, whiteSpace: 'nowrap', padding: '0 20px 0 4px' }}>{fullName}{variety ? <span style={{ fontWeight: 400, marginLeft: 4 }}>· {variety}</span> : null}</div>
-                                <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.4, whiteSpace: 'nowrap', padding: '0 20px 0 4px' }}>{[animal.birthDate ? formatDate(animal.birthDate) : null, animal.breederName !== 'Anonymous Breeder' ? animal.breederName : null].filter(Boolean).join(' · ')}</div>
+                                <div style={{ fontSize: metaSize, color: certFontColor, lineHeight: 1.4, whiteSpace: 'nowrap', padding: '0 20px 0 4px' }}>{animal.birthDate ? formatDate(animal.birthDate) : ''}</div>
                             </>
                         ) : (
                             <>
