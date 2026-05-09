@@ -588,6 +588,10 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     const [enlargedDragging, setEnlargedDragging] = useState(false);
     const inlineDragRef = useRef({ active: false, startX: 0, startY: 0, originX: 0, originY: 0 });
     const enlargedDragRef = useRef({ active: false, startX: 0, startY: 0, originX: 0, originY: 0 });
+    const inlineViewportRef = useRef(null);
+    const enlargedViewportRef = useRef(null);
+    const inlineTreeLayoutRef = useRef(null);
+    const enlargedTreeLayoutRef = useRef(null);
     const pedigreeRef = useRef(null);
 
     useEffect(() => {
@@ -1426,7 +1430,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         return 1 + Math.max(fatherDepth, motherDepth);
     };
 
-    const renderInlineRoundTree = (rootAnimal, gens) => {
+    const renderInlineRoundTree = (rootAnimal, gens, layoutRef = null) => {
         if (!rootAnimal) return null;
 
         const autoDepth = getInlineAncestorDepth(rootAnimal);
@@ -1487,6 +1491,16 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             const y = worldH - padY - nodeHalf - n.depth * rowGap;
             nodePos.set(n.key, { x, y });
         });
+
+        const subjectPos = nodePos.get('root') || { x: worldW / 2, y: worldH - padY - nodeHalf };
+        if (layoutRef) {
+            layoutRef.current = {
+                worldW,
+                worldH,
+                subjectX: subjectPos.x,
+                subjectY: subjectPos.y,
+            };
+        }
 
         const edgePaths = edges.map(({ childKey, parentKey }) => {
             const child = nodePos.get(childKey);
@@ -1667,9 +1681,41 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         return Math.max(getTreeDepth(node.father, d + 1), getTreeDepth(node.mother, d + 1));
     };
 
+    const inlineDepth = subject ? getTreeDepth(subject) : 0;
+    const resolvedInlineGens = inlineDepth > 0 ? inlineDepth : (inlineGenerations || 3);
+
+    useEffect(() => {
+        if (!inline || loading || !subject?.id_public) return;
+        const layout = inlineTreeLayoutRef.current;
+        const viewport = inlineViewportRef.current;
+        if (!layout || !viewport) return;
+
+        const scale = Math.max(0.2, Math.min(2, inlineZoomPct / 100));
+        const targetX = viewport.clientWidth / 2;
+        const targetY = viewport.clientHeight - 80;
+        setInlinePan({
+            x: targetX - layout.subjectX * scale,
+            y: targetY - layout.subjectY * scale,
+        });
+    }, [inline, loading, subject?.id_public]);
+
+    useEffect(() => {
+        if (!inlineEnlarged || !subject?.id_public) return;
+        const layout = enlargedTreeLayoutRef.current;
+        const viewport = enlargedViewportRef.current;
+        if (!layout || !viewport) return;
+
+        const scale = Math.max(0.2, Math.min(2, enlargedZoomPct / 100));
+        const targetX = viewport.clientWidth / 2;
+        const targetY = viewport.clientHeight - 100;
+        setEnlargedPan({
+            x: targetX - layout.subjectX * scale,
+            y: targetY - layout.subjectY * scale,
+        });
+    }, [inlineEnlarged, subject?.id_public]);
+
     if (inline) {
-        const rawDepth = subject ? getTreeDepth(subject) : 0;
-        const inlineGens = rawDepth > 0 ? rawDepth : (inlineGenerations || 3);
+        const inlineGens = resolvedInlineGens;
         const inlineScale = Math.max(0.2, Math.min(2, inlineZoomPct / 100));
         const previewHeight = vertical ? 620 : 440;
 
@@ -1710,7 +1756,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     fontFamily: 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
                 }}
             >
-                {subject ? renderInlineRoundTree(subject, inlineGens) : null}
+                {subject ? renderInlineRoundTree(subject, inlineGens, inlineTreeLayoutRef) : null}
             </div>
         );
 
@@ -1732,6 +1778,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                         </div>
 
                         <div
+                            ref={inlineViewportRef}
                             className="border border-gray-200 bg-slate-50 overflow-hidden"
                             style={{ height: previewHeight, cursor: inlineDragging ? 'grabbing' : 'grab' }}
                             onMouseDown={handleInlineMouseDown}
@@ -1784,6 +1831,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                             </div>
                         </div>
                         <div
+                            ref={enlargedViewportRef}
                             className="flex-1 overflow-hidden"
                             style={{ cursor: enlargedDragging ? 'grabbing' : 'grab' }}
                             onMouseDown={(e) => {
@@ -1806,7 +1854,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                                 }}
                             >
                                 <div style={{ background: '#ffffff', borderRadius: 12, padding: 10, width: 'max-content', fontFamily: 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif' }}>
-                                    {subject ? renderInlineRoundTree(subject, inlineGens) : null}
+                                    {subject ? renderInlineRoundTree(subject, inlineGens, enlargedTreeLayoutRef) : null}
                                 </div>
                             </div>
                         </div>
