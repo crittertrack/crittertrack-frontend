@@ -1150,7 +1150,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             }
         }
         const totalCols = Math.pow(2, gens);
-        const rowHeights = [200, 155, 100];
+        const rowHeights = [200, 155, 112];
         const rows = [];
         for (let g = 0; g < gens; g++) {
             const slots = vGenSlots[g];
