@@ -580,7 +580,10 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     const [showCustomPanel, setShowCustomPanel] = useState(false);
     const [vertGenerations, setVertGenerations] = useState(inline && inlineGenerations ? inlineGenerations : 3);
     const [inlineZoomPct, setInlineZoomPct] = useState(72);
+    const [inlinePan, setInlinePan] = useState({ x: 12, y: 12 });
+    const [inlineDragging, setInlineDragging] = useState(false);
     const [inlineEnlarged, setInlineEnlarged] = useState(false);
+    const inlineDragRef = useRef({ active: false, startX: 0, startY: 0, originX: 0, originY: 0 });
     const pedigreeRef = useRef(null);
 
     useEffect(() => {
@@ -1638,15 +1641,39 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         const inlineScale = Math.max(0.2, Math.min(2, inlineZoomPct / 100));
         const previewHeight = vertical ? 620 : 440;
 
+        const handleInlineMouseDown = (e) => {
+            inlineDragRef.current = {
+                active: true,
+                startX: e.clientX,
+                startY: e.clientY,
+                originX: inlinePan.x,
+                originY: inlinePan.y,
+            };
+            setInlineDragging(true);
+        };
+
+        const handleInlineMouseMove = (e) => {
+            if (!inlineDragRef.current.active) return;
+            const dx = e.clientX - inlineDragRef.current.startX;
+            const dy = e.clientY - inlineDragRef.current.startY;
+            setInlinePan({ x: inlineDragRef.current.originX + dx, y: inlineDragRef.current.originY + dy });
+        };
+
+        const stopInlineDrag = () => {
+            if (!inlineDragRef.current.active) return;
+            inlineDragRef.current.active = false;
+            setInlineDragging(false);
+        };
+
         const inlineJsx = (
             <div
                 ref={pedigreeRef}
                 style={{
-                    background: 'linear-gradient(180deg, #f8fbff 0%, #f2f7ff 100%)',
-                    border: '1px solid #d7e2f2',
+                    background: '#ffffff',
+                    border: '1px solid #dbe3ee',
                     borderRadius: 12,
                     padding: 10,
-                    width: '100%',
+                    width: 'max-content',
                     boxSizing: 'border-box',
                     fontFamily: 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
                 }}
@@ -1657,13 +1684,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
         return (
             <>
-                <div className="w-full rounded-lg border border-gray-300 bg-[#e5e7eb] overflow-hidden">
-                    <div className="flex items-center justify-between bg-[#6d88ad] text-white px-4 py-2 border-b border-[#5f7899]">
-                        <span className="text-lg font-bold uppercase tracking-wide">Family Tree</span>
-                        <span className="text-lg text-black flex items-center gap-2"><Edit size={18} /> Pedigree</span>
-                    </div>
-
-                    <div className="px-4 py-3">
+                <div className="w-full rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
+                    <div className="px-4 pt-3 pb-2">
                         <div className="flex items-center gap-3 mb-2">
                             <input
                                 type="range"
@@ -1672,18 +1694,23 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                                 step={1}
                                 value={inlineZoomPct}
                                 onChange={(e) => setInlineZoomPct(Number(e.target.value))}
-                                className="flex-1 accent-blue-600"
+                                className="flex-1 accent-primary"
                             />
-                            <span className="text-white bg-[#6d88ad] rounded px-2 py-0.5 text-sm font-bold min-w-[48px] text-center">{inlineZoomPct}%</span>
+                            <span className="text-white bg-primary rounded px-2 py-0.5 text-sm font-bold min-w-[48px] text-center">{inlineZoomPct}%</span>
                         </div>
 
-                        <div className="border-2 border-[#6d88ad] bg-white overflow-hidden" style={{ height: previewHeight }}>
+                        <div
+                            className="border border-gray-200 bg-slate-50 overflow-hidden"
+                            style={{ height: previewHeight, cursor: inlineDragging ? 'grabbing' : 'grab' }}
+                            onMouseDown={handleInlineMouseDown}
+                            onMouseMove={handleInlineMouseMove}
+                            onMouseUp={stopInlineDrag}
+                            onMouseLeave={stopInlineDrag}
+                        >
                             <div
                                 style={{
-                                    transform: `scale(${inlineScale})`,
+                                    transform: `translate(${inlinePan.x}px, ${inlinePan.y}px) scale(${inlineScale})`,
                                     transformOrigin: 'top left',
-                                    width: `${100 / inlineScale}%`,
-                                    height: `${100 / inlineScale}%`,
                                     padding: 8,
                                     boxSizing: 'border-box',
                                 }}
