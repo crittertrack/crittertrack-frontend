@@ -579,6 +579,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     const [certBgColor, setCertBgColor] = useState(_savedPrefs.certBgColor ?? '#ffffff');
     const [showCustomPanel, setShowCustomPanel] = useState(false);
     const [vertGenerations, setVertGenerations] = useState(inline && inlineGenerations ? inlineGenerations : 3);
+    const [inlineZoomPct, setInlineZoomPct] = useState(72);
+    const [inlineEnlarged, setInlineEnlarged] = useState(false);
     const pedigreeRef = useRef(null);
 
     useEffect(() => {
@@ -1419,6 +1421,113 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         );
     };
 
+    const renderInlineRoundTree = (rootAnimal, gens) => {
+        if (!rootAnimal) return null;
+
+        const nodeRadius = 34;
+        const nodeSize = nodeRadius * 2;
+        const colStep = 220;
+        const worldW = Math.max(820, (gens + 1) * colStep + 140);
+        const worldH = Math.max(420, Math.pow(2, Math.max(gens - 1, 0)) * 140);
+
+        const slots = [];
+        slots[0] = [{ path: [], isSire: null }];
+        for (let g = 1; g <= gens; g++) {
+            slots[g] = [];
+            for (const slot of slots[g - 1]) {
+                slots[g].push({ path: [...slot.path, 'father'], isSire: true });
+                slots[g].push({ path: [...slot.path, 'mother'], isSire: false });
+            }
+        }
+
+        const nodes = [];
+        const nodePos = new Map();
+
+        for (let g = 0; g <= gens; g++) {
+            const genSlots = slots[g];
+            const yStep = worldH / (genSlots.length + 1);
+            const x = 70 + g * colStep;
+            genSlots.forEach((slot, idx) => {
+                const animal = g === 0 ? rootAnimal : getAncestor(rootAnimal, slot.path);
+                const key = `${g}-${idx}`;
+                const y = yStep * (idx + 1);
+                nodes.push({ key, g, idx, x, y, slot, animal });
+                nodePos.set(key, { x, y });
+            });
+        }
+
+        const edges = [];
+        for (let g = 1; g <= gens; g++) {
+            const genSlots = slots[g];
+            genSlots.forEach((_, idx) => {
+                const parentKey = `${g}-${idx}`;
+                const childKey = `${g - 1}-${Math.floor(idx / 2)}`;
+                const parent = nodePos.get(parentKey);
+                const child = nodePos.get(childKey);
+                if (!parent || !child) return;
+                const startX = parent.x - nodeRadius;
+                const startY = parent.y;
+                const endX = child.x + nodeRadius;
+                const endY = child.y;
+                const midX = (startX + endX) / 2;
+                edges.push(`M ${startX} ${startY} L ${midX} ${startY} L ${midX} ${endY} L ${endX} ${endY}`);
+            });
+        }
+
+        return (
+            <div style={{ position: 'relative', width: worldW, height: worldH }}>
+                <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+                    {edges.map((d, i) => (
+                        <path key={i} d={d} fill="none" stroke="#8ea0ba" strokeWidth="2" strokeLinecap="round" />
+                    ))}
+                </svg>
+
+                {nodes.map((n) => {
+                    const a = n.animal;
+                    const isUnknown = !a || a.isHidden;
+                    const imgSrc = a && !a.isHidden ? (a.imageUrl || a.photoUrl || null) : null;
+                    const isMale = a?.gender === 'Male' || (a?.gender !== 'Female' && n.slot.isSire === true);
+                    const isFemale = a?.gender === 'Female' || (a?.gender !== 'Male' && n.slot.isSire === false);
+                    const borderColor = isUnknown ? '#94a3b8' : isMale ? '#3b82f6' : isFemale ? '#ec4899' : '#64748b';
+                    const bgColor = isUnknown ? '#e5e7eb' : '#f8fafc';
+                    const fullName = a && !a.isHidden ? [a.prefix, a.name, a.suffix].filter(Boolean).join(' ') : 'Unknown';
+                    const clickable = !!(a && !a.isHidden && a.id_public);
+
+                    return (
+                        <div key={n.key} style={{ position: 'absolute', left: n.x - nodeRadius, top: n.y - nodeRadius, width: nodeSize, transform: 'translate(0, 0)' }}>
+                            <div
+                                onClick={clickable ? () => handleCardClick(a) : undefined}
+                                style={{
+                                    width: nodeSize,
+                                    height: nodeSize,
+                                    borderRadius: '9999px',
+                                    overflow: 'hidden',
+                                    border: `3px solid ${borderColor}`,
+                                    background: bgColor,
+                                    boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                                    cursor: clickable ? 'pointer' : 'default',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                                title={fullName}
+                            >
+                                {imgSrc ? (
+                                    <AnimalImage src={imgSrc} alt={fullName} className="w-full h-full object-cover" iconSize={24} />
+                                ) : (
+                                    <span style={{ fontSize: '0.68rem', color: '#64748b', textAlign: 'center', padding: 4, lineHeight: 1.1 }}>?</span>
+                                )}
+                            </div>
+                            <div style={{ marginTop: 4, width: 120, marginLeft: -26, textAlign: 'center', fontSize: '0.62rem', lineHeight: 1.1, color: '#0f172a', fontWeight: 600, overflowWrap: 'anywhere' }}>
+                                {fullName}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    };
+
     if (loading) {
         if (inline) {
             return <div className="flex items-center justify-center py-12 gap-2 text-gray-400"><Loader2 size={18} className="animate-spin" /><span className="text-sm">Loading pedigree chart…</span></div>;
@@ -1526,6 +1635,9 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
     if (inline) {
         const inlineGens = inlineGenerations || (vertical ? vertGenerations : generations) || 3;
+        const inlineScale = Math.max(0.2, Math.min(2, inlineZoomPct / 100));
+        const previewHeight = vertical ? 620 : 440;
+
         const inlineJsx = (
             <div
                 ref={pedigreeRef}
@@ -1539,22 +1651,69 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     fontFamily: 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
                 }}
             >
-                <div style={{ display: 'grid', gridTemplateColumns: vertical ? '1fr' : 'minmax(220px, 1.1fr) minmax(0, 3fr)', gap: 8, alignItems: 'start' }}>
-                    <div>
-                        {subject ? renderInlineSubjectCard(subject) : null}
-                    </div>
-                    <div style={{ minWidth: 0 }}>
-                        {subject ? (vertical ? renderVerticalCertTable(subject, inlineGens, handleCardClick) : renderCertificateTable(subject, inlineGens, handleCardClick)) : null}
-                    </div>
-                </div>
+                {subject ? renderInlineRoundTree(subject, inlineGens) : null}
             </div>
         );
 
         return (
             <>
-                <div className="w-full">
-                    {inlineJsx}
+                <div className="w-full rounded-lg border border-gray-300 bg-[#e5e7eb] overflow-hidden">
+                    <div className="flex items-center justify-between bg-[#6d88ad] text-white px-4 py-2 border-b border-[#5f7899]">
+                        <span className="text-lg font-bold uppercase tracking-wide">Family Tree</span>
+                        <span className="text-lg text-black flex items-center gap-2"><Edit size={18} /> Pedigree</span>
+                    </div>
+
+                    <div className="px-4 py-3">
+                        <div className="flex items-center gap-3 mb-2">
+                            <input
+                                type="range"
+                                min={20}
+                                max={120}
+                                step={1}
+                                value={inlineZoomPct}
+                                onChange={(e) => setInlineZoomPct(Number(e.target.value))}
+                                className="flex-1 accent-blue-600"
+                            />
+                            <span className="text-white bg-[#6d88ad] rounded px-2 py-0.5 text-sm font-bold min-w-[48px] text-center">{inlineZoomPct}%</span>
+                        </div>
+
+                        <div className="border-2 border-[#6d88ad] bg-white overflow-hidden" style={{ height: previewHeight }}>
+                            <div
+                                style={{
+                                    transform: `scale(${inlineScale})`,
+                                    transformOrigin: 'top left',
+                                    width: `${100 / inlineScale}%`,
+                                    height: `${100 / inlineScale}%`,
+                                    padding: 8,
+                                    boxSizing: 'border-box',
+                                }}
+                            >
+                                {inlineJsx}
+                            </div>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() => setInlineEnlarged(true)}
+                            className="mt-2 text-2xl text-gray-800 hover:underline"
+                        >
+                            View it enlarged
+                        </button>
+                    </div>
                 </div>
+
+                {inlineEnlarged && (
+                    <PedigreeChart
+                        animalId={subject?.id_public || animalId}
+                        animalData={subject || animalData}
+                        onClose={() => setInlineEnlarged(false)}
+                        API_BASE_URL={API_BASE_URL}
+                        authToken={authToken}
+                        vertical={vertical}
+                        manualData={manualData}
+                        onViewAnimal={onViewAnimal}
+                    />
+                )}
                 {stackedPedigree && (
                     <div className="fixed inset-0 z-[90]">
                         <PedigreeChart animalId={stackedPedigree.id_public} animalData={stackedPedigree} onClose={() => setStackedPedigree(null)} API_BASE_URL={API_BASE_URL} authToken={authToken} />
