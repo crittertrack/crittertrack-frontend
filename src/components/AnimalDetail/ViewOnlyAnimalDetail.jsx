@@ -2094,7 +2094,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     </button>
                                     <button
                                         onClick={() => setShowVertCert(true)}
-                                        className="px-4 py-2 text-xs sm:text-sm rounded-lg bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200 transition flex items-center gap-1.5 font-semibold shadow-sm"
+                                        className="px-4 py-2 text-xs sm:text-sm rounded-lg bg-accent hover:bg-accent/90 text-white border border-accent/40 transition flex items-center gap-1.5 font-semibold shadow-sm"
                                     >
                                         <ScrollText size={14} /> Open Vertical Certificate
                                     </button>
