@@ -79,9 +79,10 @@ const FamilyTreeView = ({
     const [zoom, setZoom] = useState(85);
     const [pan, setPan] = useState({ x: 24, y: 24 });
     const [showNoPedigreePanel, setShowNoPedigreePanel] = useState(true);
+    const [showOwnedAnimalsPanel, setShowOwnedAnimalsPanel] = useState(true);
     const [hoveredAnimal, setHoveredAnimal] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
-    const [focusMode, setFocusMode] = useState(true);
+    const [focusMode, setFocusMode] = useState(false);
     const [focusAnimalId, setFocusAnimalId] = useState(null);
     const [ancestorDepthLimit, setAncestorDepthLimit] = useState(3);
     const [descendantDepthLimit, setDescendantDepthLimit] = useState(2);
@@ -98,6 +99,7 @@ const FamilyTreeView = ({
     const pendingViewRef = useRef({ pan: { x: 24, y: 24 }, zoom: 85 });
     const pendingCenterAnimalRef = useRef(null);
     const [centerRequestNonce, setCenterRequestNonce] = useState(0);
+    const previousFocusModeRef = useRef(false);
 
     const clampPanToViewport = (nextPan, nextZoom) => {
         const container = containerRef.current;
@@ -352,6 +354,14 @@ const FamilyTreeView = ({
             .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
         const noPedigreeSet = new Set(noPedigreeAnimals.map(a => a.id_public));
         const accountIdSet = new Set(speciesAnimals.map(a => a.id_public));
+        const activeOwnedAnimals = speciesAnimals
+            .filter(a => !noPedigreeSet.has(a.id_public))
+            .sort((a, b) => {
+                const nameA = [a?.prefix, a?.name, a?.suffix].filter(Boolean).join(' ').toLowerCase();
+                const nameB = [b?.prefix, b?.name, b?.suffix].filter(Boolean).join(' ').toLowerCase();
+                if (nameA !== nameB) return nameA.localeCompare(nameB);
+                return String(a?.id_public || '').localeCompare(String(b?.id_public || ''));
+            });
 
         const query = searchQuery.trim().toLowerCase();
         let resolvedFocusId = (focusAnimalId && allById[focusAnimalId]) ? focusAnimalId : null;
@@ -764,6 +774,7 @@ const FamilyTreeView = ({
             width: maxX,
             height: maxY,
             noPedigreeAnimals,
+            activeOwnedAnimals,
         };
     }, [
         speciesAnimals,
@@ -776,6 +787,7 @@ const FamilyTreeView = ({
     ]);
 
     const noPedigreeAnimals = graphData.noPedigreeAnimals || [];
+    const activeOwnedAnimals = graphData.activeOwnedAnimals || [];
 
     const searchMatchedIds = useMemo(() => {
         const query = searchQuery.trim().toLowerCase();
@@ -919,6 +931,32 @@ const FamilyTreeView = ({
             y: Number.isFinite(nextY) ? nextY : 24,
         });
     }, [ancestorLoading, graphData.width, graphData.height, zoom]);
+
+    useEffect(() => {
+        const enteredFocusMode = focusMode && !previousFocusModeRef.current;
+        previousFocusModeRef.current = focusMode;
+        if (!enteredFocusMode) return;
+
+        const container = containerRef.current;
+        if (!container || !graphData.width || !graphData.height) return;
+
+        const fitPadding = 32;
+        const fitScale = Math.min(
+            (container.clientWidth - fitPadding) / graphData.width,
+            (container.clientHeight - fitPadding) / graphData.height
+        );
+
+        if (!Number.isFinite(fitScale) || fitScale <= 0) return;
+
+        const nextZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, Math.floor(fitScale * 100)));
+        const scale = nextZoom / 100;
+        const targetPan = {
+            x: (container.clientWidth - (graphData.width * scale)) / 2,
+            y: (container.clientHeight - (graphData.height * scale)) / 2,
+        };
+
+        scheduleViewUpdate(targetPan, nextZoom);
+    }, [focusMode, graphData.width, graphData.height]);
 
     const handleWheel = e => {
         if (!e.ctrlKey && !e.metaKey) return;
@@ -1129,8 +1167,11 @@ const FamilyTreeView = ({
                     )}
 
                     {focusMode && graphData.focusId && graphData.byId[graphData.focusId] && (
-                        <span className="text-xs text-gray-500">
-                            Focus: {[graphData.byId[graphData.focusId].prefix, graphData.byId[graphData.focusId].name, graphData.byId[graphData.focusId].suffix].filter(Boolean).join(' ') || graphData.focusId}
+                        <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md border border-accent/40 bg-accent/10 text-accent text-xs font-semibold">
+                            <span className="uppercase tracking-wide text-[10px] opacity-85">Focus</span>
+                            <span className="text-sm leading-none">
+                                {[graphData.byId[graphData.focusId].prefix, graphData.byId[graphData.focusId].name, graphData.byId[graphData.focusId].suffix].filter(Boolean).join(' ') || graphData.focusId}
+                            </span>
                         </span>
                     )}
                 </div>
@@ -1170,6 +1211,7 @@ const FamilyTreeView = ({
                                 >
                                     +
                                 </button>
+                                <span className="mx-1 h-5 w-px bg-gray-300" aria-hidden="true" />
                                 <span className="text-xs text-gray-500 ml-1">Desc</span>
                                 <button
                                     onClick={() => setDescendantDepthLimit(v => Math.max(1, v - 1))}
@@ -1188,16 +1230,6 @@ const FamilyTreeView = ({
                                 </button>
                             </>
                         )}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <label className="text-xs text-gray-600">Lines:</label>
-                        <span
-                            className="px-2 py-1 text-xs rounded border bg-accent text-white border-accent"
-                            title="Orthogonal connector lines"
-                        >
-                            Right Angle
-                        </span>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -1257,55 +1289,112 @@ const FamilyTreeView = ({
                 Click a node to focus and center it. Double-click for details. Focus search recenters to the first match without dimming the graph.
             </div>
 
-            <div className={`grid ${showNoPedigreePanel ? 'grid-cols-[280px_minmax(0,1fr)]' : 'grid-cols-[44px_minmax(0,1fr)]'} gap-4`}>
-                <div className="border border-gray-300 rounded-lg bg-white shadow-sm h-[680px] overflow-hidden">
-                    <div className="sticky top-0 bg-white/95 backdrop-blur border-b border-gray-200 px-2.5 py-2 flex items-center justify-between gap-2">
-                        {showNoPedigreePanel ? (
-                            <>
-                                <div className="min-w-0">
-                                    <p className="text-sm font-semibold text-gray-700 truncate">No Pedigree Links</p>
-                                    <p className="text-xs text-gray-500 truncate">{noPedigreeAnimals.length} animals with no parents and no offspring in this species</p>
-                                </div>
+            <div className={`grid ${(showNoPedigreePanel || showOwnedAnimalsPanel) ? 'grid-cols-[280px_minmax(0,1fr)]' : 'grid-cols-[44px_minmax(0,1fr)]'} gap-4`}>
+                <div className="h-[680px] flex flex-col gap-3">
+                    <div className={`border border-gray-300 rounded-lg bg-white shadow-sm overflow-hidden flex flex-col transition-all ${showNoPedigreePanel ? 'w-full flex-1' : 'w-[44px] h-[44px]'}`}>
+                        <div className="bg-white/95 backdrop-blur border-b border-gray-200 px-2.5 py-2 flex items-center justify-between gap-2">
+                            {showNoPedigreePanel ? (
+                                <>
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-semibold text-gray-700 truncate">No Pedigree Links</p>
+                                        <p className="text-xs text-gray-500 truncate">{noPedigreeAnimals.length} animals with no parents and no offspring in this species</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowNoPedigreePanel(false)}
+                                        className="p-1.5 rounded border border-gray-200 hover:bg-gray-50 text-gray-600"
+                                        title="Collapse no-pedigree panel"
+                                    >
+                                        <ChevronLeft size={14} />
+                                    </button>
+                                </>
+                            ) : (
                                 <button
                                     type="button"
-                                    onClick={() => setShowNoPedigreePanel(false)}
-                                    className="p-1.5 rounded border border-gray-200 hover:bg-gray-50 text-gray-600"
-                                    title="Collapse panel"
+                                    onClick={() => setShowNoPedigreePanel(true)}
+                                    className="w-full h-full flex items-center justify-center p-1.5 rounded border border-gray-200 hover:bg-gray-50 text-gray-600"
+                                    title="Expand no-pedigree panel"
                                 >
-                                    <ChevronLeft size={14} />
+                                    <ChevronRight size={14} />
                                 </button>
-                            </>
-                        ) : (
-                            <button
-                                type="button"
-                                onClick={() => setShowNoPedigreePanel(true)}
-                                className="w-full h-full flex items-center justify-center p-1.5 rounded border border-gray-200 hover:bg-gray-50 text-gray-600"
-                                title="Expand no-pedigree panel"
-                            >
-                                <ChevronRight size={14} />
-                            </button>
+                            )}
+                        </div>
+
+                        {showNoPedigreePanel && (
+                            <div className="p-2 space-y-1.5 flex-1 overflow-auto">
+                                {noPedigreeAnimals.length === 0 ? (
+                                    <p className="text-xs text-gray-400 p-2">All animals are connected in this species graph.</p>
+                                ) : noPedigreeAnimals.map(a => (
+                                    <button
+                                        key={a.id_public}
+                                        type="button"
+                                        onClick={() => onViewAnimal && onViewAnimal(a)}
+                                        className="w-full text-left px-2 py-2 rounded border border-gray-200 hover:border-accent hover:bg-accent/5 transition"
+                                        title="Open animal details"
+                                    >
+                                        <p className="text-xs font-semibold text-gray-800 truncate">{[a.prefix, a.name, a.suffix].filter(Boolean).join(' ') || 'Unnamed'}</p>
+                                        <p className="text-[11px] text-gray-500 truncate">{a.variety || 'Unknown variety'}{a.birthDate ? ` • ${formatDate(a.birthDate)}` : ''}</p>
+                                        <p className="text-[10px] text-gray-400 font-mono truncate">{a.id_public}</p>
+                                    </button>
+                                ))}
+                            </div>
                         )}
                     </div>
 
-                    {showNoPedigreePanel && (
-                        <div className="p-2 space-y-1.5 h-[calc(680px-52px)] overflow-auto">
-                            {noPedigreeAnimals.length === 0 ? (
-                                <p className="text-xs text-gray-400 p-2">All animals are connected in this species graph.</p>
-                            ) : noPedigreeAnimals.map(a => (
+                    <div className={`border border-gray-300 rounded-lg bg-white shadow-sm overflow-hidden flex flex-col transition-all ${showOwnedAnimalsPanel ? 'w-full flex-1' : 'w-[44px] h-[44px]'}`}>
+                        <div className="bg-white/95 backdrop-blur border-b border-gray-200 px-2.5 py-2 flex items-center justify-between gap-2">
+                            {showOwnedAnimalsPanel ? (
+                                <>
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-semibold text-gray-700 truncate">Owned Animals</p>
+                                        <p className="text-xs text-gray-500 truncate">{activeOwnedAnimals.length} connected account animals in this species</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowOwnedAnimalsPanel(false)}
+                                        className="p-1.5 rounded border border-gray-200 hover:bg-gray-50 text-gray-600"
+                                        title="Collapse owned animals panel"
+                                    >
+                                        <ChevronLeft size={14} />
+                                    </button>
+                                </>
+                            ) : (
                                 <button
-                                    key={a.id_public}
                                     type="button"
-                                    onClick={() => onViewAnimal && onViewAnimal(a)}
-                                    className="w-full text-left px-2 py-2 rounded border border-gray-200 hover:border-accent hover:bg-accent/5 transition"
-                                    title="Open animal details"
+                                    onClick={() => setShowOwnedAnimalsPanel(true)}
+                                    className="w-full h-full flex items-center justify-center p-1.5 rounded border border-gray-200 hover:bg-gray-50 text-gray-600"
+                                    title="Expand owned animals panel"
                                 >
-                                    <p className="text-xs font-semibold text-gray-800 truncate">{[a.prefix, a.name, a.suffix].filter(Boolean).join(' ') || 'Unnamed'}</p>
-                                    <p className="text-[11px] text-gray-500 truncate">{a.status || 'Unknown'}{a.birthDate ? ` • ${formatDate(a.birthDate)}` : ''}</p>
-                                    <p className="text-[10px] text-gray-400 font-mono truncate">{a.id_public}</p>
+                                    <ChevronRight size={14} />
                                 </button>
-                            ))}
+                            )}
                         </div>
-                    )}
+
+                        {showOwnedAnimalsPanel && (
+                            <div className="p-2 space-y-1.5 flex-1 overflow-auto">
+                                {activeOwnedAnimals.length === 0 ? (
+                                    <p className="text-xs text-gray-400 p-2">No connected account animals in this species.</p>
+                                ) : activeOwnedAnimals.map(a => (
+                                    <button
+                                        key={a.id_public}
+                                        type="button"
+                                        onClick={() => {
+                                            setFocusMode(true);
+                                            setFocusAnimalId(a.id_public);
+                                            pendingCenterAnimalRef.current = a.id_public;
+                                            setCenterRequestNonce(n => n + 1);
+                                        }}
+                                        className={`w-full text-left px-2 py-2 rounded border transition ${graphData.focusId === a.id_public ? 'border-accent bg-accent/10' : 'border-gray-200 hover:border-accent hover:bg-accent/5'}`}
+                                        title="Focus this animal in the tree"
+                                    >
+                                        <p className="text-xs font-semibold text-gray-800 truncate">{[a.prefix, a.name, a.suffix].filter(Boolean).join(' ') || 'Unnamed'}</p>
+                                        <p className="text-[11px] text-gray-500 truncate">{a.variety || 'Unknown variety'}{a.birthDate ? ` • ${formatDate(a.birthDate)}` : ''}</p>
+                                        <p className="text-[10px] text-gray-400 font-mono truncate">{a.id_public}</p>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <div
