@@ -98,6 +98,7 @@ const FamilyTreeView = ({
     const viewFrameRef = useRef(null);
     const pendingViewRef = useRef({ pan: { x: 24, y: 24 }, zoom: 85 });
     const pendingCenterAnimalRef = useRef(null);
+    const [centerRequestNonce, setCenterRequestNonce] = useState(0);
 
     const clampPanToViewport = (nextPan, nextZoom) => {
         const container = containerRef.current;
@@ -885,24 +886,13 @@ const FamilyTreeView = ({
         setFocusMode(true);
         setFocusAnimalId(prev => (prev === firstSearchMatch ? prev : firstSearchMatch));
         pendingCenterAnimalRef.current = firstSearchMatch;
-
-        const pos = graphData.positions[firstSearchMatch];
-        const container = containerRef.current;
-        if (pos && container) {
-            const scale = zoomStateRef.current / 100;
-            const nodeCenterX = pos.x + NODE_W / 2;
-            const nodeCenterY = pos.y + NODE_H / 2;
-            const targetPan = {
-                x: (container.clientWidth / 2) - (nodeCenterX * scale),
-                y: (container.clientHeight / 2) - (nodeCenterY * scale),
-            };
-            scheduleViewUpdate(targetPan, zoomStateRef.current);
-        }
-    }, [firstSearchMatch, graphData.positions, searchQuery]);
+        setCenterRequestNonce(n => n + 1);
+    }, [firstSearchMatch, searchQuery]);
 
     useEffect(() => {
         const targetId = pendingCenterAnimalRef.current;
         if (!targetId) return;
+        if (graphData.focusId !== targetId) return;
 
         const pos = graphData.positions[targetId];
         if (!pos) return;
@@ -920,7 +910,7 @@ const FamilyTreeView = ({
 
         scheduleViewUpdate(targetPan, zoomStateRef.current);
         pendingCenterAnimalRef.current = null;
-    }, [graphData.positions, focusMode]);
+    }, [centerRequestNonce, focusMode, graphData.focusId, graphData.positions]);
 
     const getAncestors = (id, visited = new Set()) => {
         if (visited.has(id)) return new Set();
@@ -1454,6 +1444,7 @@ const FamilyTreeView = ({
                                         setFocusMode(true);
                                         setFocusAnimalId(id);
                                         pendingCenterAnimalRef.current = id;
+                                        setCenterRequestNonce(n => n + 1);
                                     }}
                                     onDoubleClick={() => {
                                         if (onViewAnimal) onViewAnimal(animal);
