@@ -37,6 +37,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
     const [animalCOI, setAnimalCOI] = useState(null);
     const [loadingCOI, setLoadingCOI] = useState(false);
     const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
+    const [collapsedCareSections, setCollapsedCareSections] = useState({});
     const [breedingRecordOffspring, setBreedingRecordOffspring] = useState({});
     const [expandedBreedingRecords, setExpandedBreedingRecords] = useState({});
     const [animalLitters, setAnimalLitters] = useState(null);
@@ -2199,18 +2200,27 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                         <div className="space-y-6">
                             {/* 1st Section: Nutrition */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><UtensilsCrossed size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Nutrition</h3>
-                                <div className="space-y-3 text-sm">
+                                <button type="button" onClick={() => setCollapsedCareSections(p => ({...p, nutrition: !p.nutrition}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><UtensilsCrossed size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Nutrition</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedCareSections.nutrition ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                </button>
+                                {!collapsedCareSections.nutrition && (
+                                <div className="space-y-3 text-sm mt-4">
                                     {animal.dietType && <div><span className="text-gray-600">Diet Type:</span> <strong>{animal.dietType}</strong></div>}
                                     {animal.feedingSchedule && <div><span className="text-gray-600">Feeding Schedule:</span> <strong>{animal.feedingSchedule}</strong></div>}
                                     {animal.supplements && <div><span className="text-gray-600">Supplements:</span> <strong>{animal.supplements}</strong></div>}
                                 </div>
+                                )}
                             </div>
 
                             {/* 2nd Section: Housing & Enclosure */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Housing & Enclosure</h3>
-                                <div className="space-y-3 text-sm">
+                                <button type="button" onClick={() => setCollapsedCareSections(p => ({...p, housingEnclosure: !p.housingEnclosure}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Housing & Enclosure</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedCareSections.housingEnclosure ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                </button>
+                                {!collapsedCareSections.housingEnclosure && (
+                                <div className="space-y-3 text-sm mt-4">
                                     {enclosureInfo && (<div><span className="text-gray-600">Enclosure:</span> <strong>{enclosureInfo.name}</strong></div>)}
                                     {fieldTemplate?.fields?.housingType?.enabled !== false && animal.housingType && <div><span className="text-gray-600">{getLabel('housingType', 'Housing Type')}:</span> <strong>{animal.housingType}</strong></div>}
                                     {fieldTemplate?.fields?.bedding?.enabled !== false && animal.bedding && <div><span className="text-gray-600">{getLabel('bedding', 'Bedding')}:</span> <strong>{animal.bedding}</strong></div>}
@@ -2232,12 +2242,17 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                                         </div>
                                     </div>
                                 )}
+                                )}
                             </div>
 
                             {/* 3rd Section: Animal Care */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Droplets size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Animal Care</h3>
-                                <div className="space-y-3 text-sm">
+                                <button type="button" onClick={() => setCollapsedCareSections(p => ({...p, animalCare: !p.animalCare}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Droplets size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Animal Care</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedCareSections.animalCare ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                </button>
+                                {!collapsedCareSections.animalCare && (
+                                <div className="space-y-3 text-sm mt-4">
                                     {animal.animalCareTasks && animal.animalCareTasks.length > 0 && (
                                         <div>
                                             <div className="text-sm font-semibold text-gray-700 mb-2">Animal Care Tasks</div>
@@ -2258,20 +2273,26 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                                     {animal.socializationNotes && <div className="flex items-baseline gap-1"><span className="text-gray-600 font-semibold shrink-0">Socialization Notes:</span><strong className="whitespace-pre-wrap">{animal.socializationNotes}</strong></div>}
                                     {animal.specialCareRequirements && <div className="flex items-baseline gap-1"><span className="text-gray-600 font-semibold shrink-0">Special Care Requirements:</span><strong className="whitespace-pre-wrap">{animal.specialCareRequirements}</strong></div>}
                                 </div>
+                                )}
                             </div>
 
-                            {/* 3rd Section: Environment */}
+                            {/* 4th Section: Environment */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Thermometer size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Environment</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <button type="button" onClick={() => setCollapsedCareSections(p => ({...p, environment: !p.environment}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Thermometer size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Environment</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedCareSections.environment ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                </button>
+                                {!collapsedCareSections.environment && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
                                     {animal.temperatureRange && <div><span className="text-gray-600">Temperature Range:</span> <strong>{animal.temperatureRange}</strong></div>}
                                     {fieldTemplate?.fields?.humidity?.enabled !== false && animal.humidity && <div><span className="text-gray-600">{getLabel('humidity', 'Humidity')}:</span> <strong>{animal.humidity}</strong></div>}
                                     {animal.lighting && <div><span className="text-gray-600">Lighting:</span> <strong>{animal.lighting}</strong></div>}
                                     {fieldTemplate?.fields?.noise?.enabled !== false && animal.noise && <div><span className="text-gray-600">{getLabel('noise', 'Noise Level')}:</span> <strong>{animal.noise}</strong></div>}
                                 </div>
+                                )}
                             </div>
 
-                            {/* 4th Section: Exercise & Grooming */}
+                            {/* 5th Section: Exercise & Grooming */}
                             {(() => {
                                 const egFields = [
                                     { key: 'exerciseRequirements', label: 'Exercise Requirements' },
@@ -2287,7 +2308,12 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return (egFields.length > 0 || trainFlags.length > 0) && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700"><Scissors size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Grooming</h3>
+                                        <button type="button" onClick={() => setCollapsedCareSections(p => ({...p, grooming: !p.grooming}))} className="w-full flex items-center justify-between text-left group">
+                                            <h3 className="text-lg font-semibold text-gray-700"><Scissors size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Grooming</h3>
+                                            <span className="text-gray-400 group-hover:text-gray-600">{collapsedCareSections.grooming ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                        </button>
+                                        {!collapsedCareSections.grooming && (
+                                        <div className="mt-4">
                                         {egFields.length > 0 && (
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                                 {egFields.map(f => (
@@ -2301,6 +2327,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                                                     <span key={f.key} className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">&#x2713; {getLabel(f.key, f.label)}</span>
                                                 ))}
                                             </div>
+                                        )}
+                                        </div>
                                         )}
                                     </div>
                                 );

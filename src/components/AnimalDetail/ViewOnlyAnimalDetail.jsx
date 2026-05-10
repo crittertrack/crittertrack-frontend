@@ -1679,16 +1679,28 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                         <div className="space-y-6">
                             {/* 1st Section: Nutrition */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><UtensilsCrossed size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Nutrition</h3>
+                                <button type="button" onClick={() => setCollapsedCareSections(p => ({...p, nutrition: !p.nutrition}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><UtensilsCrossed size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Nutrition</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedCareSections.nutrition ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                </button>
+                                {!collapsedCareSections.nutrition && (
+                                <div className="mt-4">
                                 {animal.dietType && <div><strong className="text-sm">Diet Type:</strong> <p className="text-sm mt-1">{animal.dietType}</p></div>}
                                 {animal.feedingSchedule && <div><strong className="text-sm">Feeding Schedule:</strong> <p className="text-sm mt-1">{animal.feedingSchedule}</p></div>}
                                 {animal.supplements && <div><strong className="text-sm">Supplements:</strong> <p className="text-sm mt-1">{animal.supplements}</p></div>}
                                 {!animal.dietType && !animal.feedingSchedule && !animal.supplements && <p className="text-sm text-gray-600"></p>}
+                                </div>
+                                )}
                             </div>
 
                             {/* 2nd Section: Housing & Enclosure */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Housing & Enclosure</h3>
+                                <button type="button" onClick={() => setCollapsedCareSections(p => ({...p, housingEnclosure: !p.housingEnclosure}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Housing & Enclosure</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedCareSections.housingEnclosure ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                </button>
+                                {!collapsedCareSections.housingEnclosure && (
+                                <div className="mt-4">
                                 {animal.housingType && <div><strong className="text-sm">{getLabel('housingType', 'Housing Type')}:</strong> <p className="text-sm mt-1">{animal.housingType}</p></div>}
                                 {animal.bedding && <div><strong className="text-sm">{getLabel('bedding', 'Bedding')}:</strong> <p className="text-sm mt-1">{animal.bedding}</p></div>}
                                 {animal.enrichment && <div><strong className="text-sm">Enrichment:</strong> <p className="text-sm mt-1">{animal.enrichment}</p></div>}
@@ -1709,11 +1721,18 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                         </div>
                                     </div>
                                 )}
+                                </div>
+                                )}
                             </div>
 
                             {/* 3rd Section: Animal Care */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Droplets size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Animal Care</h3>
+                                <button type="button" onClick={() => setCollapsedCareSections(p => ({...p, animalCare: !p.animalCare}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Droplets size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Animal Care</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedCareSections.animalCare ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                </button>
+                                {!collapsedCareSections.animalCare && (
+                                <div className="mt-4">
                                 {animal.animalCareTasks && animal.animalCareTasks.length > 0 && (
                                     <div>
                                         <h4 className="text-sm font-semibold text-gray-700 mb-2">Animal Care Tasks</h4>
@@ -1735,16 +1754,25 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                     {animal.socializationNotes && <div><strong className="text-sm">Socialization Notes:</strong> <strong className="text-sm whitespace-pre-wrap">{animal.socializationNotes}</strong></div>}
                                     {animal.specialCareRequirements && <div><strong className="text-sm">Special Care Requirements:</strong> <strong className="text-sm whitespace-pre-wrap">{animal.specialCareRequirements}</strong></div>}
                                 </div>
+                                </div>
+                                )}
                             </div>
 
                             {/* 4th Section: Environment */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Thermometer size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Environment</h3>
+                                <button type="button" onClick={() => setCollapsedCareSections(p => ({...p, environment: !p.environment}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Thermometer size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Environment</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedCareSections.environment ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                </button>
+                                {!collapsedCareSections.environment && (
+                                <div className="mt-4">
                                 {animal.temperatureRange && <div><strong className="text-sm">Temperature Range:</strong> <p className="text-sm mt-1">{animal.temperatureRange}</p></div>}
                                 {animal.humidity && <div><strong className="text-sm">{getLabel('humidity', 'Humidity')}:</strong> <p className="text-sm mt-1">{animal.humidity}</p></div>}
                                 {animal.lighting && <div><strong className="text-sm">Lighting:</strong> <p className="text-sm mt-1">{animal.lighting}</p></div>}
                                 {animal.noise && <div><strong className="text-sm">{getLabel('noise', 'Noise Level')}:</strong> <p className="text-sm mt-1">{animal.noise}</p></div>}
                                 {!animal.temperatureRange && !animal.humidity && !animal.lighting && !animal.noise && <p className="text-sm text-gray-600"></p>}
+                                </div>
+                                )}
                             </div>
 
                             {/* 5th Section: Exercise & Grooming */}
@@ -1763,7 +1791,12 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return (egFields.length > 0 || trainFlags.length > 0) && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700"><Scissors size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Grooming</h3>
+                                        <button type="button" onClick={() => setCollapsedCareSections(p => ({...p, grooming: !p.grooming}))} className="w-full flex items-center justify-between text-left group">
+                                            <h3 className="text-lg font-semibold text-gray-700"><Scissors size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Grooming</h3>
+                                            <span className="text-gray-400 group-hover:text-gray-600">{collapsedCareSections.grooming ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                        </button>
+                                        {!collapsedCareSections.grooming && (
+                                        <div className="mt-4">
                                         {egFields.length > 0 && (
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                                 {egFields.map(f => (
@@ -1777,6 +1810,8 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                                     <span key={f.key} className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">&#x2713; {getLabel(f.key, f.label)}</span>
                                                 ))}
                                             </div>
+                                        )}
+                                        </div>
                                         )}
                                     </div>
                                 );
