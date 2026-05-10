@@ -33,7 +33,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
     const [pan, setPan] = useState({ x: 24, y: 24 });
     const [showNoPedigreePanel, setShowNoPedigreePanel] = useState(true);
     const [hoveredAnimal, setHoveredAnimal] = useState(null);
-    const [highlightMode, setHighlightMode] = useState('ancestors');
+    const [highlightMode, setHighlightMode] = useState('none');
     const [connectorStyle, setConnectorStyle] = useState('orthogonal');
     const [externalAncestorsById, setExternalAncestorsById] = useState({});
     const [ancestorLoading, setAncestorLoading] = useState(false);
@@ -395,7 +395,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
     };
 
     const highlightedSet = useMemo(() => {
-        if (!hoveredAnimal) return new Set();
+        if (!hoveredAnimal || highlightMode === 'none') return new Set();
         const out = new Set([hoveredAnimal]);
         const rel = highlightMode === 'descendants' ? getDescendants(hoveredAnimal) : getAncestors(hoveredAnimal);
         rel.forEach(id => out.add(id));
@@ -406,7 +406,29 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
         if (!e.ctrlKey && !e.metaKey) return;
         e.preventDefault();
         const delta = e.deltaY > 0 ? -8 : 8;
-        setZoom(prev => Math.max(40, Math.min(180, prev + delta)));
+        const newZoom = Math.max(40, Math.min(180, zoom + delta));
+        
+        // Keep the point under cursor centered during zoom
+        const container = containerRef.current;
+        if (container) {
+            const rect = container.getBoundingClientRect();
+            const cursorX = e.clientX - rect.left;
+            const cursorY = e.clientY - rect.top;
+            
+            // World coords of cursor before zoom
+            const worldX = (cursorX - pan.x) / (zoom / 100);
+            const worldY = (cursorY - pan.y) / (zoom / 100);
+            
+            // New pan to keep cursor on same world point
+            const newPan = {
+                x: cursorX - worldX * (newZoom / 100),
+                y: cursorY - worldY * (newZoom / 100),
+            };
+            
+            setPan(newPan);
+        }
+        
+        setZoom(newZoom);
     };
 
     useEffect(() => {
@@ -558,6 +580,12 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                         className={`px-2 py-1 text-xs rounded border ${highlightMode === 'descendants' ? 'bg-accent text-white border-accent' : 'bg-white text-gray-600 border-gray-300'}`}
                     >
                         Descendants
+                    </button>
+                    <button
+                        onClick={() => setHighlightMode('none')}
+                        className={`px-2 py-1 text-xs rounded border ${highlightMode === 'none' ? 'bg-accent text-white border-accent' : 'bg-white text-gray-600 border-gray-300'}`}
+                    >
+                        None
                     </button>
                 </div>
 
