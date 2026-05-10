@@ -905,22 +905,22 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 2,
-        title: 'Milestones',
-        content: 'Use the Milestones section to record key events in your animal\'s life, such as birthdays, health milestones, breeding outcomes, show wins, or other important timeline moments.',
-        tips: [
-          'Record major dates and events',
-          'Useful for life-history tracking',
-          'Great for breeder and buyer transparency'
-        ]
-      },
-      {
-        stepNumber: 3,
         title: 'Notes',
         content: 'Add any observations or notes about your animal that don\'t fit in other sections. This might include personality quirks, notable achievements, breeding notes, or any other relevant information.',
         tips: [
           'Free-form text field',
           'Great for detailed observations',
           'Useful for future reference'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Milestones',
+        content: 'Use the Milestones section to record key events in your animal\'s life, such as birthdays, health milestones, breeding outcomes, show wins, or other important timeline moments.',
+        tips: [
+          'Record major dates and events',
+          'Useful for life-history tracking',
+          'Great for breeder and buyer transparency'
         ]
       }
     ]
