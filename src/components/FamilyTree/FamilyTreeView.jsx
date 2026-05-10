@@ -955,9 +955,9 @@ const FamilyTreeView = ({
     }, [ancestorLoading, graphData.width, graphData.height, zoom]);
 
     useEffect(() => {
-        const enteredFocusMode = focusMode && !previousFocusModeRef.current;
+        const modeChanged = previousFocusModeRef.current !== focusMode;
         previousFocusModeRef.current = focusMode;
-        if (!enteredFocusMode) return;
+        if (!modeChanged) return;
 
         const container = containerRef.current;
         if (!container || !graphData.width || !graphData.height) return;
