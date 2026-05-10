@@ -1084,12 +1084,12 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 2,
         title: 'Owned Toggle',
-        content: 'The owned toggle lets you mark whether you currently own this animal. When set to owned (red Heart icon), the animal appears under your "Owned" filter and, if also set to public, on your PUBLIC profile. When not owned (gray Heart-Off icon), it only appears in your private "All" filter. This is useful for tracking sold or rehomed animals while keeping their records. You can find this toggle at the top right of the detail overview screen. Changes apply instantly!',
+        content: 'The owned toggle lets you mark whether you currently own this animal. When set to owned (red Heart icon), the animal appears under your Owned toggle and, if also set to public, on your PUBLIC profile. When not owned (gray Heart-Off icon), it appears under your Unowned toggle. This is useful for tracking sold or rehomed animals while keeping their records. You can find this toggle at the top right of the detail overview screen. Changes apply instantly!',
         tips: [
           'Located at top right of detail view',
           'Red Heart = Owned, Gray Heart-Off = Not Owned',
           'Owned + Public = Shows on your PUBLIC profile',
-          'Not owned animals only in "All" filter',
+          'Use the separate Owned and Unowned toggles to filter records',
           'Useful for sold or rehomed animals',
           'Can be toggled anytime - updates instantly'
         ]
