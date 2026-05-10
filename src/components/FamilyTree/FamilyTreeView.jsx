@@ -474,6 +474,36 @@ const FamilyTreeView = ({
             };
         });
 
+        const litterInfoByKey = {};
+        const litterKeyByChildId = {};
+        Object.entries(pairGroups).forEach(([pairKey, group]) => {
+            (group.childIds || []).forEach(childId => {
+                const child = byId[childId];
+                if (!child || !positions[childId]) return;
+
+                const birthKey = child.birthDate
+                    ? new Date(child.birthDate).toISOString().slice(0, 10)
+                    : `unknown:${childId}`;
+                const litterKey = `${pairKey}|${birthKey}`;
+
+                if (!litterInfoByKey[litterKey]) {
+                    const pairInfo = pairInfoByKey[pairKey];
+                    litterInfoByKey[litterKey] = {
+                        litterKey,
+                        pairKey,
+                        birthKey,
+                        childIds: [],
+                        center: Number.isFinite(pairInfo?.childMidpoint)
+                            ? pairInfo.childMidpoint
+                            : (positions[childId].x + NODE_W / 2),
+                    };
+                }
+
+                litterInfoByKey[litterKey].childIds.push(childId);
+                litterKeyByChildId[childId] = litterKey;
+            });
+        });
+
         // Post-layout ordering pass: keep each generation deterministic and grouped by parent midpoint.
         const rankIds = {};
         Object.entries(positions).forEach(([id, pos]) => {
@@ -503,6 +533,25 @@ const FamilyTreeView = ({
 
             sortedIds.forEach(id => {
                 if (used.has(id)) return;
+
+                const litterKey = litterKeyByChildId[id];
+                if (litterKey) {
+                    const litterInfo = litterInfoByKey[litterKey];
+                    const members = (litterInfo?.childIds || [])
+                        .filter(cid => rankSet.has(cid) && !used.has(cid))
+                        .sort((a, b) => compareSiblingOrder(byId[a], byId[b]));
+
+                    if (members.length > 1) {
+                        members.forEach(cid => used.add(cid));
+                        blocks.push({
+                            kind: 'litter',
+                            key: litterKey,
+                            members,
+                            center: litterInfo.center,
+                        });
+                        return;
+                    }
+                }
 
                 const pairKey = Object.keys(pairInfoByKey).find(key => {
                     const info = pairInfoByKey[key];
@@ -563,7 +612,12 @@ const FamilyTreeView = ({
                 .sort((a, b) => a.x - b.x);
             const children = group.childIds
                 .filter(cid => positions[cid])
-                .map(cid => ({ id: cid, x: positions[cid].x + NODE_W / 2, yTop: positions[cid].y }))
+                .map(cid => ({
+                    id: cid,
+                    x: positions[cid].x + NODE_W / 2,
+                    yTop: positions[cid].y,
+                    birthDate: byId[cid]?.birthDate,
+                }))
                 .sort((a, b) => compareSiblingOrder(byId[a.id], byId[b.id]));
 
             if (!parents.length || !children.length) return;
