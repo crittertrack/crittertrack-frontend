@@ -4960,14 +4960,6 @@ const AnimalList = ({
                                     {!isBulkMode && (
                                         <>
                                             <button
-                                                onClick={() => navigate(`/animal-tree/${encodeURIComponent(species)}`)}
-                                                className="p-1 sm:p-2 hover:bg-gray-200 rounded-lg transition"
-                                                title="Animal Tree"
-                                                data-tutorial-target="animal-tree-btn"
-                                            >
-                                                <Network className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-blue-500" />
-                                            </button>
-                                            <button
                                                 onClick={() => toggleBulkPrivacy(species, true)}
                                                 className="p-1 sm:p-2 hover:bg-gray-200 rounded-lg transition"
                                                 title="Make All Public"

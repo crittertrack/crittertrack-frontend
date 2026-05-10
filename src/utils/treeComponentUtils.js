@@ -1,5 +1,5 @@
 /**
- * Shared utilities for tree components (AnimalTree, FamilyTree)
+ * Shared utilities for tree components (FamilyTree)
  * Extracted to reduce duplication (~50+ lines saved per component)
  */
 
