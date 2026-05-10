@@ -7,6 +7,8 @@ import { formatDate } from '../../utils/dateFormatter';
 const NODE_W = 96;
 const NODE_H = 92;
 const API_BASE_URL = '/api';
+const MIN_ZOOM = 50;
+const MAX_ZOOM = 180;
 const LINEAGE_COLORS = [
     '#2563eb', '#dc2626', '#059669', '#7c3aed', '#ea580c', '#0f766e', '#c026d3', '#b45309',
     '#0891b2', '#be123c', '#4f46e5', '#15803d', '#a16207', '#9333ea', '#0ea5e9', '#e11d48'
@@ -43,7 +45,17 @@ const compareSiblingOrder = (a, b) => {
     return nameA.localeCompare(nameB);
 };
 
-const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken, breedingLineDefs = [], animalBreedingLines = {} }) => {
+const FamilyTreeView = ({
+    animals = [],
+    loading = false,
+    onViewAnimal,
+    authToken,
+    breedingLineDefs = [],
+    animalBreedingLines = {},
+    prefetchedAncestorsBySpecies = {},
+    prefetchLoadingBySpecies = {},
+    onAncestorsResolved,
+}) => {
     const [selectedSpecies, setSelectedSpecies] = useState(null);
     const [zoom, setZoom] = useState(85);
     const [pan, setPan] = useState({ x: 24, y: 24 });
@@ -108,6 +120,18 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
     useEffect(() => {
         if (!selectedSpecies || speciesAnimals.length === 0) {
             setExternalAncestorsById({});
+            return;
+        }
+
+        const prefetchedForSpecies = prefetchedAncestorsBySpecies[selectedSpecies];
+        if (prefetchedForSpecies) {
+            setExternalAncestorsById(prefetchedForSpecies);
+            setAncestorLoading(false);
+            return;
+        }
+
+        if (prefetchLoadingBySpecies[selectedSpecies]) {
+            setAncestorLoading(true);
             return;
         }
 
@@ -186,6 +210,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
             if (!cancelled) {
                 setExternalAncestorsById(fetched);
                 setAncestorLoading(false);
+                if (onAncestorsResolved) onAncestorsResolved(selectedSpecies, fetched);
             }
         };
 
@@ -198,7 +223,14 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
         });
 
         return () => { cancelled = true; };
-    }, [selectedSpecies, speciesAnimals, authToken]);
+    }, [
+        selectedSpecies,
+        speciesAnimals,
+        authToken,
+        prefetchedAncestorsBySpecies,
+        prefetchLoadingBySpecies,
+        onAncestorsResolved,
+    ]);
 
     const graphData = useMemo(() => {
         const allById = {};
@@ -255,7 +287,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
         g.setGraph({
             rankdir: 'TB',
             nodesep: 42,
-            ranksep: 128,
+            ranksep: 220,
             marginx: 24,
             marginy: 24,
             ranker: 'tight-tree',
@@ -549,7 +581,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
         if (!e.ctrlKey && !e.metaKey) return;
         e.preventDefault();
         const delta = e.deltaY > 0 ? -8 : 8;
-        const newZoom = Math.max(40, Math.min(180, zoom + delta));
+        const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom + delta));
         
         // Keep the point under cursor centered during zoom
         const container = containerRef.current;
@@ -635,7 +667,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
             const dist = touchDistance(e.touches[0], e.touches[1]);
             if (!touchRef.current.startDist) return;
             const scale = dist / touchRef.current.startDist;
-            const nextZoom = Math.max(40, Math.min(180, Math.round(touchRef.current.startZoom * scale)));
+            const nextZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, Math.round(touchRef.current.startZoom * scale)));
             setZoom(nextZoom);
             return;
         }
@@ -751,11 +783,11 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                 </div>
 
                 <div className="flex items-center gap-1">
-                    <button onClick={() => setZoom(z => Math.max(40, z - 10))} className="p-2 hover:bg-gray-200 rounded transition" title="Zoom out (Ctrl+Scroll)">
+                    <button onClick={() => setZoom(z => Math.max(MIN_ZOOM, z - 10))} className="p-2 hover:bg-gray-200 rounded transition" title="Zoom out (Ctrl+Scroll)">
                         <ZoomOut size={16} className="text-gray-600" />
                     </button>
                     <span className="text-xs font-medium text-gray-600 w-12 text-center">{zoom}%</span>
-                    <button onClick={() => setZoom(z => Math.min(180, z + 10))} className="p-2 hover:bg-gray-200 rounded transition" title="Zoom in (Ctrl+Scroll)">
+                    <button onClick={() => setZoom(z => Math.min(MAX_ZOOM, z + 10))} className="p-2 hover:bg-gray-200 rounded transition" title="Zoom in (Ctrl+Scroll)">
                         <ZoomIn size={16} className="text-gray-600" />
                     </button>
                     <button
@@ -849,15 +881,21 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                         <svg style={{ position: 'absolute', inset: 0, width: graphData.width, height: graphData.height, pointerEvents: 'none' }}>
                             {graphData.edgeSegments.map(seg => {
                                 const active = hoveredAnimal && seg.relatedIds.some(rid => highlightedSet.has(rid));
+                                const isPairLine = seg.id.includes('partner-network');
+                                const isDescendantLine = /offspring|child|trunk|anchor|single-diagonal|single-parent/.test(seg.id);
+
+                                const baseStroke = isPairLine ? '#2563eb' : isDescendantLine ? '#7c3aed' : '#64748b';
+                                const activeStroke = isPairLine ? '#1d4ed8' : isDescendantLine ? '#6d28d9' : '#334155';
                                 return (
                                     <path
                                         key={seg.id}
                                         d={seg.d}
                                         fill="none"
-                                        stroke={active ? seg.color || '#1d4ed8' : seg.color || '#64748b'}
+                                        stroke={active ? activeStroke : baseStroke}
                                         strokeWidth={active ? 3.4 : 2.4}
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
+                                        strokeDasharray={isPairLine ? '4 4' : undefined}
                                         opacity={hoveredAnimal ? (active ? 1 : 0.2) : 0.92}
                                     />
                                 );

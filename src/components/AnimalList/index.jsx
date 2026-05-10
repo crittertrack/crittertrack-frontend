@@ -117,6 +117,8 @@ const getUserKey = (token) => {
 
 // -- Module-level cache so AnimalList survives unmount/remount without refetching --
 let _alCache = null;       // last animals array
+let _familyTreePrefetchCacheByUser = {};
+let _familyTreePrefetchLoadingByUser = {};
 
 // Keep cache patched even while AnimalList is unmounted
 if (!window.__alCacheListenerAttached) {
@@ -293,6 +295,44 @@ const AnimalList = ({
     const [listViewColumns, setListViewColumns] = useState(DEFAULT_LIST_COLUMNS); // populated from user-scoped key below
     const [showListColumnConfig, setShowListColumnConfig] = useState(false);
     const [externalParentsCache, setExternalParentsCache] = useState({});
+    const [familyTreePrefetchBySpecies, setFamilyTreePrefetchBySpecies] = useState(() => _familyTreePrefetchCacheByUser[userKey] || {});
+    const [familyTreePrefetchLoadingBySpecies, setFamilyTreePrefetchLoadingBySpecies] = useState(() => _familyTreePrefetchLoadingByUser[userKey] || {});
+
+    const familyTreeAnimals = useMemo(() => (
+        Array.from(
+            new Map(
+                [
+                    ...(animals || []),
+                    ...(soldTransferredRaw || []),
+                    ...(archivedAnimals || []),
+                ]
+                    .filter(a => a?.id_public)
+                    .map(a => [a.id_public, a])
+            ).values()
+        )
+    ), [animals, soldTransferredRaw, archivedAnimals]);
+
+    useEffect(() => {
+        setFamilyTreePrefetchBySpecies(_familyTreePrefetchCacheByUser[userKey] || {});
+        setFamilyTreePrefetchLoadingBySpecies(_familyTreePrefetchLoadingByUser[userKey] || {});
+    }, [userKey]);
+
+    useEffect(() => {
+        _familyTreePrefetchCacheByUser[userKey] = familyTreePrefetchBySpecies;
+    }, [userKey, familyTreePrefetchBySpecies]);
+
+    useEffect(() => {
+        _familyTreePrefetchLoadingByUser[userKey] = familyTreePrefetchLoadingBySpecies;
+    }, [userKey, familyTreePrefetchLoadingBySpecies]);
+
+    const handleFamilyTreeAncestorsResolved = useCallback((species, ancestorsById) => {
+        if (!species || !ancestorsById) return;
+        setFamilyTreePrefetchBySpecies(prev => {
+            if (prev[species]) return prev;
+            return { ...prev, [species]: ancestorsById };
+        });
+        setFamilyTreePrefetchLoadingBySpecies(prev => ({ ...prev, [species]: false }));
+    }, []);
 
     // Fetch names for external parent IDs (animals not in the user's own collection)
     // Runs whenever the animal list or view mode changes
@@ -317,6 +357,90 @@ const AnimalList = ({
         }).catch(err => console.warn('[parents-batch]', err));
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [myAnimalsViewMode, allAnimalsRaw, authToken]);
+
+    useEffect(() => {
+        if (!authToken || familyTreeAnimals.length === 0) return;
+
+        const species = [...new Set(familyTreeAnimals.map(a => a.species).filter(Boolean))].sort()[0];
+        if (!species) return;
+        if (familyTreePrefetchBySpecies[species] || familyTreePrefetchLoadingBySpecies[species]) return;
+
+        let cancelled = false;
+
+        const prefetchSpeciesAncestors = async () => {
+            setFamilyTreePrefetchLoadingBySpecies(prev => ({ ...prev, [species]: true }));
+
+            const speciesAnimals = familyTreeAnimals.filter(a => a.species === species && a.id_public);
+            const existing = new Map(speciesAnimals.map(a => [a.id_public, a]));
+            const fetched = {};
+            const visited = new Set(existing.keys());
+            const queue = [];
+
+            const enqueueParentIfMissing = id => {
+                if (!id || visited.has(id)) return;
+                visited.add(id);
+                queue.push(id);
+            };
+
+            speciesAnimals.forEach(a => {
+                enqueueParentIfMissing(a.fatherId_public || a.sireId_public);
+                enqueueParentIfMissing(a.motherId_public || a.damId_public);
+            });
+
+            const fetchOne = async (id) => {
+                if (!id) return null;
+                try {
+                    const r = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(id)}`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    if (r.data) return r.data;
+                } catch {}
+
+                try {
+                    const r = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(id)}`);
+                    return r.data?.[0] || null;
+                } catch {
+                    return null;
+                }
+            };
+
+            let guard = 0;
+            while (queue.length > 0 && guard < 1200) {
+                guard += 1;
+                const id = queue.shift();
+                const node = await fetchOne(id);
+                if (cancelled) return;
+                if (!node) continue;
+
+                const nid = node.id_public || id;
+                if (!existing.has(nid)) {
+                    const normalized = { ...node, id_public: nid, isPublicAncestor: true };
+                    existing.set(nid, normalized);
+                    fetched[nid] = normalized;
+                }
+
+                enqueueParentIfMissing(node.fatherId_public || node.sireId_public);
+                enqueueParentIfMissing(node.motherId_public || node.damId_public);
+            }
+
+            if (cancelled) return;
+
+            setFamilyTreePrefetchBySpecies(prev => ({
+                ...prev,
+                [species]: fetched,
+            }));
+            setFamilyTreePrefetchLoadingBySpecies(prev => ({ ...prev, [species]: false }));
+        };
+
+        prefetchSpeciesAncestors().catch(() => {
+            if (cancelled) return;
+            setFamilyTreePrefetchLoadingBySpecies(prev => ({ ...prev, [species]: false }));
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [authToken, familyTreeAnimals, familyTreePrefetchBySpecies, familyTreePrefetchLoadingBySpecies]);
 
     // ---- Collection CRUD helpers ----
     const _syncToApi = (cols, map) => {
@@ -4618,7 +4742,7 @@ const AnimalList = ({
             </div>
             )}
 
-            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : showActivityLogScreen ? renderActivityLogScreen() : showForSaleScreen ? renderForSaleScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'supplies' ? renderSuppliesScreen() : animalView === 'collections' ? renderCollectionsView() : animalView === 'familyTree' ? <FamilyTreeView animals={Array.from(new Map([...(animals || []), ...(soldTransferredRaw || []), ...(archivedAnimals || [])].filter(a => a?.id_public).map(a => [a.id_public, a])).values())} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} /> : (loading && animals.length === 0) ? (
+            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : showActivityLogScreen ? renderActivityLogScreen() : showForSaleScreen ? renderForSaleScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'supplies' ? renderSuppliesScreen() : animalView === 'collections' ? renderCollectionsView() : animalView === 'familyTree' ? <FamilyTreeView animals={familyTreeAnimals} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} prefetchedAncestorsBySpecies={familyTreePrefetchBySpecies} prefetchLoadingBySpecies={familyTreePrefetchLoadingBySpecies} onAncestorsResolved={handleFamilyTreeAncestorsResolved} /> : (loading && animals.length === 0) ? (
                 /* Skeleton grid ? only on very first load before any animals arrive */
                 <div className="space-y-3 sm:space-y-4">
                     {[0,1,2].map(gi => (
