@@ -1195,11 +1195,12 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 2,
         title: 'Litter Management',
-        content: 'You\'re now in the Litters section. This is where you track breeding litters and manage offspring. Click the "New Litter" button to create a new litter.',
+        content: 'You\'re now in the Litters section. This is where you track matings, litters, and offspring. Use the separate "+ Mating" button to create a mating record and the "+ Litter" button to create a litter record.',
         tips: [
+          'Use + Mating for planned/active pairings',
+          'Use + Litter for litter records and offspring workflows',
           'Litters organize offspring by breeding',
-          'Each litter has parents and offspring',
-          'Optional but helpful for breeders'
+          'Each litter has parents and offspring'
         ]
       },
       {
