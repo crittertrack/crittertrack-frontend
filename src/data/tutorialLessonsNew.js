@@ -1,7 +1,7 @@
 // NEW COMPREHENSIVE TUTORIAL SYSTEM
-// Tour 1: Getting Started (13 lessons - Animal Creation focused)
-// Tour 2: Key Features (4 lessons - Core Features)
-// Tour 3: Advanced Features (9 lessons - Advanced functionality)
+// Tour 1: Getting Started (15 lessons - Animal Creation focused)
+// Tour 2: Key Features (10 lessons - Core Features)
+// Tour 3: Advanced Features (10 lessons - Advanced functionality)
 
 const GETTING_STARTED_LESSONS = [
   // ============================================
@@ -739,9 +739,9 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 1,
         title: 'Care Tab',
-        content: 'The Care tab is your hub for daily care — feeding schedules, routine care tasks, housing & environment details. Setting these up here is what powers the Management View\'s automated due-date tracking.',
+        content: 'The Care tab is your hub for daily care — feeding schedules, routine care tasks, housing, and environment details. Setting these up here powers automated due-date tracking used across the Feeding & Care, Health, and Enclosures operation tabs.',
         tips: [
-          'Feeding & care schedules set here drive Management View alerts',
+          'Feeding & care schedules set here drive operation-tab alerts',
           'Helps if you ever need to rehome',
           'Documents your care practices'
         ]
@@ -749,9 +749,9 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 2,
         title: 'Feeding Schedule',
-        content: 'Set your animal\'s diet type, feeding frequency (in days), and last fed date. Once set, the Management View will automatically flag this animal as "Due" or "Overdue" when feeding time arrives.',
+        content: 'Set your animal\'s diet type, feeding frequency (in days), and last fed date. Once set, the Feeding & Care tab automatically flags this animal as due or overdue when feeding time arrives.',
         tips: [
-          'Feeding frequency drives Management View alerts',
+          'Feeding frequency drives Feeding & Care alerts',
           'Set last fed date to start tracking from today',
           'Works with Supplies & Inventory to log food used'
         ]
@@ -762,7 +762,7 @@ const GETTING_STARTED_LESSONS = [
         content: 'Assign your animal to an enclosure and document housing details including type, bedding, enrichment, and enclosure maintenance schedule. Add enclosure care tasks like "Deep clean" or "Water change" with frequencies.',
         tips: [
           'Enclosure assignment helps organize animals',
-          'Maintenance tracking powers Management View',
+          'Maintenance tracking powers Enclosures workflows',
           'Separate from animal-specific care tasks'
         ]
       },
@@ -772,7 +772,7 @@ const GETTING_STARTED_LESSONS = [
         content: 'Track recurring care tasks specific to this animal like weighing, nail trims, health checks, and handling routines. Add notes about handling preferences, socialization, and special care requirements.',
         tips: [
           'Each task tracked independently',
-          'Mark done from Management View',
+          'Mark done from Health or Feeding & Care workflows',
           'Document handling and socialization needs'
         ]
       },
@@ -1064,13 +1064,13 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 4,
-        title: 'Pedigree Chart Button',
-        content: 'On the Lineage tab, you can click the "View Pedigree" button to see a detailed family tree chart of your animal. This shows parents, grandparents, and further back generations. When you\'re done viewing, close this pedigree screen by clicking the X or close button.',
+        title: 'Lineage and Family Tree View',
+        content: 'Use the Lineage tab to confirm sire/dam links and pedigree context for this animal. For full interactive exploration across your collection, open the Family Tree tab from My Animals on larger screens.',
         tips: [
-          'Visual representation of pedigree',
+          'Lineage links drive tree accuracy',
           'Requires parent data to be useful',
-          'Can be downloaded as PDF',
-          'Close the pedigree screen when done'
+          'Use Family Tree for graph-style navigation',
+          'Best experience is on larger screens'
         ]
       },
       {
@@ -1683,13 +1683,114 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 5,
-        title: 'Next: Advanced Features Tour',
-        content: 'Congratulations on completing the Key Features tour! You now understand how to view and edit animals, manage litters, configure your profile, handle breeding finances, search and filter, receive notifications, and communicate with other breeders. The "My Feed" tab is your personalized community hub — check it regularly to stay up to date with your favorited animals and breeders. Would you like to start the "Advanced Features" tour? This will teach you about tags, genetics, COI calculations, and more advanced community features.',
+        title: 'Next Lessons in Key Features',
+        content: 'You now understand core communication and messaging workflows. Continue with the remaining Key Features lessons for Community and Calendar, then start the Advanced Features tour for deeper workflows like family trees, COI, and operations tabs.',
         tips: [
+          'Community and Calendar complete the Key Features overview',
           'Advanced Features builds on Key Features',
-          'Covers tags, genetics, and advanced search',
-          'You can start it anytime from the tutorial menu',
-          'Optional but highly recommended'
+          'You can start any lesson from the tutorial menu',
+          'Follow lessons in order for the smoothest onboarding'
+        ]
+      }
+    ]
+  }
+,
+
+  {
+    id: 'kf-community-hub',
+    title: '8. Community Hub & Discovery',
+    description: 'Use the community page to discover breeders, animals, and activity',
+    tour: 'key-features',
+    tourOrder: 8,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Open Community',
+        content: 'Use the Community button in the main navigation to open the community hub. This is where you can browse other users, discover activity, and jump into public profiles and animals.',
+        tips: [
+          'Community is separate from your private My Animals workspace',
+          'Great for finding new breeders to follow',
+          'Use this area for discovery and networking'
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'Find Profiles and Animals',
+        content: 'From Community, open breeder profiles and animal entries to review lines, listings, and activity before messaging or arranging transfers.',
+        tips: [
+          'Profile pages help validate breeder identity and program details',
+          'Animal pages show lineage context and visibility-aware details',
+          'Combine Community browsing with global header search for speed'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Bridge to Messaging and Marketplace',
+        content: 'Community discovery naturally connects to Messaging and Marketplace workflows. When you find relevant breeders or animals, use profile actions to contact them or move into listing details.',
+        tips: [
+          'Message only when contact preferences allow it',
+          'Use Marketplace filters for transactional browsing',
+          'Use Community for relationship-building beyond transactions'
+        ]
+      }
+    ]
+  },
+
+  {
+    id: 'kf-calendar-planning',
+    title: '9. Calendar Planning',
+    description: 'Use the calendar page to track upcoming breeding and care timelines',
+    tour: 'key-features',
+    tourOrder: 9,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Open Calendar',
+        content: 'Use the Calendar button in the main navigation to open your planning view. Calendar gives a date-based perspective on breeding and care activity.',
+        tips: [
+          'Useful for weekly and monthly planning',
+          'Complements tab-based daily operations workflows',
+          'Best used alongside Litters and Feeding/Care scheduling'
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'Review Time-Based Work',
+        content: 'Use calendar views to spot upcoming deadlines, expected events, and care cadence so nothing is missed during busy cycles.',
+        tips: [
+          'Check calendar before planning pairings or transfers',
+          'Use it as your high-level planning layer',
+          'Pair with Activity Log for historical confirmation'
+        ]
+      }
+    ]
+  },
+
+  {
+    id: 'kf-donation-support',
+    title: '10. Donation & Platform Support',
+    description: 'Use the donation page to support platform development',
+    tour: 'key-features',
+    tourOrder: 10,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Open Donation',
+        content: 'Open the Donation page from the app navigation when you want to support CritterTrack development and ongoing infrastructure.',
+        tips: [
+          'Donations help fund maintenance and feature work',
+          'You can continue using all core workflows separately from donations',
+          'Use this page whenever you want to contribute'
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'When to Use It',
+        content: 'Donation is optional and can be used any time. Most users visit it after onboarding when they are actively using breeding, planning, and record workflows.',
+        tips: [
+          'Optional feature; not required for core record management',
+          'Best used when you want to support the roadmap',
+          'Pair support with feature feedback for impact'
         ]
       }
     ]
@@ -2008,52 +2109,56 @@ const ADVANCED_FEATURES_LESSONS = [
 
   {
     id: 'af-animal-tree',
-    title: '7. Animal Tree Visualization',
+    title: '7. Family Tree Visualization',
     description: 'View your animals in an interactive family tree by species',
     tour: 'advanced-features',
     tourOrder: 7,
     steps: [
       {
         stepNumber: 1,
-        title: 'Animal Tree Overview',
-        content: 'The Animal Tree provides a visual family tree for each species, showing all your owned animals and their immediate parents. Click the Network icon next to a species name on your My Animals page to view the tree for that species.',
+        title: 'Family Tree Overview',
+        content: 'The Family Tree tab provides a visual tree for each species, showing your account animals and their linked lineage. Open it from the main view tabs in My Animals.',
         tips: [
           'Visual family tree per species',
-          'Shows owned animals + parents',
-          'Interactive drag and zoom',
+          'Shows account animals + linked lineage',
+          'Interactive pan and zoom',
+          'Focused mode for cleaner lineage slices',
           'Organized by generations'
         ]
       },
       {
         stepNumber: 2,
         title: 'Navigate the Tree',
-        content: 'The tree displays animals as nodes connected by lines showing parent-child relationships. You can click and drag to pan around, zoom in/out, and click on any animal to view their full details.',
+        content: 'Animals appear as connected nodes with parent-child lines. Drag empty space to pan, use Ctrl+scroll (or pinch) to zoom, and click nodes to focus/recenter. Double-click opens details.',
         tips: [
           'Drag to pan the view',
           'Scroll or pinch to zoom',
-          'Click animals to view details',
+          'Click animals to focus and center',
+          'Double-click animals to view details',
           'Different colors show gender'
         ]
       },
       {
         stepNumber: 3,
         title: 'Search in Tree',
-        content: 'Use the search bar to find specific animals in the tree. When you search, matching animals will be highlighted, making it easy to locate them even in large family trees.',
+        content: 'Use the focus search bar to find specific animals by name or ID. Search recenters to the first match and sets focus, without fading the rest of the graph.',
         tips: [
           'Search by animal name',
-          'Matching animals highlighted',
+          'Search by CTCID as well',
+          'Auto-centers on first match',
           'Useful for large collections',
           'Clear search to reset view'
         ]
       },
       {
         stepNumber: 4,
-        title: 'Understanding Connections',
-        content: 'Lines connect parents to offspring. Your owned animals are shown prominently, while parents (which may be from other breeders) appear with different styling. This helps you visualize your entire breeding lineage at a glance.',
+        title: 'Connections and Mobile Access',
+        content: 'Lines connect parents and offspring, with highlights available for ancestors and descendants. On smaller screens, the Family Tree tab is disabled for usability and appears only on larger viewports.',
         tips: [
           'Lines show parent-child links',
-          'Owned animals clearly marked',
-          'Parent animals may be view-only',
+          'Ancestors/Descendants highlight modes help tracing',
+          'Focused and Full Graph views support different workflows',
+          'Use larger screens for full tree editing and exploration',
           'Great for understanding lineages'
         ]
       }
@@ -2130,10 +2235,10 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 7,
         title: 'Tutorial Complete!',
-        content: 'Congratulations! You\'ve completed all CritterTrack tutorials. You now know how to manage your entire breeding program — from adding animals to tracking genetics and finances, daily feeding management in the Management View, Supplies & Inventory, and per-animal Logs. You can always revisit these tutorials from the Help section in the header. Thank you for taking the time to learn all that CritterTrack has to offer!',
+        content: 'Congratulations! You\'ve completed all CritterTrack tutorials. You now know how to manage your entire breeding program — from adding animals to tracking genetics and finances, using the separate My Animals operation tabs (Enclosures, Reproduction, Health, Feeding & Care, Supplies), and per-animal Logs. You can always revisit these tutorials from the Help section in the header. Thank you for taking the time to learn all that CritterTrack has to offer!',
         tips: [
           'Access tutorials anytime from Help',
-          'Check Management View for daily operations',
+          'Use the separate operation tabs for daily workflows',
           'Use the Logs tab on any animal for full history',
           'Happy breeding!'
         ]
@@ -2143,20 +2248,20 @@ const ADVANCED_FEATURES_LESSONS = [
 
   {
     id: 'af-management-view',
-    title: '9. Management View — Daily Operations',
-    description: 'Use the Management View to handle daily feeding, care tasks, enclosures, and reproduction tracking',
+    title: '9. Daily Operations Tabs',
+    description: 'Use the separate tabs in My Animals for enclosures, reproduction, health, feeding, and supplies',
     tour: 'advanced-features',
     tourOrder: 9,
     steps: [
       {
         stepNumber: 1,
-        title: 'Three Views: My Animals, Collections & Management',
-        content: 'At the top of your animal section you\'ll find three view tabs: My Animals (list), Collections, and Management. Each opens a different way to work with your records. On mobile the tabs show icons only to save space; on larger screens the full labels are shown.',
+        title: 'Top Navigation Tabs',
+        content: 'At the top of My Animals, navigation is split into separate tabs: My Animals, Collections, Enclosures, Reproduction, Health, Feeding & Care, Supplies, and Family Tree (desktop/larger screens only). Each tab is focused on one workflow instead of combining everything under one Management tab.',
         tips: [
-          'My Animals: the main list view with search, filters, and species groups',
-          'Collections: group your animals into custom sets (e.g. "Breeders", "For Sale")',
-          'Management: a live dashboard for daily care, feeding, enclosures, and more',
-          'Tap any tab to switch — your last-used data is retained'
+          'My Animals and Collections remain available as before',
+          'Operations are now split across dedicated tabs',
+          'Family Tree appears only when viewport width supports it',
+          'Tap any tab to switch; state is preserved where possible'
         ]
       },
       {
@@ -2174,33 +2279,33 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 3,
         title: 'Pin Your Default View',
-        content: 'Each view tab has a small pin icon in its top-right corner. Click the pin on any tab to make it your default — the next time you open the app it will land on that tab automatically. The active default pin is shown in amber; tap another tab\'s pin to change it.',
+        content: 'Each top tab has a small pin icon in its top-right corner. Click the pin on any tab to make it your default, so opening My Animals lands on that view automatically.',
         tips: [
           'Default view is saved to your browser (localStorage)',
-          'Amber filled pin = currently pinned as default',
-          'Faint pin = hover over the tab to reveal it, then click to pin',
-          'Useful if you live in Collections or Management View'
+          'Filled red pin = currently pinned as default',
+          'Unfilled pin = available to set as default',
+          'Useful if you mostly work in one operations tab'
         ]
       },
       {
         stepNumber: 4,
-        title: 'What Is the Management View?',
-        content: 'The Management View is designed for daily operations. Instead of browsing individual records, it gives you a live dashboard of everything that needs attention today — feeding, care tasks, enclosures, reproduction, medical, and more.',
+        title: 'How Daily Operations Are Organized',
+        content: 'Daily operations are split into focused tabs. Use Enclosures for habitat assignment/maintenance, Reproduction for breeding status workflows, Health for care and medical actions, Feeding & Care for feeding workflows, and Supplies for inventory management.',
         tips: [
           'Deceased and view-only animals are automatically excluded',
           'Sections collapse/expand to reduce clutter',
           'All actions update instantly with no page reload',
-          'Sections are ordered by priority: Enclosures → Feeding → Reproduction → Medical → For Sale → Scheduled Care → Maintenance'
+          'Open only the tab relevant to the task you are handling'
         ]
       },
       {
         stepNumber: 5,
-        title: 'Feeding Section — Due & Overdue',
-        content: 'The Feeding section shows three groups: Due Today / Overdue (red), Up to Date (green), and No Schedule Set. Animals appear here based on the feeding frequency you set in their Animal Care tab. The badge in the section header counts how many animals need attention.',
+        title: 'Feeding & Care Tab — Due and Overdue',
+        content: 'The Feeding & Care tab highlights animals needing feeding actions, including due/overdue states driven by each animal\'s care schedule. This is the main daily feeding workflow tab.',
         tips: [
           'Set feeding frequency on the animal\'s Animal Care tab',
           'Animals move groups automatically as dates change',
-          'Red badge on section shows total items needing feeding'
+          'Use this tab first when doing daily feeding rounds'
         ]
       },
       {
@@ -2216,42 +2321,62 @@ const ADVANCED_FEATURES_LESSONS = [
       },
       {
         stepNumber: 7,
-        title: 'Scheduled Care Tasks',
-        content: 'The Scheduled Care section lists custom recurring tasks you\'ve set on individual animals (like weighing or nail trims). Each has its own due date. Click "✓ Done" to mark a task complete; it resets the countdown based on the task\'s frequency.',
+        title: 'Health Tab — Scheduled Care and Medical',
+        content: 'Use the Health tab for recurring care and medical workflows. It surfaces animals requiring health-related actions and supports quick updates without opening every full animal record.',
         tips: [
-          'Tasks are set per-animal in the Animal Care tab',
+          'Tasks are configured from animal-level care/health settings',
           'Each task tracks independently',
-          'Done state is logged in the animal\'s Logs tab'
+          'Health actions are reflected in logs and status flows'
         ]
       },
       {
         stepNumber: 8,
-        title: 'Enclosures Section',
-        content: 'The Enclosures section shows all your enclosures with their assigned animals and any cleaning tasks that are due. You can see which animals are in which enclosure, and mark cleaning tasks done directly from Management View. Create enclosures and assign animals to them from within this section.',
+        title: 'Enclosures Tab',
+        content: 'The Enclosures tab shows your habitats, assigned animals, and enclosure maintenance tasks. Create/edit enclosures and manage assignments directly from this tab.',
         tips: [
-          'Create enclosures from the Enclosures section add button',
-          'Assign animals to enclosures in their Animal Care tab',
+          'Create enclosures from the Enclosures tab add button',
+          'Assign animals to enclosures from enclosure or animal workflows',
           'Add cleaning task schedules per enclosure for automatic due tracking'
         ]
       },
       {
         stepNumber: 9,
-        title: 'Quarantine & Reproduction Tracking',
-        content: 'The Medical / Quarantine section shows animals in quarantine (with a "✓ Release" button to un-quarantine directly) and animals under treatment. The Reproduction section tracks animals In Mating → Pregnant → Nursing; statuses can be advanced inline without opening the full edit form.',
+        title: 'Reproduction Tab and Quarantine Flows',
+        content: 'Use the Reproduction tab for breeding status workflows such as In Mating, Pregnant, and Nursing progressions. Quarantine and medical status actions are handled in health-related workflows, not a combined single management screen.',
         tips: [
           'Set quarantine on an animal via their Status & Privacy tab',
-          'Release button instantly removes quarantine status',
-          'Repro status buttons update immediately — no save needed'
+          'Reproduction updates are available directly in the Reproduction tab',
+          'Use the tab split to keep workflows focused and faster'
         ]
       },
       {
         stepNumber: 10,
         title: 'Activity Log',
-        content: 'Every action you take in Management View — feeding, care tasks, enclosure tasks, quarantine releases, repro changes — is recorded in the Activity Log. Access it via the log button in the Management View header. You can filter by action type, animal, or date range to review what was done and when.',
+        content: 'Actions you take across tabs (feeding, care, enclosure updates, reproduction updates, and more) are recorded in the Activity Log. Open it using the Activity Log button in the My Animals header controls.',
         tips: [
           'Great for accountability and handover to other caretakers',
           'Filter by action type to find specific events',
           'Feeding events show which food and quantity was used'
+        ]
+      },
+      {
+        stepNumber: 11,
+        title: 'Header Utility Screens',
+        content: 'In the My Animals header controls, you can open additional utility screens: For Sale / Available, Activity Log, Archive, and Duplicates. These are quick-access workflows outside the main top tab row.',
+        tips: [
+          'Use For Sale / Available for listing-focused review',
+          'Use Archive for historical records and non-active animals',
+          'Use Duplicates to identify potential duplicate entries'
+        ]
+      },
+      {
+        stepNumber: 12,
+        title: 'When to Use Utilities vs Tabs',
+        content: 'Use top tabs (Enclosures/Reproduction/Health/Feeding/Supplies) for day-to-day operations. Use utility screens when auditing, cleanup, or sale-focused workflows are needed.',
+        tips: [
+          'Tabs = operational execution',
+          'Utilities = review, audit, and maintenance helpers',
+          'Switch between both based on task context'
         ]
       }
     ]
@@ -2267,10 +2392,10 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 1,
         title: 'Accessing Supplies & Inventory',
-        content: 'Supplies & Inventory is accessed via the supplies button in the Management View header. It\'s a dedicated screen for tracking everything you use to care for your animals, from food and bedding to medication and feeder animals.',
+        content: 'Supplies is now a dedicated top tab in My Animals. Open the Supplies tab to track everything you use to care for your animals, from food and bedding to medication and feeder animals.',
         tips: [
-          'Accessible from within Management View',
-          'Separate from the main animal list',
+          'Accessible directly from the top tab row',
+          'Separate from list, health, feeding, and reproduction tabs',
           'Filter by category: Food, Bedding, Medication, Other'
         ]
       },
@@ -2297,10 +2422,10 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 4,
         title: 'Reorder Thresholds',
-        content: 'Set a "Reorder when stock reaches" threshold so you\'re alerted automatically. When current stock drops to or below this number, the item appears in the Management View\'s maintenance section and the maintenance badge count increases.',
+        content: 'Set a "Reorder when stock reaches" threshold so you\'re alerted automatically. When current stock drops to or below this number, the item appears in inventory attention states and related operational alerts.',
         tips: [
           'Good starting point: 1-2 weeks\' worth of supply',
-          'Badge on Management View section changes color when reorder is due',
+          'Reorder attention indicators increase when stock is due',
           'Restock button lets you quickly add stock and optionally log the cost'
         ]
       },
@@ -2349,7 +2474,7 @@ const ADVANCED_FEATURES_LESSONS = [
         title: 'Feeding History Section',
         content: 'The first section (green cards) shows every recorded feeding event with the food item used, feeder type and size (for feeder animals), quantity, date, and any notes you entered in the feeding modal. Great for spotting patterns like a snake refusing prey over several feedings.',
         tips: [
-          'Each ✓ Fed action from Management View creates an entry',
+          'Each fed action from Feeding & Care creates an entry',
           'Shows food name, quantity, and notes',
           'No food selected = entry still recorded with date only'
         ]
