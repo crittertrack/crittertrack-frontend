@@ -360,7 +360,7 @@ const FamilyTreeView = ({
         const g = new dagre.graphlib.Graph();
         g.setGraph({
             rankdir: 'TB',
-            nodesep: 42,
+            nodesep: 30,
             ranksep: 220,
             marginx: 24,
             marginy: 24,
@@ -515,8 +515,9 @@ const FamilyTreeView = ({
                 || children.map(c => animalLineColorById[c.id]).find(Boolean)
                 || lineageColorFromKey(pairKey);
 
-            const laneOffset = lineLaneOffset(pairKey, 8);
-            const childBandBaseY = Math.min(...children.map(c => c.yTop)) - 16;
+            const laneOffset = lineLaneOffset(pairKey, 5);
+            const childBandBaseY = Math.min(...children.map(c => c.yTop)) - 20;
+            const litterSpreadY = 26;
 
             const litterGroups = [];
             const litterGroupByKey = new Map();
@@ -525,7 +526,7 @@ const FamilyTreeView = ({
                 const litterKey = `${pairKey}|${birthKey}`;
                 if (!litterGroupByKey.has(litterKey)) {
                     const groupIndex = litterGroups.length;
-                    const litterLaneY = childBandBaseY - (groupIndex * 14) - lineLaneOffset(litterKey, 3);
+                    const litterLaneY = childBandBaseY - (groupIndex * litterSpreadY) - lineLaneOffset(litterKey, 4);
                     const group = {
                         key: litterKey,
                         birthKey,
@@ -546,24 +547,17 @@ const FamilyTreeView = ({
             });
 
             litterGroups.forEach((group, groupIndex) => {
-                group.laneY = keepAwayFromNode(
-                    childBandBaseY - (groupIndex * 14) - lineLaneOffset(group.key, 3),
-                    Math.min(...group.children.map(c => c.yTop)) - 20,
-                    Math.max(...group.children.map(c => c.yTop)) + NODE_H - 8,
-                    6,
-                );
+                group.laneY = childBandBaseY - (groupIndex * litterSpreadY) - lineLaneOffset(group.key, 4);
             });
 
             if (connectorStyle === 'diagonal') {
                 if (parents.length === 1) {
                     const p = parents[0];
-                    const fanY = keepAwayFromNode(p.yBottom + 10 + laneOffset, p.yMid, p.yBottom + NODE_H, 4);
-
                     litterGroups.forEach((group, groupIndex) => {
                         const childXs = group.children.map(c => c.x);
                         const minX = Math.min(...childXs);
                         const maxX = Math.max(...childXs);
-                        const fanLaneY = keepAwayFromNode(fanY - (groupIndex * 10), p.yMid, group.laneY + NODE_H, 4);
+                        const fanLaneY = group.laneY;
 
                         edgeSegments.push({
                             id: `seg-${pairKey}-single-diagonal-anchor-${groupIndex}`,
@@ -593,11 +587,10 @@ const FamilyTreeView = ({
 
                 const leftParent = parents[0];
                 const rightParent = parents[parents.length - 1];
-                const partnerLineY = keepAwayFromNode((leftParent.yMid + rightParent.yMid) / 2 + laneOffset, Math.min(leftParent.yMid, rightParent.yMid), Math.max(leftParent.yMid, rightParent.yMid), 4);
+                const partnerLineY = (leftParent.yMid + rightParent.yMid) / 2 + laneOffset;
                 const partnerLeftX = leftParent.rightX;
                 const partnerRightX = rightParent.leftX;
                 const trunkX = (partnerLeftX + partnerRightX) / 2;
-                const fanY = keepAwayFromNode(partnerLineY + 10 + laneOffset / 2, partnerLineY, Math.max(leftParent.yBottom, rightParent.yBottom) + NODE_H, 4);
 
                 edgeSegments.push({
                     id: `seg-${pairKey}-diagonal-partner-network`,
@@ -606,18 +599,18 @@ const FamilyTreeView = ({
                     color: pairColor,
                 });
 
-                edgeSegments.push({
-                    id: `seg-${pairKey}-diagonal-anchor`,
-                    d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${fanY}`,
-                    relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
-                    color: pairColor,
-                });
-
                 litterGroups.forEach((group, groupIndex) => {
                     const childXs = group.children.map(c => c.x);
                     const minX = Math.min(...childXs);
                     const maxX = Math.max(...childXs);
-                    const groupFanY = keepAwayFromNode(fanY - (groupIndex * 10), partnerLineY, group.laneY + NODE_H, 4);
+                    const groupFanY = group.laneY;
+
+                    edgeSegments.push({
+                        id: `seg-${pairKey}-diagonal-anchor-${groupIndex}`,
+                        d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${groupFanY}`,
+                        relatedIds: [leftParent.id, rightParent.id, ...group.children.map(c => c.id)],
+                        color: pairColor,
+                    });
 
                     edgeSegments.push({
                         id: `seg-${pairKey}-diagonal-band-${groupIndex}`,
@@ -644,8 +637,8 @@ const FamilyTreeView = ({
                 litterGroups.forEach((group, groupIndex) => {
                     const minX = Math.min(...group.children.map(c => c.x));
                     const maxX = Math.max(...group.children.map(c => c.x));
-                    const groupY = keepAwayFromNode(group.laneY, p.yMid, Math.max(...group.children.map(c => c.yTop)) + NODE_H, 4);
-                    const groupAnchorX = minX - 8 - (groupIndex % 2) * 6;
+                    const groupY = group.laneY;
+                    const groupAnchorX = minX - 8 - (groupIndex % 2) * 8;
 
                     if (group.children.length > 1) {
                         edgeSegments.push({
@@ -656,8 +649,8 @@ const FamilyTreeView = ({
                         });
                     } else {
                         const onlyChild = group.children[0];
-                        const elbowY = keepAwayFromNode(p.yBottom + ((onlyChild.yTop - p.yBottom) * 0.52) + laneOffset, p.yMid, onlyChild.yTop + NODE_H, 4);
-                        const elbowX = onlyChild.x - 10 - (groupIndex % 2) * 6;
+                        const elbowY = groupY;
+                        const elbowX = onlyChild.x - 10 - (groupIndex % 2) * 8;
                         edgeSegments.push({
                             id: `seg-${pairKey}-single-parent-trunk-${groupIndex}`,
                             d: `M ${p.x} ${p.yBottom} L ${p.x} ${elbowY} L ${elbowX} ${elbowY} L ${onlyChild.x} ${elbowY}`,
@@ -680,7 +673,7 @@ const FamilyTreeView = ({
 
             const leftParent = parents[0];
             const rightParent = parents[parents.length - 1];
-            const partnerLineY = keepAwayFromNode((leftParent.yMid + rightParent.yMid) / 2 + laneOffset, Math.min(leftParent.yMid, rightParent.yMid), Math.max(leftParent.yMid, rightParent.yMid), 4);
+            const partnerLineY = (leftParent.yMid + rightParent.yMid) / 2 + laneOffset;
             const partnerLeftX = leftParent.rightX;
             const partnerRightX = rightParent.leftX;
             const trunkX = (partnerLeftX + partnerRightX) / 2;
@@ -695,8 +688,8 @@ const FamilyTreeView = ({
             litterGroups.forEach((group, groupIndex) => {
                 const minX = Math.min(...group.children.map(c => c.x));
                 const maxX = Math.max(...group.children.map(c => c.x));
-                const groupY = keepAwayFromNode(group.laneY, partnerLineY, Math.max(...group.children.map(c => c.yTop)) + NODE_H, 4);
-                const groupTrunkX = trunkX + ((groupIndex % 2 === 0 ? -1 : 1) * 6 * Math.ceil(groupIndex / 2));
+                const groupY = group.laneY;
+                const groupTrunkX = trunkX + ((groupIndex % 2 === 0 ? -1 : 1) * 5 * Math.ceil((groupIndex + 1) / 2));
 
                 if (group.children.length > 1) {
                     edgeSegments.push({
@@ -707,8 +700,8 @@ const FamilyTreeView = ({
                     });
                 } else {
                     const onlyChild = group.children[0];
-                    const elbowY = keepAwayFromNode(partnerLineY + ((onlyChild.yTop - partnerLineY) * 0.52) + laneOffset, partnerLineY, onlyChild.yTop + NODE_H, 4);
-                    const elbowX = onlyChild.x + ((groupIndex % 2 === 0 ? -1 : 1) * (8 + groupIndex * 2));
+                    const elbowY = groupY;
+                    const elbowX = onlyChild.x + ((groupIndex % 2 === 0 ? -1 : 1) * (6 + groupIndex * 2));
                     edgeSegments.push({
                         id: `seg-${pairKey}-trunk-${groupIndex}`,
                         d: `M ${groupTrunkX} ${partnerLineY} L ${groupTrunkX} ${elbowY} L ${elbowX} ${elbowY} L ${onlyChild.x} ${elbowY}`,
@@ -998,125 +991,129 @@ const FamilyTreeView = ({
 
     return (
         <div className="w-full space-y-4">
-            <div className="flex items-center gap-3 flex-wrap p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <select
-                    value={selectedSpecies || ''}
-                    onChange={e => {
-                        setSelectedSpecies(e.target.value);
-                        setHoveredAnimal(null);
-                        setSearchQuery('');
-                        setPan({ x: 24, y: 24 });
-                    }}
-                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-accent focus:border-transparent"
-                >
-                    {speciesList.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-
-                <div className="flex items-center gap-2 min-w-[280px] flex-1 max-w-[420px]">
-                    <div className="relative flex-1">
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={e => setSearchQuery(e.target.value)}
-                            placeholder="Search by name or CTCID"
-                            className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-accent focus:border-transparent"
-                        />
-                        {searchQuery ? (
-                            <button
-                                type="button"
-                                onClick={() => setSearchQuery('')}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500 hover:text-gray-700"
-                                title="Clear search"
-                            >
-                                Clear
-                            </button>
-                        ) : null}
-                    </div>
-                    {searchQuery ? (
-                        <span className="text-xs text-gray-500 whitespace-nowrap">
-                            {searchMatchedIds.size} match{searchMatchedIds.size === 1 ? '' : 'es'}
-                        </span>
-                    ) : null}
-                </div>
-
-                <span className="text-sm text-gray-600 font-medium">
-                    {speciesAnimals.length} account animal{speciesAnimals.length !== 1 ? 's' : ''}
-                    {Object.keys(externalAncestorsById).length > 0 ? ` + ${Object.keys(externalAncestorsById).length} public ancestor${Object.keys(externalAncestorsById).length !== 1 ? 's' : ''}` : ''}
-                </span>
-
-                {ancestorLoading && (
-                    <span className="text-xs text-gray-500 flex items-center gap-1">
-                        <Loader2 size={12} className="animate-spin" />
-                        Loading linked ancestors...
-                    </span>
-                )}
-
-                <div className="flex items-center gap-2 ml-auto">
-                    <label className="text-xs text-gray-600">Highlight:</label>
-                    <button
-                        onClick={() => setHighlightMode('ancestors')}
-                        className={`px-2 py-1 text-xs rounded border ${highlightMode === 'ancestors' ? 'bg-accent text-white border-accent' : 'bg-white text-gray-600 border-gray-300'}`}
-                    >
-                        Ancestors
-                    </button>
-                    <button
-                        onClick={() => setHighlightMode('descendants')}
-                        className={`px-2 py-1 text-xs rounded border ${highlightMode === 'descendants' ? 'bg-accent text-white border-accent' : 'bg-white text-gray-600 border-gray-300'}`}
-                    >
-                        Descendants
-                    </button>
-                    <button
-                        onClick={() => setHighlightMode('none')}
-                        className={`px-2 py-1 text-xs rounded border ${highlightMode === 'none' ? 'bg-accent text-white border-accent' : 'bg-white text-gray-600 border-gray-300'}`}
-                    >
-                        None
-                    </button>
-                </div>
-
-                <div className="flex items-center gap-2">
-                    <label className="text-xs text-gray-600">Lines:</label>
-                    <button
-                        onClick={() => setConnectorStyle('diagonal')}
-                        className={`px-2 py-1 text-xs rounded border ${connectorStyle === 'diagonal' ? 'bg-accent text-white border-accent' : 'bg-white text-gray-600 border-gray-300'}`}
-                        title="Diagonal connector lines"
-                    >
-                        Diagonal
-                    </button>
-                    <button
-                        onClick={() => setConnectorStyle('orthogonal')}
-                        className={`px-2 py-1 text-xs rounded border ${connectorStyle === 'orthogonal' ? 'bg-accent text-white border-accent' : 'bg-white text-gray-600 border-gray-300'}`}
-                        title="Orthogonal connector lines"
-                    >
-                        Right Angle
-                    </button>
-                </div>
-
-                <div className="flex items-center gap-1">
-                    <button onClick={() => {
-                        const nextZoom = Math.max(MIN_ZOOM, zoomStateRef.current - 10);
-                        scheduleViewUpdate(panStateRef.current, nextZoom);
-                    }} className="p-2 hover:bg-gray-200 rounded transition" title="Zoom out (Ctrl+Scroll)">
-                        <ZoomOut size={16} className="text-gray-600" />
-                    </button>
-                    <span className="text-xs font-medium text-gray-600 w-12 text-center">{zoom}%</span>
-                    <button onClick={() => {
-                        const nextZoom = Math.min(MAX_ZOOM, zoomStateRef.current + 10);
-                        scheduleViewUpdate(panStateRef.current, nextZoom);
-                    }} className="p-2 hover:bg-gray-200 rounded transition" title="Zoom in (Ctrl+Scroll)">
-                        <ZoomIn size={16} className="text-gray-600" />
-                    </button>
-                    <button
-                        onClick={() => {
-                            setZoom(85);
-                            setPan({ x: 24, y: 24 });
+            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 space-y-3">
+                <div className="flex items-center gap-3 flex-wrap">
+                    <select
+                        value={selectedSpecies || ''}
+                        onChange={e => {
+                            setSelectedSpecies(e.target.value);
                             setHoveredAnimal(null);
                             setSearchQuery('');
+                            setPan({ x: 24, y: 24 });
                         }}
-                        className="p-2 hover:bg-gray-200 rounded transition"
-                        title="Reset view"
+                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-accent focus:border-transparent"
                     >
-                        <Home size={16} className="text-gray-600" />
-                    </button>
+                        {speciesList.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+
+                    <div className="flex items-center gap-2 min-w-[280px] flex-1 max-w-[420px]">
+                        <div className="relative flex-1">
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)}
+                                placeholder="Search by name or CTCID"
+                                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-accent focus:border-transparent"
+                            />
+                            {searchQuery ? (
+                                <button
+                                    type="button"
+                                    onClick={() => setSearchQuery('')}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500 hover:text-gray-700"
+                                    title="Clear search"
+                                >
+                                    Clear
+                                </button>
+                            ) : null}
+                        </div>
+                        {searchQuery ? (
+                            <span className="text-xs text-gray-500 whitespace-nowrap">
+                                {searchMatchedIds.size} match{searchMatchedIds.size === 1 ? '' : 'es'}
+                            </span>
+                        ) : null}
+                    </div>
+
+                    <span className="text-sm text-gray-600 font-medium">
+                        {speciesAnimals.length} account animal{speciesAnimals.length !== 1 ? 's' : ''}
+                        {Object.keys(externalAncestorsById).length > 0 ? ` + ${Object.keys(externalAncestorsById).length} public ancestor${Object.keys(externalAncestorsById).length !== 1 ? 's' : ''}` : ''}
+                    </span>
+
+                    {ancestorLoading && (
+                        <span className="text-xs text-gray-500 flex items-center gap-1">
+                            <Loader2 size={12} className="animate-spin" />
+                            Loading linked ancestors...
+                        </span>
+                    )}
+                </div>
+
+                <div className="flex items-center gap-3 flex-wrap">
+                    <div className="flex items-center gap-2">
+                        <label className="text-xs text-gray-600">Lines:</label>
+                        <button
+                            onClick={() => setConnectorStyle('diagonal')}
+                            className={`px-2 py-1 text-xs rounded border ${connectorStyle === 'diagonal' ? 'bg-accent text-white border-accent' : 'bg-white text-gray-600 border-gray-300'}`}
+                            title="Diagonal connector lines"
+                        >
+                            Diagonal
+                        </button>
+                        <button
+                            onClick={() => setConnectorStyle('orthogonal')}
+                            className={`px-2 py-1 text-xs rounded border ${connectorStyle === 'orthogonal' ? 'bg-accent text-white border-accent' : 'bg-white text-gray-600 border-gray-300'}`}
+                            title="Orthogonal connector lines"
+                        >
+                            Right Angle
+                        </button>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <label className="text-xs text-gray-600">Highlight:</label>
+                        <button
+                            onClick={() => setHighlightMode('ancestors')}
+                            className={`px-2 py-1 text-xs rounded border ${highlightMode === 'ancestors' ? 'bg-accent text-white border-accent' : 'bg-white text-gray-600 border-gray-300'}`}
+                        >
+                            Ancestors
+                        </button>
+                        <button
+                            onClick={() => setHighlightMode('descendants')}
+                            className={`px-2 py-1 text-xs rounded border ${highlightMode === 'descendants' ? 'bg-accent text-white border-accent' : 'bg-white text-gray-600 border-gray-300'}`}
+                        >
+                            Descendants
+                        </button>
+                        <button
+                            onClick={() => setHighlightMode('none')}
+                            className={`px-2 py-1 text-xs rounded border ${highlightMode === 'none' ? 'bg-accent text-white border-accent' : 'bg-white text-gray-600 border-gray-300'}`}
+                        >
+                            None
+                        </button>
+                    </div>
+
+                    <div className="flex items-center gap-1 ml-auto">
+                        <button onClick={() => {
+                            const nextZoom = Math.max(MIN_ZOOM, zoomStateRef.current - 10);
+                            scheduleViewUpdate(panStateRef.current, nextZoom);
+                        }} className="p-2 hover:bg-gray-200 rounded transition" title="Zoom out (Ctrl+Scroll)">
+                            <ZoomOut size={16} className="text-gray-600" />
+                        </button>
+                        <span className="text-xs font-medium text-gray-600 w-12 text-center">{zoom}%</span>
+                        <button onClick={() => {
+                            const nextZoom = Math.min(MAX_ZOOM, zoomStateRef.current + 10);
+                            scheduleViewUpdate(panStateRef.current, nextZoom);
+                        }} className="p-2 hover:bg-gray-200 rounded transition" title="Zoom in (Ctrl+Scroll)">
+                            <ZoomIn size={16} className="text-gray-600" />
+                        </button>
+                        <button
+                            onClick={() => {
+                                setZoom(85);
+                                setPan({ x: 24, y: 24 });
+                                setHoveredAnimal(null);
+                                setSearchQuery('');
+                            }}
+                            className="p-2 hover:bg-gray-200 rounded transition"
+                            title="Reset view"
+                        >
+                            <Home size={16} className="text-gray-600" />
+                        </button>
+                    </div>
                 </div>
             </div>
 
