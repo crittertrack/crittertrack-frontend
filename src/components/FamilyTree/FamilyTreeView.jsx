@@ -45,10 +45,18 @@ const compareSiblingOrder = (a, b) => {
     return nameA.localeCompare(nameB);
 };
 
-const lineLaneOffset = (key = '', spread = 10) => {
-    const bucket = hashKey(String(key)) % 5; // 0..4
-    return (bucket - 2) * spread;
+const lineLaneOffset = (key = '', spread = 6) => {
+    const bucket = hashKey(String(key)) % 3; // 0..2
+    return (bucket - 1) * spread;
 };
+
+const snapCoord = (value) => Math.round(Number(value || 0) * 2) / 2;
+
+const quantizePathData = (d = '') => String(d).replace(/-?\d+(?:\.\d+)?/g, (m) => {
+    const n = Number(m);
+    if (!Number.isFinite(n)) return m;
+    return String(snapCoord(n));
+});
 
 const keepAwayFromNode = (value, nodeTop, nodeBottom, gap = 6) => {
     if (value < nodeTop + gap) return nodeTop + gap;
@@ -78,7 +86,7 @@ const FamilyTreeView = ({
     const [ancestorDepthLimit, setAncestorDepthLimit] = useState(3);
     const [descendantDepthLimit, setDescendantDepthLimit] = useState(2);
     const [highlightMode, setHighlightMode] = useState('none');
-    const [connectorStyle, setConnectorStyle] = useState('orthogonal');
+    const connectorStyle = 'orthogonal';
     const [externalAncestorsById, setExternalAncestorsById] = useState({});
     const [ancestorLoading, setAncestorLoading] = useState(false);
     const containerRef = useRef(null);
@@ -433,7 +441,7 @@ const FamilyTreeView = ({
         const positions = {};
         g.nodes().forEach(id => {
             const n = g.node(id);
-            positions[id] = { x: n.x - NODE_W / 2, y: n.y - NODE_H / 2 };
+            positions[id] = { x: snapCoord(n.x - NODE_W / 2), y: snapCoord(n.y - NODE_H / 2) };
         });
 
         const edgeSegments = [];
@@ -1072,7 +1080,10 @@ const FamilyTreeView = ({
                             <input
                                 type="text"
                                 value={searchQuery}
-                                onChange={e => setSearchQuery(e.target.value)}
+                                onChange={e => {
+                                    setSearchQuery(e.target.value);
+                                    setFocusAnimalId(null);
+                                }}
                                 placeholder="Search by name or CTCID"
                                 className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-accent focus:border-transparent"
                             />
@@ -1170,20 +1181,12 @@ const FamilyTreeView = ({
 
                     <div className="flex items-center gap-2">
                         <label className="text-xs text-gray-600">Lines:</label>
-                        <button
-                            onClick={() => setConnectorStyle('diagonal')}
-                            className={`px-2 py-1 text-xs rounded border ${connectorStyle === 'diagonal' ? 'bg-accent text-white border-accent' : 'bg-white text-gray-600 border-gray-300'}`}
-                            title="Diagonal connector lines"
-                        >
-                            Diagonal
-                        </button>
-                        <button
-                            onClick={() => setConnectorStyle('orthogonal')}
-                            className={`px-2 py-1 text-xs rounded border ${connectorStyle === 'orthogonal' ? 'bg-accent text-white border-accent' : 'bg-white text-gray-600 border-gray-300'}`}
+                        <span
+                            className="px-2 py-1 text-xs rounded border bg-accent text-white border-accent"
                             title="Orthogonal connector lines"
                         >
                             Right Angle
-                        </button>
+                        </span>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -1240,7 +1243,7 @@ const FamilyTreeView = ({
             </div>
 
             <div className="text-xs text-gray-500 px-1">
-                Search recenters to first match. Right-click a node to set it as focus root in Focused view.
+                In Focused view: click a node to refocus, double-click for details. Search recenters to first match.
             </div>
 
             <div className={`grid ${showNoPedigreePanel ? 'grid-cols-[280px_minmax(0,1fr)]' : 'grid-cols-[44px_minmax(0,1fr)]'} gap-4`}>
@@ -1317,7 +1320,7 @@ const FamilyTreeView = ({
                             position: 'relative',
                         }}
                     >
-                        <svg style={{ position: 'absolute', inset: 0, width: graphData.width, height: graphData.height, pointerEvents: 'none' }}>
+                        <svg style={{ position: 'absolute', inset: 0, width: graphData.width, height: graphData.height, pointerEvents: 'none', shapeRendering: 'geometricPrecision' }}>
                             {graphData.edgeSegments.map(seg => {
                                 const isSearchActive = searchMatchedIds.size > 0;
                                 const active = (hoveredAnimal && seg.relatedIds.some(rid => highlightedSet.has(rid))) || (isSearchActive && seg.relatedIds.some(rid => searchMatchedIds.has(rid)));
@@ -1334,7 +1337,7 @@ const FamilyTreeView = ({
                                 return (
                                     <path
                                         key={seg.id}
-                                        d={seg.d}
+                                        d={quantizePathData(seg.d)}
                                         fill="none"
                                         stroke={active ? activeStroke : baseStroke}
                                         strokeWidth={active ? 3.4 : 2.4}
@@ -1371,7 +1374,16 @@ const FamilyTreeView = ({
                                         setFocusAnimalId(id);
                                         setFocusMode(true);
                                     }}
-                                    onClick={() => onViewAnimal && onViewAnimal(animal)}
+                                    onClick={() => {
+                                        if (focusMode) {
+                                            setFocusAnimalId(id);
+                                            return;
+                                        }
+                                        if (onViewAnimal) onViewAnimal(animal);
+                                    }}
+                                    onDoubleClick={() => {
+                                        if (onViewAnimal) onViewAnimal(animal);
+                                    }}
                                     style={{
                                         position: 'absolute',
                                         left: pos.x,
@@ -1383,7 +1395,7 @@ const FamilyTreeView = ({
                                         touchAction: 'manipulation',
                                     }}
                                     className={`text-left rounded-xl border-2 transition-all shadow-sm overflow-hidden ${active ? 'ring-2 ring-pink-200' : hoveredAnimal ? 'opacity-35' : isSearchActive ? 'opacity-30' : 'hover:border-accent hover:shadow-md'}`}
-                                    title="Click to open animal details"
+                                    title={focusMode ? 'Click to focus this animal. Double-click to open details.' : 'Click to open animal details'}
                                 >
                                     <div className="w-full h-[68px] bg-white/60 flex items-center justify-center">
                                         {imageSrc ? (
