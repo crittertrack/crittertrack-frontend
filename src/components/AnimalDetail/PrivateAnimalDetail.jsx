@@ -2225,8 +2225,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                                     {fieldTemplate?.fields?.housingType?.enabled !== false && animal.housingType && <div><span className="text-gray-600">{getLabel('housingType', 'Housing Type')}:</span> <strong>{animal.housingType}</strong></div>}
                                     {fieldTemplate?.fields?.bedding?.enabled !== false && animal.bedding && <div><span className="text-gray-600">{getLabel('bedding', 'Bedding')}:</span> <strong>{animal.bedding}</strong></div>}
                                     {animal.enrichment && <div><span className="text-gray-600">Enrichment:</span> <strong>{animal.enrichment}</strong></div>}
-                                </div>
-                                {animal.careTasks && animal.careTasks.length > 0 && (
+                                    {animal.careTasks && animal.careTasks.length > 0 && (
                                     <div className="mt-3 pt-3 border-t border-gray-200">
                                         <div className="text-sm font-semibold text-gray-700 mb-2">Enclosure Care Tasks</div>
                                         <div className="space-y-1">
@@ -2241,7 +2240,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                                             ))}
                                         </div>
                                     </div>
-                                )}
+                                    )}
+                                </div>
                                 )}
                             </div>
 
