@@ -73,6 +73,10 @@ const FamilyTreeView = ({
     const [showNoPedigreePanel, setShowNoPedigreePanel] = useState(true);
     const [hoveredAnimal, setHoveredAnimal] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [focusMode, setFocusMode] = useState(true);
+    const [focusAnimalId, setFocusAnimalId] = useState(null);
+    const [ancestorDepthLimit, setAncestorDepthLimit] = useState(3);
+    const [descendantDepthLimit, setDescendantDepthLimit] = useState(2);
     const [highlightMode, setHighlightMode] = useState('none');
     const [connectorStyle, setConnectorStyle] = useState('orthogonal');
     const [externalAncestorsById, setExternalAncestorsById] = useState({});
@@ -340,10 +344,56 @@ const FamilyTreeView = ({
         const noPedigreeSet = new Set(noPedigreeAnimals.map(a => a.id_public));
         const accountIdSet = new Set(speciesAnimals.map(a => a.id_public));
 
+        const query = searchQuery.trim().toLowerCase();
+        let resolvedFocusId = (focusAnimalId && allById[focusAnimalId]) ? focusAnimalId : null;
+        if (!resolvedFocusId && query) {
+            const matched = combinedSpecies.find(a => {
+                const name = [a?.prefix, a?.name, a?.suffix].filter(Boolean).join(' ').toLowerCase();
+                const idPublic = String(a?.id_public || '').toLowerCase();
+                return name.includes(query) || idPublic.includes(query);
+            });
+            resolvedFocusId = matched?.id_public || null;
+        }
+        if (!resolvedFocusId) resolvedFocusId = speciesAnimals[0]?.id_public || null;
+
+        const collectWithDepth = (startId, getNeighbors, maxDepth) => {
+            const out = new Set();
+            if (!startId || !Number.isFinite(maxDepth) || maxDepth < 0) return out;
+            const queue = [{ id: startId, depth: 0 }];
+            const seen = new Set([startId]);
+
+            while (queue.length) {
+                const current = queue.shift();
+                if (current.depth >= maxDepth) continue;
+                (getNeighbors(current.id) || []).forEach(nextId => {
+                    if (!nextId || seen.has(nextId) || !allById[nextId]) return;
+                    seen.add(nextId);
+                    out.add(nextId);
+                    queue.push({ id: nextId, depth: current.depth + 1 });
+                });
+            }
+            return out;
+        };
+
+        const focusVisibleIds = new Set();
+        if (focusMode && resolvedFocusId) {
+            focusVisibleIds.add(resolvedFocusId);
+            collectWithDepth(resolvedFocusId, id => parentLinksByChildAll[id], ancestorDepthLimit).forEach(id => focusVisibleIds.add(id));
+            collectWithDepth(resolvedFocusId, id => childrenByParentAll[id], descendantDepthLimit).forEach(id => focusVisibleIds.add(id));
+
+            // Keep co-parents visible for descendants in the focus slice.
+            Array.from(focusVisibleIds).forEach(id => {
+                (parentLinksByChildAll[id] || []).forEach(pid => {
+                    if (allById[pid]) focusVisibleIds.add(pid);
+                });
+            });
+        }
+
         const byId = {};
         Object.values(allById).forEach(a => {
             const isIsolatedAccountAnimal = accountIdSet.has(a.id_public) && noPedigreeSet.has(a.id_public);
-            if (!isIsolatedAccountAnimal) byId[a.id_public] = a;
+            const outsideFocus = focusMode && resolvedFocusId && !focusVisibleIds.has(a.id_public);
+            if (!isIsolatedAccountAnimal && !outsideFocus) byId[a.id_public] = a;
         });
 
         const childrenByParent = {};
@@ -730,11 +780,21 @@ const FamilyTreeView = ({
             edgeSegments,
             childrenByParent,
             parentLinksByChild,
+            focusId: resolvedFocusId,
             width: maxX,
             height: maxY,
             noPedigreeAnimals,
         };
-    }, [speciesAnimals, externalAncestorsById, connectorStyle]);
+    }, [
+        speciesAnimals,
+        externalAncestorsById,
+        connectorStyle,
+        searchQuery,
+        focusMode,
+        focusAnimalId,
+        ancestorDepthLimit,
+        descendantDepthLimit,
+    ]);
 
     const noPedigreeAnimals = graphData.noPedigreeAnimals || [];
 
@@ -999,6 +1059,7 @@ const FamilyTreeView = ({
                             setSelectedSpecies(e.target.value);
                             setHoveredAnimal(null);
                             setSearchQuery('');
+                            setFocusAnimalId(null);
                             setPan({ x: 24, y: 24 });
                         }}
                         className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-accent focus:border-transparent"
@@ -1044,9 +1105,69 @@ const FamilyTreeView = ({
                             Loading linked ancestors...
                         </span>
                     )}
+
+                    {focusMode && graphData.focusId && graphData.byId[graphData.focusId] && (
+                        <span className="text-xs text-gray-500">
+                            Focus: {[graphData.byId[graphData.focusId].prefix, graphData.byId[graphData.focusId].name, graphData.byId[graphData.focusId].suffix].filter(Boolean).join(' ') || graphData.focusId}
+                        </span>
+                    )}
                 </div>
 
                 <div className="flex items-center gap-3 flex-wrap">
+                    <div className="flex items-center gap-2">
+                        <label className="text-xs text-gray-600">View:</label>
+                        <button
+                            onClick={() => setFocusMode(true)}
+                            className={`px-2 py-1 text-xs rounded border ${focusMode ? 'bg-accent text-white border-accent' : 'bg-white text-gray-600 border-gray-300'}`}
+                            title="Show focused generations"
+                        >
+                            Focused
+                        </button>
+                        <button
+                            onClick={() => setFocusMode(false)}
+                            className={`px-2 py-1 text-xs rounded border ${!focusMode ? 'bg-accent text-white border-accent' : 'bg-white text-gray-600 border-gray-300'}`}
+                            title="Show complete graph"
+                        >
+                            Full Graph
+                        </button>
+                        {focusMode && (
+                            <>
+                                <span className="text-xs text-gray-500 ml-1">Anc</span>
+                                <button
+                                    onClick={() => setAncestorDepthLimit(v => Math.max(1, v - 1))}
+                                    className="px-2 py-1 text-xs rounded border bg-white text-gray-600 border-gray-300"
+                                    title="Decrease ancestor depth"
+                                >
+                                    -
+                                </button>
+                                <span className="text-xs text-gray-600 w-4 text-center">{ancestorDepthLimit}</span>
+                                <button
+                                    onClick={() => setAncestorDepthLimit(v => Math.min(8, v + 1))}
+                                    className="px-2 py-1 text-xs rounded border bg-white text-gray-600 border-gray-300"
+                                    title="Increase ancestor depth"
+                                >
+                                    +
+                                </button>
+                                <span className="text-xs text-gray-500 ml-1">Desc</span>
+                                <button
+                                    onClick={() => setDescendantDepthLimit(v => Math.max(1, v - 1))}
+                                    className="px-2 py-1 text-xs rounded border bg-white text-gray-600 border-gray-300"
+                                    title="Decrease descendant depth"
+                                >
+                                    -
+                                </button>
+                                <span className="text-xs text-gray-600 w-4 text-center">{descendantDepthLimit}</span>
+                                <button
+                                    onClick={() => setDescendantDepthLimit(v => Math.min(8, v + 1))}
+                                    className="px-2 py-1 text-xs rounded border bg-white text-gray-600 border-gray-300"
+                                    title="Increase descendant depth"
+                                >
+                                    +
+                                </button>
+                            </>
+                        )}
+                    </div>
+
                     <div className="flex items-center gap-2">
                         <label className="text-xs text-gray-600">Lines:</label>
                         <button
@@ -1107,6 +1228,7 @@ const FamilyTreeView = ({
                                 setPan({ x: 24, y: 24 });
                                 setHoveredAnimal(null);
                                 setSearchQuery('');
+                                setFocusAnimalId(null);
                             }}
                             className="p-2 hover:bg-gray-200 rounded transition"
                             title="Reset view"
@@ -1118,7 +1240,7 @@ const FamilyTreeView = ({
             </div>
 
             <div className="text-xs text-gray-500 px-1">
-                Search matches are highlighted and the view recenters on the first result.
+                Search recenters to first match. Right-click a node to set it as focus root in Focused view.
             </div>
 
             <div className={`grid ${showNoPedigreePanel ? 'grid-cols-[280px_minmax(0,1fr)]' : 'grid-cols-[44px_minmax(0,1fr)]'} gap-4`}>
@@ -1244,6 +1366,11 @@ const FamilyTreeView = ({
                                     data-family-node="true"
                                     onMouseEnter={() => setHoveredAnimal(id)}
                                     onMouseLeave={() => setHoveredAnimal(null)}
+                                    onContextMenu={e => {
+                                        e.preventDefault();
+                                        setFocusAnimalId(id);
+                                        setFocusMode(true);
+                                    }}
                                     onClick={() => onViewAnimal && onViewAnimal(animal)}
                                     style={{
                                         position: 'absolute',
