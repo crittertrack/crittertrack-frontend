@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import axios from 'axios';
 import ArchiveScreen from '../ArchiveScreen';
+import FamilyTreeView from '../FamilyTree/FamilyTreeView';
 import {
     Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight,
     Ban, Bean, Bell, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
     Circle, ClipboardList, Edit, Eye, EyeOff, Flag, FolderOpen, Heart, HeartOff,
     Home, Hourglass, LayoutGrid, Loader2, LockOpen, MapPin, Mars, MessageSquare, Milk, Pin,
-    Minus, Network, Package, Plus, PlusCircle, RefreshCw, Save, ScrollText,
+    Network, Package, Plus, PlusCircle, RefreshCw, Save, ScrollText,
     Search, ShoppingBag, SlidersHorizontal, Sparkles, Trash2, Utensils,
     Venus, VenusAndMars, Wrench, X
 } from 'lucide-react';
@@ -15,10 +16,12 @@ import { formatDate, formatDateShort } from '../../utils/dateFormatter';
 const API_BASE_URL = '/api';
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'];
-const STATUS_OPTIONS = ['Pet', 'Growout', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
+const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
 const normalizeAnimalView = (value) => (
-    value === 'management' || value === 'collections' ? value : 'list'
+    ['collections', 'enclosures', 'reproduction', 'health', 'feeding', 'supplies', 'familyTree'].includes(value) ? value : 'list'
 );
+
+const DEFAULT_LIST_COLUMNS = { genderIcon: true, ctId: true, identification: true, name: true, variety: true, birthdate: true, age: true, status: true, reproduction: true, sireName: true, damName: true };
 
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
@@ -103,9 +106,19 @@ const formatDateDisplay = (dateStr) => {
 };
 
 ﻿
+// -- Decode JWT payload to get a stable per-user key for localStorage scoping --
+const getUserKey = (token) => {
+    try {
+        if (!token) return 'anon';
+        const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+        return payload.sub || payload.id || payload.userId || 'anon';
+    } catch { return 'anon'; }
+};
+
 // -- Module-level cache so AnimalList survives unmount/remount without refetching --
 let _alCache = null;       // last animals array
-let _alCacheUserKey = null; // user key the cache belongs to
+let _familyTreePrefetchCacheByUser = {};
+let _familyTreePrefetchLoadingByUser = {};
 
 // Keep cache patched even while AnimalList is unmounted
 if (!window.__alCacheListenerAttached) {
@@ -116,15 +129,11 @@ if (!window.__alCacheListenerAttached) {
             _alCache = _alCache.map(a => a.id_public === u.id_public ? { ...a, ...u } : a);
         }
     });
-    window.addEventListener('animals-changed', () => {
-        _alCache = null;
-        _alCacheUserKey = null;
-    }); // bust on full reload signal
+    window.addEventListener('animals-changed', () => { _alCache = null; }); // bust on full reload signal
 }
 
 const AnimalList = ({ 
-    authToken,
-    userProfile,
+    authToken, 
     showModalMessage, 
     onEditAnimal, 
     onViewAnimal, 
@@ -145,25 +154,25 @@ const AnimalList = ({
 }) => {
     // Stable ref so showModalMessage (inline prop) doesn't destabilise useCallbacks
     const showModalMessageRef = useRef(showModalMessage);
+
+    // Per-user localStorage key prefix — scopes all persistent state to the logged-in user
+    // so that switching accounts never leaks one user's collections/prefs into another's.
+    const userKey = useMemo(() => getUserKey(authToken), [authToken]);
     useEffect(() => { showModalMessageRef.current = showModalMessage; });
 
-    const userCacheKey = userProfile?.id_public || userProfile?._id || null;
-    const hasMatchingCache = !!(userCacheKey && _alCache && _alCacheUserKey === userCacheKey);
-
-    const [animals, setAnimalsRaw] = useState(() => hasMatchingCache ? _alCache : []);
+    const [animals, setAnimalsRaw] = useState(() => _alCache || []);
     const setAnimals = useCallback((valOrFn) => {
         setAnimalsRaw(prev => {
             const next = typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn;
             _alCache = next;
-            _alCacheUserKey = userCacheKey;
             return next;
         });
-    }, [userCacheKey]);
+    }, []);
     const [allAnimalsRaw, setAllAnimalsRaw] = useState([]); // Unfiltered ? used by Management View
     const [availableAnimalsRaw, setAvailableAnimalsRaw] = useState([]); // All user-created animals with status=Available (no ownership filter)
     const [soldTransferredRaw, setSoldTransferredRaw] = useState([]); // View-only/transferred animals ? shown in Management > Sold/Transferred section
     const [soldOwnerFilter, setSoldOwnerFilter] = useState(''); // Filter sold/transferred section by recipient owner
-    const [loading, setLoading] = useState(() => !hasMatchingCache);
+    const [loading, setLoading] = useState(() => !_alCache);
     const [allAnimalsFetched, setAllAnimalsFetched] = useState(false); // true once Phase 2 (all animals) fetch completes
     
     // Load filters from localStorage or use defaults
@@ -266,54 +275,8 @@ const AnimalList = ({
             return normalizeAnimalView(saved || initialAnimalView);
         } catch { return normalizeAnimalView(initialAnimalView); }
     }); // 'list' | 'collections' | 'management'
-    // Sync default view from backend profile (cross-device / cache-cleared sync)
-    useEffect(() => {
-        const backendPref = userProfile?.uiPreferences?.defaultAnimalView;
-        if (backendPref && ['list', 'collections', 'management'].includes(backendPref)) {
-            setDefaultAnimalView(backendPref);
-            setAnimalView(backendPref);
-            try { localStorage.setItem('ct_default_animal_view', backendPref); } catch {}
-        }
-    }, [userProfile?.uiPreferences?.defaultAnimalView]);
-    const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({ enclosures: true }); // { sectionKey: bool }
+    const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({ enclosures: false }); // { sectionKey: bool }
     const [collapsedMgmtGroups, setCollapsedMgmtGroups] = useState({}); // { groupKey: bool }
-    const [showUnownedInEnclosures, setShowUnownedInEnclosures] = useState(true);
-    const [showAvailableInEnclosures, setShowAvailableInEnclosures] = useState(true);
-    const [showBookedInEnclosures, setShowBookedInEnclosures] = useState(true);
-    const [showRehomedInEnclosures, setShowRehomedInEnclosures] = useState(false);
-    useEffect(() => {
-        const prefs = userProfile?.uiPreferences || {};
-        setShowUnownedInEnclosures(prefs.enclosureShowUnowned !== false);
-        setShowAvailableInEnclosures(prefs.enclosureShowAvailable !== false);
-        setShowBookedInEnclosures(prefs.enclosureShowBooked !== false);
-        setShowRehomedInEnclosures(prefs.enclosureShowRehomed === true);
-    }, [
-        userProfile?.uiPreferences?.enclosureShowUnowned,
-        userProfile?.uiPreferences?.enclosureShowAvailable,
-        userProfile?.uiPreferences?.enclosureShowBooked,
-        userProfile?.uiPreferences?.enclosureShowRehomed,
-    ]);
-    const saveEnclosurePreference = useCallback((key, value) => {
-        const safeBool = !!value;
-        if (key === 'enclosureShowUnowned') setShowUnownedInEnclosures(safeBool);
-        if (key === 'enclosureShowAvailable') setShowAvailableInEnclosures(safeBool);
-        if (key === 'enclosureShowBooked') setShowBookedInEnclosures(safeBool);
-        if (key === 'enclosureShowRehomed') setShowRehomedInEnclosures(safeBool);
-        if (!authToken) return;
-        axios.patch(`${API_BASE_URL}/users/preferences`, { [key]: safeBool }, { headers: { Authorization: `Bearer ${authToken}` } })
-            .catch(err => console.warn('[prefs enclosure filters]', err));
-    }, [authToken]);
-    // Undo state for cage-clean / maintenance "Done" actions
-    // { type: 'maint'|'encTask'|'animalTask', key: string, prevValue: any, timer: TimeoutId }
-    const [mgmtUndoState, setMgmtUndoState] = useState(null);
-    const mgmtUndoStateRef = useRef(null);
-    mgmtUndoStateRef.current = mgmtUndoState;
-    const setMgmtUndo = useCallback((undoObj) => {
-        if (mgmtUndoStateRef.current?.timer) clearTimeout(mgmtUndoStateRef.current.timer);
-        if (!undoObj) { setMgmtUndoState(null); return; }
-        const timer = setTimeout(() => setMgmtUndoState(null), 8000);
-        setMgmtUndoState({ ...undoObj, timer });
-    }, []);
     const [mgmtAlertsEnabled, setMgmtAlertsEnabled] = useState(() => {
         try { return localStorage.getItem('ct_mgmt_urgency_enabled') !== 'false'; } catch { return true; }
     });
@@ -326,6 +289,172 @@ const AnimalList = ({
         } catch {}
     };
 
+    // ---- For Sale screen & My Animals list view ----
+    const [showForSaleScreen, setShowForSaleScreen] = useState(false);
+    const [myAnimalsViewMode, setMyAnimalsViewMode] = useState('cards'); // populated from user-scoped key below
+    const [listViewColumns, setListViewColumns] = useState(DEFAULT_LIST_COLUMNS); // populated from user-scoped key below
+    const [showListColumnConfig, setShowListColumnConfig] = useState(false);
+    const [externalParentsCache, setExternalParentsCache] = useState({});
+    const [familyTreePrefetchBySpecies, setFamilyTreePrefetchBySpecies] = useState(() => _familyTreePrefetchCacheByUser[userKey] || {});
+    const [familyTreePrefetchLoadingBySpecies, setFamilyTreePrefetchLoadingBySpecies] = useState(() => _familyTreePrefetchLoadingByUser[userKey] || {});
+
+    const familyTreeAnimals = useMemo(() => (
+        Array.from(
+            new Map(
+                [
+                    ...(animals || []),
+                    ...(soldTransferredRaw || []),
+                    ...(archivedAnimals || []),
+                ]
+                    .filter(a => a?.id_public)
+                    .map(a => [a.id_public, a])
+            ).values()
+        )
+    ), [animals, soldTransferredRaw, archivedAnimals]);
+
+    useEffect(() => {
+        setFamilyTreePrefetchBySpecies(_familyTreePrefetchCacheByUser[userKey] || {});
+        setFamilyTreePrefetchLoadingBySpecies(_familyTreePrefetchLoadingByUser[userKey] || {});
+    }, [userKey]);
+
+    useEffect(() => {
+        _familyTreePrefetchCacheByUser[userKey] = familyTreePrefetchBySpecies;
+    }, [userKey, familyTreePrefetchBySpecies]);
+
+    useEffect(() => {
+        _familyTreePrefetchLoadingByUser[userKey] = familyTreePrefetchLoadingBySpecies;
+    }, [userKey, familyTreePrefetchLoadingBySpecies]);
+
+    const handleFamilyTreeAncestorsResolved = useCallback((species, ancestorsById) => {
+        if (!species || !ancestorsById) return;
+        setFamilyTreePrefetchBySpecies(prev => {
+            if (prev[species]) return prev;
+            return { ...prev, [species]: ancestorsById };
+        });
+        setFamilyTreePrefetchLoadingBySpecies(prev => ({ ...prev, [species]: false }));
+    }, []);
+
+    // Fetch names for external parent IDs (animals not in the user's own collection)
+    // Runs whenever the animal list or view mode changes
+    useEffect(() => {
+        if (myAnimalsViewMode !== 'list' || !authToken || allAnimalsRaw.length === 0) return;
+        const localIds = new Set([...allAnimalsRaw, ...soldTransferredRaw].map(a => a.id_public).filter(Boolean));
+        const unresolvedIds = [];
+        allAnimalsRaw.forEach(a => {
+            const sireId = a.fatherId_public || a.sireId_public;
+            const damId  = a.motherId_public  || a.damId_public;
+            if (sireId && !localIds.has(sireId) && !externalParentsCache[sireId]) unresolvedIds.push(sireId);
+            if (damId  && !localIds.has(damId)  && !externalParentsCache[damId])  unresolvedIds.push(damId);
+        });
+        const uniqueIds = [...new Set(unresolvedIds)];
+        if (uniqueIds.length === 0) return;
+        axios.post(`${API_BASE_URL}/animals/parents-batch`, { ids: uniqueIds }, {
+            headers: { Authorization: `Bearer ${authToken}` }
+        }).then(res => {
+            const map = {};
+            (res.data || []).forEach(a => { if (a.id_public) map[a.id_public] = a; });
+            setExternalParentsCache(prev => ({ ...prev, ...map }));
+        }).catch(err => console.warn('[parents-batch]', err));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [myAnimalsViewMode, allAnimalsRaw, authToken]);
+
+    useEffect(() => {
+        if (!authToken || familyTreeAnimals.length === 0) return;
+
+        const species = [...new Set(familyTreeAnimals.map(a => a.species).filter(Boolean))].sort()[0];
+        if (!species) return;
+        if (familyTreePrefetchBySpecies[species] || familyTreePrefetchLoadingBySpecies[species]) return;
+
+        let cancelled = false;
+
+        const prefetchSpeciesAncestors = async () => {
+            setFamilyTreePrefetchLoadingBySpecies(prev => ({ ...prev, [species]: true }));
+
+            const canonicalId = (id) => String(id || '').trim().toLowerCase();
+            const accountIdKeys = new Set(
+                familyTreeAnimals
+                    .map(a => canonicalId(a?.id_public))
+                    .filter(Boolean)
+            );
+            const speciesAnimals = familyTreeAnimals.filter(a => a.species === species && a.id_public);
+            const existing = new Map(speciesAnimals.map(a => [a.id_public, a]));
+            const fetched = {};
+            const visited = new Set(speciesAnimals.map(a => canonicalId(a.id_public)).filter(Boolean));
+            const queue = [];
+
+            const enqueueParentIfMissing = id => {
+                const key = canonicalId(id);
+                if (!key || visited.has(key)) return;
+                visited.add(key);
+                queue.push(id);
+            };
+
+            speciesAnimals.forEach(a => {
+                enqueueParentIfMissing(a.fatherId_public || a.sireId_public);
+                enqueueParentIfMissing(a.motherId_public || a.damId_public);
+            });
+
+            const fetchOne = async (id) => {
+                if (!id) return null;
+                try {
+                    const r = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(id)}`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    if (r.data) return r.data;
+                } catch {}
+
+                try {
+                    const r = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(id)}`);
+                    return r.data?.[0] || null;
+                } catch {
+                    return null;
+                }
+            };
+
+            let guard = 0;
+            while (queue.length > 0 && guard < 1200) {
+                guard += 1;
+                const id = queue.shift();
+                const node = await fetchOne(id);
+                if (cancelled) return;
+                if (!node) continue;
+
+                const nid = node.id_public || id;
+                const nidKey = canonicalId(nid);
+                const isAlreadyOnAccount = accountIdKeys.has(nidKey);
+                if (!existing.has(nid) && !isAlreadyOnAccount) {
+                    const normalized = { ...node, id_public: nid, isPublicAncestor: true };
+                    existing.set(nid, normalized);
+                    fetched[nid] = normalized;
+                }
+
+                enqueueParentIfMissing(node.fatherId_public || node.sireId_public);
+                enqueueParentIfMissing(node.motherId_public || node.damId_public);
+            }
+
+            if (cancelled) return;
+
+            setFamilyTreePrefetchBySpecies(prev => ({
+                ...prev,
+                [species]: fetched,
+            }));
+            setFamilyTreePrefetchLoadingBySpecies(prev => ({ ...prev, [species]: false }));
+        };
+
+        prefetchSpeciesAncestors().catch(() => {
+            if (cancelled) return;
+            setFamilyTreePrefetchLoadingBySpecies(prev => ({ ...prev, [species]: false }));
+        });
+
+        return () => {
+            cancelled = true;
+            _familyTreePrefetchLoadingByUser[userKey] = {
+                ...(_familyTreePrefetchLoadingByUser[userKey] || {}),
+                [species]: false,
+            };
+        };
+    }, [authToken, familyTreeAnimals, familyTreePrefetchBySpecies, familyTreePrefetchLoadingBySpecies, userKey]);
+
     // ---- Collection CRUD helpers ----
     const _syncToApi = (cols, map) => {
         if (!authToken) return;
@@ -336,12 +465,12 @@ const AnimalList = ({
     const _saveCollections = (cols, mapOverride) => {
         const map = mapOverride !== undefined ? mapOverride : animalCollections;
         setUserCollections(cols);
-        try { localStorage.setItem(colKey, JSON.stringify(cols)); } catch {}
+        try { localStorage.setItem(`ct_collections_${userKey}`, JSON.stringify(cols)); } catch {}
         _syncToApi(cols, map);
     };
     const _saveAnimalCollections = (map) => {
         setAnimalCollections(map);
-        try { localStorage.setItem(acolKey, JSON.stringify(map)); } catch {}
+        try { localStorage.setItem(`ct_animal_collections_${userKey}`, JSON.stringify(map)); } catch {}
         _syncToApi(userCollections, map);
     };
     const createCollection = (name) => {
@@ -355,8 +484,8 @@ const AnimalList = ({
         Object.keys(next).forEach(aid => { next[aid] = next[aid].filter(cid => cid !== id); });
         setUserCollections(newCols);
         setAnimalCollections(next);
-        try { localStorage.setItem(colKey, JSON.stringify(newCols)); } catch {}
-        try { localStorage.setItem(acolKey, JSON.stringify(next)); } catch {}
+        try { localStorage.setItem(`ct_collections_${userKey}`, JSON.stringify(newCols)); } catch {}
+        try { localStorage.setItem(`ct_animal_collections_${userKey}`, JSON.stringify(next)); } catch {}
         _syncToApi(newCols, next);
     };
     const renameCollection = (id, name) => {
@@ -400,41 +529,41 @@ const AnimalList = ({
     const [restockForm, setRestockForm] = useState({ qty: '', cost: '', date: new Date().toISOString().slice(0, 10), notes: '' });
     const [restockSaving, setRestockSaving] = useState(false);
 
-    // ---- Collections state (localStorage-backed, keyed by user id_public) ----
-    const colKey = userProfile?.id_public ? `ct_collections_${userProfile.id_public}` : 'ct_collections';
-    const acolKey = userProfile?.id_public ? `ct_animal_collections_${userProfile.id_public}` : 'ct_animal_collections';
-    const [userCollections, setUserCollections] = useState(() => {
-        try { return JSON.parse(localStorage.getItem(colKey) || '[]'); } catch { return []; }
-    });
-    const [animalCollections, setAnimalCollections] = useState(() => {
-        try { return JSON.parse(localStorage.getItem(acolKey) || '{}'); } catch { return {}; }
-    });
+    // ---- Collections state (user-scoped localStorage + backend sync) ----
+    const [userCollections, setUserCollections] = useState([]); // populated from user-scoped key below
+    const [animalCollections, setAnimalCollections] = useState({}); // populated from user-scoped key below
     const [showCollectionManager, setShowCollectionManager] = useState(false);
     const [newCollectionName, setNewCollectionName] = useState('');
     const [renamingCollectionId, setRenamingCollectionId] = useState(null);
     const [renamingCollectionName, setRenamingCollectionName] = useState('');
     const [collapsedCollections, setCollapsedCollections] = useState({});
     const [assigningCollectionAnimalId, setAssigningCollectionAnimalId] = useState(null);
-    const [collectionDropdownPos, setCollectionDropdownPos] = useState(null);
+
+    // ---- Re-load user-scoped prefs & collections whenever the logged-in user changes ----
+    // This prevents one user's data from leaking into another account after switching.
+    useEffect(() => {
+        if (!userKey || userKey === 'anon') return;
+        // Collections
+        try {
+            const cols = JSON.parse(localStorage.getItem(`ct_collections_${userKey}`) || '[]');
+            const map  = JSON.parse(localStorage.getItem(`ct_animal_collections_${userKey}`) || '{}');
+            setUserCollections(cols);
+            setAnimalCollections(map);
+        } catch { setUserCollections([]); setAnimalCollections({}); }
+        // View mode & column config
+        try {
+            const vm = localStorage.getItem(`ct_my_animals_view_mode_${userKey}`);
+            if (vm) setMyAnimalsViewMode(vm);
+        } catch {}
+        try {
+            const saved = localStorage.getItem(`ct_list_view_columns_${userKey}`);
+            if (saved) setListViewColumns({ ...DEFAULT_LIST_COLUMNS, ...JSON.parse(saved) });
+        } catch {}
+    }, [userKey]);
 
     const isCollectionsView = animalView === 'collections';
+    const isMgmtTab = ['enclosures', 'reproduction', 'health', 'feeding', 'supplies'].includes(animalView);
     const isListLikeView = animalView === 'list' || isCollectionsView;
-
-    // Prevent cross-account data bleed when switching users in the same SPA session.
-    useEffect(() => {
-        if (!userCacheKey) {
-            _alCache = null;
-            _alCacheUserKey = null;
-            setAnimalsRaw([]);
-            setLoading(true);
-            return;
-        }
-
-        if (!_alCache || _alCacheUserKey !== userCacheKey) {
-            setAnimalsRaw([]);
-            setLoading(true);
-        }
-    }, [userCacheKey]);
 
     useEffect(() => {
         // Only override if the caller explicitly passed a non-default view (e.g. deep-link)
@@ -447,7 +576,9 @@ const AnimalList = ({
     const [feedingForm, setFeedingForm] = useState({ supplyId: '', qty: '1', notes: '', updateStock: true });
     const [enclosures, setEnclosures] = useState([]);
     const [enclosureFormVisible, setEnclosureFormVisible] = useState(false);
-    const [enclosureFormData, setEnclosureFormData] = useState({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [] });
+    const [reproEncFormVisible, setReproEncFormVisible] = useState(false);
+    const [healthEncFormVisible, setHealthEncFormVisible] = useState(false);
+    const [enclosureFormData, setEnclosureFormData] = useState({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'general' });
     const [editingEnclosureId, setEditingEnclosureId] = useState(null);
     const [enclosureSaving, setEnclosureSaving] = useState(false);
     const [assigningAnimalId, setAssigningAnimalId] = useState(null);
@@ -657,8 +788,8 @@ const AnimalList = ({
     }, [authToken, API_BASE_URL]);
 
     useEffect(() => {
-        // Skip fetch if we have a cache for THIS user (e.g. returning from edit/view)
-        if (_alCache && _alCacheUserKey === userCacheKey && _alCache.length > 0) {
+        // Skip fetch if we have a cache (e.g. returning from edit/view)
+        if (_alCache && _alCache.length > 0) {
             setAnimalsRaw(_alCache);
             setLoading(false);
             // Still derive species from cached data
@@ -669,7 +800,7 @@ const AnimalList = ({
             return;
         }
         fetchAnimals();
-    }, [fetchAnimals, userCacheKey]);
+    }, [fetchAnimals]);
 
     // Refresh animals when other parts of the app signal a change (e.g., after upload/save)
     useEffect(() => {
@@ -721,46 +852,25 @@ const AnimalList = ({
     useEffect(() => { fetchAvailableAnimals(); }, [fetchAvailableAnimals]);
     useEffect(() => { fetchSoldTransferred(); }, [fetchSoldTransferred]);
 
-    // Close fixed collection dropdown on scroll (but not when scrolling inside the dropdown itself)
-    const collectionDropdownRef = useRef(null);
-    useEffect(() => {
-        if (!collectionDropdownPos) return;
-        const close = (e) => {
-            if (collectionDropdownRef.current && collectionDropdownRef.current.contains(e.target)) return;
-            setAssigningCollectionAnimalId(null);
-            setCollectionDropdownPos(null);
-        };
-        window.addEventListener('scroll', close, true);
-        return () => window.removeEventListener('scroll', close, true);
-    }, [collectionDropdownPos]);
-
-    // Rehydrate collections from user-scoped localStorage whenever account changes.
-    useEffect(() => {
-        if (!userCacheKey) {
-            setUserCollections([]);
-            setAnimalCollections({});
-            return;
-        }
-        try { setUserCollections(JSON.parse(localStorage.getItem(colKey) || '[]')); } catch { setUserCollections([]); }
-        try { setAnimalCollections(JSON.parse(localStorage.getItem(acolKey) || '{}')); } catch { setAnimalCollections({}); }
-    }, [userCacheKey, colKey, acolKey]);
-
-    // Load collections from API on auth/user change; overwrite local state even when empty.
+    // Load collections from API on auth change — always overwrite state from server to prevent cross-user leakage
     useEffect(() => {
         if (!authToken) return;
+        // Reset to empty immediately so a user with no collections doesn't see a previous user's data
+        setUserCollections([]);
+        setAnimalCollections({});
         axios.get(`${API_BASE_URL}/collections`, { headers: { Authorization: `Bearer ${authToken}` } })
             .then(res => {
                 const { collections, animalMap } = res.data || {};
-                const safeCollections = Array.isArray(collections) ? collections : [];
-                const safeAnimalMap = (animalMap && typeof animalMap === 'object' && !Array.isArray(animalMap)) ? animalMap : {};
-                setUserCollections(safeCollections);
-                setAnimalCollections(safeAnimalMap);
-                try { localStorage.setItem(colKey, JSON.stringify(safeCollections)); } catch {}
-                try { localStorage.setItem(acolKey, JSON.stringify(safeAnimalMap)); } catch {}
+                const cols = Array.isArray(collections) ? collections : [];
+                const map  = (animalMap && typeof animalMap === 'object') ? animalMap : {};
+                setUserCollections(cols);
+                setAnimalCollections(map);
+                try { localStorage.setItem(`ct_collections_${userKey}`, JSON.stringify(cols)); } catch {}
+                try { localStorage.setItem(`ct_animal_collections_${userKey}`, JSON.stringify(map)); } catch {}
             })
             .catch(err => console.warn('[collections load]', err));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [authToken, userCacheKey]);
+    }, [authToken]);
 
     // Fetch the current user's activity log (lazy ? only when log screen opens)
     const fetchActivityLogs = useCallback(async (page = 1, filters = {}) => {
@@ -800,7 +910,7 @@ const AnimalList = ({
 
     // Reset log screen when navigating away from management view
     useEffect(() => {
-        if (animalView !== 'management') { setShowActivityLogScreen(false); setShowSuppliesScreen(false); setSupplyFormVisible(false); setShowDuplicatesScreen(false); }
+        if (animalView !== 'management') { setShowActivityLogScreen(false); setSupplyFormVisible(false); setShowDuplicatesScreen(false); }
     }, [animalView]);
     
     // Auto-fetch duplicates when duplicates screen opens for the first time
@@ -884,9 +994,7 @@ const AnimalList = ({
                 const idPublic = (a.id_public || '').toString().toLowerCase();
                 const tags = (a.tags || []).map(t => t.toLowerCase());
                 const tagsMatch = tags.some(tag => tag.includes(term));
-                const variety = [a.color, a.phenotype, a.variety, a.coatPattern, a.coat, a.markings, a.morph]
-                    .filter(Boolean).join(' ').toLowerCase();
-                return name.includes(term) || registry.includes(term) || idPublic.includes(term.replace(/^ct-?/,'').toLowerCase()) || tagsMatch || variety.includes(term);
+                return name.includes(term) || registry.includes(term) || idPublic.includes(term.replace(/^ct-?/,'').toLowerCase()) || tagsMatch;
             });
         }
 
@@ -1410,7 +1518,7 @@ const AnimalList = ({
             <div className="w-full flex justify-center">
                 <div
                     onClick={handleClick}
-                    className={`relative bg-white rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-44 sm:h-48 md:h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${
+                    className={`relative bg-white rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] min-h-44 sm:min-h-48 md:min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${
                         isSelected ? 'border-red-500' : animal.isViewOnly ? 'border-gray-400 bg-gray-50' : 'border-gray-300'
                     }`}
                 >
@@ -1538,7 +1646,7 @@ const AnimalList = ({
                     })()}
                     {/* Management action buttons slot */}
                     {cardActions && (
-                        <div className="w-full px-1 pb-1 flex flex-wrap gap-1 justify-center" onClick={e => e.stopPropagation()}>
+                        <div className="w-full px-1 pt-1 pb-1 border-t border-gray-100 flex flex-wrap gap-1 justify-center shrink-0" onClick={e => e.stopPropagation()}>
                             {cardActions}
                         </div>
                     )}
@@ -1762,7 +1870,7 @@ const AnimalList = ({
                                     <div className="flex-1 min-w-0">
                                         <div className="text-sm text-gray-800 font-medium">
                                             {getActionLabel(log.action)}
-                                            {(log.details?.name || log.details?.enclosureName) && <span className="text-gray-500 font-normal"> ? <span className="font-medium text-gray-700">{log.details.name || log.details.enclosureName}</span></span>}
+                                            {(log.details?.name || log.details?.enclosureName) && <span className="text-gray-500 font-normal"> • <span className="font-medium text-gray-700">{log.details.name || log.details.enclosureName}</span></span>}
                                             {log.details?.species && !log.details?.name && <span className="text-gray-500 font-normal"> ({log.details.species})</span>}
                                             {log.details?.status && <span className="text-indigo-500 font-normal text-xs ml-1">({log.details.status})</span>}
                                         </div>
@@ -1930,15 +2038,8 @@ const AnimalList = ({
 
         return (
             <div className="mt-4 space-y-4">
-                {/* Back + Refresh */}
-                <div className="flex items-center justify-between">
-                    <button
-                        onClick={() => { setShowSuppliesScreen(false); setSupplyFormVisible(false); setEditingSupplyId(null); }}
-                        className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-800 transition"
-                    >
-                        <ChevronLeft size={16} />
-                        Back to Management
-                    </button>
+                {/* Refresh */}
+                <div className="flex items-center justify-end">
                     <button onClick={fetchSupplies} disabled={suppliesLoading}
                         className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition disabled:opacity-50">
                         <RefreshCw size={12} /> Refresh
@@ -2450,8 +2551,9 @@ const AnimalList = ({
         </div>
     );
 
-    const SectionHeader = ({ sectionKey, icon, title, count, bgClass, onClick }) => {
+    const SectionHeader = ({ sectionKey, icon, title, count, bgClass, onClick, hideHeader }) => {
         const collapsed = collapsedMgmtSections[sectionKey] || false;
+        if (hideHeader) return null;
         return (
             <div
                 className={`relative flex items-center justify-between ${bgClass} px-3 py-2.5 sm:px-4 sm:py-3 border-b cursor-pointer`}
@@ -2597,10 +2699,10 @@ const AnimalList = ({
                                                             <AnimalCard animal={animal} onEditAnimal={onEditAnimal} species={animal.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned} />
                                                             <button
                                                                 onClick={e => { e.stopPropagation(); removeAnimalFromCollection(animal.id_public, col.id); }}
-                                                                className="absolute top-2 left-2 z-20 bg-white/90 hover:bg-red-50 text-red-400 hover:text-red-600 rounded-full p-1 shadow-sm border border-gray-200"
+                                                                className="absolute top-1 right-1 z-20 bg-white/90 hover:bg-red-50 text-red-400 hover:text-red-600 rounded-full p-0.5 shadow-sm border border-gray-200"
                                                                 title="Remove from this collection"
                                                             >
-                                                                <Minus size={16} />
+                                                                <X size={11} />
                                                             </button>
                                                         </div>
                                                     ))}
@@ -2642,42 +2744,26 @@ const AnimalList = ({
                                                         <div className="absolute inset-0 bg-gray-400/20 rounded-xl z-10 pointer-events-none" />
                                                         <AnimalCard animal={animal} onEditAnimal={onEditAnimal} species={animal.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned} />
                                                         <div className="absolute top-2 left-2 z-20">
-                                                            {assigningCollectionAnimalId === animal.id_public && collectionDropdownPos && (
+                                                            {assigningCollectionAnimalId === animal.id_public && (
                                                                 <div
-                                                                    ref={collectionDropdownRef}
-                                                                    style={{ position: 'fixed', top: collectionDropdownPos.top, bottom: collectionDropdownPos.bottom, left: collectionDropdownPos.left, zIndex: 9999 }}
-                                                                    className="bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[160px] max-h-52 overflow-y-auto"
+                                                                    className="absolute left-0 top-9 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[150px] z-30"
                                                                     onClick={e => e.stopPropagation()}
                                                                 >
                                                                     <p className="text-xs font-semibold text-gray-600 mb-1.5">Add to collection:</p>
                                                                     {userCollections.map(col => (
                                                                         <button
                                                                             key={col.id}
-                                                                            onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); setCollectionDropdownPos(null); }}
+                                                                            onClick={() => { assignAnimalToCollection(animal.id_public, col.id); setAssigningCollectionAnimalId(null); }}
                                                                             className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 rounded flex items-center gap-1.5 text-gray-700"
                                                                         >
                                                                             <FolderOpen size={11} className="text-amber-500" /> {col.name}
                                                                         </button>
                                                                     ))}
-                                                                    <button onClick={() => { setAssigningCollectionAnimalId(null); setCollectionDropdownPos(null); }} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 rounded text-gray-400 mt-1">Cancel</button>
+                                                                    <button onClick={() => setAssigningCollectionAnimalId(null)} className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 rounded text-gray-400 mt-1">Cancel</button>
                                                                 </div>
                                                             )}
                                                             <button
-                                                                onClick={e => {
-                                                                    e.stopPropagation();
-                                                                    if (assigningCollectionAnimalId === animal.id_public) {
-                                                                        setAssigningCollectionAnimalId(null);
-                                                                        setCollectionDropdownPos(null);
-                                                                    } else {
-                                                                        const rect = e.currentTarget.getBoundingClientRect();
-                                                                        const spaceBelow = window.innerHeight - rect.bottom;
-                                                                        setCollectionDropdownPos(spaceBelow < 220
-                                                                            ? { bottom: window.innerHeight - rect.top + 4, top: undefined, left: rect.left }
-                                                                            : { top: rect.bottom + 4, bottom: undefined, left: rect.left }
-                                                                        );
-                                                                        setAssigningCollectionAnimalId(animal.id_public);
-                                                                    }
-                                                                }}
+                                                                onClick={e => { e.stopPropagation(); setAssigningCollectionAnimalId(prev => prev === animal.id_public ? null : animal.id_public); }}
                                                                 className="bg-white/90 hover:bg-amber-50 text-amber-500 hover:text-amber-700 rounded-full p-1 shadow-sm border border-gray-200"
                                                                 title="Add to a collection"
                                                             >
@@ -2698,8 +2784,53 @@ const AnimalList = ({
         );
     };
 
-    // -- Management View ----------------------------------------------------------
-    const renderManagementView = () => {
+    // -- For Sale Screen ----------------------------------------------------------
+    const renderForSaleScreen = () => {
+        const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly);
+        const handleMarkRehomed = (e, animal) => {
+            e.stopPropagation();
+            if (!window.confirm(`Mark ${animal.name || 'this animal'} as Rehomed? This will change their status to "Rehomed".`)) return;
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, status: 'Rehomed' } : a));
+            setAvailableAnimalsRaw(prev => prev.filter(a => a.id_public !== animal.id_public));
+            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { status: 'Rehomed' },
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .catch(err => { console.error('Mark rehomed failed:', err); fetchAnimals(); });
+        };
+        return (
+            <div className="space-y-4 mt-4">
+                <div className="flex items-center gap-2 mb-2">
+                    <ShoppingBag size={18} className="text-purple-600" />
+                    <h3 className="text-base font-semibold text-gray-800">For Sale / Available</h3>
+                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">{availableList.length}</span>
+                </div>
+                {availableList.length === 0
+                    ? <div className="text-sm text-gray-400 text-center py-8">No animals currently marked as Available.</div>
+                    : <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                        {availableList.map(a => (
+                            <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species}
+                                isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                hideControls hideBreedingLines
+                                cardActions={<>
+                                    {a.isForSale && a.salePriceAmount && (
+                                        <div className="text-[10px] text-purple-600 font-medium truncate w-full text-center">
+                                            {a.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${a.salePriceCurrency || ''} ${a.salePriceAmount}`.trim()}
+                                        </div>
+                                    )}
+                                    <button onClick={(e) => handleMarkRehomed(e, a)}
+                                        className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500 text-white hover:bg-indigo-600 w-full flex items-center justify-center gap-0.5">
+                                        <Check size={9} /> Rehomed
+                                    </button>
+                                </>}
+                            />
+                        ))}
+                    </div>
+                }
+            </div>
+        );
+    };
+
+    // -- Management View (view = 'enclosures' | 'reproduction' | 'health' | 'feeding') --
+    const renderManagementView = (view = null) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -2765,8 +2896,10 @@ const AnimalList = ({
                     logManagementActivity('enclosure_create', null, { name: enclosureFormData.name.trim() });
                 }
                 setEnclosureFormVisible(false);
+                setReproEncFormVisible(false);
+                setHealthEncFormVisible(false);
                 setEditingEnclosureId(null);
-                setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [] });
+                setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'general' });
                 fetchEnclosures();
             } catch (err) {
                 showModalMessage('Error', err.response?.data?.message || 'Failed to save enclosure');
@@ -2869,22 +3002,8 @@ const AnimalList = ({
         const handleMarkMaintDone = (e, animal) => {
             e.stopPropagation();
             const now = new Date().toISOString();
-            const prevValue = animal.lastMaintenanceDate ?? null;
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastMaintenanceDate: now } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, lastMaintenanceDate: now } }));
-            setMgmtUndo({
-                type: 'maint',
-                key: `maint-${animal.id_public}`,
-                prevValue,
-                restore: () => {
-                    setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastMaintenanceDate: prevValue } : a));
-                    window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, lastMaintenanceDate: prevValue } }));
-                    axios.put(`${API_BASE_URL}/animals/${animal.id_public}`,
-                        { lastMaintenanceDate: prevValue },
-                        { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
-                        .catch(err => { console.error('Undo maintenance failed:', err); fetchAllAnimals(); });
-                },
-            });
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`,
                 { lastMaintenanceDate: now },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
@@ -2898,32 +3017,44 @@ const AnimalList = ({
             try { return JSON.parse(val); } catch { return [{ name: String(val) }]; }
         };
 
-        // -- Section data ---------------------------------------------------------
-        // Exclude deceased/rehomed and view-only (transferred/sold) animals from all management sections
-        const allAnimals = allAnimalsRaw.filter(
-            a => a.status !== 'Deceased' && a.status !== 'Rehomed' && !a.isViewOnly
-        );
-        // Enclosures can have their own visibility rules so users can control
-        // whether unowned/booked/rehomed animals appear and can be assigned.
-        const enclosureAnimals = allAnimalsRaw.filter(a => {
-            const status = String(a.status || '').trim().toLowerCase();
-            const soldStatus = String(a.soldStatus || '').trim().toLowerCase();
-            const isOwned = typeof a.isOwned === 'string'
-                ? a.isOwned.toLowerCase() === 'true'
-                : !!a.isOwned;
-            const isBooked = status === 'booked' || soldStatus === 'booked';
+        const calcNextDose = (med) => {
+            if (!med.startDate || !med.intervalValue || !med.intervalUnit) return null;
+            const v = Number(med.intervalValue);
+            const unitMs = med.intervalUnit === 'hours' ? 3600000
+                : med.intervalUnit === 'days' ? 86400000
+                : med.intervalUnit === 'weeks' ? 604800000
+                : med.intervalUnit === 'months' ? 2592000000 : null;
+            if (!unitMs) return null;
+            const start = new Date(med.startDate).getTime();
+            if (isNaN(start)) return null;
+            const intervalMs = v * unitMs;
+            const now = Date.now();
+            const elapsed = now - start;
+            if (elapsed < 0) return new Date(start);
+            const nextDose = new Date(start + (Math.floor(elapsed / intervalMs) + 1) * intervalMs);
+            return nextDose;
+        };
 
-            if (status === 'deceased' || a.isViewOnly) return false;
-            if (!showRehomedInEnclosures && status === 'rehomed') return false;
-            if (!showAvailableInEnclosures && status === 'available') return false;
-            if (!showBookedInEnclosures && isBooked) return false;
-            if (!showUnownedInEnclosures && !isOwned) return false;
-            return true;
-        });
+        const formatNextDose = (date) => {
+            const today = new Date(); today.setHours(0,0,0,0);
+            const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+            const d = new Date(date); d.setHours(0,0,0,0);
+            if (date <= Date.now()) return 'due now';
+            if (d.getTime() === today.getTime()) return 'today';
+            if (d.getTime() === tomorrow.getTime()) return 'tomorrow';
+            return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        };
+
+        // -- Section data ---------------------------------------------------------
+        // Exclude deceased and view-only (transferred/sold) animals from all management sections
+        const allAnimals = allAnimalsRaw.filter(a => a.status !== 'Deceased' && !a.isViewOnly);
         // 1. Enclosures ? grouped by named enclosure (enclosureId)
+        const generalEnclosures = enclosures.filter(e => !e.purpose || e.purpose === 'general');
+        const reproEnclosures = enclosures.filter(e => e.purpose === 'reproduction');
+        const healthEnclosures = enclosures.filter(e => e.purpose === 'health');
         const enclosureAnimalMap = {}; // { enclosureId: [animals] }
         const unassignedAnimals = [];
-        enclosureAnimals.forEach(a => {
+        allAnimals.forEach(a => {
             if (a.enclosureId) {
                 if (!enclosureAnimalMap[a.enclosureId]) enclosureAnimalMap[a.enclosureId] = [];
                 enclosureAnimalMap[a.enclosureId].push(a);
@@ -2933,10 +3064,13 @@ const AnimalList = ({
         });
 
         // 2. Reproduction
-        const matingList = allAnimals.filter(a => a.isInMating);
-        const pregnantList = allAnimals.filter(a => a.isPregnant && !a.isInMating);
-        const nursingList = allAnimals.filter(a => a.isNursing);
-        const reproTotal = allAnimals.filter(a => a.isInMating || a.isPregnant || a.isNursing).length;
+        // Animals in a repro enclosure are shown inside the enclosure card — exclude from section groups
+        const reproEnclosureIds = new Set(reproEnclosures.map(e => e._id));
+        const inReproEnclosure = a => a.enclosureId && reproEnclosureIds.has(a.enclosureId);
+        const matingList = allAnimals.filter(a => a.isInMating && !inReproEnclosure(a));
+        const pregnantList = allAnimals.filter(a => a.isPregnant && !a.isInMating && !inReproEnclosure(a));
+        const nursingList = allAnimals.filter(a => a.isNursing && !inReproEnclosure(a));
+        const reproTotal = allAnimals.filter(a => (a.isInMating || a.isPregnant || a.isNursing) && !inReproEnclosure(a)).length;
 
         // 3. Feeding
         const feedDue = allAnimals.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays));
@@ -2958,11 +3092,10 @@ const AnimalList = ({
         const animalCareDue = feedDue.length + animalsWithAnimalTasks.reduce((sum, a) => sum + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
 
         // 5. Medical ? quarantine and treatment
-        const quarantineList = allAnimals.filter(a => a.isQuarantine);
-        const treatmentList = allAnimals.filter(a => !a.isQuarantine && (
-
-            parseArrayField(a.medicalConditions).length > 0 || parseArrayField(a.medications).length > 0
-        ));
+        const healthEnclosureIds = new Set(healthEnclosures.map(e => e._id));
+        const inHealthEnclosure = a => a.enclosureId && healthEnclosureIds.has(a.enclosureId);
+        const quarantineList = allAnimals.filter(a => a.isQuarantine && !inHealthEnclosure(a));
+        const treatmentList = allAnimals.filter(a => a.isInTreatment && !a.isQuarantine && !inHealthEnclosure(a));
 
         // 6. Available for sale/rehoming ? all user-created animals with status=Available (no ownership filter)
         const availableList = availableAnimalsRaw.filter(a => a.status === 'Available' && !a.isViewOnly);
@@ -2990,28 +3123,10 @@ const AnimalList = ({
 
         const handleMarkEnclosureTaskDone = async (e, enc, taskIdx) => {
             e.stopPropagation();
-            const prevTasks = [...(enc.cleaningTasks || [])];
-            const prevValue = prevTasks[taskIdx]?.lastDoneDate ?? null;
-            const updated = [...prevTasks];
+            const updated = [...(enc.cleaningTasks || [])];
             updated[taskIdx] = { ...updated[taskIdx], lastDoneDate: new Date().toISOString() };
             // Optimistic update
             setEnclosures(prev => prev.map(ex => ex._id === enc._id ? { ...ex, cleaningTasks: updated } : ex));
-            setMgmtUndo({
-                type: 'encTask',
-                key: `${enc._id}-${taskIdx}`,
-                encId: enc._id,
-                taskIdx,
-                prevValue,
-                restore: () => {
-                    const restored = [...updated];
-                    restored[taskIdx] = { ...restored[taskIdx], lastDoneDate: prevValue };
-                    setEnclosures(prev => prev.map(ex => ex._id === enc._id ? { ...ex, cleaningTasks: restored } : ex));
-                    axios.put(`${API_BASE_URL}/enclosures/${enc._id}`,
-                        { name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: restored },
-                        { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
-                        .catch(err => { console.error('Undo enclosure task failed:', err); fetchEnclosures(); });
-                },
-            });
             axios.put(`${API_BASE_URL}/enclosures/${enc._id}`,
                 { name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: updated },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
@@ -3036,27 +3151,11 @@ const AnimalList = ({
         const handleMarkAnimalCareTaskDone = (e, animal, taskIdx, taskType = 'enclosure') => {
             e.stopPropagation();
             const fieldName = taskType === 'animal' ? 'animalCareTasks' : 'careTasks';
-            const prevTasks = [...(animal[fieldName] || [])];
-            const prevValue = prevTasks[taskIdx]?.lastDoneDate ?? null;
-            const updated = [...prevTasks];
+            const updated = [...(animal[fieldName] || [])];
             updated[taskIdx] = { ...updated[taskIdx], lastDoneDate: new Date().toISOString() };
             // Optimistic update
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: updated } : a));
             window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: updated } }));
-            setMgmtUndo({
-                type: 'animalTask',
-                key: `${animal.id_public}-${fieldName}-${taskIdx}`,
-                prevValue,
-                restore: () => {
-                    const restored = [...updated];
-                    restored[taskIdx] = { ...restored[taskIdx], lastDoneDate: prevValue };
-                    setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, [fieldName]: restored } : a));
-                    window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, [fieldName]: restored } }));
-                    axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: restored },
-                        { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
-                        .catch(err => { console.error('Undo animal care task failed:', err); fetchAllAnimals(); });
-                },
-            });
             axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { [fieldName]: updated },
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
                 .then(() => logManagementActivity('care_task_done', animal.id_public, { name: animal.name, taskName: updated[taskIdx]?.taskName || 'Care task' }))
@@ -3090,6 +3189,19 @@ const AnimalList = ({
                 .catch(err => { console.error('Unquarantine failed:', err); setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, isQuarantine: true } : a)); });
         };
 
+        const handleDischargeTreatment = (e, animal) => {
+            e.stopPropagation();
+            if (!window.confirm(`Discharge ${animal.name || 'this animal'} from treatment? This will clear all recorded conditions and medications.`)) return;
+            const patch = { medicalConditions: null, medications: null, isInTreatment: false };
+            const prev = { medicalConditions: animal.medicalConditions, medications: animal.medications, isInTreatment: animal.isInTreatment };
+            setAllAnimalsRaw(prevArr => prevArr.map(a => a.id_public === animal.id_public ? { ...a, ...patch } : a));
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: animal.id_public, ...patch } }));
+            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, patch,
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => logManagementActivity('treatment_discharged', animal.id_public, { name: animal.name, species: animal.species }))
+                .catch(err => { console.error('Discharge failed:', err); setAllAnimalsRaw(prevArr => prevArr.map(a => a.id_public === animal.id_public ? { ...a, ...prev } : a)); });
+        };
+
         const handleReproStatusUpdate = (e, animal, patch) => {
             e.stopPropagation();
             // Optimistic update
@@ -3113,9 +3225,9 @@ const AnimalList = ({
             <div className="space-y-3 sm:space-y-4 mt-4">
 
                 {/* -- 1. ENCLOSURES ------------------------------------------ */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {(!view || view === 'enclosures') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     {/* Section header ? collapse on click, Add button on right */}
-                    <div className="relative flex items-center justify-between bg-blue-50 px-3 py-2.5 sm:px-4 sm:py-3 border-b cursor-pointer" onClick={() => toggleSection('enclosures')}>
+                    {!view && <div className="relative flex items-center justify-between bg-blue-50 px-3 py-2.5 sm:px-4 sm:py-3 border-b cursor-pointer" onClick={() => toggleSection('enclosures')}>
                         <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
                             {collapsedMgmtSections['enclosures']
                                 ? <ChevronDown className="w-4 h-4 text-gray-400" />
@@ -3130,16 +3242,25 @@ const AnimalList = ({
                             onClick={(e) => {
                                 e.stopPropagation();
                                 if (editingEnclosureId) { setEditingEnclosureId(null); setEnclosureFormVisible(false); }
-                                else { setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [] }); setEnclosureFormVisible(v => !v); }
+                                else { setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'general' }); setEnclosureFormVisible(v => !v); }
                             }}
                             className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 bg-white border border-blue-200 px-2 py-1 rounded-lg"
                         >
                             <Plus size={13} /> {enclosureFormVisible && !editingEnclosureId ? 'Cancel' : 'Add'}
                         </button>
-                    </div>
+                    </div>}
+                    {/* Add button shown standalone when on dedicated tab */}
+                    {view && <div className="flex justify-end px-3 py-2 border-b bg-blue-50/40">
+                        <button
+                            onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setEnclosureFormVisible(false); } else { setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'general' }); setEnclosureFormVisible(v => !v); } }}
+                            className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 bg-white border border-blue-200 px-2 py-1 rounded-lg"
+                        >
+                            <Plus size={13} /> {enclosureFormVisible && !editingEnclosureId ? 'Cancel' : 'Add Enclosure'}
+                        </button>
+                    </div>}
 
                     {/* Inline create / edit form */}
-                    {enclosureFormVisible && !collapsedMgmtSections['enclosures'] && (
+                    {enclosureFormVisible && (!collapsedMgmtSections['enclosures'] || !!view) && (
                         <div className="p-3 border-b bg-blue-50/40 space-y-2">
                             <div className="text-xs font-semibold text-blue-700 mb-1">{editingEnclosureId ? 'Edit Enclosure' : 'New Enclosure'}</div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -3213,53 +3334,14 @@ const AnimalList = ({
                         </div>
                     )}
 
-                    {!collapsedMgmtSections['enclosures'] && (
+                    {(!collapsedMgmtSections['enclosures'] || !!view) && (
                         <div className="p-3 space-y-2">
-                            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-blue-100 bg-blue-50/40 px-2 py-2">
-                                <span className="text-xs font-medium text-blue-700">Show in Enclosures:</span>
-                                <label className="inline-flex items-center gap-1 text-xs text-gray-700">
-                                    <input
-                                        type="checkbox"
-                                        checked={showUnownedInEnclosures}
-                                        onChange={(e) => saveEnclosurePreference('enclosureShowUnowned', e.target.checked)}
-                                        className="rounded border-gray-300"
-                                    />
-                                    Unowned
-                                </label>
-                                <label className="inline-flex items-center gap-1 text-xs text-gray-700">
-                                    <input
-                                        type="checkbox"
-                                        checked={showBookedInEnclosures}
-                                        onChange={(e) => saveEnclosurePreference('enclosureShowBooked', e.target.checked)}
-                                        className="rounded border-gray-300"
-                                    />
-                                    Booked
-                                </label>
-                                <label className="inline-flex items-center gap-1 text-xs text-gray-700">
-                                    <input
-                                        type="checkbox"
-                                        checked={showAvailableInEnclosures}
-                                        onChange={(e) => saveEnclosurePreference('enclosureShowAvailable', e.target.checked)}
-                                        className="rounded border-gray-300"
-                                    />
-                                    Available
-                                </label>
-                                <label className="inline-flex items-center gap-1 text-xs text-gray-700">
-                                    <input
-                                        type="checkbox"
-                                        checked={showRehomedInEnclosures}
-                                        onChange={(e) => saveEnclosurePreference('enclosureShowRehomed', e.target.checked)}
-                                        className="rounded border-gray-300"
-                                    />
-                                    Rehomed
-                                </label>
-                            </div>
-                            {enclosures.length === 0 && unassignedAnimals.length === 0 ? (
+                            {generalEnclosures.length === 0 && unassignedAnimals.length === 0 ? (
                                 <div className="text-sm text-gray-400 text-center py-4">No enclosures yet. Click Add to create your first enclosure.</div>
                             ) : (
                                 <>
                                     {/* Named enclosures */}
-                                    {enclosures.map(enc => {
+                                    {generalEnclosures.map(enc => {
                                         const occupants = enclosureAnimalMap[enc._id] || [];
                                         const isGrpCollapsed = collapsedMgmtGroups[`enc_${enc._id}`] || false;
                                         return (
@@ -3282,7 +3364,7 @@ const AnimalList = ({
                                                     <div className="flex items-center gap-1 ml-2 shrink-0" onClick={e => e.stopPropagation()}>
                                                         <button
                                                             onClick={() => {
-                                                                setEnclosureFormData({ name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: enc.cleaningTasks || [] });
+                                                                setEnclosureFormData({ name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: enc.cleaningTasks || [], purpose: enc.purpose || 'general' });
                                                                 setEditingEnclosureId(enc._id);
                                                                 setEnclosureFormVisible(true);
                                                                 setCollapsedMgmtSections(p => ({...p, enclosures: false}));
@@ -3343,14 +3425,14 @@ const AnimalList = ({
                                                         <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                             hideControls hideBreedingLines
                                                             cardActions={
-                                                                enclosures.length > 0 ? (
+                                                                generalEnclosures.length > 0 ? (
                                                                     assigningAnimalId === a.id_public ? (
                                                                         <select autoFocus defaultValue=""
                                                                             onChange={e => { if (e.target.value) { handleAssignAnimalToEnclosure(a.id_public, e.target.value); } setAssigningAnimalId(null); }}
                                                                             onBlur={() => setAssigningAnimalId(null)}
                                                                             className="text-[10px] border border-blue-300 rounded p-1 w-full">
                                                                             <option value="" disabled>Select enclosure...</option>
-                                                                            {enclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}
+                                                                            {generalEnclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}
                                                                         </select>
                                                                     ) : (
                                                                         <button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }}
@@ -3370,22 +3452,27 @@ const AnimalList = ({
                             )}
                         </div>
                     )}
-                </div>
+                </div>)}
 
                 {/* -- 2. FEEDING -------------------------------------------- */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {(!view || view === 'feeding') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="feeding"
                         icon={<Utensils size={18} className="text-green-600" />}
-                        title="Feeding" count={animalCareDue > 0 ? `${animalCareDue} due` : animals.length} bgClass="bg-green-50" />
-                    {!collapsedMgmtSections['feeding'] && (
+                        title="Feeding" count={animalCareDue > 0 ? `${animalCareDue} due` : animals.length} bgClass="bg-green-50" hideHeader={!!view} />
+                    {(!collapsedMgmtSections['feeding'] || !!view) && (
                         <div className="p-3 space-y-4">
+                            {!!view && <div className="flex items-center gap-2 pb-2 mb-1 border-b border-green-100">
+                                <Utensils size={15} className="text-green-600 flex-shrink-0" />
+                                <span className="text-sm font-bold text-green-700 uppercase tracking-wide">Feeding Schedule</span>
+                            </div>}
                             {feedDue.length > 0 && (
                                 <div>
-                                    <div className="flex items-center gap-2 px-1 pb-2">
+                                    <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('feed_due')}>
+                                        {collapsedMgmtGroups['feed_due'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
                                         <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" />
                                         <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Due Today / Overdue ({feedDue.length})</span>
                                     </div>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                    {!collapsedMgmtGroups['feed_due'] && <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
                                         {feedDue.map(a => (
                                             <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                 hideControls hideBreedingLines
@@ -3404,16 +3491,17 @@ const AnimalList = ({
                                                 </>}
                                             />
                                         ))}
-                                    </div>
+                                    </div>}
                                 </div>
                             )}
                             {feedOk.length > 0 && (
                                 <div>
-                                    <div className="flex items-center gap-2 px-1 pb-2">
+                                    <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('feed_ok')}>
+                                        {collapsedMgmtGroups['feed_ok'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
                                         <span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" />
                                         <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Up to Date ({feedOk.length})</span>
                                     </div>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                    {!collapsedMgmtGroups['feed_ok'] && <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
                                         {feedOk.map(a => (
                                             <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                 hideControls hideBreedingLines
@@ -3427,16 +3515,17 @@ const AnimalList = ({
                                                 </>}
                                             />
                                         ))}
-                                    </div>
+                                    </div>}
                                 </div>
                             )}
                             {feedNone.length > 0 && (
                                 <div>
-                                    <div className="flex items-center gap-2 px-1 pb-2">
+                                    <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('feed_none')}>
+                                        {collapsedMgmtGroups['feed_none'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
                                         <span className="w-2.5 h-2.5 rounded-full bg-gray-300 inline-block" />
                                         <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">No Schedule Set ({feedNone.length})</span>
                                     </div>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                    {!collapsedMgmtGroups['feed_none'] && <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
                                         {feedNone.map(a => (
                                             <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                 hideControls hideBreedingLines
@@ -3445,7 +3534,7 @@ const AnimalList = ({
                                                     : undefined}
                                             />
                                         ))}
-                                    </div>
+                                    </div>}
                                 </div>
                             )}
                             {feedDue.length === 0 && feedOk.length === 0 && feedNone.length === 0 && (
@@ -3453,147 +3542,358 @@ const AnimalList = ({
                             )}
                         </div>
                     )}
-                </div>
+                </div>)}
 
                 {/* -- 3. REPRODUCTION ---------------------------------------- */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {(!view || view === 'reproduction') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="reproduction"
                         icon={<Bean size={18} className="text-pink-600" />}
-                        title="Reproduction" count={reproTotal} bgClass="bg-pink-50" />
-                    {!collapsedMgmtSections['reproduction'] && (
+                        title="Reproduction" count={reproTotal} bgClass="bg-pink-50" hideHeader={!!view} />
+                    {(!collapsedMgmtSections['reproduction'] || !!view) && (
                         <div className="p-3 space-y-4">
-                            {reproTotal === 0
-                                ? <div className="text-sm text-gray-400 text-center py-4">No animals currently in a reproductive state.</div>
-                                : <>
-                                    {matingList.length > 0 && (
-                                        <div>
-                                            <div className="flex items-center gap-2 px-1 pb-2">
-                                                <span className="w-2.5 h-2.5 rounded-full bg-purple-400 inline-block" />
-                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">In Mating ({matingList.length})</span>
-                                            </div>
+                            {/* Enclosures sub-panel */}
+                            <div className="border border-blue-200 rounded-lg overflow-hidden">
+                                <div className="flex items-center justify-between px-3 py-2 bg-blue-50/60">
+                                    <div className="flex items-center gap-2">
+                                        <Home size={13} className="text-blue-600" />
+                                        <span className="text-xs font-semibold text-gray-700">Enclosures</span>
+                                        <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full">{reproEnclosures.length}</span>
+                                    </div>
+                                    <button onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setReproEncFormVisible(false); } else { setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'reproduction' }); setReproEncFormVisible(v => !v); } }} className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 bg-white border border-blue-200 px-2 py-1 rounded-lg">
+                                        <Plus size={11} /> {reproEncFormVisible && !editingEnclosureId ? 'Cancel' : 'Add'}
+                                    </button>
+                                </div>
+                                {reproEncFormVisible && (
+                                    <div className="p-3 border-b bg-blue-50/40 space-y-2">
+                                        <div className="text-xs font-semibold text-blue-700 mb-1">{editingEnclosureId ? 'Edit Enclosure' : 'New Enclosure'}</div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Name *</label><input type="text" value={enclosureFormData.name} onChange={e => setEnclosureFormData(p => ({...p, name: e.target.value}))} placeholder="e.g. Breeding Pair Tank A" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Type</label><input type="text" value={enclosureFormData.enclosureType} onChange={e => setEnclosureFormData(p => ({...p, enclosureType: e.target.value}))} placeholder="e.g. Tank, Cage, Vivarium" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Size</label><input type="text" value={enclosureFormData.size} onChange={e => setEnclosureFormData(p => ({...p, size: e.target.value}))} placeholder="e.g. 40 gallon" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Notes</label><input type="text" value={enclosureFormData.notes} onChange={e => setEnclosureFormData(p => ({...p, notes: e.target.value}))} placeholder="Optional notes" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" /></div>
+                                        </div>
+                                        <div className="flex justify-end gap-2">
+                                            <button onClick={() => { setReproEncFormVisible(false); setEditingEnclosureId(null); }} className="text-xs px-3 py-1.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Cancel</button>
+                                            <button onClick={handleSaveEnclosure} disabled={enclosureSaving || !enclosureFormData.name.trim()} className="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50">{enclosureSaving ? 'Saving...' : (editingEnclosureId ? 'Save Changes' : 'Create Enclosure')}</button>
+                                        </div>
+                                    </div>
+                                )}
+                                <div className="p-2 space-y-2">
+                                    {reproEnclosures.length === 0
+                                        ? <div className="text-xs text-gray-400 text-center py-2">No enclosures yet. Click Add to create one.</div>
+                                        : reproEnclosures.map(enc => {
+                                            const occupants = enclosureAnimalMap[enc._id] || [];
+                                            const isGrpCollapsed = collapsedMgmtGroups[`enc_${enc._id}`] || false;
+                                            return (
+                                                <div key={enc._id} className="border border-gray-200 rounded-lg overflow-hidden">
+                                                    <div className="relative flex items-center bg-blue-50/60 px-3 py-2 cursor-pointer" onClick={() => toggleGroup(`enc_${enc._id}`)}>
+                                                        <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
+                                                            {isGrpCollapsed ? <ChevronDown className="w-3.5 h-3.5 text-gray-400" /> : <ChevronUp className="w-3.5 h-3.5 text-gray-400" />}
+                                                        </div>
+                                                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                            <span className="font-semibold text-sm text-gray-800 truncate">{enc.name}</span>
+                                                            {enc.enclosureType && <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full whitespace-nowrap shrink-0 hidden sm:inline">{enc.enclosureType}</span>}
+                                                            {enc.size && <span className="text-xs text-gray-400 whitespace-nowrap hidden sm:inline shrink-0">{enc.size}</span>}
+                                                            <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full shrink-0">{occupants.length}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1 ml-2 shrink-0" onClick={e => e.stopPropagation()}>
+                                                            <button onClick={() => { setEnclosureFormData({ name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: enc.cleaningTasks || [], purpose: enc.purpose || 'reproduction' }); setEditingEnclosureId(enc._id); setReproEncFormVisible(true); }} className="p-1 text-gray-400 hover:text-blue-600 rounded" title="Edit"><Edit size={13} /></button>
+                                                            <button onClick={() => handleDeleteEnclosure(enc._id)} className="p-1 text-gray-400 hover:text-red-500 rounded" title="Delete"><Trash2 size={13} /></button>
+                                                        </div>
+                                                    </div>
+                                                    {!isGrpCollapsed && enc.notes && (
+                                                        <div className="px-3 py-1.5 bg-gray-50 text-xs text-gray-500 border-b border-gray-100">{enc.notes}</div>
+                                                    )}
+                                                    {!isGrpCollapsed && (
+                                                        <div>
+                                                            {occupants.length === 0
+                                                                ? <div className="text-xs text-gray-400 text-center py-2">No animals assigned yet</div>
+                                                                : (
+                                                                    <div className="p-1.5 sm:p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                                                        {occupants.map(a => (
+                                                                            <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                                                hideControls hideBreedingLines
+                                                                                cardActions={<>
+                                                                                    {/* State badge */}
+                                                                                    {(a.isInMating || a.isPregnant || a.isNursing) && (
+                                                                                        <div className={`text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full ${a.isNursing ? 'bg-blue-100 text-blue-700' : a.isPregnant ? 'bg-pink-100 text-pink-700' : 'bg-purple-100 text-purple-700'}`}>
+                                                                                            {a.isNursing ? 'Nursing' : a.isPregnant ? 'Pregnant' : 'Mating'}
+                                                                                        </div>
+                                                                                    )}
+                                                                                    {/* Advance state */}
+                                                                                    {a.isInMating && !a.isPregnant && !a.isNursing && a.gender !== 'Male' && (
+                                                                                        <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: true })}
+                                                                                            className="text-[10px] px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 w-full flex items-center justify-center gap-0.5"><Bean size={9} /> Set as Pregnant</button>
+                                                                                    )}
+                                                                                    {a.isInMating && !a.isPregnant && !a.isNursing && a.gender === 'Male' && (
+                                                                                        <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false })}
+                                                                                            className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
+                                                                                    )}
+                                                                                    {a.isPregnant && !a.isNursing && (
+                                                                                        <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false, isNursing: true })}
+                                                                                            className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 w-full flex items-center justify-center gap-0.5"><Milk size={9} /> Set to Nursing</button>
+                                                                                    )}
+                                                                                    {a.isNursing && (
+                                                                                        <button onClick={(e) => handleReproStatusUpdate(e, a, { isNursing: false })}
+                                                                                            className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
+                                                                                    )}
+                                                                                    <button onClick={(e) => { e.stopPropagation(); handleAssignAnimalToEnclosure(a.id_public, ''); }}
+                                                                                        className="text-[10px] text-gray-400 hover:text-red-500 border border-gray-200 hover:border-red-200 rounded px-1.5 py-0.5 w-full">Remove from enclosure</button>
+                                                                                </>}
+                                                                            />
+                                                                        ))}
+                                                                    </div>
+                                                                )
+                                                            }
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })
+                                    }
+                                </div>
+                            </div>
+                            {(() => {
+                                const unassignedReproAnimals = [...matingList, ...pregnantList, ...nursingList];
+                                return unassignedReproAnimals.length === 0 ? null : (
+                                    <div>
+                                        <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('repro_unassigned')}>
+                                            {collapsedMgmtGroups['repro_unassigned'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
+                                            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Unassigned ({unassignedReproAnimals.length})</span>
+                                        </div>
+                                        {!collapsedMgmtGroups['repro_unassigned'] && (
                                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                                {matingList.map(a => (
+                                                {unassignedReproAnimals.map(a => (
                                                     <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                         hideControls hideBreedingLines
                                                         cardActions={<>
-                                                            {a.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: true })}
-                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 w-full flex items-center justify-center gap-0.5"><Bean size={9} /> Pregnant</button>}
-                                                            <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false })}
-                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
+                                                            {/* State badge */}
+                                                            <div className={`text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full ${a.isNursing ? 'bg-blue-100 text-blue-700' : a.isPregnant ? 'bg-pink-100 text-pink-700' : 'bg-purple-100 text-purple-700'}`}>
+                                                                {a.isNursing ? 'Nursing' : a.isPregnant ? 'Pregnant' : 'Mating'}
+                                                            </div>
+                                                            {/* Advance state */}
+                                                            {a.isInMating && !a.isPregnant && !a.isNursing && a.gender !== 'Male' && (
+                                                                <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: true })}
+                                                                    className="text-[10px] px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 w-full flex items-center justify-center gap-0.5"><Bean size={9} /> Set as Pregnant</button>
+                                                            )}
+                                                            {a.isInMating && !a.isPregnant && !a.isNursing && a.gender === 'Male' && (
+                                                                <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false })}
+                                                                    className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
+                                                            )}
+                                                            {a.isPregnant && !a.isNursing && (
+                                                                <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false, isNursing: true })}
+                                                                    className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 w-full flex items-center justify-center gap-0.5"><Milk size={9} /> Set to Nursing</button>
+                                                            )}
+                                                            {a.isNursing && (
+                                                                <button onClick={(e) => handleReproStatusUpdate(e, a, { isNursing: false })}
+                                                                    className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
+                                                            )}
+                                                            {assigningAnimalId === a.id_public
+                                                                ? <select autoFocus defaultValue="" onChange={e => { if (e.target.value) handleAssignAnimalToEnclosure(a.id_public, e.target.value); setAssigningAnimalId(null); }} onBlur={() => setAssigningAnimalId(null)} className="text-[10px] border border-blue-300 rounded p-1 w-full">
+                                                                    <option value="" disabled>{reproEnclosures.length === 0 ? 'No enclosures yet' : 'Select enclosure...'}</option>
+                                                                    {reproEnclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}
+                                                                  </select>
+                                                                : <button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }} className="text-[10px] text-blue-500 hover:text-blue-700 border border-blue-200 rounded px-1.5 py-0.5 w-full">Assign enclosure</button>
+                                                            }
                                                         </>}
                                                     />
                                                 ))}
                                             </div>
-                                        </div>
-                                    )}
-                                    {pregnantList.length > 0 && (
-                                        <div>
-                                            <div className="flex items-center gap-2 px-1 pb-2">
-                                                <span className="w-2.5 h-2.5 rounded-full bg-pink-400 inline-block" />
-                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Pregnant / Gravid ({pregnantList.length})</span>
-                                            </div>
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                                {pregnantList.map(a => (
-                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
-                                                        hideControls hideBreedingLines
-                                                        cardActions={<>
-                                                            {a.gender !== 'Male' && <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false, isNursing: true })}
-                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 w-full flex items-center justify-center gap-0.5"><Milk size={9} /> Nursing</button>}
-                                                            <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false })}
-                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 w-full">Clear</button>
-                                                        </>}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                    {nursingList.length > 0 && (
-                                        <div>
-                                            <div className="flex items-center gap-2 px-1 pb-2">
-                                                <span className="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block" />
-                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Nursing / Brooding ({nursingList.length})</span>
-                                            </div>
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                                {nursingList.map(a => (
-                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
-                                                        hideControls hideBreedingLines
-                                                        cardActions={
-                                                            <button onClick={(e) => handleReproStatusUpdate(e, a, { isNursing: false })}
-                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 w-full flex items-center justify-center gap-0.5"><Check size={9} /> Done</button>
-                                                        }
-                                                    />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </>
-                            }
+                                        )}
+                                    </div>
+                                );
+                            })()}
                         </div>
                     )}
-                </div>
+                </div>)}
 
                 {/* -- 4. MEDICAL / QUARANTINE -------------------------------- */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {(!view || view === 'health') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="medical"
                         icon={<Activity size={18} className="text-red-600" />}
-                        title="Medical / Quarantine" count={quarantineList.length + treatmentList.length} bgClass="bg-red-50" />
-                    {!collapsedMgmtSections['medical'] && (
+                        title="Medical / Quarantine" count={quarantineList.length + treatmentList.length} bgClass="bg-red-50" hideHeader={!!view} />
+                    {(!collapsedMgmtSections['medical'] || !!view) && (
                         <div className="p-3 space-y-4">
-                            {quarantineList.length === 0 && treatmentList.length === 0
-                                ? <div className="text-sm text-gray-400 text-center py-4">No animals in quarantine or under treatment.</div>
-                                : <>
-                                    {quarantineList.length > 0 && (
-                                        <div>
-                                            <div className="flex items-center gap-2 px-1 pb-2">
-                                                <span className="w-2.5 h-2.5 rounded-full bg-orange-400 inline-block" />
-                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Quarantine / Isolation ({quarantineList.length})</span>
-                                            </div>
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                                {quarantineList.map(a => (
-                                                    <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
-                                                        hideControls hideBreedingLines
-                                                        cardActions={
-                                                            <button onClick={(e) => handleUnquarantine(e, a)}
-                                                                className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5">
-                                                                <LockOpen size={9} /> Release
-                                                            </button>
-                                                        }
-                                                    />
-                                                ))}
-                                            </div>
+                            {/* Enclosures sub-panel */}
+                            <div className="border border-orange-200 rounded-lg overflow-hidden">
+                                <div className="flex items-center justify-between px-3 py-2 bg-orange-50/60">
+                                    <div className="flex items-center gap-2">
+                                        <Home size={13} className="text-orange-600" />
+                                        <span className="text-xs font-semibold text-gray-700">Enclosures</span>
+                                        <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full">{healthEnclosures.length}</span>
+                                    </div>
+                                    <button onClick={(e) => { e.stopPropagation(); if (editingEnclosureId) { setEditingEnclosureId(null); setHealthEncFormVisible(false); } else { setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [], purpose: 'health' }); setHealthEncFormVisible(v => !v); } }} className="flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-800 bg-white border border-orange-200 px-2 py-1 rounded-lg">
+                                        <Plus size={11} /> {healthEncFormVisible && !editingEnclosureId ? 'Cancel' : 'Add'}
+                                    </button>
+                                </div>
+                                {healthEncFormVisible && (
+                                    <div className="p-3 border-b bg-orange-50/40 space-y-2">
+                                        <div className="text-xs font-semibold text-orange-700 mb-1">{editingEnclosureId ? 'Edit Enclosure' : 'New Enclosure'}</div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Name *</label><input type="text" value={enclosureFormData.name} onChange={e => setEnclosureFormData(p => ({...p, name: e.target.value}))} placeholder="e.g. Quarantine Tank 1" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-orange-400 focus:border-orange-400" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Type</label><input type="text" value={enclosureFormData.enclosureType} onChange={e => setEnclosureFormData(p => ({...p, enclosureType: e.target.value}))} placeholder="e.g. Tank, Cage, Vivarium" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-orange-400 focus:border-orange-400" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Size</label><input type="text" value={enclosureFormData.size} onChange={e => setEnclosureFormData(p => ({...p, size: e.target.value}))} placeholder="e.g. 40 gallon" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-orange-400 focus:border-orange-400" /></div>
+                                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Notes</label><input type="text" value={enclosureFormData.notes} onChange={e => setEnclosureFormData(p => ({...p, notes: e.target.value}))} placeholder="Optional notes" className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-orange-400 focus:border-orange-400" /></div>
                                         </div>
-                                    )}
-                                    {treatmentList.length > 0 && (
-                                        <div>
-                                            <div className="flex items-center gap-2 px-1 pb-2">
-                                                <span className="w-2.5 h-2.5 rounded-full bg-red-400 inline-block" />
-                                                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Under Treatment ({treatmentList.length})</span>
-                                            </div>
+                                        <div className="flex justify-end gap-2">
+                                            <button onClick={() => { setHealthEncFormVisible(false); setEditingEnclosureId(null); }} className="text-xs px-3 py-1.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Cancel</button>
+                                            <button onClick={handleSaveEnclosure} disabled={enclosureSaving || !enclosureFormData.name.trim()} className="text-xs px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium disabled:opacity-50">{enclosureSaving ? 'Saving...' : (editingEnclosureId ? 'Save Changes' : 'Create Enclosure')}</button>
+                                        </div>
+                                    </div>
+                                )}
+                                <div className="p-2 space-y-2">
+                                    {healthEnclosures.length === 0
+                                        ? <div className="text-xs text-gray-400 text-center py-2">No enclosures yet. Click Add to create one.</div>
+                                        : healthEnclosures.map(enc => {
+                                            const occupants = (enclosureAnimalMap[enc._id] || []).filter(a => {
+                                                const isTreatment = a.isInTreatment && !a.isQuarantine;
+                                                return a.isQuarantine || isTreatment;
+                                            });
+                                            const isGrpCollapsed = collapsedMgmtGroups[`enc_${enc._id}`] || false;
+                                            return (
+                                                <div key={enc._id} className="border border-gray-200 rounded-lg overflow-hidden">
+                                                    <div className="relative flex items-center bg-orange-50/60 px-3 py-2 cursor-pointer" onClick={() => toggleGroup(`enc_${enc._id}`)}>
+                                                        <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
+                                                            {isGrpCollapsed ? <ChevronDown className="w-3.5 h-3.5 text-gray-400" /> : <ChevronUp className="w-3.5 h-3.5 text-gray-400" />}
+                                                        </div>
+                                                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                            <span className="font-semibold text-sm text-gray-800 truncate">{enc.name}</span>
+                                                            {enc.enclosureType && <span className="text-xs bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-full whitespace-nowrap shrink-0 hidden sm:inline">{enc.enclosureType}</span>}
+                                                            {enc.size && <span className="text-xs text-gray-400 whitespace-nowrap hidden sm:inline shrink-0">{enc.size}</span>}
+                                                            <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full shrink-0">{occupants.length}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1 ml-2 shrink-0" onClick={e => e.stopPropagation()}>
+                                                            <button onClick={() => { setEnclosureFormData({ name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: enc.cleaningTasks || [], purpose: enc.purpose || 'health' }); setEditingEnclosureId(enc._id); setHealthEncFormVisible(true); }} className="p-1 text-gray-400 hover:text-orange-600 rounded" title="Edit"><Edit size={13} /></button>
+                                                            <button onClick={() => handleDeleteEnclosure(enc._id)} className="p-1 text-gray-400 hover:text-red-500 rounded" title="Delete"><Trash2 size={13} /></button>
+                                                        </div>
+                                                    </div>
+                                                    {!isGrpCollapsed && enc.notes && (
+                                                        <div className="px-3 py-1.5 bg-gray-50 text-xs text-gray-500 border-b border-gray-100">{enc.notes}</div>
+                                                    )}
+                                                    {!isGrpCollapsed && (
+                                                        <div>
+                                                            {occupants.length === 0
+                                                                ? <div className="text-xs text-gray-400 text-center py-2">No animals assigned yet</div>
+                                                                : (
+                                                                    <div className="p-1.5 sm:p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                                                                        {occupants.map(a => {
+                                                                            const conds = parseArrayField(a.medicalConditions);
+                                                                            const meds = parseArrayField(a.medications);
+                                                                            const isTreatment = a.isInTreatment && !a.isQuarantine;
+                                                                            const hasHealthState = a.isQuarantine || isTreatment;
+                                                                            return (
+                                                                                <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
+                                                                                    hideControls hideBreedingLines
+                                                                                    cardActions={<>
+                                                                                        {/* State badge */}
+                                                                                        {hasHealthState ? (
+                                                                                            <div className={`text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full ${isTreatment ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                                                                {isTreatment ? 'Treatment' : 'Quarantine'}
+                                                                                            </div>
+                                                                                        ) : (
+                                                                                            <div className="text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full bg-gray-100 text-gray-500">
+                                                                                                No health status
+                                                                                            </div>
+                                                                                        )}
+                                                                                        {isTreatment && conds.length > 0 && <div className="text-[10px] text-gray-500 truncate w-full text-center">{conds.map(c => c.name || c).join(', ')}</div>}
+                                                                                        {isTreatment && meds.length > 0 && meds.slice(0, 2).map((m, i) => {
+                                                                                            const next = calcNextDose(m);
+                                                                                            const nextLabel = next ? formatNextDose(next) : null;
+                                                                                            const intervalLabel = m.intervalValue ? `every ${m.intervalValue}${m.intervalUnit === 'hours' ? 'h' : m.intervalUnit === 'days' ? 'd' : m.intervalUnit === 'weeks' ? 'w' : 'mo'}` : null;
+                                                                                            return (
+                                                                                                <div key={i} className="text-[10px] text-blue-600 w-full text-center leading-tight">
+                                                                                                    <span className="font-medium truncate block">{m.name || m}</span>
+                                                                                                    <span className="text-blue-400">{[m.dose, intervalLabel].filter(Boolean).join(' · ')}{nextLabel ? <span className="text-orange-400 ml-1">· {nextLabel}</span> : null}</span>
+                                                                                                </div>
+                                                                                            );
+                                                                                        })}
+                                                                                        {a.isQuarantine
+                                                                                            ? <button onClick={(e) => handleUnquarantine(e, a)} className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5"><LockOpen size={9} /> Release</button>
+                                                                                            : isTreatment && <button onClick={(e) => handleDischargeTreatment(e, a)} className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5"><LockOpen size={9} /> Discharge</button>
+                                                                                        }
+                                                                                        <button onClick={(e) => { e.stopPropagation(); handleAssignAnimalToEnclosure(a.id_public, ''); }}
+                                                                                            className="text-[10px] text-gray-400 hover:text-red-500 border border-gray-200 hover:border-red-200 rounded px-1.5 py-0.5 w-full">Remove from enclosure</button>
+                                                                                    </>}
+                                                                                />
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                )
+                                                            }
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })
+                                    }
+                                </div>
+                            </div>
+                            {(() => {
+                                const unassignedHealthAnimals = [...quarantineList, ...treatmentList];
+                                return unassignedHealthAnimals.length === 0 ? null : (
+                                    <div>
+                                        <div className="flex items-center gap-2 px-1 pb-2 cursor-pointer" onClick={() => toggleGroup('health_unassigned')}>
+                                            {collapsedMgmtGroups['health_unassigned'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
+                                            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Unassigned ({unassignedHealthAnimals.length})</span>
+                                        </div>
+                                        {!collapsedMgmtGroups['health_unassigned'] && (
                                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-                                                {treatmentList.map(a => {
+                                                {unassignedHealthAnimals.map(a => {
                                                     const conds = parseArrayField(a.medicalConditions);
                                                     const meds = parseArrayField(a.medications);
+                                                    const isTreatment = a.isInTreatment && !a.isQuarantine;
+                                                    const hasHealthState = a.isQuarantine || isTreatment;
                                                     return (
                                                         <AnimalCard key={a._id || a.id_public} animal={a} onEditAnimal={onEditAnimal} species={a.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned}
                                                             hideControls hideBreedingLines
                                                             cardActions={<>
-                                                                {conds.length > 0 && <div className="text-[10px] text-gray-500 truncate w-full text-center">{conds.map(c => c.name || c).join(', ')}</div>}
-                                                                {meds.length > 0 && <div className="text-[10px] text-blue-500 truncate w-full text-center">{meds.map(m => m.name || m).join(', ')}</div>}
+                                                                {hasHealthState ? (
+                                                                    <div className={`text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full ${isTreatment ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                                        {isTreatment ? 'Treatment' : 'Quarantine'}
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="text-[10px] text-center font-semibold px-1.5 py-0.5 rounded w-full bg-gray-100 text-gray-500">
+                                                                        No health status
+                                                                    </div>
+                                                                )}
+                                                                {isTreatment && conds.length > 0 && <div className="text-[10px] text-gray-500 truncate w-full text-center">{conds.map(c => c.name || c).join(', ')}</div>}
+                                                                {isTreatment && meds.length > 0 && meds.slice(0, 2).map((m, i) => {
+                                                                    const next = calcNextDose(m);
+                                                                    const nextLabel = next ? formatNextDose(next) : null;
+                                                                    const intervalLabel = m.intervalValue ? `every ${m.intervalValue}${m.intervalUnit === 'hours' ? 'h' : m.intervalUnit === 'days' ? 'd' : m.intervalUnit === 'weeks' ? 'w' : 'mo'}` : null;
+                                                                    return (
+                                                                        <div key={i} className="text-[10px] text-blue-600 w-full text-center leading-tight">
+                                                                            <span className="font-medium truncate block">{m.name || m}</span>
+                                                                            <span className="text-blue-400">{[m.dose, intervalLabel].filter(Boolean).join(' · ')}{nextLabel ? <span className="text-orange-400 ml-1">· {nextLabel}</span> : null}</span>
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                                {a.isQuarantine
+                                                                    ? <button onClick={(e) => handleUnquarantine(e, a)} className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5"><LockOpen size={9} /> Release</button>
+                                                                    : isTreatment && <button onClick={(e) => handleDischargeTreatment(e, a)} className="text-[10px] px-1.5 py-0.5 rounded bg-green-500 text-white hover:bg-green-600 w-full flex items-center justify-center gap-0.5"><LockOpen size={9} /> Discharge</button>
+                                                                }
+                                                                {assigningAnimalId === a.id_public
+                                                                    ? <select autoFocus defaultValue="" onChange={e => { if (e.target.value) handleAssignAnimalToEnclosure(a.id_public, e.target.value); setAssigningAnimalId(null); }} onBlur={() => setAssigningAnimalId(null)} className="text-[10px] border border-orange-300 rounded p-1 w-full">
+                                                                        <option value="" disabled>{healthEnclosures.length === 0 ? 'No enclosures yet' : 'Select enclosure...'}</option>
+                                                                        {healthEnclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}
+                                                                      </select>
+                                                                    : <button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }} className="text-[10px] text-orange-500 hover:text-orange-700 border border-orange-200 rounded px-1.5 py-0.5 w-full">Assign enclosure</button>
+                                                                }
                                                             </>}
                                                         />
                                                     );
                                                 })}
                                             </div>
-                                        </div>
-                                    )}
-                                </>
-                            }
+                                        )}
+                                    </div>
+                                );
+                            })()}
                         </div>
                     )}
-                </div>
+                </div>)}
 
-                {/* -- 5. FOR SALE / AVAILABLE -------------------------------- */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {/* -- 5. FOR SALE / AVAILABLE (moved to top-bar button) ------ */}
+                {!view && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="available"
                         icon={<ShoppingBag size={18} className="text-purple-600" />}
                         title="For Sale / Available" count={availableList.length} bgClass="bg-purple-50" />
@@ -3622,17 +3922,21 @@ const AnimalList = ({
                             }
                         </div>
                     )}
-                </div>
+                </div>)}
 
                 {/* -- 6. SCHEDULED CARE ------------------------------------- */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {(!view || view === 'feeding') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="scheduledcare"
                         icon={<ClipboardList size={18} className="text-teal-600" />}
-                        title="Scheduled Care" count={animalsWithAnimalTasks.reduce((s, a) => s + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0) > 0 ? `${animalsWithAnimalTasks.reduce((s, a) => s + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0)} due` : animalsWithAnimalTasks.length} bgClass="bg-teal-50" />
-                    {!collapsedMgmtSections['scheduledcare'] && (
+                        title="Scheduled Care" count={animalsWithAnimalTasks.reduce((s, a) => s + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0) > 0 ? `${animalsWithAnimalTasks.reduce((s, a) => s + (a.animalCareTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0)} due` : animalsWithAnimalTasks.length} bgClass="bg-teal-50" hideHeader={!!view} />
+                    {(!collapsedMgmtSections['scheduledcare'] || !!view) && (
                         <div className="divide-y divide-gray-100">
+                            {!!view && <div className="flex items-center gap-2 px-3 py-2 bg-teal-50 border-b border-teal-100">
+                                <ClipboardList size={15} className="text-teal-600 flex-shrink-0" />
+                                <span className="text-sm font-bold text-teal-700 uppercase tracking-wide">Scheduled Animal Care</span>
+                            </div>}
                             {animalsWithAnimalTasks.length === 0 ? (
-                                <div className="px-3 py-4 text-xs text-gray-400 text-center">No animal care tasks. Edit an animal and add tasks in the Animal Care tab.</div>
+                                <div className="px-3 py-4 text-xs text-gray-400 text-center">No animal care tasks. Edit an animal and add tasks in the Care tab.</div>
                             ) : animalsWithAnimalTasks.map(a => {
                                 const grpKey = `animalcare_${a.id_public}`;
                                 const isGrpCollapsed = collapsedMgmtGroups[grpKey] || false;
@@ -3673,12 +3977,6 @@ const AnimalList = ({
                                                                     className={`text-xs px-2 py-0.5 rounded font-medium border flex items-center gap-0.5 ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
                                                                     <Check size={10} /> Done
                                                                 </button>
-                                                                {mgmtUndoState?.key === `${a.id_public}-animalCareTasks-${idx}` && (
-                                                                    <button onClick={(e) => { e.stopPropagation(); mgmtUndoState.restore(); setMgmtUndo(null); }}
-                                                                        className="text-xs px-2 py-0.5 rounded font-medium border bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200 flex items-center gap-0.5">
-                                                                        ↩ Undo
-                                                                    </button>
-                                                                )}
                                                                 <button onClick={(e) => handleSkipAnimalCareTask(e, a, idx, 'animal')}
                                                                     className="text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200 flex items-center gap-0.5">
                                                                     <ChevronRight size={10} /> Skip
@@ -3694,20 +3992,27 @@ const AnimalList = ({
                             })}
                         </div>
                     )}
-                </div>
+                </div>)}
 
                 {/* -- 7. MAINTENANCE ----------------------------------------- */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                {(!view || view === 'feeding') && (<div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="maintenance"
                         icon={<Wrench size={18} className="text-amber-600" />}
-                        title="Maintenance" count={`${maintTotalDue} due`} bgClass="bg-amber-50" />
-                    {!collapsedMgmtSections['maintenance'] && (
+                        title="Maintenance" count={`${maintTotalDue} due`} bgClass="bg-amber-50" hideHeader={!!view} />
+                    {(!collapsedMgmtSections['maintenance'] || !!view) && (
                         <div className="divide-y divide-gray-100">
+                            {!!view && <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border-b border-amber-100">
+                                <Wrench size={15} className="text-amber-600 flex-shrink-0" />
+                                <span className="text-sm font-bold text-amber-700 uppercase tracking-wide">Maintenance</span>
+                            </div>}
                             {/* -- Housing Maintenance (animal enclosure care tasks + maintenance schedule) -- */}
                             <div>
-                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide">Housing Maintenance</div>
-                                {animalsWithEnclosureCareTasks.length === 0 ? (
-                                    <div className="px-3 py-4 text-xs text-gray-400 text-center">No housing maintenance tasks. Edit an animal and add tasks in the Housing tab.</div>
+                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide flex items-center gap-2 cursor-pointer" onClick={() => toggleGroup('maint_housing')}>
+                                    {collapsedMgmtGroups['maint_housing'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
+                                    Housing Maintenance
+                                </div>
+                                {!collapsedMgmtGroups['maint_housing'] && (animalsWithEnclosureCareTasks.length === 0 ? (
+                                    <div className="px-3 py-4 text-xs text-gray-400 text-center">No housing maintenance tasks. Edit an animal and add tasks in the Care tab.</div>
                                 ) : animalsWithEnclosureCareTasks.map(a => {
                                     const grpKey = `housingmaint_${a.id_public}`;
                                     const isGrpCollapsed = collapsedMgmtGroups[grpKey] || false;
@@ -3742,16 +4047,10 @@ const AnimalList = ({
                                                                 {a.lastMaintenanceDate
                                                                     ? <span className="flex items-center gap-0.5 text-green-600"><Check size={10} /> Last: {formatDateShort(a.lastMaintenanceDate)}</span>
                                                                     : <span className="flex items-center gap-0.5 text-orange-500"><X size={10} /> Never done</span>}
-                                                                <button onClick={(e) => handleMarkMaintDone(e, a)}
+                                                                <button onClick={(e) => { e.stopPropagation(); const today = new Date().toISOString().split('T')[0]; setAllAnimalsRaw(prev => prev.map(x => x.id_public === a.id_public ? { ...x, lastMaintenanceDate: today } : x)); axios.put(`${API_BASE_URL}/animals/${a.id_public}`, { lastMaintenanceDate: today }, { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } }).catch(err => { console.error('Mark maintenance done failed:', err); fetchAllAnimals(); }); }}
                                                                     className={`text-xs px-2 py-0.5 rounded font-medium border flex items-center gap-0.5 ${maintDue ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
                                                                     <Check size={10} /> Done
                                                                 </button>
-                                                                {mgmtUndoState?.key === `maint-${a.id_public}` && (
-                                                                    <button onClick={(e) => { e.stopPropagation(); mgmtUndoState.restore(); setMgmtUndo(null); }}
-                                                                        className="text-xs px-2 py-0.5 rounded font-medium border bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200 flex items-center gap-0.5">
-                                                                        ↩ Undo
-                                                                    </button>
-                                                                )}
                                                             </div>
                                                         </div>
                                                     )}
@@ -3776,12 +4075,6 @@ const AnimalList = ({
                                                                         className={`text-xs px-2 py-0.5 rounded font-medium border flex items-center gap-0.5 ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
                                                                         <Check size={10} /> Done
                                                                     </button>
-                                                                    {mgmtUndoState?.key === `${a.id_public}-careTasks-${idx}` && (
-                                                                        <button onClick={(e) => { e.stopPropagation(); mgmtUndoState.restore(); setMgmtUndo(null); }}
-                                                                            className="text-xs px-2 py-0.5 rounded font-medium border bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200 flex items-center gap-0.5">
-                                                                            ↩ Undo
-                                                                        </button>
-                                                                    )}
                                                                     <button onClick={(e) => handleSkipAnimalCareTask(e, a, idx, 'enclosure')}
                                                                         className="text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200 flex items-center gap-0.5">
                                                                         <ChevronRight size={10} /> Skip
@@ -3794,13 +4087,16 @@ const AnimalList = ({
                                             )}
                                         </div>
                                     );
-                                })}
+                                }))}
                             </div>
 
                             {/* -- Enclosure Cleaning -- */}
                             <div>
-                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide">Enclosure Cleaning</div>
-                                {enclosuresWithCleaningTasks.length === 0 ? (
+                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide flex items-center gap-2 cursor-pointer" onClick={() => toggleGroup('maint_cleaning')}>
+                                    {collapsedMgmtGroups['maint_cleaning'] ? <ChevronDown size={12} className="text-gray-400" /> : <ChevronUp size={12} className="text-gray-400" />}
+                                    Enclosure Cleaning
+                                </div>
+                                {!collapsedMgmtGroups['maint_cleaning'] && (enclosuresWithCleaningTasks.length === 0 ? (
                                     <div className="px-3 py-4 text-xs text-gray-400 text-center">No cleaning tasks defined. Edit an enclosure above and add tasks.</div>
                                 ) : enclosuresWithCleaningTasks.map(enc => {
                                     const grpKey = `maint_enc_${enc._id}`;
@@ -3836,12 +4132,6 @@ const AnimalList = ({
                                                                         className={`ml-1 text-xs px-2 py-0.5 rounded font-medium border flex items-center gap-0.5 ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
                                                                         <Check size={10} /> Done
                                                                     </button>
-                                                                    {mgmtUndoState?.key === `${enc._id}-${idx}` && (
-                                                                        <button onClick={(e) => { e.stopPropagation(); mgmtUndoState.restore(); setMgmtUndo(null); }}
-                                                                            className="ml-1 text-xs px-2 py-0.5 rounded font-medium border bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200 flex items-center gap-0.5">
-                                                                            ↩ Undo
-                                                                        </button>
-                                                                    )}
                                                                     <button onClick={(e) => handleSkipEnclosureTask(e, enc, idx)}
                                                                         className="ml-1 text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200 flex items-center gap-0.5">
                                                                         <ChevronRight size={10} /> Skip
@@ -3854,59 +4144,11 @@ const AnimalList = ({
                                             )}
                                         </div>
                                     );
-                                })}
-                            </div>
-
-                            {/* -- Supplies & Inventory -- */}
-                            <div>
-                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide flex items-center justify-between">
-                                    <span>Supplies &amp; Inventory</span>
-                                    {suppliesLoading
-                                        ? <Loader2 size={11} className="animate-spin text-gray-400" />
-                                        : <span className="text-gray-400 font-normal normal-case">
-                                            {supplies.length} item{supplies.length !== 1 ? 's' : ''}
-                                            {supplyReorderDue.length > 0 && <span className="ml-1 text-amber-600 font-semibold"><AlertCircle size={12} className="inline-block align-middle mr-0.5" /> {supplyReorderDue.length} to reorder</span>}
-                                          </span>
-                                    }
-                                </div>
-                                {supplies.length === 0 ? (
-                                    <div className="px-3 py-3 flex items-center justify-between">
-                                        <span className="text-xs text-gray-400">No items tracked yet.</span>
-                                        <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); setShowSuppliesScreen(true); }} className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-800 font-medium transition"><Package size={12} /> View All</button>
-                                    </div>
-                                ) : (
-                                    <div className="px-3 py-2 space-y-1.5">
-                                        {supplyReorderDue.length > 0 ? (
-                                            supplyReorderDue.map(s => {
-                                                const isDate = s.nextOrderDate && new Date(s.nextOrderDate) < todayMaint;
-                                                const isStock = s.reorderThreshold != null && s.currentStock <= s.reorderThreshold;
-                                                return (
-                                                    <div key={s._id} className="flex items-center justify-between gap-2 text-sm">
-                                                        <div className="flex items-center gap-2 min-w-0">
-                                                            <span className="w-2 h-2 rounded-full flex-shrink-0 bg-red-500" />
-                                                            <span className="text-gray-700 truncate">{s.name}</span>
-                                                            {s.unit && <span className="text-gray-400 text-xs">{s.unit}</span>}
-                                                        </div>
-                                                        <div className="flex items-center gap-1.5 shrink-0">
-                                                            {isStock && <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">Low stock: {s.currentStock}</span>}
-                                                            {isDate && <span className="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full">Order due</span>}
-                                                            <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); setShowSuppliesScreen(true); }} className="text-xs px-2 py-0.5 rounded font-medium border bg-amber-500 text-white hover:bg-amber-600 border-amber-500">Reorder</button>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })
-                                        ) : (
-                                            <p className="text-xs text-gray-400 py-1">{supplies.length} item{supplies.length !== 1 ? 's' : ''} tracked • all stocked</p>
-                                        )}
-                                        <div className="flex justify-end pt-0.5">
-                                            <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); setShowSuppliesScreen(true); }} className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-800 font-medium transition"><Package size={12} /> View All</button>
-                                        </div>
-                                    </div>
-                                )}
+                                }))}
                             </div>
                         </div>
                     )}
-                </div>
+                </div>)}
 
                 {/* -- 8. ACTIVITY LOG ? now a separate screen, accessed via button in header -- */}
 
@@ -4013,152 +4255,175 @@ const AnimalList = ({
     return (
         <div className="w-full max-w-7xl bg-white p-6 rounded-xl shadow-lg">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div className='flex items-center gap-2'>
-                    <ClipboardList size={20} className="sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
-                    {animalView === 'list' ? `My Animals (${displayedAnimalCount})` : animalView === 'collections' ? 'Collections' : showActivityLogScreen ? 'Activity Log' : showSuppliesScreen ? 'Supplies & Inventory' : 'Management View'}
-                    {isListLikeView && hasActiveFilters && (
-                        <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
-                            Filtered
+                <div className="flex items-center justify-between w-full sm:w-auto gap-2 min-w-0">
+                    <div className='flex items-center gap-2 min-w-0 flex-1'>
+                        <ClipboardList size={20} className="sm:w-6 sm:h-6 shrink-0 text-primary-dark" />
+                        <span className="truncate">
+                            {animalView === 'list' ? `My Animals (${displayedAnimalCount})` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : animalView === 'familyTree' ? 'Family Tree' : showActivityLogScreen ? 'Activity Log' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
                         </span>
-                    )}
-                    <button 
-                        onClick={handleRefresh}
-                        disabled={loading}
-                        className="text-gray-500 hover:text-primary transition disabled:opacity-50 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-medium"
-                        title="Refresh List"
-                    >
-                        {loading ? <Loader2 size={14} className="sm:w-4 sm:h-4 animate-spin" /> : <RefreshCw size={14} className="sm:w-4 sm:h-4" />}
-                        <span className="hidden sm:inline">Refresh</span>
-                    </button>
-                </div>
-                <div className="flex items-center gap-1 sm:gap-2 flex-wrap" data-tutorial-target="bulk-privacy-controls">
-                    {isListLikeView && (<>
-                    {isListLikeView && !showDuplicatesScreen && (
+                        {isListLikeView && hasActiveFilters && (
+                            <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full shrink-0">
+                                Filtered
+                            </span>
+                        )}
+                    </div>
+                    {/* Add Animal — icon-only on mobile, hidden on sm+ (desktop has full button in buttons row) */}
+                    {isListLikeView && !showArchiveScreen && (
                         <button
-                            onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(true); }}
-                            className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-amber-600 hover:text-amber-800 hover:bg-amber-50 border border-amber-200 rounded-lg transition font-medium"
-                            title="Find Duplicate Animals"
+                            onClick={() => navigate('/select-species')}
+                            className="sm:hidden bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 px-2.5 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 shrink-0 text-xs"
+                            data-tutorial-target="add-animal-btn"
+                            title="Add Animal"
                         >
-                            <Search size={14} className="sm:w-4 sm:h-4" />
-                            <span className="font-medium">Find Duplicates</span>
+                            <PlusCircle size={14} /> Add
                         </button>
                     )}
-                    {isListLikeView && (
-                    <button
-                        onClick={() => setShowArchiveScreen(true)}
-                        className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-purple-600 hover:text-purple-800 hover:bg-purple-50 border border-purple-200 rounded-lg transition font-medium"
-                        title="Archive"
-                    >
-                        <Archive size={14} className="sm:w-4 sm:h-4" />
-                        <span className="font-medium">Archive</span>
-                    </button>
-                    )}
-                    <button 
-                        onClick={() => navigate('/select-species')} 
-                        className="bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
-                        data-tutorial-target="add-animal-btn"
-                    >
-                        <PlusCircle size={14} className="sm:w-4 sm:h-4" /> <span>Add Animal</span>
-                    </button>
-
-                    </>)}
-                    {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
+                </div>
+                {/* Universal top-bar action buttons */}
+                <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap" data-tutorial-target="bulk-privacy-controls">
+                    {/* For Sale */}
+                    {!showArchiveScreen && !showDuplicatesScreen && (
                         <button
-                            onClick={() => {
-                                setActivityLogs([]);
-                                setLogsLoaded(false);
-                                setShowActivityLogScreen(true);
-                            }}
-                            className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 border border-indigo-200 rounded-lg transition font-medium"
-                            title="View Activity Log"
+                            onClick={() => { setShowForSaleScreen(v => !v); setShowActivityLogScreen(false); }}
+                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showForSaleScreen ? 'bg-purple-600 text-white border-purple-600' : 'text-purple-600 hover:text-purple-800 hover:bg-purple-50 border-purple-200'}`}
+                            title="For Sale / Available"
+                        >
+                            <ShoppingBag size={14} className="sm:w-4 sm:h-4" />
+                            <span className="font-medium hidden sm:inline">For Sale</span>
+                        </button>
+                    )}
+                    {/* Activity Log */}
+                    {!showArchiveScreen && !showDuplicatesScreen && (
+                        <button
+                            onClick={() => { setShowActivityLogScreen(v => { if (!v) { setActivityLogs([]); setLogsLoaded(false); } return !v; }); setShowForSaleScreen(false); }}
+                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showActivityLogScreen ? 'bg-indigo-600 text-white border-indigo-600' : 'text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 border-indigo-200'}`}
+                            title="Activity Log"
                         >
                             <ScrollText size={14} className="sm:w-4 sm:h-4" />
-                            <span className="font-medium">Activity Log</span>
+                            <span className="font-medium hidden sm:inline">Activity Log</span>
                         </button>
                     )}
-                    {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
+                    {/* Archive */}
+                    {!showDuplicatesScreen && (
                         <button
-                            onClick={() => { setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months' }); setEditingSupplyId(null); setSupplyFormVisible(false); setShowSuppliesScreen(true); }}
-                            className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 border border-emerald-200 rounded-lg transition font-medium"
-                            title="Supplies & Inventory"
-                        >
-                            <Package size={14} className="sm:w-4 sm:h-4" />
-                            <span className="font-medium">Supplies</span>
-                        </button>
-                    )}
-                    {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
-                        <button
-                            onClick={() => setShowArchiveScreen(true)}
-                            className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-purple-600 hover:text-purple-800 hover:bg-purple-50 border border-purple-200 rounded-lg transition font-medium"
+                            onClick={() => { setShowArchiveScreen(v => !v); setShowForSaleScreen(false); setShowActivityLogScreen(false); }}
+                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showArchiveScreen ? 'bg-purple-600 text-white border-purple-600' : 'text-purple-600 hover:text-purple-800 hover:bg-purple-50 border-purple-200'}`}
                             title="Archive"
                         >
                             <Archive size={14} className="sm:w-4 sm:h-4" />
-                            <span className="font-medium">Archive</span>
+                            <span className="font-medium hidden sm:inline">Archive</span>
                         </button>
                     )}
-                    {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
+                    {/* Find Duplicates */}
+                    {!showArchiveScreen && (
                         <button
-                            onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(true); }}
-                            className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-amber-600 hover:text-amber-800 hover:bg-amber-50 border border-amber-200 rounded-lg transition font-medium"
+                            onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(v => !v); setShowForSaleScreen(false); setShowActivityLogScreen(false); }}
+                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showDuplicatesScreen ? 'bg-amber-500 text-white border-amber-500' : 'text-amber-600 hover:text-amber-800 hover:bg-amber-50 border-amber-200'}`}
                             title="Find Duplicate Animals"
                         >
                             <Search size={14} className="sm:w-4 sm:h-4" />
-                            <span className="font-medium">Find Duplicates</span>
+                            <span className="font-medium hidden sm:inline">Find Duplicates</span>
                         </button>
                     )}
-                    {animalView === 'management' && !showArchiveScreen && !showActivityLogScreen && !showSuppliesScreen && !showDuplicatesScreen && (
-                        <button
-                            onClick={toggleMgmtAlerts}
-                            title={mgmtAlertsEnabled ? 'Management alerts on ? click to disable' : 'Management alerts off ? click to enable'}
-                            className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border shadow-sm transition-colors ${
-                                mgmtAlertsEnabled ? 'bg-orange-50 border-orange-300 text-orange-700 hover:bg-orange-100' : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50'
-                            }`}
-                        >
-                            <Bell size={14} className="sm:w-4 sm:h-4" />
-                            <span className="font-medium hidden sm:inline">Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
-                        </button>
-                    )}
-                    {animalView === 'management' && (
-                    <button 
-                        onClick={handleRefresh} 
+                    {/* Alerts On/Off */}
+                    <button
+                        onClick={toggleMgmtAlerts}
+                        title={mgmtAlertsEnabled ? 'Alerts on — click to disable' : 'Alerts off — click to enable'}
+                        className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${mgmtAlertsEnabled ? 'bg-orange-50 border-orange-300 text-orange-700 hover:bg-orange-100' : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50'}`}
+                    >
+                        <Bell size={14} className="sm:w-4 sm:h-4" />
+                        <span className="font-medium hidden sm:inline">Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
+                    </button>
+                    {/* Refresh */}
+                    <button
+                        onClick={handleRefresh}
                         disabled={loading}
                         className="text-gray-500 hover:text-primary transition disabled:opacity-50 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-medium"
-                        title="Refresh List"
+                        title="Refresh"
                     >
                         {loading ? <Loader2 size={14} className="sm:w-4 sm:h-4 animate-spin" /> : <RefreshCw size={14} className="sm:w-4 sm:h-4" />}
                         <span className="hidden sm:inline">Refresh</span>
                     </button>
+                    {/* Add Animal (only on list/collections views) — desktop only, mobile is in title row */}
+                    {isListLikeView && !showArchiveScreen && (
+                        <button
+                            onClick={() => navigate('/select-species')}
+                            className="hidden sm:flex bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
+                            data-tutorial-target="add-animal-btn"
+                        >
+                            <PlusCircle size={14} className="sm:w-4 sm:h-4" /> <span>Add Animal</span>
+                        </button>
+                    )}
+                    {/* Bulk privacy controls (list view only) */}
+                    {isListLikeView && !showArchiveScreen && !showDuplicatesScreen && (
+                        <></> /* placeholder — privacy buttons moved to filter bar below */
                     )}
                 </div>
             </h2>
 
-            {/* View Toggle: My Animals / Collections / Management */}
+            {/* View Toggle: My Animals / Collections / Enclosures / Reproduction / Health / Feeding & Care / Supplies */}
             {!showArchiveScreen && (
-            <div className="flex border border-gray-200 rounded-xl overflow-hidden shadow-sm mb-4">
-                {[{key:'list', icon:<ClipboardList size={16} className="shrink-0" />, label:'My Animals'},
-                  {key:'collections', icon:<FolderOpen size={16} className="shrink-0" />, label:'Collections'},
-                  {key:'management', icon:<LayoutGrid size={16} className="shrink-0" />, label:'Management'}
+            <div className="mb-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                <div className="grid grid-cols-4 sm:hidden">
+                                {[{key:'list', icon:<ClipboardList size={14} className="shrink-0" />, label:'My Animals'},
+                                    {key:'collections', icon:<FolderOpen size={14} className="shrink-0" />, label:'Collections'},
+                                    {key:'enclosures', icon:<Home size={14} className="shrink-0" />, label:'Enclosures'},
+                                    {key:'reproduction', icon:<Bean size={14} className="shrink-0" />, label:'Reproduction'},
+                                    {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
+                                    {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'},
+                                    {key:'supplies', icon:<Package size={14} className="shrink-0" />, label:'Supplies'},
+                                    {key:'familyTree', icon:<Network size={14} className="shrink-0" />, label:'Family Tree'},
                 ].map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
-                        className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 sm:py-2 px-2 sm:px-4 text-[10px] sm:text-sm font-semibold transition ${
+                                                className={`relative flex flex-col items-center justify-center gap-0.5 py-1.5 px-2 text-[10px] font-semibold transition ${
                             animalView === tab.key ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'
                         }`}
                     >
                         {tab.icon}
                         <span>{tab.label}</span>
                         <span
-                            onClick={e => { e.stopPropagation(); const next = tab.key; setDefaultAnimalView(next); try { localStorage.setItem('ct_default_animal_view', next); } catch {} if (authToken) { axios.patch(`${API_BASE_URL}/users/preferences`, { defaultAnimalView: next }, { headers: { Authorization: `Bearer ${authToken}` } }).catch(err => console.warn('[prefs]', err)); } }}
+                            onClick={e => { e.stopPropagation(); const next = tab.key; setDefaultAnimalView(next); try { localStorage.setItem('ct_default_animal_view', next); } catch {} }}
                             title={defaultAnimalView === tab.key ? 'Default view' : 'Set as default'}
                             className={`absolute top-1 right-1.5 transition-colors ${
                                 defaultAnimalView === tab.key ? 'text-red-500' : 'text-gray-300 hover:text-gray-500'
                             }`}
                         >
-                            <Pin size={13} className="sm:hidden" fill={defaultAnimalView === tab.key ? 'currentColor' : 'none'} strokeWidth={2} />
-                            <Pin size={18} className="hidden sm:block" fill={defaultAnimalView === tab.key ? 'currentColor' : 'none'} strokeWidth={2} />
+                            <Pin size={13} fill={defaultAnimalView === tab.key ? 'currentColor' : 'none'} strokeWidth={2} />
                         </span>
                     </button>
                 ))}
+                </div>
+                <div className="hidden sm:flex">
+                {[{key:'list', icon:<ClipboardList size={14} className="shrink-0" />, label:'My Animals'},
+                  {key:'collections', icon:<FolderOpen size={14} className="shrink-0" />, label:'Collections'},
+                  {key:'enclosures', icon:<Home size={14} className="shrink-0" />, label:'Enclosures'},
+                  {key:'reproduction', icon:<Bean size={14} className="shrink-0" />, label:'Reproduction'},
+                  {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
+                  {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'},
+                  {key:'supplies', icon:<Package size={14} className="shrink-0" />, label:'Supplies'},
+                  {key:'familyTree', icon:<Network size={14} className="shrink-0" />, label:'Family Tree'},
+                ].map(tab => (
+                    <button key={tab.key}
+                        onClick={() => setAnimalView(tab.key)}
+                        className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 py-2 px-4 text-sm font-semibold transition ${
+                            animalView === tab.key ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'
+                        }`}
+                    >
+                        {tab.icon}
+                        <span>{tab.label}</span>
+                        <span
+                            onClick={e => { e.stopPropagation(); const next = tab.key; setDefaultAnimalView(next); try { localStorage.setItem('ct_default_animal_view', next); } catch {} }}
+                            title={defaultAnimalView === tab.key ? 'Default view' : 'Set as default'}
+                            className={`absolute top-1 right-1.5 transition-colors ${
+                                defaultAnimalView === tab.key ? 'text-red-500' : 'text-gray-300 hover:text-gray-500'
+                            }`}
+                        >
+                            <Pin size={18} fill={defaultAnimalView === tab.key ? 'currentColor' : 'none'} strokeWidth={2} />
+                        </span>
+                    </button>
+                ))}
+                </div>
             </div>
             )}
 
@@ -4245,7 +4510,7 @@ const AnimalList = ({
                     </button>
                 </div>
 
-                {/* Search + Filters toggle + Add */}
+                {/* Search + Filters toggle + View mode toggle */}
                 <div className="flex items-center gap-2 p-2 sm:p-3 border-t border-gray-200">
                     <input
                         type="text"
@@ -4279,6 +4544,23 @@ const AnimalList = ({
                             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-pink-500 rounded-full" />
                         )}
                     </button>
+                    {/* Card / List view toggle */}
+                    <div className="flex border border-gray-200 rounded-lg overflow-hidden shrink-0">
+                        <button
+                            onClick={() => { setMyAnimalsViewMode('cards'); try { localStorage.setItem(`ct_my_animals_view_mode_${userKey}`, 'cards'); } catch {} }}
+                            className={`p-2 transition text-xs font-medium flex items-center gap-1 ${myAnimalsViewMode === 'cards' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                            title="Card view"
+                        >
+                            <LayoutGrid size={14} />
+                        </button>
+                        <button
+                            onClick={() => { setMyAnimalsViewMode('list'); try { localStorage.setItem(`ct_my_animals_view_mode_${userKey}`, 'list'); } catch {} }}
+                            className={`p-2 transition text-xs font-medium flex items-center gap-1 border-l border-gray-200 ${myAnimalsViewMode === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                            title="List view"
+                        >
+                            <ClipboardList size={14} />
+                        </button>
+                    </div>
                 </div>
 
                 {/* Collapsible filter panel */}
@@ -4451,9 +4733,7 @@ const AnimalList = ({
             </div>
             )}
 
-            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : animalView === 'management' ? (
-                showActivityLogScreen ? renderActivityLogScreen() : showSuppliesScreen ? renderSuppliesScreen() : renderManagementView()
-            ) : animalView === 'collections' ? renderCollectionsView() : (loading && animals.length === 0) ? (
+            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : showActivityLogScreen ? renderActivityLogScreen() : showForSaleScreen ? renderForSaleScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'supplies' ? renderSuppliesScreen() : animalView === 'collections' ? renderCollectionsView() : animalView === 'familyTree' ? <FamilyTreeView animals={familyTreeAnimals} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} prefetchedAncestorsBySpecies={familyTreePrefetchBySpecies} prefetchLoadingBySpecies={familyTreePrefetchLoadingBySpecies} onAncestorsResolved={handleFamilyTreeAncestorsResolved} /> : (loading && animals.length === 0) ? (
                 /* Skeleton grid ? only on very first load before any animals arrive */
                 <div className="space-y-3 sm:space-y-4">
                     {[0,1,2].map(gi => (
@@ -4476,6 +4756,105 @@ const AnimalList = ({
                     <Cat size={48} className="text-gray-400 mx-auto mb-4" />
                     <p className="text-xl font-semibold text-gray-600">No animals found.</p>
                     <p className="text-gray-500">Try adjusting your filters or add a new animal!</p>
+                </div>
+            ) : myAnimalsViewMode === 'list' ? (
+                /* Flat list / table view */
+                <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+                    {/* Column config panel — above the table */}
+                    {showListColumnConfig && (
+                        <div className="border-b border-gray-200 bg-gray-50 px-4 py-3 flex flex-wrap gap-3 items-center">
+                            <span className="text-xs font-semibold text-gray-600 mr-2">Show columns:</span>
+                            {Object.entries({ genderIcon: 'Gender', ctId: 'CT ID', identification: 'ID', name: 'Name', variety: 'Variety', birthdate: 'Birthdate', age: 'Age', status: 'Status', reproduction: 'Repro', sireName: 'Sire', damName: 'Dam' }).map(([key, label]) => (
+                                <label key={key} className="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={!!listViewColumns[key]}
+                                        onChange={() => setListViewColumns(prev => {
+                                            const next = { ...prev, [key]: !prev[key] };
+                                            try { localStorage.setItem(`ct_list_view_columns_${userKey}`, JSON.stringify(next)); } catch {}
+                                            return next;
+                                        })}
+                                        className="rounded"
+                                    />
+                                    {label}
+                                </label>
+                            ))}
+                        </div>
+                    )}
+                    <table className="min-w-full text-sm">
+                        <thead className="bg-gray-100 text-gray-600 text-xs uppercase">
+                            <tr>
+                                {listViewColumns.genderIcon && <th className="px-2 py-2 text-center w-8"></th>}
+                                {listViewColumns.ctId && <th className="px-3 py-2 text-left whitespace-nowrap">CT ID</th>}
+                                {listViewColumns.identification && <th className="px-3 py-2 text-left min-w-[8rem]">ID</th>}
+                                {listViewColumns.name && <th className="px-3 py-2 text-left">Name</th>}
+                                {listViewColumns.variety && <th className="px-3 py-2 text-left">Variety</th>}
+                                {listViewColumns.birthdate && <th className="px-3 py-2 text-left whitespace-nowrap">Birth Date</th>}
+                                {listViewColumns.age && <th className="px-3 py-2 text-left">Age</th>}
+                                {listViewColumns.status && <th className="px-3 py-2 text-left">Status</th>}
+                                {listViewColumns.reproduction && <th className="px-3 py-2 text-left w-px whitespace-nowrap">Repro</th>}
+                                {listViewColumns.sireName && <th className="px-3 py-2 text-left">Sire</th>}
+                                {listViewColumns.damName && <th className="px-3 py-2 text-left">Dam</th>}
+                                <th className="px-3 py-2 text-right">
+                                    <button
+                                        onClick={() => setShowListColumnConfig(v => !v)}
+                                        className="text-gray-400 hover:text-gray-700 transition"
+                                        title="Configure columns"
+                                    >
+                                        <SlidersHorizontal size={13} />
+                                    </button>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {(() => {
+                                const parentLookup = {};
+                                [...allAnimalsRaw, ...soldTransferredRaw].forEach(a => { if (a.id_public) parentLookup[a.id_public] = a; });
+                                Object.assign(parentLookup, externalParentsCache);
+                                const resolveParent = (id) => {
+                                    if (!id) return '—';
+                                    const a = parentLookup[id];
+                                    if (a) return [a.prefix, a.name, a.suffix].filter(Boolean).join(' ') || id;
+                                    return id; // show raw ID as fallback for truly external animals
+                                };
+                                return speciesNames.flatMap(species => (groupedAnimals[species] || []).map(animal => {
+                                const sireId = animal.fatherId_public || animal.sireId_public;
+                                const damId = animal.motherId_public || animal.damId_public;
+                                const sireName = resolveParent(sireId);
+                                const damName = resolveParent(damId);
+                                const birthDateObj = animal.birthDate ? new Date(animal.birthDate) : null;
+                                const ageStr = birthDateObj ? (() => {
+                                    const birth = birthDateObj;
+                                    const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
+                                    let years = endDate.getFullYear() - birth.getFullYear();
+                                    let months = endDate.getMonth() - birth.getMonth();
+                                    let days = endDate.getDate() - birth.getDate();
+                                    if (days < 0) { months--; days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
+                                    if (months < 0) { years--; months += 12; }
+                                    return years > 0 ? `${years}y ${months}m ${days}d` : (months > 0 ? `${months}m ${days}d` : `${days}d`);
+                                })() : '—';
+                                const varietyStr = [animal.color, animal.coatPattern, animal.coat, animal.earset, animal.phenotype, animal.morph, animal.markings, animal.eyeColor, animal.nailColor, animal.size].filter(Boolean).join(' ') || '—';
+                                const reproBadges = [animal.isQuarantine && { label: 'Quarantine', cls: 'bg-red-100 text-red-700' }, animal.isInMating && { label: 'Mating', cls: 'bg-yellow-100 text-yellow-700' }, animal.isPregnant && { label: 'Pregnant', cls: 'bg-pink-100 text-pink-700' }, animal.isNursing && { label: 'Nursing', cls: 'bg-purple-100 text-purple-700' }].filter(Boolean);
+                                return (
+                                    <tr key={animal.id_public || animal._id} className="hover:bg-gray-50 cursor-pointer" onClick={() => onViewAnimal(animal)}>
+                                        {listViewColumns.genderIcon && <td className="px-2 py-1.5 text-center">{animal.gender === 'Male' ? <Mars className="w-4 h-4 mx-auto" strokeWidth={2.5} style={{color:'var(--color-primary,#9ED4E0)'}} /> : animal.gender === 'Female' ? <Venus className="w-4 h-4 mx-auto" strokeWidth={2.5} style={{color:'var(--color-accent,#D27096)'}} /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-4 h-4 mx-auto text-purple-500" strokeWidth={2.5} /> : <Circle className="w-4 h-4 mx-auto text-gray-400" strokeWidth={2.5} />}</td>}
+                                        {listViewColumns.ctId && <td className="px-3 py-1.5 font-mono text-xs text-gray-500">{animal.id_public || '—'}</td>}
+                                        {listViewColumns.identification && <td className="px-3 py-1.5 text-gray-600 text-xs min-w-[8rem]">{animal.breederAssignedId || '—'}</td>}
+                                        {listViewColumns.name && <td className="px-3 py-1.5 font-medium text-gray-800">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}</td>}
+                                        {listViewColumns.variety && <td className="px-3 py-1.5 text-gray-600">{varietyStr}</td>}
+                                        {listViewColumns.birthdate && <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">{birthDateObj ? birthDateObj.toLocaleDateString() : '—'}</td>}
+                                        {listViewColumns.age && <td className="px-3 py-1.5 text-gray-600 whitespace-nowrap">{ageStr}</td>}
+                                        {listViewColumns.status && <td className="px-3 py-1.5 text-gray-600 text-xs">{animal.status || '—'}</td>}
+                                        {listViewColumns.reproduction && <td className="px-3 py-1.5 w-px whitespace-nowrap"><div className="flex gap-1">{reproBadges.length ? reproBadges.map(b => <span key={b.label} className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${b.cls}`}>{b.label}</span>) : <span className="text-gray-400">—</span>}</div></td>}
+                                        {listViewColumns.sireName && <td className="px-3 py-1.5 text-gray-500 text-xs">{sireName}</td>}
+                                        {listViewColumns.damName && <td className="px-3 py-1.5 text-gray-500 text-xs">{damName}</td>}
+                                        <td />
+                                    </tr>
+                                );
+                            }));
+                            })()}
+                        </tbody>
+                    </table>
                 </div>
             ) : (
                 <div className="space-y-3 sm:space-y-4">
@@ -4580,14 +4959,6 @@ const AnimalList = ({
                                     )}
                                     {!isBulkMode && (
                                         <>
-                                            <button
-                                                onClick={() => navigate(`/animal-tree/${encodeURIComponent(species)}`)}
-                                                className="p-1 sm:p-2 hover:bg-gray-200 rounded-lg transition"
-                                                title="Animal Tree"
-                                                data-tutorial-target="animal-tree-btn"
-                                            >
-                                                <Network className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-blue-500" />
-                                            </button>
                                             <button
                                                 onClick={() => toggleBulkPrivacy(species, true)}
                                                 className="p-1 sm:p-2 hover:bg-gray-200 rounded-lg transition"

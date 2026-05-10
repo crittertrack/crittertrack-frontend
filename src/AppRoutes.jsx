@@ -5,7 +5,6 @@ import { Route, Routes, useNavigate } from 'react-router-dom';
 const AnimalList = lazy(() => import('./components/AnimalList'));
 const DonationView = lazy(() => import('./components/Donation/DonationView'));
 const Marketplace = lazy(() => import('./components/Marketplace'));
-const AnimalTree = lazy(() => import('./components/AnimalTree'));
 const ProfileView = lazy(() => import('./components/Profile/ProfileView'));
 const CommunityPage = lazy(() => import('./components/Community/CommunityPage'));
 const BreederDirectory = lazy(() => import('./components/PublicProfile/BreederDirectory'));
@@ -208,17 +207,6 @@ export function AppRoutes({
             window.location.href = `/user/${userId}`;
           }}
           onStartConversation={handleStartConversation}
-        />
-      } />
-
-      {/* Animal Tree */}
-      <Route path="/animal-tree/:species" element={
-        <AnimalTree
-          authToken={authToken}
-          userProfile={userProfile}
-          showModalMessage={showModalMessage}
-          onViewAnimal={handleViewAnimal}
-          onBack={() => navigate('/')}
         />
       } />
 

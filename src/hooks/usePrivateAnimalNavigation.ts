@@ -48,20 +48,24 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
      * Handles fetching latest data and setting up return paths
      */
     const handleViewAnimal = useCallback(
-        (animal) => {
+        (animal, targetTab = 1, returnTab = null) => {
             if (!animal) return;
 
             // Add current animal to history before viewing new one
             if (animalToView) {
-                setAnimalViewHistory(prev => [...prev, animalToView]);
+                setAnimalViewHistory(prev => [...prev, {
+                    animal: animalToView,
+                    tab: Number.isFinite(returnTab) ? Number(returnTab) : privateAnimalInitialTab,
+                }]);
             }
 
             // Set the new animal to view
+            setPrivateAnimalInitialTab(Number.isFinite(targetTab) ? Number(targetTab) : 1);
             setAnimalToView(animal);
             setAnimalToEdit(null);
             setViewAnimalBreederInfo(null);
         },
-        [animalToView]
+        [animalToView, privateAnimalInitialTab]
     );
 
     /**
@@ -73,9 +77,20 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
         // When editing from a nested detail context (for example offspring cards),
         // close the view overlay and leave only the edit modal visible.
         setAnimalToView(null);
-        setAnimalToEdit(animal);
+        setAnimalToEdit(animal); // set immediately so form opens without delay
         setViewAnimalBreederInfo(null);
-    }, []);
+
+        // Fetch full record in background (list uses slim projection which omits many fields)
+        if (animal.id_public && authToken) {
+            axios.get(`${API_BASE_URL}/animals/${animal.id_public}`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            }).then(res => {
+                setAnimalToEdit(res.data);
+            }).catch(err => {
+                console.warn('[handleEditAnimal] Failed to fetch full animal data:', err.message);
+            });
+        }
+    }, [authToken, API_BASE_URL]);
 
     /**
      * Close the edit overlay and return to the currently edited animal
@@ -98,15 +113,17 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
         if (animalViewHistory.length > 0) {
             // Pop from history
             const newHistory = [...animalViewHistory];
-            const previousAnimal = newHistory.pop();
+            const previousEntry = newHistory.pop();
             setAnimalViewHistory(newHistory);
-            setAnimalToView(previousAnimal);
+            setAnimalToView(previousEntry?.animal || previousEntry || null);
+            setPrivateAnimalInitialTab(Number.isFinite(previousEntry?.tab) ? Number(previousEntry.tab) : 1);
             setSireData(null);
             setDamData(null);
             setOffspringData([]);
         } else {
             // No history - close view
             setAnimalToView(null);
+            setPrivateAnimalInitialTab(1);
             setSireData(null);
             setDamData(null);
             setOffspringData([]);
@@ -120,6 +137,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
         setAnimalToView(null);
         setAnimalToEdit(null);
         setAnimalViewHistory([]);
+        setPrivateAnimalInitialTab(1);
         setSireData(null);
         setDamData(null);
         setOffspringData([]);
@@ -354,8 +372,28 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
     useEffect(() => {
         if (!animalToView) {
             setAnimalViewHistory([]);
+            lastFetchedIdRef.current = null;
         }
     }, [animalToView]);
+
+    /**
+     * Fetch full animal data whenever a new animal is opened.
+     * The list uses a slim projection, so we always refresh with the complete record.
+     */
+    const lastFetchedIdRef = useRef<string | null>(null);
+    useEffect(() => {
+        if (!animalToView?.id_public || !authToken) return;
+        // Skip if we already fetched full data for this animal id
+        if (lastFetchedIdRef.current === animalToView.id_public) return;
+        lastFetchedIdRef.current = animalToView.id_public;
+        axios.get(`${API_BASE_URL}/animals/${animalToView.id_public}`, {
+            headers: { Authorization: `Bearer ${authToken}` }
+        }).then(res => {
+            setAnimalToView(res.data);
+        }).catch(err => {
+            console.warn('[usePrivateAnimalNavigation] Failed to fetch full animal data:', err.message);
+        });
+    }, [animalToView?.id_public, authToken, API_BASE_URL]);
 
     /**
      * Fetch pedigree data when viewing an animal

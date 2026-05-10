@@ -9,7 +9,7 @@ import { useDetailFieldTemplate, parseJsonField, DetailJsonList, ViewOnlyParentC
 import { formatDate, formatDateShort, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/locationUtils';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
-import { PedigreeChart } from '../AnimalForm';
+import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';
 import { QRModal } from '../PublicProfile/PublicProfileView';
 import ReportButton from '../ReportButton';
 const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BASE_URL, onViewProfile, onViewAnimal, authToken, setModCurrentContext, setShowImageModal, setEnlargedImageUrl, initialTab = 1 }) => {
@@ -41,6 +41,22 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
     const chartRef = useRef(null);
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
     const [betaPedigreeView, setBetaPedigreeView] = useState('vertical');
+    const [showHorizCert, setShowHorizCert] = useState(false);
+    const [showVertCert, setShowVertCert] = useState(false);
+
+    // Warm pedigree cache shortly after opening details so Pedigree tab opens faster.
+    useEffect(() => {
+        if (!animal?.id_public) return;
+        const timer = setTimeout(() => {
+            prefetchPedigreeTree({
+                animalId: animal.id_public,
+                API_BASE_URL,
+                authToken,
+            }).catch(() => {});
+        }, 700);
+        return () => clearTimeout(timer);
+    }, [animal?.id_public, API_BASE_URL, authToken]);
+
     useEffect(() => {
         if (detailViewTab !== 5) return;
         let cancelled = false;
@@ -409,7 +425,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                             >
                                 <ArrowLeft size={16} className="mr-1" /> Back
                             </button>
-                            <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={24} />
                             </button>
                         </div>
@@ -477,7 +493,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                 authToken={authToken}
                                 tooltipText="Report this animal"
                             />
-                            <button onClick={onCloseAll || onClose} className="text-gray-500 hover:text-gray-800">
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={28} />
                             </button>
                         </div>
@@ -2081,48 +2097,42 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                     };
                     return (
                         <div className="space-y-6">
-                            <div className="flex items-center justify-between flex-wrap gap-2">
-                                <div className="flex items-center gap-2">
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-center gap-2 flex-wrap">
+                                    <button
+                                        onClick={() => setShowHorizCert(true)}
+                                        className="px-4 py-2 text-xs sm:text-sm rounded-lg bg-primary text-black border border-primary/40 hover:bg-primary/90 transition flex items-center gap-1.5 font-semibold shadow-sm"
+                                    >
+                                        <ScrollText size={14} /> Open Horizontal Certificate
+                                    </button>
+                                    <button
+                                        onClick={() => setShowVertCert(true)}
+                                        className="px-4 py-2 text-xs sm:text-sm rounded-lg bg-accent hover:bg-accent/90 text-white border border-accent/40 transition flex items-center gap-1.5 font-semibold shadow-sm"
+                                    >
+                                        <ScrollText size={14} /> Open Vertical Certificate
+                                    </button>
+                                </div>
+                                <div className="flex items-center justify-center gap-2">
                                     <Dna size={18} className="text-orange-500" />
-                                    <h3 className="text-base font-semibold text-gray-700">Pedigree</h3>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <div className="flex rounded border border-gray-300 overflow-hidden text-xs">
-                                        <button onClick={() => setBetaPedigreeView('vertical')} className={`px-2 py-1 transition-colors ${betaPedigreeView === 'vertical' ? 'bg-gray-200 font-semibold text-gray-800' : 'text-gray-400 hover:bg-gray-100'}`}>Vertical</button>
-                                        <button onClick={() => setBetaPedigreeView('chart')} className={`px-2 py-1 transition-colors ${betaPedigreeView === 'chart' ? 'bg-primary font-semibold text-black' : 'text-gray-400 hover:bg-gray-100'}`}>Chart</button>
-                                    </div>
-                                    {hasAnyData && betaPedigreeView === 'vertical' && (
-                                        <>
-                                        <button onClick={handleDownloadMPPDF} disabled={mpDownloading}
-                                            className="px-3 py-1.5 text-sm bg-primary hover:bg-primary/90 text-black rounded-lg border border-primary/40 transition flex items-center gap-1.5 disabled:opacity-60 font-semibold">
-                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Download size={14} /> Save PDF</>}
-                                        </button>
-                                        <button onClick={handleDownloadMP} disabled={mpDownloading}
-                                            className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
-                                            {mpDownloading ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Images size={14} /> Save Image</>}
-                                        </button>
-                                        </>
-                                    )}
-                                    {betaPedigreeView === 'chart' && (
-                                        <>
-                                        <button onClick={() => chartRef.current?.downloadPDF()} disabled={!chartRef.current?.imagesLoaded || chartRef.current?.isSaving}
-                                            className="px-3 py-1.5 text-sm bg-primary hover:bg-primary/90 text-black rounded-lg border border-primary/40 transition flex items-center gap-1.5 disabled:opacity-60 font-semibold">
-                                            <Download size={14} /> Save PDF
-                                        </button>
-                                        <button onClick={() => chartRef.current?.downloadImage()} disabled={!chartRef.current?.imagesLoaded || chartRef.current?.isSaving}
-                                            className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 transition flex items-center gap-1.5 disabled:opacity-60">
-                                            <Images size={14} /> Save Image
-                                        </button>
-                                        </>
-                                    )}
+                                    <h3 className="text-base font-semibold text-gray-700">Full Family Tree</h3>
                                 </div>
                             </div>
-                            <p className="text-xs text-gray-400 -mt-3">This pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations (shown on Overview tab). Manual entries are for display/reference only and do not affect COI.</p>
-                            <div className={betaPedigreeView === 'chart' ? '' : 'hidden'}>
-                                <PedigreeChart ref={chartRef} inline animalId={animal.id_public} animalData={animal} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => {}} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />
+                            <p className="text-xs text-gray-400 -mt-3">You are viewing the full family tree here. Use the certificate buttons to open the horizontal or vertical certificate modal, where you can save/download as PDF or image. This pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations (shown on Overview tab). Manual entries are for display/reference only and do not affect COI.</p>
+                            {showHorizCert && <PedigreeChart animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => setShowHorizCert(false)} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />}
+                                {showVertCert && <PedigreeChart vertical animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => setShowVertCert(false)} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />}
+                            <div ref={mpTreeRef} className="bg-white p-2 rounded-xl">
+                                <PedigreeChart
+                                    inline
+                                    inlineGenerations={3}
+                                    animalId={animal.id_public}
+                                    animalData={animal}
+                                    API_BASE_URL={API_BASE_URL}
+                                    authToken={authToken}
+                                    manualData={mpEnrichedData}
+                                    onViewAnimal={onViewAnimal}
+                                />
                             </div>
-                            <div className={betaPedigreeView === 'vertical' ? '' : 'hidden'}>
-                            <div ref={mpTreeRef} className="space-y-6 bg-white p-4 rounded-xl">
+                            <div className="hidden">
                                 {(() => {
                                     const subjectVariety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => animal[k]).filter(Boolean).join(' ');
                                     const subjectImgUrl = animal.imageUrl || animal.photoUrl || null;
@@ -2207,7 +2217,6 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                         {renderSlot('damDamDam', 'Great-Granddam')}
                                     </div>
                                 </div>
-                            </div>
                             </div>
                         </div>
                     );
