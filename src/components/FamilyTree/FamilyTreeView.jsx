@@ -948,6 +948,20 @@ const FamilyTreeView = ({
         return out;
     }, [highlightAnchorId, highlightMode, graphData]);
 
+    const directDescendantPairKeySet = useMemo(() => {
+        const out = new Set();
+        if (!highlightAnchorId || highlightMode !== 'descendants') return out;
+
+        Object.entries(graphData.parentLinksByChild || {}).forEach(([childId, parentIds]) => {
+            if (!Array.isArray(parentIds) || parentIds.length < 2) return;
+            if (!descendantSeedSet.has(childId)) return;
+            if (!parentIds.some(pid => descendantSeedSet.has(pid))) return;
+            out.add(parentIds.slice().sort().join('|'));
+        });
+
+        return out;
+    }, [descendantSeedSet, highlightAnchorId, highlightMode, graphData.parentLinksByChild]);
+
     const highlightedSet = useMemo(() => {
         if (!highlightAnchorId || highlightMode === 'none') return new Set();
         const out = new Set([highlightAnchorId]);
@@ -955,15 +969,6 @@ const FamilyTreeView = ({
             ? descendantSeedSet
             : getAncestors(highlightAnchorId);
         rel.forEach(id => out.add(id));
-
-        if (highlightMode === 'descendants') {
-            // Keep partners of highlighted descendants (and focus animal) active.
-            Object.values(graphData.parentLinksByChild || {}).forEach(parentIds => {
-                if (!Array.isArray(parentIds) || !parentIds.length) return;
-                if (!parentIds.some(pid => descendantSeedSet.has(pid))) return;
-                parentIds.forEach(pid => out.add(pid));
-            });
-        }
 
         return out;
     }, [descendantSeedSet, highlightAnchorId, highlightMode, graphData]);
@@ -1423,13 +1428,15 @@ const FamilyTreeView = ({
                                 const bothPairParentsHighlighted = Array.isArray(seg.pairParentIds)
                                     && seg.pairParentIds.length === 2
                                     && seg.pairParentIds.every(pid => highlightedSet.has(pid));
-                                const pairTouchesDescendantSeed = Array.isArray(seg.pairParentIds)
-                                    && seg.pairParentIds.some(pid => descendantSeedSet.has(pid));
+                                const pairKey = Array.isArray(seg.pairParentIds)
+                                    ? seg.pairParentIds.slice().sort().join('|')
+                                    : '';
+                                const isDirectDescendantPair = Boolean(pairKey) && directDescendantPairKeySet.has(pairKey);
                                 const active = hasHighlightSelection && (
                                     isPairLine
                                         ? (highlightMode === 'ancestors'
                                             ? bothPairParentsHighlighted
-                                            : (allowPairLineHighlight && pairTouchesDescendantSeed && relatedHighlightCount >= 1))
+                                            : (allowPairLineHighlight && isDirectDescendantPair && relatedHighlightCount >= 1))
                                         : relatedHighlightCount >= 2
                                 );
 
