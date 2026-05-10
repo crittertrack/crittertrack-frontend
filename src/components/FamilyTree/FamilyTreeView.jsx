@@ -750,22 +750,20 @@ const FamilyTreeView = ({
                     const minX = Math.min(...group.children.map(c => c.x));
                     const maxX = Math.max(...group.children.map(c => c.x));
                     const groupY = group.laneY;
-                    const groupAnchorX = minX - 8 - (groupIndex % 2) * 8;
 
                     if (group.children.length > 1) {
                         edgeSegments.push({
                             id: `seg-${pairKey}-single-offspring-network-${groupIndex}`,
-                            d: `M ${p.x} ${p.yBottom} L ${p.x} ${groupY} L ${groupAnchorX} ${groupY} L ${maxX} ${groupY}`,
+                            d: `M ${p.x} ${p.yBottom} L ${p.x} ${groupY} L ${minX} ${groupY} L ${maxX} ${groupY}`,
                             relatedIds: [p.id, ...group.children.map(c => c.id)],
                             color: pairColor,
                         });
                     } else {
                         const onlyChild = group.children[0];
                         const elbowY = groupY;
-                        const elbowX = onlyChild.x - 10 - (groupIndex % 2) * 8;
                         edgeSegments.push({
                             id: `seg-${pairKey}-single-parent-trunk-${groupIndex}`,
-                            d: `M ${p.x} ${p.yBottom} L ${p.x} ${elbowY} L ${elbowX} ${elbowY} L ${onlyChild.x} ${elbowY}`,
+                            d: `M ${p.x} ${p.yBottom} L ${p.x} ${elbowY} L ${onlyChild.x} ${elbowY}`,
                             relatedIds: [p.id, onlyChild.id],
                             color: pairColor,
                         });
@@ -785,7 +783,7 @@ const FamilyTreeView = ({
 
             const leftParent = parents[0];
             const rightParent = parents[parents.length - 1];
-            const partnerLineY = (leftParent.yMid + rightParent.yMid) / 2 + laneOffset;
+            const partnerLineY = (leftParent.yMid + rightParent.yMid) / 2;
             const partnerLeftX = leftParent.rightX;
             const partnerRightX = rightParent.leftX;
             const trunkX = (partnerLeftX + partnerRightX) / 2;
@@ -801,7 +799,7 @@ const FamilyTreeView = ({
                 const minX = Math.min(...group.children.map(c => c.x));
                 const maxX = Math.max(...group.children.map(c => c.x));
                 const groupY = group.laneY;
-                const groupTrunkX = trunkX + ((groupIndex % 2 === 0 ? -1 : 1) * 5 * Math.ceil((groupIndex + 1) / 2));
+                const groupTrunkX = trunkX;
 
                 if (group.children.length > 1) {
                     edgeSegments.push({
@@ -813,10 +811,9 @@ const FamilyTreeView = ({
                 } else {
                     const onlyChild = group.children[0];
                     const elbowY = groupY;
-                    const elbowX = onlyChild.x + ((groupIndex % 2 === 0 ? -1 : 1) * (6 + groupIndex * 2));
                     edgeSegments.push({
                         id: `seg-${pairKey}-trunk-${groupIndex}`,
-                        d: `M ${groupTrunkX} ${partnerLineY} L ${groupTrunkX} ${elbowY} L ${elbowX} ${elbowY} L ${onlyChild.x} ${elbowY}`,
+                        d: `M ${groupTrunkX} ${partnerLineY} L ${groupTrunkX} ${elbowY} L ${onlyChild.x} ${elbowY}`,
                         relatedIds: [leftParent.id, rightParent.id, onlyChild.id],
                         color: pairColor,
                     });
