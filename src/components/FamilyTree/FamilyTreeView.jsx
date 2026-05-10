@@ -64,6 +64,25 @@ const keepAwayFromNode = (value, nodeTop, nodeBottom, gap = 6) => {
     return value;
 };
 
+const VARIETY_KEYS = [
+    'color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph',
+    'markings', 'eyeColor', 'nailColor', 'carrierTraits', 'size',
+];
+
+const getVarietyLabel = (animal = {}) => {
+    const direct = String(animal?.variety || animal?.varietyName || '').trim();
+    if (direct) return direct;
+
+    const derived = VARIETY_KEYS
+        .map((key) => animal?.[key])
+        .flatMap((value) => (Array.isArray(value) ? value : [value]))
+        .map((value) => String(value || '').trim())
+        .filter(Boolean)
+        .join(' ');
+
+    return derived || 'Unknown variety';
+};
+
 const FamilyTreeView = ({
     animals = [],
     loading = false,
@@ -355,7 +374,10 @@ const FamilyTreeView = ({
         const noPedigreeSet = new Set(noPedigreeAnimals.map(a => a.id_public));
         const accountIdSet = new Set(speciesAnimals.map(a => a.id_public));
         const activeOwnedAnimals = speciesAnimals
-            .filter(a => !noPedigreeSet.has(a.id_public))
+            .filter(a => {
+                const owned = a?.isOwned === true || a?.isOwned === 'true' || a?.isOwned === 1;
+                return owned && !a?.isViewOnly && !noPedigreeSet.has(a.id_public);
+            })
             .sort((a, b) => {
                 const nameA = [a?.prefix, a?.name, a?.suffix].filter(Boolean).join(' ').toLowerCase();
                 const nameB = [b?.prefix, b?.name, b?.suffix].filter(Boolean).join(' ').toLowerCase();
@@ -1333,7 +1355,7 @@ const FamilyTreeView = ({
                                         title="Open animal details"
                                     >
                                         <p className="text-xs font-semibold text-gray-800 truncate">{[a.prefix, a.name, a.suffix].filter(Boolean).join(' ') || 'Unnamed'}</p>
-                                        <p className="text-[11px] text-gray-500 truncate">{a.variety || 'Unknown variety'}{a.birthDate ? ` • ${formatDate(a.birthDate)}` : ''}</p>
+                                        <p className="text-[11px] text-gray-500 truncate">{getVarietyLabel(a)}{a.birthDate ? ` • ${formatDate(a.birthDate)}` : ''}</p>
                                         <p className="text-[10px] text-gray-400 font-mono truncate">{a.id_public}</p>
                                     </button>
                                 ))}
@@ -1388,7 +1410,7 @@ const FamilyTreeView = ({
                                         title="Focus this animal in the tree"
                                     >
                                         <p className="text-xs font-semibold text-gray-800 truncate">{[a.prefix, a.name, a.suffix].filter(Boolean).join(' ') || 'Unnamed'}</p>
-                                        <p className="text-[11px] text-gray-500 truncate">{a.variety || 'Unknown variety'}{a.birthDate ? ` • ${formatDate(a.birthDate)}` : ''}</p>
+                                        <p className="text-[11px] text-gray-500 truncate">{getVarietyLabel(a)}{a.birthDate ? ` • ${formatDate(a.birthDate)}` : ''}</p>
                                         <p className="text-[10px] text-gray-400 font-mono truncate">{a.id_public}</p>
                                     </button>
                                 ))}
