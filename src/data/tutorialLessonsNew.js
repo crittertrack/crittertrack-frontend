@@ -905,7 +905,7 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 2,
-        title: 'Remarks & Notes',
+        title: 'Notes',
         content: 'Add any observations or notes about your animal that don\'t fit in other sections. This might include personality quirks, notable achievements, breeding notes, or any other relevant information.',
         tips: [
           'Free-form text field',
