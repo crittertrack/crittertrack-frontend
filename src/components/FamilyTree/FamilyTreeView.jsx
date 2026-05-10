@@ -34,7 +34,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
     const [showNoPedigreePanel, setShowNoPedigreePanel] = useState(true);
     const [hoveredAnimal, setHoveredAnimal] = useState(null);
     const [highlightMode, setHighlightMode] = useState('ancestors');
-    const [connectorStyle, setConnectorStyle] = useState('diagonal');
+    const [connectorStyle, setConnectorStyle] = useState('orthogonal');
     const [externalAncestorsById, setExternalAncestorsById] = useState({});
     const [ancestorLoading, setAncestorLoading] = useState(false);
     const containerRef = useRef(null);
@@ -268,18 +268,21 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
 
                 if (parents.length === 1) {
                     const p = parents[0];
-                    edgeSegments.push({
-                        id: `seg-${pairKey}-single-parent-trunk`,
-                        d: `M ${p.x} ${p.yBottom} L ${p.x} ${childBandY}`,
-                        relatedIds: [p.id, ...children.map(c => c.id)],
-                    });
+                    const minX = Math.min(...children.map(c => c.x));
+                    const maxX = Math.max(...children.map(c => c.x));
 
                     if (children.length > 1) {
-                        const minX = Math.min(...children.map(c => c.x));
-                        const maxX = Math.max(...children.map(c => c.x));
+                        // Combined path: trunk → sibling bar
                         edgeSegments.push({
-                            id: `seg-${pairKey}-single-sibling-bar`,
-                            d: `M ${minX} ${childBandY} L ${maxX} ${childBandY}`,
+                            id: `seg-${pairKey}-single-offspring-network`,
+                            d: `M ${p.x} ${p.yBottom} L ${p.x} ${childBandY} L ${minX} ${childBandY} L ${maxX} ${childBandY}`,
+                            relatedIds: [p.id, ...children.map(c => c.id)],
+                        });
+                    } else {
+                        // Single child: simple trunk
+                        edgeSegments.push({
+                            id: `seg-${pairKey}-single-parent-trunk`,
+                            d: `M ${p.x} ${p.yBottom} L ${p.x} ${childBandY}`,
                             relatedIds: [p.id, ...children.map(c => c.id)],
                         });
                     }
@@ -299,34 +302,27 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                 const partnerLineY = Math.max(leftParent.yBottom, rightParent.yBottom) + 8;
                 const trunkX = (leftParent.x + rightParent.x) / 2;
 
+                // Combined path: left parent down → partner line → right parent down
                 edgeSegments.push({
-                    id: `seg-${pairKey}-left-down`,
-                    d: `M ${leftParent.x} ${leftParent.yBottom} L ${leftParent.x} ${partnerLineY}`,
-                    relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
-                });
-                edgeSegments.push({
-                    id: `seg-${pairKey}-partner-line`,
-                    d: `M ${leftParent.x} ${partnerLineY} L ${rightParent.x} ${partnerLineY}`,
-                    relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
-                });
-                edgeSegments.push({
-                    id: `seg-${pairKey}-right-down`,
-                    d: `M ${rightParent.x} ${rightParent.yBottom} L ${rightParent.x} ${partnerLineY}`,
+                    id: `seg-${pairKey}-partner-network`,
+                    d: `M ${leftParent.x} ${leftParent.yBottom} L ${leftParent.x} ${partnerLineY} L ${rightParent.x} ${partnerLineY} L ${rightParent.x} ${rightParent.yBottom}`,
                     relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
                 });
 
-                edgeSegments.push({
-                    id: `seg-${pairKey}-trunk`,
-                    d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${childBandY}`,
-                    relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
-                });
+                const minX = Math.min(...children.map(c => c.x));
+                const maxX = Math.max(...children.map(c => c.x));
 
+                // Combined path: trunk down to sibling bar
                 if (children.length > 1) {
-                    const minX = Math.min(...children.map(c => c.x));
-                    const maxX = Math.max(...children.map(c => c.x));
                     edgeSegments.push({
-                        id: `seg-${pairKey}-sibling-bar`,
-                        d: `M ${minX} ${childBandY} L ${maxX} ${childBandY}`,
+                        id: `seg-${pairKey}-offspring-network`,
+                        d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${childBandY} L ${minX} ${childBandY} L ${maxX} ${childBandY}`,
+                        relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
+                    });
+                } else {
+                    edgeSegments.push({
+                        id: `seg-${pairKey}-trunk`,
+                        d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${childBandY}`,
                         relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
                     });
                 }
