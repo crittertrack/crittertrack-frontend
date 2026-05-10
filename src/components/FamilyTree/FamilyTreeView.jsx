@@ -80,9 +80,13 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
             };
 
             speciesAnimals.forEach(a => {
-                enqueueParentIfMissing(a.fatherId_public || a.sireId_public);
-                enqueueParentIfMissing(a.motherId_public || a.damId_public);
+                const sire = a.fatherId_public || a.sireId_public;
+                const dam = a.motherId_public || a.damId_public;
+                if (sire) enqueueParentIfMissing(sire);
+                if (dam) enqueueParentIfMissing(dam);
             });
+
+            console.log(`[FamilyTree] Queued ${queue.length} ancestors to fetch for ${selectedSpecies}`);
 
             const fetchOne = async (id) => {
                 if (!id) return null;
@@ -91,15 +95,24 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                         const r = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(id)}`, {
                             headers: { Authorization: `Bearer ${authToken}` }
                         });
-                        return r.data || null;
-                    } catch {}
+                        if (r.data) {
+                            console.log(`[FamilyTree] Fetched (authenticated): ${id}`, r.data);
+                            return r.data;
+                        }
+                    } catch (e) {
+                        console.log(`[FamilyTree] Auth fetch failed for ${id}:`, e.message);
+                    }
                 }
                 try {
                     const r = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(id)}`);
-                    return r.data?.[0] || null;
-                } catch {
-                    return null;
+                    if (r.data?.[0]) {
+                        console.log(`[FamilyTree] Fetched (public): ${id}`, r.data[0]);
+                        return r.data[0];
+                    }
+                } catch (e) {
+                    console.log(`[FamilyTree] Public fetch failed for ${id}:`, e.message);
                 }
+                return null;
             };
 
             let guard = 0;
@@ -121,13 +134,16 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                 enqueueParentIfMissing(node.motherId_public || node.damId_public);
             }
 
+            console.log(`[FamilyTree] Fetch complete. Got ${Object.keys(fetched).length} external ancestors`);
+
             if (!cancelled) {
                 setExternalAncestorsById(fetched);
                 setAncestorLoading(false);
             }
         };
 
-        fetchAncestorForest().catch(() => {
+        fetchAncestorForest().catch((err) => {
+            console.error('[FamilyTree] Ancestor fetch error:', err);
             if (!cancelled) {
                 setExternalAncestorsById({});
                 setAncestorLoading(false);
