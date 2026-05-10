@@ -888,7 +888,7 @@ const GETTING_STARTED_LESSONS = [
 
   {
     id: 'gs-records-eol',
-    title: '13. Notes',
+    title: '13. Notes & Milestones',
     description: 'Add notes, milestones, and additional information about your animal',
     tour: 'getting-started',
     tourOrder: 13,
