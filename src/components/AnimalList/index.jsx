@@ -1870,7 +1870,7 @@ const AnimalList = ({
                                     <div className="flex-1 min-w-0">
                                         <div className="text-sm text-gray-800 font-medium">
                                             {getActionLabel(log.action)}
-                                            {(log.details?.name || log.details?.enclosureName) && <span className="text-gray-500 font-normal"> ? <span className="font-medium text-gray-700">{log.details.name || log.details.enclosureName}</span></span>}
+                                            {(log.details?.name || log.details?.enclosureName) && <span className="text-gray-500 font-normal"> • <span className="font-medium text-gray-700">{log.details.name || log.details.enclosureName}</span></span>}
                                             {log.details?.species && !log.details?.name && <span className="text-gray-500 font-normal"> ({log.details.species})</span>}
                                             {log.details?.status && <span className="text-indigo-500 font-normal text-xs ml-1">({log.details.status})</span>}
                                         </div>
