@@ -559,6 +559,8 @@ const LitterSyncConflictModal = ({ items, onResolve, onSkip }) => {
 
 // Pedigree Chart Component
 const pedigreeTreeCache = new Map(); // key: `${authScope}:${animalId}` => { data, ownerProfile }
+const MAX_PEDIGREE_FETCH_DEPTH = 13; // 14 generations including the subject (depth 0)
+const MAX_PEDIGREE_FETCH_NODES = 1500; // safety guard against runaway recursive fetches
 
 const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BASE_URL, authToken = null, inline = false, vertical = false, manualData = null, onViewAnimal = null, inlineGenerations = null }, ref) => {
     const [pedigreeData, setPedigreeData] = useState(null);
@@ -682,8 +684,9 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 //   which would then be reused when the ancestor chain needs them at depth=3.
                 // pathIds: Set of IDs in the current call-chain — detects true circular loops only.
                 const resultCache = new Map();
+                let remainingFetchBudget = MAX_PEDIGREE_FETCH_NODES;
                 const fetchAnimalWithFamily = async (id, depth = 0, pathIds = new Set()) => {
-                    if (!id || depth > 11) return null;
+                    if (!id || depth > MAX_PEDIGREE_FETCH_DEPTH) return null;
                     if (pathIds.has(id)) return null; // circular reference — stop this branch
 
                     // Return cached result only if it was fetched at the same or shallower depth
@@ -695,6 +698,9 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                         // else: cache was built at a deeper position — fewer ancestors stored.
                         // Fall through and re-fetch so we get the full ancestor chain.
                     }
+
+                    if (remainingFetchBudget <= 0) return null;
+                    remainingFetchBudget -= 1;
 
                     let animalInfo = null;
                     let foundViaOwned = false;
@@ -873,13 +879,17 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         
         setLoading(true);
         const resultCache = new Map();
+        let remainingFetchBudget = MAX_PEDIGREE_FETCH_NODES;
         const fetchAnimalWithFamily = async (id, depth = 0, pathIds = new Set()) => {
-            if (!id || depth > 11) return null;
+            if (!id || depth > MAX_PEDIGREE_FETCH_DEPTH) return null;
             if (pathIds.has(id)) return null;
             if (resultCache.has(id)) {
                 const cached = resultCache.get(id);
                 if (cached.fetchedAtDepth <= depth) return cached.data;
             }
+
+            if (remainingFetchBudget <= 0) return null;
+            remainingFetchBudget -= 1;
 
             let animalInfo = null;
             let foundViaOwned = false;
