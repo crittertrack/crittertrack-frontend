@@ -1238,12 +1238,12 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 6,
         title: 'Save or Edit the Planned Mating',
-        content: 'Save the planned mating to close the modal and store it as Planned. Later, click that mating card to reopen it and choose either Edit Mating to change the planned entry, or Convert to Litter when the litter has actually arrived and needs birth or offspring details.',
+        content: 'Save the planned mating to close the modal and store it as Planned. After it is saved, click the planned mating card in the litter list to expand it. From the expanded card, click the Edit action, and then choose either Edit Mating to change the planned entry or Convert to Litter when the litter has actually arrived and needs birth or offspring details.',
         tips: [
           'Saving closes the planned mating modal',
-          'Edit Mating is for correcting the planned record',
-          'Convert to Litter starts the actual litter workflow',
-          'This is the bridge between the two parts of the process'
+          'You must open the planned mating card first',
+          'The Edit action lives on the expanded card',
+          'Edit Mating or Convert to Litter are chosen after that'
         ]
       },
       {
