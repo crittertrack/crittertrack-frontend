@@ -132,7 +132,6 @@ const FamilyTreeView = ({
 
         if (prefetchLoadingBySpecies[selectedSpecies]) {
             setAncestorLoading(true);
-            return;
         }
 
         let cancelled = false;

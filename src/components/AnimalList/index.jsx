@@ -439,8 +439,12 @@ const AnimalList = ({
 
         return () => {
             cancelled = true;
+            _familyTreePrefetchLoadingByUser[userKey] = {
+                ...(_familyTreePrefetchLoadingByUser[userKey] || {}),
+                [species]: false,
+            };
         };
-    }, [authToken, familyTreeAnimals, familyTreePrefetchBySpecies, familyTreePrefetchLoadingBySpecies]);
+    }, [authToken, familyTreeAnimals, familyTreePrefetchBySpecies, familyTreePrefetchLoadingBySpecies, userKey]);
 
     // ---- Collection CRUD helpers ----
     const _syncToApi = (cols, map) => {
