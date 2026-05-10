@@ -510,9 +510,10 @@ const FamilyTreeView = ({
                     });
                 } else {
                     const onlyChild = children[0];
+                    const elbowY = p.yBottom + ((onlyChild.yTop - p.yBottom) * 0.52);
                     edgeSegments.push({
                         id: `seg-${pairKey}-single-parent-trunk`,
-                        d: `M ${p.x} ${p.yBottom} L ${p.x} ${childBandY} L ${onlyChild.x} ${childBandY}`,
+                        d: `M ${p.x} ${p.yBottom} L ${p.x} ${elbowY} L ${onlyChild.x} ${elbowY}`,
                         relatedIds: [p.id, ...children.map(c => c.id)],
                         color: pairColor,
                     });
@@ -553,9 +554,10 @@ const FamilyTreeView = ({
                 });
             } else {
                 const onlyChild = children[0];
+                const elbowY = partnerLineY + ((onlyChild.yTop - partnerLineY) * 0.52);
                 edgeSegments.push({
                     id: `seg-${pairKey}-trunk`,
-                    d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${childBandY} L ${onlyChild.x} ${childBandY}`,
+                    d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${elbowY} L ${onlyChild.x} ${elbowY}`,
                     relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
                     color: pairColor,
                 });
