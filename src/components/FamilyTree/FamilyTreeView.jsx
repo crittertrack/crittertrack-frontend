@@ -56,6 +56,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
     const containerRef = useRef(null);
     const dragRef = useRef({ active: false, startX: 0, startY: 0, originX: 0, originY: 0 });
     const touchRef = useRef({ mode: null, startX: 0, startY: 0, originX: 0, originY: 0, startDist: 0, startZoom: 85 });
+    const wasAncestorLoadingRef = useRef(false);
 
     const speciesList = useMemo(() => [...new Set(animals.map(a => a.species).filter(Boolean))].sort(), [animals]);
 
@@ -523,6 +524,27 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
         return out;
     }, [hoveredAnimal, highlightMode, graphData]);
 
+    useEffect(() => {
+        const justFinishedLoading = wasAncestorLoadingRef.current && !ancestorLoading;
+        wasAncestorLoadingRef.current = ancestorLoading;
+        if (!justFinishedLoading) return;
+
+        const container = containerRef.current;
+        if (!container) return;
+
+        const scale = zoom / 100;
+        const contentWidth = graphData.width * scale;
+        const contentHeight = graphData.height * scale;
+
+        const nextX = (container.clientWidth - contentWidth) / 2;
+        const nextY = (container.clientHeight - contentHeight) / 2;
+
+        setPan({
+            x: Number.isFinite(nextX) ? nextX : 24,
+            y: Number.isFinite(nextY) ? nextY : 24,
+        });
+    }, [ancestorLoading, graphData.width, graphData.height, zoom]);
+
     const handleWheel = e => {
         if (!e.ctrlKey && !e.metaKey) return;
         e.preventDefault();
@@ -811,7 +833,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                     onTouchMove={onTouchMove}
                     onTouchEnd={onTouchEnd}
                     onTouchCancel={onTouchEnd}
-                    className="w-full border border-gray-300 rounded-lg bg-white overflow-auto shadow-sm"
+                    className="relative w-full border border-gray-300 rounded-lg bg-white overflow-auto shadow-sm"
                     style={{ height: '680px', cursor: dragRef.current.active ? 'grabbing' : 'grab', userSelect: 'none', touchAction: 'none' }}
                 >
                     <div
@@ -893,6 +915,15 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                             );
                         })}
                     </div>
+
+                    {ancestorLoading && (
+                        <div className="absolute inset-0 z-20 bg-white/75 backdrop-blur-[1px] flex items-center justify-center pointer-events-auto">
+                            <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-white shadow-sm text-gray-600 text-sm font-medium">
+                                <Loader2 size={16} className="animate-spin" />
+                                Loading linked public ancestors...
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
