@@ -45,6 +45,17 @@ const compareSiblingOrder = (a, b) => {
     return nameA.localeCompare(nameB);
 };
 
+const lineLaneOffset = (key = '', spread = 10) => {
+    const bucket = hashKey(String(key)) % 5; // 0..4
+    return (bucket - 2) * spread;
+};
+
+const keepAwayFromNode = (value, nodeTop, nodeBottom, gap = 6) => {
+    if (value < nodeTop + gap) return nodeTop + gap;
+    if (value > nodeBottom - gap) return nodeBottom - gap;
+    return value;
+};
+
 const FamilyTreeView = ({
     animals = [],
     loading = false,
@@ -504,12 +515,16 @@ const FamilyTreeView = ({
                 || children.map(c => animalLineColorById[c.id]).find(Boolean)
                 || lineageColorFromKey(pairKey);
 
-            const childBandY = Math.min(...children.map(c => c.yTop)) - 16;
+            const laneOffset = lineLaneOffset(pairKey, 8);
+            const childLaneOffset = lineLaneOffset(`${pairKey}-children`, 6);
+
+            const childBandBaseY = Math.min(...children.map(c => c.yTop)) - 16;
+            const childBandY = keepAwayFromNode(childBandBaseY + childLaneOffset, Math.min(...children.map(c => c.yTop)) - 20, Math.max(...children.map(c => c.yTop)) + NODE_H - 8, 6);
 
             if (connectorStyle === 'diagonal') {
                 if (parents.length === 1) {
                     const p = parents[0];
-                    const fanY = p.yBottom + 10;
+                    const fanY = keepAwayFromNode(p.yBottom + 10 + laneOffset, p.yMid, p.yBottom + NODE_H, 4);
 
                     edgeSegments.push({
                         id: `seg-${pairKey}-single-diagonal-anchor`,
@@ -531,11 +546,11 @@ const FamilyTreeView = ({
 
                 const leftParent = parents[0];
                 const rightParent = parents[parents.length - 1];
-                const partnerLineY = (leftParent.yMid + rightParent.yMid) / 2;
+                const partnerLineY = keepAwayFromNode((leftParent.yMid + rightParent.yMid) / 2 + laneOffset, Math.min(leftParent.yMid, rightParent.yMid), Math.max(leftParent.yMid, rightParent.yMid), 4);
                 const partnerLeftX = leftParent.rightX;
                 const partnerRightX = rightParent.leftX;
                 const trunkX = (partnerLeftX + partnerRightX) / 2;
-                const fanY = partnerLineY + 10;
+                const fanY = keepAwayFromNode(partnerLineY + 10 + laneOffset / 2, partnerLineY, Math.max(leftParent.yBottom, rightParent.yBottom) + NODE_H, 4);
 
                 edgeSegments.push({
                     id: `seg-${pairKey}-diagonal-partner-network`,
@@ -578,7 +593,7 @@ const FamilyTreeView = ({
                     });
                 } else {
                     const onlyChild = children[0];
-                    const elbowY = p.yBottom + ((onlyChild.yTop - p.yBottom) * 0.52);
+                    const elbowY = keepAwayFromNode(p.yBottom + ((onlyChild.yTop - p.yBottom) * 0.52) + laneOffset, p.yMid, onlyChild.yTop + NODE_H, 4);
                     dropStartY = elbowY;
                     edgeSegments.push({
                         id: `seg-${pairKey}-single-parent-trunk`,
@@ -601,7 +616,7 @@ const FamilyTreeView = ({
 
             const leftParent = parents[0];
             const rightParent = parents[parents.length - 1];
-            const partnerLineY = (leftParent.yMid + rightParent.yMid) / 2;
+            const partnerLineY = keepAwayFromNode((leftParent.yMid + rightParent.yMid) / 2 + laneOffset, Math.min(leftParent.yMid, rightParent.yMid), Math.max(leftParent.yMid, rightParent.yMid), 4);
             const partnerLeftX = leftParent.rightX;
             const partnerRightX = rightParent.leftX;
             const trunkX = (partnerLeftX + partnerRightX) / 2;
@@ -626,7 +641,7 @@ const FamilyTreeView = ({
                 });
             } else {
                 const onlyChild = children[0];
-                const elbowY = partnerLineY + ((onlyChild.yTop - partnerLineY) * 0.52);
+                const elbowY = keepAwayFromNode(partnerLineY + ((onlyChild.yTop - partnerLineY) * 0.52) + laneOffset, partnerLineY, onlyChild.yTop + NODE_H, 4);
                 dropStartY = elbowY;
                 edgeSegments.push({
                     id: `seg-${pairKey}-trunk`,
