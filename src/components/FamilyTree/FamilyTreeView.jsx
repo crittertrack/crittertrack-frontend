@@ -1,11 +1,11 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { Loader2, ZoomIn, ZoomOut, Home, Mars, Venus } from 'lucide-react';
+import { Loader2, ZoomIn, ZoomOut, Home, Cat, ChevronLeft, ChevronRight } from 'lucide-react';
 import dagre from 'dagre';
 import { formatDate } from '../../utils/dateFormatter';
 
-const NODE_W = 180;
-const NODE_H = 116;
+const NODE_W = 96;
+const NODE_H = 92;
 const API_BASE_URL = '/api';
 
 const parseCtcNumeric = (idPublic = '') => {
@@ -31,6 +31,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
     const [selectedSpecies, setSelectedSpecies] = useState(null);
     const [zoom, setZoom] = useState(85);
     const [pan, setPan] = useState({ x: 24, y: 24 });
+    const [showNoPedigreePanel, setShowNoPedigreePanel] = useState(true);
     const [hoveredAnimal, setHoveredAnimal] = useState(null);
     const [highlightMode, setHighlightMode] = useState('ancestors');
     const [externalAncestorsById, setExternalAncestorsById] = useState({});
@@ -136,9 +137,9 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
     }, [selectedSpecies, speciesAnimals, authToken]);
 
     const graphData = useMemo(() => {
-        const byId = {};
-        const childrenByParent = {};
-        const parentLinksByChild = {};
+        const allById = {};
+        const childrenByParentAll = {};
+        const parentLinksByChildAll = {};
 
         const combinedSpecies = [
             ...speciesAnimals,
@@ -146,15 +147,43 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
         ];
 
         combinedSpecies.forEach(a => {
-            byId[a.id_public] = a;
+            allById[a.id_public] = a;
         });
 
-        Object.values(byId).forEach(a => {
+        Object.values(allById).forEach(a => {
             const parents = [a.fatherId_public || a.sireId_public, a.motherId_public || a.damId_public].filter(Boolean);
-            parentLinksByChild[a.id_public] = parents.filter(pid => byId[pid]);
-            parentLinksByChild[a.id_public].forEach(pid => {
+            parentLinksByChildAll[a.id_public] = parents.filter(pid => allById[pid]);
+            parentLinksByChildAll[a.id_public].forEach(pid => {
+                if (!childrenByParentAll[pid]) childrenByParentAll[pid] = [];
+                childrenByParentAll[pid].push(a.id_public);
+            });
+        });
+
+        // Account animals with no pedigree links live only in the left list, not in the graph.
+        const noPedigreeAnimals = speciesAnimals
+            .filter(a => {
+                const hasParents = Boolean(a.fatherId_public || a.sireId_public || a.motherId_public || a.damId_public);
+                const hasOffspring = (childrenByParentAll[a.id_public] || []).length > 0;
+                return !hasParents && !hasOffspring;
+            })
+            .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        const noPedigreeSet = new Set(noPedigreeAnimals.map(a => a.id_public));
+        const accountIdSet = new Set(speciesAnimals.map(a => a.id_public));
+
+        const byId = {};
+        Object.values(allById).forEach(a => {
+            const isIsolatedAccountAnimal = accountIdSet.has(a.id_public) && noPedigreeSet.has(a.id_public);
+            if (!isIsolatedAccountAnimal) byId[a.id_public] = a;
+        });
+
+        const childrenByParent = {};
+        const parentLinksByChild = {};
+        Object.keys(byId).forEach(cid => {
+            const parentIds = (parentLinksByChildAll[cid] || []).filter(pid => byId[pid]);
+            parentLinksByChild[cid] = parentIds;
+            parentIds.forEach(pid => {
                 if (!childrenByParent[pid]) childrenByParent[pid] = [];
-                childrenByParent[pid].push(a.id_public);
+                childrenByParent[pid].push(cid);
             });
         });
 
@@ -220,8 +249,8 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                 });
 
                 if (children.length > 1) {
-                    const minX = children[0].x;
-                    const maxX = children[children.length - 1].x;
+                    const minX = Math.min(...children.map(c => c.x));
+                    const maxX = Math.max(...children.map(c => c.x));
                     edgeSegments.push({
                         id: `seg-${pairKey}-single-sibling-bar`,
                         d: `M ${minX} ${childBandY} L ${maxX} ${childBandY}`,
@@ -267,8 +296,8 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
             });
 
             if (children.length > 1) {
-                const minX = children[0].x;
-                const maxX = children[children.length - 1].x;
+                const minX = Math.min(...children.map(c => c.x));
+                const maxX = Math.max(...children.map(c => c.x));
                 edgeSegments.push({
                     id: `seg-${pairKey}-sibling-bar`,
                     d: `M ${minX} ${childBandY} L ${maxX} ${childBandY}`,
@@ -288,18 +317,19 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
         const maxX = Math.max(...Object.values(positions).map(p => p.x + NODE_W), 1200) + 48;
         const maxY = Math.max(...Object.values(positions).map(p => p.y + NODE_H), 700) + 48;
 
-        return { byId, positions, edgeSegments, childrenByParent, parentLinksByChild, width: maxX, height: maxY };
+        return {
+            byId,
+            positions,
+            edgeSegments,
+            childrenByParent,
+            parentLinksByChild,
+            width: maxX,
+            height: maxY,
+            noPedigreeAnimals,
+        };
     }, [speciesAnimals, externalAncestorsById]);
 
-    const noPedigreeAnimals = useMemo(() => {
-        return speciesAnimals
-            .filter(a => {
-                const hasParents = Boolean(a.fatherId_public || a.sireId_public || a.motherId_public || a.damId_public);
-                const hasOffspring = (graphData.childrenByParent[a.id_public] || []).length > 0;
-                return !hasParents && !hasOffspring;
-            })
-            .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-    }, [speciesAnimals, graphData.childrenByParent]);
+    const noPedigreeAnimals = graphData.noPedigreeAnimals || [];
 
     const getAncestors = (id, visited = new Set()) => {
         if (visited.has(id)) return new Set();
@@ -514,29 +544,55 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] gap-4">
-                <div className="border border-gray-300 rounded-lg bg-white shadow-sm h-[680px] overflow-auto">
-                    <div className="sticky top-0 bg-white/95 backdrop-blur border-b border-gray-200 px-3 py-2">
-                        <p className="text-sm font-semibold text-gray-700">No Pedigree Links</p>
-                        <p className="text-xs text-gray-500">{noPedigreeAnimals.length} animals with no parents and no offspring in this species</p>
-                    </div>
-                    <div className="p-2 space-y-1.5">
-                        {noPedigreeAnimals.length === 0 ? (
-                            <p className="text-xs text-gray-400 p-2">All animals are connected in this species graph.</p>
-                        ) : noPedigreeAnimals.map(a => (
+            <div className={`grid grid-cols-1 lg:grid-cols-[${showNoPedigreePanel ? '280px' : '44px'}_minmax(0,1fr)] gap-4`}>
+                <div className="border border-gray-300 rounded-lg bg-white shadow-sm h-[680px] overflow-hidden">
+                    <div className="sticky top-0 bg-white/95 backdrop-blur border-b border-gray-200 px-2.5 py-2 flex items-center justify-between gap-2">
+                        {showNoPedigreePanel ? (
+                            <>
+                                <div className="min-w-0">
+                                    <p className="text-sm font-semibold text-gray-700 truncate">No Pedigree Links</p>
+                                    <p className="text-xs text-gray-500 truncate">{noPedigreeAnimals.length} animals with no parents and no offspring in this species</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowNoPedigreePanel(false)}
+                                    className="p-1.5 rounded border border-gray-200 hover:bg-gray-50 text-gray-600"
+                                    title="Collapse panel"
+                                >
+                                    <ChevronLeft size={14} />
+                                </button>
+                            </>
+                        ) : (
                             <button
-                                key={a.id_public}
                                 type="button"
-                                onClick={() => onViewAnimal && onViewAnimal(a)}
-                                className="w-full text-left px-2 py-2 rounded border border-gray-200 hover:border-accent hover:bg-accent/5 transition"
-                                title="Open animal details"
+                                onClick={() => setShowNoPedigreePanel(true)}
+                                className="w-full h-full flex items-center justify-center p-1.5 rounded border border-gray-200 hover:bg-gray-50 text-gray-600"
+                                title="Expand no-pedigree panel"
                             >
-                                <p className="text-xs font-semibold text-gray-800 truncate">{[a.prefix, a.name, a.suffix].filter(Boolean).join(' ') || 'Unnamed'}</p>
-                                <p className="text-[11px] text-gray-500 truncate">{a.status || 'Unknown'}{a.birthDate ? ` • ${formatDate(a.birthDate)}` : ''}</p>
-                                <p className="text-[10px] text-gray-400 font-mono truncate">{a.id_public}</p>
+                                <ChevronRight size={14} />
                             </button>
-                        ))}
+                        )}
                     </div>
+
+                    {showNoPedigreePanel && (
+                        <div className="p-2 space-y-1.5 h-[calc(680px-52px)] overflow-auto">
+                            {noPedigreeAnimals.length === 0 ? (
+                                <p className="text-xs text-gray-400 p-2">All animals are connected in this species graph.</p>
+                            ) : noPedigreeAnimals.map(a => (
+                                <button
+                                    key={a.id_public}
+                                    type="button"
+                                    onClick={() => onViewAnimal && onViewAnimal(a)}
+                                    className="w-full text-left px-2 py-2 rounded border border-gray-200 hover:border-accent hover:bg-accent/5 transition"
+                                    title="Open animal details"
+                                >
+                                    <p className="text-xs font-semibold text-gray-800 truncate">{[a.prefix, a.name, a.suffix].filter(Boolean).join(' ') || 'Unnamed'}</p>
+                                    <p className="text-[11px] text-gray-500 truncate">{a.status || 'Unknown'}{a.birthDate ? ` • ${formatDate(a.birthDate)}` : ''}</p>
+                                    <p className="text-[10px] text-gray-400 font-mono truncate">{a.id_public}</p>
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 <div
@@ -564,7 +620,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                     >
                         <svg style={{ position: 'absolute', inset: 0, width: graphData.width, height: graphData.height, pointerEvents: 'none' }}>
                             {graphData.edgeSegments.map(seg => {
-                                const active = hoveredAnimal && seg.relatedIds.every(rid => highlightedSet.has(rid));
+                                const active = hoveredAnimal && seg.relatedIds.some(rid => highlightedSet.has(rid));
                                 return (
                                     <path
                                         key={seg.id}
@@ -587,8 +643,9 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                             const isMale = animal.gender === 'Male';
                             const isFemale = animal.gender === 'Female';
                             const borderColor = isMale ? '#3b82f6' : isFemale ? '#ec4899' : '#94a3b8';
-                            const bgColor = isMale ? '#e8f1ff' : isFemale ? '#fdeef6' : '#f8fafc';
-                            const GenderIcon = isMale ? Mars : Venus;
+                            const bgColor = isMale ? '#dbeafe' : isFemale ? '#fce7f3' : '#eef2f7';
+                            const displayName = [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ') || 'Unnamed';
+                            const imageSrc = animal.imageUrl || animal.photoUrl || null;
 
                             return (
                                 <button
@@ -608,18 +665,24 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                                         backgroundColor: bgColor,
                                         touchAction: 'manipulation',
                                     }}
-                                    className={`text-left p-2.5 rounded-xl border transition-all shadow-sm ${active ? 'ring-2 ring-pink-200' : hoveredAnimal ? 'opacity-35' : 'hover:border-accent hover:shadow-md'}`}
+                                    className={`text-left rounded-xl border-2 transition-all shadow-sm overflow-hidden ${active ? 'ring-2 ring-pink-200' : hoveredAnimal ? 'opacity-35' : 'hover:border-accent hover:shadow-md'}`}
                                     title="Click to open animal details"
                                 >
-                                    <div className="absolute top-1 right-1">
-                                        <GenderIcon size={14} color={borderColor} />
+                                    <div className="w-full h-[68px] bg-white/60 flex items-center justify-center">
+                                        {imageSrc ? (
+                                            <img
+                                                src={imageSrc}
+                                                alt={displayName}
+                                                className="w-full h-full object-cover"
+                                                draggable={false}
+                                            />
+                                        ) : (
+                                            <Cat size={24} className="text-slate-400" />
+                                        )}
                                     </div>
-                                    <p className="text-sm font-semibold text-gray-800 truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ') || 'Unnamed'}</p>
-                                    <p className="text-xs text-gray-500 truncate">{animal.species || 'Unknown species'}</p>
-                                    <p className="text-xs text-gray-400">{animal.birthDate ? formatDate(animal.birthDate) : 'No birth date'}</p>
-                                    <p className="text-xs text-gray-600 mt-1 truncate">{animal.status || 'Unknown'}</p>
-                                    <p className="text-xs text-gray-600 truncate">{animal.color || 'No variety'}</p>
-                                    <p className="text-[10px] text-gray-400 font-mono truncate mt-0.5">{animal.id_public}{animal.isPublicAncestor ? ' • public' : ''}</p>
+                                    <div className="w-full h-[22px] bg-white border-t border-gray-200 px-1.5 flex items-center justify-center">
+                                        <p className="text-[11px] font-semibold text-gray-800 truncate max-w-full">{displayName}</p>
+                                    </div>
                                 </button>
                             );
                         })}
