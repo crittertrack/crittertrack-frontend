@@ -81,24 +81,22 @@ const FamilyTreeView = ({
         const scale = nextZoom / 100;
         const scaledW = graphData.width * scale;
         const scaledH = graphData.height * scale;
-        const pad = 120;
-
         let x = nextPan.x;
         let y = nextPan.y;
 
         if (scaledW <= container.clientWidth) {
             x = (container.clientWidth - scaledW) / 2;
         } else {
-            const minX = container.clientWidth - scaledW - pad;
-            const maxX = pad;
+            const minX = container.clientWidth - scaledW;
+            const maxX = 0;
             x = Math.min(maxX, Math.max(minX, x));
         }
 
         if (scaledH <= container.clientHeight) {
             y = (container.clientHeight - scaledH) / 2;
         } else {
-            const minY = container.clientHeight - scaledH - pad;
-            const maxY = pad;
+            const minY = container.clientHeight - scaledH;
+            const maxY = 0;
             y = Math.min(maxY, Math.max(minY, y));
         }
 
@@ -690,7 +688,14 @@ const FamilyTreeView = ({
         if (!el) return;
         el.addEventListener('wheel', handleWheel, { passive: false });
         return () => el.removeEventListener('wheel', handleWheel);
-    }, []);
+    }, [handleWheel]);
+
+    useEffect(() => {
+        const clamped = clampPanToViewport(panStateRef.current, zoomStateRef.current);
+        if (Math.abs(clamped.x - panStateRef.current.x) > 0.5 || Math.abs(clamped.y - panStateRef.current.y) > 0.5) {
+            setPan(clamped);
+        }
+    }, [graphData.width, graphData.height, zoom]);
 
     const beginDrag = e => {
         // Left-drag pans when starting from empty canvas space.
@@ -864,14 +869,14 @@ const FamilyTreeView = ({
                 <div className="flex items-center gap-1">
                     <button onClick={() => {
                         const nextZoom = Math.max(MIN_ZOOM, zoomStateRef.current - 10);
-                        setZoom(nextZoom);
+                        scheduleViewUpdate(panStateRef.current, nextZoom);
                     }} className="p-2 hover:bg-gray-200 rounded transition" title="Zoom out (Ctrl+Scroll)">
                         <ZoomOut size={16} className="text-gray-600" />
                     </button>
                     <span className="text-xs font-medium text-gray-600 w-12 text-center">{zoom}%</span>
                     <button onClick={() => {
                         const nextZoom = Math.min(MAX_ZOOM, zoomStateRef.current + 10);
-                        setZoom(nextZoom);
+                        scheduleViewUpdate(panStateRef.current, nextZoom);
                     }} className="p-2 hover:bg-gray-200 rounded transition" title="Zoom in (Ctrl+Scroll)">
                         <ZoomIn size={16} className="text-gray-600" />
                     </button>
@@ -950,7 +955,7 @@ const FamilyTreeView = ({
                     onTouchMove={onTouchMove}
                     onTouchEnd={onTouchEnd}
                     onTouchCancel={onTouchEnd}
-                    className="relative w-full border border-gray-300 rounded-lg bg-white overflow-auto shadow-sm"
+                    className="relative w-full border border-gray-300 rounded-lg bg-white overflow-hidden shadow-sm"
                     style={{ height: '680px', cursor: dragRef.current.active ? 'grabbing' : 'grab', userSelect: 'none', touchAction: 'none' }}
                 >
                     <div
