@@ -355,13 +355,13 @@ const FamilyTreeView = ({
 
         const query = searchQuery.trim().toLowerCase();
         let resolvedFocusId = (focusAnimalId && allById[focusAnimalId]) ? focusAnimalId : null;
-        if (!resolvedFocusId && query) {
+        if (query) {
             const matched = combinedSpecies.find(a => {
                 const name = [a?.prefix, a?.name, a?.suffix].filter(Boolean).join(' ').toLowerCase();
                 const idPublic = String(a?.id_public || '').toLowerCase();
                 return name.includes(query) || idPublic.includes(query);
             });
-            resolvedFocusId = matched?.id_public || null;
+            if (matched?.id_public) resolvedFocusId = matched.id_public;
         }
         if (!resolvedFocusId) resolvedFocusId = speciesAnimals[0]?.id_public || null;
 
@@ -875,8 +875,9 @@ const FamilyTreeView = ({
 
     const firstSearchMatch = useMemo(() => {
         if (!searchMatchedIds.size) return null;
+        if (graphData.focusId && searchMatchedIds.has(graphData.focusId)) return graphData.focusId;
         return Object.keys(graphData.positions || {}).find(id => searchMatchedIds.has(id)) || null;
-    }, [graphData.positions, searchMatchedIds]);
+    }, [graphData.focusId, graphData.positions, searchMatchedIds]);
 
     useEffect(() => {
         if (!searchQuery.trim() || !firstSearchMatch) return;
@@ -884,7 +885,20 @@ const FamilyTreeView = ({
         setFocusMode(true);
         setFocusAnimalId(prev => (prev === firstSearchMatch ? prev : firstSearchMatch));
         pendingCenterAnimalRef.current = firstSearchMatch;
-    }, [firstSearchMatch, searchQuery]);
+
+        const pos = graphData.positions[firstSearchMatch];
+        const container = containerRef.current;
+        if (pos && container) {
+            const scale = zoomStateRef.current / 100;
+            const nodeCenterX = pos.x + NODE_W / 2;
+            const nodeCenterY = pos.y + NODE_H / 2;
+            const targetPan = {
+                x: (container.clientWidth / 2) - (nodeCenterX * scale),
+                y: (container.clientHeight / 2) - (nodeCenterY * scale),
+            };
+            scheduleViewUpdate(targetPan, zoomStateRef.current);
+        }
+    }, [firstSearchMatch, graphData.positions, searchQuery]);
 
     useEffect(() => {
         const targetId = pendingCenterAnimalRef.current;
