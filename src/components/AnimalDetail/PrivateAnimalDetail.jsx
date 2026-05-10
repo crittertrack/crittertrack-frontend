@@ -23,7 +23,7 @@ import { formatDate, litterAge } from '../../utils/dateFormatter';
 import { getCurrencySymbol, getCountryFlag, getCountryName } from '../../utils/locationUtils';
 import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { QRModal } from '../PublicProfile/PublicProfileView';
-import { PedigreeChart } from '../AnimalForm';
+import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';
 const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, onAddSibling, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onViewPublicAnimal, onToggleOwned, userProfile, userAnimals = [], breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, setAnimalBreedingLinesDirect, initialTab = 1, initialBetaView = 'vertical' }) => {
     const navigate = useNavigate();
     const [breederInfo, setBreederInfo] = useState(null);
@@ -59,6 +59,20 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
     const [mpEnrichedData, setMpEnrichedData] = useState(null);
     const [betaPedigreeView, setBetaPedigreeView] = useState(initialBetaView);
     const [returningAnimal, setReturningAnimal] = useState(false);
+
+    // Warm pedigree cache shortly after opening details so Pedigree tab opens faster.
+    useEffect(() => {
+        if (!animal?.id_public) return;
+        const timer = setTimeout(() => {
+            prefetchPedigreeTree({
+                animalId: animal.id_public,
+                API_BASE_URL,
+                authToken,
+            }).catch(() => {});
+        }, 700);
+        return () => clearTimeout(timer);
+    }, [animal?.id_public, API_BASE_URL, authToken]);
+
     useEffect(() => {
         if (detailViewTab !== 5) return;
         let cancelled = false;
@@ -2713,20 +2727,24 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
 
                     return (
                         <div className="space-y-6">
-                            <div className="flex items-center justify-between flex-wrap gap-2">
-                                <div className="flex items-center gap-2">
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-center gap-2 flex-wrap">
+                                    <button
+                                        onClick={() => setShowHorizCert(true)}
+                                        className="px-4 py-2 text-xs sm:text-sm rounded-lg bg-primary text-black border border-primary/40 hover:bg-primary/90 transition flex items-center gap-1.5 font-semibold shadow-sm"
+                                    >
+                                        <ScrollText size={14} /> Open Horizontal Certificate
+                                    </button>
+                                    <button
+                                        onClick={() => setShowVertCert(true)}
+                                        className="px-4 py-2 text-xs sm:text-sm rounded-lg bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200 transition flex items-center gap-1.5 font-semibold shadow-sm"
+                                    >
+                                        <ScrollText size={14} /> Open Vertical Certificate
+                                    </button>
+                                </div>
+                                <div className="flex items-center justify-center gap-2">
                                     <Dna size={18} className="text-orange-500" />
                                     <h3 className="text-base font-semibold text-gray-700">Full Family Tree</h3>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <div className="flex items-center gap-2">
-                                    <button onClick={() => setShowHorizCert(true)} className="px-3 py-1.5 text-xs border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-600 flex items-center gap-1.5">
-                                        <ScrollText size={13} /> Open Horizontal Certificate
-                                    </button>
-                                    <button onClick={() => setShowVertCert(true)} className="px-3 py-1.5 text-xs border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-600 flex items-center gap-1.5">
-                                        <ScrollText size={13} /> Open Vertical Certificate
-                                    </button>
-                                </div>
                                 </div>
                             </div>
                             <p className="text-xs text-gray-400 -mt-3">You are viewing the full family tree here. Use the certificate buttons to open the horizontal or vertical certificate modal, where you can save/download as PDF or image. This pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations (shown on Overview tab). Manual entries are for display/reference only and do not affect COI. To add or edit manual ancestors, use the Edit button.</p>

@@ -559,8 +559,143 @@ const LitterSyncConflictModal = ({ items, onResolve, onSkip }) => {
 
 // Pedigree Chart Component
 const pedigreeTreeCache = new Map(); // key: `${authScope}:${animalId}` => { data, ownerProfile }
+const pedigreePrefetchInFlight = new Map();
 const MAX_PEDIGREE_FETCH_DEPTH = 13; // 14 generations including the subject (depth 0)
 const MAX_PEDIGREE_FETCH_NODES = 1500; // safety guard against runaway recursive fetches
+
+const getPedigreeCacheKey = (rootId, authToken) => {
+    if (!rootId) return null;
+    return `${authToken ? 'auth' : 'public'}:${rootId}`;
+};
+
+const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }) => {
+    const rootId = animalId;
+    if (!rootId || !API_BASE_URL) return null;
+
+    const cacheKey = getPedigreeCacheKey(rootId, authToken);
+    if (!cacheKey) return null;
+
+    if (pedigreeTreeCache.has(cacheKey)) {
+        return pedigreeTreeCache.get(cacheKey);
+    }
+
+    if (pedigreePrefetchInFlight.has(cacheKey)) {
+        return pedigreePrefetchInFlight.get(cacheKey);
+    }
+
+    const task = (async () => {
+        const resultCache = new Map();
+        let remainingFetchBudget = MAX_PEDIGREE_FETCH_NODES;
+
+        const fetchAnimalWithFamily = async (id, depth = 0, pathIds = new Set()) => {
+            if (!id || depth > MAX_PEDIGREE_FETCH_DEPTH) return null;
+            if (pathIds.has(id)) return null;
+
+            if (resultCache.has(id)) {
+                const cached = resultCache.get(id);
+                if (cached.fetchedAtDepth <= depth) return cached.data;
+            }
+
+            if (remainingFetchBudget <= 0) return null;
+            remainingFetchBudget -= 1;
+
+            let animalInfo = null;
+            if (authToken) {
+                const isPublicId = /^CTC\d+|^\d+$/.test(id);
+                if (!isPublicId) {
+                    try {
+                        const response = await axios.get(`${API_BASE_URL}/animals/${id}`, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        });
+                        animalInfo = response.data;
+                    } catch (error) {}
+                }
+
+                if (!animalInfo) {
+                    try {
+                        const response = await axios.get(`${API_BASE_URL}/animals/any/${id}`, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        });
+                        animalInfo = response.data;
+                    } catch (error2) {}
+                }
+            }
+
+            if (!animalInfo) {
+                try {
+                    const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${id}`);
+                    if (publicResponse.data && publicResponse.data.length > 0) {
+                        animalInfo = publicResponse.data[0];
+                    }
+                } catch (error) {}
+            }
+
+            if (!animalInfo && id) return { isHidden: true, id_public: id };
+            if (!animalInfo) return null;
+            if (!authToken && !animalInfo.showOnPublicProfile) return { isHidden: true, id_public: id };
+
+            if (animalInfo.manualBreederName) {
+                animalInfo.breederName = animalInfo.manualBreederName;
+            } else if (animalInfo.breederId_public) {
+                try {
+                    const breederResponse = await axios.get(
+                        `${API_BASE_URL}/public/profiles/search?query=${animalInfo.breederId_public}&limit=1`
+                    );
+                    if (breederResponse.data && breederResponse.data.length > 0) {
+                        const breeder = breederResponse.data[0];
+                        const showPersonalName = breeder.showPersonalName ?? false;
+                        const showBreederName = breeder.showBreederName ?? false;
+                        let breederName;
+                        if (showBreederName && showPersonalName && breeder.personalName && breeder.breederName) {
+                            breederName = `${breeder.personalName} (${breeder.breederName})`;
+                        } else if (showBreederName && breeder.breederName) {
+                            breederName = breeder.breederName;
+                        } else if (showPersonalName && breeder.personalName) {
+                            breederName = breeder.personalName;
+                        } else {
+                            breederName = 'Anonymous Breeder';
+                        }
+                        animalInfo.breederName = breederName;
+                    }
+                } catch (error) {}
+            }
+
+            const fatherId = animalInfo.fatherId_public || animalInfo.sireId_public;
+            const motherId = animalInfo.motherId_public || animalInfo.damId_public;
+            const childPath = new Set([...pathIds, id]);
+            const father = fatherId ? await fetchAnimalWithFamily(fatherId, depth + 1, childPath) : null;
+            const mother = motherId ? await fetchAnimalWithFamily(motherId, depth + 1, childPath) : null;
+            const result = { ...animalInfo, father, mother };
+
+            if (!resultCache.has(id) || resultCache.get(id).fetchedAtDepth > depth) {
+                resultCache.set(id, { fetchedAtDepth: depth, data: result });
+            }
+            return result;
+        };
+
+        const data = await fetchAnimalWithFamily(rootId);
+        let fetchedOwnerProfile = null;
+        if (data?.breederId_public) {
+            try {
+                const ownerResponse = await axios.get(
+                    `${API_BASE_URL}/public/profiles/search?query=${data.breederId_public}&limit=1`
+                );
+                if (ownerResponse.data && ownerResponse.data.length > 0) {
+                    fetchedOwnerProfile = ownerResponse.data[0];
+                }
+            } catch (error) {}
+        }
+
+        const payload = { data, ownerProfile: fetchedOwnerProfile };
+        pedigreeTreeCache.set(cacheKey, payload);
+        return payload;
+    })().catch(() => null).finally(() => {
+        pedigreePrefetchInFlight.delete(cacheKey);
+    });
+
+    pedigreePrefetchInFlight.set(cacheKey, task);
+    return task;
+};
 
 const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BASE_URL, authToken = null, inline = false, vertical = false, manualData = null, onViewAnimal = null, inlineGenerations = null }, ref) => {
     const [pedigreeData, setPedigreeData] = useState(null);
@@ -9203,4 +9338,4 @@ const AnimalForm = ({
 };
 
 export default AnimalForm;
-export { PedigreeChart };
+export { PedigreeChart, prefetchPedigreeTree };
