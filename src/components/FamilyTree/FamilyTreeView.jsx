@@ -74,10 +74,45 @@ const FamilyTreeView = ({
     const viewFrameRef = useRef(null);
     const pendingViewRef = useRef({ pan: { x: 24, y: 24 }, zoom: 85 });
 
+    const clampPanToViewport = (nextPan, nextZoom) => {
+        const container = containerRef.current;
+        if (!container || !graphData?.width || !graphData?.height) return nextPan;
+
+        const scale = nextZoom / 100;
+        const scaledW = graphData.width * scale;
+        const scaledH = graphData.height * scale;
+        const pad = 120;
+
+        let x = nextPan.x;
+        let y = nextPan.y;
+
+        if (scaledW <= container.clientWidth) {
+            x = (container.clientWidth - scaledW) / 2;
+        } else {
+            const minX = container.clientWidth - scaledW - pad;
+            const maxX = pad;
+            x = Math.min(maxX, Math.max(minX, x));
+        }
+
+        if (scaledH <= container.clientHeight) {
+            y = (container.clientHeight - scaledH) / 2;
+        } else {
+            const minY = container.clientHeight - scaledH - pad;
+            const maxY = pad;
+            y = Math.min(maxY, Math.max(minY, y));
+        }
+
+        return { x, y };
+    };
+
     const scheduleViewUpdate = (nextPan, nextZoom) => {
+        const targetZoom = typeof nextZoom === 'number' ? nextZoom : pendingViewRef.current.zoom;
+        const unclampedPan = nextPan || pendingViewRef.current.pan;
+        const targetPan = clampPanToViewport(unclampedPan, targetZoom);
+
         pendingViewRef.current = {
-            pan: nextPan || pendingViewRef.current.pan,
-            zoom: typeof nextZoom === 'number' ? nextZoom : pendingViewRef.current.zoom,
+            pan: targetPan,
+            zoom: targetZoom,
         };
 
         panStateRef.current = pendingViewRef.current.pan;
@@ -476,9 +511,10 @@ const FamilyTreeView = ({
                         color: pairColor,
                     });
                 } else {
+                    const onlyChild = children[0];
                     edgeSegments.push({
                         id: `seg-${pairKey}-single-parent-trunk`,
-                        d: `M ${p.x} ${p.yBottom} L ${p.x} ${childBandY}`,
+                        d: `M ${p.x} ${p.yBottom} L ${p.x} ${childBandY} L ${onlyChild.x} ${childBandY}`,
                         relatedIds: [p.id, ...children.map(c => c.id)],
                         color: pairColor,
                     });
@@ -518,9 +554,10 @@ const FamilyTreeView = ({
                     color: pairColor,
                 });
             } else {
+                const onlyChild = children[0];
                 edgeSegments.push({
                     id: `seg-${pairKey}-trunk`,
-                    d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${childBandY}`,
+                    d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${childBandY} L ${onlyChild.x} ${childBandY}`,
                     relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
                     color: pairColor,
                 });
