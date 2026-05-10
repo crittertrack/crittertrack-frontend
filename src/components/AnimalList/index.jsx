@@ -14,6 +14,7 @@ import {
 import { formatDate, formatDateShort } from '../../utils/dateFormatter';
 
 const API_BASE_URL = '/api';
+const FAMILY_TREE_MIN_WIDTH = 900;
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'];
 const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
@@ -275,6 +276,10 @@ const AnimalList = ({
             return normalizeAnimalView(saved || initialAnimalView);
         } catch { return normalizeAnimalView(initialAnimalView); }
     }); // 'list' | 'collections' | 'management'
+    const [isFamilyTreeEnabled, setIsFamilyTreeEnabled] = useState(() => {
+        if (typeof window === 'undefined') return true;
+        return window.innerWidth >= FAMILY_TREE_MIN_WIDTH;
+    });
     const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({ enclosures: false }); // { sectionKey: bool }
     const [collapsedMgmtGroups, setCollapsedMgmtGroups] = useState({}); // { groupKey: bool }
     const [mgmtAlertsEnabled, setMgmtAlertsEnabled] = useState(() => {
@@ -297,6 +302,26 @@ const AnimalList = ({
     const [externalParentsCache, setExternalParentsCache] = useState({});
     const [familyTreePrefetchBySpecies, setFamilyTreePrefetchBySpecies] = useState(() => _familyTreePrefetchCacheByUser[userKey] || {});
     const [familyTreePrefetchLoadingBySpecies, setFamilyTreePrefetchLoadingBySpecies] = useState(() => _familyTreePrefetchLoadingByUser[userKey] || {});
+
+    useEffect(() => {
+        const onResize = () => {
+            setIsFamilyTreeEnabled(window.innerWidth >= FAMILY_TREE_MIN_WIDTH);
+        };
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+    }, []);
+
+    useEffect(() => {
+        if (isFamilyTreeEnabled) return;
+
+        if (animalView === 'familyTree') {
+            setAnimalView('list');
+        }
+        if (defaultAnimalView === 'familyTree') {
+            setDefaultAnimalView('list');
+            try { localStorage.setItem('ct_default_animal_view', 'list'); } catch {}
+        }
+    }, [animalView, defaultAnimalView, isFamilyTreeEnabled]);
 
     const familyTreeAnimals = useMemo(() => (
         Array.from(
@@ -4373,7 +4398,7 @@ const AnimalList = ({
                                     {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'},
                                     {key:'supplies', icon:<Package size={14} className="shrink-0" />, label:'Supplies'},
                                     {key:'familyTree', icon:<Network size={14} className="shrink-0" />, label:'Family Tree'},
-                ].map(tab => (
+                ].filter(tab => isFamilyTreeEnabled || tab.key !== 'familyTree').map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
                                                 className={`relative flex flex-col items-center justify-center gap-0.5 py-1.5 px-2 text-[10px] font-semibold transition ${
@@ -4403,7 +4428,7 @@ const AnimalList = ({
                   {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'},
                   {key:'supplies', icon:<Package size={14} className="shrink-0" />, label:'Supplies'},
                   {key:'familyTree', icon:<Network size={14} className="shrink-0" />, label:'Family Tree'},
-                ].map(tab => (
+                                ].filter(tab => isFamilyTreeEnabled || tab.key !== 'familyTree').map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
                         className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 py-2 px-4 text-sm font-semibold transition ${
@@ -4733,7 +4758,7 @@ const AnimalList = ({
             </div>
             )}
 
-            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : showActivityLogScreen ? renderActivityLogScreen() : showForSaleScreen ? renderForSaleScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'supplies' ? renderSuppliesScreen() : animalView === 'collections' ? renderCollectionsView() : animalView === 'familyTree' ? <FamilyTreeView animals={familyTreeAnimals} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} prefetchedAncestorsBySpecies={familyTreePrefetchBySpecies} prefetchLoadingBySpecies={familyTreePrefetchLoadingBySpecies} onAncestorsResolved={handleFamilyTreeAncestorsResolved} /> : (loading && animals.length === 0) ? (
+            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : showActivityLogScreen ? renderActivityLogScreen() : showForSaleScreen ? renderForSaleScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'supplies' ? renderSuppliesScreen() : animalView === 'collections' ? renderCollectionsView() : (animalView === 'familyTree' && isFamilyTreeEnabled) ? <FamilyTreeView animals={familyTreeAnimals} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} breedingLineDefs={breedingLineDefs} animalBreedingLines={animalBreedingLines} prefetchedAncestorsBySpecies={familyTreePrefetchBySpecies} prefetchLoadingBySpecies={familyTreePrefetchLoadingBySpecies} onAncestorsResolved={handleFamilyTreeAncestorsResolved} /> : (loading && animals.length === 0) ? (
                 /* Skeleton grid ? only on very first load before any animals arrive */
                 <div className="space-y-3 sm:space-y-4">
                     {[0,1,2].map(gi => (
