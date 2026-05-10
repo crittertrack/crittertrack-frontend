@@ -1110,10 +1110,10 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 4,
-        title: 'Lineage and Family Tree View',
-        content: 'Use the Lineage tab to confirm sire/dam links and pedigree context for this animal. For full interactive exploration across your collection, open the Family Tree tab from My Animals on larger screens.',
+        title: 'Family and Family Tree View',
+        content: 'Use the Family tab in the animal view to confirm sire/dam links and relationship context for this animal. For full interactive exploration across your collection, open the Family Tree tab from My Animals on larger screens.',
         tips: [
-          'Lineage links drive tree accuracy',
+          'Parent links drive tree accuracy',
           'Requires parent data to be useful',
           'Use Family Tree for graph-style navigation',
           'Best experience is on larger screens'
