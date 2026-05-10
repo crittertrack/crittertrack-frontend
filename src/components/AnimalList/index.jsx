@@ -4122,7 +4122,7 @@ const AnimalList = ({
                     <div className='flex items-center gap-2 min-w-0 flex-1'>
                         <ClipboardList size={20} className="sm:w-6 sm:h-6 shrink-0 text-primary-dark" />
                         <span className="truncate">
-                            {animalView === 'list' ? `My Animals (${displayedAnimalCount})` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : showActivityLogScreen ? 'Activity Log' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
+                            {animalView === 'list' ? `My Animals (${displayedAnimalCount})` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : animalView === 'familyTree' ? 'Family Tree' : showActivityLogScreen ? 'Activity Log' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
                         </span>
                         {isListLikeView && hasActiveFilters && (
                             <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full shrink-0">
@@ -4618,7 +4618,7 @@ const AnimalList = ({
             </div>
             )}
 
-            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : showActivityLogScreen ? renderActivityLogScreen() : showForSaleScreen ? renderForSaleScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'supplies' ? renderSuppliesScreen() : animalView === 'collections' ? renderCollectionsView() : animalView === 'familyTree' ? <FamilyTreeView animals={animals} loading={loading} /> : (loading && animals.length === 0) ? (
+            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : showActivityLogScreen ? renderActivityLogScreen() : showForSaleScreen ? renderForSaleScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'supplies' ? renderSuppliesScreen() : animalView === 'collections' ? renderCollectionsView() : animalView === 'familyTree' ? <FamilyTreeView animals={Array.from(new Map([...(animals || []), ...(soldTransferredRaw || []), ...(archivedAnimals || [])].filter(a => a?.id_public).map(a => [a.id_public, a])).values())} loading={loading} onViewAnimal={onViewAnimal || onEditAnimal} authToken={authToken} /> : (loading && animals.length === 0) ? (
                 /* Skeleton grid ? only on very first load before any animals arrive */
                 <div className="space-y-3 sm:space-y-4">
                     {[0,1,2].map(gi => (

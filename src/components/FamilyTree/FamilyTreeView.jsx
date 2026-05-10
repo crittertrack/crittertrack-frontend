@@ -1,203 +1,327 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { ChevronDown, ChevronUp, Loader2, ZoomIn, ZoomOut, Home } from 'lucide-react';
+import axios from 'axios';
+import { Loader2, ZoomIn, ZoomOut, Home, Mars, Venus } from 'lucide-react';
+import dagre from 'dagre';
 import { formatDate } from '../../utils/dateFormatter';
 
-const FamilyTreeView = ({ animals = [], loading = false }) => {
+const NODE_W = 180;
+const NODE_H = 116;
+const API_BASE_URL = '/api';
+
+const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken }) => {
     const [selectedSpecies, setSelectedSpecies] = useState(null);
-    const [zoom, setZoom] = useState(100);
-    const [pan, setPan] = useState({ x: 0, y: 0 });
-    const [highlightedAnimal, setHighlightedAnimal] = useState(null);
-    const [highlightMode, setHighlightMode] = useState(null); // 'ancestors', 'descendants', or null
+    const [zoom, setZoom] = useState(85);
+    const [pan, setPan] = useState({ x: 24, y: 24 });
+    const [hoveredAnimal, setHoveredAnimal] = useState(null);
+    const [highlightMode, setHighlightMode] = useState('ancestors');
+    const [externalAncestorsById, setExternalAncestorsById] = useState({});
+    const [ancestorLoading, setAncestorLoading] = useState(false);
     const containerRef = useRef(null);
-    const isDragging = useRef({ active: false, startX: 0, startY: 0, panStart: { x: 0, y: 0 } });
+    const dragRef = useRef({ active: false, startX: 0, startY: 0, originX: 0, originY: 0 });
+    const touchRef = useRef({ mode: null, startX: 0, startY: 0, originX: 0, originY: 0, startDist: 0, startZoom: 85 });
 
-    // Get unique species
-    const speciesList = useMemo(() => {
-        const species = [...new Set(animals.map(a => a.species).filter(Boolean))].sort();
-        if (species.length > 0 && !selectedSpecies) {
-            setSelectedSpecies(species[0]);
+    const speciesList = useMemo(() => [...new Set(animals.map(a => a.species).filter(Boolean))].sort(), [animals]);
+
+    useEffect(() => {
+        if (!speciesList.length) {
+            setSelectedSpecies(null);
+            return;
         }
-        return species;
-    }, [animals, selectedSpecies]);
+        if (!selectedSpecies || !speciesList.includes(selectedSpecies)) {
+            setSelectedSpecies(speciesList[0]);
+        }
+    }, [speciesList, selectedSpecies]);
 
-    // Filter animals by species
     const speciesAnimals = useMemo(() => {
         if (!selectedSpecies) return [];
-        return animals.filter(a => a.species === selectedSpecies);
+        return animals.filter(a => a.species === selectedSpecies && a.id_public);
     }, [animals, selectedSpecies]);
 
-    // Build family tree structure
-    const treeStructure = useMemo(() => {
-        if (speciesAnimals.length === 0) return { roots: [], allNodes: {} };
+    useEffect(() => {
+        if (!selectedSpecies || speciesAnimals.length === 0) {
+            setExternalAncestorsById({});
+            return;
+        }
 
-        const animalMap = {};
-        speciesAnimals.forEach(a => { animalMap[a.id_public] = a; });
+        let cancelled = false;
 
-        const allNodes = {};
-        const parentOf = {}; // Map of parent -> children
-        const childOf = {}; // Map of child -> parents
+        const fetchAncestorForest = async () => {
+            setAncestorLoading(true);
+            const existing = new Map(speciesAnimals.map(a => [a.id_public, a]));
+            const fetched = {};
+            const visited = new Set(existing.keys());
+            const queue = [];
 
-        speciesAnimals.forEach(a => {
-            allNodes[a.id_public] = {
-                ...a,
-                children: [],
-                generation: 0,
+            const enqueueParentIfMissing = (id) => {
+                if (!id || visited.has(id)) return;
+                visited.add(id);
+                queue.push(id);
             };
 
-            const sireId = a.fatherId_public || a.sireId_public;
-            const damId = a.motherId_public || a.damId_public;
+            speciesAnimals.forEach(a => {
+                enqueueParentIfMissing(a.fatherId_public || a.sireId_public);
+                enqueueParentIfMissing(a.motherId_public || a.damId_public);
+            });
 
-            if (sireId) {
-                if (!childOf[a.id_public]) childOf[a.id_public] = [];
-                childOf[a.id_public].push(sireId);
+            const fetchOne = async (id) => {
+                if (!id) return null;
+                if (authToken) {
+                    try {
+                        const r = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(id)}`, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        });
+                        return r.data || null;
+                    } catch {}
+                }
+                try {
+                    const r = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(id)}`);
+                    return r.data?.[0] || null;
+                } catch {
+                    return null;
+                }
+            };
+
+            let guard = 0;
+            while (queue.length > 0 && guard < 1200) {
+                guard += 1;
+                const id = queue.shift();
+                const node = await fetchOne(id);
+                if (cancelled) return;
+                if (!node) continue;
+
+                const nid = node.id_public || id;
+                if (!existing.has(nid)) {
+                    const normalized = { ...node, id_public: nid, isPublicAncestor: true };
+                    existing.set(nid, normalized);
+                    fetched[nid] = normalized;
+                }
+
+                enqueueParentIfMissing(node.fatherId_public || node.sireId_public);
+                enqueueParentIfMissing(node.motherId_public || node.damId_public);
             }
-            if (damId) {
-                if (!childOf[a.id_public]) childOf[a.id_public] = [];
-                childOf[a.id_public].push(damId);
+
+            if (!cancelled) {
+                setExternalAncestorsById(fetched);
+                setAncestorLoading(false);
             }
-        });
-
-        // Find roots (animals with no parents in collection)
-        const roots = speciesAnimals.filter(a => {
-            const sireId = a.fatherId_public || a.sireId_public;
-            const damId = a.motherId_public || a.damId_public;
-            return (!sireId || !animalMap[sireId]) && (!damId || !animalMap[damId]);
-        });
-
-        // Calculate generations top-down
-        const calculateGeneration = (animalId, visited = new Set()) => {
-            if (visited.has(animalId)) return 0;
-            visited.add(animalId);
-            const animal = allNodes[animalId];
-            if (!animal) return 0;
-
-            const sireId = animal.fatherId_public || animal.sireId_public;
-            const damId = animal.motherId_public || animal.damId_public;
-
-            let maxParentGen = 0;
-            if (sireId && animalMap[sireId]) {
-                maxParentGen = Math.max(maxParentGen, calculateGeneration(sireId, visited));
-            }
-            if (damId && animalMap[damId]) {
-                maxParentGen = Math.max(maxParentGen, calculateGeneration(damId, visited));
-            }
-
-            animal.generation = maxParentGen + 1;
-            return animal.generation;
         };
 
-        roots.forEach(r => calculateGeneration(r.id_public));
-
-        // Build offspring relationships
-        speciesAnimals.forEach(a => {
-            const sireId = a.fatherId_public || a.sireId_public;
-            const damId = a.motherId_public || a.damId_public;
-
-            if (sireId && animalMap[sireId]) {
-                if (!animalMap[sireId]._offspring) animalMap[sireId]._offspring = [];
-                animalMap[sireId]._offspring.push(a.id_public);
-            }
-            if (damId && animalMap[damId]) {
-                if (!animalMap[damId]._offspring) animalMap[damId]._offspring = [];
-                animalMap[damId]._offspring.push(a.id_public);
+        fetchAncestorForest().catch(() => {
+            if (!cancelled) {
+                setExternalAncestorsById({});
+                setAncestorLoading(false);
             }
         });
 
-        return { roots: roots.sort((a, b) => (a.name || '').localeCompare(b.name || '')), allNodes, animalMap };
-    }, [speciesAnimals]);
+        return () => { cancelled = true; };
+    }, [selectedSpecies, speciesAnimals, authToken]);
 
-    // Get ancestors of an animal
-    const getAncestors = (animalId, visited = new Set()) => {
-        if (visited.has(animalId)) return new Set();
-        visited.add(animalId);
+    const graphData = useMemo(() => {
+        const byId = {};
+        const childrenByParent = {};
+        const parentLinksByChild = {};
 
-        const ancestors = new Set();
-        const animal = treeStructure.allNodes[animalId];
-        if (!animal) return ancestors;
+        const combinedSpecies = [
+            ...speciesAnimals,
+            ...Object.values(externalAncestorsById),
+        ];
 
-        const sireId = animal.fatherId_public || animal.sireId_public;
-        const damId = animal.motherId_public || animal.damId_public;
+        combinedSpecies.forEach(a => {
+            byId[a.id_public] = a;
+        });
 
-        if (sireId && treeStructure.animalMap[sireId]) {
-            ancestors.add(sireId);
-            getAncestors(sireId, visited).forEach(a => ancestors.add(a));
-        }
-        if (damId && treeStructure.animalMap[damId]) {
-            ancestors.add(damId);
-            getAncestors(damId, visited).forEach(a => ancestors.add(a));
-        }
-
-        return ancestors;
-    };
-
-    // Get descendants of an animal
-    const getDescendants = (animalId, visited = new Set()) => {
-        if (visited.has(animalId)) return new Set();
-        visited.add(animalId);
-
-        const descendants = new Set();
-        const animal = treeStructure.animalMap[animalId];
-        if (!animal) return descendants;
-
-        if (animal._offspring) {
-            animal._offspring.forEach(childId => {
-                descendants.add(childId);
-                getDescendants(childId, visited).forEach(d => descendants.add(d));
+        Object.values(byId).forEach(a => {
+            const parents = [a.fatherId_public || a.sireId_public, a.motherId_public || a.damId_public].filter(Boolean);
+            parentLinksByChild[a.id_public] = parents.filter(pid => byId[pid]);
+            parentLinksByChild[a.id_public].forEach(pid => {
+                if (!childrenByParent[pid]) childrenByParent[pid] = [];
+                childrenByParent[pid].push(a.id_public);
             });
-        }
+        });
 
-        return descendants;
+        const g = new dagre.graphlib.Graph();
+        g.setGraph({
+            rankdir: 'TB',
+            nodesep: 42,
+            ranksep: 128,
+            marginx: 24,
+            marginy: 24,
+            ranker: 'tight-tree',
+        });
+        g.setDefaultEdgeLabel(() => ({}));
+
+        Object.values(byId).forEach(a => {
+            g.setNode(a.id_public, { width: NODE_W, height: NODE_H });
+        });
+
+        Object.values(byId).forEach(child => {
+            (parentLinksByChild[child.id_public] || []).forEach(parentId => {
+                g.setEdge(parentId, child.id_public);
+            });
+        });
+
+        dagre.layout(g);
+
+        const positions = {};
+        g.nodes().forEach(id => {
+            const n = g.node(id);
+            positions[id] = { x: n.x - NODE_W / 2, y: n.y - NODE_H / 2 };
+        });
+
+        const edges = g.edges().map((e, idx) => {
+            const from = positions[e.v];
+            const to = positions[e.w];
+            return {
+                id: `${e.v}-${e.w}-${idx}`,
+                parentId: e.v,
+                childId: e.w,
+                x1: from.x + NODE_W / 2,
+                y1: from.y + NODE_H,
+                x2: to.x + NODE_W / 2,
+                y2: to.y,
+            };
+        });
+
+        const maxX = Math.max(...Object.values(positions).map(p => p.x + NODE_W), 1200) + 48;
+        const maxY = Math.max(...Object.values(positions).map(p => p.y + NODE_H), 700) + 48;
+
+        return { byId, positions, edges, childrenByParent, parentLinksByChild, width: maxX, height: maxY };
+    }, [speciesAnimals, externalAncestorsById]);
+
+    const getAncestors = (id, visited = new Set()) => {
+        if (visited.has(id)) return new Set();
+        visited.add(id);
+        const out = new Set();
+        (graphData.parentLinksByChild[id] || []).forEach(pid => {
+            if (!graphData.byId[pid]) return;
+            out.add(pid);
+            getAncestors(pid, visited).forEach(x => out.add(x));
+        });
+        return out;
     };
 
-    const highlightedAnimals = useMemo(() => {
-        if (!highlightedAnimal) return new Set();
+    const getDescendants = (id, visited = new Set()) => {
+        if (visited.has(id)) return new Set();
+        visited.add(id);
+        const out = new Set();
+        (graphData.childrenByParent[id] || []).forEach(cid => {
+            if (!graphData.byId[cid]) return;
+            out.add(cid);
+            getDescendants(cid, visited).forEach(x => out.add(x));
+        });
+        return out;
+    };
 
-        const highlighted = new Set([highlightedAnimal]);
+    const highlightedSet = useMemo(() => {
+        if (!hoveredAnimal) return new Set();
+        const out = new Set([hoveredAnimal]);
+        const rel = highlightMode === 'descendants' ? getDescendants(hoveredAnimal) : getAncestors(hoveredAnimal);
+        rel.forEach(id => out.add(id));
+        return out;
+    }, [hoveredAnimal, highlightMode, graphData]);
 
-        if (highlightMode === 'ancestors') {
-            getAncestors(highlightedAnimal).forEach(a => highlighted.add(a));
-        } else if (highlightMode === 'descendants') {
-            getDescendants(highlightedAnimal).forEach(d => highlighted.add(d));
-        }
-
-        return highlighted;
-    }, [highlightedAnimal, highlightMode, treeStructure]);
-
-    // Mouse wheel zoom
     const handleWheel = e => {
         if (!e.ctrlKey && !e.metaKey) return;
         e.preventDefault();
-        const delta = e.deltaY > 0 ? -10 : 10;
-        setZoom(z => Math.max(50, Math.min(200, z + delta)));
-    };
-
-    // Pan drag
-    const handleMouseDown = e => {
-        if (e.button !== 1 && !e.shiftKey) return; // Middle mouse or shift+left click
-        isDragging.current = { active: true, startX: e.clientX, startY: e.clientY, panStart: { ...pan } };
-    };
-
-    const handleMouseMove = e => {
-        if (!isDragging.current.active) return;
-        const deltaX = e.clientX - isDragging.current.startX;
-        const deltaY = e.clientY - isDragging.current.startY;
-        setPan({
-            x: isDragging.current.panStart.x + deltaX,
-            y: isDragging.current.panStart.y + deltaY,
-        });
-    };
-
-    const handleMouseUp = () => {
-        isDragging.current.active = false;
+        const delta = e.deltaY > 0 ? -8 : 8;
+        setZoom(prev => Math.max(40, Math.min(180, prev + delta)));
     };
 
     useEffect(() => {
-        const container = containerRef.current;
-        if (container) {
-            container.addEventListener('wheel', handleWheel, { passive: false });
-            return () => container.removeEventListener('wheel', handleWheel);
-        }
+        const el = containerRef.current;
+        if (!el) return;
+        el.addEventListener('wheel', handleWheel, { passive: false });
+        return () => el.removeEventListener('wheel', handleWheel);
     }, []);
+
+    const beginDrag = e => {
+        // Left-drag pans when starting from empty canvas space.
+        if (e.button !== 0 && e.button !== 1) return;
+        if (e.target.closest('[data-family-node="true"]')) return;
+        dragRef.current = { active: true, startX: e.clientX, startY: e.clientY, originX: pan.x, originY: pan.y };
+    };
+
+    const onDrag = e => {
+        if (!dragRef.current.active) return;
+        const dx = e.clientX - dragRef.current.startX;
+        const dy = e.clientY - dragRef.current.startY;
+        setPan({ x: dragRef.current.originX + dx, y: dragRef.current.originY + dy });
+    };
+
+    const endDrag = () => {
+        dragRef.current.active = false;
+    };
+
+    const touchDistance = (t1, t2) => {
+        const dx = t1.clientX - t2.clientX;
+        const dy = t1.clientY - t2.clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    const onTouchStart = e => {
+        if (e.touches.length === 2) {
+            const dist = touchDistance(e.touches[0], e.touches[1]);
+            touchRef.current = { ...touchRef.current, mode: 'pinch', startDist: dist, startZoom: zoom };
+            return;
+        }
+        if (e.touches.length !== 1) return;
+
+        const t = e.touches[0];
+        if (e.target.closest('[data-family-node="true"]')) {
+            touchRef.current = { ...touchRef.current, mode: 'tap' };
+            return;
+        }
+
+        touchRef.current = {
+            ...touchRef.current,
+            mode: 'pan',
+            startX: t.clientX,
+            startY: t.clientY,
+            originX: pan.x,
+            originY: pan.y,
+        };
+    };
+
+    const onTouchMove = e => {
+        if (touchRef.current.mode === 'pinch' && e.touches.length === 2) {
+            e.preventDefault();
+            const dist = touchDistance(e.touches[0], e.touches[1]);
+            if (!touchRef.current.startDist) return;
+            const scale = dist / touchRef.current.startDist;
+            const nextZoom = Math.max(40, Math.min(180, Math.round(touchRef.current.startZoom * scale)));
+            setZoom(nextZoom);
+            return;
+        }
+
+        if (touchRef.current.mode === 'pan' && e.touches.length === 1) {
+            e.preventDefault();
+            const t = e.touches[0];
+            const dx = t.clientX - touchRef.current.startX;
+            const dy = t.clientY - touchRef.current.startY;
+            setPan({ x: touchRef.current.originX + dx, y: touchRef.current.originY + dy });
+        }
+    };
+
+    const onTouchEnd = e => {
+        if (e.touches.length >= 2) {
+            const dist = touchDistance(e.touches[0], e.touches[1]);
+            touchRef.current = { ...touchRef.current, mode: 'pinch', startDist: dist, startZoom: zoom };
+            return;
+        }
+        if (e.touches.length === 1 && touchRef.current.mode === 'pinch') {
+            const t = e.touches[0];
+            touchRef.current = {
+                ...touchRef.current,
+                mode: 'pan',
+                startX: t.clientX,
+                startY: t.clientY,
+                originX: pan.x,
+                originY: pan.y,
+            };
+            return;
+        }
+        touchRef.current = { ...touchRef.current, mode: null, startDist: 0 };
+    };
 
     if (loading) {
         return (
@@ -208,288 +332,164 @@ const FamilyTreeView = ({ animals = [], loading = false }) => {
         );
     }
 
-    if (speciesList.length === 0) {
-        return (
-            <div className="text-center py-12 text-gray-400">
-                <p>No animals to display</p>
-            </div>
-        );
+    if (!speciesList.length) {
+        return <div className="text-center py-12 text-gray-400">No animals to display</div>;
     }
-
-    if (speciesAnimals.length === 0) {
-        return (
-            <div className="text-center py-12 text-gray-400">
-                <p>No animals of this species</p>
-            </div>
-        );
-    }
-
-    const zoomScale = zoom / 100;
 
     return (
         <div className="w-full space-y-4">
-            {/* Controls */}
             <div className="flex items-center gap-3 flex-wrap p-4 bg-gray-50 rounded-lg border border-gray-200">
-                {/* Species selector */}
                 <select
                     value={selectedSpecies || ''}
                     onChange={e => {
                         setSelectedSpecies(e.target.value);
-                        setHighlightedAnimal(null);
-                        setPan({ x: 0, y: 0 });
+                        setHoveredAnimal(null);
+                        setPan({ x: 24, y: 24 });
                     }}
                     className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-accent focus:border-transparent"
                 >
-                    {speciesList.map(s => (
-                        <option key={s} value={s}>{s}</option>
-                    ))}
+                    {speciesList.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
 
-                {/* Animal count */}
                 <span className="text-sm text-gray-600 font-medium">
-                    {speciesAnimals.length} animal{speciesAnimals.length !== 1 ? 's' : ''}
+                    {speciesAnimals.length} account animal{speciesAnimals.length !== 1 ? 's' : ''}
+                    {Object.keys(externalAncestorsById).length > 0 ? ` + ${Object.keys(externalAncestorsById).length} public ancestor${Object.keys(externalAncestorsById).length !== 1 ? 's' : ''}` : ''}
                 </span>
 
-                {/* Zoom controls */}
-                <div className="flex items-center gap-1 ml-auto">
+                {ancestorLoading && (
+                    <span className="text-xs text-gray-500 flex items-center gap-1">
+                        <Loader2 size={12} className="animate-spin" />
+                        Loading linked ancestors...
+                    </span>
+                )}
+
+                <div className="flex items-center gap-2 ml-auto">
+                    <label className="text-xs text-gray-600">Highlight:</label>
                     <button
-                        onClick={() => setZoom(z => Math.max(50, z - 10))}
-                        className="p-2 hover:bg-gray-200 rounded transition"
-                        title="Zoom out (Ctrl+Scroll)"
+                        onClick={() => setHighlightMode('ancestors')}
+                        className={`px-2 py-1 text-xs rounded border ${highlightMode === 'ancestors' ? 'bg-accent text-white border-accent' : 'bg-white text-gray-600 border-gray-300'}`}
                     >
+                        Ancestors
+                    </button>
+                    <button
+                        onClick={() => setHighlightMode('descendants')}
+                        className={`px-2 py-1 text-xs rounded border ${highlightMode === 'descendants' ? 'bg-accent text-white border-accent' : 'bg-white text-gray-600 border-gray-300'}`}
+                    >
+                        Descendants
+                    </button>
+                </div>
+
+                <div className="flex items-center gap-1">
+                    <button onClick={() => setZoom(z => Math.max(40, z - 10))} className="p-2 hover:bg-gray-200 rounded transition" title="Zoom out (Ctrl+Scroll)">
                         <ZoomOut size={16} className="text-gray-600" />
                     </button>
                     <span className="text-xs font-medium text-gray-600 w-12 text-center">{zoom}%</span>
-                    <button
-                        onClick={() => setZoom(z => Math.min(200, z + 10))}
-                        className="p-2 hover:bg-gray-200 rounded transition"
-                        title="Zoom in (Ctrl+Scroll)"
-                    >
+                    <button onClick={() => setZoom(z => Math.min(180, z + 10))} className="p-2 hover:bg-gray-200 rounded transition" title="Zoom in (Ctrl+Scroll)">
                         <ZoomIn size={16} className="text-gray-600" />
                     </button>
+                    <button
+                        onClick={() => {
+                            setZoom(85);
+                            setPan({ x: 24, y: 24 });
+                            setHoveredAnimal(null);
+                        }}
+                        className="p-2 hover:bg-gray-200 rounded transition"
+                        title="Reset view"
+                    >
+                        <Home size={16} className="text-gray-600" />
+                    </button>
                 </div>
-
-                {/* Reset button */}
-                <button
-                    onClick={() => {
-                        setZoom(100);
-                        setPan({ x: 0, y: 0 });
-                        setHighlightedAnimal(null);
-                    }}
-                    className="p-2 hover:bg-gray-200 rounded transition"
-                    title="Reset view"
-                >
-                    <Home size={16} className="text-gray-600" />
-                </button>
             </div>
 
-            {/* Legend */}
-            {highlightedAnimal && (
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                        <p className="text-sm text-gray-700">
-                            <strong>{treeStructure.allNodes[highlightedAnimal]?.name || 'Animal'}</strong> highlighted
-                        </p>
-                        <div className="flex items-center gap-2">
-                            <label className="flex items-center gap-2 cursor-pointer text-sm">
-                                <input
-                                    type="radio"
-                                    checked={highlightMode === 'ancestors'}
-                                    onChange={() => setHighlightMode('ancestors')}
-                                    className="w-4 h-4"
-                                />
-                                Show Ancestors
-                            </label>
-                            <label className="flex items-center gap-2 cursor-pointer text-sm">
-                                <input
-                                    type="radio"
-                                    checked={highlightMode === 'descendants'}
-                                    onChange={() => setHighlightMode('descendants')}
-                                    className="w-4 h-4"
-                                />
-                                Show Descendants
-                            </label>
-                            <button
-                                onClick={() => setHighlightedAnimal(null)}
-                                className="text-sm text-blue-600 hover:text-blue-800 underline"
-                            >
-                                Clear
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Tree viewport */}
             <div
                 ref={containerRef}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
+                onMouseDown={beginDrag}
+                onMouseMove={onDrag}
+                onMouseUp={endDrag}
+                onMouseLeave={endDrag}
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+                onTouchCancel={onTouchEnd}
                 className="w-full border border-gray-300 rounded-lg bg-white overflow-auto shadow-sm"
-                style={{ height: '600px', cursor: 'grab', userSelect: 'none' }}
+                style={{ height: '680px', cursor: dragRef.current.active ? 'grabbing' : 'grab', userSelect: 'none', touchAction: 'none' }}
             >
                 <div
                     style={{
-                        transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoomScale})`,
+                        transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom / 100})`,
                         transformOrigin: '0 0',
-                        transition: isDragging.current.active ? 'none' : 'transform 0.2s',
-                        minWidth: 'max-content',
-                        minHeight: 'max-content',
+                        transition: dragRef.current.active ? 'none' : 'transform 0.12s linear',
+                        width: graphData.width,
+                        height: graphData.height,
+                        position: 'relative',
                     }}
                 >
-                    <FamilyTreeGraph
-                        roots={treeStructure.roots}
-                        allNodes={treeStructure.allNodes}
-                        highlighted={highlightedAnimals}
-                        onAnimalClick={setHighlightedAnimal}
-                    />
+                    <svg style={{ position: 'absolute', inset: 0, width: graphData.width, height: graphData.height, pointerEvents: 'none' }}>
+                        {graphData.edges.map(edge => {
+                            const active = highlightedSet.has(edge.parentId) && highlightedSet.has(edge.childId);
+                            const midY = edge.y1 + (edge.y2 - edge.y1) / 2;
+                            return (
+                                <path
+                                    key={edge.id}
+                                    d={`M ${edge.x1} ${edge.y1} C ${edge.x1} ${midY}, ${edge.x2} ${midY}, ${edge.x2} ${edge.y2}`}
+                                    fill="none"
+                                    stroke={active ? '#d946ef' : '#cbd5e1'}
+                                    strokeWidth={active ? 2.8 : 1.6}
+                                    opacity={hoveredAnimal ? (active ? 1 : 0.18) : 0.75}
+                                />
+                            );
+                        })}
+                    </svg>
+
+                    {Object.entries(graphData.positions).map(([id, pos]) => {
+                        const animal = graphData.byId[id];
+                        if (!animal) return null;
+                        const active = highlightedSet.has(id);
+                        const isMale = animal.gender === 'Male';
+                        const isFemale = animal.gender === 'Female';
+                        const borderColor = isMale ? '#3b82f6' : isFemale ? '#ec4899' : '#94a3b8';
+                        const bgColor = isMale ? '#e8f1ff' : isFemale ? '#fdeef6' : '#f8fafc';
+                        const GenderIcon = isMale ? Mars : Venus;
+
+                        return (
+                            <button
+                                key={id}
+                                type="button"
+                                data-family-node="true"
+                                onMouseEnter={() => setHoveredAnimal(id)}
+                                onMouseLeave={() => setHoveredAnimal(null)}
+                                onClick={() => onViewAnimal && onViewAnimal(animal)}
+                                style={{
+                                    position: 'absolute',
+                                    left: pos.x,
+                                    top: pos.y,
+                                    width: NODE_W,
+                                    height: NODE_H,
+                                    borderColor,
+                                    backgroundColor: bgColor,
+                                    touchAction: 'manipulation',
+                                }}
+                                className={`text-left p-2.5 rounded-xl border transition-all shadow-sm ${active ? 'ring-2 ring-pink-200' : hoveredAnimal ? 'opacity-35' : 'hover:border-accent hover:shadow-md'}`}
+                                title="Click to open animal details"
+                            >
+                                <div className="absolute top-1 right-1">
+                                    <GenderIcon size={14} color={borderColor} />
+                                </div>
+                                <p className="text-sm font-semibold text-gray-800 truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ') || 'Unnamed'}</p>
+                                <p className="text-xs text-gray-500 truncate">{animal.species || 'Unknown species'}</p>
+                                <p className="text-xs text-gray-400">{animal.birthDate ? formatDate(animal.birthDate) : 'No birth date'}</p>
+                                <p className="text-xs text-gray-600 mt-1 truncate">{animal.status || 'Unknown'}</p>
+                                <p className="text-xs text-gray-600 truncate">{animal.color || 'No variety'}</p>
+                                <p className="text-[10px] text-gray-400 font-mono truncate mt-0.5">{animal.id_public}{animal.isPublicAncestor ? ' • public' : ''}</p>
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 
-            {/* Info */}
             <p className="text-xs text-gray-500 italic">
-                Tip: Ctrl+Scroll to zoom • Shift+Drag to pan • Click an animal to highlight relationships
+                Hover a node to highlight {highlightMode}. Click a node to open details. Use Ctrl+scroll to zoom and drag empty space to pan. On touch devices: one-finger drag to pan, two-finger pinch to zoom.
             </p>
-        </div>
-    );
-};
-
-// Render the hierarchical tree graph
-const FamilyTreeGraph = ({ roots, allNodes, highlighted, onAnimalClick }) => {
-    // Group by generation
-    const generationMap = {};
-    Object.values(allNodes).forEach(node => {
-        if (!generationMap[node.generation]) generationMap[node.generation] = [];
-        generationMap[node.generation].push(node);
-    });
-
-    const generations = Object.keys(generationMap).map(Number).sort((a, b) => a - b);
-    const maxGen = Math.max(...generations, 0);
-
-    // Position nodes
-    const nodePositions = {};
-    const cellWidth = 200;
-    const cellHeight = 140;
-    const genHeight = 180;
-
-    generations.forEach(gen => {
-        const nodesInGen = generationMap[gen] || [];
-        nodesInGen.forEach((node, idx) => {
-            nodePositions[node.id_public] = {
-                x: idx * cellWidth + 20,
-                y: (maxGen - gen) * genHeight + 20,
-            };
-        });
-    });
-
-    // Draw edges
-    const edges = [];
-    Object.values(allNodes).forEach(node => {
-        const sireId = node.fatherId_public || node.sireId_public;
-        const damId = node.motherId_public || node.damId_public;
-        const fromPos = nodePositions[node.id_public];
-
-        if (sireId && allNodes[sireId] && fromPos) {
-            const toPos = nodePositions[sireId];
-            if (toPos) {
-                edges.push({
-                    from: node.id_public,
-                    to: sireId,
-                    x1: fromPos.x + 90,
-                    y1: fromPos.y,
-                    x2: toPos.x + 90,
-                    y2: toPos.y + cellHeight,
-                });
-            }
-        }
-
-        if (damId && allNodes[damId] && fromPos) {
-            const toPos = nodePositions[damId];
-            if (toPos) {
-                edges.push({
-                    from: node.id_public,
-                    to: damId,
-                    x1: fromPos.x + 90,
-                    y1: fromPos.y,
-                    x2: toPos.x + 90,
-                    y2: toPos.y + cellHeight,
-                });
-            }
-        }
-    });
-
-    // Calculate SVG dimensions
-    const maxX = Math.max(...Object.values(nodePositions).map(p => p.x), 200) + cellWidth + 40;
-    const maxY = Math.max(...Object.values(nodePositions).map(p => p.y), 200) + cellHeight + 40;
-
-    return (
-        <div style={{ position: 'relative', width: maxX, height: maxY, paddingBottom: '40px' }}>
-            {/* SVG for edges */}
-            <svg
-                style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: maxX,
-                    height: maxY,
-                    pointerEvents: 'none',
-                }}
-            >
-                {edges.map((edge, idx) => (
-                    <line
-                        key={idx}
-                        x1={edge.x1}
-                        y1={edge.y1}
-                        x2={edge.x2}
-                        y2={edge.y2}
-                        stroke={highlighted.has(edge.from) && highlighted.has(edge.to) ? '#ec4899' : '#d1d5db'}
-                        strokeWidth={highlighted.has(edge.from) && highlighted.has(edge.to) ? 3 : 1}
-                        opacity={highlighted.has(edge.from) && highlighted.has(edge.to) ? 1 : 0.5}
-                    />
-                ))}
-            </svg>
-
-            {/* Nodes */}
-            {Object.entries(nodePositions).map(([animalId, pos]) => {
-                const animal = allNodes[animalId];
-                if (!animal) return null;
-
-                const isHighlighted = highlighted.has(animalId);
-
-                return (
-                    <div
-                        key={animalId}
-                        onClick={() => onAnimalClick(animalId)}
-                        style={{
-                            position: 'absolute',
-                            left: pos.x,
-                            top: pos.y,
-                            width: cellWidth - 20,
-                            height: cellHeight,
-                        }}
-                        className={`p-2 rounded-lg border-2 cursor-pointer transition-all ${
-                            isHighlighted
-                                ? 'bg-pink-100 border-pink-500 shadow-lg ring-2 ring-pink-300'
-                                : highlighted.size > 0
-                                ? 'bg-gray-50 border-gray-300 opacity-30'
-                                : 'bg-white border-gray-300 hover:shadow-md hover:border-accent'
-                        }`}
-                    >
-                        <div className="text-xs font-semibold text-gray-800 truncate">
-                            {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
-                        </div>
-                        {animal.species && <div className="text-[10px] text-gray-500">{animal.species}</div>}
-                        {animal.birthDate && <div className="text-[10px] text-gray-400">{formatDate(animal.birthDate)}</div>}
-                        <div className="text-[10px] text-gray-500 mt-1">
-                            {animal.gender === 'Male' ? '♂' : animal.gender === 'Female' ? '♀' : '◆'} {animal.status || 'Unknown'}
-                        </div>
-                        {animal.color && <div className="text-[10px] text-gray-600 truncate mt-0.5">{animal.color}</div>}
-                        <div className="text-[9px] text-gray-400 font-mono mt-0.5 truncate">{animal.id_public}</div>
-                    </div>
-                );
-            })}
         </div>
     );
 };
