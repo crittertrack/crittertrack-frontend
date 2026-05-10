@@ -1395,10 +1395,16 @@ const FamilyTreeView = ({
                                 const hasHighlightSelection = highlightMode !== 'none' && highlightedSet.size > 0;
                                 const isPairLine = seg.id.includes('partner-network');
                                 const isDescendantLine = /offspring|child|trunk|anchor|single-diagonal|single-parent/.test(seg.id);
+                                const relatedHighlightCount = (seg.relatedIds || []).reduce(
+                                    (count, rid) => count + (highlightedSet.has(rid) ? 1 : 0),
+                                    0
+                                );
                                 const allowPairLineHighlight = highlightMode === 'descendants';
-                                const active = hasHighlightSelection
-                                    && (!isPairLine || allowPairLineHighlight)
-                                    && seg.relatedIds.some(rid => highlightedSet.has(rid));
+                                const active = hasHighlightSelection && (
+                                    isPairLine
+                                        ? (allowPairLineHighlight && relatedHighlightCount >= 1)
+                                        : relatedHighlightCount >= 2
+                                );
 
                                 const baseStroke = isPairLine ? '#2563eb' : isDescendantLine ? '#7c3aed' : '#64748b';
                                 const activeStroke = isPairLine ? '#1d4ed8' : isDescendantLine ? '#6d28d9' : '#334155';
