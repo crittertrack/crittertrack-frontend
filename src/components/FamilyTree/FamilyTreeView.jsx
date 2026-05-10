@@ -516,29 +516,76 @@ const FamilyTreeView = ({
                 || lineageColorFromKey(pairKey);
 
             const laneOffset = lineLaneOffset(pairKey, 8);
-            const childLaneOffset = lineLaneOffset(`${pairKey}-children`, 6);
-
             const childBandBaseY = Math.min(...children.map(c => c.yTop)) - 16;
-            const childBandY = keepAwayFromNode(childBandBaseY + childLaneOffset, Math.min(...children.map(c => c.yTop)) - 20, Math.max(...children.map(c => c.yTop)) + NODE_H - 8, 6);
+
+            const litterGroups = [];
+            const litterGroupByKey = new Map();
+            children.forEach(child => {
+                const birthKey = child.birthDate ? new Date(child.birthDate).toISOString().slice(0, 10) : 'unknown';
+                const litterKey = `${pairKey}|${birthKey}`;
+                if (!litterGroupByKey.has(litterKey)) {
+                    const groupIndex = litterGroups.length;
+                    const litterLaneY = childBandBaseY - (groupIndex * 14) - lineLaneOffset(litterKey, 3);
+                    const group = {
+                        key: litterKey,
+                        birthKey,
+                        laneY: litterLaneY,
+                        children: [],
+                    };
+                    litterGroupByKey.set(litterKey, group);
+                    litterGroups.push(group);
+                }
+                litterGroupByKey.get(litterKey).children.push(child);
+            });
+
+            litterGroups.sort((a, b) => {
+                if (a.birthKey === 'unknown' && b.birthKey === 'unknown') return a.key.localeCompare(b.key);
+                if (a.birthKey === 'unknown') return 1;
+                if (b.birthKey === 'unknown') return -1;
+                return a.birthKey.localeCompare(b.birthKey);
+            });
+
+            litterGroups.forEach((group, groupIndex) => {
+                group.laneY = keepAwayFromNode(
+                    childBandBaseY - (groupIndex * 14) - lineLaneOffset(group.key, 3),
+                    Math.min(...group.children.map(c => c.yTop)) - 20,
+                    Math.max(...group.children.map(c => c.yTop)) + NODE_H - 8,
+                    6,
+                );
+            });
 
             if (connectorStyle === 'diagonal') {
                 if (parents.length === 1) {
                     const p = parents[0];
                     const fanY = keepAwayFromNode(p.yBottom + 10 + laneOffset, p.yMid, p.yBottom + NODE_H, 4);
 
-                    edgeSegments.push({
-                        id: `seg-${pairKey}-single-diagonal-anchor`,
-                        d: `M ${p.x} ${p.yBottom} L ${p.x} ${fanY}`,
-                        relatedIds: [p.id, ...children.map(c => c.id)],
-                        color: pairColor,
-                    });
+                    litterGroups.forEach((group, groupIndex) => {
+                        const childXs = group.children.map(c => c.x);
+                        const minX = Math.min(...childXs);
+                        const maxX = Math.max(...childXs);
+                        const fanLaneY = keepAwayFromNode(fanY - (groupIndex * 10), p.yMid, group.laneY + NODE_H, 4);
 
-                    children.forEach((c, idx) => {
                         edgeSegments.push({
-                            id: `seg-${pairKey}-single-diagonal-${idx}`,
-                            d: `M ${p.x} ${fanY} L ${c.x} ${c.yTop}`,
-                            relatedIds: [p.id, c.id],
+                            id: `seg-${pairKey}-single-diagonal-anchor-${groupIndex}`,
+                            d: `M ${p.x} ${p.yBottom} L ${p.x} ${fanLaneY}`,
+                            relatedIds: [p.id, ...group.children.map(c => c.id)],
                             color: pairColor,
+                        });
+
+                        edgeSegments.push({
+                            id: `seg-${pairKey}-single-diagonal-band-${groupIndex}`,
+                            d: `M ${p.x} ${fanLaneY} L ${minX} ${fanLaneY} L ${maxX} ${fanLaneY}`,
+                            relatedIds: [p.id, ...group.children.map(c => c.id)],
+                            color: pairColor,
+                        });
+
+                        group.children.forEach((c, idx) => {
+                            edgeSegments.push({
+                                id: `seg-${pairKey}-single-diagonal-child-${groupIndex}-${idx}`,
+                                d: `M ${c.x} ${fanLaneY} L ${c.x} ${c.yTop}`,
+                                relatedIds: [p.id, c.id],
+                                color: pairColor,
+                            });
                         });
                     });
                     return;
@@ -566,12 +613,26 @@ const FamilyTreeView = ({
                     color: pairColor,
                 });
 
-                children.forEach((c, idx) => {
+                litterGroups.forEach((group, groupIndex) => {
+                    const childXs = group.children.map(c => c.x);
+                    const minX = Math.min(...childXs);
+                    const maxX = Math.max(...childXs);
+                    const groupFanY = keepAwayFromNode(fanY - (groupIndex * 10), partnerLineY, group.laneY + NODE_H, 4);
+
                     edgeSegments.push({
-                        id: `seg-${pairKey}-diagonal-child-${idx}`,
-                        d: `M ${trunkX} ${fanY} L ${c.x} ${c.yTop}`,
-                        relatedIds: [leftParent.id, rightParent.id, c.id],
+                        id: `seg-${pairKey}-diagonal-band-${groupIndex}`,
+                        d: `M ${trunkX} ${groupFanY} L ${minX} ${groupFanY} L ${maxX} ${groupFanY}`,
+                        relatedIds: [leftParent.id, rightParent.id, ...group.children.map(c => c.id)],
                         color: pairColor,
+                    });
+
+                    group.children.forEach((c, idx) => {
+                        edgeSegments.push({
+                            id: `seg-${pairKey}-diagonal-child-${groupIndex}-${idx}`,
+                            d: `M ${trunkX} ${groupFanY} L ${c.x} ${c.yTop}`,
+                            relatedIds: [leftParent.id, rightParent.id, c.id],
+                            color: pairColor,
+                        });
                     });
                 });
                 return;
@@ -580,35 +641,38 @@ const FamilyTreeView = ({
             // Orthogonal connector style (default): parent-pair grouping with shared sibling bars.
             if (parents.length === 1) {
                 const p = parents[0];
-                const minX = Math.min(...children.map(c => c.x));
-                const maxX = Math.max(...children.map(c => c.x));
-                let dropStartY = childBandY;
+                litterGroups.forEach((group, groupIndex) => {
+                    const minX = Math.min(...group.children.map(c => c.x));
+                    const maxX = Math.max(...group.children.map(c => c.x));
+                    const groupY = keepAwayFromNode(group.laneY, p.yMid, Math.max(...group.children.map(c => c.yTop)) + NODE_H, 4);
+                    const groupAnchorX = minX - 8 - (groupIndex % 2) * 6;
 
-                if (children.length > 1) {
-                    edgeSegments.push({
-                        id: `seg-${pairKey}-single-offspring-network`,
-                        d: `M ${p.x} ${p.yBottom} L ${p.x} ${childBandY} L ${minX} ${childBandY} L ${maxX} ${childBandY}`,
-                        relatedIds: [p.id, ...children.map(c => c.id)],
-                        color: pairColor,
-                    });
-                } else {
-                    const onlyChild = children[0];
-                    const elbowY = keepAwayFromNode(p.yBottom + ((onlyChild.yTop - p.yBottom) * 0.52) + laneOffset, p.yMid, onlyChild.yTop + NODE_H, 4);
-                    dropStartY = elbowY;
-                    edgeSegments.push({
-                        id: `seg-${pairKey}-single-parent-trunk`,
-                        d: `M ${p.x} ${p.yBottom} L ${p.x} ${elbowY} L ${onlyChild.x} ${elbowY}`,
-                        relatedIds: [p.id, ...children.map(c => c.id)],
-                        color: pairColor,
-                    });
-                }
+                    if (group.children.length > 1) {
+                        edgeSegments.push({
+                            id: `seg-${pairKey}-single-offspring-network-${groupIndex}`,
+                            d: `M ${p.x} ${p.yBottom} L ${p.x} ${groupY} L ${groupAnchorX} ${groupY} L ${maxX} ${groupY}`,
+                            relatedIds: [p.id, ...group.children.map(c => c.id)],
+                            color: pairColor,
+                        });
+                    } else {
+                        const onlyChild = group.children[0];
+                        const elbowY = keepAwayFromNode(p.yBottom + ((onlyChild.yTop - p.yBottom) * 0.52) + laneOffset, p.yMid, onlyChild.yTop + NODE_H, 4);
+                        const elbowX = onlyChild.x - 10 - (groupIndex % 2) * 6;
+                        edgeSegments.push({
+                            id: `seg-${pairKey}-single-parent-trunk-${groupIndex}`,
+                            d: `M ${p.x} ${p.yBottom} L ${p.x} ${elbowY} L ${elbowX} ${elbowY} L ${onlyChild.x} ${elbowY}`,
+                            relatedIds: [p.id, onlyChild.id],
+                            color: pairColor,
+                        });
+                    }
 
-                children.forEach((c, idx) => {
-                    edgeSegments.push({
-                        id: `seg-${pairKey}-single-child-${idx}`,
-                        d: `M ${c.x} ${dropStartY} L ${c.x} ${c.yTop}`,
-                        relatedIds: [p.id, c.id],
-                        color: pairColor,
+                    group.children.forEach((c, idx) => {
+                        edgeSegments.push({
+                            id: `seg-${pairKey}-single-child-${groupIndex}-${idx}`,
+                            d: `M ${c.x} ${groupY} L ${c.x} ${c.yTop}`,
+                            relatedIds: [p.id, c.id],
+                            color: pairColor,
+                        });
                     });
                 });
                 return;
@@ -628,35 +692,38 @@ const FamilyTreeView = ({
                 color: pairColor,
             });
 
-            const minX = Math.min(...children.map(c => c.x));
-            const maxX = Math.max(...children.map(c => c.x));
-            let dropStartY = childBandY;
+            litterGroups.forEach((group, groupIndex) => {
+                const minX = Math.min(...group.children.map(c => c.x));
+                const maxX = Math.max(...group.children.map(c => c.x));
+                const groupY = keepAwayFromNode(group.laneY, partnerLineY, Math.max(...group.children.map(c => c.yTop)) + NODE_H, 4);
+                const groupTrunkX = trunkX + ((groupIndex % 2 === 0 ? -1 : 1) * 6 * Math.ceil(groupIndex / 2));
 
-            if (children.length > 1) {
-                edgeSegments.push({
-                    id: `seg-${pairKey}-offspring-network`,
-                    d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${childBandY} L ${minX} ${childBandY} L ${maxX} ${childBandY}`,
-                    relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
-                    color: pairColor,
-                });
-            } else {
-                const onlyChild = children[0];
-                const elbowY = keepAwayFromNode(partnerLineY + ((onlyChild.yTop - partnerLineY) * 0.52) + laneOffset, partnerLineY, onlyChild.yTop + NODE_H, 4);
-                dropStartY = elbowY;
-                edgeSegments.push({
-                    id: `seg-${pairKey}-trunk`,
-                    d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${elbowY} L ${onlyChild.x} ${elbowY}`,
-                    relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
-                    color: pairColor,
-                });
-            }
+                if (group.children.length > 1) {
+                    edgeSegments.push({
+                        id: `seg-${pairKey}-offspring-network-${groupIndex}`,
+                        d: `M ${groupTrunkX} ${partnerLineY} L ${groupTrunkX} ${groupY} L ${minX} ${groupY} L ${maxX} ${groupY}`,
+                        relatedIds: [leftParent.id, rightParent.id, ...group.children.map(c => c.id)],
+                        color: pairColor,
+                    });
+                } else {
+                    const onlyChild = group.children[0];
+                    const elbowY = keepAwayFromNode(partnerLineY + ((onlyChild.yTop - partnerLineY) * 0.52) + laneOffset, partnerLineY, onlyChild.yTop + NODE_H, 4);
+                    const elbowX = onlyChild.x + ((groupIndex % 2 === 0 ? -1 : 1) * (8 + groupIndex * 2));
+                    edgeSegments.push({
+                        id: `seg-${pairKey}-trunk-${groupIndex}`,
+                        d: `M ${groupTrunkX} ${partnerLineY} L ${groupTrunkX} ${elbowY} L ${elbowX} ${elbowY} L ${onlyChild.x} ${elbowY}`,
+                        relatedIds: [leftParent.id, rightParent.id, onlyChild.id],
+                        color: pairColor,
+                    });
+                }
 
-            children.forEach((c, idx) => {
-                edgeSegments.push({
-                    id: `seg-${pairKey}-child-drop-${idx}`,
-                    d: `M ${c.x} ${dropStartY} L ${c.x} ${c.yTop}`,
-                    relatedIds: [leftParent.id, rightParent.id, c.id],
-                    color: pairColor,
+                group.children.forEach((c, idx) => {
+                    edgeSegments.push({
+                        id: `seg-${pairKey}-child-drop-${groupIndex}-${idx}`,
+                        d: `M ${c.x} ${groupY} L ${c.x} ${c.yTop}`,
+                        relatedIds: [leftParent.id, rightParent.id, c.id],
+                        color: pairColor,
+                    });
                 });
             });
         });
