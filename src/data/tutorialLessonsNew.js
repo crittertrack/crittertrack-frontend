@@ -442,9 +442,9 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 4,
         title: 'Genetic Code',
-        content: 'The Genetic Code field lets you record the genetic notation for your animal. For Fancy Mouse, an ADD button appears next to the field — click it to open the interactive Genetic Builder which guides you through selecting genes with dropdowns. For all other species, only a plain text field is shown with no builder or modal.',
+        content: 'The Genetic Code field lets you record the genetic notation for your animal. For Fancy Mouse and Fancy Rat, an ADD button appears next to the field — click it to open the interactive Genetic Builder which guides you through selecting genes with dropdowns. For all other species, only a plain text field is shown with no builder or modal.',
         tips: [
-          'Fancy Mouse only: ADD button opens the interactive Genetic Builder',
+          'Fancy Mouse and Fancy Rat: ADD button opens the interactive Genetic Builder',
           'All other species: plain text field, no builder or modal',
           'Genetic codes are optional but highly recommended for breeders',
           'You can always edit this later'
@@ -453,9 +453,9 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 5,
         title: 'Genetic Builder Overview',
-        content: 'Welcome to the Genetic Code Builder! This tool helps you document the genetic traits of your animal. You can select genes using dropdown menus (available for Fancy Mouse) or switch to manual mode to enter genetics for any species.',
+        content: 'Welcome to the Genetic Code Builder! This tool helps you document the genetic traits of your animal. You can select genes using dropdown menus (available for Fancy Mouse and Fancy Rat) or switch to manual mode to enter genetics for any species.',
         tips: [
-          'Dropdown mode available for Fancy Mouse',
+          'Dropdown mode available for Fancy Mouse and Fancy Rat',
           'Manual mode available for all species',
           'Both methods produce the same result',
           'Click "Switch to Manual" to continue'
@@ -555,9 +555,12 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 2,
-        title: 'Select Sire (Father)',
-        content: 'Click the "Select Sire" button to choose the father of your animal. This will open a search modal.',
+        title: 'Assign Sire (Father)',
+        content: 'In the parent assignment area, set the Sire/Father using the parent picker for that slot. Use the Manual/CTC switch to choose your entry mode: CTC mode opens the search selector for existing animals, while Manual mode lets you type parent details directly.',
         tips: [
+          'Use the Sire/Father slot in the parent section (not a separate old-style button)',
+          'Use the Manual/CTC switch before selecting a parent',
+          'CTC mode links to existing animal records; Manual mode is for unregistered/unknown parents',
           'Sire must be the same species',
           'Sire is typically male (but not always)',
           'Search in Local Animals (yours) or Global (community)'
@@ -566,8 +569,9 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 3,
         title: 'Parent Search System',
-        content: 'This modal lets you search for the sire. Notice the buttons for "Local" (your animals), "Global" (community animals), and "Both". You can also search by name or ID. The system only shows animals that match your current animal\'s species and the correct gender. Note: Global search only shows public community animals that other users have made publicly visible.',
+        content: 'In CTC mode, the parent selector modal lets you search for the sire. Notice the buttons for "Local" (your animals), "Global" (community animals), and "Both". You can also search by name or ID. The system only shows animals that match your current animal\'s species and the correct gender. Note: Global search only shows public community animals that other users have made publicly visible.',
         tips: [
+          'If you do not want to link a CTC record, switch back to Manual mode',
           'Local Animals: Your collection only',
           'Global Animals: Public community animals only',
           'Both: Search everywhere',
