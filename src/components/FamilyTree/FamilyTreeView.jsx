@@ -34,6 +34,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
     const [showNoPedigreePanel, setShowNoPedigreePanel] = useState(true);
     const [hoveredAnimal, setHoveredAnimal] = useState(null);
     const [highlightMode, setHighlightMode] = useState('ancestors');
+    const [connectorStyle, setConnectorStyle] = useState('orthogonal');
     const [externalAncestorsById, setExternalAncestorsById] = useState({});
     const [ancestorLoading, setAncestorLoading] = useState(false);
     const containerRef = useRef(null);
@@ -327,7 +328,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
             height: maxY,
             noPedigreeAnimals,
         };
-    }, [speciesAnimals, externalAncestorsById]);
+    }, [speciesAnimals, externalAncestorsById, connectorStyle]);
 
     const noPedigreeAnimals = graphData.noPedigreeAnimals || [];
 
@@ -544,7 +545,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                 </div>
             </div>
 
-            <div className={`grid grid-cols-1 lg:grid-cols-[${showNoPedigreePanel ? '280px' : '44px'}_minmax(0,1fr)] gap-4`}>
+            <div className={`grid ${showNoPedigreePanel ? 'grid-cols-[280px_minmax(0,1fr)]' : 'grid-cols-[44px_minmax(0,1fr)]'} gap-4`}>
                 <div className="border border-gray-300 rounded-lg bg-white shadow-sm h-[680px] overflow-hidden">
                     <div className="sticky top-0 bg-white/95 backdrop-blur border-b border-gray-200 px-2.5 py-2 flex items-center justify-between gap-2">
                         {showNoPedigreePanel ? (
