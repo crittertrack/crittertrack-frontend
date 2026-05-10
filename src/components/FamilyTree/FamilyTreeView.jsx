@@ -425,7 +425,14 @@ const FamilyTreeView = ({
 
         Object.entries(pairGroups).forEach(([pairKey, group]) => {
             const parents = group.parentIds
-                .map(pid => ({ id: pid, x: positions[pid].x + NODE_W / 2, yBottom: positions[pid].y + NODE_H }))
+                .map(pid => ({
+                    id: pid,
+                    x: positions[pid].x + NODE_W / 2,
+                    leftX: positions[pid].x,
+                    rightX: positions[pid].x + NODE_W,
+                    yMid: positions[pid].y + NODE_H / 2,
+                    yBottom: positions[pid].y + NODE_H,
+                }))
                 .sort((a, b) => a.x - b.x);
             const children = group.childIds
                 .filter(cid => positions[cid])
@@ -466,13 +473,15 @@ const FamilyTreeView = ({
 
                 const leftParent = parents[0];
                 const rightParent = parents[parents.length - 1];
-                const partnerLineY = Math.max(leftParent.yBottom, rightParent.yBottom) + 8;
-                const trunkX = (leftParent.x + rightParent.x) / 2;
+                const partnerLineY = (leftParent.yMid + rightParent.yMid) / 2;
+                const partnerLeftX = leftParent.rightX;
+                const partnerRightX = rightParent.leftX;
+                const trunkX = (partnerLeftX + partnerRightX) / 2;
                 const fanY = partnerLineY + 10;
 
                 edgeSegments.push({
                     id: `seg-${pairKey}-diagonal-partner-network`,
-                    d: `M ${leftParent.x} ${leftParent.yBottom} L ${leftParent.x} ${partnerLineY} L ${rightParent.x} ${partnerLineY} L ${rightParent.x} ${rightParent.yBottom}`,
+                    d: `M ${partnerLeftX} ${leftParent.yMid} L ${partnerLeftX} ${partnerLineY} L ${partnerRightX} ${partnerLineY} L ${partnerRightX} ${rightParent.yMid}`,
                     relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
                     color: pairColor,
                 });
@@ -500,6 +509,7 @@ const FamilyTreeView = ({
                 const p = parents[0];
                 const minX = Math.min(...children.map(c => c.x));
                 const maxX = Math.max(...children.map(c => c.x));
+                let dropStartY = childBandY;
 
                 if (children.length > 1) {
                     edgeSegments.push({
@@ -511,6 +521,7 @@ const FamilyTreeView = ({
                 } else {
                     const onlyChild = children[0];
                     const elbowY = p.yBottom + ((onlyChild.yTop - p.yBottom) * 0.52);
+                    dropStartY = elbowY;
                     edgeSegments.push({
                         id: `seg-${pairKey}-single-parent-trunk`,
                         d: `M ${p.x} ${p.yBottom} L ${p.x} ${elbowY} L ${onlyChild.x} ${elbowY}`,
@@ -522,7 +533,7 @@ const FamilyTreeView = ({
                 children.forEach((c, idx) => {
                     edgeSegments.push({
                         id: `seg-${pairKey}-single-child-${idx}`,
-                        d: `M ${c.x} ${childBandY} L ${c.x} ${c.yTop}`,
+                        d: `M ${c.x} ${dropStartY} L ${c.x} ${c.yTop}`,
                         relatedIds: [p.id, c.id],
                         color: pairColor,
                     });
@@ -532,18 +543,21 @@ const FamilyTreeView = ({
 
             const leftParent = parents[0];
             const rightParent = parents[parents.length - 1];
-            const partnerLineY = Math.max(leftParent.yBottom, rightParent.yBottom) + 8;
-            const trunkX = (leftParent.x + rightParent.x) / 2;
+            const partnerLineY = (leftParent.yMid + rightParent.yMid) / 2;
+            const partnerLeftX = leftParent.rightX;
+            const partnerRightX = rightParent.leftX;
+            const trunkX = (partnerLeftX + partnerRightX) / 2;
 
             edgeSegments.push({
                 id: `seg-${pairKey}-partner-network`,
-                d: `M ${leftParent.x} ${leftParent.yBottom} L ${leftParent.x} ${partnerLineY} L ${rightParent.x} ${partnerLineY} L ${rightParent.x} ${rightParent.yBottom}`,
+                d: `M ${partnerLeftX} ${leftParent.yMid} L ${partnerLeftX} ${partnerLineY} L ${partnerRightX} ${partnerLineY} L ${partnerRightX} ${rightParent.yMid}`,
                 relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
                 color: pairColor,
             });
 
             const minX = Math.min(...children.map(c => c.x));
             const maxX = Math.max(...children.map(c => c.x));
+            let dropStartY = childBandY;
 
             if (children.length > 1) {
                 edgeSegments.push({
@@ -555,6 +569,7 @@ const FamilyTreeView = ({
             } else {
                 const onlyChild = children[0];
                 const elbowY = partnerLineY + ((onlyChild.yTop - partnerLineY) * 0.52);
+                dropStartY = elbowY;
                 edgeSegments.push({
                     id: `seg-${pairKey}-trunk`,
                     d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${elbowY} L ${onlyChild.x} ${elbowY}`,
@@ -566,7 +581,7 @@ const FamilyTreeView = ({
             children.forEach((c, idx) => {
                 edgeSegments.push({
                     id: `seg-${pairKey}-child-drop-${idx}`,
-                    d: `M ${c.x} ${childBandY} L ${c.x} ${c.yTop}`,
+                    d: `M ${c.x} ${dropStartY} L ${c.x} ${c.yTop}`,
                     relatedIds: [leftParent.id, rightParent.id, c.id],
                     color: pairColor,
                 });
