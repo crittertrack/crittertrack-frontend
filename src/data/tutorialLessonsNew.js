@@ -1194,90 +1194,111 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 2,
-        title: 'Litter Management',
-        content: 'You\'re now in the Litters section. This is where you track matings, litters, and offspring. Use the separate "+ Mating" button to create a mating record and the "+ Litter" button to create a litter record.',
+        title: 'Open + Mating First',
+        content: 'Start with "+ Mating" when you want to record a planned breeding. Clicking it opens the planned mating modal, where the first field you must fill is the species picker. From there the sire and dam choices become available and the rest of the mating details can be entered.',
         tips: [
-          'Use + Mating for planned/active pairings',
-          'Use + Litter for litter records and offspring workflows',
-          'Litters organize offspring by breeding',
-          'Each litter has parents and offspring'
+          'The planned mating flow starts by opening + Mating',
+          'Species is chosen inside the modal, not on the page',
+          'Use this flow for pairings that have not produced a litter yet',
+          'The sire and dam fields stay disabled until species is chosen'
         ]
       },
       {
         stepNumber: 3,
-        title: 'Sire & Dam Selection',
-        content: 'Select both a Sire (father) and Dam (mother) for the litter. Note: Intersex and Unknown gender animals can be selected on both Sire and Dam selectors, allowing inclusive representation of intersex/unknown animals.',
+        title: 'Choose Species in the Mating Modal',
+        content: 'Inside the planned mating modal, click the Species field and pick the correct species from the picker. Selecting a species clears any parent selections so the sire and dam search can be filtered correctly for that species.',
         tips: [
-          'Both parents are mandatory',
-          'Can use same species animals',
-          'Inclusive gender selection available'
+          'This happens inside the + Mating modal',
+          'Choosing species resets the sire and dam fields',
+          'Parent search is filtered after the species is set'
         ]
       },
       {
         stepNumber: 4,
-        title: 'Birth Date & Offspring Count',
-        content: 'Enter the birth date of the litter (optional but recommended). The male and female count fields are simple text fields for administrative tracking. There is a separate feature for direct offspring creation that relies on the birth date.',
+        title: 'Select Sire and Dam',
+        content: 'After the species is set, choose the sire and dam for the planned mating. The sire and dam buttons are only enabled once a species has been selected. When both parents are chosen, the modal can show a predicted COI, and the parent cards are now tied to the correct species.',
         tips: [
-          'Birth date needed to create offspring directly',
-          'Male/female counts are optional text fields',
-          'Used for statistics and tracking'
+          'Parent selection comes after species selection',
+          'Predicted COI appears after both parents are selected',
+          'The buttons stay disabled until the species is set',
+          'This is the actual breeding pair you are recording'
         ]
       },
       {
         stepNumber: 5,
-        title: 'Link Existing Animals',
-        content: 'You can link existing animals as offspring during litter creation. Select animals with matching parents to link them to this litter. If you have no birth date filled, it will auto-fill from the existing offspring when you click them.',
+        title: 'Add Mating Date and Details',
+        content: 'Fill in the mating date and the expected due date. Then open the optional breeding details area if you want to record the breeding method or the breeding condition at the time. Add notes if you want a freeform reminder before saving the planned mating.',
         tips: [
-          'Only requires parents to be filled',
-          'Shows animals matching those parents',
-          'Auto-fills birth date from offspring if empty',
-          'Completes the family tree'
+          'Mating date is part of the planned entry',
+          'Expected due date is useful for calendar tracking',
+          'Breeding details are optional but available in the modal',
+          'Notes help when you come back to the pairing later'
         ]
       },
       {
         stepNumber: 6,
-        title: 'Create New Offspring Animals',
-        content: 'In the "New Offspring Animals" section (separate from the male/female count fields), you can directly create new offspring animals. With a birth date filled in, click "Create Offspring" to add new animals and automatically set them as children of this litter with the sire and dam already assigned.',
+        title: 'Save or Edit the Planned Mating',
+        content: 'Save the planned mating to close the modal and store it as Planned. Later, click that mating card to reopen it and choose either Edit Mating to change the planned entry, or Convert to Litter when the litter has actually arrived and needs birth or offspring details.',
         tips: [
-          'Different from male/female count fields',
-          'Found in "New Offspring Animals" section',
-          'Creates animals with parent links pre-filled',
-          'Requires birth date to use'
+          'Saving closes the planned mating modal',
+          'Edit Mating is for correcting the planned record',
+          'Convert to Litter starts the actual litter workflow',
+          'This is the bridge between the two parts of the process'
         ]
       },
       {
         stepNumber: 7,
-        title: 'Litter Card Details',
-        content: 'Once you\'ve created a litter, click on a litter card to view its details. Here you can see the parents, offspring, and manage the litter from an expanded view.',
+        title: 'Open + Litter Next',
+        content: 'When you are recording the actual birth, click "+ Litter" to open the litter modal. This is a separate form from the mating modal, but it follows the same first rule: select the species inside the modal before selecting parents.',
         tips: [
-          'Requires a litter to be created first',
-          'Shows complete litter information',
-          'Edit, link, or add offspring from here',
-          'View parentage clearly'
+          'The litter flow is separate from the mating flow',
+          'Species is selected inside the litter modal',
+          'Use this when the litter exists and needs recording',
+          'The next steps work the same way, just for a litter record'
         ]
       },
       {
         stepNumber: 8,
-        title: 'Litter Actions',
-        content: 'On the expanded litter view, you\'ll see buttons to: Edit the litter, Link animals to it, Add new offspring, and Delete the litter. These give you full control over litter management.',
+        title: 'Choose Species in the Litter Modal',
+        content: 'Inside the litter modal, click the Species field and choose the correct species. Like the mating form, selecting a species clears the parent fields and unlocks the sire and dam buttons so they can be filtered for the right species.',
         tips: [
-          'Edit changes parent or dates',
-          'Link connects existing animals',
-          'Add offspring creates new animals',
-          'Delete removes litter (careful!)'
+          'This happens after opening + Litter',
+          'Species choice resets sire and dam in the litter form',
+          'Parent searching is filtered by the selected species',
+          'The litter form follows the same guard rails as the mating form'
         ]
       },
       {
         stepNumber: 9,
-        title: 'Show a Litter on Your Public Profile',
-        content: 'Each litter card has an Eye / EyeOff icon at the very left of the compact header, before the litter name. Click it to toggle public visibility: green Eye = this litter is shown on your public breeder profile, grey EyeOff = hidden. A "Litters" tab automatically appears on your public profile once at least one litter is marked public. The public card shows the pairing name, litter ID badge, sire × dam, status badge (Planned / Born), dates, a photo thumbnail strip, and any notes.',
+        title: 'Set Parents, Dates, and Counts',
+        content: 'After the litter species is selected, choose the sire and dam, then fill in the litter name or ID, birth date, weaning date, and the male, female, and unknown/intersex counts. The total born field is calculated from those counts, and the form also tracks stillborn, losses, and total weaned.',
         tips: [
-          'Eye/EyeOff icon is the first element on each litter card',
-          'Green Eye = shown publicly, Grey EyeOff = hidden from profile',
-          'Litters tab only appears on your public profile when at least 1 litter is public',
-          'Notes are always shown when a litter is public',
-          'Photos (if uploaded) display as a thumbnail strip on the public card',
-          'Works for both planned and born litters'
+          'Parent selection follows the species picker',
+          'Counts are part of the litter record',
+          'Birth date unlocks the offspring tools',
+          'Weaning, stillborn, and losses are tracked separately'
+        ]
+      },
+      {
+        stepNumber: 10,
+        title: 'Link Existing Offspring and Create New Ones',
+        content: 'If some offspring already exist, use Link Existing Animals as Offspring to attach them to the litter. If others still need to be created, use Create New Offspring Animals and enter the remaining male, female, and unknown counts. The modal shows what is already linked and what is still missing so you can finish the litter record accurately.',
+        tips: [
+          'Link existing offspring before creating new placeholders',
+          'The form only shows matching offspring',
+          'Remaining counts help you see what still needs to be created',
+          'This is where the litter becomes a complete offspring record'
+        ]
+      },
+      {
+        stepNumber: 11,
+        title: 'Save and Review the Litter',
+        content: 'Save the litter to close the modal and return to the list. Then click the litter card to open the expanded view, where you can verify the parents, dates, linked offspring, and litter actions. From there you can edit the litter, add more offspring, or make corrections if anything needs to change.',
+        tips: [
+          'Save closes the modal and writes the record',
+          'Expanded view is where you verify the final result',
+          'You can edit or add offspring later from the card',
+          'This is the best place to confirm the workflow completed correctly'
         ]
       }
     ]
