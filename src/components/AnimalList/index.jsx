@@ -35,6 +35,13 @@ const getSpeciesDisplayName = (species) => {
     return displayNames[species] || species;
 };
 
+const normalizeSpeciesForFilter = (species) => {
+    const value = (species || '').toString().trim().toLowerCase();
+    if (['rat', 'rats', 'fancy rat', 'fancy rats'].includes(value)) return 'fancy rat';
+    if (['mouse', 'mice', 'fancy mouse', 'fancy mice'].includes(value)) return 'fancy mouse';
+    return value;
+};
+
 const formatTimeAgo = (dateStr) => {
     if (!dateStr) return '';
     const now = new Date();
@@ -855,7 +862,8 @@ const AnimalList = ({
 
         // Species filter
         if (af.selectedSpecies.length > 0) {
-            source = source.filter(a => af.selectedSpecies.includes(a.species));
+            const selectedSpeciesKeys = new Set(af.selectedSpecies.map(normalizeSpeciesForFilter));
+            source = source.filter(a => selectedSpeciesKeys.has(normalizeSpeciesForFilter(a.species)));
         }
 
         // Gender filter
