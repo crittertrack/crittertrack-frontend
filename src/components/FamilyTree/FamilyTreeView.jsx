@@ -8,6 +8,25 @@ const NODE_W = 180;
 const NODE_H = 116;
 const API_BASE_URL = '/api';
 
+const parseCtcNumeric = (idPublic = '') => {
+    const m = String(idPublic).match(/(\d+)/);
+    return m ? Number(m[1]) : Number.MAX_SAFE_INTEGER;
+};
+
+const compareSiblingOrder = (a, b) => {
+    const dateA = a?.birthDate ? new Date(a.birthDate).getTime() : Number.MAX_SAFE_INTEGER;
+    const dateB = b?.birthDate ? new Date(b.birthDate).getTime() : Number.MAX_SAFE_INTEGER;
+    if (dateA !== dateB) return dateA - dateB;
+
+    const ctcA = parseCtcNumeric(a?.id_public);
+    const ctcB = parseCtcNumeric(b?.id_public);
+    if (ctcA !== ctcB) return ctcA - ctcB;
+
+    const nameA = [a?.prefix, a?.name, a?.suffix].filter(Boolean).join(' ').toLowerCase();
+    const nameB = [b?.prefix, b?.name, b?.suffix].filter(Boolean).join(' ').toLowerCase();
+    return nameA.localeCompare(nameB);
+};
+
 const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken }) => {
     const [selectedSpecies, setSelectedSpecies] = useState(null);
     const [zoom, setZoom] = useState(85);
@@ -168,25 +187,119 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
             positions[id] = { x: n.x - NODE_W / 2, y: n.y - NODE_H / 2 };
         });
 
-        const edges = g.edges().map((e, idx) => {
-            const from = positions[e.v];
-            const to = positions[e.w];
-            return {
-                id: `${e.v}-${e.w}-${idx}`,
-                parentId: e.v,
-                childId: e.w,
-                x1: from.x + NODE_W / 2,
-                y1: from.y + NODE_H,
-                x2: to.x + NODE_W / 2,
-                y2: to.y,
-            };
+        const edgeSegments = [];
+        const pairGroups = {};
+
+        Object.entries(parentLinksByChild).forEach(([childId, linkedParentIds]) => {
+            const parents = (linkedParentIds || []).filter(pid => byId[pid] && positions[pid]);
+            if (!parents.length) return;
+            const key = parents.slice().sort().join('|');
+            if (!pairGroups[key]) pairGroups[key] = { parentIds: parents.slice().sort(), childIds: [] };
+            pairGroups[key].childIds.push(childId);
+        });
+
+        Object.entries(pairGroups).forEach(([pairKey, group]) => {
+            const parents = group.parentIds
+                .map(pid => ({ id: pid, x: positions[pid].x + NODE_W / 2, yBottom: positions[pid].y + NODE_H }))
+                .sort((a, b) => a.x - b.x);
+            const children = group.childIds
+                .filter(cid => positions[cid])
+                .map(cid => ({ id: cid, x: positions[cid].x + NODE_W / 2, yTop: positions[cid].y }))
+                .sort((a, b) => compareSiblingOrder(byId[a.id], byId[b.id]));
+
+            if (!parents.length || !children.length) return;
+
+            const childBandY = Math.min(...children.map(c => c.yTop)) - 16;
+
+            if (parents.length === 1) {
+                const p = parents[0];
+                edgeSegments.push({
+                    id: `seg-${pairKey}-single-parent-trunk`,
+                    d: `M ${p.x} ${p.yBottom} L ${p.x} ${childBandY}`,
+                    relatedIds: [p.id, ...children.map(c => c.id)],
+                });
+
+                if (children.length > 1) {
+                    const minX = children[0].x;
+                    const maxX = children[children.length - 1].x;
+                    edgeSegments.push({
+                        id: `seg-${pairKey}-single-sibling-bar`,
+                        d: `M ${minX} ${childBandY} L ${maxX} ${childBandY}`,
+                        relatedIds: [p.id, ...children.map(c => c.id)],
+                    });
+                }
+
+                children.forEach((c, idx) => {
+                    edgeSegments.push({
+                        id: `seg-${pairKey}-single-child-${idx}`,
+                        d: `M ${c.x} ${childBandY} L ${c.x} ${c.yTop}`,
+                        relatedIds: [p.id, c.id],
+                    });
+                });
+                return;
+            }
+
+            const leftParent = parents[0];
+            const rightParent = parents[parents.length - 1];
+            const partnerLineY = Math.max(leftParent.yBottom, rightParent.yBottom) + 8;
+            const trunkX = (leftParent.x + rightParent.x) / 2;
+
+            edgeSegments.push({
+                id: `seg-${pairKey}-left-down`,
+                d: `M ${leftParent.x} ${leftParent.yBottom} L ${leftParent.x} ${partnerLineY}`,
+                relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
+            });
+            edgeSegments.push({
+                id: `seg-${pairKey}-partner-line`,
+                d: `M ${leftParent.x} ${partnerLineY} L ${rightParent.x} ${partnerLineY}`,
+                relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
+            });
+            edgeSegments.push({
+                id: `seg-${pairKey}-right-down`,
+                d: `M ${rightParent.x} ${rightParent.yBottom} L ${rightParent.x} ${partnerLineY}`,
+                relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
+            });
+
+            edgeSegments.push({
+                id: `seg-${pairKey}-trunk`,
+                d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${childBandY}`,
+                relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
+            });
+
+            if (children.length > 1) {
+                const minX = children[0].x;
+                const maxX = children[children.length - 1].x;
+                edgeSegments.push({
+                    id: `seg-${pairKey}-sibling-bar`,
+                    d: `M ${minX} ${childBandY} L ${maxX} ${childBandY}`,
+                    relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
+                });
+            }
+
+            children.forEach((c, idx) => {
+                edgeSegments.push({
+                    id: `seg-${pairKey}-child-drop-${idx}`,
+                    d: `M ${c.x} ${childBandY} L ${c.x} ${c.yTop}`,
+                    relatedIds: [leftParent.id, rightParent.id, c.id],
+                });
+            });
         });
 
         const maxX = Math.max(...Object.values(positions).map(p => p.x + NODE_W), 1200) + 48;
         const maxY = Math.max(...Object.values(positions).map(p => p.y + NODE_H), 700) + 48;
 
-        return { byId, positions, edges, childrenByParent, parentLinksByChild, width: maxX, height: maxY };
+        return { byId, positions, edgeSegments, childrenByParent, parentLinksByChild, width: maxX, height: maxY };
     }, [speciesAnimals, externalAncestorsById]);
+
+    const noPedigreeAnimals = useMemo(() => {
+        return speciesAnimals
+            .filter(a => {
+                const hasParents = Boolean(a.fatherId_public || a.sireId_public || a.motherId_public || a.damId_public);
+                const hasOffspring = (graphData.childrenByParent[a.id_public] || []).length > 0;
+                return !hasParents && !hasOffspring;
+            })
+            .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    }, [speciesAnimals, graphData.childrenByParent]);
 
     const getAncestors = (id, visited = new Set()) => {
         if (visited.has(id)) return new Set();
@@ -401,89 +514,116 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                 </div>
             </div>
 
-            <div
-                ref={containerRef}
-                onMouseDown={beginDrag}
-                onMouseMove={onDrag}
-                onMouseUp={endDrag}
-                onMouseLeave={endDrag}
-                onTouchStart={onTouchStart}
-                onTouchMove={onTouchMove}
-                onTouchEnd={onTouchEnd}
-                onTouchCancel={onTouchEnd}
-                className="w-full border border-gray-300 rounded-lg bg-white overflow-auto shadow-sm"
-                style={{ height: '680px', cursor: dragRef.current.active ? 'grabbing' : 'grab', userSelect: 'none', touchAction: 'none' }}
-            >
+            <div className="grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] gap-4">
+                <div className="border border-gray-300 rounded-lg bg-white shadow-sm h-[680px] overflow-auto">
+                    <div className="sticky top-0 bg-white/95 backdrop-blur border-b border-gray-200 px-3 py-2">
+                        <p className="text-sm font-semibold text-gray-700">No Pedigree Links</p>
+                        <p className="text-xs text-gray-500">{noPedigreeAnimals.length} animals with no parents and no offspring in this species</p>
+                    </div>
+                    <div className="p-2 space-y-1.5">
+                        {noPedigreeAnimals.length === 0 ? (
+                            <p className="text-xs text-gray-400 p-2">All animals are connected in this species graph.</p>
+                        ) : noPedigreeAnimals.map(a => (
+                            <button
+                                key={a.id_public}
+                                type="button"
+                                onClick={() => onViewAnimal && onViewAnimal(a)}
+                                className="w-full text-left px-2 py-2 rounded border border-gray-200 hover:border-accent hover:bg-accent/5 transition"
+                                title="Open animal details"
+                            >
+                                <p className="text-xs font-semibold text-gray-800 truncate">{[a.prefix, a.name, a.suffix].filter(Boolean).join(' ') || 'Unnamed'}</p>
+                                <p className="text-[11px] text-gray-500 truncate">{a.status || 'Unknown'}{a.birthDate ? ` • ${formatDate(a.birthDate)}` : ''}</p>
+                                <p className="text-[10px] text-gray-400 font-mono truncate">{a.id_public}</p>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
                 <div
-                    style={{
-                        transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom / 100})`,
-                        transformOrigin: '0 0',
-                        transition: dragRef.current.active ? 'none' : 'transform 0.12s linear',
-                        width: graphData.width,
-                        height: graphData.height,
-                        position: 'relative',
-                    }}
+                    ref={containerRef}
+                    onMouseDown={beginDrag}
+                    onMouseMove={onDrag}
+                    onMouseUp={endDrag}
+                    onMouseLeave={endDrag}
+                    onTouchStart={onTouchStart}
+                    onTouchMove={onTouchMove}
+                    onTouchEnd={onTouchEnd}
+                    onTouchCancel={onTouchEnd}
+                    className="w-full border border-gray-300 rounded-lg bg-white overflow-auto shadow-sm"
+                    style={{ height: '680px', cursor: dragRef.current.active ? 'grabbing' : 'grab', userSelect: 'none', touchAction: 'none' }}
                 >
-                    <svg style={{ position: 'absolute', inset: 0, width: graphData.width, height: graphData.height, pointerEvents: 'none' }}>
-                        {graphData.edges.map(edge => {
-                            const active = highlightedSet.has(edge.parentId) && highlightedSet.has(edge.childId);
-                            const midY = edge.y1 + (edge.y2 - edge.y1) / 2;
+                    <div
+                        style={{
+                            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom / 100})`,
+                            transformOrigin: '0 0',
+                            transition: dragRef.current.active ? 'none' : 'transform 0.12s linear',
+                            width: graphData.width,
+                            height: graphData.height,
+                            position: 'relative',
+                        }}
+                    >
+                        <svg style={{ position: 'absolute', inset: 0, width: graphData.width, height: graphData.height, pointerEvents: 'none' }}>
+                            {graphData.edgeSegments.map(seg => {
+                                const active = hoveredAnimal && seg.relatedIds.every(rid => highlightedSet.has(rid));
+                                return (
+                                    <path
+                                        key={seg.id}
+                                        d={seg.d}
+                                        fill="none"
+                                        stroke={active ? '#1d4ed8' : '#64748b'}
+                                        strokeWidth={active ? 3.4 : 2.4}
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        opacity={hoveredAnimal ? (active ? 1 : 0.2) : 0.92}
+                                    />
+                                );
+                            })}
+                        </svg>
+
+                        {Object.entries(graphData.positions).map(([id, pos]) => {
+                            const animal = graphData.byId[id];
+                            if (!animal) return null;
+                            const active = highlightedSet.has(id);
+                            const isMale = animal.gender === 'Male';
+                            const isFemale = animal.gender === 'Female';
+                            const borderColor = isMale ? '#3b82f6' : isFemale ? '#ec4899' : '#94a3b8';
+                            const bgColor = isMale ? '#e8f1ff' : isFemale ? '#fdeef6' : '#f8fafc';
+                            const GenderIcon = isMale ? Mars : Venus;
+
                             return (
-                                <path
-                                    key={edge.id}
-                                    d={`M ${edge.x1} ${edge.y1} C ${edge.x1} ${midY}, ${edge.x2} ${midY}, ${edge.x2} ${edge.y2}`}
-                                    fill="none"
-                                    stroke={active ? '#d946ef' : '#cbd5e1'}
-                                    strokeWidth={active ? 2.8 : 1.6}
-                                    opacity={hoveredAnimal ? (active ? 1 : 0.18) : 0.75}
-                                />
+                                <button
+                                    key={id}
+                                    type="button"
+                                    data-family-node="true"
+                                    onMouseEnter={() => setHoveredAnimal(id)}
+                                    onMouseLeave={() => setHoveredAnimal(null)}
+                                    onClick={() => onViewAnimal && onViewAnimal(animal)}
+                                    style={{
+                                        position: 'absolute',
+                                        left: pos.x,
+                                        top: pos.y,
+                                        width: NODE_W,
+                                        height: NODE_H,
+                                        borderColor,
+                                        backgroundColor: bgColor,
+                                        touchAction: 'manipulation',
+                                    }}
+                                    className={`text-left p-2.5 rounded-xl border transition-all shadow-sm ${active ? 'ring-2 ring-pink-200' : hoveredAnimal ? 'opacity-35' : 'hover:border-accent hover:shadow-md'}`}
+                                    title="Click to open animal details"
+                                >
+                                    <div className="absolute top-1 right-1">
+                                        <GenderIcon size={14} color={borderColor} />
+                                    </div>
+                                    <p className="text-sm font-semibold text-gray-800 truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ') || 'Unnamed'}</p>
+                                    <p className="text-xs text-gray-500 truncate">{animal.species || 'Unknown species'}</p>
+                                    <p className="text-xs text-gray-400">{animal.birthDate ? formatDate(animal.birthDate) : 'No birth date'}</p>
+                                    <p className="text-xs text-gray-600 mt-1 truncate">{animal.status || 'Unknown'}</p>
+                                    <p className="text-xs text-gray-600 truncate">{animal.color || 'No variety'}</p>
+                                    <p className="text-[10px] text-gray-400 font-mono truncate mt-0.5">{animal.id_public}{animal.isPublicAncestor ? ' • public' : ''}</p>
+                                </button>
                             );
                         })}
-                    </svg>
-
-                    {Object.entries(graphData.positions).map(([id, pos]) => {
-                        const animal = graphData.byId[id];
-                        if (!animal) return null;
-                        const active = highlightedSet.has(id);
-                        const isMale = animal.gender === 'Male';
-                        const isFemale = animal.gender === 'Female';
-                        const borderColor = isMale ? '#3b82f6' : isFemale ? '#ec4899' : '#94a3b8';
-                        const bgColor = isMale ? '#e8f1ff' : isFemale ? '#fdeef6' : '#f8fafc';
-                        const GenderIcon = isMale ? Mars : Venus;
-
-                        return (
-                            <button
-                                key={id}
-                                type="button"
-                                data-family-node="true"
-                                onMouseEnter={() => setHoveredAnimal(id)}
-                                onMouseLeave={() => setHoveredAnimal(null)}
-                                onClick={() => onViewAnimal && onViewAnimal(animal)}
-                                style={{
-                                    position: 'absolute',
-                                    left: pos.x,
-                                    top: pos.y,
-                                    width: NODE_W,
-                                    height: NODE_H,
-                                    borderColor,
-                                    backgroundColor: bgColor,
-                                    touchAction: 'manipulation',
-                                }}
-                                className={`text-left p-2.5 rounded-xl border transition-all shadow-sm ${active ? 'ring-2 ring-pink-200' : hoveredAnimal ? 'opacity-35' : 'hover:border-accent hover:shadow-md'}`}
-                                title="Click to open animal details"
-                            >
-                                <div className="absolute top-1 right-1">
-                                    <GenderIcon size={14} color={borderColor} />
-                                </div>
-                                <p className="text-sm font-semibold text-gray-800 truncate">{[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ') || 'Unnamed'}</p>
-                                <p className="text-xs text-gray-500 truncate">{animal.species || 'Unknown species'}</p>
-                                <p className="text-xs text-gray-400">{animal.birthDate ? formatDate(animal.birthDate) : 'No birth date'}</p>
-                                <p className="text-xs text-gray-600 mt-1 truncate">{animal.status || 'Unknown'}</p>
-                                <p className="text-xs text-gray-600 truncate">{animal.color || 'No variety'}</p>
-                                <p className="text-[10px] text-gray-400 font-mono truncate mt-0.5">{animal.id_public}{animal.isPublicAncestor ? ' • public' : ''}</p>
-                            </button>
-                        );
-                    })}
+                    </div>
                 </div>
             </div>
 
