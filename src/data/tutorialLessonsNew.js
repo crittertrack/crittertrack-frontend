@@ -673,13 +673,13 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 4,
-        title: 'Stud Information',
-        content: 'This section is available for all male animals to track fertility status and genetics information. To make your animal available for breeding in the showcase, go to the Status & Privacy tab and enable "Available for Stud" with a fee.',
+        title: 'Sire Information',
+        content: 'This section is available for all male animals to track fertility status and genetics information. To make your animal available for breeding in the showcase, go to the Status & Privacy tab and enable "Available as Sire" with a fee.',
         tips: [
           'Available for all males by default',
           'Track fertility status and genetics',
-          'Use Status tab to set "For Stud" and fee',
-          'Public + "For Stud" = Appears in showcase'
+          'Use Status tab to set "For Sire" and fee',
+          'Public + "For Sire" = Appears in showcase'
         ]
       },
       {
