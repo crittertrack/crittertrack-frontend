@@ -1150,7 +1150,7 @@ const FamilyTreeView = ({
                                     setSearchQuery(e.target.value);
                                     setFocusAnimalId(null);
                                 }}
-                                placeholder="Search by name or CTCID"
+                                placeholder="Focus by name or CTCID"
                                 className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-accent focus:border-transparent"
                             />
                             {searchQuery ? (
@@ -1309,7 +1309,7 @@ const FamilyTreeView = ({
             </div>
 
             <div className="text-xs text-gray-500 px-1">
-                Click a node to focus and center it. Double-click for details. Search focuses and recenters to the first match.
+                Click a node to focus and center it. Double-click for details. Focus search recenters to the first match without dimming the graph.
             </div>
 
             <div className={`grid ${showNoPedigreePanel ? 'grid-cols-[280px_minmax(0,1fr)]' : 'grid-cols-[44px_minmax(0,1fr)]'} gap-4`}>
@@ -1388,8 +1388,7 @@ const FamilyTreeView = ({
                     >
                         <svg style={{ position: 'absolute', inset: 0, width: graphData.width, height: graphData.height, pointerEvents: 'none', shapeRendering: 'geometricPrecision' }}>
                             {graphData.edgeSegments.map(seg => {
-                                const isSearchActive = searchMatchedIds.size > 0;
-                                const active = (hoveredAnimal && seg.relatedIds.some(rid => highlightedSet.has(rid))) || (isSearchActive && seg.relatedIds.some(rid => searchMatchedIds.has(rid)));
+                                const active = hoveredAnimal && seg.relatedIds.some(rid => highlightedSet.has(rid));
                                 const isPairLine = seg.id.includes('partner-network');
                                 const isDescendantLine = /offspring|child|trunk|anchor|single-diagonal|single-parent/.test(seg.id);
 
@@ -1397,9 +1396,7 @@ const FamilyTreeView = ({
                                 const activeStroke = isPairLine ? '#1d4ed8' : isDescendantLine ? '#6d28d9' : '#334155';
                                 const opacity = hoveredAnimal
                                     ? (active ? 1 : 0.2)
-                                    : isSearchActive
-                                        ? (active ? 1 : 0.1)
-                                        : 0.92;
+                                    : 0.92;
                                 return (
                                     <path
                                         key={seg.id}
@@ -1418,9 +1415,7 @@ const FamilyTreeView = ({
                         {Object.entries(graphData.positions).map(([id, pos]) => {
                             const animal = graphData.byId[id];
                             if (!animal) return null;
-                            const isSearchActive = searchMatchedIds.size > 0;
-                            const isSearchMatch = searchMatchedIds.has(id);
-                            const active = highlightedSet.has(id) || isSearchMatch;
+                            const active = highlightedSet.has(id) || graphData.focusId === id;
                             const isMale = animal.gender === 'Male';
                             const isFemale = animal.gender === 'Female';
                             const borderColor = isMale ? '#3b82f6' : isFemale ? '#ec4899' : '#94a3b8';
@@ -1459,7 +1454,7 @@ const FamilyTreeView = ({
                                         backgroundColor: bgColor,
                                         touchAction: 'manipulation',
                                     }}
-                                    className={`text-left rounded-xl border-2 transition-all shadow-sm overflow-hidden ${active ? 'ring-2 ring-pink-200' : hoveredAnimal ? 'opacity-35' : isSearchActive ? 'opacity-30' : 'hover:border-accent hover:shadow-md'}`}
+                                    className={`text-left rounded-xl border-2 transition-all shadow-sm overflow-hidden ${active ? 'ring-2 ring-pink-200' : hoveredAnimal ? 'opacity-35' : 'hover:border-accent hover:shadow-md'}`}
                                     title="Click to focus this animal. Double-click to open details."
                                 >
                                     <div className="w-full h-[68px] bg-white/60 flex items-center justify-center">
@@ -1494,7 +1489,7 @@ const FamilyTreeView = ({
             </div>
 
             <p className="text-xs text-gray-500 italic">
-                Hover a node to highlight {highlightMode}. Click a node to focus and center it. Double-click to open details. Use Ctrl+scroll to zoom and drag empty space to pan. On touch devices: one-finger drag to pan, two-finger pinch to zoom.
+                Hover a node to highlight {highlightMode}. Click a node to focus and center it. Double-click to open details. Focus search navigates without fading other animals. Use Ctrl+scroll to zoom and drag empty space to pan. On touch devices: one-finger drag to pan, two-finger pinch to zoom.
             </p>
         </div>
     );
