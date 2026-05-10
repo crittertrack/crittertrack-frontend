@@ -7,7 +7,7 @@ import { formatDate } from '../../utils/dateFormatter';
 const NODE_W = 96;
 const NODE_H = 92;
 const API_BASE_URL = '/api';
-const MIN_ZOOM = 50;
+const MIN_ZOOM = 20;
 const MAX_ZOOM = 180;
 const LINEAGE_COLORS = [
     '#2563eb', '#dc2626', '#059669', '#7c3aed', '#ea580c', '#0f766e', '#c026d3', '#b45309',
@@ -69,6 +69,27 @@ const FamilyTreeView = ({
     const dragRef = useRef({ active: false, startX: 0, startY: 0, originX: 0, originY: 0 });
     const touchRef = useRef({ mode: null, startX: 0, startY: 0, originX: 0, originY: 0, startDist: 0, startZoom: 85 });
     const wasAncestorLoadingRef = useRef(false);
+    const panStateRef = useRef({ x: 24, y: 24 });
+    const zoomStateRef = useRef(85);
+    const viewFrameRef = useRef(null);
+    const pendingViewRef = useRef({ pan: { x: 24, y: 24 }, zoom: 85 });
+
+    const scheduleViewUpdate = (nextPan, nextZoom) => {
+        pendingViewRef.current = {
+            pan: nextPan || pendingViewRef.current.pan,
+            zoom: typeof nextZoom === 'number' ? nextZoom : pendingViewRef.current.zoom,
+        };
+
+        panStateRef.current = pendingViewRef.current.pan;
+        zoomStateRef.current = pendingViewRef.current.zoom;
+
+        if (viewFrameRef.current) return;
+        viewFrameRef.current = requestAnimationFrame(() => {
+            viewFrameRef.current = null;
+            setPan(pendingViewRef.current.pan);
+            setZoom(pendingViewRef.current.zoom);
+        });
+    };
 
     const speciesList = useMemo(() => [...new Set(animals.map(a => a.species).filter(Boolean))].sort(), [animals]);
 
@@ -138,14 +159,21 @@ const FamilyTreeView = ({
 
         const fetchAncestorForest = async () => {
             setAncestorLoading(true);
+            const canonicalId = (id) => String(id || '').trim().toLowerCase();
+            const accountIdKeys = new Set(
+                (animals || [])
+                    .map(a => canonicalId(a?.id_public))
+                    .filter(Boolean)
+            );
             const existing = new Map(speciesAnimals.map(a => [a.id_public, a]));
             const fetched = {};
-            const visited = new Set(existing.keys());
+            const visited = new Set(speciesAnimals.map(a => canonicalId(a.id_public)).filter(Boolean));
             const queue = [];
 
             const enqueueParentIfMissing = (id) => {
-                if (!id || visited.has(id)) return;
-                visited.add(id);
+                const key = canonicalId(id);
+                if (!key || visited.has(key)) return;
+                visited.add(key);
                 queue.push(id);
             };
 
@@ -194,7 +222,9 @@ const FamilyTreeView = ({
                 if (!node) continue;
 
                 const nid = node.id_public || id;
-                if (!existing.has(nid)) {
+                const nidKey = canonicalId(nid);
+                const isAlreadyOnAccount = accountIdKeys.has(nidKey);
+                if (!existing.has(nid) && !isAlreadyOnAccount) {
                     const normalized = { ...node, id_public: nid, isPublicAncestor: true };
                     existing.set(nid, normalized);
                     fetched[nid] = normalized;
@@ -556,6 +586,16 @@ const FamilyTreeView = ({
     }, [hoveredAnimal, highlightMode, graphData]);
 
     useEffect(() => {
+        panStateRef.current = pan;
+        zoomStateRef.current = zoom;
+        pendingViewRef.current = { pan, zoom };
+    }, [pan, zoom]);
+
+    useEffect(() => () => {
+        if (viewFrameRef.current) cancelAnimationFrame(viewFrameRef.current);
+    }, []);
+
+    useEffect(() => {
         const justFinishedLoading = wasAncestorLoadingRef.current && !ancestorLoading;
         wasAncestorLoadingRef.current = ancestorLoading;
         if (!justFinishedLoading) return;
@@ -580,7 +620,9 @@ const FamilyTreeView = ({
         if (!e.ctrlKey && !e.metaKey) return;
         e.preventDefault();
         const delta = e.deltaY > 0 ? -8 : 8;
-        const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom + delta));
+        const currentZoom = zoomStateRef.current;
+        const currentPan = panStateRef.current;
+        const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, currentZoom + delta));
         
         // Keep the point under cursor centered during zoom
         const container = containerRef.current;
@@ -590,8 +632,8 @@ const FamilyTreeView = ({
             const cursorY = e.clientY - rect.top;
             
             // World coords of cursor before zoom
-            const worldX = (cursorX - pan.x) / (zoom / 100);
-            const worldY = (cursorY - pan.y) / (zoom / 100);
+            const worldX = (cursorX - currentPan.x) / (currentZoom / 100);
+            const worldY = (cursorY - currentPan.y) / (currentZoom / 100);
             
             // New pan to keep cursor on same world point
             const newPan = {
@@ -599,10 +641,11 @@ const FamilyTreeView = ({
                 y: cursorY - worldY * (newZoom / 100),
             };
             
-            setPan(newPan);
+            scheduleViewUpdate(newPan, newZoom);
+            return;
         }
-        
-        setZoom(newZoom);
+
+        scheduleViewUpdate(currentPan, newZoom);
     };
 
     useEffect(() => {
@@ -616,14 +659,14 @@ const FamilyTreeView = ({
         // Left-drag pans when starting from empty canvas space.
         if (e.button !== 0 && e.button !== 1) return;
         if (e.target.closest('[data-family-node="true"]')) return;
-        dragRef.current = { active: true, startX: e.clientX, startY: e.clientY, originX: pan.x, originY: pan.y };
+        dragRef.current = { active: true, startX: e.clientX, startY: e.clientY, originX: panStateRef.current.x, originY: panStateRef.current.y };
     };
 
     const onDrag = e => {
         if (!dragRef.current.active) return;
         const dx = e.clientX - dragRef.current.startX;
         const dy = e.clientY - dragRef.current.startY;
-        setPan({ x: dragRef.current.originX + dx, y: dragRef.current.originY + dy });
+        scheduleViewUpdate({ x: dragRef.current.originX + dx, y: dragRef.current.originY + dy }, zoomStateRef.current);
     };
 
     const endDrag = () => {
@@ -639,7 +682,7 @@ const FamilyTreeView = ({
     const onTouchStart = e => {
         if (e.touches.length === 2) {
             const dist = touchDistance(e.touches[0], e.touches[1]);
-            touchRef.current = { ...touchRef.current, mode: 'pinch', startDist: dist, startZoom: zoom };
+            touchRef.current = { ...touchRef.current, mode: 'pinch', startDist: dist, startZoom: zoomStateRef.current };
             return;
         }
         if (e.touches.length !== 1) return;
@@ -655,8 +698,8 @@ const FamilyTreeView = ({
             mode: 'pan',
             startX: t.clientX,
             startY: t.clientY,
-            originX: pan.x,
-            originY: pan.y,
+            originX: panStateRef.current.x,
+            originY: panStateRef.current.y,
         };
     };
 
@@ -667,7 +710,7 @@ const FamilyTreeView = ({
             if (!touchRef.current.startDist) return;
             const scale = dist / touchRef.current.startDist;
             const nextZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, Math.round(touchRef.current.startZoom * scale)));
-            setZoom(nextZoom);
+            scheduleViewUpdate(panStateRef.current, nextZoom);
             return;
         }
 
@@ -676,14 +719,14 @@ const FamilyTreeView = ({
             const t = e.touches[0];
             const dx = t.clientX - touchRef.current.startX;
             const dy = t.clientY - touchRef.current.startY;
-            setPan({ x: touchRef.current.originX + dx, y: touchRef.current.originY + dy });
+            scheduleViewUpdate({ x: touchRef.current.originX + dx, y: touchRef.current.originY + dy }, zoomStateRef.current);
         }
     };
 
     const onTouchEnd = e => {
         if (e.touches.length >= 2) {
             const dist = touchDistance(e.touches[0], e.touches[1]);
-            touchRef.current = { ...touchRef.current, mode: 'pinch', startDist: dist, startZoom: zoom };
+            touchRef.current = { ...touchRef.current, mode: 'pinch', startDist: dist, startZoom: zoomStateRef.current };
             return;
         }
         if (e.touches.length === 1 && touchRef.current.mode === 'pinch') {
@@ -693,8 +736,8 @@ const FamilyTreeView = ({
                 mode: 'pan',
                 startX: t.clientX,
                 startY: t.clientY,
-                originX: pan.x,
-                originY: pan.y,
+                originX: panStateRef.current.x,
+                originY: panStateRef.current.y,
             };
             return;
         }
@@ -782,11 +825,17 @@ const FamilyTreeView = ({
                 </div>
 
                 <div className="flex items-center gap-1">
-                    <button onClick={() => setZoom(z => Math.max(MIN_ZOOM, z - 10))} className="p-2 hover:bg-gray-200 rounded transition" title="Zoom out (Ctrl+Scroll)">
+                    <button onClick={() => {
+                        const nextZoom = Math.max(MIN_ZOOM, zoomStateRef.current - 10);
+                        setZoom(nextZoom);
+                    }} className="p-2 hover:bg-gray-200 rounded transition" title="Zoom out (Ctrl+Scroll)">
                         <ZoomOut size={16} className="text-gray-600" />
                     </button>
                     <span className="text-xs font-medium text-gray-600 w-12 text-center">{zoom}%</span>
-                    <button onClick={() => setZoom(z => Math.min(MAX_ZOOM, z + 10))} className="p-2 hover:bg-gray-200 rounded transition" title="Zoom in (Ctrl+Scroll)">
+                    <button onClick={() => {
+                        const nextZoom = Math.min(MAX_ZOOM, zoomStateRef.current + 10);
+                        setZoom(nextZoom);
+                    }} className="p-2 hover:bg-gray-200 rounded transition" title="Zoom in (Ctrl+Scroll)">
                         <ZoomIn size={16} className="text-gray-600" />
                     </button>
                     <button
@@ -871,7 +920,7 @@ const FamilyTreeView = ({
                         style={{
                             transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom / 100})`,
                             transformOrigin: '0 0',
-                            transition: dragRef.current.active ? 'none' : 'transform 0.12s linear',
+                            transition: 'none',
                             width: graphData.width,
                             height: graphData.height,
                             position: 'relative',
@@ -894,7 +943,6 @@ const FamilyTreeView = ({
                                         strokeWidth={active ? 3.4 : 2.4}
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
-                                        strokeDasharray={isPairLine ? '4 4' : undefined}
                                         opacity={hoveredAnimal ? (active ? 1 : 0.2) : 0.92}
                                     />
                                 );

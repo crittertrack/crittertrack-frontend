@@ -370,15 +370,22 @@ const AnimalList = ({
         const prefetchSpeciesAncestors = async () => {
             setFamilyTreePrefetchLoadingBySpecies(prev => ({ ...prev, [species]: true }));
 
+            const canonicalId = (id) => String(id || '').trim().toLowerCase();
+            const accountIdKeys = new Set(
+                familyTreeAnimals
+                    .map(a => canonicalId(a?.id_public))
+                    .filter(Boolean)
+            );
             const speciesAnimals = familyTreeAnimals.filter(a => a.species === species && a.id_public);
             const existing = new Map(speciesAnimals.map(a => [a.id_public, a]));
             const fetched = {};
-            const visited = new Set(existing.keys());
+            const visited = new Set(speciesAnimals.map(a => canonicalId(a.id_public)).filter(Boolean));
             const queue = [];
 
             const enqueueParentIfMissing = id => {
-                if (!id || visited.has(id)) return;
-                visited.add(id);
+                const key = canonicalId(id);
+                if (!key || visited.has(key)) return;
+                visited.add(key);
                 queue.push(id);
             };
 
@@ -413,7 +420,9 @@ const AnimalList = ({
                 if (!node) continue;
 
                 const nid = node.id_public || id;
-                if (!existing.has(nid)) {
+                const nidKey = canonicalId(nid);
+                const isAlreadyOnAccount = accountIdKeys.has(nidKey);
+                if (!existing.has(nid) && !isAlreadyOnAccount) {
                     const normalized = { ...node, id_public: nid, isPublicAncestor: true };
                     existing.set(nid, normalized);
                     fetched[nid] = normalized;
