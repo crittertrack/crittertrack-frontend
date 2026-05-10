@@ -4456,7 +4456,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         <p className="text-sm text-gray-500 mb-5">
                             {matingEditChoice.litter_id_public && <span className="font-mono bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded text-xs mr-2">{matingEditChoice.litter_id_public}</span>}
                             {[matingEditChoice.sire?.prefix, matingEditChoice.sire?.name].filter(Boolean).join(' ') || matingEditChoice.sireId_public || '?'}
-                            {' ? '}
+                            {' x '}
                             {[matingEditChoice.dam?.prefix, matingEditChoice.dam?.name].filter(Boolean).join(' ') || matingEditChoice.damId_public || '?'}
                         </p>
                         <div className="space-y-3">
