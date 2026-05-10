@@ -7,6 +7,22 @@ import { formatDate } from '../../utils/dateFormatter';
 const NODE_W = 96;
 const NODE_H = 92;
 const API_BASE_URL = '/api';
+const LINEAGE_COLORS = [
+    '#2563eb', '#dc2626', '#059669', '#7c3aed', '#ea580c', '#0f766e', '#c026d3', '#b45309',
+    '#0891b2', '#be123c', '#4f46e5', '#15803d', '#a16207', '#9333ea', '#0ea5e9', '#e11d48'
+];
+
+const hashKey = (key = '') => {
+    let h = 0;
+    for (let i = 0; i < key.length; i += 1) {
+        h = ((h << 5) - h) + key.charCodeAt(i);
+        h |= 0;
+    }
+    return Math.abs(h);
+};
+
+const lineageColorFromKey = (key = '') => LINEAGE_COLORS[hashKey(key) % LINEAGE_COLORS.length];
+const isHexColor = (value = '') => /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(String(value).trim());
 
 const parseCtcNumeric = (idPublic = '') => {
     const m = String(idPublic).match(/(\d+)/);
@@ -27,7 +43,7 @@ const compareSiblingOrder = (a, b) => {
     return nameA.localeCompare(nameB);
 };
 
-const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken }) => {
+const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken, breedingLineDefs = [], animalBreedingLines = {} }) => {
     const [selectedSpecies, setSelectedSpecies] = useState(null);
     const [zoom, setZoom] = useState(85);
     const [pan, setPan] = useState({ x: 24, y: 24 });
@@ -42,6 +58,36 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
     const touchRef = useRef({ mode: null, startX: 0, startY: 0, originX: 0, originY: 0, startDist: 0, startZoom: 85 });
 
     const speciesList = useMemo(() => [...new Set(animals.map(a => a.species).filter(Boolean))].sort(), [animals]);
+
+    const animalLineColorById = useMemo(() => {
+        const colorByLineId = {};
+        const linePriorityById = {};
+        (breedingLineDefs || []).forEach(def => {
+            if (def?.id === undefined || def?.id === null) return;
+            const color = String(def?.color || '').trim();
+            linePriorityById[String(def.id)] = Number(def.id);
+            if (!isHexColor(color)) return;
+            colorByLineId[String(def.id)] = color;
+        });
+
+        const out = {};
+        Object.entries(animalBreedingLines || {}).forEach(([animalId, lineIds]) => {
+            if (!animalId || !Array.isArray(lineIds) || lineIds.length === 0) return;
+            const matched = lineIds
+                .map(lineId => String(lineId))
+                .filter(lineId => Boolean(colorByLineId[lineId]))
+                .sort((a, b) => {
+                    const pa = Number.isFinite(linePriorityById[a]) ? linePriorityById[a] : Number.MAX_SAFE_INTEGER;
+                    const pb = Number.isFinite(linePriorityById[b]) ? linePriorityById[b] : Number.MAX_SAFE_INTEGER;
+                    if (pa !== pb) return pa - pb;
+                    return Number(a) - Number(b);
+                })
+                .map(lineId => colorByLineId[lineId])[0];
+            if (matched) out[animalId] = matched;
+        });
+
+        return out;
+    }, [breedingLineDefs, animalBreedingLines]);
 
     useEffect(() => {
         if (!speciesList.length) {
@@ -293,6 +339,11 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
 
             if (!parents.length || !children.length) return;
 
+            const pairColor =
+                parents.map(p => animalLineColorById[p.id]).find(Boolean)
+                || children.map(c => animalLineColorById[c.id]).find(Boolean)
+                || lineageColorFromKey(pairKey);
+
             const childBandY = Math.min(...children.map(c => c.yTop)) - 16;
 
             if (connectorStyle === 'diagonal') {
@@ -304,6 +355,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                         id: `seg-${pairKey}-single-diagonal-anchor`,
                         d: `M ${p.x} ${p.yBottom} L ${p.x} ${fanY}`,
                         relatedIds: [p.id, ...children.map(c => c.id)],
+                        color: pairColor,
                     });
 
                     children.forEach((c, idx) => {
@@ -311,6 +363,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                             id: `seg-${pairKey}-single-diagonal-${idx}`,
                             d: `M ${p.x} ${fanY} L ${c.x} ${c.yTop}`,
                             relatedIds: [p.id, c.id],
+                            color: pairColor,
                         });
                     });
                     return;
@@ -326,12 +379,14 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                     id: `seg-${pairKey}-diagonal-partner-network`,
                     d: `M ${leftParent.x} ${leftParent.yBottom} L ${leftParent.x} ${partnerLineY} L ${rightParent.x} ${partnerLineY} L ${rightParent.x} ${rightParent.yBottom}`,
                     relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
+                    color: pairColor,
                 });
 
                 edgeSegments.push({
                     id: `seg-${pairKey}-diagonal-anchor`,
                     d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${fanY}`,
                     relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
+                    color: pairColor,
                 });
 
                 children.forEach((c, idx) => {
@@ -339,6 +394,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                         id: `seg-${pairKey}-diagonal-child-${idx}`,
                         d: `M ${trunkX} ${fanY} L ${c.x} ${c.yTop}`,
                         relatedIds: [leftParent.id, rightParent.id, c.id],
+                        color: pairColor,
                     });
                 });
                 return;
@@ -355,12 +411,14 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                         id: `seg-${pairKey}-single-offspring-network`,
                         d: `M ${p.x} ${p.yBottom} L ${p.x} ${childBandY} L ${minX} ${childBandY} L ${maxX} ${childBandY}`,
                         relatedIds: [p.id, ...children.map(c => c.id)],
+                        color: pairColor,
                     });
                 } else {
                     edgeSegments.push({
                         id: `seg-${pairKey}-single-parent-trunk`,
                         d: `M ${p.x} ${p.yBottom} L ${p.x} ${childBandY}`,
                         relatedIds: [p.id, ...children.map(c => c.id)],
+                        color: pairColor,
                     });
                 }
 
@@ -369,6 +427,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                         id: `seg-${pairKey}-single-child-${idx}`,
                         d: `M ${c.x} ${childBandY} L ${c.x} ${c.yTop}`,
                         relatedIds: [p.id, c.id],
+                        color: pairColor,
                     });
                 });
                 return;
@@ -383,6 +442,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                 id: `seg-${pairKey}-partner-network`,
                 d: `M ${leftParent.x} ${leftParent.yBottom} L ${leftParent.x} ${partnerLineY} L ${rightParent.x} ${partnerLineY} L ${rightParent.x} ${rightParent.yBottom}`,
                 relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
+                color: pairColor,
             });
 
             const minX = Math.min(...children.map(c => c.x));
@@ -393,12 +453,14 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                     id: `seg-${pairKey}-offspring-network`,
                     d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${childBandY} L ${minX} ${childBandY} L ${maxX} ${childBandY}`,
                     relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
+                    color: pairColor,
                 });
             } else {
                 edgeSegments.push({
                     id: `seg-${pairKey}-trunk`,
                     d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${childBandY}`,
                     relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
+                    color: pairColor,
                 });
             }
 
@@ -407,6 +469,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                     id: `seg-${pairKey}-child-drop-${idx}`,
                     d: `M ${c.x} ${childBandY} L ${c.x} ${c.yTop}`,
                     relatedIds: [leftParent.id, rightParent.id, c.id],
+                    color: pairColor,
                 });
             });
         });
@@ -769,7 +832,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                                         key={seg.id}
                                         d={seg.d}
                                         fill="none"
-                                        stroke={active ? '#1d4ed8' : '#64748b'}
+                                        stroke={active ? seg.color || '#1d4ed8' : seg.color || '#64748b'}
                                         strokeWidth={active ? 3.4 : 2.4}
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
