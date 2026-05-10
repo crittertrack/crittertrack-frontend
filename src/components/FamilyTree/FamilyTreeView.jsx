@@ -936,13 +936,17 @@ const FamilyTreeView = ({
         return out;
     };
 
+    const highlightAnchorId = hoveredAnimal || (focusMode ? graphData.focusId : null);
+
     const highlightedSet = useMemo(() => {
-        if (!hoveredAnimal || highlightMode === 'none') return new Set();
-        const out = new Set([hoveredAnimal]);
-        const rel = highlightMode === 'descendants' ? getDescendants(hoveredAnimal) : getAncestors(hoveredAnimal);
+        if (!highlightAnchorId || highlightMode === 'none') return new Set();
+        const out = new Set([highlightAnchorId]);
+        const rel = highlightMode === 'descendants'
+            ? getDescendants(highlightAnchorId)
+            : getAncestors(highlightAnchorId);
         rel.forEach(id => out.add(id));
         return out;
-    }, [hoveredAnimal, highlightMode, graphData]);
+    }, [highlightAnchorId, highlightMode, graphData]);
 
     useEffect(() => {
         panStateRef.current = pan;
@@ -1388,13 +1392,17 @@ const FamilyTreeView = ({
                     >
                         <svg style={{ position: 'absolute', inset: 0, width: graphData.width, height: graphData.height, pointerEvents: 'none', shapeRendering: 'geometricPrecision' }}>
                             {graphData.edgeSegments.map(seg => {
-                                const active = hoveredAnimal && seg.relatedIds.some(rid => highlightedSet.has(rid));
+                                const hasHighlightSelection = highlightMode !== 'none' && highlightedSet.size > 0;
                                 const isPairLine = seg.id.includes('partner-network');
                                 const isDescendantLine = /offspring|child|trunk|anchor|single-diagonal|single-parent/.test(seg.id);
+                                const allowPairLineHighlight = highlightMode === 'descendants';
+                                const active = hasHighlightSelection
+                                    && (!isPairLine || allowPairLineHighlight)
+                                    && seg.relatedIds.some(rid => highlightedSet.has(rid));
 
                                 const baseStroke = isPairLine ? '#2563eb' : isDescendantLine ? '#7c3aed' : '#64748b';
                                 const activeStroke = isPairLine ? '#1d4ed8' : isDescendantLine ? '#6d28d9' : '#334155';
-                                const opacity = hoveredAnimal
+                                const opacity = hasHighlightSelection
                                     ? (active ? 1 : 0.2)
                                     : 0.92;
                                 return (
@@ -1415,6 +1423,7 @@ const FamilyTreeView = ({
                         {Object.entries(graphData.positions).map(([id, pos]) => {
                             const animal = graphData.byId[id];
                             if (!animal) return null;
+                            const hasHighlightSelection = highlightMode !== 'none' && highlightedSet.size > 0;
                             const active = highlightedSet.has(id) || graphData.focusId === id;
                             const isMale = animal.gender === 'Male';
                             const isFemale = animal.gender === 'Female';
@@ -1454,7 +1463,7 @@ const FamilyTreeView = ({
                                         backgroundColor: bgColor,
                                         touchAction: 'manipulation',
                                     }}
-                                    className={`text-left rounded-xl border-2 transition-all shadow-sm overflow-hidden ${active ? 'ring-2 ring-pink-200' : hoveredAnimal ? 'opacity-35' : 'hover:border-accent hover:shadow-md'}`}
+                                    className={`text-left rounded-xl border-2 transition-all shadow-sm overflow-hidden ${active ? 'ring-2 ring-pink-200' : hasHighlightSelection ? 'opacity-35' : 'hover:border-accent hover:shadow-md'}`}
                                     title="Click to focus this animal. Double-click to open details."
                                 >
                                     <div className="w-full h-[68px] bg-white/60 flex items-center justify-center">
