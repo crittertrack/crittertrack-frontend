@@ -34,7 +34,7 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
     const [showNoPedigreePanel, setShowNoPedigreePanel] = useState(true);
     const [hoveredAnimal, setHoveredAnimal] = useState(null);
     const [highlightMode, setHighlightMode] = useState('ancestors');
-    const [connectorStyle, setConnectorStyle] = useState('orthogonal');
+    const [connectorStyle, setConnectorStyle] = useState('diagonal');
     const [externalAncestorsById, setExternalAncestorsById] = useState({});
     const [ancestorLoading, setAncestorLoading] = useState(false);
     const containerRef = useRef(null);
@@ -218,102 +218,128 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
         });
 
         const edgeSegments = [];
-        const pairGroups = {};
+        const siblingGroups = {};
 
-        Object.entries(parentLinksByChild).forEach(([childId, linkedParentIds]) => {
-            const parents = (linkedParentIds || []).filter(pid => byId[pid] && positions[pid]);
-            if (!parents.length) return;
-            const key = parents.slice().sort().join('|');
-            if (!pairGroups[key]) pairGroups[key] = { parentIds: parents.slice().sort(), childIds: [] };
-            pairGroups[key].childIds.push(childId);
-        });
+        if (connectorStyle === 'diagonal') {
+            // Diagonal connector style: direct lines from each parent to each child
+            Object.entries(parentLinksByChild).forEach(([childId, linkedParentIds]) => {
+                const childPos = positions[childId];
+                if (!childPos) return;
+                const childY = childPos.y;
+                const childX = childPos.x + NODE_W / 2;
 
-        Object.entries(pairGroups).forEach(([pairKey, group]) => {
-            const parents = group.parentIds
-                .map(pid => ({ id: pid, x: positions[pid].x + NODE_W / 2, yBottom: positions[pid].y + NODE_H }))
-                .sort((a, b) => a.x - b.x);
-            const children = group.childIds
-                .filter(cid => positions[cid])
-                .map(cid => ({ id: cid, x: positions[cid].x + NODE_W / 2, yTop: positions[cid].y }))
-                .sort((a, b) => compareSiblingOrder(byId[a.id], byId[b.id]));
+                (linkedParentIds || []).forEach(parentId => {
+                    if (!byId[parentId] || !positions[parentId]) return;
+                    const parentPos = positions[parentId];
+                    const parentY = parentPos.y + NODE_H;
+                    const parentX = parentPos.x + NODE_W / 2;
 
-            if (!parents.length || !children.length) return;
+                    edgeSegments.push({
+                        id: `seg-diagonal-${parentId}-to-${childId}`,
+                        d: `M ${parentX} ${parentY} L ${childX} ${childY}`,
+                        relatedIds: [parentId, childId],
+                    });
+                });
+            });
+        } else {
+            // Orthogonal connector style (default): parent-pair grouping with shared sibling bars
+            const pairGroups = {};
 
-            const childBandY = Math.min(...children.map(c => c.yTop)) - 16;
+            Object.entries(parentLinksByChild).forEach(([childId, linkedParentIds]) => {
+                const parents = (linkedParentIds || []).filter(pid => byId[pid] && positions[pid]);
+                if (!parents.length) return;
+                const key = parents.slice().sort().join('|');
+                if (!pairGroups[key]) pairGroups[key] = { parentIds: parents.slice().sort(), childIds: [] };
+                pairGroups[key].childIds.push(childId);
+            });
 
-            if (parents.length === 1) {
-                const p = parents[0];
+            Object.entries(pairGroups).forEach(([pairKey, group]) => {
+                const parents = group.parentIds
+                    .map(pid => ({ id: pid, x: positions[pid].x + NODE_W / 2, yBottom: positions[pid].y + NODE_H }))
+                    .sort((a, b) => a.x - b.x);
+                const children = group.childIds
+                    .filter(cid => positions[cid])
+                    .map(cid => ({ id: cid, x: positions[cid].x + NODE_W / 2, yTop: positions[cid].y }))
+                    .sort((a, b) => compareSiblingOrder(byId[a.id], byId[b.id]));
+
+                if (!parents.length || !children.length) return;
+
+                const childBandY = Math.min(...children.map(c => c.yTop)) - 16;
+
+                if (parents.length === 1) {
+                    const p = parents[0];
+                    edgeSegments.push({
+                        id: `seg-${pairKey}-single-parent-trunk`,
+                        d: `M ${p.x} ${p.yBottom} L ${p.x} ${childBandY}`,
+                        relatedIds: [p.id, ...children.map(c => c.id)],
+                    });
+
+                    if (children.length > 1) {
+                        const minX = Math.min(...children.map(c => c.x));
+                        const maxX = Math.max(...children.map(c => c.x));
+                        edgeSegments.push({
+                            id: `seg-${pairKey}-single-sibling-bar`,
+                            d: `M ${minX} ${childBandY} L ${maxX} ${childBandY}`,
+                            relatedIds: [p.id, ...children.map(c => c.id)],
+                        });
+                    }
+
+                    children.forEach((c, idx) => {
+                        edgeSegments.push({
+                            id: `seg-${pairKey}-single-child-${idx}`,
+                            d: `M ${c.x} ${childBandY} L ${c.x} ${c.yTop}`,
+                            relatedIds: [p.id, c.id],
+                        });
+                    });
+                    return;
+                }
+
+                const leftParent = parents[0];
+                const rightParent = parents[parents.length - 1];
+                const partnerLineY = Math.max(leftParent.yBottom, rightParent.yBottom) + 8;
+                const trunkX = (leftParent.x + rightParent.x) / 2;
+
                 edgeSegments.push({
-                    id: `seg-${pairKey}-single-parent-trunk`,
-                    d: `M ${p.x} ${p.yBottom} L ${p.x} ${childBandY}`,
-                    relatedIds: [p.id, ...children.map(c => c.id)],
+                    id: `seg-${pairKey}-left-down`,
+                    d: `M ${leftParent.x} ${leftParent.yBottom} L ${leftParent.x} ${partnerLineY}`,
+                    relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
+                });
+                edgeSegments.push({
+                    id: `seg-${pairKey}-partner-line`,
+                    d: `M ${leftParent.x} ${partnerLineY} L ${rightParent.x} ${partnerLineY}`,
+                    relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
+                });
+                edgeSegments.push({
+                    id: `seg-${pairKey}-right-down`,
+                    d: `M ${rightParent.x} ${rightParent.yBottom} L ${rightParent.x} ${partnerLineY}`,
+                    relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
+                });
+
+                edgeSegments.push({
+                    id: `seg-${pairKey}-trunk`,
+                    d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${childBandY}`,
+                    relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
                 });
 
                 if (children.length > 1) {
                     const minX = Math.min(...children.map(c => c.x));
                     const maxX = Math.max(...children.map(c => c.x));
                     edgeSegments.push({
-                        id: `seg-${pairKey}-single-sibling-bar`,
+                        id: `seg-${pairKey}-sibling-bar`,
                         d: `M ${minX} ${childBandY} L ${maxX} ${childBandY}`,
-                        relatedIds: [p.id, ...children.map(c => c.id)],
+                        relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
                     });
                 }
 
                 children.forEach((c, idx) => {
                     edgeSegments.push({
-                        id: `seg-${pairKey}-single-child-${idx}`,
+                        id: `seg-${pairKey}-child-drop-${idx}`,
                         d: `M ${c.x} ${childBandY} L ${c.x} ${c.yTop}`,
-                        relatedIds: [p.id, c.id],
+                        relatedIds: [leftParent.id, rightParent.id, c.id],
                     });
                 });
-                return;
-            }
-
-            const leftParent = parents[0];
-            const rightParent = parents[parents.length - 1];
-            const partnerLineY = Math.max(leftParent.yBottom, rightParent.yBottom) + 8;
-            const trunkX = (leftParent.x + rightParent.x) / 2;
-
-            edgeSegments.push({
-                id: `seg-${pairKey}-left-down`,
-                d: `M ${leftParent.x} ${leftParent.yBottom} L ${leftParent.x} ${partnerLineY}`,
-                relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
             });
-            edgeSegments.push({
-                id: `seg-${pairKey}-partner-line`,
-                d: `M ${leftParent.x} ${partnerLineY} L ${rightParent.x} ${partnerLineY}`,
-                relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
-            });
-            edgeSegments.push({
-                id: `seg-${pairKey}-right-down`,
-                d: `M ${rightParent.x} ${rightParent.yBottom} L ${rightParent.x} ${partnerLineY}`,
-                relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
-            });
-
-            edgeSegments.push({
-                id: `seg-${pairKey}-trunk`,
-                d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${childBandY}`,
-                relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
-            });
-
-            if (children.length > 1) {
-                const minX = Math.min(...children.map(c => c.x));
-                const maxX = Math.max(...children.map(c => c.x));
-                edgeSegments.push({
-                    id: `seg-${pairKey}-sibling-bar`,
-                    d: `M ${minX} ${childBandY} L ${maxX} ${childBandY}`,
-                    relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
-                });
-            }
-
-            children.forEach((c, idx) => {
-                edgeSegments.push({
-                    id: `seg-${pairKey}-child-drop-${idx}`,
-                    d: `M ${c.x} ${childBandY} L ${c.x} ${c.yTop}`,
-                    relatedIds: [leftParent.id, rightParent.id, c.id],
-                });
-            });
-        });
+        }
 
         const maxX = Math.max(...Object.values(positions).map(p => p.x + NODE_W), 1200) + 48;
         const maxY = Math.max(...Object.values(positions).map(p => p.y + NODE_H), 700) + 48;
@@ -520,6 +546,22 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                         className={`px-2 py-1 text-xs rounded border ${highlightMode === 'descendants' ? 'bg-accent text-white border-accent' : 'bg-white text-gray-600 border-gray-300'}`}
                     >
                         Descendants
+                    </button>
+                <div className="flex items-center gap-2">
+                    <label className="text-xs text-gray-600">Lines:</label>
+                    <button
+                        onClick={() => setConnectorStyle('diagonal')}
+                        className={`px-2 py-1 text-xs rounded border ${connectorStyle === 'diagonal' ? 'bg-accent text-white border-accent' : 'bg-white text-gray-600 border-gray-300'}`}
+                        title="Diagonal connector lines"
+                    >
+                        Diagonal
+                    </button>
+                    <button
+                        onClick={() => setConnectorStyle('orthogonal')}
+                        className={`px-2 py-1 text-xs rounded border ${connectorStyle === 'orthogonal' ? 'bg-accent text-white border-accent' : 'bg-white text-gray-600 border-gray-300'}`}
+                        title="Orthogonal connector lines"
+                    >
+                        Right Angle
                     </button>
                 </div>
 
