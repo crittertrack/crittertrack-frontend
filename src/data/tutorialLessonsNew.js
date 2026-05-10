@@ -588,15 +588,47 @@ const GETTING_STARTED_LESSONS = [
           'Can add them anytime later',
           'Doesn\'t affect animal creation'
         ]
+      }
+    ]
+  },
+
+  {
+    id: 'gs-family-tab',
+    title: '8. Family Tab — Overview',
+    description: 'Review parents, siblings, litters, and offspring in one place',
+    tour: 'getting-started',
+    tourOrder: 8,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Open Family Tab',
+        content: 'In the animal detail/edit experience, open the Family tab to review relationship context. In creation/edit mode, this tab is view-only and usually shows placeholder sections until relationships are linked.',
+        tips: [
+          'Family tab is view-only while editing',
+          'During creation, seeing placeholder cards is expected',
+          'Family tab is most useful after parents are assigned',
+          'Use it to quickly sanity-check lineage links',
+          'Great for reviewing family context before pairing decisions'
+        ]
       },
       {
-        stepNumber: 5,
-        title: 'Other Parent Selector',
-        content: 'This selector is for animals with Intersex or Unknown gender. It works the same way as the Sire and Dam selectors but allows selection of any gender. This is important for inclusive genetics tracking.',
+        stepNumber: 2,
+        title: 'Parents and Siblings',
+        content: 'The Family tab shows linked parents and related siblings so you can confirm your sire/dam assignments are correct. If nothing is linked yet, you will see an empty/placeholder state (for example, "No known relatives found").',
         tips: [
-          'Allows selection of Intersex/Unknown genders',
-          'Same search functionality as Sire/Dam',
-          'Helps track diverse pedigrees'
+          'If a parent is missing, return to Pedigree tab and assign it',
+          'Sibling relationships depend on shared parent links',
+          'Use this as a quick relationship verification screen'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Litters and Offspring',
+        content: 'You can also review litter associations and offspring records connected to this animal. In creation/edit mode, this area may show a loading or empty placeholder until saved records and links exist.',
+        tips: [
+          'Litter links come from Litter Management and parent assignments',
+          'Offspring visibility depends on existing linked records',
+          'Useful for validating complete breeding timelines'
         ]
       }
     ]
