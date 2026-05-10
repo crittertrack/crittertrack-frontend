@@ -3870,6 +3870,7 @@ const AnimalForm = ({
     const [showCommunityGeneticsModal, setShowCommunityGeneticsModal] = useState(false);
     const [activeTab, setActiveTab] = useState(1); // Tab navigation state
     const [collapsedHealthSections, setCollapsedHealthSections] = useState({});
+    const [collapsedCareSections, setCollapsedCareSections] = useState({});
     // Manual Pedigree (Beta) ? Tab 15
     const [mpEditForm, setMpEditForm] = useState(() => animalToEdit?.manualPedigree || {});
     const [mpCTCOpenSlot, setMpCTCOpenSlot] = useState(null);
@@ -8023,8 +8024,11 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* 1st Section: Nutrition */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="nutrition-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><UtensilsCrossed size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Nutrition</h3>
-                            <div className="space-y-4">
+                            <button type="button" onClick={() => setCollapsedCareSections(p => ({...p, nutrition: !p.nutrition}))} className="w-full flex items-center justify-between text-left group">
+                                <h3 className="text-lg font-semibold text-gray-700"><UtensilsCrossed size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Nutrition</h3>
+                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedCareSections.nutrition ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                            </button>
+                            {!collapsedCareSections.nutrition && (<div className="space-y-4 mt-4">
                                 {!isFieldHidden('dietType') && (
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Diet Type</label>
@@ -8066,13 +8070,16 @@ const AnimalForm = ({
                                         placeholder="e.g., Vitamin D, calcium powder" />
                                 </div>
                                 )}
-                            </div>
+                            </div>)}
                         </div>
 
                         {/* 2nd Section: Housing & Enclosure */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="housing-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Housing & Enclosure</h3>
-                            <div className="space-y-4">
+                            <button type="button" onClick={() => setCollapsedCareSections(p => ({...p, housingEnclosure: !p.housingEnclosure}))} className="w-full flex items-center justify-between text-left group">
+                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Housing & Enclosure</h3>
+                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedCareSections.housingEnclosure ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                            </button>
+                            {!collapsedCareSections.housingEnclosure && (<div className="space-y-4 mt-4">
                                 {/* Enclosure assignment */}
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
@@ -8209,13 +8216,16 @@ const AnimalForm = ({
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div>)}
                         </div>
 
                         {/* 3rd Section: Animal Care */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="animal-care-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><Droplets size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Animal Care</h3>
-                            <div className="space-y-4">
+                            <button type="button" onClick={() => setCollapsedCareSections(p => ({...p, animalCare: !p.animalCare}))} className="w-full flex items-center justify-between text-left group">
+                                <h3 className="text-lg font-semibold text-gray-700"><Droplets size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Animal Care</h3>
+                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedCareSections.animalCare ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                            </button>
+                            {!collapsedCareSections.animalCare && (<div className="space-y-4 mt-4">
                                 <p className="text-sm text-gray-600">Track recurring care tasks specific to this animal, such as health checks, grooming, weighing, and handling routines.</p>
 
                                 {/* Animal Care Tasks ? flexible recurring tasks for animal care */}
@@ -8276,13 +8286,16 @@ const AnimalForm = ({
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="e.g., Requires daily medication, sensitive to stress, special diet needs" />
                                 </div>
-                            </div>
+                            </div>)}
                         </div>
 
                         {/* 4th Section: Environment */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="environment-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><Thermometer size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Environment</h3>
-                            <div className="space-y-4">
+                            <button type="button" onClick={() => setCollapsedCareSections(p => ({...p, environment: !p.environment}))} className="w-full flex items-center justify-between text-left group">
+                                <h3 className="text-lg font-semibold text-gray-700"><Thermometer size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Environment</h3>
+                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedCareSections.environment ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                            </button>
+                            {!collapsedCareSections.environment && (<div className="space-y-4 mt-4">
                                 {!isFieldHidden('temperatureRange') && (
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Temperature Range</label>
@@ -8318,14 +8331,17 @@ const AnimalForm = ({
                                             placeholder="e.g., Quiet, moderate, high" />
                                     </div>
                                 )}
-                            </div>
+                            </div>)}
                         </div>
 
                         {/* 5th Section: Exercise & Grooming */}
                         {(!isFieldHidden('groomingNeeds') || !isFieldHidden('sheddingLevel')) && (
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="exercise-grooming-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4"><Scissors size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Grooming</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <button type="button" onClick={() => setCollapsedCareSections(p => ({...p, grooming: !p.grooming}))} className="w-full flex items-center justify-between text-left group">
+                                <h3 className="text-lg font-semibold text-gray-700"><Scissors size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Grooming</h3>
+                                <span className="text-gray-400 group-hover:text-gray-600">{collapsedCareSections.grooming ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                            </button>
+                            {!collapsedCareSections.grooming && (<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                 {!isFieldHidden('groomingNeeds') && (
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">{getFieldLabel('groomingNeeds', 'Grooming Needs')}</label>
@@ -8360,7 +8376,7 @@ const AnimalForm = ({
                                     </select>
                                 </div>
                                 )}
-                            </div>
+                            </div>)}
                         </div>
                         )}
                     </div>
