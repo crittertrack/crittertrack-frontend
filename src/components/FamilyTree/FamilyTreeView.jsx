@@ -86,7 +86,6 @@ const FamilyTreeView = ({
     const [ancestorDepthLimit, setAncestorDepthLimit] = useState(3);
     const [descendantDepthLimit, setDescendantDepthLimit] = useState(2);
     const [highlightMode, setHighlightMode] = useState('none');
-    const connectorStyle = 'orthogonal';
     const [externalAncestorsById, setExternalAncestorsById] = useState({});
     const [ancestorLoading, setAncestorLoading] = useState(false);
     const containerRef = useRef(null);
@@ -664,88 +663,6 @@ const FamilyTreeView = ({
                 group.laneY = childBandBaseY - (groupIndex * litterSpreadY) - lineLaneOffset(group.key, 4);
             });
 
-            if (connectorStyle === 'diagonal') {
-                if (parents.length === 1) {
-                    const p = parents[0];
-                    litterGroups.forEach((group, groupIndex) => {
-                        const childXs = group.children.map(c => c.x);
-                        const minX = Math.min(...childXs);
-                        const maxX = Math.max(...childXs);
-                        const fanLaneY = group.laneY;
-
-                        edgeSegments.push({
-                            id: `seg-${pairKey}-single-diagonal-anchor-${groupIndex}`,
-                            d: `M ${p.x} ${p.yBottom} L ${p.x} ${fanLaneY}`,
-                            relatedIds: [p.id, ...group.children.map(c => c.id)],
-                            color: pairColor,
-                        });
-
-                        edgeSegments.push({
-                            id: `seg-${pairKey}-single-diagonal-band-${groupIndex}`,
-                            d: `M ${p.x} ${fanLaneY} L ${minX} ${fanLaneY} L ${maxX} ${fanLaneY}`,
-                            relatedIds: [p.id, ...group.children.map(c => c.id)],
-                            color: pairColor,
-                        });
-
-                        group.children.forEach((c, idx) => {
-                            edgeSegments.push({
-                                id: `seg-${pairKey}-single-diagonal-child-${groupIndex}-${idx}`,
-                                d: `M ${c.x} ${fanLaneY} L ${c.x} ${c.yTop}`,
-                                relatedIds: [p.id, c.id],
-                                color: pairColor,
-                            });
-                        });
-                    });
-                    return;
-                }
-
-                const leftParent = parents[0];
-                const rightParent = parents[parents.length - 1];
-                const partnerLineY = (leftParent.yMid + rightParent.yMid) / 2 + laneOffset;
-                const partnerLeftX = leftParent.rightX;
-                const partnerRightX = rightParent.leftX;
-                const trunkX = (partnerLeftX + partnerRightX) / 2;
-
-                edgeSegments.push({
-                    id: `seg-${pairKey}-diagonal-partner-network`,
-                    d: `M ${partnerLeftX} ${leftParent.yMid} L ${partnerLeftX} ${partnerLineY} L ${partnerRightX} ${partnerLineY} L ${partnerRightX} ${rightParent.yMid}`,
-                    relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
-                    pairParentIds: [leftParent.id, rightParent.id],
-                    color: pairColor,
-                });
-
-                litterGroups.forEach((group, groupIndex) => {
-                    const childXs = group.children.map(c => c.x);
-                    const minX = Math.min(...childXs);
-                    const maxX = Math.max(...childXs);
-                    const groupFanY = group.laneY;
-
-                    edgeSegments.push({
-                        id: `seg-${pairKey}-diagonal-anchor-${groupIndex}`,
-                        d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${groupFanY}`,
-                        relatedIds: [leftParent.id, rightParent.id, ...group.children.map(c => c.id)],
-                        color: pairColor,
-                    });
-
-                    edgeSegments.push({
-                        id: `seg-${pairKey}-diagonal-band-${groupIndex}`,
-                        d: `M ${trunkX} ${groupFanY} L ${minX} ${groupFanY} L ${maxX} ${groupFanY}`,
-                        relatedIds: [leftParent.id, rightParent.id, ...group.children.map(c => c.id)],
-                        color: pairColor,
-                    });
-
-                    group.children.forEach((c, idx) => {
-                        edgeSegments.push({
-                            id: `seg-${pairKey}-diagonal-child-${groupIndex}-${idx}`,
-                            d: `M ${trunkX} ${groupFanY} L ${c.x} ${c.yTop}`,
-                            relatedIds: [leftParent.id, rightParent.id, c.id],
-                            color: pairColor,
-                        });
-                    });
-                });
-                return;
-            }
-
             // Orthogonal connector style (default): parent-pair grouping with shared sibling bars.
             if (parents.length === 1) {
                 const p = parents[0];
@@ -851,7 +768,6 @@ const FamilyTreeView = ({
     }, [
         speciesAnimals,
         externalAncestorsById,
-        connectorStyle,
         searchQuery,
         focusMode,
         focusAnimalId,
@@ -1419,7 +1335,7 @@ const FamilyTreeView = ({
                             {graphData.edgeSegments.map(seg => {
                                 const hasHighlightSelection = highlightMode !== 'none' && highlightedSet.size > 0;
                                 const isPairLine = seg.id.includes('partner-network');
-                                const isDescendantLine = /offspring|child|trunk|anchor|single-diagonal|single-parent/.test(seg.id);
+                                const isDescendantLine = /offspring|child|trunk|anchor|single-parent/.test(seg.id);
                                 const relatedHighlightCount = (seg.relatedIds || []).reduce(
                                     (count, rid) => count + (highlightedSet.has(rid) ? 1 : 0),
                                     0
