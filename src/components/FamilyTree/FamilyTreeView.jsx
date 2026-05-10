@@ -710,6 +710,7 @@ const FamilyTreeView = ({
                     id: `seg-${pairKey}-diagonal-partner-network`,
                     d: `M ${partnerLeftX} ${leftParent.yMid} L ${partnerLeftX} ${partnerLineY} L ${partnerRightX} ${partnerLineY} L ${partnerRightX} ${rightParent.yMid}`,
                     relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
+                    pairParentIds: [leftParent.id, rightParent.id],
                     color: pairColor,
                 });
 
@@ -794,6 +795,7 @@ const FamilyTreeView = ({
                 id: `seg-${pairKey}-partner-network`,
                 d: `M ${partnerLeftX} ${leftParent.yMid} L ${partnerLeftX} ${partnerLineY} L ${partnerRightX} ${partnerLineY} L ${partnerRightX} ${rightParent.yMid}`,
                 relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
+                pairParentIds: [leftParent.id, rightParent.id],
                 color: pairColor,
             });
 
@@ -938,15 +940,33 @@ const FamilyTreeView = ({
 
     const highlightAnchorId = hoveredAnimal || (focusMode ? graphData.focusId : null);
 
+    const descendantSeedSet = useMemo(() => {
+        const out = new Set();
+        if (!highlightAnchorId || highlightMode !== 'descendants') return out;
+        out.add(highlightAnchorId);
+        getDescendants(highlightAnchorId).forEach(id => out.add(id));
+        return out;
+    }, [highlightAnchorId, highlightMode, graphData]);
+
     const highlightedSet = useMemo(() => {
         if (!highlightAnchorId || highlightMode === 'none') return new Set();
         const out = new Set([highlightAnchorId]);
         const rel = highlightMode === 'descendants'
-            ? getDescendants(highlightAnchorId)
+            ? descendantSeedSet
             : getAncestors(highlightAnchorId);
         rel.forEach(id => out.add(id));
+
+        if (highlightMode === 'descendants') {
+            // Keep partners of highlighted descendants (and focus animal) active.
+            Object.values(graphData.parentLinksByChild || {}).forEach(parentIds => {
+                if (!Array.isArray(parentIds) || !parentIds.length) return;
+                if (!parentIds.some(pid => descendantSeedSet.has(pid))) return;
+                parentIds.forEach(pid => out.add(pid));
+            });
+        }
+
         return out;
-    }, [highlightAnchorId, highlightMode, graphData]);
+    }, [descendantSeedSet, highlightAnchorId, highlightMode, graphData]);
 
     useEffect(() => {
         panStateRef.current = pan;
@@ -1400,9 +1420,16 @@ const FamilyTreeView = ({
                                     0
                                 );
                                 const allowPairLineHighlight = highlightMode === 'descendants';
+                                const bothPairParentsHighlighted = Array.isArray(seg.pairParentIds)
+                                    && seg.pairParentIds.length === 2
+                                    && seg.pairParentIds.every(pid => highlightedSet.has(pid));
+                                const pairTouchesDescendantSeed = Array.isArray(seg.pairParentIds)
+                                    && seg.pairParentIds.some(pid => descendantSeedSet.has(pid));
                                 const active = hasHighlightSelection && (
                                     isPairLine
-                                        ? (allowPairLineHighlight && relatedHighlightCount >= 1)
+                                        ? (highlightMode === 'ancestors'
+                                            ? bothPairParentsHighlighted
+                                            : (allowPairLineHighlight && pairTouchesDescendantSeed && relatedHighlightCount >= 1))
                                         : relatedHighlightCount >= 2
                                 );
 
