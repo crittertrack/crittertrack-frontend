@@ -234,79 +234,82 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
         });
 
         const edgeSegments = [];
-        const siblingGroups = {};
+        const pairGroups = {};
+        Object.entries(parentLinksByChild).forEach(([childId, linkedParentIds]) => {
+            const parents = (linkedParentIds || []).filter(pid => byId[pid] && positions[pid]);
+            if (!parents.length) return;
+            const key = parents.slice().sort().join('|');
+            if (!pairGroups[key]) pairGroups[key] = { parentIds: parents.slice().sort(), childIds: [] };
+            pairGroups[key].childIds.push(childId);
+        });
 
-        if (connectorStyle === 'diagonal') {
-            // Diagonal connector style: direct lines from each parent to each child
-            Object.entries(parentLinksByChild).forEach(([childId, linkedParentIds]) => {
-                const childPos = positions[childId];
-                if (!childPos) return;
-                const childY = childPos.y;
-                const childX = childPos.x + NODE_W / 2;
+        // Post-layout ordering pass: keep each generation deterministic and grouped by parent midpoint.
+        const rankIds = {};
+        Object.entries(positions).forEach(([id, pos]) => {
+            const rankKey = String(Math.round(pos.y));
+            if (!rankIds[rankKey]) rankIds[rankKey] = [];
+            rankIds[rankKey].push(id);
+        });
 
-                (linkedParentIds || []).forEach(parentId => {
-                    if (!byId[parentId] || !positions[parentId]) return;
-                    const parentPos = positions[parentId];
-                    const parentY = parentPos.y + NODE_H;
-                    const parentX = parentPos.x + NODE_W / 2;
+        Object.values(rankIds).forEach(ids => {
+            if (ids.length < 2) return;
 
-                    edgeSegments.push({
-                        id: `seg-diagonal-${parentId}-to-${childId}`,
-                        d: `M ${parentX} ${parentY} L ${childX} ${childY}`,
-                        relatedIds: [parentId, childId],
-                    });
-                });
+            const currentCenters = ids
+                .map(id => positions[id].x + NODE_W / 2)
+                .sort((a, b) => a - b);
+
+            const desired = ids.slice().sort((idA, idB) => {
+                const parentsA = parentLinksByChild[idA] || [];
+                const parentsB = parentLinksByChild[idB] || [];
+
+                const midpointA = parentsA.length
+                    ? parentsA.reduce((sum, pid) => sum + (positions[pid].x + NODE_W / 2), 0) / parentsA.length
+                    : positions[idA].x + NODE_W / 2;
+                const midpointB = parentsB.length
+                    ? parentsB.reduce((sum, pid) => sum + (positions[pid].x + NODE_W / 2), 0) / parentsB.length
+                    : positions[idB].x + NODE_W / 2;
+
+                if (midpointA !== midpointB) return midpointA - midpointB;
+
+                const siblingCmp = compareSiblingOrder(byId[idA], byId[idB]);
+                if (siblingCmp !== 0) return siblingCmp;
+
+                return (positions[idA].x + NODE_W / 2) - (positions[idB].x + NODE_W / 2);
             });
-        } else {
-            // Orthogonal connector style (default): parent-pair grouping with shared sibling bars
-            const pairGroups = {};
 
-            Object.entries(parentLinksByChild).forEach(([childId, linkedParentIds]) => {
-                const parents = (linkedParentIds || []).filter(pid => byId[pid] && positions[pid]);
-                if (!parents.length) return;
-                const key = parents.slice().sort().join('|');
-                if (!pairGroups[key]) pairGroups[key] = { parentIds: parents.slice().sort(), childIds: [] };
-                pairGroups[key].childIds.push(childId);
+            desired.forEach((id, idx) => {
+                positions[id].x = currentCenters[idx] - NODE_W / 2;
             });
+        });
 
-            Object.entries(pairGroups).forEach(([pairKey, group]) => {
-                const parents = group.parentIds
-                    .map(pid => ({ id: pid, x: positions[pid].x + NODE_W / 2, yBottom: positions[pid].y + NODE_H }))
-                    .sort((a, b) => a.x - b.x);
-                const children = group.childIds
-                    .filter(cid => positions[cid])
-                    .map(cid => ({ id: cid, x: positions[cid].x + NODE_W / 2, yTop: positions[cid].y }))
-                    .sort((a, b) => compareSiblingOrder(byId[a.id], byId[b.id]));
+        Object.entries(pairGroups).forEach(([pairKey, group]) => {
+            const parents = group.parentIds
+                .map(pid => ({ id: pid, x: positions[pid].x + NODE_W / 2, yBottom: positions[pid].y + NODE_H }))
+                .sort((a, b) => a.x - b.x);
+            const children = group.childIds
+                .filter(cid => positions[cid])
+                .map(cid => ({ id: cid, x: positions[cid].x + NODE_W / 2, yTop: positions[cid].y }))
+                .sort((a, b) => compareSiblingOrder(byId[a.id], byId[b.id]));
 
-                if (!parents.length || !children.length) return;
+            if (!parents.length || !children.length) return;
 
-                const childBandY = Math.min(...children.map(c => c.yTop)) - 16;
+            const childBandY = Math.min(...children.map(c => c.yTop)) - 16;
 
+            if (connectorStyle === 'diagonal') {
                 if (parents.length === 1) {
                     const p = parents[0];
-                    const minX = Math.min(...children.map(c => c.x));
-                    const maxX = Math.max(...children.map(c => c.x));
+                    const fanY = p.yBottom + 10;
 
-                    if (children.length > 1) {
-                        // Combined path: trunk → sibling bar
-                        edgeSegments.push({
-                            id: `seg-${pairKey}-single-offspring-network`,
-                            d: `M ${p.x} ${p.yBottom} L ${p.x} ${childBandY} L ${minX} ${childBandY} L ${maxX} ${childBandY}`,
-                            relatedIds: [p.id, ...children.map(c => c.id)],
-                        });
-                    } else {
-                        // Single child: simple trunk
-                        edgeSegments.push({
-                            id: `seg-${pairKey}-single-parent-trunk`,
-                            d: `M ${p.x} ${p.yBottom} L ${p.x} ${childBandY}`,
-                            relatedIds: [p.id, ...children.map(c => c.id)],
-                        });
-                    }
+                    edgeSegments.push({
+                        id: `seg-${pairKey}-single-diagonal-anchor`,
+                        d: `M ${p.x} ${p.yBottom} L ${p.x} ${fanY}`,
+                        relatedIds: [p.id, ...children.map(c => c.id)],
+                    });
 
                     children.forEach((c, idx) => {
                         edgeSegments.push({
-                            id: `seg-${pairKey}-single-child-${idx}`,
-                            d: `M ${c.x} ${childBandY} L ${c.x} ${c.yTop}`,
+                            id: `seg-${pairKey}-single-diagonal-${idx}`,
+                            d: `M ${p.x} ${fanY} L ${c.x} ${c.yTop}`,
                             relatedIds: [p.id, c.id],
                         });
                     });
@@ -317,41 +320,96 @@ const FamilyTreeView = ({ animals = [], loading = false, onViewAnimal, authToken
                 const rightParent = parents[parents.length - 1];
                 const partnerLineY = Math.max(leftParent.yBottom, rightParent.yBottom) + 8;
                 const trunkX = (leftParent.x + rightParent.x) / 2;
+                const fanY = partnerLineY + 10;
 
-                // Combined path: left parent down → partner line → right parent down
                 edgeSegments.push({
-                    id: `seg-${pairKey}-partner-network`,
+                    id: `seg-${pairKey}-diagonal-partner-network`,
                     d: `M ${leftParent.x} ${leftParent.yBottom} L ${leftParent.x} ${partnerLineY} L ${rightParent.x} ${partnerLineY} L ${rightParent.x} ${rightParent.yBottom}`,
                     relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
                 });
 
+                edgeSegments.push({
+                    id: `seg-${pairKey}-diagonal-anchor`,
+                    d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${fanY}`,
+                    relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
+                });
+
+                children.forEach((c, idx) => {
+                    edgeSegments.push({
+                        id: `seg-${pairKey}-diagonal-child-${idx}`,
+                        d: `M ${trunkX} ${fanY} L ${c.x} ${c.yTop}`,
+                        relatedIds: [leftParent.id, rightParent.id, c.id],
+                    });
+                });
+                return;
+            }
+
+            // Orthogonal connector style (default): parent-pair grouping with shared sibling bars.
+            if (parents.length === 1) {
+                const p = parents[0];
                 const minX = Math.min(...children.map(c => c.x));
                 const maxX = Math.max(...children.map(c => c.x));
 
-                // Combined path: trunk down to sibling bar
                 if (children.length > 1) {
                     edgeSegments.push({
-                        id: `seg-${pairKey}-offspring-network`,
-                        d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${childBandY} L ${minX} ${childBandY} L ${maxX} ${childBandY}`,
-                        relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
+                        id: `seg-${pairKey}-single-offspring-network`,
+                        d: `M ${p.x} ${p.yBottom} L ${p.x} ${childBandY} L ${minX} ${childBandY} L ${maxX} ${childBandY}`,
+                        relatedIds: [p.id, ...children.map(c => c.id)],
                     });
                 } else {
                     edgeSegments.push({
-                        id: `seg-${pairKey}-trunk`,
-                        d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${childBandY}`,
-                        relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
+                        id: `seg-${pairKey}-single-parent-trunk`,
+                        d: `M ${p.x} ${p.yBottom} L ${p.x} ${childBandY}`,
+                        relatedIds: [p.id, ...children.map(c => c.id)],
                     });
                 }
 
                 children.forEach((c, idx) => {
                     edgeSegments.push({
-                        id: `seg-${pairKey}-child-drop-${idx}`,
+                        id: `seg-${pairKey}-single-child-${idx}`,
                         d: `M ${c.x} ${childBandY} L ${c.x} ${c.yTop}`,
-                        relatedIds: [leftParent.id, rightParent.id, c.id],
+                        relatedIds: [p.id, c.id],
                     });
                 });
+                return;
+            }
+
+            const leftParent = parents[0];
+            const rightParent = parents[parents.length - 1];
+            const partnerLineY = Math.max(leftParent.yBottom, rightParent.yBottom) + 8;
+            const trunkX = (leftParent.x + rightParent.x) / 2;
+
+            edgeSegments.push({
+                id: `seg-${pairKey}-partner-network`,
+                d: `M ${leftParent.x} ${leftParent.yBottom} L ${leftParent.x} ${partnerLineY} L ${rightParent.x} ${partnerLineY} L ${rightParent.x} ${rightParent.yBottom}`,
+                relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
             });
-        }
+
+            const minX = Math.min(...children.map(c => c.x));
+            const maxX = Math.max(...children.map(c => c.x));
+
+            if (children.length > 1) {
+                edgeSegments.push({
+                    id: `seg-${pairKey}-offspring-network`,
+                    d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${childBandY} L ${minX} ${childBandY} L ${maxX} ${childBandY}`,
+                    relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
+                });
+            } else {
+                edgeSegments.push({
+                    id: `seg-${pairKey}-trunk`,
+                    d: `M ${trunkX} ${partnerLineY} L ${trunkX} ${childBandY}`,
+                    relatedIds: [leftParent.id, rightParent.id, ...children.map(c => c.id)],
+                });
+            }
+
+            children.forEach((c, idx) => {
+                edgeSegments.push({
+                    id: `seg-${pairKey}-child-drop-${idx}`,
+                    d: `M ${c.x} ${childBandY} L ${c.x} ${c.yTop}`,
+                    relatedIds: [leftParent.id, rightParent.id, c.id],
+                });
+            });
+        });
 
         const maxX = Math.max(...Object.values(positions).map(p => p.x + NODE_W), 1200) + 48;
         const maxY = Math.max(...Object.values(positions).map(p => p.y + NODE_H), 700) + 48;
