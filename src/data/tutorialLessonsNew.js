@@ -1270,30 +1270,52 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 9,
-        title: 'Set Parents, Dates, and Counts',
-        content: 'After the litter species is selected, choose the sire and dam, then fill in the litter name or ID, birth date, weaning date, and the male, female, and unknown/intersex counts. The total born field is calculated from those counts, and the form also tracks stillborn, losses, and total weaned.',
+        title: 'Add Litter Photos',
+        content: 'At the top of the + Litter modal, use the Litter Photos section to add images before saving. Click + Add Photo to stage PNG or JPEG images (up to 5). In create mode, these photos are uploaded when you save the litter.',
         tips: [
-          'Parent selection follows the species picker',
-          'Counts are part of the litter record',
-          'Birth date unlocks the offspring tools',
-          'Weaning, stillborn, and losses are tracked separately'
+          'This is the first section in the + Litter form',
+          'You can remove a staged image before saving',
+          'Photos help identify the litter later',
+          'Image upload is completed after the litter is saved'
         ]
       },
       {
         stepNumber: 10,
-        title: 'Link Existing Offspring and Create New Ones',
-        content: 'If some offspring already exist, use Link Existing Animals as Offspring to attach them to the litter. If others still need to be created, use Create New Offspring Animals and enter the remaining male, female, and unknown counts. The modal shows what is already linked and what is still missing so you can finish the litter record accurately.',
+        title: 'Set Pair Name and Parents',
+        content: 'Fill in Litter Name/ID (your pair name or internal code), then choose sire and dam. The litter name field stores your custom pairing label, and the parent buttons stay species-filtered based on the species you selected earlier.',
         tips: [
-          'Link existing offspring before creating new placeholders',
-          'The form only shows matching offspring',
-          'Remaining counts help you see what still needs to be created',
-          'This is where the litter becomes a complete offspring record'
+          'Litter Name/ID is where pair names are recorded',
+          'Use a label like season plus pairing name if helpful',
+          'Parent selection is still required for a complete litter record',
+          'Sire and dam are filtered by species'
         ]
       },
       {
         stepNumber: 11,
+        title: 'Complete Breeding Information',
+        content: 'Open the Breeding Information section and fill the available fields: Breeding Method, Breeding Condition, Breeding Outcome, Mating Date, Expected Due Date, and Birth Method. This section captures the pairing context before the birth and offspring totals are finalized.',
+        tips: [
+          'Breeding Information is its own card in the modal',
+          'Mating and expected due dates are tracked separately from birth date',
+          'Outcome can be set as successful, unsuccessful, or unknown',
+          'Birth Method is captured in this section'
+        ]
+      },
+      {
+        stepNumber: 12,
+        title: 'Record Dates, Counts, and Offspring',
+        content: 'In Birth & Offspring Details, enter birth and weaning dates, sex counts, stillborn, losses, and total weaned. Then link existing offspring and create any remaining offspring records so the litter totals are fully accounted for.',
+        tips: [
+          'Total born is calculated from male, female, and unknown counts',
+          'Birth date unlocks offspring linking and creation actions',
+          'Link existing offspring before creating new placeholders',
+          'Use remaining counts to finish the litter accurately'
+        ]
+      },
+      {
+        stepNumber: 13,
         title: 'Save and Review the Litter',
-        content: 'Save the litter to close the modal and return to the list. Then click the litter card to open the expanded view, where you can verify the parents, dates, linked offspring, and litter actions. From there you can edit the litter, add more offspring, or make corrections if anything needs to change.',
+        content: 'Save the litter to close the modal and return to the list. Then click the litter card to open the expanded view, where you can verify photos, parents, breeding information, dates, linked offspring, and litter actions. From there you can edit the litter, add more offspring, or make corrections if anything needs to change.',
         tips: [
           'Save closes the modal and writes the record',
           'Expanded view is where you verify the final result',
