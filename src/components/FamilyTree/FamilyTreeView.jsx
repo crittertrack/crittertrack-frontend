@@ -61,6 +61,7 @@ const FamilyTreeView = ({
     const [pan, setPan] = useState({ x: 24, y: 24 });
     const [showNoPedigreePanel, setShowNoPedigreePanel] = useState(true);
     const [hoveredAnimal, setHoveredAnimal] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
     const [highlightMode, setHighlightMode] = useState('none');
     const [connectorStyle, setConnectorStyle] = useState('orthogonal');
     const [externalAncestorsById, setExternalAncestorsById] = useState({});
@@ -384,6 +385,26 @@ const FamilyTreeView = ({
             pairGroups[key].childIds.push(childId);
         });
 
+        const pairInfoByKey = {};
+        Object.entries(pairGroups).forEach(([pairKey, group]) => {
+            const parentIds = (group.parentIds || []).filter(pid => positions[pid]);
+            if (parentIds.length < 2) return;
+
+            const childCenters = (group.childIds || [])
+                .filter(cid => positions[cid])
+                .map(cid => positions[cid].x + NODE_W / 2);
+
+            const childMidpoint = childCenters.length
+                ? childCenters.reduce((sum, x) => sum + x, 0) / childCenters.length
+                : parentIds.reduce((sum, pid) => sum + (positions[pid].x + NODE_W / 2), 0) / parentIds.length;
+
+            pairInfoByKey[pairKey] = {
+                pairKey,
+                parentIds,
+                childMidpoint,
+            };
+        });
+
         // Post-layout ordering pass: keep each generation deterministic and grouped by parent midpoint.
         const rankIds = {};
         Object.entries(positions).forEach(([id, pos]) => {
@@ -399,26 +420,63 @@ const FamilyTreeView = ({
                 .map(id => positions[id].x + NODE_W / 2)
                 .sort((a, b) => a - b);
 
-            const desired = ids.slice().sort((idA, idB) => {
-                const parentsA = parentLinksByChild[idA] || [];
-                const parentsB = parentLinksByChild[idB] || [];
+            const rankSet = new Set(ids);
+            const sortedIds = ids.slice().sort((idA, idB) => (positions[idA].x + NODE_W / 2) - (positions[idB].x + NODE_W / 2));
+            const used = new Set();
+            const blocks = [];
 
-                const midpointA = parentsA.length
-                    ? parentsA.reduce((sum, pid) => sum + (positions[pid].x + NODE_W / 2), 0) / parentsA.length
-                    : positions[idA].x + NODE_W / 2;
-                const midpointB = parentsB.length
-                    ? parentsB.reduce((sum, pid) => sum + (positions[pid].x + NODE_W / 2), 0) / parentsB.length
-                    : positions[idB].x + NODE_W / 2;
+            const scoreBlock = (block) => {
+                if (block.kind === 'pair') {
+                    return block.center;
+                }
+                return positions[block.members[0]].x + NODE_W / 2;
+            };
 
-                if (midpointA !== midpointB) return midpointA - midpointB;
+            sortedIds.forEach(id => {
+                if (used.has(id)) return;
 
-                const siblingCmp = compareSiblingOrder(byId[idA], byId[idB]);
-                if (siblingCmp !== 0) return siblingCmp;
+                const pairKey = Object.keys(pairInfoByKey).find(key => {
+                    const info = pairInfoByKey[key];
+                    return info.parentIds.includes(id)
+                        && info.parentIds.every(pid => rankSet.has(pid))
+                        && !used.has(info.parentIds[0])
+                        && !used.has(info.parentIds[1]);
+                });
 
-                return (positions[idA].x + NODE_W / 2) - (positions[idB].x + NODE_W / 2);
+                if (pairKey) {
+                    const info = pairInfoByKey[pairKey];
+                    const members = info.parentIds.slice().sort((a, b) => (positions[a].x + NODE_W / 2) - (positions[b].x + NODE_W / 2));
+                    members.forEach(pid => used.add(pid));
+                    blocks.push({
+                        kind: 'pair',
+                        key: pairKey,
+                        members,
+                        center: info.childMidpoint,
+                    });
+                    return;
+                }
+
+                used.add(id);
+                blocks.push({
+                    kind: 'single',
+                    key: id,
+                    members: [id],
+                    center: positions[id].x + NODE_W / 2,
+                });
+            });
+
+            blocks.sort((a, b) => {
+                if (scoreBlock(a) !== scoreBlock(b)) return scoreBlock(a) - scoreBlock(b);
+                return a.key.localeCompare(b.key);
+            });
+
+            const desired = [];
+            blocks.forEach(block => {
+                block.members.forEach(id => desired.push(id));
             });
 
             desired.forEach((id, idx) => {
+                if (currentCenters[idx] === undefined) return;
                 positions[id].x = currentCenters[idx] - NODE_W / 2;
             });
         });
@@ -604,6 +662,46 @@ const FamilyTreeView = ({
     }, [speciesAnimals, externalAncestorsById, connectorStyle]);
 
     const noPedigreeAnimals = graphData.noPedigreeAnimals || [];
+
+    const searchMatchedIds = useMemo(() => {
+        const query = searchQuery.trim().toLowerCase();
+        if (!query) return new Set();
+
+        const out = new Set();
+        Object.values(graphData.byId || {}).forEach(animal => {
+            const displayName = [animal?.prefix, animal?.name, animal?.suffix].filter(Boolean).join(' ').toLowerCase();
+            const idPublic = String(animal?.id_public || '').toLowerCase();
+            if (displayName.includes(query) || idPublic.includes(query)) {
+                out.add(animal.id_public);
+            }
+        });
+        return out;
+    }, [graphData.byId, searchQuery]);
+
+    const firstSearchMatch = useMemo(() => {
+        if (!searchMatchedIds.size) return null;
+        return Object.keys(graphData.positions || {}).find(id => searchMatchedIds.has(id)) || null;
+    }, [graphData.positions, searchMatchedIds]);
+
+    useEffect(() => {
+        if (!searchQuery.trim() || !firstSearchMatch) return;
+
+        const pos = graphData.positions[firstSearchMatch];
+        if (!pos) return;
+
+        const container = containerRef.current;
+        if (!container) return;
+
+        const scale = zoomStateRef.current / 100;
+        const nodeCenterX = pos.x + NODE_W / 2;
+        const nodeCenterY = pos.y + NODE_H / 2;
+        const targetPan = {
+            x: (container.clientWidth / 2) - (nodeCenterX * scale),
+            y: (container.clientHeight / 2) - (nodeCenterY * scale),
+        };
+
+        scheduleViewUpdate(targetPan, zoomStateRef.current);
+    }, [firstSearchMatch, graphData.positions, searchQuery]);
 
     const getAncestors = (id, visited = new Set()) => {
         if (visited.has(id)) return new Set();
@@ -824,12 +922,40 @@ const FamilyTreeView = ({
                     onChange={e => {
                         setSelectedSpecies(e.target.value);
                         setHoveredAnimal(null);
+                        setSearchQuery('');
                         setPan({ x: 24, y: 24 });
                     }}
                     className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-accent focus:border-transparent"
                 >
                     {speciesList.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
+
+                <div className="flex items-center gap-2 min-w-[280px] flex-1 max-w-[420px]">
+                    <div className="relative flex-1">
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={e => setSearchQuery(e.target.value)}
+                            placeholder="Search by name or CTCID"
+                            className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-accent focus:border-transparent"
+                        />
+                        {searchQuery ? (
+                            <button
+                                type="button"
+                                onClick={() => setSearchQuery('')}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500 hover:text-gray-700"
+                                title="Clear search"
+                            >
+                                Clear
+                            </button>
+                        ) : null}
+                    </div>
+                    {searchQuery ? (
+                        <span className="text-xs text-gray-500 whitespace-nowrap">
+                            {searchMatchedIds.size} match{searchMatchedIds.size === 1 ? '' : 'es'}
+                        </span>
+                    ) : null}
+                </div>
 
                 <span className="text-sm text-gray-600 font-medium">
                     {speciesAnimals.length} account animal{speciesAnimals.length !== 1 ? 's' : ''}
@@ -902,6 +1028,7 @@ const FamilyTreeView = ({
                             setZoom(85);
                             setPan({ x: 24, y: 24 });
                             setHoveredAnimal(null);
+                            setSearchQuery('');
                         }}
                         className="p-2 hover:bg-gray-200 rounded transition"
                         title="Reset view"
@@ -909,6 +1036,10 @@ const FamilyTreeView = ({
                         <Home size={16} className="text-gray-600" />
                     </button>
                 </div>
+            </div>
+
+            <div className="text-xs text-gray-500 px-1">
+                Search matches are highlighted and the view recenters on the first result.
             </div>
 
             <div className={`grid ${showNoPedigreePanel ? 'grid-cols-[280px_minmax(0,1fr)]' : 'grid-cols-[44px_minmax(0,1fr)]'} gap-4`}>
@@ -987,12 +1118,18 @@ const FamilyTreeView = ({
                     >
                         <svg style={{ position: 'absolute', inset: 0, width: graphData.width, height: graphData.height, pointerEvents: 'none' }}>
                             {graphData.edgeSegments.map(seg => {
-                                const active = hoveredAnimal && seg.relatedIds.some(rid => highlightedSet.has(rid));
+                                const isSearchActive = searchMatchedIds.size > 0;
+                                const active = (hoveredAnimal && seg.relatedIds.some(rid => highlightedSet.has(rid))) || (isSearchActive && seg.relatedIds.some(rid => searchMatchedIds.has(rid)));
                                 const isPairLine = seg.id.includes('partner-network');
                                 const isDescendantLine = /offspring|child|trunk|anchor|single-diagonal|single-parent/.test(seg.id);
 
                                 const baseStroke = isPairLine ? '#2563eb' : isDescendantLine ? '#7c3aed' : '#64748b';
                                 const activeStroke = isPairLine ? '#1d4ed8' : isDescendantLine ? '#6d28d9' : '#334155';
+                                const opacity = hoveredAnimal
+                                    ? (active ? 1 : 0.2)
+                                    : isSearchActive
+                                        ? (active ? 1 : 0.1)
+                                        : 0.92;
                                 return (
                                     <path
                                         key={seg.id}
@@ -1002,7 +1139,7 @@ const FamilyTreeView = ({
                                         strokeWidth={active ? 3.4 : 2.4}
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
-                                        opacity={hoveredAnimal ? (active ? 1 : 0.2) : 0.92}
+                                        opacity={opacity}
                                     />
                                 );
                             })}
@@ -1011,7 +1148,9 @@ const FamilyTreeView = ({
                         {Object.entries(graphData.positions).map(([id, pos]) => {
                             const animal = graphData.byId[id];
                             if (!animal) return null;
-                            const active = highlightedSet.has(id);
+                            const isSearchActive = searchMatchedIds.size > 0;
+                            const isSearchMatch = searchMatchedIds.has(id);
+                            const active = highlightedSet.has(id) || isSearchMatch;
                             const isMale = animal.gender === 'Male';
                             const isFemale = animal.gender === 'Female';
                             const borderColor = isMale ? '#3b82f6' : isFemale ? '#ec4899' : '#94a3b8';
@@ -1037,7 +1176,7 @@ const FamilyTreeView = ({
                                         backgroundColor: bgColor,
                                         touchAction: 'manipulation',
                                     }}
-                                    className={`text-left rounded-xl border-2 transition-all shadow-sm overflow-hidden ${active ? 'ring-2 ring-pink-200' : hoveredAnimal ? 'opacity-35' : 'hover:border-accent hover:shadow-md'}`}
+                                    className={`text-left rounded-xl border-2 transition-all shadow-sm overflow-hidden ${active ? 'ring-2 ring-pink-200' : hoveredAnimal ? 'opacity-35' : isSearchActive ? 'opacity-30' : 'hover:border-accent hover:shadow-md'}`}
                                     title="Click to open animal details"
                                 >
                                     <div className="w-full h-[68px] bg-white/60 flex items-center justify-center">
