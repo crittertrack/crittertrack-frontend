@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import axios from 'axios';
 import ArchiveScreen from '../ArchiveScreen';
+import FamilyTreeView from '../FamilyTree/FamilyTreeView';
 import {
     Activity, AlertCircle, AlertTriangle, Archive, ArrowLeftRight,
     Ban, Bean, Bell, Calendar, Cat, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
@@ -17,7 +18,7 @@ const API_BASE_URL = '/api';
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'];
 const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown'];
 const normalizeAnimalView = (value) => (
-    ['collections', 'enclosures', 'reproduction', 'health', 'feeding', 'supplies'].includes(value) ? value : 'list'
+    ['collections', 'enclosures', 'reproduction', 'health', 'feeding', 'supplies', 'familyTree'].includes(value) ? value : 'list'
 );
 
 const DEFAULT_LIST_COLUMNS = { genderIcon: true, ctId: true, identification: true, name: true, variety: true, birthdate: true, age: true, status: true, reproduction: true, sireName: true, damName: true };
@@ -4251,11 +4252,12 @@ const AnimalList = ({
                     </button>
                 ))}
                 </div>
-                <div className="grid grid-cols-4 sm:hidden border-t border-gray-200">
+                <div className="grid grid-cols-5 sm:hidden border-t border-gray-200">
                 {[{key:'reproduction', icon:<Bean size={14} className="shrink-0" />, label:'Reproduction'},
                   {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
                   {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'},
                   {key:'supplies', icon:<Package size={14} className="shrink-0" />, label:'Supplies'},
+                  {key:'familyTree', icon:<Network size={14} className="shrink-0" />, label:'Family Tree'},
                 ].map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
@@ -4285,6 +4287,7 @@ const AnimalList = ({
                   {key:'health', icon:<Activity size={14} className="shrink-0" />, label:'Health'},
                   {key:'feeding', icon:<Utensils size={14} className="shrink-0" />, label:'Feeding & Care'},
                   {key:'supplies', icon:<Package size={14} className="shrink-0" />, label:'Supplies'},
+                  {key:'familyTree', icon:<Network size={14} className="shrink-0" />, label:'Family Tree'},
                 ].map(tab => (
                     <button key={tab.key}
                         onClick={() => setAnimalView(tab.key)}
@@ -4615,7 +4618,7 @@ const AnimalList = ({
             </div>
             )}
 
-            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : showActivityLogScreen ? renderActivityLogScreen() : showForSaleScreen ? renderForSaleScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'supplies' ? renderSuppliesScreen() : animalView === 'collections' ? renderCollectionsView() : (loading && animals.length === 0) ? (
+            {showArchiveScreen ? renderArchiveScreen() : showDuplicatesScreen ? renderDuplicatesScreen() : showActivityLogScreen ? renderActivityLogScreen() : showForSaleScreen ? renderForSaleScreen() : animalView === 'enclosures' ? renderManagementView('enclosures') : animalView === 'reproduction' ? renderManagementView('reproduction') : animalView === 'health' ? renderManagementView('health') : animalView === 'feeding' ? renderManagementView('feeding') : animalView === 'supplies' ? renderSuppliesScreen() : animalView === 'collections' ? renderCollectionsView() : animalView === 'familyTree' ? <FamilyTreeView animals={animals} loading={loading} /> : (loading && animals.length === 0) ? (
                 /* Skeleton grid ? only on very first load before any animals arrive */
                 <div className="space-y-3 sm:space-y-4">
                     {[0,1,2].map(gi => (
