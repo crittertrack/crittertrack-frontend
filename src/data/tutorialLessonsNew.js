@@ -889,17 +889,17 @@ const GETTING_STARTED_LESSONS = [
   {
     id: 'gs-records-eol',
     title: '13. Notes',
-    description: 'Add notes and additional information about your animal',
+    description: 'Add notes, milestones, and additional information about your animal',
     tour: 'getting-started',
     tourOrder: 13,
     steps: [
       {
         stepNumber: 1,
         title: 'Notes Tab',
-        content: 'The Notes tab is for general remarks and any additional information about your animal.',
+        content: 'The Notes tab is for general remarks, milestone tracking, and any additional information about your animal.',
         tips: [
-          'Catch-all for additional info',
-          'Good for observations',
+          'Use for notes and milestones',
+          'Good for observations and key events',
           'Can add images here'
         ]
       },
