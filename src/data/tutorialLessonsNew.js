@@ -895,8 +895,8 @@ const GETTING_STARTED_LESSONS = [
     steps: [
       {
         stepNumber: 1,
-        title: 'Notes Tab',
-        content: 'The Notes tab is for general remarks, milestone tracking, and any additional information about your animal.',
+        title: 'Notes & Milestones Tab',
+        content: 'The Notes & Milestones tab is for general remarks, milestone tracking, and any additional information about your animal.',
         tips: [
           'Use for notes and milestones',
           'Good for observations and key events',
