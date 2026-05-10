@@ -97,6 +97,7 @@ const FamilyTreeView = ({
     const zoomStateRef = useRef(85);
     const viewFrameRef = useRef(null);
     const pendingViewRef = useRef({ pan: { x: 24, y: 24 }, zoom: 85 });
+    const pendingCenterAnimalRef = useRef(null);
 
     const clampPanToViewport = (nextPan, nextZoom) => {
         const container = containerRef.current;
@@ -880,7 +881,16 @@ const FamilyTreeView = ({
     useEffect(() => {
         if (!searchQuery.trim() || !firstSearchMatch) return;
 
-        const pos = graphData.positions[firstSearchMatch];
+        setFocusMode(true);
+        setFocusAnimalId(prev => (prev === firstSearchMatch ? prev : firstSearchMatch));
+        pendingCenterAnimalRef.current = firstSearchMatch;
+    }, [firstSearchMatch, searchQuery]);
+
+    useEffect(() => {
+        const targetId = pendingCenterAnimalRef.current;
+        if (!targetId) return;
+
+        const pos = graphData.positions[targetId];
         if (!pos) return;
 
         const container = containerRef.current;
@@ -895,7 +905,8 @@ const FamilyTreeView = ({
         };
 
         scheduleViewUpdate(targetPan, zoomStateRef.current);
-    }, [firstSearchMatch, graphData.positions, searchQuery]);
+        pendingCenterAnimalRef.current = null;
+    }, [graphData.positions, focusMode]);
 
     const getAncestors = (id, visited = new Set()) => {
         if (visited.has(id)) return new Set();
@@ -1294,7 +1305,7 @@ const FamilyTreeView = ({
             </div>
 
             <div className="text-xs text-gray-500 px-1">
-                In Focused view: click a node to refocus, double-click for details. Search recenters to first match.
+                Click a node to focus and center it. Double-click for details. Search focuses and recenters to the first match.
             </div>
 
             <div className={`grid ${showNoPedigreePanel ? 'grid-cols-[280px_minmax(0,1fr)]' : 'grid-cols-[44px_minmax(0,1fr)]'} gap-4`}>
@@ -1426,11 +1437,9 @@ const FamilyTreeView = ({
                                         setFocusMode(true);
                                     }}
                                     onClick={() => {
-                                        if (focusMode) {
-                                            setFocusAnimalId(id);
-                                            return;
-                                        }
-                                        if (onViewAnimal) onViewAnimal(animal);
+                                        setFocusMode(true);
+                                        setFocusAnimalId(id);
+                                        pendingCenterAnimalRef.current = id;
                                     }}
                                     onDoubleClick={() => {
                                         if (onViewAnimal) onViewAnimal(animal);
@@ -1446,7 +1455,7 @@ const FamilyTreeView = ({
                                         touchAction: 'manipulation',
                                     }}
                                     className={`text-left rounded-xl border-2 transition-all shadow-sm overflow-hidden ${active ? 'ring-2 ring-pink-200' : hoveredAnimal ? 'opacity-35' : isSearchActive ? 'opacity-30' : 'hover:border-accent hover:shadow-md'}`}
-                                    title={focusMode ? 'Click to focus this animal. Double-click to open details.' : 'Click to open animal details'}
+                                    title="Click to focus this animal. Double-click to open details."
                                 >
                                     <div className="w-full h-[68px] bg-white/60 flex items-center justify-center">
                                         {imageSrc ? (
@@ -1480,7 +1489,7 @@ const FamilyTreeView = ({
             </div>
 
             <p className="text-xs text-gray-500 italic">
-                Hover a node to highlight {highlightMode}. Click a node to open details. Use Ctrl+scroll to zoom and drag empty space to pan. On touch devices: one-finger drag to pan, two-finger pinch to zoom.
+                Hover a node to highlight {highlightMode}. Click a node to focus and center it. Double-click to open details. Use Ctrl+scroll to zoom and drag empty space to pan. On touch devices: one-finger drag to pan, two-finger pinch to zoom.
             </p>
         </div>
     );
