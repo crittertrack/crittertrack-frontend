@@ -3084,7 +3084,7 @@ const AnimalList = ({
                 if (!enclosureAnimalMap[a.enclosureId]) enclosureAnimalMap[a.enclosureId] = [];
                 enclosureAnimalMap[a.enclosureId].push(a);
             } else {
-                unassignedAnimals.push(a);
+                if (a.status !== 'Rehomed') unassignedAnimals.push(a);
             }
         });
 
