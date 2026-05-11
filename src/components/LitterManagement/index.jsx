@@ -2207,7 +2207,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const response = await axios.get(`${API_BASE_URL}/litters`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            const littersData = Array.isArray(response.data) ? response.data : [];
+            if (!Array.isArray(response.data)) {
+                console.warn('Unexpected litters payload shape; preserving existing litter list.');
+                return;
+            }
+            const littersData = response.data;
             
             // Set litters immediately so UI can render
             setLitters(littersData);
@@ -2292,7 +2296,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             });
         } catch (error) {
             console.error('Error fetching litters:', error);
-            setLitters([]);
+            // Preserve current list on transient failures so the UI doesn't appear to lose all litters.
         }
     };
 
