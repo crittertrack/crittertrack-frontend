@@ -450,6 +450,9 @@ const App = () => {
     // All breeding line logic consolidated into custom hook for reusability--------------------------------------------------------
     const [parentCardKey, setParentCardKey] = useState(0); // Force parent cards to refetch when tab opens
     const [animalDataRefreshTrigger, setAnimalDataRefreshTrigger] = useState(0); // Force entire animal data refresh after ANY edit
+    const pedigreeAbortControllerRef = useRef(null); // Cancel pedigree fetches when switching views
+    const fullAnimalAbortControllerRef = useRef(null); // Cancel full animal fetch when switching views
+    const animalRefreshAbortControllerRef = useRef(null); // Cancel refresh fetch when switching to edit
     const [showTabs, setShowTabs] = useState(true); // Toggle for collapsible tabs panel
     const [sireData, setSireData] = useState(null);
     const [damData, setDamData] = useState(null);
@@ -526,14 +529,26 @@ const App = () => {
         }
     }, [detailViewTab]);
     
-    // Fetch parent animals when viewing an animal
+    // Fetch parent animals when viewing an animal (ONLY in detail, ABORT if editing)
     React.useEffect(() => {
+        // Cancel if switching to edit view
+        if (animalToEdit) {
+            if (pedigreeAbortControllerRef.current) {
+                pedigreeAbortControllerRef.current.abort();
+            }
+            return;
+        }
+
         if (!animalToView) {
             setSireData(null);
             setDamData(null);
             setOffspringData([]);
             return;
         }
+
+        // Create abort controller for this fetch
+        const controller = new AbortController();
+        pedigreeAbortControllerRef.current = controller;
         
         const fetchPedigreeData = async () => {
             try {
@@ -542,77 +557,155 @@ const App = () => {
                 
                 // Fetch parents using /any/ endpoint to get parents regardless of ownership
                 if (sireId) {
-                    const response = await axios.get(`${API_BASE_URL}/animals/any/${sireId}`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
-                    setSireData(response.data);
+                    try {
+                        const response = await axios.get(`${API_BASE_URL}/animals/any/${sireId}`, {
+                            headers: { Authorization: `Bearer ${authToken}` },
+                            signal: controller.signal
+                        });
+                        if (!controller.signal.aborted) {
+                            setSireData(response.data);
+                        }
+                    } catch (e) {
+                        if (e.name !== 'CanceledError' && !controller.signal.aborted) {
+                            setSireData(null);
+                        }
+                    }
                 }
                 
                 if (damId) {
-                    const response = await axios.get(`${API_BASE_URL}/animals/any/${damId}`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
-                    setDamData(response.data);
+                    try {
+                        const response = await axios.get(`${API_BASE_URL}/animals/any/${damId}`, {
+                            headers: { Authorization: `Bearer ${authToken}` },
+                            signal: controller.signal
+                        });
+                        if (!controller.signal.aborted) {
+                            setDamData(response.data);
+                        }
+                    } catch (e) {
+                        if (e.name !== 'CanceledError' && !controller.signal.aborted) {
+                            setDamData(null);
+                        }
+                    }
                 }
                 
                 // Fetch offspring using the dedicated offspring endpoint
                 try {
                     const offspringResponse = await axios.get(`${API_BASE_URL}/animals/${animalToView.id_public}/offspring`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
+                        headers: { Authorization: `Bearer ${authToken}` },
+                        signal: controller.signal
                     });
                     
-                    const litters = offspringResponse.data || [];
-                    // Flatten offspring from all litters into a single array
-                    const allOffspring = [];
-                    litters.forEach(litter => {
-                        if (litter.offspring && Array.isArray(litter.offspring)) {
-                            allOffspring.push(...litter.offspring);
-                        }
-                    });
-                    
-                    setOffspringData(allOffspring);
+                    if (!controller.signal.aborted) {
+                        const litters = offspringResponse.data || [];
+                        // Flatten offspring from all litters into a single array
+                        const allOffspring = [];
+                        litters.forEach(litter => {
+                            if (litter.offspring && Array.isArray(litter.offspring)) {
+                                allOffspring.push(...litter.offspring);
+                            }
+                        });
+                        
+                        setOffspringData(allOffspring);
+                    }
                 } catch (e) {
-                    setOffspringData([]);
+                    if (e.name !== 'CanceledError' && !controller.signal.aborted) {
+                        setOffspringData([]);
+                    }
                 }
             } catch (error) {
-                console.error('Error fetching pedigree data:', error);
+                if (!controller.signal.aborted) {
+                    console.error('Error fetching pedigree data:', error);
+                }
             }
         };
         
         fetchPedigreeData();
-    }, [animalToView, authToken, animalDataRefreshTrigger]);
+
+        // Cleanup: abort on unmount or when dependencies change
+        return () => {
+            if (pedigreeAbortControllerRef.current === controller) {
+                controller.abort();
+            }
+        };
+    }, [animalToView, authToken, animalDataRefreshTrigger, animalToEdit]);
     
-    // Fetch full animal record when a new animal is opened for viewing
+    // Fetch full animal record when a new animal is opened for viewing (ONLY in detail, ABORT if editing)
     // (the list uses slim=true which strips appearance/genetics fields)
     React.useEffect(() => {
-        if (!animalToView?.id_public || !authToken) return;
-        axios.get(`${API_BASE_URL}/animals/${animalToView.id_public}`, {
-            headers: { Authorization: `Bearer ${authToken}` }
-        })
-        .then(res => setAnimalToView(res.data))
-        .catch(() => {}); // silently keep the slim data if the fetch fails
-    }, [animalToView?.id_public]); // eslint-disable-line react-hooks/exhaustive-deps
+        // Cancel if switching to edit view
+        if (animalToEdit) {
+            if (fullAnimalAbortControllerRef.current) {
+                fullAnimalAbortControllerRef.current.abort();
+            }
+            return;
+        }
 
-    // Re-fetch the current animal from server when data is saved/updated
+        if (!animalToView?.id_public || !authToken) return;
+
+        // Create abort controller for this fetch
+        const controller = new AbortController();
+        fullAnimalAbortControllerRef.current = controller;
+
+        axios.get(`${API_BASE_URL}/animals/${animalToView.id_public}`, {
+            headers: { Authorization: `Bearer ${authToken}` },
+            signal: controller.signal
+        })
+        .then(res => {
+            if (!controller.signal.aborted) {
+                setAnimalToView(res.data);
+            }
+        })
+        .catch(err => {
+            if (err.name !== 'CanceledError' && !controller.signal.aborted) {
+                // silently keep the slim data if the fetch fails
+            }
+        });
+
+        // Cleanup: abort on unmount or when dependencies change
+        return () => {
+            if (fullAnimalAbortControllerRef.current === controller) {
+                controller.abort();
+            }
+        };
+    }, [animalToView?.id_public, animalToEdit, authToken, API_BASE_URL]); // Added animalToEdit
+
+    // Re-fetch the current animal from server when data is saved/updated (ONLY if NOT editing)
     React.useEffect(() => {
-        if (!animalToView?.id_public || animalDataRefreshTrigger === 0 || !authToken) return;
+        // Don't refetch if user is editing - save handler will update the data
+        if (animalToEdit || !animalToView?.id_public || animalDataRefreshTrigger === 0 || !authToken) return;
         
+        // Create abort controller for this fetch
+        const controller = new AbortController();
+        animalRefreshAbortControllerRef.current = controller;
+
         const refetchCurrentAnimal = async () => {
             try {
                 const response = await axios.get(`${API_BASE_URL}/animals/${animalToView.id_public}`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
+                    headers: { Authorization: `Bearer ${authToken}` },
+                    signal: controller.signal
                 });
                 // Update the animal state with fresh data from server
-                setAnimalToView(response.data);
-                // Broadcast settled server state to all components
-                window.dispatchEvent(new CustomEvent('animal-updated', { detail: response.data }));
+                if (!controller.signal.aborted) {
+                    setAnimalToView(response.data);
+                    // Broadcast settled server state to all components
+                    window.dispatchEvent(new CustomEvent('animal-updated', { detail: response.data }));
+                }
             } catch (error) {
-                console.error('Error refetching animal data:', error);
+                if (error.name !== 'CanceledError' && !controller.signal.aborted) {
+                    console.error('Error refetching animal data:', error);
+                }
             }
         };
         
         refetchCurrentAnimal();
-    }, [animalDataRefreshTrigger, animalToView?.id_public, authToken, API_BASE_URL]);
+
+        // Cleanup: abort on unmount or when dependencies change
+        return () => {
+            if (animalRefreshAbortControllerRef.current === controller) {
+                controller.abort();
+            }
+        };
+    }, [animalDataRefreshTrigger, animalToView?.id_public, authToken, API_BASE_URL, animalToEdit]);
 
     // Global: keep animalToView in sync with any animal-updated event from anywhere in the app
     React.useEffect(() => {
