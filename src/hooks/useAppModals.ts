@@ -84,6 +84,25 @@ export function useAppModals() {
     
     // ========== BETA FEEDBACK SURVEY ==========
     const [showBetaFeedbackModal, setShowBetaFeedbackModal] = useState(false);
+    const [showBetaSurveyModal, setShowBetaSurveyModal] = useState(false);
+    const [surveyResponses, setSurveyResponses] = useState({
+        q1_overall_satisfaction: null,
+        q2_visual_design: null,
+        q3_primary_use: [],
+        q4_features_used: [],
+        q5_find_animals: null,
+        q6_litter_family_tree: null,
+        q7_genetics_tools: null,
+        q8_animal_profile_clarity: null,
+        q9_litter_tracking: null,
+        q10_ownership_management: null,
+        q11_profile_settings: null,
+        q12_breeder_directory: null,
+        q13_visibility_comfort: null,
+        q14_marketplace_utility: null,
+        q15_improvements: ''
+    });
+    const [surveySubmitting, setSurveySubmitting] = useState(false);
 
     // ========== POLICY & LEGAL MODALS ==========
     const [showTermsModal, setShowTermsModal] = useState(false);
@@ -149,6 +168,7 @@ export function useAppModals() {
             showFeedbackModal,
             showWelcomeGuide,
             showBetaFeedbackModal,
+            showBetaSurveyModal,
             showTermsModal,
             showPrivacyModal,
             showTransferModal,
@@ -169,6 +189,7 @@ export function useAppModals() {
             showFeedbackModal: setShowFeedbackModal,
             showWelcomeGuide: setShowWelcomeGuide,
             showBetaFeedbackModal: setShowBetaFeedbackModal,
+            showBetaSurveyModal: setShowBetaSurveyModal,
             showTermsModal: setShowTermsModal,
             showPrivacyModal: setShowPrivacyModal,
             showTransferModal: setShowTransferModal,
@@ -209,6 +230,7 @@ export function useAppModals() {
             showFeedbackModal: setShowFeedbackModal,
             showWelcomeGuide: setShowWelcomeGuide,
             showBetaFeedbackModal: setShowBetaFeedbackModal,
+            showBetaSurveyModal: setShowBetaSurveyModal,
             showTermsModal: setShowTermsModal,
             showPrivacyModal: setShowPrivacyModal,
             showTransferModal: setShowTransferModal,
@@ -249,6 +271,7 @@ export function useAppModals() {
             showFeedbackModal: [showFeedbackModal, setShowFeedbackModal],
             showWelcomeGuide: [showWelcomeGuide, setShowWelcomeGuide],
             showBetaFeedbackModal: [showBetaFeedbackModal, setShowBetaFeedbackModal],
+            showBetaSurveyModal: [showBetaSurveyModal, setShowBetaSurveyModal],
             showTermsModal: [showTermsModal, setShowTermsModal],
             showPrivacyModal: [showPrivacyModal, setShowPrivacyModal],
             showTransferModal: [showTransferModal, setShowTransferModal],
@@ -283,6 +306,7 @@ export function useAppModals() {
         showFeedbackModal,
         showWelcomeGuide,
         showBetaFeedbackModal,
+        showBetaSurveyModal,
         showTermsModal,
         showPrivacyModal,
         showTransferModal,
@@ -314,6 +338,7 @@ export function useAppModals() {
         setShowFeedbackModal(false);
         setShowWelcomeGuide(false);
         setShowBetaFeedbackModal(false);
+        setShowBetaSurveyModal(false);
         setShowTermsModal(false);
         setShowPrivacyModal(false);
         setShowTransferModal(false);
@@ -451,6 +476,12 @@ export function useAppModals() {
         // Beta Feedback Survey
         showBetaFeedbackModal,
         setShowBetaFeedbackModal,
+        showBetaSurveyModal,
+        setShowBetaSurveyModal,
+        surveyResponses,
+        setSurveyResponses,
+        surveySubmitting,
+        setSurveySubmitting,
 
         // Policy & Legal
         showTermsModal,

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Sparkles } from 'lucide-react';
 
-const BetaFeedbackModal = ({ onClose }) => {
+const BetaFeedbackModal = ({ onClose, onStartSurvey }) => {
     const [dontShowAgain, setDontShowAgain] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
 
@@ -18,6 +18,21 @@ const BetaFeedbackModal = ({ onClose }) => {
             await onClose();
         } catch (error) {
             console.error('Error closing beta feedback modal:', error);
+        }
+    };
+
+    const handleStartSurvey = async () => {
+        setIsClosing(true);
+        if (dontShowAgain) {
+            const storageKey = localStorage.getItem('betaFeedbackModalUserId');
+            if (storageKey) {
+                localStorage.setItem(`${storageKey}_dontShowBetaFeedback`, 'true');
+            }
+        }
+        try {
+            await onStartSurvey();
+        } catch (error) {
+            console.error('Error starting survey:', error);
         }
     };
 
@@ -113,7 +128,15 @@ const BetaFeedbackModal = ({ onClose }) => {
                         disabled={isClosing}
                         className="px-4 sm:px-6 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100 transition font-medium text-sm disabled:opacity-50"
                     >
-                        Close
+                        Not Now
+                    </button>
+                    <button
+                        onClick={handleStartSurvey}
+                        disabled={isClosing}
+                        className="px-4 sm:px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-medium text-sm disabled:opacity-50 flex items-center gap-2"
+                    >
+                        <span>Start Survey</span>
+                        <span>→</span>
                     </button>
                 </div>
             </div>

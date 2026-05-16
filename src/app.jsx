@@ -64,6 +64,7 @@ import { ParentSearchModal, LocalAnimalSearchModal, UserSearchModal } from './co
 import { SpeciesPickerModal, SpeciesManager, SpeciesSelector } from './components/Modals/SpeciesModals';
 import { CommunityGeneticsModal } from './components/Modals/CommunityGeneticsModal';
 import BetaFeedbackModal from './components/Modals/BetaFeedbackModal';
+import SurveyModal from './components/Modals/SurveyModal';
 import { MessagesView } from './components/Messages/MessagesView';
 
 // Phase 10: Custom Hooks for App state decomposition
@@ -679,8 +680,27 @@ const App = () => {
         return localStorage.getItem('hasSeenDonationHighlight') === 'true';
     });
 
-    // Beta Feedback Modal State
+    // Beta Feedback Survey States
     const [showBetaFeedbackModal, setShowBetaFeedbackModal] = useState(false);
+    const [showBetaSurveyModal, setShowBetaSurveyModal] = useState(false);
+    const [surveyResponses, setSurveyResponses] = useState({
+        q1_overall_satisfaction: null,
+        q2_visual_design: null,
+        q3_primary_use: [],
+        q4_features_used: [],
+        q5_find_animals: null,
+        q6_litter_family_tree: null,
+        q7_genetics_tools: null,
+        q8_animal_profile_clarity: null,
+        q9_litter_tracking: null,
+        q10_ownership_management: null,
+        q11_profile_settings: null,
+        q12_breeder_directory: null,
+        q13_visibility_comfort: null,
+        q14_marketplace_utility: null,
+        q15_improvements: ''
+    });
+    const [surveySubmitting, setSurveySubmitting] = useState(false);
     
     const [showTermsModal, setShowTermsModal] = useState(false);
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
@@ -1638,6 +1658,21 @@ const App = () => {
             {showBetaFeedbackModal && (
                 <BetaFeedbackModal 
                     onClose={() => setShowBetaFeedbackModal(false)}
+                    onStartSurvey={() => {
+                        setShowBetaFeedbackModal(false);
+                        setShowBetaSurveyModal(true);
+                    }}
+                />
+            )}
+
+            {/* Beta Survey Modal */}
+            {showBetaSurveyModal && (
+                <SurveyModal 
+                    onClose={() => setShowBetaSurveyModal(false)}
+                    surveyResponses={surveyResponses}
+                    setSurveyResponses={setSurveyResponses}
+                    setSurveySubmitting={setSurveySubmitting}
+                    surveySubmitting={surveySubmitting}
                 />
             )}
             
