@@ -1168,34 +1168,34 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 4,
-        title: 'Birth Date & Offspring Count',
-        content: 'Enter the birth date of the litter (optional but recommended). The male and female count fields are simple text fields for administrative tracking. There is a separate feature for direct offspring creation that relies on the birth date.',
+        title: 'Dates, Counts & Totals',
+        content: 'Enter the expected due date or birth date, then fill the male, female, and unknown offspring counts. Total Born is calculated as males + females + unknown. Stillborn, losses, and weaned are free-form fields you can use as needed for your litter record.',
         tips: [
-          'Birth date needed to create offspring directly',
-          'Male/female counts are optional text fields',
-          'Used for statistics and tracking'
+          'Total Born = males + females + unknown',
+          'Stillborn/losses/weaned are free-form fields',
+          'Birth or due date helps with offspring creation and reporting'
         ]
       },
       {
         stepNumber: 5,
-        title: 'Link Existing Animals',
-        content: 'You can link existing animals as offspring during litter creation. Select animals with matching parents to link them to this litter. If you have no birth date filled, it will auto-fill from the existing offspring when you click them.',
+        title: 'Create New Offspring Animals',
+        content: 'In the "New Offspring Animals" section, enter a birth date and click "Create Offspring" to build placeholder offspring records. The system will pre-fill the sire, dam, and birthdate on the new animals so they are linked to this litter immediately.',
         tips: [
-          'Only requires parents to be filled',
-          'Shows animals matching those parents',
-          'Auto-fills birth date from offspring if empty',
-          'Completes the family tree'
+          'Requires both parents and a birth date',
+          'Creates placeholder animals with parent links auto-filled',
+          'Use this when offspring records do not exist yet',
+          'Saved offspring are linked to the litter automatically'
         ]
       },
       {
         stepNumber: 6,
-        title: 'Create New Offspring Animals',
-        content: 'In the "New Offspring Animals" section (separate from the male/female count fields), you can directly create new offspring animals. With a birth date filled in, click "Create Offspring" to add new animals and automatically set them as children of this litter with the sire and dam already assigned.',
+        title: 'Link Existing Animals',
+        content: 'Use "Link Existing Animals" to connect previously created animals to this litter. Only animals with the same parents are shown. If no birth date is set on the litter yet, selecting an existing offspring will auto-fill the litter birth date from that animal.',
         tips: [
-          'Different from male/female count fields',
-          'Found in "New Offspring Animals" section',
-          'Creates animals with parent links pre-filled',
-          'Requires birth date to use'
+          'Parents are required to find matching existing offspring',
+          'Shows only animals with the same sire and dam',
+          'Linking an existing animal auto-fills the litter birth date if missing',
+          'Great for completing the family tree with already-created offspring'
         ]
       },
       {

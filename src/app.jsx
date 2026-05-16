@@ -63,6 +63,8 @@ import { ConflictResolutionModal, LitterSyncConflictModal } from './components/M
 import { ParentSearchModal, LocalAnimalSearchModal, UserSearchModal } from './components/Modals/SearchModals';
 import { SpeciesPickerModal, SpeciesManager, SpeciesSelector } from './components/Modals/SpeciesModals';
 import { CommunityGeneticsModal } from './components/Modals/CommunityGeneticsModal';
+import BetaFeedbackModal from './components/Modals/BetaFeedbackModal';
+import SurveyModal from './components/Modals/SurveyModal';
 import { MessagesView } from './components/Messages/MessagesView';
 
 // Phase 10: Custom Hooks for App state decomposition
@@ -677,6 +679,28 @@ const App = () => {
     const [hasSeenDonationHighlight, setHasSeenDonationHighlight] = useState(() => {
         return localStorage.getItem('hasSeenDonationHighlight') === 'true';
     });
+
+    // Beta Feedback Survey States
+    const [showBetaFeedbackModal, setShowBetaFeedbackModal] = useState(false);
+    const [showBetaSurveyModal, setShowBetaSurveyModal] = useState(false);
+    const [surveyResponses, setSurveyResponses] = useState({
+        q1_overall_satisfaction: null,
+        q2_visual_design: null,
+        q3_primary_use: [],
+        q4_features_used: [],
+        q5_find_animals: null,
+        q6_litter_family_tree: null,
+        q7_genetics_tools: null,
+        q8_animal_profile_clarity: null,
+        q9_litter_tracking: null,
+        q10_ownership_management: null,
+        q11_profile_settings: null,
+        q12_breeder_directory: null,
+        q13_visibility_comfort: null,
+        q14_marketplace_utility: null,
+        q15_improvements: ''
+    });
+    const [surveySubmitting, setSurveySubmitting] = useState(false);
     
     const [showTermsModal, setShowTermsModal] = useState(false);
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
@@ -984,6 +1008,22 @@ const App = () => {
             setShowWelcomeGuide(true);
         }
     }, [authToken, userProfile]);
+
+    // Check if user wants to dismiss beta feedback modal
+    useEffect(() => {
+        if (!authToken || !userProfile) return;
+
+        // Store userId in localStorage for use by BetaFeedbackModal
+        localStorage.setItem('betaFeedbackModalUserId', userProfile._id);
+
+        const storageKey = `${userProfile._id}_dontShowBetaFeedback`;
+        const dontShow = localStorage.getItem(storageKey) === 'true';
+
+        // Show beta feedback modal to all users unless they've dismissed it
+        if (!dontShow && !showWelcomeGuide) { // Don't show if welcome guide is showing
+            setShowBetaFeedbackModal(true);
+        }
+    }, [authToken, userProfile, showWelcomeGuide]);
 
     // Fetch animals for genetics calculator when needed
     useEffect(() => {
@@ -1611,6 +1651,28 @@ const App = () => {
             {showWelcomeGuide && (
                 <WelcomeGuideModal 
                     onClose={handleDismissWelcomeGuide}
+                />
+            )}
+
+            {/* Beta Feedback Modal - Shows to all users */}
+            {showBetaFeedbackModal && (
+                <BetaFeedbackModal 
+                    onClose={() => setShowBetaFeedbackModal(false)}
+                    onStartSurvey={() => {
+                        setShowBetaFeedbackModal(false);
+                        setShowBetaSurveyModal(true);
+                    }}
+                />
+            )}
+
+            {/* Beta Survey Modal */}
+            {showBetaSurveyModal && (
+                <SurveyModal 
+                    onClose={() => setShowBetaSurveyModal(false)}
+                    surveyResponses={surveyResponses}
+                    setSurveyResponses={setSurveyResponses}
+                    setSurveySubmitting={setSurveySubmitting}
+                    surveySubmitting={surveySubmitting}
                 />
             )}
             

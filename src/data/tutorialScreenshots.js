@@ -132,19 +132,30 @@ export const TUTORIAL_SCREENSHOTS = {
     8: 'necropsy-results.png', // Step 8: Necropsy Results
   },
   
-  'gs-show': {
-    1: 'show-tab.png', // Step 1: Show Tab
-    2: 'show-titles-and-ratings.png', // Step 2: Show Titles & Ratings
-    3: 'judge-comments.png', // Step 3: Judge Comments
+  'kf-viewing-animals': {
+    1: 'click-on-an-existing-animal.png', // Step 1: Click on an Existing Animal
+    2: 'owned-toggle.png', // Step 2: Owned Toggle
+    3: 'private-toggle.png', // Step 3: Private Toggle
+    4: 'family-and-family-tree-view.png', // Step 4: Pedigree Chart Button
+    5: 'edit-button.png', // Step 5: Edit Button
+    6: 'edit-view-overview.png', // Step 6: Edit View Overview
+    7: 'delete-button.png', // Step 7: Delete Button
+    8: 'close-edit-without-saving.png', // Step 8: Close Edit Without Saving
+    9: 'add-sibling-button.png', // Step 9: Add Sibling Button
   },
-  
-  'gs-legal': {
-    1: 'legal-tab.png', // Step 1: Legal Tab
-    2: 'licensing-and-permits.png', // Step 2: Licensing & Permits
-    3: 'legal-administrative.png', // Step 3: Legal / Administrative
-    4: 'restrictions.png', // Step 4: Restrictions
+
+  'kf-creating-litters': {
+    1: 'move-to-litters.png', // Step 1: Move to Litters
+    2: 'open-litter-next.png', // Step 2: Litter Management
+    3: 'select-sire-and-dam.png', // Step 3: Sire & Dam Selection
+    4: 'add-mating-date-and-details.png', // Step 4: Dates, Counts & Totals
+    5: 'complete-breeding-information.png', // Step 5: Create New Offspring Animals
+    6: 'click-on-an-existing-animal.png', // Step 6: Link Existing Animals
+    7: 'set-pair-name-and-parents.png', // Step 7: Litter Card Details
+    8: 'save-or-edit-the-planned-mating.png', // Step 8: Litter Actions
+    9: 'add-litter-photos.png', // Step 9: Show a Litter on Your Public Profile
   },
-  
+
 };
 
 /**
