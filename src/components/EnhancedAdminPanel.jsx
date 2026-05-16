@@ -14,6 +14,7 @@ import ModChatTab from './admin/ModChatTab';
 import AnimalManagementPanel from './admin/AnimalManagementPanel';
 import BugReportsTab from './admin/BugReportsTab';
 import FeedbackTab from './admin/FeedbackTab';
+import BetaSurveyManagement from './admin/BetaSurveyManagement';
 import SpeciesManagementTab from './admin/SpeciesManagementTab';
 import FieldTemplateManagement from './admin/FieldTemplateManagement';
 import GeneticsBuilderTab from './admin/GeneticsBuilderTab';
@@ -616,6 +617,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                 items={[
                                     { id: 'audit-logs', label: 'Audit Logs', icon: FileText },
                                     { id: 'bug-reports', label: 'Bug Reports', icon: Bug },
+                                    { id: 'beta-survey', label: 'Beta Survey', icon: Sparkles, requiredRole: 'admin' },
                                     { id: 'backup-management', label: 'Backup Management', icon: Database, requiredRole: 'admin' },
                                     { id: 'reports', label: 'Analytics', icon: BarChart3 }
                                 ]}
@@ -753,6 +755,16 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                         {activeSection === 'bug-reports' && (
                             <div className="p-8">
                                 <BugReportsTab
+                                    API_BASE_URL={API_BASE_URL}
+                                    authToken={authToken}
+                                />
+                            </div>
+                        )}
+
+                        {/* Beta Survey Management */}
+                        {activeSection === 'beta-survey' && (
+                            <div className="p-8">
+                                <BetaSurveyManagement
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
                                 />
