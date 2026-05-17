@@ -16,34 +16,40 @@ const BetaSurveyManagement = ({ authToken, API_BASE_URL }) => {
     }, []);
 
     const fetchSurveyData = async () => {
-        try {
-            setLoading(true);
-            setError('');
+    try {
+        setLoading(true);
+        setError('');
 
-            // Fetch stats and responses in parallel
-            const [statsRes, responsesRes] = await Promise.all([
-                axios.get(`${API_BASE_URL}/api/surveys/beta-survey/stats`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                }),
-                axios.get(`${API_BASE_URL}/api/surveys/beta-survey/all`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                })
-            ]);
+        // Fetch stats and responses in parallel
+        const [statsRes, responsesRes] = await Promise.all([
+            axios.get(`${API_BASE_URL}/api/surveys/beta-survey/stats`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            }),
+            axios.get(`${API_BASE_URL}/api/surveys/beta-survey/all`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            })
+        ]);
 
-            setStats(statsRes.data);
-            setAllResponses(responsesRes.data);
-        } catch (err) {
-    console.error('FULL SURVEY ERROR:', err);
-    console.error('Response:', err.response);
-    console.error('Data:', err.response?.data);
+        setStats(statsRes.data);
+        setAllResponses(responsesRes.data);
 
-    setError(
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        err.message ||
-        'Failed to load survey data'
-    );
-}
+    } catch (err) {
+
+        console.error('FULL SURVEY ERROR:', err);
+        console.error('Response:', err.response);
+        console.error('Data:', err.response?.data);
+
+        setError(
+            err.response?.data?.message ||
+            err.response?.data?.error ||
+            err.message ||
+            'Failed to load survey data'
+        );
+
+    } finally {
+        setLoading(false);
+    }
+};
 
     const downloadAsCSV = () => {
         if (!allResponses.length) return;
@@ -406,4 +412,4 @@ const BetaSurveyManagement = ({ authToken, API_BASE_URL }) => {
     );
 };
 
-export default BetaSurveyManagement;}
+export default BetaSurveyManagement;
