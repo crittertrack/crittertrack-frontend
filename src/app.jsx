@@ -1666,15 +1666,16 @@ const App = () => {
             )}
 
             {/* Beta Survey Modal */}
-            {showBetaSurveyModal && (
-                <SurveyModal 
-                    onClose={() => setShowBetaSurveyModal(false)}
-                    surveyResponses={surveyResponses}
-                    setSurveyResponses={setSurveyResponses}
-                    setSurveySubmitting={setSurveySubmitting}
-                    surveySubmitting={surveySubmitting}
-                />
-            )}
+            {showBetaSurveyModal &&
+ !localStorage.getItem('betaSurveyCompleted') && (
+    <SurveyModal
+        onClose={() => setShowBetaSurveyModal(false)}
+        surveyResponses={surveyResponses}
+        setSurveyResponses={setSurveyResponses}
+        setSurveySubmitting={setSurveySubmitting}
+        surveySubmitting={surveySubmitting}
+    />
+)}
             
             {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
             {showUserSearchModal && (

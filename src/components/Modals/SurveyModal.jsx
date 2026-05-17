@@ -196,18 +196,30 @@ const SurveyModal = ({ onClose, surveyResponses, setSurveyResponses, setSurveySu
             const response = await axios.post('/api/surveys/beta-survey', surveyResponses);
 
             if (response.status === 201) {
-                setCurrentPage(4); // Go to thank you page
-                setTimeout(() => {
-                    setSurveySubmitting(false);
-                    setTimeout(() => onClose(), 2000);
-                }, 1000);
-            }
-        } catch (error) {
-            console.error('Error submitting survey:', error);
-            setSubmitError(error.response?.data?.error || 'Failed to submit survey. Please try again.');
-            setSurveySubmitting(false);
+
+            // ADD THIS
+            localStorage.setItem('betaSurveyCompleted', 'true');
+
+            setCurrentPage(4);
+
+            setTimeout(() => {
+                setSurveySubmitting(false);
+
+                setTimeout(() => onClose(), 2000);
+            }, 1000);
         }
-    };
+
+    } catch (error) {
+        console.error('Error submitting survey:', error);
+
+        setSubmitError(
+            error.response?.data?.error ||
+            'Failed to submit survey. Please try again.'
+        );
+
+        setSurveySubmitting(false);
+    }
+};
 
     const handlePrevPage = () => {
         if (currentPage > 1) setCurrentPage(currentPage - 1);

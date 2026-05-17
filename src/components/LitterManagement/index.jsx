@@ -342,7 +342,7 @@ const getPrototypePhenotypeInterpretation = (selectedTraits, species = TARGET_OU
         'dom-red':      ['brindle', 'red', 'fawn', 'amber'],
         'dom-fawn':     ['fawn'],
         'dom-amber':    ['amber'],
-        'astrex':       ['astrex', 'texel'],
+        'astrex':       ['astrex'],
         'texel':        ['texel'],
         'mock-choc':    ['mock chocolate'],
         'colorpoint-beige': ['colorpoint'],
@@ -364,6 +364,12 @@ const getPrototypePhenotypeInterpretation = (selectedTraits, species = TARGET_OU
     const phenoLower = basePheno ? basePheno.toLowerCase() : '';
     const missingModifiers = selectedModifierChips
         .filter(c => {
+            if ((c.id === 'longhair' || c.id === 'astrex')
+                && selectedTraits.includes('longhair')
+                && selectedTraits.includes('astrex')
+                && phenoLower.includes('texel')) {
+                return false;
+            }
             const keywords = CHIP_EXPRESSED_AS[c.id] || [c.label.toLowerCase()];
             return !keywords.some(kw => phenoLower.includes(kw));
         })
@@ -1120,7 +1126,7 @@ const ParentSearchModal = ({
                     <div className="flex items-center space-x-2 mb-2">
                         <span className="text-sm font-medium text-gray-600">Search Scope:</span>
                         {['local','global','both'].map(s => (
-                            <button key={s} onClick={() => setScope(s)}
+                            <button key={s} type="button" onClick={() => setScope(s)}
                                 className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
                                 {s === 'both' ? 'Local + Global' : (s === 'local' ? 'Local' : 'Global')}
                             </button>
@@ -1294,7 +1300,11 @@ const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) =>
     );
 };
 
+// Litter Management Component
+const TARGET_OUTCOME_ALLOWED_USERS = ['CTU1', 'CTU2', 'CTU5', 'CTU9', 'CTU24'];
+
 const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp, initialView = 'list' }) => {
+    const canAccessTargetOutcome = TARGET_OUTCOME_ALLOWED_USERS.includes(userProfile?.id_public);
     const [litters, setLitters] = useState([]);
     const [myAnimals, setMyAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -1319,6 +1329,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         litterSizeBorn: null,
         litterSizeWeaned: null,
         stillbornCount: null,
+        lossesCount: null,
         expectedDueDate: '',
         weaningDate: ''
     });
@@ -1385,6 +1396,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     // Session-level cache: key = `${sireId}:${damId}` or `litter:${_id}`, value = COI number
     // Prevents re-fetching the same pairing every time fetchLitters is called
     const coiCacheRef = useRef({});
+    const fetchLittersAbortControllerRef = useRef(null); // Track current fetch to prevent stale requests
     const [myAnimalsLoaded, setMyAnimalsLoaded] = useState(false);
     const [litterOffspringMap, setLitterOffspringMap] = useState({}); // litter._id ? offspring array (undefined = not yet loaded)
     const [offspringRefetchToken, setOffspringRefetchToken] = useState(0); // increment to force offspring re-fetch
@@ -1437,6 +1449,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [tpHasRun, setTpHasRun] = useState(false);
     const [tpExpandedCard, setTpExpandedCard] = useState(null); // key = `${sireId}:${damId}:${idx}`
     const [tpShowResultsHelp, setTpShowResultsHelp] = useState(false);
+    const [tpHideActiveFemales, setTpHideActiveFemales] = useState(false);
     const handleCalculateTestPairing = async () => {
         if (!tpSireId || !tpDamId) return;
         const cacheKey = `${tpSireId}:${tpDamId}`;
@@ -1459,7 +1472,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             coiCacheRef.current[cacheKey] = val;
             setTpCOI(val);
         } catch (err) {
-            if (axios.isCancel(err)) setTpError('Request timed out ? please try again.');
+            if (axios.isCancel(err)) setTpError('Request timed out — please try again.');
             else setTpError('Failed to calculate COI. Please try again.');
         } finally {
             clearTimeout(timeout);
@@ -1536,21 +1549,73 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         setTpGenerating(true);
 
         const speciesForPairs = tpTargetSpecies;
+        const parseGeneticCodeTokens = (animal) => {
+            if (!animal?.geneticCode) return [];
+            return animal.geneticCode
+                .replace(/,/g, ' ')
+                .replace(/\t/g, ' ')
+                .trim()
+                .split(/\s+/)
+                .filter(Boolean);
+        };
+        const shouldExcludeAstrexForLonghair = tpSelectedTraits.includes('longhair')
+            && !tpSelectedTraits.includes('astrex')
+            && !tpSelectedTraits.includes('texel');
+        const shouldExcludeLonghairForAstrex = tpSelectedTraits.includes('astrex')
+            && !tpSelectedTraits.includes('longhair')
+            && !tpSelectedTraits.includes('texel');
+        const animalHasAstrexEvidence = (animal) => {
+            if (!animal) return false;
+            for (const token of parseGeneticCodeTokens(animal)) {
+                const slash = token.indexOf('/');
+                if (slash < 0) continue;
+                const left = token.slice(0, slash).trim();
+                const right = token.slice(slash + 1).trim();
+                if (left === 'Re' || right === 'Re') return true;
+            }
+            const text = [animal.color, animal.phenotype, animal.coatPattern, animal.coat, animal.markings, animal.morph]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
+            return ['astrex', 'texel', 'rex'].some(keyword => text.includes(keyword));
+        };
+        const animalHasLonghairEvidence = (animal) => {
+            if (!animal) return false;
+            for (const token of parseGeneticCodeTokens(animal)) {
+                const slash = token.indexOf('/');
+                if (slash < 0) continue;
+                const left = token.slice(0, slash).trim();
+                const right = token.slice(slash + 1).trim();
+                if (left === 'go' && right === 'go') return true;
+            }
+            const text = [animal.color, animal.phenotype, animal.coatPattern, animal.coat, animal.markings, animal.morph]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
+            return ['longhair', 'angora', 'texel'].some(keyword => text.includes(keyword));
+        };
         const malePool = myAnimals.filter(a =>
             (a.species?.toLowerCase() === speciesForPairs.toLowerCase()) &&
             ['Male', 'Intersex', 'Unknown'].includes(a.gender) &&
             a.status !== 'Deceased' &&
+            a.isOwned === true &&
             !a.isViewOnly &&
             !a.isTransferred &&
+            !(shouldExcludeAstrexForLonghair && animalHasAstrexEvidence(a)) &&
+            !(shouldExcludeLonghairForAstrex && animalHasLonghairEvidence(a)) &&
             !!a.geneticCode
         );
         const femalePool = myAnimals.filter(a =>
             (a.species?.toLowerCase() === speciesForPairs.toLowerCase()) &&
             ['Female', 'Intersex', 'Unknown'].includes(a.gender) &&
             a.status !== 'Deceased' &&
+            a.isOwned === true &&
             !a.isViewOnly &&
             !a.isTransferred &&
-            !!a.geneticCode
+            !!a.geneticCode &&
+            !(shouldExcludeAstrexForLonghair && animalHasAstrexEvidence(a)) &&
+            !(shouldExcludeLonghairForAstrex && animalHasLonghairEvidence(a)) &&
+            !(tpHideActiveFemales && (a.isInMating || a.isPregnant || a.isNursing || a.status === 'Retired'))
         );
 
         const selectedSire = tpSireId ? (myAnimals.find(a => a.id_public === tpSireId) || selectedTpSireAnimal) : null;
@@ -1999,10 +2064,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 if (cachedLitters && cachedLitters.length > 0) {
                     setLitters(cachedLitters);
                     setLoading(false);
-                    // Still fetch fresh data in background
-                    await fetchLitters();
+                    // Still fetch fresh data in background, but properly coordinated
+                    try {
+                        await fetchLitters();
+                    } catch (error) {
+                        console.error('Background litter fetch failed:', error);
+                    }
                 } else {
-                    // Load litters first so cards appear immediately; animals fetch silently in background
+                    // Load litters first so cards appear immediately
                     await fetchLitters();
                 }
             } catch (error) {
@@ -2010,7 +2079,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             } finally {
                 setLoading(false);
             }
-            // Background – populates offspring cards as soon as it resolves
+            // Background – populates offspring cards as soon as it resolves (no await to keep UI responsive)
             fetchMyAnimals().catch(err => console.error('Error loading animals:', err));
         };
         loadData();
@@ -2134,6 +2203,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
     const fetchLitters = async ({ preserveOffspring = false } = {}) => {
         try {
+            // Cancel any previous fetchLitters request to prevent race conditions on mobile
+            if (fetchLittersAbortControllerRef.current) {
+                fetchLittersAbortControllerRef.current.abort();
+            }
+            const controller = new AbortController();
+            fetchLittersAbortControllerRef.current = controller;
+            
             // Clear offspring cache so expanded litter re-fetches fresh data
             // (skip when caller has already applied an optimistic update)
             if (!preserveOffspring) {
@@ -2141,9 +2217,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             }
             setOffspringRefetchToken(t => t + 1);
             const response = await axios.get(`${API_BASE_URL}/litters`, {
-                headers: { Authorization: `Bearer ${authToken}` }
+                headers: { Authorization: `Bearer ${authToken}` },
+                signal: controller.signal
             });
-            const littersData = Array.isArray(response.data) ? response.data : [];
+            if (!Array.isArray(response.data)) {
+                console.warn('Unexpected litters payload shape; preserving existing litter list.');
+                return;
+            }
+            const littersData = response.data;
             
             // Set litters immediately so UI can render
             setLitters(littersData);
@@ -2174,13 +2255,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 setCoiCalculating(new Set(littersNeedingCOI.map(l => l._id)));
                 littersNeedingCOI.forEach(async (litter) => {
                     const cacheKey = `${litter.sireId_public}:${litter.damId_public}`;
-                    const controller = new AbortController();
-                    const timeout = setTimeout(() => controller.abort(), 15000);
+                    const coiController = new AbortController();
+                    const timeout = setTimeout(() => coiController.abort(), 15000);
                     try {
                         const coiResponse = await axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
                             params: { sireId: litter.sireId_public, damId: litter.damId_public, generations: 20 },
                             headers: { Authorization: `Bearer ${authToken}` },
-                            signal: controller.signal,
+                            signal: coiController.signal,
                         });
                         const coi = coiResponse.data.inbreedingCoefficient ?? 0;
                         coiCacheRef.current[cacheKey] = coi;
@@ -2228,7 +2309,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             });
         } catch (error) {
             console.error('Error fetching litters:', error);
-            setLitters([]);
+            // Preserve current list on transient failures so the UI doesn't appear to lose all litters.
         }
     };
 
@@ -2401,7 +2482,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             showModalMessage('Success', editingMatingId ? 'Planned mating updated!' : 'Planned mating recorded! Edit the entry to add birth details when the litter arrives.');
             setShowAddMatingForm(false);
             resetMatingForm();
-            fetchLitters();
+            await fetchLitters();
         } catch (error) {
             console.error('Error recording planned mating:', error);
             showModalMessage('Error', error.response?.data?.message || 'Failed to record mating');
@@ -2422,7 +2503,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 localStorage.setItem('ct_urgency_dismissed', JSON.stringify(prev));
                 window.dispatchEvent(new StorageEvent('storage', { key: 'ct_urgency_dismissed' }));
             } catch {}
-            fetchLitters();
+            await fetchLitters();
         } catch (err) {
             showModalMessage('Error', 'Failed to mark as mated');
         }
@@ -2431,7 +2512,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     // -- Litter form save-time reconciliation ---------------------------------
     // Returns { correctedCounts, warnings[] } based on form values + linked animals.
     // Rule 1: gender sum > total ? bump total (silent)
-    // Rule 2: stillborn or weaned > total ? warn, do NOT auto-correct
+    // Rule 2: stillborn, losses, or weaned > total ? warn, do NOT auto-correct
     const reconcileLitterFormCounts = (fd, linkedAnimals = []) => {
         const linkedMales   = linkedAnimals.filter(a => a.gender === 'Male').length;
         const linkedFemales = linkedAnimals.filter(a => a.gender === 'Female').length;
@@ -2445,14 +2526,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         const manualTotal  = parseInt(fd.litterSizeBorn) || 0;
         const litterSizeBorn = Math.max(manualTotal, genderSum, linkedCount) || null;
         const stillborn    = parseInt(fd.stillbornCount) || 0;
+        const losses      = parseInt(fd.lossesCount) || 0;
         const weaned       = parseInt(fd.litterSizeWeaned) || 0;
         const warnings     = [];
         if (litterSizeBorn && stillborn > litterSizeBorn)
             warnings.push(`Stillborn (${stillborn}) exceeds Total Born (${litterSizeBorn}).`);
+        if (litterSizeBorn && losses > litterSizeBorn)
+            warnings.push(`Losses (${losses}) exceeds Total Born (${litterSizeBorn}).`);
         if (litterSizeBorn && weaned > litterSizeBorn)
             warnings.push(`Weaned (${weaned}) exceeds Total Born (${litterSizeBorn}).`);
-        if (litterSizeBorn && (stillborn + weaned) > litterSizeBorn)
-            warnings.push(`Stillborn + Weaned (${stillborn + weaned}) exceeds Total Born (${litterSizeBorn}).`);
+        if (litterSizeBorn && (stillborn + losses + weaned) > litterSizeBorn)
+            warnings.push(`Stillborn + Losses + Weaned (${stillborn + losses + weaned}) exceeds Total Born (${litterSizeBorn}).`);
         return {
             correctedCounts: { maleCount: maleCount || null, femaleCount: femaleCount || null, unknownCount: unknownCount || null, litterSizeBorn, numberBorn: litterSizeBorn },
             warnings,
@@ -2523,6 +2607,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 birthMethod: formData.birthMethod || null,
                 litterSizeWeaned: formData.litterSizeWeaned || null,
                 stillbornCount: formData.stillbornCount || null,
+                lossesCount: formData.lossesCount || null,
                 weaningDate: formData.weaningDate || null
             };
 
@@ -2663,6 +2748,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 litterSizeBorn: null,
                 litterSizeWeaned: null,
                 stillbornCount: null,
+                lossesCount: null,
                 weaningDate: ''
             });
             setCreateOffspringCounts({ males: 0, females: 0, unknown: 0 });
@@ -2684,7 +2770,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     //  1. Linked animals are ground truth for gender counts (always overwrite)
     //  2. litterSizeBorn = max(current manual total, gender sum, linked count)
     //  3. numberBorn stays in sync with litterSizeBorn
-    //  4. stillborn/weaned are never touched here
+    //  4. stillborn/losses/weaned are never touched here
     const calcLitterCounts = (litter, allLinkedAnimals) => {
         const maleCount   = allLinkedAnimals.filter(a => a.gender === 'Male').length;
         const femaleCount = allLinkedAnimals.filter(a => a.gender === 'Female').length;
@@ -2765,13 +2851,19 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             showModalMessage('Success', 'Animal linked to litter!');
             
             // Remove from available list
+            const remainingAnimals = availableToLink.animals.filter(a => a.id_public !== animalId);
             setAvailableToLink({
                 ...availableToLink,
-                animals: availableToLink.animals.filter(a => a.id_public !== animalId)
+                animals: remainingAnimals
             });
             
+            // Close modal if no more animals to link
+            if (remainingAnimals.length === 0) {
+                setLinkingAnimals(false);
+            }
+            
             // Refresh litters to show updated count without clearing offspring cache
-            fetchLitters({ preserveOffspring: true });
+            await fetchLitters({ preserveOffspring: true });
         } catch (error) {
             console.error('Error linking animal to litter:', error);
             showModalMessage('Error', 'Failed to link animal to litter');
@@ -2805,14 +2897,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
             showModalMessage('Success', `${animalIdsToAdd.length} animal(s) linked to litter!`);
             
-            // Clear available list
+            // Close modal and clear available list
+            setLinkingAnimals(false);
             setAvailableToLink({
-                ...availableToLink,
+                litter: null,
                 animals: []
             });
             
             // Refresh litters to show updated count without clearing offspring cache
-            fetchLitters({ preserveOffspring: true });
+            await fetchLitters({ preserveOffspring: true });
         } catch (error) {
             console.error('Error linking animals to litter:', error);
             showModalMessage('Error', 'Failed to link animals to litter');
@@ -2820,7 +2913,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     };
 
     const handleUnlinkOffspring = async (litter, animalId_public) => {
-        if (!window.confirm('Remove this animal from the litter? The animal record will NOT be deleted ? only the link to this litter will be removed.')) return;
+        if (!window.confirm('Remove this animal from the litter? The animal record will NOT be deleted — only the link to this litter will be removed.')) return;
         try {
             const updatedOffspringIds = (litter.offspringIds_public || []).filter(id => id !== animalId_public);
             const remainingOffspring = (litterOffspringMap[litter._id] || []).filter(a => a.id_public !== animalId_public);
@@ -2853,7 +2946,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             });
             
             showModalMessage('Success', 'Litter deleted successfully!');
-            fetchLitters();
+            await fetchLitters();
         } catch (error) {
             console.error('Error deleting litter:', error);
             showModalMessage('Error', 'Failed to delete litter');
@@ -2977,6 +3070,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             litterSizeBorn: litter.litterSizeBorn || litter.numberBorn || null,
             litterSizeWeaned: litter.litterSizeWeaned || litter.numberWeaned || null,
             stillbornCount: litter.stillbornCount || litter.stillborn || null,
+            lossesCount: litter.lossesCount || litter.losses || null,
             expectedDueDate: formatDateForInput(litter.expectedDueDate),
             weaningDate: formatDateForInput(litter.weaningDate)
         });
@@ -3091,12 +3185,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 birthMethod: formData.birthMethod || null,
                 litterSizeWeaned: formData.litterSizeWeaned || null,
                 stillbornCount: formData.stillbornCount || null,
+                lossesCount: formData.lossesCount || null,
                 weaningDate: formData.weaningDate || null
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
 
-            // Update all linked offspring to have the correct parents
+            // Update all linked offspring to have the correct parents.
+            // Use allSettled so that offspring the user no longer owns (transferred/sold)
+            // don't abort the litter save — those animals are skipped silently.
             const linkedOffspringIds = formData.linkedOffspringIds || [];
             if (linkedOffspringIds.length > 0) {
                 const parentPatch = { sireId_public: formData.sireId_public || null, damId_public: formData.damId_public || null };
@@ -3104,8 +3201,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     axios.put(`${API_BASE_URL}/animals/${offspringId}`, parentPatch, {
                         headers: { Authorization: `Bearer ${authToken}` }
                     }).then(() => window.dispatchEvent(new CustomEvent('animal-updated', { detail: { id_public: offspringId, ...parentPatch } })))
+                      .catch(err => console.warn(`[updateLitter] Could not update parent links for offspring ${offspringId} (may no longer be owned):`, err?.response?.data?.message || err?.message))
                 );
-                await Promise.all(updateOffspringPromises);
+                await Promise.allSettled(updateOffspringPromises);
             }
 
             showModalMessage('Success', 'Litter updated successfully!');
@@ -3136,6 +3234,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 litterSizeBorn: null,
                 litterSizeWeaned: null,
                 stillbornCount: null,
+                lossesCount: null,
                 weaningDate: ''
             });
             setCreateOffspringCounts({ males: 0, females: 0, unknown: 0 });
@@ -3821,12 +3920,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     <h4 className="text-md font-semibold text-gray-700 mb-4 flex items-center">
                                         <Baby size={18} className="inline-block align-middle text-green-600 mr-2 flex-shrink-0" />Birth & Offspring Details
                                     </h4>
-                                    
-                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4" data-tutorial-target="litter-dates-counts">
-                                        {/* Birth Date */}
+
+                                    {/* Row 1: Dates */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4" data-tutorial-target="litter-dates-counts">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Birth Date (Optional)
+                                                Birth Date <span className="text-xs text-gray-400 font-normal">(optional)</span>
                                             </label>
                                             <DatePicker
                                                 value={formData.birthDate}
@@ -3835,71 +3934,39 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 className="px-3 py-2"
                                             />
                                         </div>
-
-                                        {/* Total Born - auto-computed from male + female + unknown */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Total Born <span className="text-xs text-gray-400 font-normal">(auto)</span>
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={typeof formData.litterSizeBorn === 'number' ? formData.litterSizeBorn : (formData.litterSizeBorn || '')}
-                                                readOnly
-                                                className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
-                                                placeholder="Set counts below"
-                                            />
-                                        </div>
-
-                                        {/* Stillborn Count */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Stillborn
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={typeof formData.stillbornCount === 'number' ? formData.stillbornCount : (formData.stillbornCount || '')}
-                                                onChange={(e) => setFormData({...formData, stillbornCount: e.target.value ? parseInt(e.target.value) : null})}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                placeholder="0"
-                                                min="0"
-                                            />
-                                        </div>
-
-                                        {/* Total Weaned */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Total Weaned
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={typeof formData.litterSizeWeaned === 'number' ? formData.litterSizeWeaned : (formData.litterSizeWeaned || '')}
-                                                onChange={(e) => setFormData({...formData, litterSizeWeaned: e.target.value ? parseInt(e.target.value) : null})}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                placeholder="0"
-                                                min="0"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Weaning Date */}
-                                    <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Weaning Date
+                                                Weaning Date <span className="text-xs text-gray-400 font-normal">(optional — shows on calendar)</span>
                                             </label>
                                             <DatePicker
                                                 value={formData.weaningDate || ''}
                                                 onChange={(e) => setFormData({...formData, weaningDate: e.target.value})}
                                                 className="px-3 py-2"
                                             />
-                                            <p className="text-xs text-gray-500 mt-1">Optional — shows on calendar</p>
+
                                         </div>
                                     </div>
 
-                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    {/* Row 2: Total Born (auto) + sex breakdown */}
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                                        {/* Total Born - read-only, summed from M+F+U */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Total Born
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={typeof formData.litterSizeBorn === 'number' ? formData.litterSizeBorn : (formData.litterSizeBorn || '')}
+                                                readOnly
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 cursor-not-allowed font-semibold"
+                                                placeholder="0"
+                                            />
+                                            <p className="text-xs text-gray-400 mt-1">Auto-calculated from M + F + U</p>
+                                        </div>
+
                                         {/* Male Count */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Number of Males</label>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Males</label>
                                             <input
                                                 type="number"
                                                 value={typeof formData.maleCount === 'number' ? formData.maleCount : (formData.maleCount || '')}
@@ -3913,12 +3980,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 placeholder="0"
                                                 min={myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length || 0}
                                             />
-                                            {(() => { const lm = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length; return lm > 0 && (formData.maleCount || 0) < lm ? (<p className="text-xs text-red-600 mt-1">? {lm} male{lm > 1 ? 's' : ''} linked ? can't be below {lm}</p>) : lm > 0 ? (<p className="text-xs text-gray-500 mt-1">{lm} male{lm > 1 ? 's' : ''} linked</p>) : null; })()}
+                                            {(() => { const lm = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Male').length; return lm > 0 && (formData.maleCount || 0) < lm ? (<p className="text-xs text-red-600 mt-1">⚠ {lm} male{lm > 1 ? 's' : ''} linked — can't be below {lm}</p>) : lm > 0 ? (<p className="text-xs text-gray-500 mt-1">{lm} male{lm > 1 ? 's' : ''} linked</p>) : null; })()}
                                         </div>
 
                                         {/* Female Count */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Number of Females</label>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Females</label>
                                             <input
                                                 type="number"
                                                 value={typeof formData.femaleCount === 'number' ? formData.femaleCount : (formData.femaleCount || '')}
@@ -3932,7 +3999,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 placeholder="0"
                                                 min={myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Female').length || 0}
                                             />
-                                            {(() => { const lf = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Female').length; return lf > 0 && (formData.femaleCount || 0) < lf ? (<p className="text-xs text-red-600 mt-1">? {lf} female{lf > 1 ? 's' : ''} linked ? can't be below {lf}</p>) : lf > 0 ? (<p className="text-xs text-gray-500 mt-1">{lf} female{lf > 1 ? 's' : ''} linked</p>) : null; })()}
+                                            {(() => { const lf = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && a.gender === 'Female').length; return lf > 0 && (formData.femaleCount || 0) < lf ? (<p className="text-xs text-red-600 mt-1">⚠ {lf} female{lf > 1 ? 's' : ''} linked — can't be below {lf}</p>) : lf > 0 ? (<p className="text-xs text-gray-500 mt-1">{lf} female{lf > 1 ? 's' : ''} linked</p>) : null; })()}
                                         </div>
 
                                         {/* Unknown/Intersex Count */}
@@ -3951,16 +4018,60 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 placeholder="0"
                                                 min={myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && (a.gender === 'Unknown' || a.gender === 'Intersex' || !a.gender)).length || 0}
                                             />
-                                            {(() => { const lu = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && (a.gender === 'Unknown' || a.gender === 'Intersex' || !a.gender)).length; return lu > 0 && (formData.unknownCount || 0) < lu ? (<p className="text-xs text-red-600 mt-1">? {lu} unknown linked ? can't be below {lu}</p>) : lu > 0 ? (<p className="text-xs text-gray-500 mt-1">{lu} unknown linked</p>) : null; })()}
+                                            {(() => { const lu = myAnimals.filter(a => formData.linkedOffspringIds?.includes(a.id_public) && (a.gender === 'Unknown' || a.gender === 'Intersex' || !a.gender)).length; return lu > 0 && (formData.unknownCount || 0) < lu ? (<p className="text-xs text-red-600 mt-1">⚠ {lu} unknown linked — can't be below {lu}</p>) : lu > 0 ? (<p className="text-xs text-gray-500 mt-1">{lu} unknown linked</p>) : null; })()}
                                         </div>
                                     </div>
 
-                                    {/* Total Born (auto-computed) */}
-                                    {formData.litterSizeBorn > 0 && (
-                                        <div className="mt-2 p-2 rounded-md bg-green-50 border border-green-200">
-                                            <p className="text-xs text-green-800"><Hash size={12} className="inline-block align-middle mr-0.5" /> <strong>Total Born auto-set to {formData.litterSizeBorn}</strong> ({formData.maleCount || 0}M + {formData.femaleCount || 0}F + {formData.unknownCount || 0}U)</p>
+                                    {/* Row 3: Outcomes */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        {/* Stillborn Count */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Stillborn
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={typeof formData.stillbornCount === 'number' ? formData.stillbornCount : (formData.stillbornCount || '')}
+                                                onChange={(e) => setFormData({...formData, stillbornCount: e.target.value ? parseInt(e.target.value) : null})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                placeholder="0"
+                                                min="0"
+                                            />
+                                            <p className="text-xs text-gray-400 mt-1">Born dead</p>
                                         </div>
-                                    )}
+
+                                        {/* Losses */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Losses
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={typeof formData.lossesCount === 'number' ? formData.lossesCount : (formData.lossesCount || '')}
+                                                onChange={(e) => setFormData({...formData, lossesCount: e.target.value ? parseInt(e.target.value) : null})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                placeholder="0"
+                                                min="0"
+                                            />
+                                            <p className="text-xs text-gray-400 mt-1">Died after birth</p>
+                                        </div>
+
+                                        {/* Total Weaned */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Total Weaned
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={typeof formData.litterSizeWeaned === 'number' ? formData.litterSizeWeaned : (formData.litterSizeWeaned || '')}
+                                                onChange={(e) => setFormData({...formData, litterSizeWeaned: e.target.value ? parseInt(e.target.value) : null})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                placeholder="0"
+                                                min="0"
+                                            />
+                                            <p className="text-xs text-gray-400 mt-1">Survived to weaning</p>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {/* Link Existing Offspring */}
@@ -4369,7 +4480,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         <p className="text-sm text-gray-500 mb-5">
                             {matingEditChoice.litter_id_public && <span className="font-mono bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded text-xs mr-2">{matingEditChoice.litter_id_public}</span>}
                             {[matingEditChoice.sire?.prefix, matingEditChoice.sire?.name].filter(Boolean).join(' ') || matingEditChoice.sireId_public || '?'}
-                            {' ? '}
+                            {' x '}
                             {[matingEditChoice.dam?.prefix, matingEditChoice.dam?.name].filter(Boolean).join(' ') || matingEditChoice.damId_public || '?'}
                         </p>
                         <div className="space-y-3">
@@ -4807,8 +4918,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         {/* -- 3. Litter Stats: left = counts, right = sex ------------ */}
                                         {!litter.isPlanned && <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4 shadow-sm">
                                             <div className="flex flex-col sm:grid sm:grid-cols-2 sm:divide-x divide-gray-200 gap-3 sm:gap-0">
-                                                {/* Left: Born / Stillborn / Weaned */}
-                                                <div className="grid grid-cols-3 sm:pr-4">
+                                                {/* Left: Born / Stillborn / Weaned / Losses */}
+                                                <div className="grid grid-cols-4 sm:pr-4">
                                                     <div>
                                                         <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Born</div>
                                                         <div className="text-xl font-bold text-gray-800">{litter.litterSizeBorn ?? litter.numberBorn ?? 0}</div>
@@ -4820,6 +4931,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     <div>
                                                         <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weaned</div>
                                                         <div className="text-xl font-bold text-green-600">{litter.litterSizeWeaned ?? litter.numberWeaned ?? 0}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Losses</div>
+                                                        <div className="text-xl font-bold text-red-500">{litter.lossesCount ?? litter.losses ?? 0}</div>
                                                     </div>
                                                 </div>
                                                 {/* Right: Males / Females / Unknown */}
@@ -5572,6 +5687,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <Row label="Males:" value={l.maleCount ?? null} />
                                             <Row label="Females:" value={l.femaleCount ?? null} />
                                             <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Stillborn:</span><span className="text-gray-800 font-medium">{l.stillbornCount ?? 0}</span></div>
+                                            <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Losses:</span><span className="text-gray-800 font-medium">{l.lossesCount ?? 0}</span></div>
                                             <div className="flex gap-2 text-sm"><span className="text-gray-500 w-32 flex-shrink-0">Weaned:</span><span className="text-gray-800 font-medium">{l.litterSizeWeaned ?? l.numberWeaned ?? 0}</span></div>
                                             <Row label="Weaning Date:" value={fmtD(l.weaningDate)} />
                                         </>)}
@@ -5853,7 +5969,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     onClick={() => setTpMode('target')}
                                     className={`px-3 py-1.5 text-sm font-medium border-l border-gray-200 ${tpMode === 'target' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
                                 >
-                                    Trait Calculator
+                                    Target Outcome
                                 </button>
                                 )}
                             </div>
@@ -5938,7 +6054,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         </div>
                         )}
 
-                        {tpMode === 'target' && (
+                        {tpMode === 'target' && canAccessTargetOutcome && (
                         <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-200 h-full">
                             <div className="divide-y divide-gray-200 overflow-y-auto min-h-0">
 
@@ -5978,6 +6094,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     </button>
                                                 ))}
                                             </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Female Filter</label>
+                                            <button
+                                                type="button"
+                                                onClick={() => setTpHideActiveFemales(v => !v)}
+                                                className={`px-3 py-1.5 text-sm rounded-lg border transition ${tpHideActiveFemales ? 'bg-primary text-black border-primary' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                                            >
+                                                Hide Mating / Pregnant / Nursing / Retired
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
