@@ -248,8 +248,7 @@ export const TUTORIAL_SCREENSHOTS = {
     3: 'sire-dam-notifications.png', // Step 3: Sire/Dam Notifications
     4: 'message-notifications.png', // Step 4: Message Notifications
   }
-
-},
+};
 
 /**
 
