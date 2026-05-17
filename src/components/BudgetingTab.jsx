@@ -7,14 +7,8 @@ const BudgetingTab = ({
     authToken,
     API_BASE_URL,
     showModalMessage,
-
     preSelectedAnimal = null,
     preSelectedType = null,
-
-    showTransferModal = false,
-    transferAnimal = null,
-    setShowTransferModal = () => {},
-
     onAddModalOpen = null
 }) => {
     const [transactions, setTransactions] = useState([]);
@@ -114,31 +108,6 @@ const BudgetingTab = ({
         }
     }, [preSelectedAnimal, preSelectedType, userProfile]);
 
-
-useEffect(() => {
-    if (showTransferModal && transferAnimal) {
-        setFormData(prev => ({
-            ...prev,
-            type: 'animal-sale',
-            animalId: transferAnimal.id_public,
-            animalName: transferAnimal.name
-        }));
-
-        setSelectedSpecies(transferAnimal.species);
-
-        setAnimalSaleMode('transfer');
-
-        setShowTypeSelection(false);
-        setShowModeSelection(false);
-        setShowAddModal(true);
-
-        setShowTransferModal(false);
-    }
-}, [
-    showTransferModal,
-    transferAnimal,
-    setShowTransferModal
-]);
 
     const fetchUserProfile = async () => {
         try {
