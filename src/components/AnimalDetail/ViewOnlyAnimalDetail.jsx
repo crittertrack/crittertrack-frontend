@@ -694,7 +694,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                         </div>
                     )}
 
-                    {/* Tab 2: Status & Privacy */}
+                    {/* Tab 2: Ownership */}
                     {detailViewTab === 2 && (
                         <div className="space-y-6">
                             {/* 1st Section: Ownership */}

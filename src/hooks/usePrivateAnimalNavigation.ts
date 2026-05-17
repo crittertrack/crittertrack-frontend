@@ -358,7 +358,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
     // ========== EFFECTS ==========
 
     /**
-     * Force parent cards to refetch when Lineage tab opens
+     * Force parent cards to refetch when Pedigree tab opens
      */
     useEffect(() => {
         if (detailViewTab === 5) {

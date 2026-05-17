@@ -933,23 +933,24 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                             </button>
                         </div>
 
-                        {/* Tab Navigation - ALL 16 TABS (15 standard + Reports) */}
+                        {/* Tab Navigation - ALL 17 TABS (16 standard + Reports) */}
                         <div className="modal-tabs">
                             <div className="modal-tabs-row" style={{display: 'flex', flexWrap: 'wrap', gap: '0.25rem'}}>
                                 {[
                                     { id: 'overview', label: 'Overview', icon: '📋' },
-                                    { id: 'status', label: 'Status & Privacy', icon: '🔒' },
-                                    { id: 'physical', label: 'Physical', icon: '🎨' },
+                                    { id: 'status', label: 'Ownership', icon: '🔒' },
                                     { id: 'identification', label: 'Identification', icon: '🏷️' },
-                                    { id: 'lineage', label: 'Lineage', icon: '🌳' },
-                                    { id: 'breeding', label: 'Breeding', icon: '🥚' },
+                                    { id: 'physical', label: 'Appearance', icon: '🎨' },
+                                    { id: 'lineage', label: 'Pedigree', icon: '🌳' },
+                                    { id: 'family', label: 'Family', icon: '🎨' },
+                                    { id: 'breeding', label: 'Fertility', icon: '🥚' },
                                     { id: 'health', label: 'Health', icon: '🏥' },
-                                    { id: 'husbandry', label: 'Animal Care', icon: '🏠' },
+                                    { id: 'husbandry', label: 'Care', icon: '🏠' },
                                     { id: 'behavior', label: 'Behavior', icon: '🧠' },
-                                    { id: 'records', label: 'Records', icon: '📝' },
-                                    { id: 'endoflife', label: 'End of Life', icon: '⚖️' },
+                                    { id: 'records', label: 'Notes & Milestones', icon: '📝' },
                                     { id: 'show', label: 'Show', icon: '🏆' },
                                     { id: 'legal', label: 'Legal', icon: '📄' },
+                                    { id: 'endoflife', label: 'End of Life', icon: '⚖️' },
                                     { id: 'gallery', label: 'Gallery', icon: '🖼️' },
                                     { id: 'logs', label: 'Logs', icon: '📜' },
                                     { id: 'reports', label: 'Reports', icon: '⚠️' }
@@ -1117,8 +1118,8 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                     </div>
                                 )}
 
-                                {/* Physical Tab */}
-                                {viewActiveTab === 'physical' && (
+                                {/* Appearance  Tab */}
+                                {viewActiveTab === 'appearance' && (
                                     <div className="tab-panel">
                                         <div className="animal-detail-section">
                                             <h4>Variety</h4>
@@ -1186,8 +1187,8 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                     </div>
                                 )}
 
-                                {/* Lineage Tab */}
-                                {viewActiveTab === 'lineage' && (
+                                {/* Pedigree Tab */}
+                                {viewActiveTab === 'pedigree' && (
                                     <div className="tab-panel">
                                         <div className="animal-detail-section">
                                             <h4>Pedigree: Sire and Dam</h4>
@@ -1721,10 +1722,10 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                 🔒 Status
                             </button>
                             <button 
-                                className={`tab ${editActiveTab === 'physical' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('physical')}
+                                className={`tab ${editActiveTab === 'appearance' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('appearance')}
                             >
-                                🎨 Physical
+                                🎨 Appearance
                             </button>
                             <button 
                                 className={`tab ${editActiveTab === 'identification' ? 'active' : ''}`}
@@ -1733,10 +1734,10 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                 🏷️ Identification
                             </button>
                             <button 
-                                className={`tab ${editActiveTab === 'lineage' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('lineage')}
+                                className={`tab ${editActiveTab === 'pedigree' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('pedigree')}
                             >
-                                🌳 Lineage
+                                🌳 Pedigree
                             </button>
                             <button 
                                 className={`tab ${editActiveTab === 'breeding' ? 'active' : ''}`}
@@ -2053,8 +2054,8 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                 </div>
                             )}
 
-                            {/* Tab 3: Physical */}
-                            {editActiveTab === 'physical' && (
+                            {/* Tab 3: Appearance */}
+                            {editActiveTab === 'appearance' && (
                                 <div className="tab-panel">
                                     <div className="edit-form">
                                         <div className="form-section">
@@ -2255,8 +2256,8 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                 </div>
                             )}
 
-                            {/* Tab 5: Lineage */}
-                            {editActiveTab === 'lineage' && (
+                            {/* Tab 5: Pedigree */}
+                            {editActiveTab === 'pedigree' && (
                                 <div className="tab-panel">
                                     <div className="edit-form">
                                         <div className="form-section">

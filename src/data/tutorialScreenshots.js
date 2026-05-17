@@ -78,7 +78,7 @@ export const TUTORIAL_SCREENSHOTS = {
   },
 
    'gs-family-tab-overview': {
-    1: 'open-family-tab.png', // Step 1: Lineage Tab
+    1: 'open-family-tab.png', // Step 1: Pedigree Tab
     2: 'parents-and-siblings.png', // Step 2: Parents and Siblings
     3: 'litters-and-offspring.png', // Step 3: Litters and Offspring
   },
@@ -255,7 +255,26 @@ export const TUTORIAL_SCREENSHOTS = {
     3: 'message-conversations.png', // Step 3: Message Conversations
     4: 'privacy-in-messaging.png', // Step 4: Privacy in Messaging
     5: 'system-news-and-updates.png', // Step 5: System News & Updates
-  }
+  },
+
+  // Advanced Features Lessons
+  'af-daily-operations-tabs': {
+    1: 'how-daily-operations-are-organized.png', // Step 1: How Daily Operations are Organized
+    2: 'my-animals-list-view.png', // Step 2: My Animals List View
+    3: 'collections-tab.png', // Step 3: Collections Tab
+    4: 'enclosures-tab.png', // Step 4: Enclosures Tab 
+    5: 'reproduction-tab.png', // Step 5: Reproduction Tab
+    6: 'health-tab-scheduled-care-and-medical.png', // Step 6: Health Tab - Scheduled Care & Medical
+    7: 'quarantine-flow.png', // Step 7: Quarantine Flow
+    8: 'feeding-and-care-tab-due-and-overdue-tasks.png', // Step 8: Feeding & Care Tab - Due & Overdue Tasks
+    9: 'recording-a-feeding.png', // Step 9: Recording a Feeding
+    10: 'accessing-supplies.png', // Step 10: Accessing Supplies
+    11: 'adding-a-supply-item.png', // Step 11: Adding a Supply Item
+    12: 'feeder-animal-items.png', // Step 12: Feeder Animal Items
+    13: 'reorder-thresholds.png', // Step 13: Reorder Thresholds
+    14: 'restocking.png', // Step 14: Restocking
+    15: 'pin-your-default-view.png', // Step 15: Pin Your Default View
+   },
 };
 
 /**

@@ -84,7 +84,7 @@ Both systems implement a **history-stack navigation pattern** allowing users to 
   - `2` = Breeding records
   - `3` = Litters
   - `4` = Genetics/COI
-  - `5` = Lineage (triggers parent card refresh)
+  - `5` = Pedigree (triggers parent card refresh)
   - Other tabs managed by detail component
 - **Dependencies:**
   - Set by: PrivateAnimalDetail component (managed internally)
@@ -123,7 +123,7 @@ Both systems implement a **history-stack navigation pattern** allowing users to 
 - **Line:** [473](src/app.jsx#L473)
 - **Type:** `useState(null)`
 - **Default:** `null`
-- **Purpose:** Fetched sire/father animal object (for lineage display)
+- **Purpose:** Fetched sire/father animal object (for Pedigree display)
 - **Source:** Fetched via `GET /animals/any/{sireId}` (line 509-513)
 - **Dependencies:**
   - Fetched by: Effect at line 497-551 when `animalToView` changes
@@ -137,7 +137,7 @@ Both systems implement a **history-stack navigation pattern** allowing users to 
 - **Line:** [474](src/app.jsx#L474)
 - **Type:** `useState(null)`
 - **Default:** `null`
-- **Purpose:** Fetched dam/mother animal object (for lineage display)
+- **Purpose:** Fetched dam/mother animal object (for Pedigree display)
 - **Source:** Fetched via `GET /animals/any/{damId}` (line 515-519)
 - **Dependencies:**
   - Fetched by: Same effect as sireData (line 497-551)
@@ -203,13 +203,13 @@ Both systems implement a **history-stack navigation pattern** allowing users to 
 - **Line:** [469](src/app.jsx#L469)
 - **Type:** `useState(0)`
 - **Default:** `0`
-- **Purpose:** React key for forcing parent cards to remount/refetch when Lineage tab opens
+- **Purpose:** React key for forcing parent cards to remount/refetch when Pedigree tab opens
 - **Dependencies:**
   - Incremented by: Effect at line 493-496 when `detailViewTab === 5`
   - Used by: PrivateAnimalDetail component for parent card keys
 - **Size Estimate:** ~10 bytes
 - **Related State:** `detailViewTab`, `sireData`, `damData`
-- **Note:** Forces re-fetch of fresh parent data when user navigates to Lineage tab
+- **Note:** Forces re-fetch of fresh parent data when user navigates to Pedigree tab
 
 #### 14. **showTabs**
 - **Line:** [471](src/app.jsx#L471)
@@ -536,7 +536,7 @@ Both systems implement a **history-stack navigation pattern** allowing users to 
 
 ### Parent Card Refresh Effect
 - **Line:** [493-496](src/app.jsx#L493-L496)
-- **Purpose:** Force parent cards to refetch when Lineage tab opened
+- **Purpose:** Force parent cards to refetch when Pedigree tab opened
 - **Operations:**
   - Increments `parentCardKey` when `detailViewTab === 5`
   - Causes parent cards to remount and refetch fresh data

@@ -28,17 +28,21 @@ const FIELD_GROUPS = {
 
 const TAB_NAMES = [
     'Overview',
-    'Status & Privacy',
-    'Physical',
+    'Ownership',
     'Identification',
-    'Lineage',
-    'Breeding',
+    'Appearance',
+    'Pedigree',
+    'Family',
+    'Fertility',
     'Health',
-    'Husbandry',
+    'Care',
     'Behavior',
-    'Records',
+    'Notes & Milestones',
+    'Show',
+    'Legal',
     'End of Life',
-    'Legal & Documentation'
+    'Gallery',
+    'Logs',
 ];
 
 /**
