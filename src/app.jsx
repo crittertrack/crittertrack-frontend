@@ -2310,7 +2310,6 @@ const App = () => {
     setPreSelectedTransferAnimal(animal);
     setPreSelectedTransactionType('animal-sale');
     setShowTransferModal(true);
-    setTransactionMode('transfer'); // if you have this state
 }}
                                 onViewAnimal={handleViewAnimal}
                                 onViewPublicAnimal={handleViewPublicAnimal}

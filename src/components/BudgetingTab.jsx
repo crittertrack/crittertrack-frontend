@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { DollarSign, Plus, Edit, Trash2, Search, X, Calendar, Filter, Download, TrendingUp, TrendingDown, Info } from 'lucide-react';
 import axios from 'axios';
 import DatePicker from './DatePicker';
-import { useLocation } from 'react-router-dom';
 
 const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAnimal = null, preSelectedType = null, onAddModalOpen = null }) => {
     const [transactions, setTransactions] = useState([]);
@@ -12,7 +11,6 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
     const [showAnimalDropdown, setShowAnimalDropdown] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
     const [loading, setLoading] = useState(true);
-    const location = useLocation();
     const [userProfile, setUserProfile] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showModeSelection, setShowModeSelection] = useState(false); // Show modal to choose manual vs transfer
@@ -85,40 +83,23 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
 
     // Handle pre-selected animal and type (from Transfer button)
     useEffect(() => {
-    if (preSelectedAnimal && preSelectedType) {
-        const bypassSaleSelection =
-            location.state?.bypassSaleSelection;
-
-        setFormData(prev => ({
-            ...prev,
-            type: preSelectedType,
-            animalId: preSelectedAnimal.id_public,
-            animalName: preSelectedAnimal.name,
-            buyer: userProfile?.breederName || userProfile?.personalName || ''
-        }));
-
-        setSelectedSpecies(preSelectedAnimal.species);
-        setShowAddModal(true);
-        setShowTypeSelection(false);
-
-        // OPEN DIRECTLY INTO TRANSFER MODE
-        if (
-            preSelectedType === 'animal-sale' &&
-            bypassSaleSelection
-        ) {
-            setAnimalSaleMode('transfer');
-            setShowModeSelection(false);
-        } else if (preSelectedType === 'animal-sale') {
-            // NORMAL BUDGET FLOW
-            setShowModeSelection(true);
+        if (preSelectedAnimal && preSelectedType) {
+            setFormData(prev => ({
+                ...prev,
+                type: preSelectedType,
+                animalId: preSelectedAnimal.id_public,
+                animalName: preSelectedAnimal.name,
+                buyer: userProfile?.breederName || userProfile?.personalName || ''
+            }));
+            setSelectedSpecies(preSelectedAnimal.species);
+            setShowAddModal(true);
+            setShowTypeSelection(false);
+            // For animal-sale, show mode selection
+            if (preSelectedType === 'animal-sale') {
+                setShowModeSelection(true);
+            }
         }
-    }
-}, [
-    preSelectedAnimal,
-    preSelectedType,
-    userProfile,
-    location.state
-]);
+    }, [preSelectedAnimal, preSelectedType, userProfile]);
 
     const fetchUserProfile = async () => {
         try {
