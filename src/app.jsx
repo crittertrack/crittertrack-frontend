@@ -2306,12 +2306,12 @@ const App = () => {
                                 onUpdateAnimal={handleAnimalFieldUpdate}
                                 showModalMessage={showModalMessage}
                                 onTransfer={(animal) => {
-                                    setTransferAnimal(animal);
-                                    setPreSelectedTransferAnimal(animal);
-                                    setPreSelectedTransactionType('animal-sale');
-                                    setShowTransferModal(false);
-                                    navigate('/budget');
-                                }}
+    setTransferAnimal(animal);
+    setPreSelectedTransferAnimal(animal);
+    setPreSelectedTransactionType('animal-sale');
+    setShowTransferModal(true);
+    setTransactionMode('transfer'); // if you have this state
+}}
                                 onViewAnimal={handleViewAnimal}
                                 onViewPublicAnimal={handleViewPublicAnimal}
                                 onToggleOwned={handleToggleAnimalOwned}

@@ -1294,11 +1294,7 @@ const TpResultsList = ({ results, expandedCard, setExpandedCard, onUsePair }) =>
     );
 };
 
-// Litter Management Component
-const TARGET_OUTCOME_ALLOWED_USERS = ['CTU1', 'CTU2', 'CTU5', 'CTU9', 'CTU24'];
-
 const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, handleViewAnimal, handleEditAnimal, formDataRef, onFormOpenChange, speciesOptions = [], cachedLitters = null, setCachedLitters, litterCacheTimestamp = 0, setLitterCacheTimestamp, initialView = 'list' }) => {
-    const canAccessTargetOutcome = TARGET_OUTCOME_ALLOWED_USERS.includes(userProfile?.id_public);
     const [litters, setLitters] = useState([]);
     const [myAnimals, setMyAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -5857,7 +5853,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     onClick={() => setTpMode('target')}
                                     className={`px-3 py-1.5 text-sm font-medium border-l border-gray-200 ${tpMode === 'target' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
                                 >
-                                    Target Outcome
+                                    Trait Calculator
                                 </button>
                                 )}
                             </div>
@@ -5942,7 +5938,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         </div>
                         )}
 
-                        {tpMode === 'target' && canAccessTargetOutcome && (
+                        {tpMode === 'target' && (
                         <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-200 h-full">
                             <div className="divide-y divide-gray-200 overflow-y-auto min-h-0">
 
