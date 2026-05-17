@@ -83,9 +83,6 @@ export const TUTORIAL_SCREENSHOTS = {
     3: 'litters-and-offspring.png', // Step 3: Litters and Offspring
   },
 
-  parents-and-siblings.png
-  litters-and-offspring.png
-  
   'gs-fertility-information': {
     1: 'fertility-tab.png', // Step 1: Breeding Tab
     2: 'reproductive-status.png', // Step 2: Reproductive Status
