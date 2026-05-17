@@ -202,7 +202,7 @@ export const TUTORIAL_SCREENSHOTS = {
   'kf-global-calendar': {
     1: 'calendar-view.png', // Step 1: Global Calendar View
     2: 'event-filters.png', // Step 2: Event Filters
-    3: 'month-event-list.png', // Step 3: Month View Event List
+    3: 'month-events-list.png', // Step 3: Month View Event List
     4: 'click-calendar-events-for-details.png', // Step 4: Click Calendar Events for Details
     5: 'reminders.png', // Step 5: Reminders
   },
