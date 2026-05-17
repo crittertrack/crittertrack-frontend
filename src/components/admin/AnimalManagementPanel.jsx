@@ -1080,8 +1080,8 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                     </div>
                                 )}
 
-                                {/* Status Tab */}
-                                {viewActiveTab === 'status' && (
+                                {/* Ownership Tab */}
+                                {viewActiveTab === 'ownership' && (
                                     <div className="tab-panel">
                                         <div className="animal-detail-section">
                                             <h4>Ownership</h4>
@@ -1719,7 +1719,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                 className={`tab ${editActiveTab === 'status' ? 'active' : ''}`}
                                 onClick={() => setEditActiveTab('status')}
                             >
-                                🔒 Status
+                                🔒 Ownership
                             </button>
                             <button 
                                 className={`tab ${editActiveTab === 'appearance' ? 'active' : ''}`}
