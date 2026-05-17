@@ -245,14 +245,14 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                             {notification.type === 'litter_assignment' && (
                                                 <div className="flex items-center text-green-700 font-semibold mb-2 text-sm">
                                                     <Baby size={16} className="mr-2 flex-shrink-0" />
-                                                    <span>Litter Assignment ? {notification.parentType === 'sire' ? 'Sire' : 'Dam'}</span>
+                                                    <span>Litter Assignment — {notification.parentType === 'sire' ? 'Sire' : 'Dam'}</span>
                                                 </div>
                                             )}
                                             {/* Mating Reminder Header */}
                                             {notification.type === 'mating_reminder' && (
                                                 <div className="flex items-center text-indigo-700 font-semibold mb-2 text-sm">
                                                     <PawPrint size={16} className="mr-2 flex-shrink-0" />
-                                                    <span>Planned Mating ? Today!</span>
+                                                    <span>Planned Mating — Today!</span>
                                                 </div>
                                             )}
                                             <div className="flex items-start space-x-3 mb-2">

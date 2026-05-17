@@ -962,8 +962,8 @@ const GETTING_STARTED_LESSONS = [
 
   {
     id: 'gs-legal',
-    title: '15. Legal & End of Life',
-    description: 'Manage legal documentation and end-of-life records',
+    title: '15. Legal & End of Life & Gallery',
+    description: 'Manage legal documentation, end-of-life records and images',
     tour: 'getting-started',
     tourOrder: 15,
     steps: [
@@ -1046,9 +1046,19 @@ const GETTING_STARTED_LESSONS = [
           'Helps understand health issues',
           'Valuable for genetics research'
         ]
+      },
+      {
+        stepNumber: 9,
+        title: 'Gallery Tab',
+        content: 'The Gallery tab allows you to upload and manage extra images related to your animal, including photos from necropsies or other significant events.',
+        tips: [
+          'Upload images for documentation',
+          'Helps with visual identification',
+          'Valuable for genetic research'
+        ]
       }
-    ]
-  }
+        ]
+      }
 ];
 
 // ============================================
@@ -1563,16 +1573,6 @@ const KEY_FEATURES_LESSONS = [
           'Manage login credentials',
           'Account deletion is permanent' 
         ]
-      },
-      {
-        stepNumber: 16,
-        title: 'Save or Cancel',
-        content: 'Use the Save button to keep your changes or Cancel to discard them. Changes are applied immediately upon save.',
-        tips: [
-          'Save makes changes permanent',
-          'Cancel discards edits',
-          'Return to summary after save'
-        ]
       }
     ]
   },
@@ -1870,27 +1870,41 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 2,
-        title: 'Favorite Animals',
-        content: 'Favorite animals in your collection to see updates about them in your My Feed.',
+        title: 'Favorite Animals Button',
+        content: 'Favorite animals of other users to see updates about them in your My Feed.',
         tips: [
         ]
       },
       {
         stepNumber: 3,
+        title: 'Favorite Animals Section',
+        content: 'Favorite animals of other users to see updates about them in this section.',
+        tips: [
+        ]
+      },
+      {
+        stepNumber: 4,
         title: 'Recently Updated Favorites',
         content: 'This section shows recently updated information about your favorited animals.',
         tips: [
         ]
       },
       {
-        stepNumber: 4,
-        title: 'Favorite Users',
+        stepNumber: 5,
+        title: 'Favorite Users Button',
         content: 'Favorite other users in the community to see their updates in your My Feed. This is a great way to stay connected to breeders you\'re interested in.',
         tips: [
         ]
       },
       {
-        stepNumber: 5,
+        stepNumber: 6,
+        title: 'Favorite Users Section',
+        content: 'Favorite other users in the community to see their updates occur here. This is a great way to stay connected to breeders you\'re interested in.',
+        tips: [
+        ]
+      },
+      {
+        stepNumber: 7,
         title: 'Available from Favorited Breeders',
         content: 'This section shows all available animals from breeders you\'ve favorited. This is a great way to discover new prospects for your breeding program.',
         tips: [

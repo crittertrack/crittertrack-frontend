@@ -137,6 +137,7 @@ export const TUTORIAL_SCREENSHOTS = {
     6: 'date-of-death.png', // Step 6: Date of Death
     7: 'cause-of-death.png', // Step 7: Cause of Death
     8: 'necropsy-results.png', // Step 8: Necropsy Results
+    9: 'gallery-tab.png', // Step 9: Gallery Tab
   },
 
   // Key Features Lessons
@@ -190,11 +191,68 @@ export const TUTORIAL_SCREENSHOTS = {
     7: 'public-profile-visibility.png', // Step 7: Public Profile Visibility
     8: 'messaging-preferences.png', // Step 8: Messaging Preferences
     9: 'email-notifications.png', // Step 9: Email Notifications
+    10: 'breeding-status.png', // Step 10: Breeding Status
+    11: 'info-and-adoption-settings-tab.png', // Step 11: Info & Adoption Settings Tab
+    12: 'ratings-tab.png', // Step 12: Ratings Tab
+    13: 'breeding-lines-tab.png', // Step 13: Breeding Lines Tab
+    14: 'data-portability-tab.png', // Step 14: Data Portability Tab
+    15: 'account-tab.png', // Step 15: Account Tab
   },
 
-};
+  'kf-global-calendar': {
+    1: 'calendar-view.png', // Step 1: Global Calendar View
+    2: 'event-filters.png', // Step 2: Event Filters
+    3: 'month-event-list.png', // Step 3: Month View Event List
+    4: 'click-calendar-events-for-details.png', // Step 4: Click Calendar Events for Details
+    5: 'reminders.png', // Step 5: Reminders
+  },
+
+  'kf-budget-transfers': {
+    1: 'budget-overview.png', // Step 1: Budget Overview
+    2: 'add-transaction-expense.png', // Step 2: Add Transaction - Expense
+    3: 'expense-fields.png', // Step 3: Expense Fields
+    4: 'add-transaction-income.png', // Step 4: Add Transaction - Income
+    5: 'income-fields.png', // Step 5: Income Fields
+    6: 'animal-sale-manual-entry.png', // Step 6: Animal Sale Manual Entry
+    7: 'manual-sale-fields.png', // Step 7: Manual Sale Fields
+    8: 'close-and-reopen-transfer-ownership.png', // Step 8: Close & Reopen Transfer of Ownership
+    9: 'transfer-ownership-features.png', // Step 9: Transfer of Ownership Features
+    10: 'transfer-button-on-detail-view.png', // Step 10: Transfer Button on Detail View
+    11: 'close-and-reopen-animal-purchase.png', // Step 11: Close & Reopen Animal Purchase
+    12: 'notify-seller-feature.png', // Step 12: Notify Seller Feature
+  },
+
+  'kf-searching-filtering': {
+    1: 'global-search-bar-in-header.png', // Step 1: Global Search Bar in Header
+    2: 'my-animals-search-bar.png', // Step 2: My Animals Search Bar
+    3: 'species-filter.png', // Step 3: Species Filter
+    4: 'gender-filter.png', // Step 4: Gender Filter
+    5: 'status-filter.png', // Step 5: Status Filter
+    6: 'combined-filtering.png', // Step 6: Combined Filtering
+    7: 'breeding-lines-filter.png', // Step 7: Breeding Lines Filter
+  },
+
+  'kf-my-feed-community-updates': {
+    1: 'open-my-feed.png', // Step 1: Open My Feed
+    2: 'favorite-animals-button.png', // Step 2: Favorite Animals Button
+    3: 'favorite-animals.png', // Step 3: Favorite Animals
+    4: 'recently-updated-favorites.png', // Step 4: Recently Updated Favorites
+    5: 'favorite-users-button.png', // Step 5: Favorite Users Button
+    6: 'favorite-users.png', // Step 6: Favorite Users
+    7: 'available-from-favorited-breeders.png', // Step 7: Available from Favorited Breeders
+  },
+
+  'kf-notifications': {
+    1: 'notifications-overview.png', // Step 1: Notifications Overview
+    2: 'transfer-request-notifications.png', // Step 2: Transfer Request Notifications
+    3: 'sire-dam-notifications.png', // Step 3: Sire/Dam Notifications
+    4: 'message-notifications.png', // Step 4: Message Notifications
+  }
+
+},
 
 /**
+
  * Get screenshot URL for a specific lesson step
  * @param {string} lessonId - The lesson ID
  * @param {number} stepNumber - The step number (1-based)
