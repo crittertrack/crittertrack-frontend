@@ -332,6 +332,7 @@ const SurveyModal = ({ onClose, surveyResponses, setSurveyResponses, setSurveySu
 
                             {/* Scale Response */}
                             {question.type === 'scale' && (
+                                <>
                                 <div className="grid grid-cols-5 gap-1 sm:gap-2">
                                     {question.labels.map((label, i) => (
                                         <div key={i} className="flex flex-col items-center gap-1">
@@ -351,10 +352,12 @@ const SurveyModal = ({ onClose, surveyResponses, setSurveyResponses, setSurveySu
                                         </div>
                                     ))}
                                 </div>
+
                                 <div className="flex gap-2 mt-2 sm:hidden text-xs text-gray-500">
                                     <span>← {question.labels[0]}</span>
                                     <span className="ml-auto">{question.labels[4]} →</span>
                                 </div>
+                                </>
                             )}
 
                             {/* Multiple Choice Response */}
