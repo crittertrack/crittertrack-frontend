@@ -841,8 +841,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             <div className="flex flex-wrap border-b border-gray-200 mb-6">
                 {[
                     { id: 'profile',         label: 'Profile' },
+                    { id: 'Breeding Status',       label: 'Breeding Status' },
                     { id: 'info-adoption',   label: 'Info & Adoption' },
-                    { id: 'directory',       label: 'Directory' },
                     { id: 'ratings',         label: 'Ratings' },
                     { id: 'breeding-lines',  label: 'Breeding Lines' },
                     { id: 'data',            label: 'Data Portability' },
