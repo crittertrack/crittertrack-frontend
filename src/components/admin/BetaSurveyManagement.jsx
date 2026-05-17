@@ -33,12 +33,17 @@ const BetaSurveyManagement = ({ authToken, API_BASE_URL }) => {
             setStats(statsRes.data);
             setAllResponses(responsesRes.data);
         } catch (err) {
-            console.error('Error fetching survey data:', err);
-            setError('Failed to load survey data');
-        } finally {
-            setLoading(false);
-        }
-    };
+    console.error('FULL SURVEY ERROR:', err);
+    console.error('Response:', err.response);
+    console.error('Data:', err.response?.data);
+
+    setError(
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.message ||
+        'Failed to load survey data'
+    );
+}
 
     const downloadAsCSV = () => {
         if (!allResponses.length) return;
@@ -401,4 +406,4 @@ const BetaSurveyManagement = ({ authToken, API_BASE_URL }) => {
     );
 };
 
-export default BetaSurveyManagement;
+export default BetaSurveyManagement;}
