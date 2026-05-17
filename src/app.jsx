@@ -2306,8 +2306,9 @@ const App = () => {
                                 onUpdateAnimal={handleAnimalFieldUpdate}
                                 showModalMessage={showModalMessage}
                                 onTransfer={(animal) => {
-    handleOpenTransferWithAnimal(animal, 'animal-sale');
-}}
+                                handleOpenTransferWithAnimal(animal, 'animal-sale');
+                                setAnimalToView(null);
+                            }}
                                 onViewAnimal={handleViewAnimal}
                                 onViewPublicAnimal={handleViewPublicAnimal}
                                 onToggleOwned={handleToggleAnimalOwned}
