@@ -2014,7 +2014,7 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 5,
         title: 'System News & Updates',
-        content: 'Receive alerts about important system events, updates, or maintenance in the Reminders & News section on the dashboard. These are typically low-priority but keep you informed.',
+        content: 'Receive alerts about important system events, updates, or maintenance in the Reminders & News section on the dashboard. You can click these cards to expand them and read the full details.',
         tips: [
           'Stay informed about platform changes',
           'Know about new features',

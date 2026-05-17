@@ -247,6 +247,14 @@ export const TUTORIAL_SCREENSHOTS = {
     2: 'transfer-request-notifications.png', // Step 2: Transfer Request Notifications
     3: 'sire-dam-notifications.png', // Step 3: Sire/Dam Notifications
     4: 'message-notifications.png', // Step 4: Message Notifications
+  },
+
+  'kf-messaging': {
+    1: 'messaging-overview.png', // Step 1: Messaging Overview
+    2: 'send-message-from-profile.png', // Step 2: Send Message from Profile
+    3: 'message-conversations.png', // Step 3: Message Conversations
+    4: 'privacy-in-messaging.png', // Step 4: Privacy in Messaging
+    5: 'system-news-and-updates.png', // Step 5: System News & Updates
   }
 };
 
