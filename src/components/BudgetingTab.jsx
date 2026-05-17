@@ -3,14 +3,7 @@ import { DollarSign, Plus, Edit, Trash2, Search, X, Calendar, Filter, Download, 
 import axios from 'axios';
 import DatePicker from './DatePicker';
 
-const BudgetingTab = ({
-    authToken,
-    API_BASE_URL,
-    showModalMessage,
-    preSelectedAnimal = null,
-    preSelectedType = null,
-    onAddModalOpen = null
-}) => {
+const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAnimal = null, preSelectedType = null, onAddModalOpen = null }) => {
     const [transactions, setTransactions] = useState([]);
     const [animals, setAnimals] = useState([]);
     const [animalsLoading, setAnimalsLoading] = useState(true);
@@ -107,7 +100,6 @@ const BudgetingTab = ({
             }
         }
     }, [preSelectedAnimal, preSelectedType, userProfile]);
-
 
     const fetchUserProfile = async () => {
         try {
@@ -317,7 +309,33 @@ const BudgetingTab = ({
                     transactionData,
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
-                showModalMessage('Success', 'Transaction added successfully');
+
+                const isTransferModeSubmission =
+                    transactionData.mode === 'transfer' &&
+                    (transactionData.type === 'sale' || transactionData.type === 'purchase') &&
+                    !!selectedUser;
+
+                if (isTransferModeSubmission) {
+                    const recipientName =
+                        selectedUser.breederName ||
+                        selectedUser.personalName ||
+                        selectedUser.id_public ||
+                        'selected user';
+
+                    if (transactionData.type === 'sale') {
+                        showModalMessage(
+                            'Transfer Offer Sent',
+                            `Transaction added and ${transactionData.animalName || 'the animal'} was offered for transfer to ${recipientName}.`
+                        );
+                    } else {
+                        showModalMessage(
+                            'Seller Notified',
+                            `Transaction added and ${recipientName} was notified about this purchase transfer.`
+                        );
+                    }
+                } else {
+                    showModalMessage('Success', 'Transaction added successfully');
+                }
             }
 
             console.log('API call successful');
@@ -693,7 +711,7 @@ const BudgetingTab = ({
 
             {/* Add/Edit Modal */}
             {showAddModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[120] p-4">
                     <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-xl font-bold text-gray-800">
