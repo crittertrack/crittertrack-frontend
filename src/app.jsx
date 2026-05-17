@@ -2309,7 +2309,6 @@ const App = () => {
                                     setTransferAnimal(animal);
                                     setPreSelectedTransferAnimal(animal);
                                     setPreSelectedTransactionType('animal-sale');
-                                    setAnimalSaleMode('transfer');
                                     setShowTransferModal(false);
                                     navigate('/budget');
                                 }}
