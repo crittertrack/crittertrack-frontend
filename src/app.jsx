@@ -1654,27 +1654,31 @@ const App = () => {
                 />
             )}
 
-            {/* Beta Feedback Modal - Shows to all users */}
-            {showBetaFeedbackModal && (
-                <BetaFeedbackModal 
-                    onClose={() => setShowBetaFeedbackModal(false)}
-                    onStartSurvey={() => {
-                        setShowBetaFeedbackModal(false);
-                        setShowBetaSurveyModal(true);
-                    }}
-                />
-            )}
+            {false && (
+    <>
+        {/* Beta Feedback Modal - Shows to all users */}
+        {showBetaFeedbackModal && (
+            <BetaFeedbackModal 
+                onClose={() => setShowBetaFeedbackModal(false)}
+                onStartSurvey={() => {
+                    setShowBetaFeedbackModal(false);
+                    setShowBetaSurveyModal(true);
+                }}
+            />
+        )}
 
-            {/* Beta Survey Modal */}
-            {showBetaSurveyModal &&
- !localStorage.getItem('betaSurveyCompleted') && (
-    <SurveyModal
-        onClose={() => setShowBetaSurveyModal(false)}
-        surveyResponses={surveyResponses}
-        setSurveyResponses={setSurveyResponses}
-        setSurveySubmitting={setSurveySubmitting}
-        surveySubmitting={surveySubmitting}
-    />
+        {/* Beta Survey Modal */}
+        {showBetaSurveyModal &&
+         !localStorage.getItem('betaSurveyCompleted') && (
+            <SurveyModal
+                onClose={() => setShowBetaSurveyModal(false)}
+                surveyResponses={surveyResponses}
+                setSurveyResponses={setSurveyResponses}
+                setSurveySubmitting={setSurveySubmitting}
+                surveySubmitting={surveySubmitting}
+            />
+        )}
+    </>
 )}
             
             {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
