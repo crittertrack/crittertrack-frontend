@@ -232,7 +232,7 @@ const GETTING_STARTED_LESSONS = [
   },
 
   {
-    id: 'gs-status-privacy',
+    id: 'gs-ownership-settings',
     title: '4. Ownership Settings',
     description: 'Configure ownership and visibility settings',
     tour: 'getting-started',
@@ -399,7 +399,7 @@ const GETTING_STARTED_LESSONS = [
   },
 
   {
-    id: 'gs-physical',
+    id: 'gs-appearance-genetic-code',
     title: '6. Appearance & Genetic Code',
     description: 'Document color, coat, genetics, and measurements',
     tour: 'getting-started',
@@ -537,7 +537,7 @@ const GETTING_STARTED_LESSONS = [
   },
 
   {
-    id: 'gs-lineage',
+    id: 'gs-pedigree-parent-selection',
     title: '7. Pedigree — Parent Selection',
     description: 'Set up parent information and view pedigree',
     tour: 'getting-started',
@@ -584,22 +584,51 @@ const GETTING_STARTED_LESSONS = [
           'Can add them anytime later',
           'Doesn\'t affect animal creation'
         ]
-      },
-      {
-        stepNumber: 5,
-        title: 'Other Parent Selector',
-        content: 'This selector is for animals with Intersex or Unknown gender. It works the same way as the Sire and Dam selectors but allows selection of any gender. This is important for inclusive genetics tracking.',
-        tips: [
-          'Allows selection of Intersex/Unknown genders',
-          'Same search functionality as Sire/Dam',
-          'Helps track diverse pedigrees'
-        ]
       }
     ]
   },
 
   {
-    id: 'gs-breeding',
+    id: 'gs-family-tab-overview',
+    title: '8. Family Tab — Overview',
+    description: 'Review parents, siblings, litters, and offspring in one place',
+    tour: 'getting-started',
+    tourOrder: 8,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Open Family Tab',
+        content: 'The Family tab contains all relationship information for your animal. It\'s optional for pets but important for breeding animals. During creation this tab is empty since you haven\'t added parents or offspring yet, but it will populate as you add that information in the Pedigree and Records tabs.',
+        tips: [
+          'Family tab is an overview of all relationships',
+          'Parents, siblings, litters, and offspring all appear here',
+          'Populates as you add pedigree and records information'
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'Parents and Siblings',
+        content: 'The Family tab shows linked parents and related siblings so you can confirm your sire/dam assignments are correct. If nothing is linked yet, you will see an empty/placeholder state (for example, "No known relatives found").',
+        tips: [
+          'Parents are linked from the Pedigree tab',
+          'Siblings appear based on shared parents'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Litters and Offspring',
+        content: 'The Family tab also displays information about litters and offspring, allowing you to track breeding history and family lineage.',
+        tips: [
+          'Litters appear under the "Offspring" section',
+          'Each offspring links back to their parents',
+          'Helps with genetic analysis and breeding decisions'
+        ]
+      }
+        ]
+      },
+
+  {
+    id: 'gs-fertility-information',
     title: '9. Fertility Information',
     description: 'Track reproductive status and breeding history',
     tour: 'getting-started',
@@ -637,13 +666,12 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 4,
-        title: 'Stud Information',
-        content: 'This section is available for all male animals to track fertility status and genetics information. To make your animal available for breeding in the showcase, go to the Status & Privacy tab and enable "Available for Stud" with a fee.',
+        title: 'Sire Information',
+        content: 'This section is available for all male animals to track fertility status and genetics information. To make your animal available as a hired stud, go to the Status tab and enable "Available for Stud" with a fee.',
         tips: [
           'Available for all males by default',
           'Track fertility status and genetics',
-          'Use Status tab to set "For Stud" and fee',
-          'Public + "For Stud" = Appears in showcase'
+          'Use Status tab to set "For Stud" and fee'
         ]
       },
       {
@@ -730,7 +758,7 @@ const GETTING_STARTED_LESSONS = [
   },
 
   {
-    id: 'gs-husbandry',
+    id: 'gs-care-tab-feeding-daily-care',
     title: '11. Care Tab — Feeding & Daily Care',
     description: 'Set up feeding schedules, care tasks, and housing details for your animal',
     tour: 'getting-started',
@@ -851,30 +879,40 @@ const GETTING_STARTED_LESSONS = [
   },
 
   {
-    id: 'gs-records-eol',
-    title: '13. Notes',
-    description: 'Add notes and additional information about your animal',
+    id: 'gs-notes-milestones',
+    title: '13. Notes & Milestones',
+    description: 'Add notes, milestones, and additional information about your animal',
     tour: 'getting-started',
     tourOrder: 13,
     steps: [
       {
         stepNumber: 1,
-        title: 'Notes Tab',
-        content: 'The Notes tab is for general remarks and any additional information about your animal.',
+        title: 'Notes & Milestones Tab',
+        content: 'The Notes & Milestones tab is for general remarks, milestone tracking, and any additional information about your animal.',
         tips: [
-          'Catch-all for additional info',
-          'Good for observations',
-          'Can add images here'
+          'Use for any important info that doesn\'t fit elsewhere',
+          'Milestones can include breeding achievements, show wins, or personal bests',
+          'Great for documenting your animal\'s unique story'
         ]
       },
       {
         stepNumber: 2,
-        title: 'Remarks & Notes',
+        title: 'Notes',
         content: 'Add any observations or notes about your animal that don\'t fit in other sections. This might include personality quirks, notable achievements, breeding notes, or any other relevant information.',
         tips: [
           'Free-form text field',
           'Great for detailed observations',
           'Useful for future reference'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Milestones',
+        content: 'Track important events or achievements in your animal\'s life. This might include breeding accomplishments, show wins, or personal bests.',
+        tips: [
+          'Helpful for documenting progress',
+          'Can be used for marketing or breeding purposes',
+          'Great for sharing your animal\'s story'
         ]
       }
     ]
@@ -1064,17 +1102,33 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 4,
-        title: 'Pedigree Chart Button',
-        content: 'On the Lineage tab, you can click the "View Pedigree" button to see a detailed family tree chart of your animal. This shows parents, grandparents, and further back generations. When you\'re done viewing, close this pedigree screen by clicking the X or close button.',
+        title: 'Pedigree Tab',
+        content: 'On the Pedigree tab, you can see a detailed family tree chart of your animal. This shows parents, grandparents, and further back generations.',
         tips: [
           'Visual representation of pedigree',
-          'Requires parent data to be useful',
-          'Can be downloaded as PDF',
-          'Close the pedigree screen when done'
+          'Requires parent data to be useful'
         ]
       },
       {
         stepNumber: 5,
+        title: 'Horizontal Pedigree Button',
+        content: 'On the Pedigree tab, you can see two buttons at the top: a vertical pedigree chart and a horizontal pedigree chart. The horizontal pedigree opens in a new modal and gives you the ability to customise and show up to 4 generations of ancestors in a horizontal layout.',
+        tips: [
+          'Can be saved as PDF or PNG',
+          'Includes manual ancestors set in edit'
+        ]
+      },
+      {
+        stepNumber: 6,
+        title: 'Vertical Pedigree Button',
+        content: 'On the Pedigree tab, you can see two buttons at the top: a vertical pedigree chart and a horizontal pedigree chart. The vertical pedigree opens in a new modal and gives you the ability to customise and show up to 4 generations of ancestors in a vertical layout.',
+        tips: [
+          'Can be saved as PDF or PNG',
+          'Includes manual ancestors set in edit'
+        ]
+      },
+      {
+        stepNumber: 7,
         title: 'Edit Button',
         content: 'Click the "Edit" button in the top right corner to enter edit mode. This allows you to modify any information in the animal record.',
         tips: [
@@ -1084,7 +1138,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 6,
+        stepNumber: 8,
         title: 'Edit View Overview',
         content: 'You\'re now in the edit view. Notice it works exactly like the create form - same tabs, same fields, same Save button. You can edit any information here.',
         tips: [
@@ -1094,7 +1148,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 7,
+        stepNumber: 9,
         title: 'Delete Button',
         content: 'When you\'re in edit mode, you can find the Delete button (usually in red) at the bottom of the form. This allows you to remove an animal from your collection entirely. Warning: This action cannot be undone, so use with caution.',
         tips: [
@@ -1105,7 +1159,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 8,
+        stepNumber: 10,
         title: 'Close Edit Without Saving',
         content: 'For now, let\'s go back to the main animal list without making changes. Click the back arrow at the top right to close edit mode and return to your list. You can always reopen an existing animal to view or edit it again.',
         tips: [
@@ -1116,14 +1170,34 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 9,
+        stepNumber: 11,
         title: 'Add Sibling Button',
-        content: 'When viewing an animal that has at least one parent assigned, you\'ll see a green "Add Sibling" button next to the Edit button at the top of the detail view. Clicking it opens a blank animal creation form pre-filled with the same species, birth date, sire, and dam — saving you time when adding littermates or siblings from the same parents.',
+        content: 'When viewing an animal, you\'ll see a green "Add Sibling" button next to the Edit button at the top of the detail view. Clicking it opens a blank animal creation form pre-filled with the same species, birth date, sire, and dam — saving you time when adding littermates or siblings from the same parents.',
         tips: [
-          'Only appears when the animal has at least one parent set',
-          'Pre-fills species, birth date, sire, and dam',
+          'Pre-fills species, birth date, sire, and dam if any are entered on the current animal',
           'Great for quickly adding multiple animals from the same litter',
           'You can still adjust any pre-filled field before saving'
+        ]
+      },
+      {
+        stepNumber: 12,
+        title: 'Sharing Animals',
+        content: 'When viewing an animal, you\'ll see a blue "Share" button next to the Transfer button at the top of the detail view. Clicking it opens a modal with a QR code and a link to the animal\'s profile.',
+        tips: [
+          'Anyone can scan the QR code or use the link to view this animal\'s profile',
+          'Great for sharing with potential buyers or fellow breeders',
+          'Sharing does not affect privacy settings - the animal will still only show details if it\'s set to public'
+        ]
+      },
+      {
+        stepNumber: 13,
+        title: 'Archive Animals',
+        content: 'When viewing an animal, you\'ll see a white "Archive" button at the top of the detail view. Clicking it Archives your animal and moves it to the archived section.',
+        tips: [
+          'Quickly view all archived animals',
+          'Toggle back to view all animals',
+          'Archived animals are not deleted and can be unarchived anytime',
+          'Archived animals stay visible in pedigrees unless you set them to private'
         ]
       }
     ]
@@ -1148,38 +1222,122 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 2,
-        title: 'Litter Management',
-        content: 'You\'re now in the Litters section. This is where you track breeding litters and manage offspring. Click the "New Litter" button to create a new litter.',
+        title: 'Open + Mating First',
+        content: 'Start with "+ Mating" when you want to record a planned breeding. Clicking it opens the planned mating modal.',
         tips: [
-          'Litters organize offspring by breeding',
-          'Each litter has parents and offspring',
-          'Optional but helpful for breeders'
+          'Planned matings can only be created for current or future dates',
         ]
       },
       {
         stepNumber: 3,
-        title: 'Sire & Dam Selection',
-        content: 'Select both a Sire (father) and Dam (mother) for the litter. Note: Intersex and Unknown gender animals can be selected on both Sire and Dam selectors, allowing inclusive representation of intersex/unknown animals.',
+        title: 'Choose Species in the Mating Modal',
+        content: 'Inside the planned mating modal, click the Species field and pick the correct species from the picker. Selecting a species clears any parent selections so the sire and dam search can be filtered correctly for that species.',
         tips: [
           'Both parents are mandatory',
-          'Can use same species animals',
+          'Can only use same species animals',
           'Inclusive gender selection available'
         ]
       },
       {
         stepNumber: 4,
-        title: 'Dates, Counts & Totals',
+        title: 'Select Sire and Dam',
+        content: 'After the species is set, choose the sire and dam for the planned mating. The sire and dam buttons are only enabled once a species has been selected. When both parents are chosen, the modal can show a predicted COI, and the parent cards are now tied to the correct species.',
+        tips: [
+          'Both parents are mandatory',
+          'Can only use same species animals',
+          'Inclusive gender selection available'
+        ]
+      },
+      {
+        stepNumber: 5,
+        title: 'Add Mating Date and Expected Due Date',
+        content: 'Fill in the mating date and the expected due date.',
+        tips: [
+          'Both dates show on litter calendar'
+        ]
+      },
+      {
+        stepNumber: 6,
+        title: 'Add Mating Details and Optional Notes',
+        content: 'open the optional breeding details area if you want to record the breeding method or the breeding condition at the time. Add notes if you want a freeform reminder before saving the planned mating.',
+        tips: [
+                ]
+      },
+      {
+        stepNumber: 7,
+        title: 'Save the Planned Mating',
+        content: 'Save the planned mating to close the modal and store it as Planned. Planned matings appear on the calendar and in the list with a blue "Planned" badge. You can click on a planned mating to view its details, edit it, or convert it to a born litter once the breeding is successful.',
+        tips: [
+                ]
+      },
+      {
+        stepNumber: 8,
+        title: 'Open + Litter Next',
+        content: 'When you are recording an actual birth, click "+ Litter" to open the litter modal. This is a separate form from the mating modal, but it follows the same first rule: select the species inside the modal before selecting parents.',
+        tips: [
+                ]
+      },
+      {
+        stepNumber: 9,
+        title: 'Choose Species in the Litter Modal',
+        content: 'Inside the litter modal, click the Species field and pick the correct species from the picker. Selecting a species clears any parent selections so the sire and dam search can be filtered correctly for that species.',
+        tips: [
+          'Both parents are mandatory',
+          'Can only use same species animals',
+          'Inclusive gender selection available'
+        ]
+      },
+      {
+        stepNumber: 10,
+        title: 'Select Sire and Dam',
+        content: 'After the species is set, choose the sire and dam for the litter. The sire and dam buttons are only enabled once a species has been selected. When both parents are chosen, the modal can show a predicted COI, and the parent cards are now tied to the correct species.',
+        tips: [
+          'Both parents are mandatory',
+          'Can only use same species animals',
+          'Inclusive gender selection available'
+        ]
+      },
+      {
+        stepNumber: 11,
+        title: 'Add Litter Photos',
+        content: 'Upload photos of the litter to document their appearance and development.',
+        tips: [
+          'Photos help with identification and tracking',
+          'Include close-ups of the offspring and their parents',
+          'Ensure photos are clear and well-lit'
+        ]
+      },
+      {
+        stepNumber: 12,
+        title: 'Set Pair Name (Optional)',
+        content: 'Fill in Litter Name/ID (your pair name or internal code), The litter name field stores your custom pairing label.',
+        tips: [
+          'Optional field for your internal use',
+        ]
+      },
+      {
+        stepNumber: 13,
+        title: 'Complete Breeding Information',
+        content: 'The Breeding Information section lets you fill the fields: Breeding Method, Breeding Condition, Breeding Outcome, Mating Date, Expected Due Date, and Birth Method. This section captures the pairing context before the birth and offspring totals are finalized.',
+        tips: [
+          'Mating Dates and Expected Due Dates show on calendar',
+        ]
+      },
+      {
+        stepNumber: 14,
+        title: 'Record Dates & Counts',
         content: 'Enter the expected due date or birth date, then fill the male, female, and unknown offspring counts. Total Born is calculated as males + females + unknown. Stillborn, losses, and weaned are free-form fields you can use as needed for your litter record.',
         tips: [
+          'Birthdate is mandatory for new offspring creation',
           'Total Born = males + females + unknown',
           'Stillborn/losses/weaned are free-form fields',
           'Birth or due date helps with offspring creation and reporting'
         ]
       },
       {
-        stepNumber: 5,
+        stepNumber: 15,
         title: 'Create New Offspring Animals',
-        content: 'In the "New Offspring Animals" section, enter a birth date and click "Create Offspring" to build placeholder offspring records. The system will pre-fill the sire, dam, and birthdate on the new animals so they are linked to this litter immediately.',
+        content: 'In the "Create New Offspring Animals" section, you will see total set, already linked and remaining counts. The "add/fill remaining" buttons create new animals records with parent links auto-filled to this litter\'s sire and dam. The number of animals created at once is determined by the remaining count. This is a great way to quickly create placeholder records for all offspring in a litter, which you can then edit with individual details later.',
         tips: [
           'Requires both parents and a birth date',
           'Creates placeholder animals with parent links auto-filled',
@@ -1188,9 +1346,9 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 6,
+        stepNumber: 16,
         title: 'Link Existing Animals',
-        content: 'Use "Link Existing Animals" to connect previously created animals to this litter. Only animals with the same parents are shown. If no birth date is set on the litter yet, selecting an existing offspring will auto-fill the litter birth date from that animal.',
+        content: 'Use "Link Existing Animals as Offspring" to connect previously created animals to this litter. Only animals with the same parents are shown. If no birth date is set on the litter yet, selecting an existing offspring will auto-fill the litter birth date from that animal.',
         tips: [
           'Parents are required to find matching existing offspring',
           'Shows only animals with the same sire and dam',
@@ -1199,18 +1357,27 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 7,
-        title: 'Litter Card Details',
-        content: 'Once you\'ve created a litter, click on a litter card to view its details. Here you can see the parents, offspring, and manage the litter from an expanded view.',
+        stepNumber: 17,
+        title: 'Mating Card Details',
+        content: 'Once you\'ve created a Planned Mating, click on a Mating card to expand and view its details. The "Mated Today" button allows you to mark the mating as completed for the day and this will auto-set mating date to current date.',
         tips: [
-          'Requires a litter to be created first',
-          'Shows complete litter information',
-          'Edit, link, or add offspring from here',
+          'Requires a planned mating to be created first',
+          'Shows complete mating information',
+          'Edit the planned mating from here',
           'View parentage clearly'
         ]
       },
       {
-        stepNumber: 8,
+        stepNumber: 18,
+        title: 'Mating Edit and Convert to Litter',
+        content: 'Once you\'ve created a Mating, click on the Edit button in expanded view to modify its details. The convert to litter functionality allows you to convert the mating record to a full litter record.',
+        tips: [
+          'Requires a mating to be created first',
+          'Edit the planned mating from here'
+                ]
+      },
+      {
+        stepNumber: 19,
         title: 'Litter Actions',
         content: 'On the expanded litter view, you\'ll see buttons to: Edit the litter, Link animals to it, Add new offspring, and Delete the litter. These give you full control over litter management.',
         tips: [
@@ -1221,16 +1388,15 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 9,
-        title: 'Show a Litter on Your Public Profile',
-        content: 'Each litter card has an Eye / EyeOff icon at the very left of the compact header, before the litter name. Click it to toggle public visibility: green Eye = this litter is shown on your public breeder profile, grey EyeOff = hidden. A "Litters" tab automatically appears on your public profile once at least one litter is marked public. The public card shows the pairing name, litter ID badge, sire × dam, status badge (Planned / Born), dates, a photo thumbnail strip, and any notes.',
+        stepNumber: 20,
+        title: 'Show pairings on Your Public Profile',
+        content: 'Each card has an Eye / EyeOff icon at the very left of the compact header, before the pair name. Click it to toggle public visibility: green Eye = this entry is shown on your public breeder profile, grey EyeOff = hidden. A "Pairings" tab automatically appears on your public profile once at least one entry is marked public. The public cards shows the optional pair name, litter ID badge, sire × dam, status badge (Planned / Mated / Born), dates grouped by status, and any notes.',
         tips: [
-          'Eye/EyeOff icon is the first element on each litter card',
+          'Eye/EyeOff icon is the first element on each pairing card',
           'Green Eye = shown publicly, Grey EyeOff = hidden from profile',
-          'Litters tab only appears on your public profile when at least 1 litter is public',
-          'Notes are always shown when a litter is public',
-          'Photos (if uploaded) display as a thumbnail strip on the public card',
-          'Works for both planned and born litters'
+          'pairings tab only appears on your public profile when at least 1 pairing is public',
+          'Notes are always shown when a pairing is public',
+          'Works for both planned, mated and born pairings/litters'
         ]
       }
     ]
@@ -1246,7 +1412,7 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 1,
         title: 'Move to Profile',
-        content: 'Let\'s now explore your profile settings. Click the "Profile" button in the header.',
+        content: 'Let\'s explore your profile settings. Click your profile image in the top right corner and click the "Profile" button in the dropdown menu.',
         tips: [
           'Profile shows your public identity',
           'Settings affect sharing and visibility',
@@ -1296,8 +1462,8 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 6,
-        title: 'Website & Country',
-        content: 'Add your website (if you have a breeding website), select your country, and write a bio. The bio helps tell other breeders about yourself and your breeding program. These help other users find and learn about you.',
+        title: 'Websites & Country',
+        content: 'Add your websites (if you have a breeding website and/or social media profiles), select your country, and write a bio. The bio helps tell other breeders about yourself and your breeding program. These help other users find and learn about you.',
         tips: [
           'Website links to your info',
           'Country helps with shipping/contact',
@@ -1360,6 +1526,46 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 12,
+        title: 'Ratings Tab',
+        content: 'In your Settings, open the "Ratings" tab to manage reviews and ratings for your breeding program. This allows you to view feedback from other users.',
+        tips: [
+          'Found under Settings → Ratings tab',
+          'Helps build trust with potential customers'
+        ]
+      },
+      {
+        stepNumber: 13,
+        title: 'Breeding Lines Tab',
+        content: 'In your Settings, open the "Breeding Lines" tab to Define up to 10 personal breeding lines. These are private and only visible to you, This helps you manage and track genetic diversity within your breeding program.',
+        tips: [
+          'Found under Settings → Breeding Lines tab',
+          'Assign breeding lines to animals on the Identification Tab in private view-mode',
+          'Helps manage genetic diversity'
+        ]
+      },
+      {
+        stepNumber: 14,
+        title: 'Data Portability Tab',
+        content: 'In your Settings, open the "Data Portability" tab to manage your data and import/export your breeding information.',
+        tips: [
+          'Found under Settings → Data Portability tab',
+          'Export your data for backup or analysis',
+          'Import data from other systems',
+          'Manage your data with ease'
+        ]
+      },
+      {
+        stepNumber: 15,
+        title: 'Account Tab',
+        content: 'In your Settings, open the "Account" tab to manage your Email and Password. This is also where you can delete your account if needed.',
+        tips: [
+          'Found under Settings → Account tab',
+          'Manage login credentials',
+          'Account deletion is permanent' 
+        ]
+      },
+      {
+        stepNumber: 16,
         title: 'Save or Cancel',
         content: 'Use the Save button to keep your changes or Cancel to discard them. Changes are applied immediately upon save.',
         tips: [
@@ -1367,26 +1573,69 @@ const KEY_FEATURES_LESSONS = [
           'Cancel discards edits',
           'Return to summary after save'
         ]
-      },
-      {
-        stepNumber: 13,
-        title: 'Move to Budget',
-        content: 'Now let\'s explore the Budget section to understand financial tracking. Click the "Budget" button in the header.',
-        tips: [
-          'Budget tracks breeding finances',
-          'Shows profitability',
-          'Important for breeders'
-        ]
       }
     ]
   },
 
   {
-    id: 'kf-budget-transfers',
-    title: '4. Budget & Animal Transfers',
-    description: 'Track finances and manage animal transfers',
+    id: 'kf-global-calendar',
+    title: '4. Calendar & Reminders',
+    description: 'Track all events and important dates in one place',
     tour: 'key-features',
     tourOrder: 4,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Calendar View',
+        content: 'The Calendar page shows all your events and important dates in one place.',
+        tips: [
+          'Shows all events and dates',
+          'Helps plan breeding',
+          'includes custom milestones you create on animals',
+          'Tracks important milestones'
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'Event Filters',
+        content: 'Click the Event buttons to filter events on your calendar.',
+        tips: [
+          'Filter by event type',
+          'Focus on specific categories',
+          'Customizable event types'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Month Events List',
+        content: 'Shows all events for the selected month in a list format.',
+        tips: [
+          'Easy overview of monthly events',
+        ]
+      },
+      {
+        stepNumber: 4,
+        title: 'Click Calendar Events for Details',
+        content: 'Shows all expanded details below the calendar.',
+        tips: [
+        ]
+      },
+      {
+        stepNumber: 5,
+        title: 'Reminders',
+        content: 'Reminders and Alerts show up as events on the calendar and in the Reminders section. Click on a reminder to see its details and mark it as completed.',
+        tips: [
+        ]
+      }
+          ]
+  },
+
+  {
+    id: 'kf-budget-transfers',
+    title: '5. Budget & Animal Transfers',
+    description: 'Track finances and manage animal transfers',
+    tour: 'key-features',
+    tourOrder: 5,
     steps: [
       {
         stepNumber: 1,
@@ -1420,16 +1669,27 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 4,
-        title: 'Close & Reopen Add Transaction',
-        content: 'Let\'s explore other transaction types. Close this transaction and reopen the "Add Transaction" button.',
+        title: 'Add Transaction - Income',
+        content: 'Click the "Add Transaction" button and select "Income". This records revenue like animal sales, donations, grants, etc.',
         tips: [
-          'Multiple transaction types available',
-          'Each serves different purpose',
-          'Different forms for different types'
+          'Income increases net profit',
+          'Important for accurate tracking',
+          'Includes all revenue sources'
         ]
       },
       {
         stepNumber: 5,
+        title: 'Income Fields',
+        content: 'On the Income form, fill in: Date, Category (sales, donations, grants, other), Description, Amount, and optional notes. This creates a detailed income record.',
+        tips: [
+          'Categorize for better tracking',
+          'Be specific in description',
+          'Notes help remember details'
+        ]
+      },
+      
+      {
+        stepNumber: 6,
         title: 'Animal Sale - Manual Entry',
         content: 'Select "Animal Sale" then "Manual Entry". This records a sale without using the transfer system - you just record the basic sale details manually.',
         tips: [
@@ -1439,7 +1699,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 6,
+        stepNumber: 7,
         title: 'Manual Sale Fields',
         content: 'Enter: Date, Animal (if you want to link it), Buyer, Sale Price, and Notes. This creates a record of the transaction.',
         tips: [
@@ -1449,7 +1709,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 7,
+        stepNumber: 8,
         title: 'Close & Reopen - Transfer Ownership',
         content: 'Let\'s look at Transfer Ownership, which is more sophisticated. Close this, reopen Add Transaction, select "Animal Sale", then "Transfer Ownership".',
         tips: [
@@ -1459,7 +1719,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 8,
+        stepNumber: 9,
         title: 'Transfer Ownership Features',
         content: 'Transfer Ownership initiates an animal transfer between CritterTrack users. The key features are: The animal gets a "Sold" status in your collection, you retain a view-only copy of the animal\'s record, the new owner gains full editing rights, and you can see all future changes they make. Neither party can delete the animal. Privacy note: transferred animals are treated like your own animals for visibility purposes — both parties can always view the full record and its ancestors in pedigrees, even if those ancestors are set to private by their owners.',
         tips: [
@@ -1471,7 +1731,17 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 9,
+        stepNumber: 10,
+        title: 'Transfer Button on Detail View',
+        content: 'Access this feature directly from animal detail by clicking the blue "Transfer" button.',
+        tips: [
+          'Quick access from animal detail',
+          'Initiates transfer process',
+          'Follow prompts to complete transfer'
+        ]
+      },
+      {
+        stepNumber: 11,
         title: 'Close & Reopen - Animal Purchase',
         content: 'Now let\'s look at purchases. Close this, reopen Add Transaction, and select "Animal Purchase". Since manual entry is the same as sales, we\'ll focus on the "Notify Seller" option.',
         tips: [
@@ -1481,7 +1751,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 10,
+        stepNumber: 12,
         title: 'Notify Seller Feature',
         content: 'The "Notify Seller" feature sends a notification to the original breeder that you\'ve acquired their animal. You enter their Personal ID, and they receive a notification. The seller gets a view-only copy showing that you now own the animal and any information you\'ve added.',
         tips: [
@@ -1495,11 +1765,11 @@ const KEY_FEATURES_LESSONS = [
   },
 
   {
-    id: 'af-searching',
-    title: '5. Searching & Filtering Animals',
+    id: 'kf-searching-filtering',
+    title: '6. Searching & Filtering',
     description: 'Master search and filtering tools',
     tour: 'key-features',
-    tourOrder: 5,
+    tourOrder: 6,
     steps: [
       {
         stepNumber: 1,
@@ -1513,20 +1783,8 @@ const KEY_FEATURES_LESSONS = [
           'Click any result to jump straight to that profile or animal'
         ]
       },
-      {
+            {
         stepNumber: 2,
-        title: 'My Feed',
-        content: 'The "My Feed" tab (first in the navigation bar) is your personal community hub. It shows: recently active members with a green dot, your favorited animals, your favorited breeders, and recently updated animals from breeders you follow. It is a quick overview of everything you care about in the community.',
-        tips: [
-          'Access My Feed from the first nav tab (Users icon)',
-          'Recently active members show with a green dot',
-          'Favorite animals by clicking the heart icon on any animal profile',
-          'Favorite breeders by clicking the heart icon on their profile',
-          'Recently updated favorites: see when your saved animals change'
-        ]
-      },
-      {
-        stepNumber: 3,
         title: 'My Animals Search Bar',
         content: 'In your "My Animals" section, you\'ll find a separate search bar that lets you search within your own collection by animal name. This is local to your animals only.',
         tips: [
@@ -1537,9 +1795,9 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 4,
+        stepNumber: 3,
         title: 'Species Filter',
-        content: 'In your "My Animals" section, use the Species dropdown to filter your collection by animal type. Combine this with the search bar for quick access to specific animals.',
+        content: 'In your "My Animals" filters section, use the Species dropdown to filter your collection by animal type. Combine this with the search bar for quick access to specific animals.',
         tips: [
           'Filter your collection by type',
           'Narrows down results quickly',
@@ -1548,7 +1806,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 5,
+        stepNumber: 4,
         title: 'Gender Filter',
         content: 'Use the Gender filter to find males, females, or other genders in your collection. This is helpful when planning breeding pairs.',
         tips: [
@@ -1559,7 +1817,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 6,
+        stepNumber: 5,
         title: 'Status Filter',
         content: 'Filter by status (Pet, Breeder, Available, Sold, etc.) to quickly find animals in specific situations within your collection.',
         tips: [
@@ -1570,7 +1828,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 7,
+        stepNumber: 6,
         title: 'Combined Filtering',
         content: 'Use multiple filters together: search by name, filter by species and gender, then by status. This gives you powerful tools to find exactly what you\'re looking for in your collection.',
         tips: [
@@ -1579,16 +1837,74 @@ const KEY_FEATURES_LESSONS = [
           'Very flexible organization',
           'Manage large collections easily'
         ]
+      },
+      {
+        stepNumber: 7,
+        title: 'Breeding Lines Filter',
+        content: 'Filter by breeding lines to quickly find animals in specific breeding lines within your collection.',
+        tips: [
+          'Find specific breeding lines',
+          'Track lineage information',
+          'Manage genetic diversity'
+        ]
       }
     ]
   },
 
   {
-    id: 'af-notifications',
-    title: '6. Notification System',
+    id: 'kf-my-feed-community-updates',
+    title: '7. My Feed & Community Updates',
+    description: 'Stay informed about your favorites and the community',
+    tour: 'key-features',
+    tourOrder: 7,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Open My Feed',
+        content: 'Use the My Feed button in the main navigation to open the community hub. This is where you can see active users, newest users, and see updates about your favorited users/animals.',
+        tips: [
+          'Stay connected to community',
+          'Never miss important info',
+          'Customizable preferences'
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'Favorite Animals',
+        content: 'Favorite animals in your collection to see updates about them in your My Feed.',
+        tips: [
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Recently Updated Favorites',
+        content: 'This section shows recently updated information about your favorited animals.',
+        tips: [
+        ]
+      },
+      {
+        stepNumber: 4,
+        title: 'Favorite Users',
+        content: 'Favorite other users in the community to see their updates in your My Feed. This is a great way to stay connected to breeders you\'re interested in.',
+        tips: [
+        ]
+      },
+      {
+        stepNumber: 5,
+        title: 'Available from Favorited Breeders',
+        content: 'This section shows all available animals from breeders you\'ve favorited. This is a great way to discover new prospects for your breeding program.',
+        tips: [
+        ]
+     }
+    ]
+  },
+
+  {
+    id: 'kf-notifications',
+    title: '8. Notification System',
     description: 'Stay informed with notifications',
     tour: 'key-features',
-    tourOrder: 6,
+    tourOrder: 8,
     steps: [
       {
         stepNumber: 1,
@@ -1603,21 +1919,21 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 2,
         title: 'Transfer Request Notifications',
-        content: 'When someone initiates an animal transfer with you (either to buy or to receive your animal), you\'ll be notified.',
+        content: 'When someone initiates an animal transfer to you, you\'ll be notified.',
         tips: [
-          'Don\'t miss sale opportunities',
-          'Stay on top of incoming animals',
-          'Act quickly on time-sensitive offers'
+          'Receive transfer requests',
+          'View transfer details',
+          'Accept or decline requests'
         ]
       },
       {
         stepNumber: 3,
-        title: 'System Notifications',
-        content: 'Receive alerts about important system events, updates, or maintenance. These are typically low-priority but keep you informed.',
+        title: 'Sire/Dam Notifications',
+        content: 'Receive alerts when your animals are assigned as parents in breeding programs. users can auto-assign your animals as sire or dam if they are public. You\'ll get a notification whenever this happens, so you can stay informed about how your animals are being used in the community and decline requests if necessary (this reverts the assignment).',
         tips: [
-          'Stay aware of platform changes',
-          'Know about new features',
-          'Understand any issues'
+          'Know when your animals are used in breeding',
+          'Stay informed about breeding activity',
+          'See lineage connections'
         ]
       },
       {
@@ -1634,11 +1950,11 @@ const KEY_FEATURES_LESSONS = [
   },
 
   {
-    id: 'af-messaging',
-    title: '7. Messaging System',
+    id: 'kf-messaging',
+    title: '9. Messaging System',
     description: 'Communicate with other breeders',
     tour: 'key-features',
-    tourOrder: 7,
+    tourOrder: 9,
     steps: [
       {
         stepNumber: 1,
@@ -1683,13 +1999,12 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 5,
-        title: 'Next: Advanced Features Tour',
-        content: 'Congratulations on completing the Key Features tour! You now understand how to view and edit animals, manage litters, configure your profile, handle breeding finances, search and filter, receive notifications, and communicate with other breeders. The "My Feed" tab is your personalized community hub — check it regularly to stay up to date with your favorited animals and breeders. Would you like to start the "Advanced Features" tour? This will teach you about tags, genetics, COI calculations, and more advanced community features.',
+        title: 'System News & Updates',
+        content: 'Receive alerts about important system events, updates, or maintenance in the Reminders & News section on the dashboard. These are typically low-priority but keep you informed.',
         tips: [
-          'Advanced Features builds on Key Features',
-          'Covers tags, genetics, and advanced search',
-          'You can start it anytime from the tutorial menu',
-          'Optional but highly recommended'
+          'Stay informed about platform changes',
+          'Know about new features',
+          'Understand any issues'
         ]
       }
     ]
@@ -1697,17 +2012,160 @@ const KEY_FEATURES_LESSONS = [
 ];
 
 const ADVANCED_FEATURES_LESSONS = [
-  {
-    id: 'af-tags-management',
-    title: '1. Tags & Mass Management',
-    description: 'Organize animals with tags and bulk operations',
+    {
+    id: 'af-daily-operations-tabs',
+    title: '1. Daily Operations Tabs',
+    description: 'Use the separate tabs in My Animals for enclosures, reproduction, health, feeding, and supplies management',
     tour: 'advanced-features',
     tourOrder: 1,
+    steps: [
+            {
+        stepNumber: 1,
+        title: 'How Daily Operations Are Organized',
+        content: 'Daily operations are split into focused tabs. Use Enclosures for habitat assignment/maintenance, Reproduction for breeding status workflows, Health for care and medical actions, Feeding & Care for feeding workflows, and Supplies for inventory management.',
+        tips: [
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'My Animals List View',
+        content: 'On the right side of the search bar / filters button is a toggle that lets you switch views.',
+        tips: [
+          'Toggle between grid and list view',
+          'List view shows more details in a compact format',
+          'Great for managing large collections'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Collections Tab',
+        content: 'The Collections tab lets you create named groups of animals that cut across species and ownership. Add animals to a collection, and use the search bar to filter animals within it. Great for organising show animals, or any custom grouping you need for your own tracking.',
+        tips: [
+        ]
+      },
+      {
+        stepNumber: 4,
+        title: 'Enclosures Tab',
+        content: 'The Enclosures tab shows your habitats, assigned animals. Create/edit enclosures and manage assignments directly from this tab.',
+        tips: [
+        ]
+      },
+      {
+        stepNumber: 5,
+        title: 'Reproduction Tab',
+        content: 'Use the Reproduction tab for breeding status workflows such as In Mating, Pregnant, and Nursing progressions.',
+        tips: [
+        ]
+      },
+      {
+        stepNumber: 6,
+        title: 'Health Tab — Scheduled Care and Medical',
+        content: 'Use the Health tab for managing scheduled care and medical treatments.',
+        tips: [
+        ]
+      },
+      {
+        stepNumber: 7,
+        title: 'Quarantine Flow',
+        content: 'Quarantine and medical status actions are handled in health-related workflows. Assign animal in quarantine in the animal edit health tab, then use the health tab to see all animals in quarantine and manage their care and eventual release.',
+        tips: [
+        ]
+      },
+      {
+        stepNumber: 8,
+        title: 'Feeding & Care Tab — Due and Overdue Tasks',
+        content: 'The Feeding & Care tab highlights animals needing feeding actions, including due/overdue states driven by each animal\'s care schedule. This is the main daily feeding workflow tab.',
+        tips: [
+        ]
+      },
+      {
+        stepNumber: 9,
+        title: 'Recording a Feeding',
+        content: 'Click the green "✓ Fed" button on any animal to record a feeding. A modal opens where you can optionally select which food item from your Supplies was used, enter the quantity fed (which automatically deducts from your stock), and add notes. You can also skip food selection and just mark the animal as fed Or use the skip button to entirely skip a feeding.',
+        tips: [
+        ]
+      },
+      {
+        stepNumber: 10,
+        title: 'Accessing Supplies',
+        content: 'Supplies is accessed via the supplies tab in the My Animals header. It\'s a dedicated screen for tracking everything you use to care for your animals, from food and bedding to medication and feeder animals.',
+        tips: [
+          'Accessible from within My Animals',
+          'Separate from the main animal list',
+          'Filter by category: Food, Bedding, Medication, Other'
+        ]
+      },
+      {
+        stepNumber: 11,
+        title: 'Adding a Supply Item',
+        content: 'Click "Add Item" to create a new supply. Give it a name, select a category (Food, Bedding, Medication, Other), and enter the current stock amount and unit (e.g. "15 bags" or "200 grams"). Optionally set a Cost Per Unit for budget tracking.',
+        tips: [
+          'Name: e.g. "Timothy Hay", "Deli Nature Premium", "Adult Mice"',
+          'Units can be anything: bags, grams, kg, pieces',
+          'Cost Per Unit flows into budget expenses on restock'
+        ]
+      },
+      {
+        stepNumber: 12,
+        title: 'Feeder Animal Items',
+        content: 'Food items can be marked as "Feeder Animal" to unlock extra fields: Feeder Type (e.g. Mice, Rats, Crickets) and Feeder Size (e.g. Pinky, Fuzzy, Adult, Large). These details appear in feeding logs when you select the item during a feeding event.',
+        tips: [
+          'Only available for Food category items',
+          'Feeder type and size shown in feeding log entries',
+          'Useful for reptile and amphibian keepers'
+        ]
+      },
+      {
+        stepNumber: 13,
+        title: 'Reorder Thresholds',
+        content: 'Set a "Reorder when stock reaches" threshold so you\'re alerted automatically. When current stock drops to or below this number, the item appears in the Management View\'s maintenance section and the maintenance badge count increases.',
+        tips: [
+          'Good starting point: 1-2 weeks\' worth of supply',
+          'Badge on Management View section changes color when reorder is due',
+          'Restock button lets you quickly add stock and optionally log the cost'
+        ]
+      },
+      {
+        stepNumber: 14,
+        title: 'Schedule-Based Reorder',
+        content: 'For bulk items where stock count isn\'t practical (like hay bales or substrate bags), use schedule-based reordering. Set a "Next Order Date" and an order frequency (e.g. every 2 months). The item will appear in alerts when the next order date arrives, independent of stock count.',
+        tips: [
+          'Great for subscription feeds or regular bulk orders',
+          'Frequency: days, weeks, or months',
+          'Next Order Date auto-advances when you restock'
+        ]
+      },
+      {
+        stepNumber: 15,
+        title: 'Restocking',
+        content: 'Click "Restock" on any item to add to your running stock. Enter the quantity received and optionally the cost paid — this automatically creates a budget expense entry. After restocking, any overdue reorder date is automatically advanced to the next cycle.',
+        tips: [
+          'Restock logs a budget expense automatically',
+          'You can edit or delete transactions later in Budget',
+          'Stock level updates immediately'
+        ]
+      },
+      {
+        stepNumber: 16,
+        title: 'Pin Your Default View',
+        content: 'Each top tab has a small pin icon in its top-right corner. Click the pin on any tab to make it your default, so opening Crittertrack lands on that view automatically.',
+        tips: [
+        ]
+      }
+    ]
+  },
+
+  {
+    id: 'af-tags-management',
+    title: '2. Tags & Mass Management',
+    description: 'Organize animals with tags and bulk operations',
+    tour: 'advanced-features',
+    tourOrder: 2,
     steps: [
       {
         stepNumber: 1,
         title: 'Tags Overview',
-        content: 'Tags are labels you create to organize your collection. Common tags: "Show Animals", "Breeding Stock", "Pets", "For Sale", "Problem Behaviors", etc.',
+        content: 'Tags are custom labels you create to organize your collection. Tags are public to other users.',
         tips: [
           'Flexible organization system',
           'Create your own tags',
@@ -1717,7 +2175,7 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 2,
         title: 'Adding Tags',
-        content: 'In the animal form, find the Tags field. Type a tag name and press Enter to add it. Tags can be new or existing from your tag list.',
+        content: 'In the animal form, find the Tags field on the identification tab. Type a tag name and press Enter to add it. Tags can be new or existing from your tag list.',
         tips: [
           'Create tags on the fly',
           'Tag suggestions appear',
@@ -1738,11 +2196,12 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 4,
         title: 'Bulk Privacy Controls',
-        content: 'At the top of the My Animals page, you\'ll see "All Public" and "All Private" buttons. These let you instantly change the visibility of ALL your animals at once. The UI updates immediately, and changes sync with the database in the background.',
+        content: 'At the top of the My Animals page, you\'ll see "Set All Public" and "Set All Private" buttons. These let you instantly change the visibility of ALL your animals at once. The UI updates immediately, and changes sync with the database in the background.',
         tips: [
           'Green Eye icon = Make All Public',
           'Gray Eye-Off icon = Make All Private',
           'Changes apply instantly to all animals',
+          'Also optional per species by eye icons in species headers',
           'Background sync keeps database updated',
           'Confirmation prompt before applying'
         ]
@@ -1750,11 +2209,38 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 5,
         title: 'Mass Delete',
-        content: 'Click the trash icon to enter mass delete mode. Select multiple animals using checkboxes, then click "Delete Selected" to remove them all at once.',
+        content: 'Click the trash icon in species headers to enter mass delete mode. Select multiple animals using checkboxes, then click "Delete Selected" to remove them all at once.',
         tips: [
           'Efficient for large collections',
           'Delete multiple animals at once',
           'Click Cancel to exit without deleting'
+        ]
+      },
+      {
+        stepNumber: 6,
+        title: 'For Sale Button',
+        content: 'Click the "For Sale" button on the top header of My Animals to show animals marked For Sale.',
+        tips: [
+          'Quickly view all animals for sale',
+          'Toggle back to view all animals'
+        ]
+      },
+      {
+        stepNumber: 7,
+        title: 'Archive Button',
+        content: 'Click the "Archive" button on the top header of My Animals to show archived animals.',
+        tips: [
+          'Quickly view all archived animals',
+          'Toggle back to view all animals'
+        ]
+      },
+      {
+        stepNumber: 8,
+        title: 'Find Duplicates Button',
+        content: 'Click the "Find Duplicates" button on the top header of My Animals to show animals with possible duplicate entries.',
+        tips: [
+          'Identify potential duplicate records',
+          'Review and merge duplicates to keep your database clean'
         ]
       }
     ]
@@ -1762,32 +2248,33 @@ const ADVANCED_FEATURES_LESSONS = [
 
   {
     id: 'af-public-profiles',
-    title: '2. Public Profiles & Sharing',
+    title: '3. Public Profiles & Sharing',
     description: 'Share your breeding program with the community',
     tour: 'advanced-features',
-    tourOrder: 2,
+    tourOrder: 3,
     steps: [
       {
         stepNumber: 1,
         title: 'Public Profile Overview',
-        content: 'Your public profile is how other breeders find and learn about you. It is organised into up to four tabs that appear automatically once you have content: Animals (always visible), For Sale / Stud (appears when you have animals marked for sale or stud), Info & Adoption (appears when you have breeder info filled in Settings), and Litters (appears when you have at least one litter toggled public in Litter Management).',
+        content: 'Your public profile is how other breeders find and learn about you. It is organised into up to six tabs that appear automatically once you have content: Animals (always visible), For Sale / Stud (appears when you have animals marked for sale or stud), Info & Adoption (appears when you have breeder info filled in Settings), Pairings (appears when you have at least one pairing toggled public in Litter Management), Stats and Ratings.',
         tips: [
           'Tabs appear automatically — no manual setup needed',
           'Animals tab is always shown',
           'For Sale / Stud tab requires animals marked for sale or stud',
           'Info & Adoption tab requires fields filled in Settings',
-          'Litters tab requires at least one litter toggled public'
+          'Pairings tab requires at least one pairing toggled public',
+          'Stats and Ratings tab shows your breeding statistics'
         ]
       },
       {
         stepNumber: 2,
-        title: 'For Sale / Stud Tab',
-        content: 'The "For Sale / Stud" tab shows two sections: animals you have listed for sale (with price) and animals available for stud services (with fee). Animals appear here when they are both set to Public AND have "Available for Sale" or "Available for Stud" enabled in their Status & Privacy tab. Visitors can see the price/fee, gender, species, and photo at a glance.',
+        title: 'Animals Tab',
+        content: 'The "Animals" tab shows all your owned and public animals, organized by species. Users can filter by name, species, gender or status.',
         tips: [
-          'Animal must be Public AND marked For Sale or For Stud',
-          'Set price/fee or mark as Negotiable',
-          'Tab is hidden if you have no animals listed',
-          'Also feeds into the global Marketplace'
+          'Shows all owned and public animals',
+          'Organized by species',
+          'Search and filter available',
+          'Great for showcasing your breeding stock'
         ]
       },
       {
@@ -1795,7 +2282,7 @@ const ADVANCED_FEATURES_LESSONS = [
         title: 'Info & Adoption Tab',
         content: 'The "Info & Adoption" tab shows your breeding program information as collapsible accordions: About My Program, Adoption Rules, Care Requirements, Health Guarantee, Waitlist Info, Pricing Notes, Contact Preferences, and any custom fields you have added. Fill these fields in Settings → Info & Adoption tab. The tab is hidden if none of the fields are filled.',
         tips: [
-          'Fill fields in Settings → Info & Adoption tab',
+          'Fill fields in Profile Settings → Info & Adoption tab',
           'Only filled sections are shown publicly',
           'Up to 10 custom fields with your own titles',
           'Formatting (bold, italic) is preserved in the public view',
@@ -1804,111 +2291,72 @@ const ADVANCED_FEATURES_LESSONS = [
       },
       {
         stepNumber: 4,
-        title: 'Litters Tab',
-        content: 'The "Litters" tab shows litters you have chosen to share publicly. Toggle any litter public using the Eye / EyeOff icon on each litter card in Litter Management. Public litter cards display the pair name and ID, sire × dam names, a status badge (Planned or Born), relevant dates, a photo strip (if you have uploaded litter photos), and your notes. Litters are grouped into Planned and Past (born).',
+        title: 'Pairings Tab',
+        content: 'The "Pairings" tab shows pairings you have chosen to share publicly. Toggle any pairing public using the Eye / EyeOff icon on each pairing card in Litter Management. Public pairing cards display the pair name and ID, sire × dam names, a status badge (Planned, Mated or Born), relevant dates, and your notes. Pairings are grouped into Planned, Mated and Past (born).',
         tips: [
-          'Toggle per-litter from Litter Management (Eye icon at start of card)',
-          'Planned and born litters appear in separate groups',
-          'Photos and notes are shown if present',
-          'Tab hidden until at least one litter is set public'
+          'Toggle per-pairing from Litter Management (Eye icon at start of card)',
+          'Planned, Mated and Born pairings appear in separate groups',
+          'Notes are shown if present',
+          'Tab hidden until at least one pairing is set public'
         ]
       },
       {
         stepNumber: 5,
-        title: 'Profile Visibility Control',
-        content: 'Use visibility toggles to control what appears on your public profile. You can be selective about what you share while maintaining community connections.',
+        title: 'For Sale / Stud Tab',
+        content: 'The "For Sale / Stud" tab shows two sections: animals you have listed for sale and animals available for stud services. Animals appear here when they are both set to Public AND have "Available for Sale" or "Available for Stud" enabled in their Ownership tab. Visitors can see the optional price/fee, gender, species, and photo at a glance.',
         tips: [
-          'Strategic sharing',
-          'Balance openness and privacy',
-          'Control your information'
+          'Animal must be Public AND marked For Sale or For Stud',
+          'Set price/fee or mark as Negotiable',
+          'Tab is hidden if you have no animals listed',
+          'Also feeds into the "Available Animals" section in the header'
         ]
       },
       {
         stepNumber: 6,
-        title: 'Sharing Animals',
-        content: 'First, open an existing animal from your collection to view its details. Then, click the "Share" button to copy the unique link to your clipboard. You can share this link with other breeders so they can view the full pedigree and contact you about the animal.',
+        title: 'Stats Tab',
+        content: 'The "Stats" tab shows all your breeding statistics: total animals, total breeders, total litters, and more. This is a great way to showcase the scope and success of your breeding program.',
         tips: [
-          'Direct promotion',
-          'Easy distribution',
-          'Professional presentation'
+          'Shows comprehensive breeding statistics',
+          'Includes totals for animals, breeders, litters, and more',
+          'Great for showcasing your program\'s success',
+          'only shows stats for public animals and pairings'
+        ]
+      },
+      {
+        stepNumber: 7,
+        title: 'Ratings Tab',
+        content: 'The "Ratings" tab shows all your breeding ratings and reviews from other breeders. This is a great way to build credibility and showcase the quality of your breeding program. Visiting this tab on another breeder allows you to rate this user.',
+        tips: [
+          'Shows ratings and reviews from other breeders',
+          'Builds credibility in the community',
+          'Encourages high-quality breeding practices',
+          'Allows visitors to rate your program'
+        ]
+      },
+      {
+        stepNumber: 8,
+        title: 'Sharing Profiles',
+        content: 'Click the "Share Profile" button on any profile to open a modal with a QR code and a link to copy the unique link to your clipboard. You can share this link with other breeders so they can view your full profile.',
+        tips: [
+          'Share your profile with other breeders',
+          'Use the unique link or QR code',
+          'Great for social media, forums, or direct sharing'
         ]
       }
     ]
   },
 
   {
-    id: 'af-understanding-coi',
-    title: '3. Understanding Coefficient of Inbreeding (COI)',
-    description: 'Learn about genetic diversity and inbreeding coefficient',
-    tour: 'advanced-features',
-    tourOrder: 3,
-    steps: [
-      {
-        stepNumber: 1,
-        title: 'What is COI?',
-        content: 'The Coefficient of Inbreeding (COI) is a mathematical measure of genetic diversity. It ranges from 0% (no common ancestors) to 100% (completely inbred).',
-        tips: [
-          '0% = maximum diversity',
-          '100% = completely inbred',
-          'Important metric for breeding decisions'
-        ]
-      },
-      {
-        stepNumber: 2,
-        title: 'Why COI Matters',
-        content: 'COI helps breeders understand the genetic relationship between ancestors in a pedigree. Monitoring COI allows breeders to make informed decisions about their breeding programs.',
-        tips: [
-          'Genetics matter',
-          'Track genetic relationships',
-          'Use COI in breeding decisions'
-        ]
-      },
-      {
-        stepNumber: 3,
-        title: 'Viewing COI',
-        content: 'When viewing an animal, the COI percentage is shown on the Overview tab in the Parents section (top right of the Parents header). It reflects that animal\'s genetic diversity based on all known ancestors in the pedigree. The COI is visible to anyone who can view the animal — including the public view.',
-        tips: [
-          'Found on the Overview tab, Parents section (top right)',
-          'Visible in both private and public views',
-          'Check before breeding',
-          'Use in breeding decisions',
-          'Important pedigree metric'
-        ]
-      },
-      {
-        stepNumber: 4,
-        title: 'Predicted COI for Pairings',
-        content: 'When selecting potential breeding pairs, the system can predict the COI of offspring. This helps you understand the genetic relationship before making breeding decisions.',
-        tips: [
-          'Plan ahead',
-          'Compare different pairings',
-          'Preview offspring COI'
-        ]
-      },
-      {
-        stepNumber: 5,
-        title: 'Using COI in Your Program',
-        content: 'COI is one of many tools breeders use to make informed decisions. Consider COI alongside other factors like temperament, conformation, and health testing when planning your breeding program.',
-        tips: [
-          'One factor among many',
-          'Consider COI in every decision',
-          'Use alongside other metrics'
-        ]
-      }
-    ]
-  },
-
-  {
-    id: 'af-marketplace',
-    title: '4. Marketplace',
+    id: 'af-available-animals',
+    title: '4. Available Animals',
     description: 'Browse and discover animals available for sale or stud',
     tour: 'advanced-features',
     tourOrder: 4,
     steps: [
       {
         stepNumber: 1,
-        title: 'Marketplace Overview',
-        content: 'The Marketplace lets you browse animals that breeders have marked as "Available for Sale" or "Available for Stud". Only animals that are both marked as available AND have their public profile enabled will appear here.',
+        title: 'Overview',
+        content: 'This page lets you browse animals that breeders have marked as "Available for Sale" or "Available for Stud". Only animals that are both marked as available AND have their public profile enabled will appear here.',
         tips: [
           'Find animals for sale',
           'Discover stud services',
@@ -1941,7 +2389,7 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 4,
         title: 'Contact Breeders',
-        content: 'When viewing an animal, you can contact the breeder through their public profile to inquire about availability, ask questions, or arrange a purchase or stud service.',
+        content: 'When viewing an animal, you can contact the breeder through the blue message button on the animal card or on their public profile to inquire about availability, ask questions, or arrange a purchase or stud service.',
         tips: [
           'Message breeders directly',
           'Ask about availability',
@@ -1962,7 +2410,7 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 1,
         title: 'Breeders Registry Overview',
-        content: 'The Breeders Registry helps you find active breeders of specific species. Click the star/moon icon in the header to access it. Breeders can mark themselves as "Active Breeder" or "Retired Breeder" for each species in their settings.',
+        content: 'The Breeders Registry helps you find active breeders of specific species. Click the star/moon icon in the header to access it. Breeders can mark themselves as "Active Breeder" or "Retired Breeder" for each species in their profile settings.',
         tips: [
           'Find breeders by species',
           'Connect with the community',
@@ -1973,7 +2421,7 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 2,
         title: 'Setting Your Breeding Status',
-        content: 'In your Settings, you can mark yourself as an "Active Breeder", "Retired Breeder", or "Owner" for each species you keep. Active and Retired breeders appear in the directory. This is optional - you only appear if you choose to.',
+        content: 'In your Profile Settings, you can mark yourself as an "Active Breeder", "Retired Breeder", or "Owner" for each species you keep. Active and Retired breeders appear in the directory. This is optional - you only appear if you choose to.',
         tips: [
           'Choose your status per species',
           'Only opt-in if you want to be listed',
@@ -2006,26 +2454,172 @@ const ADVANCED_FEATURES_LESSONS = [
     ]
   },
 
-  {
-    id: 'af-animal-tree',
-    title: '7. Animal Tree Visualization',
-    description: 'View your animals in an interactive family tree by species',
+ {
+    id: 'af-test-pairing',
+    title: '6. Test Pairing',
+    description: 'Test pairing animals to predict offspring traits and target outcomes',
+    tour: 'advanced-features',
+    tourOrder: 6,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Test Pairing Overview',
+        content: 'The button is located on the Litter Management page. Clicking this button will open the Test Pairing tool that includes a COI calculator and Trait Calculator.',
+        tips: [
+          'Access from Litter Management',]
+      },
+      {
+        stepNumber: 2,
+        title: 'Using the Test Pairing Tool - COI Calculator',
+        content: 'Once opened, the COI Calculator allows you to input parent animals and predict COI for their potential offspring. The COI calculator helps assess genetic diversity.',
+        tips: [
+          'Input parent animals',
+          'Assess genetic diversity'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'What is COI?',
+        content: 'The Coefficient of Inbreeding (COI) is a mathematical measure of genetic diversity. It ranges from 0% (no common ancestors) to 100% (completely inbred).',
+        tips: [
+          '0% = maximum diversity',
+          '100% = completely inbred',
+          'Important metric for breeding decisions'
+        ]
+      },
+      {
+        stepNumber: 4,
+        title: 'Why COI Matters',
+        content: 'COI helps breeders understand the genetic relationship between ancestors in a pedigree. Monitoring COI allows breeders to make informed decisions about their breeding programs.',
+        tips: [
+          'Genetics matter',
+          'Track genetic relationships',
+          'Use COI in breeding decisions'
+        ]
+      },
+      {
+        stepNumber: 5,
+        title: 'Using the Test Pairing Tool - Trait Calculator',
+        content: 'The Trait Calculator helps you plan breeding goals by predicting the likelihood of achieving specific traits in offspring based on parent genetics. Click Trait chips to set them as targets and see the reproductive probabilities within your current breeding animals.',
+        tips: [
+          'Set breeding goals',
+          'Predict trait inheritance',
+          'Plan for desired outcomes',
+          'Only works with species with defined genetic loci in the Genetic Code Builder (e.g. Fancy Mice)'
+        ]
+      }
+        ]
+      },
+
+      {
+    id: 'af-genetics-calculator',
+    title: '7. Genetics Calculator',
+    description: 'Use the genetics calculator to predict offspring traits',
     tour: 'advanced-features',
     tourOrder: 7,
     steps: [
       {
         stepNumber: 1,
-        title: 'Animal Tree Overview',
-        content: 'The Animal Tree provides a visual family tree for each species, showing all your owned animals and their immediate parents. Click the Network icon next to a species name on your My Animals page to view the tree for that species.',
+        title: 'Genetics Calculator Overview',
+        content: 'Click the "Calculator" button in the header to access the Genetics Calculator - a tool for predicting offspring genetic traits. It works with species like Fancy Mice that have defined genetic loci.',
         tips: [
-          'Visual family tree per species',
-          'Shows owned animals + parents',
-          'Interactive drag and zoom',
-          'Organized by generations'
+          'Predict offspring appearance',
+          'Understand inheritance',
+          'Plan trait combinations'
         ]
       },
       {
         stepNumber: 2,
+        title: 'Set Species',
+        content: 'Click the dropdown menu in the header to switch species - Currently only for Fancy Mice & Fancy Rats.',
+        tips: [
+          'Select species for accurate predictions',
+          'Currently only supports Fancy Mice and Fancy Rats',
+          'More species coming in the future'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Selecting Animals',
+        content: 'You can freely enter genes OR Click the "Select Animal" buttons to choose parents from your collection. Their genetic codes are automatically filled in when you select them.',
+        tips: [
+          'Use your animals',
+          'Genetic code auto-fills',
+          'Pre-populate parents'
+        ]
+      },
+      {
+        stepNumber: 4,
+        title: 'Genetic Loci',
+        content: 'Each genetic locus represents a trait. Select the combination for each parent using the dropdowns if you want to free-form calculation without entered parents. The Sire (father) section is blue and the Dam (mother) section is pink.',
+        tips: [
+          'One row per genetic trait',
+          'Select parent genotypes',
+          'System shows options'
+        ]
+      },
+      {
+        stepNumber: 5,
+        title: 'Calculate Offspring',
+        content: 'First, select genetic combinations for both parents (or input "a/a" for both as a test). Then click "Calculate Offspring" to see all possible outcomes.',
+        tips: [
+          'Both parents must have selections',
+          'Button activates when ready',
+          'Results show all possibilities'
+        ]
+      },
+      {
+        stepNumber: 6,
+        title: 'Predicted Offspring',
+        content: 'The "Possible Offspring Outcomes" section shows all possible combinations and their probabilities. Click on combinations to see phenotypes (appearance) and any special notes.',
+        tips: [
+          'See all possibilities',
+          'Probabilities shown',
+          'Plan desired traits'
+        ]
+      },
+      {
+        stepNumber: 7,
+        title: 'Phenotype Information',
+        content: 'Each phenotype (appearance) is displayed with relevant information like colors, markings, and any lethal or problematic combinations highlighted in red.',
+        tips: [
+          'Avoid lethal combinations',
+          'Plan for traits',
+          'Understand genetics'
+        ]
+      }
+    ]
+  },
+
+  {
+    id: 'af-animal-tree',
+    title: '8. Family Tree',
+    description: 'View your animals in an interactive family tree by species',
+    tour: 'advanced-features',
+    tourOrder: 8,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Family Tree Overview',
+        content: 'The Family Tree tab provides a visual tree for each species, showing your account animals and their linked lineage. Open it from the main view tabs in My Animals.',
+        tips: [
+          'Visualize lineage connections',
+          'See parents and offspring',
+          'Great for understanding breeding history'
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'Species-Specific Trees',
+        content: 'The top left shows a species dropdown. Selecting a species displays its family tree.',
+        tips: [
+          'Select species to view',
+          'Only shows animals of that species',
+          'Switch between species easily'
+        ]
+      },
+      {
+        stepNumber: 3,
         title: 'Navigate the Tree',
         content: 'The tree displays animals as nodes connected by lines showing parent-child relationships. You can click and drag to pan around, zoom in/out, and click on any animal to view their full details.',
         tips: [
@@ -2036,308 +2630,39 @@ const ADVANCED_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 3,
+        stepNumber: 4,
         title: 'Search in Tree',
-        content: 'Use the search bar to find specific animals in the tree. When you search, matching animals will be highlighted, making it easy to locate them even in large family trees.',
+        content: 'Use the focus search bar to find specific animals by name or ID. Search recenters to the first match and sets focus, making it easy to find specific animals in large trees.',
         tips: [
-          'Search by animal name',
-          'Matching animals highlighted',
-          'Useful for large collections',
-          'Clear search to reset view'
-        ]
-      },
-      {
-        stepNumber: 4,
-        title: 'Understanding Connections',
-        content: 'Lines connect parents to offspring. Your owned animals are shown prominently, while parents (which may be from other breeders) appear with different styling. This helps you visualize your entire breeding lineage at a glance.',
-        tips: [
-          'Lines show parent-child links',
-          'Owned animals clearly marked',
-          'Parent animals may be view-only',
-          'Great for understanding lineages'
-        ]
-      }
-    ]
-  },
-
-  {
-    id: 'af-genetics-calculator',
-    title: '8. Genetics Calculator',
-    description: 'Use the genetics calculator to predict offspring traits',
-    tour: 'advanced-features',
-    tourOrder: 8,
-    steps: [
-      {
-        stepNumber: 1,
-        title: 'Genetics Calculator Overview',
-        content: 'Click the "Genetics" button in the header to access the Genetics Calculator - a tool for predicting offspring genetic traits. It works with species like Fancy Mice that have defined genetic loci.',
-        tips: [
-          'Predict offspring appearance',
-          'Understand inheritance',
-          'Plan trait combinations'
-        ]
-      },
-      {
-        stepNumber: 2,
-        title: 'Selecting Animals',
-        content: 'Click the "Select Animal" button to choose parents from your collection. Their genetic codes are automatically filled in when you select them.',
-        tips: [
-          'Use your animals',
-          'Genetic code auto-fills',
-          'Pre-populate parents'
-        ]
-      },
-      {
-        stepNumber: 3,
-        title: 'Genetic Loci',
-        content: 'Each genetic locus represents a trait. Select the combination for each parent using the dropdowns. The Sire (father) section is blue and the Dam (mother) section is pink.',
-        tips: [
-          'One row per genetic trait',
-          'Select parent genotypes',
-          'System shows options'
-        ]
-      },
-      {
-        stepNumber: 4,
-        title: 'Calculate Offspring',
-        content: 'First, select genetic combinations for both parents (or input "a/a" for both as a test). Then click "Calculate Offspring" to see all possible outcomes.',
-        tips: [
-          'Both parents must have selections',
-          'Button activates when ready',
-          'Results show all possibilities'
+          'Search by name or ID',
+          'Recenters to first match',
+          'Sets focus for easy navigation'
         ]
       },
       {
         stepNumber: 5,
-        title: 'Predicted Offspring',
-        content: 'The "Possible Offspring Outcomes" section shows all possible combinations and their probabilities. Click on combinations to see phenotypes (appearance) and any special notes.',
+        title: 'Connections and Mobile Access',
+        content: 'Lines connect parents and offspring, with highlights available for ancestors and descendants. On smaller screens, the Family Tree tab is disabled for usability and appears only on larger viewports.',
         tips: [
-          'See all possibilities',
-          'Probabilities shown',
-          'Plan desired traits'
-        ]
-      },
-      {
-        stepNumber: 6,
-        title: 'Phenotype Information',
-        content: 'Each phenotype (appearance) is displayed with relevant information like colors, markings, and any lethal or problematic combinations highlighted in red.',
-        tips: [
-          'Avoid lethal combinations',
-          'Plan for traits',
-          'Understand genetics'
-        ]
-      },
-      {
-        stepNumber: 7,
-        title: 'Tutorial Complete!',
-        content: 'Congratulations! You\'ve completed all CritterTrack tutorials. You now know how to manage your entire breeding program — from adding animals to tracking genetics and finances, daily feeding management in the Management View, Supplies & Inventory, and per-animal Logs. You can always revisit these tutorials from the Help section in the header. Thank you for taking the time to learn all that CritterTrack has to offer!',
-        tips: [
-          'Access tutorials anytime from Help',
-          'Check Management View for daily operations',
-          'Use the Logs tab on any animal for full history',
-          'Happy breeding!'
+          'Lines show parent-child relationships',
+          'Highlights for ancestors and descendants',
+          'Disabled on smaller screens for usability'
         ]
       }
     ]
   },
 
-  {
-    id: 'af-management-view',
-    title: '9. Management View — Daily Operations',
-    description: 'Use the Management View to handle daily feeding, care tasks, enclosures, and reproduction tracking',
+   {
+    id: 'af-animal-logs',
+    title: '9. Animal Logs Tab & Activity Log',
+    description: 'View the full history of feedings, care changes, and field edits on any individual animal',
     tour: 'advanced-features',
     tourOrder: 9,
     steps: [
       {
         stepNumber: 1,
-        title: 'Three Views: My Animals, Collections & Management',
-        content: 'At the top of your animal section you\'ll find three view tabs: My Animals (list), Collections, and Management. Each opens a different way to work with your records. On mobile the tabs show icons only to save space; on larger screens the full labels are shown.',
-        tips: [
-          'My Animals: the main list view with search, filters, and species groups',
-          'Collections: group your animals into custom sets (e.g. "Breeders", "For Sale")',
-          'Management: a live dashboard for daily care, feeding, enclosures, and more',
-          'Tap any tab to switch — your last-used data is retained'
-        ]
-      },
-      {
-        stepNumber: 2,
-        title: 'Collections Tab',
-        content: 'The Collections tab lets you create named groups of animals that cut across species and ownership. Add animals to a collection, mark the collection public or private, and use the search bar to filter animals within it. Great for organising show animals, animals available for rehoming, or any custom grouping you need.',
-        tips: [
-          'Click the + button on any collection card to add animals',
-          'Collections can be made public (visible on your profile) or private',
-          '"Set All Public" / "Set All Private" buttons let you bulk-toggle visibility',
-          'Uncategorised animals appear in a special grey Uncategorised card',
-          'Use the search bar at the top to filter animals across all collections'
-        ]
-      },
-      {
-        stepNumber: 3,
-        title: 'Pin Your Default View',
-        content: 'Each view tab has a small pin icon in its top-right corner. Click the pin on any tab to make it your default — the next time you open the app it will land on that tab automatically. The active default pin is shown in amber; tap another tab\'s pin to change it.',
-        tips: [
-          'Default view is saved to your browser (localStorage)',
-          'Amber filled pin = currently pinned as default',
-          'Faint pin = hover over the tab to reveal it, then click to pin',
-          'Useful if you live in Collections or Management View'
-        ]
-      },
-      {
-        stepNumber: 4,
-        title: 'What Is the Management View?',
-        content: 'The Management View is designed for daily operations. Instead of browsing individual records, it gives you a live dashboard of everything that needs attention today — feeding, care tasks, enclosures, reproduction, medical, and more.',
-        tips: [
-          'Deceased and view-only animals are automatically excluded',
-          'Sections collapse/expand to reduce clutter',
-          'All actions update instantly with no page reload',
-          'Sections are ordered by priority: Enclosures → Feeding → Reproduction → Medical → For Sale → Scheduled Care → Maintenance'
-        ]
-      },
-      {
-        stepNumber: 5,
-        title: 'Feeding Section — Due & Overdue',
-        content: 'The Feeding section shows three groups: Due Today / Overdue (red), Up to Date (green), and No Schedule Set. Animals appear here based on the feeding frequency you set in their Animal Care tab. The badge in the section header counts how many animals need attention.',
-        tips: [
-          'Set feeding frequency on the animal\'s Animal Care tab',
-          'Animals move groups automatically as dates change',
-          'Red badge on section shows total items needing feeding'
-        ]
-      },
-      {
-        stepNumber: 6,
-        title: 'Recording a Feeding',
-        content: 'Click the green "✓ Fed" button next to any animal to record a feeding. A modal opens where you can optionally select which food item from your Supplies was used, enter the quantity fed (which automatically deducts from your stock), and add notes. You can also skip food selection and just mark the animal as fed.',
-        tips: [
-          'Food selection is optional — just click Record Feeding to mark as fed',
-          'Selecting a supply + quantity deducts from your stock automatically',
-          'Uncheck "Deduct from stock" for bulk items tracked by date only',
-          'Feeding events are logged in the animal\'s Logs tab'
-        ]
-      },
-      {
-        stepNumber: 7,
-        title: 'Scheduled Care Tasks',
-        content: 'The Scheduled Care section lists custom recurring tasks you\'ve set on individual animals (like weighing or nail trims). Each has its own due date. Click "✓ Done" to mark a task complete; it resets the countdown based on the task\'s frequency.',
-        tips: [
-          'Tasks are set per-animal in the Animal Care tab',
-          'Each task tracks independently',
-          'Done state is logged in the animal\'s Logs tab'
-        ]
-      },
-      {
-        stepNumber: 8,
-        title: 'Enclosures Section',
-        content: 'The Enclosures section shows all your enclosures with their assigned animals and any cleaning tasks that are due. You can see which animals are in which enclosure, and mark cleaning tasks done directly from Management View. Create enclosures and assign animals to them from within this section.',
-        tips: [
-          'Create enclosures from the Enclosures section add button',
-          'Assign animals to enclosures in their Animal Care tab',
-          'Add cleaning task schedules per enclosure for automatic due tracking'
-        ]
-      },
-      {
-        stepNumber: 9,
-        title: 'Quarantine & Reproduction Tracking',
-        content: 'The Medical / Quarantine section shows animals in quarantine (with a "✓ Release" button to un-quarantine directly) and animals under treatment. The Reproduction section tracks animals In Mating → Pregnant → Nursing; statuses can be advanced inline without opening the full edit form.',
-        tips: [
-          'Set quarantine on an animal via their Status & Privacy tab',
-          'Release button instantly removes quarantine status',
-          'Repro status buttons update immediately — no save needed'
-        ]
-      },
-      {
-        stepNumber: 10,
-        title: 'Activity Log',
-        content: 'Every action you take in Management View — feeding, care tasks, enclosure tasks, quarantine releases, repro changes — is recorded in the Activity Log. Access it via the log button in the Management View header. You can filter by action type, animal, or date range to review what was done and when.',
-        tips: [
-          'Great for accountability and handover to other caretakers',
-          'Filter by action type to find specific events',
-          'Feeding events show which food and quantity was used'
-        ]
-      }
-    ]
-  },
-
-  {
-    id: 'af-supplies-inventory',
-    title: '10. Supplies & Inventory',
-    description: 'Track food, bedding, medication, and feeder animals — with automatic reorder alerts',
-    tour: 'advanced-features',
-    tourOrder: 10,
-    steps: [
-      {
-        stepNumber: 1,
-        title: 'Accessing Supplies & Inventory',
-        content: 'Supplies & Inventory is accessed via the supplies button in the Management View header. It\'s a dedicated screen for tracking everything you use to care for your animals, from food and bedding to medication and feeder animals.',
-        tips: [
-          'Accessible from within Management View',
-          'Separate from the main animal list',
-          'Filter by category: Food, Bedding, Medication, Other'
-        ]
-      },
-      {
-        stepNumber: 2,
-        title: 'Adding a Supply Item',
-        content: 'Click "Add Item" to create a new supply. Give it a name, select a category (Food, Bedding, Medication, Other), and enter the current stock amount and unit (e.g. "15 bags" or "200 grams"). Optionally set a Cost Per Unit for budget tracking.',
-        tips: [
-          'Name: e.g. "Timothy Hay", "Deli Nature Premium", "Adult Mice"',
-          'Units can be anything: bags, grams, kg, pieces',
-          'Cost Per Unit flows into budget expenses on restock'
-        ]
-      },
-      {
-        stepNumber: 3,
-        title: 'Feeder Animal Items',
-        content: 'Food items can be marked as "Feeder Animal" to unlock extra fields: Feeder Type (e.g. Mice, Rats, Crickets) and Feeder Size (e.g. Pinky, Fuzzy, Adult, Large). These details appear in feeding logs when you select the item during a feeding event.',
-        tips: [
-          'Only available for Food category items',
-          'Feeder type and size shown in feeding log entries',
-          'Useful for reptile and amphibian keepers'
-        ]
-      },
-      {
-        stepNumber: 4,
-        title: 'Reorder Thresholds',
-        content: 'Set a "Reorder when stock reaches" threshold so you\'re alerted automatically. When current stock drops to or below this number, the item appears in the Management View\'s maintenance section and the maintenance badge count increases.',
-        tips: [
-          'Good starting point: 1-2 weeks\' worth of supply',
-          'Badge on Management View section changes color when reorder is due',
-          'Restock button lets you quickly add stock and optionally log the cost'
-        ]
-      },
-      {
-        stepNumber: 5,
-        title: 'Schedule-Based Reorder',
-        content: 'For bulk items where stock count isn\'t practical (like hay bales or substrate bags), use schedule-based reordering. Set a "Next Order Date" and an order frequency (e.g. every 2 months). The item will appear in alerts when the next order date arrives, independent of stock count.',
-        tips: [
-          'Great for subscription feeds or regular bulk orders',
-          'Frequency: days, weeks, or months',
-          'Next Order Date auto-advances when you restock'
-        ]
-      },
-      {
-        stepNumber: 6,
-        title: 'Restocking',
-        content: 'Click "Restock" on any item to add to your running stock. Enter the quantity received and optionally the cost paid — this automatically creates a budget expense entry. After restocking, any overdue reorder date is automatically advanced to the next cycle.',
-        tips: [
-          'Restock logs a budget expense automatically',
-          'You can edit or delete transactions later in Budget',
-          'Stock level updates immediately'
-        ]
-      }
-    ]
-  },
-
-  {
-    id: 'af-animal-logs',
-    title: '11. Animal Logs Tab — Per-Animal History',
-    description: 'View the full history of feedings, care changes, and field edits on any individual animal',
-    tour: 'advanced-features',
-    tourOrder: 11,
-    steps: [
-      {
-        stepNumber: 1,
         title: 'What Is the Logs Tab?',
-        content: 'Every animal has a "Logs 📜" tab in their detail view. This is a complete, automatically-generated history of everything that has happened to that animal — feedings recorded, care schedule changes, and any field edits made. You don\'t need to do anything special — it builds itself as you use the app.',
+        content: 'Every animal has a "Logs 📜" button in their detail view. This is a complete, automatically-generated history of everything that has happened to that animal — feedings recorded, care schedule changes, and any field edits made. You don\'t need to do anything special — it builds itself as you use the app.',
         tips: [
           'Find it as the last tab in any animal\'s detail view',
           'Loads lazily — only fetched when you open the tab',
@@ -2372,6 +2697,45 @@ const ADVANCED_FEATURES_LESSONS = [
           'Covers 27+ tracked fields automatically',
           'Old value shown in red strikethrough, new in green',
           'Changes from any edit — including quick management actions'
+        ]
+      },
+      {
+        stepNumber: 5,
+        title: 'Activity Log',
+        content: 'Every action you take in Daily Operations — feeding, care tasks, enclosure tasks, quarantine releases, repro changes — is recorded in the Activity Log. Access it via the activity log button in the My Animals header. You can filter by action type, animal, or date range to review what was done and when.',
+        tips: [
+          'Great for accountability and handover to other caretakers',
+          'Filter by action type to find specific events',
+          'Feeding events show which food and quantity was used'
+        ]
+      }      
+    ]
+  },
+  {
+    id: 'af-donation-platform-support',
+    title: '10. Donation & Platform Support',
+    description: 'Use the donation page to support platform development',
+    tour: 'advanced-features',
+    tourOrder: 10,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Open Donation',
+        content: 'Visit the donation page by clicking the heart icon in the top left corner to support platform development and help us continue improving CritterTrack.',
+        tips: [
+          'Every contribution helps',
+          'Supports ongoing development',
+          'Helps us keep the platform free for all users'
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'Am I obligated to donate?',
+        content: 'No, donating is completely voluntary. However, any contribution you make helps us continue improving CritterTrack and keeping it free for all users. There are ways to purchase items in the shop that also support the platform if you\'d like to contribute without donating directly.',
+        tips: [
+          'Donation is voluntary',
+          'Every bit helps us improve',
+          'Shop purchases also support the platform'
         ]
       }
     ]

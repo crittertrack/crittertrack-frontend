@@ -4179,7 +4179,7 @@ const AnimalList = ({
                                         </option>
                                     ))}
                                     {supplies.filter(s => s.category === 'Food').length === 0 && (
-                                        <option disabled>No food items in supply ? add some in Supplies & Inventory</option>
+                                        <option disabled>No food items in supply — add some in Supplies & Inventory</option>
                                     )}
                                 </select>
                             </div>
@@ -4211,7 +4211,7 @@ const AnimalList = ({
                                                     onChange={e => setFeedingForm(f => ({ ...f, qty: e.target.value }))}
                                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary"
                                                 />
-                                                {s && <p className="text-xs text-gray-400">Stock after: {s.currentStock} ? <span className={stockAfter < 0 ? 'text-red-500 font-medium' : 'text-gray-600'}>{stockAfter} {s.unit}</span></p>}
+                                                {s && <p className="text-xs text-gray-400">Stock after: <span className={stockAfter < 0 ? 'text-red-500 font-medium' : 'text-gray-600'}>{stockAfter} {s.unit}</span></p>}
                                             </div>
                                         )}
                                     </div>
@@ -4233,9 +4233,10 @@ const AnimalList = ({
                             <div className="flex gap-2 pt-1">
                                 <button
                                     onClick={handleFeedingSubmit}
-                                    className="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg text-sm transition"
+                                    className="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg text-sm transition flex items-center justify-center gap-2"
                                 >
-                                    ? Record Feeding
+                                    <Check size={16} className="inline-block" />
+                                    Record Feeding
                                 </button>
                                 <button
                                     onClick={() => setFeedingModal(null)}

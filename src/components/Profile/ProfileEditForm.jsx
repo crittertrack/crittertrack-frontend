@@ -893,7 +893,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none" 
                             disabled={profileLoading}
                         />
-                        {bio && <p className="text-xs text-gray-500 mt-1">{bio.length}/1000 characters ? {bio.split('\n').length}/15 lines</p>}
+                        {bio && <p className="text-xs text-gray-500 mt-1">{bio.length}/1000 characters · {bio.split('\n').length}/15 lines</p>}
 
                         <select value={country} onChange={(e) => { setCountry(e.target.value); if (e.target.value !== 'US') setUsState(''); }}
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading}>
@@ -1077,6 +1077,16 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             </div>
             </>}
 
+            {settingsTab === 'Breeding Status' && <>
+            <BreederDirectorySettings
+                authToken={authToken}
+                API_BASE_URL={API_BASE_URL}
+                showModalMessage={showModalMessage}
+                userProfile={userProfile}
+            />
+            </>}
+            
+
             {settingsTab === 'info-adoption' && <>
             <form onSubmit={handleBreederInfoSave} className="space-y-4 p-4 sm:p-6 border rounded-lg bg-gray-50">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Info &amp; Adoption</h3>
@@ -1183,15 +1193,6 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     </button>
                 </div>
             </form>
-            </>}
-
-            {settingsTab === 'directory' && <>
-            <BreederDirectorySettings
-                authToken={authToken}
-                API_BASE_URL={API_BASE_URL}
-                showModalMessage={showModalMessage}
-                userProfile={userProfile}
-            />
             </>}
 
             {settingsTab === 'ratings' && <>
