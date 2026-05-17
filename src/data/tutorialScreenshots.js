@@ -72,16 +72,19 @@ export const TUTORIAL_SCREENSHOTS = {
    
   'gs-pedigree-parent-selection': {
     1: 'pedigree-tab.png', // Step 1: Open Family Tab
-    2: 'parents-and-siblings.png', // Step 2: Parents and Siblings
-    3: 'litters-and-offspring.png', // Step 3: Litters and Offspring
-  },
-
-   'gs-family-tab-overview': {
-    1: 'open-family-tab.png', // Step 1: Lineage Tab
     2: 'assign-sire-father.png', // Step 2: Select Sire (Father)
     3: 'parent-search-system.png', // Step 3: Parent Search System
     4: 'close-sire-selector.png', // Step 4: Close Sire Selector
   },
+
+   'gs-family-tab-overview': {
+    1: 'open-family-tab.png', // Step 1: Lineage Tab
+    2: 'parents-and-siblings.png', // Step 2: Parents and Siblings
+    3: 'litters-and-offspring.png', // Step 3: Litters and Offspring
+  },
+
+  parents-and-siblings.png
+  litters-and-offspring.png
   
   'gs-fertility-information': {
     1: 'fertility-tab.png', // Step 1: Breeding Tab
