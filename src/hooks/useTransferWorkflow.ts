@@ -143,21 +143,20 @@ export function useTransferWorkflow(
             }
 
             try {
-                // Prepare transfer payload
+                // For the standalone version, transfers are recorded as unified budget transactions
                 const payload = {
-                    animalId: animal._id,
-                    animalId_public: animal.id_public,
-                    recipientUserId: recipientUserId,
-                    price: price ? parseFloat(String(price)) : 0,
+                    animalId: animal._id || animal.id_public,
+                    recipientId: recipientUserId,
+                    amount: price ? parseFloat(String(price)) : 0,
                     notes: notes || '',
-                    transactionType: 'transfer'
+                    type: parseFloat(String(price)) > 0 ? 'sale' : 'transfer'
                 };
 
                 console.log('[TRANSFER] Submitting transfer:', payload);
 
-                // On the new standalone, transfers are handled via a dedicated root endpoint
+                // Use the unified budgeting endpoint which handles ownership logic
                 const response = await axios.post(
-                    `${API_BASE_URL}/transfers`,
+                    `${API_BASE_URL}/budget/transactions`,
                     payload,
                     {
                         headers: { Authorization: `Bearer ${authToken}` }
