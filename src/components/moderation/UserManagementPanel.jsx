@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
     Shield, AlertTriangle, Eye, Search, Filter, X, Ban, Clock, CheckCircle, UserCog, RefreshCw,
     ChevronUp, ChevronDown, Users, Calendar, MessageSquare, PawPrint, Activity, LogIn
@@ -12,7 +12,6 @@ const API_URL = process.env.REACT_APP_API_URL || '/api';
 const UserManagementPanel = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [fetching, setFetching] = useState(false);
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
@@ -45,8 +44,7 @@ const UserManagementPanel = () => {
 
     const fetchUsers = async () => {
         try {
-            if (users.length === 0) setLoading(true);
-            setFetching(true);
+            setLoading(true);
             const token = localStorage.getItem('authToken');
             const response = await axios.get(`${API_URL}/admin/users/moderation-overview`, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -59,7 +57,6 @@ const UserManagementPanel = () => {
             console.error('Error fetching users:', err);
         } finally {
             setLoading(false);
-            setFetching(false);
         }
     };
 
@@ -70,18 +67,16 @@ const UserManagementPanel = () => {
             if (type === 'monthly') {
                 body.monthlyDonationActive = !badgeUser?.monthlyDonationActive;
             }
-            await withRetry(async () => {
-                const response = await axios.patch(
-                    `${API_URL}/admin/users/${userId}/donation-badge`,
-                    body,
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
-                await fetchUsers();
-                // Update badgeUser with the latest user data from response
-                if (response.data && response.data.user) {
-                    setBadgeUser(response.data.user);
-                }
-            });
+            const response = await axios.patch(
+                `${API_URL}/admin/users/${userId}/donation-badge`,
+                body,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            await fetchUsers();
+            // Update badgeUser with the latest user data from response
+            if (response.data && response.data.user) {
+                setBadgeUser(response.data.user);
+            }
         } catch (err) {
             console.error('Error updating donation badge:', err);
         }
@@ -258,7 +253,7 @@ const UserManagementPanel = () => {
             <ChevronDown size={14} className="sort-icon" />;
     };
 
-    const filteredUsers = useMemo(() => users
+    const filteredUsers = users
         .filter(user => {
             const matchesSearch = !searchTerm || 
                 user.personalName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -299,8 +294,7 @@ const UserManagementPanel = () => {
             if (aVal < bVal) return direction === 'asc' ? -1 : 1;
             if (aVal > bVal) return direction === 'asc' ? 1 : -1;
             return 0;
-                }), [users, searchTerm, statusFilter, roleFilter, sortConfig]);
-
+        });
 
     const openActionModal = (user, type) => {
         setSelectedUser(user);
@@ -319,13 +313,10 @@ const UserManagementPanel = () => {
     return (
         <div className="user-management-panel">
             <div className="panel-header">
-                <div className="header-with-status" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <h2 style={{ margin: 0 }}>
-                        <Shield size={24} />
-                        User Management
-                    </h2>
-                    {fetching && <RefreshCw size={16} className="animate-spin text-gray-400" />}
-                </div>
+                <h2>
+                    <Shield size={24} />
+                    User Management
+                </h2>
                 <p className="panel-subtitle">
                     Monitor and manage user accounts, warnings, suspensions, and bans
                 </p>
@@ -526,7 +517,7 @@ const UserManagementPanel = () => {
                     </tbody>
                 </table>
 
-                {!loading && filteredUsers.length === 0 && (
+                {filteredUsers.length === 0 && (
                     <div className="no-results">
                         No users found matching your filters.
                     </div>
@@ -839,7 +830,7 @@ const UserHistoryModal = ({ user, onClose, onLiftWarning, onRefresh }) => {
     };
 
     // Build unified timeline from all events
-    const timeline = useMemo(() => {
+    const buildTimeline = () => {
         const events = [];
         
         // Add account creation
@@ -908,8 +899,10 @@ const UserHistoryModal = ({ user, onClose, onLiftWarning, onRefresh }) => {
         });
 
         // Sort by date descending
-        return events.sort((a, b) => b.date.getTime() - a.date.getTime());
-    }, [localUser]);
+        return events.sort((a, b) => b.date - a.date);
+    };
+
+    const timeline = buildTimeline();
 
     const getTimelineIcon = (event) => {
         switch (event.icon) {
