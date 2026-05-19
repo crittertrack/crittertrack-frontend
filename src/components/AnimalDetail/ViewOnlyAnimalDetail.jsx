@@ -1,4 +1,4 @@
-﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -12,7 +12,20 @@ import { getSpeciesLatinName } from '../../utils/speciesUtils';
 import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';
 import { QRModal } from '../PublicProfile/PublicProfileView';
 import ReportButton from '../ReportButton';
-const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onViewProfile, onViewAnimal, authToken, setModCurrentContext, setShowImageModal, setEnlargedImageUrl, initialTab = 1 }) => {
+const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BASE_URL, onViewProfile, onViewAnimal, authToken, setModCurrentContext, setShowImageModal, setEnlargedImageUrl, initialTab = 1 }) => {
+    // Always fetch full animal record by id_public
+    const [fullAnimal, setFullAnimal] = useState(animalProp);
+    useEffect(() => {
+        if (!animalProp?.id_public) return;
+        let cancelled = false;
+        axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(animalProp.id_public)}`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(res => { if (!cancelled) setFullAnimal(res.data); })
+            .catch(() => {});
+        return () => { cancelled = true; };
+    }, [animalProp?.id_public, API_BASE_URL, authToken]);
+    // Use fullAnimal for all rendering below
+    const animal = fullAnimal;
+
     const [breederInfo, setBreederInfo] = useState(null);
     const [ownerInfo, setOwnerInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
@@ -385,30 +398,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
         fetchCOI();
     }, [animal?.id_public, animal?.fatherId_public, animal?.sireId_public, animal?.motherId_public, animal?.damId_public, API_BASE_URL]);
     
-    const getRelLabel = useCallback((groupLabel, rel) => {
-        const isMale = rel.gender === 'Male';
-        const isFemale = rel.gender === 'Female';
-        const side = rel._side === 'paternal' ? 'Paternal ' : rel._side === 'maternal' ? 'Maternal ' : '';
-        switch (groupLabel) {
-            case 'Parents':
-                if (rel.id_public === animal?.sireId_public) return 'Sire (Father)';
-                if (rel.id_public === animal?.damId_public) return 'Dam (Mother)';
-                return isMale ? 'Sire (Father)' : isFemale ? 'Dam (Mother)' : 'Parent';
-            case 'Siblings':
-                return isMale ? 'Brother' : isFemale ? 'Sister' : 'Sibling';
-            case 'Nieces & Nephews':
-                return isMale ? 'Nephew' : isFemale ? 'Niece' : 'Niece / Nephew';
-            case 'Aunts & Uncles':
-                return isMale ? `${side}Uncle` : isFemale ? `${side}Aunt` : `${side}Aunt / Uncle`;
-            case 'Grandparents':
-                return isMale ? `${side}Grandfather` : isFemale ? `${side}Grandmother` : `${side}Grandparent`;
-            case 'Great-Grandparents':
-                return isMale ? `${side}Great-Grandfather` : isFemale ? `${side}Great-Grandmother` : `${side}Great-Grandparent`;
-            case 'Cousins': return 'Cousin';
-            default: return groupLabel;
-        }
-    }, [animal?.sireId_public, animal?.damId_public]);
-
     if (!animal) return null;
 
     // All sections are now publicly visible if the animal is public
@@ -420,30 +409,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
         detailViewTab,
         hasRemarks: !!animal.remarks,
         hasGeneticCode: !!animal.geneticCode
-    });
-
-    const allRelGroups = useMemo(() => {
-        const groupDefs = [
-            { key: 'parents', label: 'Parents' },
-            { key: 'siblings', label: 'Siblings' },
-            { key: 'nephewsNieces', label: 'Nieces & Nephews' },
-            { key: 'auntsUncles', label: 'Aunts & Uncles' },
-            { key: 'grandparents', label: 'Grandparents' },
-            { key: 'greatGrandparents', label: 'Great-Grandparents' },
-            { key: 'cousins', label: 'Cousins' },
-        ];
-        const seenAcrossGroups = new Set();
-        return groupDefs.map(({ key, label }) => {
-            const items = [];
-            if (publicRelationships) {
-                // Ensure publicRelationships[key] is an array before filtering/iterating
-                const relationsForKey = Array.isArray(publicRelationships[key]) ? publicRelationships[key] : [];
-                relationsForKey.filter(a => a.id_public !== animal?.id_public).forEach(rel => {
-                    if (!seenAcrossGroups.has(rel.id_public)) { seenAcrossGroups.add(rel.id_public); items.push({ rel, relLabel: getRelLabel(label, rel) }); }
-                });
-            }
-            return { label, items };
-        }).filter(g => g.items.length > 0);
     });
 
     return (
@@ -540,7 +505,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                     <div className="flex flex-wrap gap-1 sm:gap-2 px-0.5 sm:px-4 py-2 justify-center">
                         {[
                             { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
-                            { id: 2, label: 'Ownership', icon: Lock, color: 'text-slate-500' },
+                            { id: 2, label: 'Status', icon: Lock, color: 'text-slate-500' },
                             { id: 3, label: 'Identification', icon: Tag, color: 'text-amber-500' },
                             { id: 4, label: 'Appearance', icon: Palette, color: 'text-pink-500' },
                             { id: 5, label: 'Pedigree', icon: Dna, color: 'text-orange-500' },
@@ -742,7 +707,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                         </div>
                     )}
 
-                    {/* Tab 2: Ownership */}
+                    {/* Tab 2: Status & Privacy */}
                     {detailViewTab === 2 && (
                         <div className="space-y-6">
                             {/* 1st Section: Ownership */}
@@ -1009,7 +974,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                 {Object.values(publicRelationships).reduce((s, arr) => s + (Array.isArray(arr) ? arr.length : 0), 0)} relatives
                                             </span>
                                         </h3>
-                                        {/* The original code had a missing closing tag for h3, which is now fixed. */}
                                         {relInsightsOpen
                                             ? <ChevronUp size={18} className="text-blue-400 flex-shrink-0" />
                                             : <ChevronDown size={18} className="text-blue-400 flex-shrink-0" />}
@@ -1028,11 +992,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                 { key: 'cousins',           label: 'Cousins' },
                                             ].map(({ key, label }) => {
                                                 const group = (publicRelationships[key] || []).filter(a => a.id_public !== animal?.id_public && !_seenRel.has(a.id_public));
-                                                // Ensure publicRelationships[key] is an array before filtering/iterating
-                                                const relationsForKey = Array.isArray(publicRelationships[key]) ? publicRelationships[key] : [];
-                                                relationsForKey.filter(a => a.id_public !== animal?.id_public && !_seenRel.has(a.id_public)).forEach(rel => {
-                                                    if (!seenAcrossGroups.has(rel.id_public)) { seenAcrossGroups.add(rel.id_public); items.push({ rel, relLabel: getRelLabel(label, rel) }); }
-                                                });
+                                                group.forEach(a => _seenRel.add(a.id_public));
                                                 if (!group.length) return null;
                                                 return (
                                                     <div key={key}>
@@ -1719,16 +1679,28 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                         <div className="space-y-6">
                             {/* 1st Section: Nutrition */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><UtensilsCrossed size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Nutrition</h3>
+                                <button type="button" onClick={() => setCollapsedCareSections(p => ({...p, nutrition: !p.nutrition}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><UtensilsCrossed size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Nutrition</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedCareSections.nutrition ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                </button>
+                                {!collapsedCareSections.nutrition && (
+                                <div className="mt-4">
                                 {animal.dietType && <div><strong className="text-sm">Diet Type:</strong> <p className="text-sm mt-1">{animal.dietType}</p></div>}
                                 {animal.feedingSchedule && <div><strong className="text-sm">Feeding Schedule:</strong> <p className="text-sm mt-1">{animal.feedingSchedule}</p></div>}
                                 {animal.supplements && <div><strong className="text-sm">Supplements:</strong> <p className="text-sm mt-1">{animal.supplements}</p></div>}
                                 {!animal.dietType && !animal.feedingSchedule && !animal.supplements && <p className="text-sm text-gray-600"></p>}
+                                </div>
+                                )}
                             </div>
 
                             {/* 2nd Section: Housing & Enclosure */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Housing & Enclosure</h3>
+                                <button type="button" onClick={() => setCollapsedCareSections(p => ({...p, housingEnclosure: !p.housingEnclosure}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Housing & Enclosure</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedCareSections.housingEnclosure ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                </button>
+                                {!collapsedCareSections.housingEnclosure && (
+                                <div className="mt-4">
                                 {animal.housingType && <div><strong className="text-sm">{getLabel('housingType', 'Housing Type')}:</strong> <p className="text-sm mt-1">{animal.housingType}</p></div>}
                                 {animal.bedding && <div><strong className="text-sm">{getLabel('bedding', 'Bedding')}:</strong> <p className="text-sm mt-1">{animal.bedding}</p></div>}
                                 {animal.enrichment && <div><strong className="text-sm">Enrichment:</strong> <p className="text-sm mt-1">{animal.enrichment}</p></div>}
@@ -1749,11 +1721,18 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                         </div>
                                     </div>
                                 )}
+                                </div>
+                                )}
                             </div>
 
                             {/* 3rd Section: Animal Care */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Droplets size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Animal Care</h3>
+                                <button type="button" onClick={() => setCollapsedCareSections(p => ({...p, animalCare: !p.animalCare}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Droplets size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Animal Care</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedCareSections.animalCare ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                </button>
+                                {!collapsedCareSections.animalCare && (
+                                <div className="mt-4">
                                 {animal.animalCareTasks && animal.animalCareTasks.length > 0 && (
                                     <div>
                                         <h4 className="text-sm font-semibold text-gray-700 mb-2">Animal Care Tasks</h4>
@@ -1775,16 +1754,25 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     {animal.socializationNotes && <div><strong className="text-sm">Socialization Notes:</strong> <strong className="text-sm whitespace-pre-wrap">{animal.socializationNotes}</strong></div>}
                                     {animal.specialCareRequirements && <div><strong className="text-sm">Special Care Requirements:</strong> <strong className="text-sm whitespace-pre-wrap">{animal.specialCareRequirements}</strong></div>}
                                 </div>
+                                </div>
+                                )}
                             </div>
 
                             {/* 4th Section: Environment */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700"><Thermometer size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Environment</h3>
+                                <button type="button" onClick={() => setCollapsedCareSections(p => ({...p, environment: !p.environment}))} className="w-full flex items-center justify-between text-left group">
+                                    <h3 className="text-lg font-semibold text-gray-700"><Thermometer size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Environment</h3>
+                                    <span className="text-gray-400 group-hover:text-gray-600">{collapsedCareSections.environment ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                </button>
+                                {!collapsedCareSections.environment && (
+                                <div className="mt-4">
                                 {animal.temperatureRange && <div><strong className="text-sm">Temperature Range:</strong> <p className="text-sm mt-1">{animal.temperatureRange}</p></div>}
                                 {animal.humidity && <div><strong className="text-sm">{getLabel('humidity', 'Humidity')}:</strong> <p className="text-sm mt-1">{animal.humidity}</p></div>}
                                 {animal.lighting && <div><strong className="text-sm">Lighting:</strong> <p className="text-sm mt-1">{animal.lighting}</p></div>}
                                 {animal.noise && <div><strong className="text-sm">{getLabel('noise', 'Noise Level')}:</strong> <p className="text-sm mt-1">{animal.noise}</p></div>}
                                 {!animal.temperatureRange && !animal.humidity && !animal.lighting && !animal.noise && <p className="text-sm text-gray-600"></p>}
+                                </div>
+                                )}
                             </div>
 
                             {/* 5th Section: Exercise & Grooming */}
@@ -1803,7 +1791,12 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
                                 return (egFields.length > 0 || trainFlags.length > 0) && (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700"><Scissors size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Grooming</h3>
+                                        <button type="button" onClick={() => setCollapsedCareSections(p => ({...p, grooming: !p.grooming}))} className="w-full flex items-center justify-between text-left group">
+                                            <h3 className="text-lg font-semibold text-gray-700"><Scissors size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Grooming</h3>
+                                            <span className="text-gray-400 group-hover:text-gray-600">{collapsedCareSections.grooming ? <ChevronRight size={16} className="flex-shrink-0" /> : <ChevronDown size={16} className="flex-shrink-0" />}</span>
+                                        </button>
+                                        {!collapsedCareSections.grooming && (
+                                        <div className="mt-4">
                                         {egFields.length > 0 && (
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                                 {egFields.map(f => (
@@ -1817,6 +1810,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                     <span key={f.key} className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">&#x2713; {getLabel(f.key, f.label)}</span>
                                                 ))}
                                             </div>
+                                        )}
+                                        </div>
                                         )}
                                     </div>
                                 );
