@@ -25,7 +25,7 @@ export function useTransferWorkflow(
     const [showTransferModal, setShowTransferModal] = useState(false);
     const [transferAnimal, setTransferAnimal] = useState(null);
     const [preSelectedTransferAnimal, setPreSelectedTransferAnimal] = useState(null);
-    const [preSelectedTransactionType, setPreSelectedTransactionType] = useState(null);
+    const [preSelectedTransactionType, setPreSelectedTransactionType] = useState<string | null>(null);
 
     // ========== BUDGET/TRANSACTION PANEL ==========
     const [budgetModalOpen, setBudgetModalOpen] = useState(false);
@@ -81,8 +81,25 @@ export function useTransferWorkflow(
     /**
      * Select a user as transfer recipient
      */
-    const handleSelectTransferUser = useCallback((user) => {
+    const handleSelectTransferUser = useCallback((user: any) => {
         setTransferSelectedUser(user);
+    }, []);
+
+    /**
+     * Close transfer workflow and reset state
+     */
+    const handleCloseTransferWorkflow = useCallback(() => {
+        setShowTransferModal(false);
+        setBudgetModalOpen(false);
+        setTransferAnimal(null);
+        setTransferUserQuery('');
+        setTransferUserResults([]);
+        setTransferSelectedUser(null);
+        setTransferSearchPerformed(false);
+        setTransferPrice('');
+        setTransferNotes('');
+        setPreSelectedTransferAnimal(null);
+        setPreSelectedTransactionType(null);
     }, []);
 
     /**
@@ -90,7 +107,7 @@ export function useTransferWorkflow(
      * Sends transfer/sale to backend
      */
     const handleSubmitTransfer = useCallback(
-        async (transferData) => {
+        async (transferData: any) => {
             // Use data passed from form if available, otherwise fall back to hook state (auto-fill)
             const animal = transferData?.animal || transferAnimal;
             const selectedUser = transferData?.selectedUser || transferSelectedUser;
@@ -163,7 +180,7 @@ export function useTransferWorkflow(
                 window.dispatchEvent(new Event('animals-changed'));
 
                 return response.data;
-            } catch (error) {
+            } catch (error: any) {
                 console.error('[TRANSFER] Transfer failed:', error);
                 const errorMessage =
                     error.response?.data?.message || error.message || 'Transfer failed. Please try again.';
@@ -184,27 +201,10 @@ export function useTransferWorkflow(
     );
 
     /**
-     * Close transfer workflow and reset state
-     */
-    const handleCloseTransferWorkflow = useCallback(() => {
-        setShowTransferModal(false);
-        setBudgetModalOpen(false);
-        setTransferAnimal(null);
-        setTransferUserQuery('');
-        setTransferUserResults([]);
-        setTransferSelectedUser(null);
-        setTransferSearchPerformed(false);
-        setTransferPrice('');
-        setTransferNotes('');
-        setPreSelectedTransferAnimal(null);
-        setPreSelectedTransactionType(null);
-    }, []);
-
-    /**
      * Open transfer modal with pre-selected animal
      * Called from budget view or animal detail
      */
-    const handleOpenTransferWithAnimal = useCallback((animal, transactionType = 'transfer') => {
+    const handleOpenTransferWithAnimal = useCallback((animal: any, transactionType = 'transfer') => {
         setPreSelectedTransferAnimal(animal);
         setPreSelectedTransactionType(transactionType);
         setTransferAnimal(animal);
