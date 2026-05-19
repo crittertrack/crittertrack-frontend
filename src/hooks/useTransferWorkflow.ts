@@ -114,9 +114,12 @@ export function useTransferWorkflow(
             const price = transferData?.price ?? transferPrice;
             const notes = transferData?.notes ?? transferNotes;
 
+            // Ensure we have a recipient user object
+            const resolvedUser = transferData?.selectedUser || transferSelectedUser;
+
             console.log('[handleSubmitTransfer] Received transferData:', transferData);
             console.log('[handleSubmitTransfer] Resolved animal:', animal);
-            console.log('[handleSubmitTransfer] Resolved selectedUser:', selectedUser);
+            console.log('[handleSubmitTransfer] Resolved selectedUser:', resolvedUser);
             console.log('[handleSubmitTransfer] Resolved price:', price);
             console.log('[handleSubmitTransfer] Resolved notes:', notes);
 
@@ -124,15 +127,17 @@ export function useTransferWorkflow(
                 showModalMessage('Missing Information', 'Please select an animal for the transfer.');
                 return;
             }
-            if (!selectedUser) {
+            if (!resolvedUser) {
                 showModalMessage('Missing Information', 'Please select a recipient for the transfer.');
                 return;
             }
 
             // Ensure recipientUserId is resolved
-            const recipientUserId = selectedUser.userId_backend || selectedUser.id_public || selectedUser._id;
+            const recipientUserId = resolvedUser.userId_backend || resolvedUser.id_public || resolvedUser._id;
+            console.log('[handleSubmitTransfer] Resolved recipientUserId:', recipientUserId);
+
             if (!recipientUserId) {
-                console.error('[handleSubmitTransfer] Selected user has no identifiable ID:', selectedUser);
+                console.error('[handleSubmitTransfer] Selected user has no identifiable ID:', resolvedUser);
                 showModalMessage('Error', 'Selected recipient user has no valid ID. Please select another user.');
                 return;
             }
@@ -140,6 +145,7 @@ export function useTransferWorkflow(
             try {
                 // Prepare transfer payload
                 const payload = {
+                    animalId: animal._id,
                     animalId_public: animal.id_public,
                     recipientUserId: recipientUserId,
                     price: price ? parseFloat(String(price)) : 0,
@@ -149,9 +155,12 @@ export function useTransferWorkflow(
 
                 console.log('[TRANSFER] Submitting transfer:', payload);
 
+                // Prefer internal _id for the URL path as mutation routes typically require the DB identifier
+                const targetId = animal._id || animal.id_public;
+
                 // Submit to backend
                 const response = await axios.post(
-                    `${API_BASE_URL}/animals/${animal.id_public}/transfer`,
+                    `${API_BASE_URL}/animals/${targetId}/transfer`,
                     payload,
                     {
                         headers: { Authorization: `Bearer ${authToken}` }
@@ -174,7 +183,7 @@ export function useTransferWorkflow(
                 // Emit event for external components to sync
                 window.dispatchEvent(
                     new CustomEvent('animal-transferred', {
-                        detail: { animalId: animal.id_public, recipientId: selectedUser.id_public }
+                        detail: { animalId: animal.id_public, recipientId: resolvedUser.id_public || recipientUserId }
                     })
                 );
                 window.dispatchEvent(new Event('animals-changed'));
