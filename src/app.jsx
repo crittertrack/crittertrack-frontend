@@ -62,7 +62,7 @@ import { OffspringSection } from './components/AnimalDetail/utils';
 import { ConflictResolutionModal, LitterSyncConflictModal } from './components/Modals/LitterConflictModals';
 import { ParentSearchModal, LocalAnimalSearchModal, UserSearchModal } from './components/Modals/SearchModals';
 import { SpeciesPickerModal, SpeciesManager, SpeciesSelector } from './components/Modals/SpeciesModals';
-import TransferOwnershipModal from './TransferOwnershipModal'; 
+import TransferOwnershipModal from './components/Modals/TransferOwnershipModal'; 
 import { CommunityGeneticsModal } from './components/Modals/CommunityGeneticsModal';
 import BetaFeedbackModal from './components/Modals/BetaFeedbackModal';
 import SurveyModal from './components/Modals/SurveyModal';
