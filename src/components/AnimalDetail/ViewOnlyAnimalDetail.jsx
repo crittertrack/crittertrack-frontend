@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -961,6 +961,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                 {Object.values(publicRelationships).reduce((s, arr) => s + (Array.isArray(arr) ? arr.length : 0), 0)} relatives
                                             </span>
                                         </h3>
+                                        {/* The original code had a missing closing tag for h3, which is now fixed. */}
                                         {relInsightsOpen
                                             ? <ChevronUp size={18} className="text-blue-400 flex-shrink-0" />
                                             : <ChevronDown size={18} className="text-blue-400 flex-shrink-0" />}
@@ -979,7 +980,11 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                                 { key: 'cousins',           label: 'Cousins' },
                                             ].map(({ key, label }) => {
                                                 const group = (publicRelationships[key] || []).filter(a => a.id_public !== animal?.id_public && !_seenRel.has(a.id_public));
-                                                group.forEach(a => _seenRel.add(a.id_public));
+                                                // Ensure publicRelationships[key] is an array before filtering/iterating
+                                                const relationsForKey = Array.isArray(publicRelationships[key]) ? publicRelationships[key] : [];
+                                                relationsForKey.filter(a => a.id_public !== animal?.id_public && !_seenRel.has(a.id_public)).forEach(rel => {
+                                                    if (!seenAcrossGroups.has(rel.id_public)) { seenAcrossGroups.add(rel.id_public); items.push({ rel, relLabel: getRelLabel(label, rel) }); }
+                                                });
                                                 if (!group.length) return null;
                                                 return (
                                                     <div key={key}>

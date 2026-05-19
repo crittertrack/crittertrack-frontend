@@ -169,7 +169,9 @@ export const FamilyTabContent = ({ animal, API_BASE_URL, authToken, onViewAnimal
                 if (!seenAcrossGroups.has(rel.id_public)) { seenAcrossGroups.add(rel.id_public); items.push({ rel, relLabel }); }
             });
             if (globalRels) {
-                (globalRels[key] || []).filter(a => a.id_public !== animal?.id_public).forEach(rel => {
+                // Ensure globalRels[key] is an array before filtering/iterating
+                const globalRelationsForKey = Array.isArray(globalRels[key]) ? globalRels[key] : [];
+                globalRelationsForKey.filter(a => a.id_public !== animal?.id_public).forEach(rel => {
                     if (!seenAcrossGroups.has(rel.id_public)) { seenAcrossGroups.add(rel.id_public); items.push({ rel, relLabel: getRelLabel(label, rel) }); }
                 });
             }
