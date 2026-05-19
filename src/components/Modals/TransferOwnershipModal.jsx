@@ -137,7 +137,7 @@ const TransferOwnershipModal = ({
                         </label>
                         <DatePicker
                             value={formData.date}
-                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                            // Date is auto-set to today and cannot be changed by the user
                             maxDate={new Date()}
                             required
                             readOnly // Make the date picker read-only
