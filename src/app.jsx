@@ -929,11 +929,11 @@ const App = () => {
 
     // Clear pre-selected transfer data when leaving budget view
     useEffect(() => {
-        if (currentView !== 'budget') {
+        if (currentView !== 'budget' && !showTransferModal) {
             setPreSelectedTransferAnimal(null);
             setPreSelectedTransactionType(null);
         }
-    }, [currentView]);
+    }, [currentView, showTransferModal]);
 
     // Auth token effect - set up axios defaults
     useEffect(() => {
@@ -2540,7 +2540,12 @@ const App = () => {
                     animalSaleMode="transfer"
                     // Props from useTransferWorkflow for the modal's internal state/logic
                     preSelectedTransactionType={preSelectedTransactionType}
+                    setPreSelectedTransactionType={setPreSelectedTransactionType}
                     preSelectedTransferAnimal={preSelectedTransferAnimal}
+                    transferPrice={transferPrice}
+                    setTransferPrice={setTransferPrice}
+                    transferNotes={transferNotes}
+                    setTransferNotes={setTransferNotes}
                     transferUserQuery={transferUserQuery}
                     setTransferUserQuery={setTransferUserQuery}
                     transferUserResults={transferUserResults}

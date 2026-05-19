@@ -40,6 +40,10 @@ const TransferOwnershipModal = ({
             // Map budgeting types to transfer types if necessary
             const type = preSelectedTransactionType.includes('sale') ? 'sale' : 'transfer';
             // Note: If the hook handles this, we just ensure it's set
+            // Ensure the state in the hook is updated with the mapped type
+            if (type !== preSelectedTransactionType && setPreSelectedTransactionType) {
+                setPreSelectedTransactionType(type);
+            }
         }
     }, [preSelectedTransactionType]);
 
