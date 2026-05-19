@@ -155,12 +155,9 @@ export function useTransferWorkflow(
 
                 console.log('[TRANSFER] Submitting transfer:', payload);
 
-                // Prefer internal _id for the URL path as mutation routes typically require the DB identifier
-                const targetId = animal._id || animal.id_public;
-
-                // Submit to backend
+                // On the new standalone, transfers are handled via a dedicated root endpoint
                 const response = await axios.post(
-                    `${API_BASE_URL}/animals/${targetId}/transfer`,
+                    `${API_BASE_URL}/transfers`,
                     payload,
                     {
                         headers: { Authorization: `Bearer ${authToken}` }
