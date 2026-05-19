@@ -113,7 +113,7 @@ export function useTransferWorkflow(
             const selectedUser = transferData?.selectedUser || transferSelectedUser;
             const price = transferData?.price ?? transferPrice;
             const notes = transferData?.notes ?? transferNotes;
-            const date = new Date().toISOString(); // Always auto-assign current date for transfers
+            const date = new Date().toISOString().split('T')[0]; // Use YYYY-MM-DD format for budget entries
 
             // Ensure we have a recipient user object
             const resolvedUser = transferData?.selectedUser || transferSelectedUser;
@@ -151,13 +151,17 @@ export function useTransferWorkflow(
                 // The 'mode: "transfer"' flag signals the backend to also handle ownership change.
                 const payload = {
                     animalId: animal._id || animal.id_public,
+                    animalId_public: animal.id_public,
                     animalName: animal.name,
+                    recipientId: recipientUserId,
                     buyerUserId: recipientUserId,
+                    amount: price ? parseFloat(String(price)) : 0,
                     price: price ? parseFloat(String(price)) : 0,
-                    date: date, // Use the resolved date
+                    date: date,
                     notes: notes || '',
                     type: 'sale', // Always 'sale' for animal transfers/sales
-                    mode: 'transfer'
+                    mode: 'transfer',
+                    isTransfer: true
                 };
 
                 console.log('[TRANSFER] Submitting transfer:', payload);
