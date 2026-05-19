@@ -30,7 +30,8 @@ const TransferOwnershipModal = ({
 }) => {
     const [formData, setFormData] = useState({
         price: '',
-        notes: ''
+        notes: '',
+        transferType: 'sale' // Default to 'sale' for ownership transfers
     });
 
     const handleSearchUsers = async () => {
@@ -82,7 +83,8 @@ const TransferOwnershipModal = ({
             animal: animal, // Pass the animal prop
             selectedUser: transferSelectedUser,
             price: formData.price === '' ? 0 : priceValue,
-            notes: formData.notes
+            notes: formData.notes,
+            transferType: formData.transferType // Include the transfer type
         });
     };
 
