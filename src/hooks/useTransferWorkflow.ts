@@ -91,26 +91,50 @@ export function useTransferWorkflow(
      */
     const handleSubmitTransfer = useCallback(
         async (transferData) => {
-            if (!transferData.animal || !transferData.recipient) {
-                showModalMessage('Missing Information', 'Please select an animal and recipient.');
+            // Use data passed from form if available, otherwise fall back to hook state (auto-fill)
+            const animal = transferData?.animal || transferAnimal;
+            const selectedUser = transferData?.selectedUser || transferSelectedUser;
+            const price = transferData?.price ?? transferPrice;
+            const notes = transferData?.notes ?? transferNotes;
+
+            console.log('[handleSubmitTransfer] Received transferData:', transferData);
+            console.log('[handleSubmitTransfer] Resolved animal:', animal);
+            console.log('[handleSubmitTransfer] Resolved selectedUser:', selectedUser);
+            console.log('[handleSubmitTransfer] Resolved price:', price);
+            console.log('[handleSubmitTransfer] Resolved notes:', notes);
+
+            if (!animal) {
+                showModalMessage('Missing Information', 'Please select an animal for the transfer.');
+                return;
+            }
+            if (!selectedUser) {
+                showModalMessage('Missing Information', 'Please select a recipient for the transfer.');
+                return;
+            }
+
+            // Ensure recipientUserId is resolved
+            const recipientUserId = selectedUser.userId_backend || selectedUser.id_public || selectedUser._id;
+            if (!recipientUserId) {
+                console.error('[handleSubmitTransfer] Selected user has no identifiable ID:', selectedUser);
+                showModalMessage('Error', 'Selected recipient user has no valid ID. Please select another user.');
                 return;
             }
 
             try {
                 // Prepare transfer payload
                 const payload = {
-                    animalId_public: transferData.animal.id_public,
-                    recipientUserId: transferData.recipient.userId_backend || transferData.recipient.id_public,
-                    price: transferData.price ? parseFloat(transferData.price) : 0,
-                    notes: transferData.notes || '',
-                    transactionType: transferData.transactionType || 'transfer'
+                    animalId_public: animal.id_public,
+                    recipientUserId: recipientUserId,
+                    price: price ? parseFloat(String(price)) : 0,
+                    notes: notes || '',
+                    transactionType: 'transfer'
                 };
 
                 console.log('[TRANSFER] Submitting transfer:', payload);
 
                 // Submit to backend
                 const response = await axios.post(
-                    `${API_BASE_URL}/animals/${transferData.animal.id_public}/transfer`,
+                    `${API_BASE_URL}/animals/${animal.id_public}/transfer`,
                     payload,
                     {
                         headers: { Authorization: `Bearer ${authToken}` }
@@ -121,8 +145,8 @@ export function useTransferWorkflow(
 
                 // Show success message
                 const messageText =
-                    transferData.price && parseFloat(transferData.price) > 0
-                        ? `Animal sold for ${transferData.currency || '$'}${transferData.price}`
+                       price && parseFloat(String(price)) > 0 // Use String(price) for parseFloat
+                        ? `Animal sold for $${price}` // Using '$' as default currency symbol
                         : 'Animal transferred successfully';
 
                 showModalMessage('Transfer Complete', messageText);
@@ -133,7 +157,7 @@ export function useTransferWorkflow(
                 // Emit event for external components to sync
                 window.dispatchEvent(
                     new CustomEvent('animal-transferred', {
-                        detail: { animalId: transferData.animal.id_public, recipientId: transferData.recipient.id_public }
+                        detail: { animalId: animal.id_public, recipientId: selectedUser.id_public }
                     })
                 );
                 window.dispatchEvent(new Event('animals-changed'));
@@ -147,7 +171,16 @@ export function useTransferWorkflow(
                 throw error;
             }
         },
-        [authToken, API_BASE_URL, showModalMessage]
+        [
+            authToken, 
+            API_BASE_URL, 
+            showModalMessage, 
+            handleCloseTransferWorkflow, 
+            transferAnimal, 
+            transferSelectedUser, 
+            transferPrice, 
+            transferNotes
+        ]
     );
 
     /**

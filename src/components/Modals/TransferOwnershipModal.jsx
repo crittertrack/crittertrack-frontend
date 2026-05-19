@@ -80,9 +80,10 @@ const TransferOwnershipModal = ({
 
         // Pass structured data back to the hook handler
         onSubmit({
-            ...formData,
+            animal: animal, // Pass the animal prop
+            selectedUser: transferSelectedUser,
             price: formData.price === '' ? 0 : priceValue,
-            selectedUser: transferSelectedUser
+            notes: formData.notes
         });
     };
 
