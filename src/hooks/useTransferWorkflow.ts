@@ -113,7 +113,7 @@ export function useTransferWorkflow(
             const selectedUser = transferData?.selectedUser || transferSelectedUser;
             const price = transferData?.price ?? transferPrice;
             const notes = transferData?.notes ?? transferNotes;
-            const date = new Date().toISOString().split('T')[0]; // Use YYYY-MM-DD format for budget entries
+            // Date is handled by the backend upon transfer creation
 
             // Ensure we have a recipient user object
             const resolvedUser = transferData?.selectedUser || transferSelectedUser;
@@ -122,7 +122,6 @@ export function useTransferWorkflow(
             console.log('[handleSubmitTransfer] Resolved animal:', animal);
             console.log('[handleSubmitTransfer] Resolved selectedUser:', resolvedUser);
             console.log('[handleSubmitTransfer] Resolved price:', price);
-            console.log('[handleSubmitTransfer] Resolved date:', date);
             console.log('[handleSubmitTransfer] Resolved notes:', notes);
 
             if (!animal) {
@@ -145,30 +144,19 @@ export function useTransferWorkflow(
             }
 
             try {
-                // For the standalone version, transfers are recorded as unified budget transactions
-                // The 'type' must be one of: sale, purchase, expense, or income.
-                // If price > 0, it's a 'sale'. If price is 0, it's an 'expense' from the sender's perspective.
-                // The 'mode: "transfer"' flag signals the backend to also handle ownership change.
+                // For the standalone version, we hit the dedicated transfers endpoint
+                // to ensure a transfer record and notification are created.
                 const payload = {
-                    animalId: animal._id || animal.id_public,
                     animalId_public: animal.id_public,
-                    animalName: animal.name,
-                    recipientId: recipientUserId,
-                    buyerUserId: recipientUserId,
-                    amount: price ? parseFloat(String(price)) : 0,
+                    toUserId: recipientUserId,
                     price: price ? parseFloat(String(price)) : 0,
-                    date: date,
                     notes: notes || '',
-                    type: 'sale', // Always 'sale' for animal transfers/sales
-                    mode: 'transfer',
-                    isTransfer: true
                 };
 
                 console.log('[TRANSFER] Submitting transfer:', payload);
 
-                // Use the unified budgeting endpoint which handles ownership logic
                 const response = await axios.post(
-                    `${API_BASE_URL}/budget/transactions`,
+                    `${API_BASE_URL}/transfers`,
                     payload,
                     {
                         headers: { Authorization: `Bearer ${authToken}` }
@@ -176,14 +164,7 @@ export function useTransferWorkflow(
                 );
 
                 console.log('[TRANSFER] Transfer successful:', response.data);
-
-                // Show success message
-                const messageText =
-                       price && parseFloat(String(price)) > 0 // Use String(price) for parseFloat
-                        ? `Animal sold for $${price}` // Using '$' as default currency symbol
-                        : 'Animal transferred successfully';
-
-                showModalMessage('Transfer Complete', messageText);
+                showModalMessage('Transfer Request Sent', 'The transfer request has been sent. The recipient must accept it to complete the ownership change.');
 
                 // Reset form
                 handleCloseTransferWorkflow();
