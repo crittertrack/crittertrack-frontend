@@ -62,10 +62,7 @@ import { OffspringSection } from './components/AnimalDetail/utils';
 import { ConflictResolutionModal, LitterSyncConflictModal } from './components/Modals/LitterConflictModals';
 import { ParentSearchModal, LocalAnimalSearchModal, UserSearchModal } from './components/Modals/SearchModals';
 import { SpeciesPickerModal, SpeciesManager, SpeciesSelector } from './components/Modals/SpeciesModals';
-import TransferOwnershipModal from './components/Modals/TransferOwnershipModal'; 
 import { CommunityGeneticsModal } from './components/Modals/CommunityGeneticsModal';
-import BetaFeedbackModal from './components/Modals/BetaFeedbackModal';
-import SurveyModal from './components/Modals/SurveyModal';
 import { MessagesView } from './components/Messages/MessagesView';
 
 // Phase 10: Custom Hooks for App state decomposition
@@ -453,6 +450,9 @@ const App = () => {
     // All breeding line logic consolidated into custom hook for reusability--------------------------------------------------------
     const [parentCardKey, setParentCardKey] = useState(0); // Force parent cards to refetch when tab opens
     const [animalDataRefreshTrigger, setAnimalDataRefreshTrigger] = useState(0); // Force entire animal data refresh after ANY edit
+    const pedigreeAbortControllerRef = useRef(null); // Cancel pedigree fetches when switching views
+    const fullAnimalAbortControllerRef = useRef(null); // Cancel full animal fetch when switching views
+    const animalRefreshAbortControllerRef = useRef(null); // Cancel refresh fetch when switching to edit
     const [showTabs, setShowTabs] = useState(true); // Toggle for collapsible tabs panel
     const [sireData, setSireData] = useState(null);
     const [damData, setDamData] = useState(null);
@@ -529,14 +529,26 @@ const App = () => {
         }
     }, [detailViewTab]);
     
-    // Fetch parent animals when viewing an animal
+    // Fetch parent animals when viewing an animal (ONLY in detail, ABORT if editing)
     React.useEffect(() => {
+        // Cancel if switching to edit view
+        if (animalToEdit) {
+            if (pedigreeAbortControllerRef.current) {
+                pedigreeAbortControllerRef.current.abort();
+            }
+            return;
+        }
+
         if (!animalToView) {
             setSireData(null);
             setDamData(null);
             setOffspringData([]);
             return;
         }
+
+        // Create abort controller for this fetch
+        const controller = new AbortController();
+        pedigreeAbortControllerRef.current = controller;
         
         const fetchPedigreeData = async () => {
             try {
@@ -545,66 +557,155 @@ const App = () => {
                 
                 // Fetch parents using /any/ endpoint to get parents regardless of ownership
                 if (sireId) {
-                    const response = await axios.get(`${API_BASE_URL}/animals/any/${sireId}`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
-                    setSireData(response.data);
+                    try {
+                        const response = await axios.get(`${API_BASE_URL}/animals/any/${sireId}`, {
+                            headers: { Authorization: `Bearer ${authToken}` },
+                            signal: controller.signal
+                        });
+                        if (!controller.signal.aborted) {
+                            setSireData(response.data);
+                        }
+                    } catch (e) {
+                        if (e.name !== 'CanceledError' && !controller.signal.aborted) {
+                            setSireData(null);
+                        }
+                    }
                 }
                 
                 if (damId) {
-                    const response = await axios.get(`${API_BASE_URL}/animals/any/${damId}`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
-                    setDamData(response.data);
+                    try {
+                        const response = await axios.get(`${API_BASE_URL}/animals/any/${damId}`, {
+                            headers: { Authorization: `Bearer ${authToken}` },
+                            signal: controller.signal
+                        });
+                        if (!controller.signal.aborted) {
+                            setDamData(response.data);
+                        }
+                    } catch (e) {
+                        if (e.name !== 'CanceledError' && !controller.signal.aborted) {
+                            setDamData(null);
+                        }
+                    }
                 }
                 
                 // Fetch offspring using the dedicated offspring endpoint
                 try {
                     const offspringResponse = await axios.get(`${API_BASE_URL}/animals/${animalToView.id_public}/offspring`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
+                        headers: { Authorization: `Bearer ${authToken}` },
+                        signal: controller.signal
                     });
                     
-                    const litters = offspringResponse.data || [];
-                    // Flatten offspring from all litters into a single array
-                    const allOffspring = [];
-                    litters.forEach(litter => {
-                        if (litter.offspring && Array.isArray(litter.offspring)) {
-                            allOffspring.push(...litter.offspring);
-                        }
-                    });
-                    
-                    setOffspringData(allOffspring);
+                    if (!controller.signal.aborted) {
+                        const litters = offspringResponse.data || [];
+                        // Flatten offspring from all litters into a single array
+                        const allOffspring = [];
+                        litters.forEach(litter => {
+                            if (litter.offspring && Array.isArray(litter.offspring)) {
+                                allOffspring.push(...litter.offspring);
+                            }
+                        });
+                        
+                        setOffspringData(allOffspring);
+                    }
                 } catch (e) {
-                    setOffspringData([]);
+                    if (e.name !== 'CanceledError' && !controller.signal.aborted) {
+                        setOffspringData([]);
+                    }
                 }
             } catch (error) {
-                console.error('Error fetching pedigree data:', error);
+                if (!controller.signal.aborted) {
+                    console.error('Error fetching pedigree data:', error);
+                }
             }
         };
         
         fetchPedigreeData();
-    }, [animalToView, authToken, animalDataRefreshTrigger]);
+
+        // Cleanup: abort on unmount or when dependencies change
+        return () => {
+            if (pedigreeAbortControllerRef.current === controller) {
+                controller.abort();
+            }
+        };
+    }, [animalToView, authToken, animalDataRefreshTrigger, animalToEdit]);
     
-    // Re-fetch the current animal from server when data is saved/updated
+    // Fetch full animal record when a new animal is opened for viewing (ONLY in detail, ABORT if editing)
+    // (the list uses slim=true which strips appearance/genetics fields)
     React.useEffect(() => {
-        if (!animalToView?.id_public || animalDataRefreshTrigger === 0 || !authToken) return;
+        // Cancel if switching to edit view
+        if (animalToEdit) {
+            if (fullAnimalAbortControllerRef.current) {
+                fullAnimalAbortControllerRef.current.abort();
+            }
+            return;
+        }
+
+        if (!animalToView?.id_public || !authToken) return;
+
+        // Create abort controller for this fetch
+        const controller = new AbortController();
+        fullAnimalAbortControllerRef.current = controller;
+
+        axios.get(`${API_BASE_URL}/animals/${animalToView.id_public}`, {
+            headers: { Authorization: `Bearer ${authToken}` },
+            signal: controller.signal
+        })
+        .then(res => {
+            if (!controller.signal.aborted) {
+                setAnimalToView(res.data);
+            }
+        })
+        .catch(err => {
+            if (err.name !== 'CanceledError' && !controller.signal.aborted) {
+                // silently keep the slim data if the fetch fails
+            }
+        });
+
+        // Cleanup: abort on unmount or when dependencies change
+        return () => {
+            if (fullAnimalAbortControllerRef.current === controller) {
+                controller.abort();
+            }
+        };
+    }, [animalToView?.id_public, animalToEdit, authToken, API_BASE_URL]); // Added animalToEdit
+
+    // Re-fetch the current animal from server when data is saved/updated (ONLY if NOT editing)
+    React.useEffect(() => {
+        // Don't refetch if user is editing - save handler will update the data
+        if (animalToEdit || !animalToView?.id_public || animalDataRefreshTrigger === 0 || !authToken) return;
         
+        // Create abort controller for this fetch
+        const controller = new AbortController();
+        animalRefreshAbortControllerRef.current = controller;
+
         const refetchCurrentAnimal = async () => {
             try {
                 const response = await axios.get(`${API_BASE_URL}/animals/${animalToView.id_public}`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
+                    headers: { Authorization: `Bearer ${authToken}` },
+                    signal: controller.signal
                 });
                 // Update the animal state with fresh data from server
-                setAnimalToView(response.data);
-                // Broadcast settled server state to all components
-                window.dispatchEvent(new CustomEvent('animal-updated', { detail: response.data }));
+                if (!controller.signal.aborted) {
+                    setAnimalToView(response.data);
+                    // Broadcast settled server state to all components
+                    window.dispatchEvent(new CustomEvent('animal-updated', { detail: response.data }));
+                }
             } catch (error) {
-                console.error('Error refetching animal data:', error);
+                if (error.name !== 'CanceledError' && !controller.signal.aborted) {
+                    console.error('Error refetching animal data:', error);
+                }
             }
         };
         
         refetchCurrentAnimal();
-    }, [animalDataRefreshTrigger, animalToView?.id_public, authToken, API_BASE_URL]);
+
+        // Cleanup: abort on unmount or when dependencies change
+        return () => {
+            if (animalRefreshAbortControllerRef.current === controller) {
+                controller.abort();
+            }
+        };
+    }, [animalDataRefreshTrigger, animalToView?.id_public, authToken, API_BASE_URL, animalToEdit]);
 
     // Global: keep animalToView in sync with any animal-updated event from anywhere in the app
     React.useEffect(() => {
@@ -680,28 +781,6 @@ const App = () => {
     const [hasSeenDonationHighlight, setHasSeenDonationHighlight] = useState(() => {
         return localStorage.getItem('hasSeenDonationHighlight') === 'true';
     });
-
-    // Beta Feedback Survey States
-    const [showBetaFeedbackModal, setShowBetaFeedbackModal] = useState(false);
-    const [showBetaSurveyModal, setShowBetaSurveyModal] = useState(false);
-    const [surveyResponses, setSurveyResponses] = useState({
-        q1_overall_satisfaction: null,
-        q2_visual_design: null,
-        q3_primary_use: [],
-        q4_features_used: [],
-        q5_find_animals: null,
-        q6_litter_family_tree: null,
-        q7_genetics_tools: null,
-        q8_animal_profile_clarity: null,
-        q9_litter_tracking: null,
-        q10_ownership_management: null,
-        q11_profile_settings: null,
-        q12_breeder_directory: null,
-        q13_visibility_comfort: null,
-        q14_marketplace_utility: null,
-        q15_improvements: ''
-    });
-    const [surveySubmitting, setSurveySubmitting] = useState(false);
     
     const [showTermsModal, setShowTermsModal] = useState(false);
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
@@ -929,11 +1008,11 @@ const App = () => {
 
     // Clear pre-selected transfer data when leaving budget view
     useEffect(() => {
-        if (currentView !== 'budget' && !showTransferModal) {
+        if (currentView !== 'budget') {
             setPreSelectedTransferAnimal(null);
             setPreSelectedTransactionType(null);
         }
-    }, [currentView, showTransferModal]);
+    }, [currentView]);
 
     // Auth token effect - set up axios defaults
     useEffect(() => {
@@ -1009,22 +1088,6 @@ const App = () => {
             setShowWelcomeGuide(true);
         }
     }, [authToken, userProfile]);
-
-    // Check if user wants to dismiss beta feedback modal
-    useEffect(() => {
-        if (!authToken || !userProfile) return;
-
-        // Store userId in localStorage for use by BetaFeedbackModal
-        localStorage.setItem('betaFeedbackModalUserId', userProfile._id);
-
-        const storageKey = `${userProfile._id}_dontShowBetaFeedback`;
-        const dontShow = localStorage.getItem(storageKey) === 'true';
-
-        // Show beta feedback modal to all users unless they've dismissed it
-        if (!dontShow && !showWelcomeGuide) { // Don't show if welcome guide is showing
-            setShowBetaFeedbackModal(true);
-        }
-    }, [authToken, userProfile, showWelcomeGuide]);
 
     // Fetch animals for genetics calculator when needed
     useEffect(() => {
@@ -1654,33 +1717,6 @@ const App = () => {
                     onClose={handleDismissWelcomeGuide}
                 />
             )}
-
-            {false && (
-    <>
-        {/* Beta Feedback Modal - Shows to all users */}
-        {showBetaFeedbackModal && (
-            <BetaFeedbackModal 
-                onClose={() => setShowBetaFeedbackModal(false)}
-                onStartSurvey={() => {
-                    setShowBetaFeedbackModal(false);
-                    setShowBetaSurveyModal(true);
-                }}
-            />
-        )}
-
-        {/* Beta Survey Modal */}
-        {showBetaSurveyModal &&
-         !localStorage.getItem('betaSurveyCompleted') && (
-            <SurveyModal
-                onClose={() => setShowBetaSurveyModal(false)}
-                surveyResponses={surveyResponses}
-                setSurveyResponses={setSurveyResponses}
-                setSurveySubmitting={setSurveySubmitting}
-                surveySubmitting={surveySubmitting}
-            />
-        )}
-    </>
-)}
             
             {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
             {showUserSearchModal && (
@@ -1934,8 +1970,8 @@ const App = () => {
                         </div>
                     </div>
 
-                    {/* Third row: Navigation row 1 (5 buttons) */}
-                    <nav className="grid grid-cols-5 gap-1 mb-1">
+                    {/* Third row: Navigation row 1 (4 buttons) */}
+                    <nav className="grid grid-cols-4 gap-1 mb-1">
                         <button onClick={() => navigate('/community')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'community' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Users size={18} className="mb-0.5" />
                             <span>My Feed</span>
@@ -1952,14 +1988,14 @@ const App = () => {
                             <Calendar size={18} className="mb-0.5" />
                             <span>Calendar</span>
                         </button>
+                    </nav>
+
+                    {/* Fourth row: Navigation row 2 (4 buttons) */}
+                    <nav className="grid grid-cols-4 gap-1">
                         <button onClick={() => navigate('/budget')} data-tutorial-target="budget-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <DollarSign size={18} className="mb-0.5" />
                             <span>Budget</span>
                         </button>
-                    </nav>
-
-                    {/* Fourth row: Navigation row 2 (3 buttons) */}
-                    <nav className="grid grid-cols-3 gap-1">
                         <button onClick={() => navigate('/marketplace')} data-tutorial-target="marketplace-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <ShoppingBag size={18} className="mb-0.5" />
                             <span>Available</span>
@@ -2315,8 +2351,8 @@ const App = () => {
                                     setTransferAnimal(animal);
                                     setPreSelectedTransferAnimal(animal);
                                     setPreSelectedTransactionType('animal-sale');
-                                    setShowTransferModal(true); // Open the transfer ownership modal
-                                    // Do NOT navigate to /budget here, as the modal overlays the current view
+                                    setShowTransferModal(false);
+                                    navigate('/budget');
                                 }}
                                 onViewAnimal={handleViewAnimal}
                                 onViewPublicAnimal={handleViewPublicAnimal}
@@ -2521,42 +2557,6 @@ const App = () => {
                         </button>
                     </div>
                 </div>
-            )}
-
-            {/* Transfer Ownership Modal - Controlled by useTransferWorkflow */}
-            {showTransferModal && (
-                <TransferOwnershipModal
-                    // Ensure z-index is higher than PrivateAnimalDetail (z-70)
-                    className="z-[100]"
-                    animal={transferAnimal} // The animal to be transferred
-                    onClose={handleCloseTransferWorkflow} // Function to close the modal
-                    onSubmit={handleSubmitTransfer} // Function to handle the transfer submission
-                    authToken={authToken}
-                    API_BASE_URL={API_BASE_URL}
-                    showModalMessage={showModalMessage}
-                    // Override default budgeting behavior to skip selection screens
-                    showTypeSelection={false} 
-                    showModeSelection={false}
-                    animalSaleMode="transfer"
-                    // Props from useTransferWorkflow for the modal's internal state/logic
-                    preSelectedTransactionType={preSelectedTransactionType}
-                    setPreSelectedTransactionType={setPreSelectedTransactionType}
-                    preSelectedTransferAnimal={preSelectedTransferAnimal}
-                    transferPrice={transferPrice}
-                    setTransferPrice={setTransferPrice}
-                    transferNotes={transferNotes}
-                    setTransferNotes={setTransferNotes}
-                    transferUserQuery={transferUserQuery}
-                    setTransferUserQuery={setTransferUserQuery}
-                    transferUserResults={transferUserResults}
-                    setTransferUserResults={setTransferUserResults}
-                    transferSelectedUser={transferSelectedUser}
-                    setTransferSelectedUser={setTransferSelectedUser}
-                    transferSearching={transferSearching}
-                    setTransferSearching={setTransferSearching}
-                    transferSearchPerformed={transferSearchPerformed}
-                    setTransferSearchPerformed={setTransferSearchPerformed}
-                />
             )}
         </div>
     );
