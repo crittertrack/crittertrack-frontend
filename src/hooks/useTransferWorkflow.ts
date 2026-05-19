@@ -25,7 +25,7 @@ export function useTransferWorkflow(
     const [showTransferModal, setShowTransferModal] = useState(false);
     const [transferAnimal, setTransferAnimal] = useState(null);
     const [preSelectedTransferAnimal, setPreSelectedTransferAnimal] = useState(null);
-    const [preSelectedTransactionType, setPreSelectedTransactionType] = useState<string | null>(null);
+    const [preSelectedTransactionType, setPreSelectedTransactionType] = useState(null);
 
     // ========== BUDGET/TRANSACTION PANEL ==========
     const [budgetModalOpen, setBudgetModalOpen] = useState(false);
@@ -81,9 +81,74 @@ export function useTransferWorkflow(
     /**
      * Select a user as transfer recipient
      */
-    const handleSelectTransferUser = useCallback((user: any) => {
+    const handleSelectTransferUser = useCallback((user) => {
         setTransferSelectedUser(user);
     }, []);
+
+    /**
+     * Submit transfer request
+     * Sends transfer/sale to backend
+     */
+    const handleSubmitTransfer = useCallback(
+        async (transferData) => {
+            if (!transferData.animal || !transferData.recipient) {
+                showModalMessage('Missing Information', 'Please select an animal and recipient.');
+                return;
+            }
+
+            try {
+                // Prepare transfer payload
+                const payload = {
+                    animalId_public: transferData.animal.id_public,
+                    recipientUserId: transferData.recipient.userId_backend || transferData.recipient.id_public,
+                    price: transferData.price ? parseFloat(transferData.price) : 0,
+                    notes: transferData.notes || '',
+                    transactionType: transferData.transactionType || 'transfer'
+                };
+
+                console.log('[TRANSFER] Submitting transfer:', payload);
+
+                // Submit to backend
+                const response = await axios.post(
+                    `${API_BASE_URL}/animals/${transferData.animal.id_public}/transfer`,
+                    payload,
+                    {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    }
+                );
+
+                console.log('[TRANSFER] Transfer successful:', response.data);
+
+                // Show success message
+                const messageText =
+                    transferData.price && parseFloat(transferData.price) > 0
+                        ? `Animal sold for ${transferData.currency || '$'}${transferData.price}`
+                        : 'Animal transferred successfully';
+
+                showModalMessage('Transfer Complete', messageText);
+
+                // Reset form
+                handleCloseTransferWorkflow();
+
+                // Emit event for external components to sync
+                window.dispatchEvent(
+                    new CustomEvent('animal-transferred', {
+                        detail: { animalId: transferData.animal.id_public, recipientId: transferData.recipient.id_public }
+                    })
+                );
+                window.dispatchEvent(new Event('animals-changed'));
+
+                return response.data;
+            } catch (error) {
+                console.error('[TRANSFER] Transfer failed:', error);
+                const errorMessage =
+                    error.response?.data?.message || error.message || 'Transfer failed. Please try again.';
+                showModalMessage('Transfer Failed', errorMessage);
+                throw error;
+            }
+        },
+        [authToken, API_BASE_URL, showModalMessage]
+    );
 
     /**
      * Close transfer workflow and reset state
@@ -103,106 +168,10 @@ export function useTransferWorkflow(
     }, []);
 
     /**
-     * Submit transfer request
-     * Sends transfer/sale to backend
-     */
-    const handleSubmitTransfer = useCallback(
-        async (transferData: any) => {
-            // Use data passed from form if available, otherwise fall back to hook state (auto-fill)
-            const animal = transferData?.animal || transferAnimal;
-            const selectedUser = transferData?.selectedUser || transferSelectedUser;
-            const price = transferData?.price ?? transferPrice;
-            const notes = transferData?.notes ?? transferNotes;
-            // Date is handled by the backend upon transfer creation
-
-            // Ensure we have a recipient user object
-            const resolvedUser = transferData?.selectedUser || transferSelectedUser;
-
-            console.log('[handleSubmitTransfer] Received transferData:', transferData);
-            console.log('[handleSubmitTransfer] Resolved animal:', animal);
-            console.log('[handleSubmitTransfer] Resolved selectedUser:', resolvedUser);
-            console.log('[handleSubmitTransfer] Resolved price:', price);
-            console.log('[handleSubmitTransfer] Resolved notes:', notes);
-
-            if (!animal) {
-                showModalMessage('Missing Information', 'Please select an animal for the transfer.');
-                return;
-            }
-            if (!resolvedUser) {
-                showModalMessage('Missing Information', 'Please select a recipient for the transfer.');
-                return;
-            }
-
-            // Ensure recipientUserId is resolved
-            const recipientUserId = resolvedUser.userId_backend || resolvedUser.id_public || resolvedUser._id;
-            console.log('[handleSubmitTransfer] Resolved recipientUserId:', recipientUserId);
-
-            if (!recipientUserId) {
-                console.error('[handleSubmitTransfer] Selected user has no identifiable ID:', resolvedUser);
-                showModalMessage('Error', 'Selected recipient user has no valid ID. Please select another user.');
-                return;
-            }
-
-            try {
-                // For the standalone version, we hit the dedicated transfers endpoint
-                // to ensure a transfer record and notification are created.
-                const payload = {
-                    animalId_public: animal.id_public,
-                    toUserId: recipientUserId,
-                    price: price ? parseFloat(String(price)) : 0,
-                    notes: notes || '',
-                };
-
-                console.log('[TRANSFER] Submitting transfer:', payload);
-
-                const response = await axios.post(
-                    `${API_BASE_URL}/transfers`,
-                    payload,
-                    {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    }
-                );
-
-                console.log('[TRANSFER] Transfer successful:', response.data);
-                showModalMessage('Transfer Request Sent', 'The transfer request has been sent. The recipient must accept it to complete the ownership change.');
-
-                // Reset form
-                handleCloseTransferWorkflow();
-
-                // Emit event for external components to sync
-                window.dispatchEvent(
-                    new CustomEvent('animal-transferred', {
-                        detail: { animalId: animal.id_public, recipientId: resolvedUser.id_public || recipientUserId }
-                    })
-                );
-                window.dispatchEvent(new Event('animals-changed'));
-
-                return response.data;
-            } catch (error: any) {
-                console.error('[TRANSFER] Transfer failed:', error);
-                const errorMessage =
-                    error.response?.data?.message || error.message || 'Transfer failed. Please try again.';
-                showModalMessage('Transfer Failed', errorMessage);
-                throw error;
-            }
-        },
-        [
-            authToken, 
-            API_BASE_URL, 
-            showModalMessage, 
-            handleCloseTransferWorkflow, 
-            transferAnimal, 
-            transferSelectedUser, 
-            transferPrice, 
-            transferNotes
-        ]
-    );
-
-    /**
      * Open transfer modal with pre-selected animal
      * Called from budget view or animal detail
      */
-    const handleOpenTransferWithAnimal = useCallback((animal: any, transactionType = 'transfer') => {
+    const handleOpenTransferWithAnimal = useCallback((animal, transactionType = 'transfer') => {
         setPreSelectedTransferAnimal(animal);
         setPreSelectedTransactionType(transactionType);
         setTransferAnimal(animal);
