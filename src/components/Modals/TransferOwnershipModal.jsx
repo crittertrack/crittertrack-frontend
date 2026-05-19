@@ -30,7 +30,6 @@ const TransferOwnershipModal = ({
 }) => {
     const [formData, setFormData] = useState({
         price: '',
-        date: new Date().toISOString().split('T')[0],
         notes: ''
     });
 
@@ -83,8 +82,7 @@ const TransferOwnershipModal = ({
             animal: animal, // Pass the animal prop
             selectedUser: transferSelectedUser,
             price: formData.price === '' ? 0 : priceValue,
-            notes: formData.notes,
-            date: formData.date // Pass the date from the form data
+            notes: formData.notes
         });
     };
 
@@ -131,19 +129,6 @@ const TransferOwnershipModal = ({
                 </div>
 
                 <form onSubmit={handleFormSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Date of Transfer *
-                        </label>
-                        <DatePicker
-                            value={formData.date}
-                            // Date is auto-set to today and cannot be changed by the user
-                            maxDate={new Date()}
-                            required
-                            readOnly // Make the date picker read-only
-                        />
-                    </div>
-
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Sale Price (optional)

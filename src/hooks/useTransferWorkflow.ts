@@ -113,7 +113,7 @@ export function useTransferWorkflow(
             const selectedUser = transferData?.selectedUser || transferSelectedUser;
             const price = transferData?.price ?? transferPrice;
             const notes = transferData?.notes ?? transferNotes;
-            const date = transferData?.date ? new Date(transferData.date).toISOString() : new Date().toISOString(); // Get date from transferData or default to now
+            const date = new Date().toISOString(); // Always auto-assign current date for transfers
 
             // Ensure we have a recipient user object
             const resolvedUser = transferData?.selectedUser || transferSelectedUser;
@@ -156,7 +156,7 @@ export function useTransferWorkflow(
                     price: price ? parseFloat(String(price)) : 0,
                     date: date, // Use the resolved date
                     notes: notes || '',
-                    type: parseFloat(String(price)) > 0 ? 'sale' : 'expense',
+                    type: 'sale', // Always 'sale' for animal transfers/sales
                     mode: 'transfer'
                 };
 
