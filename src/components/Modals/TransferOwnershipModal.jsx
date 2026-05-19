@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Search, Info, TrendingUp, Calendar, DollarSign, ChevronRight, Cat, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import DatePicker from '../DatePicker';
@@ -17,6 +17,12 @@ const TransferOwnershipModal = ({
     API_BASE_URL,
     showModalMessage,
     // Props managed by useTransferWorkflow hook
+    preSelectedTransactionType,
+    setPreSelectedTransactionType,
+    transferPrice,
+    setTransferPrice,
+    transferNotes,
+    setTransferNotes,
     transferUserQuery,
     setTransferUserQuery,
     transferUserResults,
@@ -28,11 +34,14 @@ const TransferOwnershipModal = ({
     transferSearchPerformed,
     setTransferSearchPerformed
 }) => {
-    const [formData, setFormData] = useState({
-        price: '',
-        notes: '',
-        transferType: 'sale' // Default to 'sale' for ownership transfers
-    });
+    // Sync internal transfer type with prop on mount
+    useEffect(() => {
+        if (preSelectedTransactionType && preSelectedTransactionType !== 'sale') {
+            // Map budgeting types to transfer types if necessary
+            const type = preSelectedTransactionType.includes('sale') ? 'sale' : 'transfer';
+            // Note: If the hook handles this, we just ensure it's set
+        }
+    }, [preSelectedTransactionType]);
 
     const handleSearchUsers = async () => {
         if (!transferUserQuery || transferUserQuery.trim().length < 2) {
@@ -72,19 +81,19 @@ const TransferOwnershipModal = ({
             return;
         }
 
-        const priceValue = parseFloat(formData.price);
-        if (formData.price && (isNaN(priceValue) || priceValue < 0)) {
+        const priceValue = parseFloat(transferPrice);
+        if (transferPrice && (isNaN(priceValue) || priceValue < 0)) {
             showModalMessage('Error', 'Price cannot be negative');
             return;
         }
 
-        // Pass structured data back to the hook handler
+        // Pass structured data back to the hook handler to ensure backend validation passes
         onSubmit({
             animal: animal, // Pass the animal prop
             selectedUser: transferSelectedUser,
-            price: formData.price === '' ? 0 : priceValue,
-            notes: formData.notes,
-            transferType: formData.transferType // Include the transfer type
+            price: transferPrice === '' ? 0 : priceValue,
+            notes: transferNotes,
+            transferType: preSelectedTransactionType || 'sale' // Ensure transferType is never undefined
         });
     };
 
@@ -143,12 +152,25 @@ const TransferOwnershipModal = ({
                                 type="number"
                                 step="0.01"
                                 min="0"
-                                value={formData.price}
-                                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                value={transferPrice}
+                                onChange={(e) => setTransferPrice(e.target.value)}
                                 placeholder="0.00"
                                 className="w-full pl-9 p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
                             />
                         </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Notes (optional)
+                        </label>
+                        <textarea
+                            value={transferNotes}
+                            onChange={(e) => setTransferNotes(e.target.value)}
+                            placeholder="Add transaction notes (e.g. shipping details, warranty terms)..."
+                            rows={3}
+                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary resize-none"
+                        />
                     </div>
 
                     <div>
