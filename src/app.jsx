@@ -62,6 +62,7 @@ import { OffspringSection } from './components/AnimalDetail/utils';
 import { ConflictResolutionModal, LitterSyncConflictModal } from './components/Modals/LitterConflictModals';
 import { ParentSearchModal, LocalAnimalSearchModal, UserSearchModal } from './components/Modals/SearchModals';
 import { SpeciesPickerModal, SpeciesManager, SpeciesSelector } from './components/Modals/SpeciesModals';
+import TransferOwnershipModal from './components/Modals/TransferOwnershipModal'; // Assuming this component exists
 import { CommunityGeneticsModal } from './components/Modals/CommunityGeneticsModal';
 import BetaFeedbackModal from './components/Modals/BetaFeedbackModal';
 import SurveyModal from './components/Modals/SurveyModal';
@@ -2314,8 +2315,8 @@ const App = () => {
                                     setTransferAnimal(animal);
                                     setPreSelectedTransferAnimal(animal);
                                     setPreSelectedTransactionType('animal-sale');
-                                    setShowTransferModal(false);
-                                    navigate('/budget');
+                                    setShowTransferModal(true); // Open the transfer ownership modal
+                                    // Do NOT navigate to /budget here, as the modal overlays the current view
                                 }}
                                 onViewAnimal={handleViewAnimal}
                                 onViewPublicAnimal={handleViewPublicAnimal}
@@ -2521,6 +2522,37 @@ const App = () => {
                     </div>
                 </div>
             )}
+
+            {/* Transfer Ownership Modal - Controlled by useTransferWorkflow */}
+            {showTransferModal && (
+                <TransferOwnershipModal
+                    // Ensure z-index is higher than PrivateAnimalDetail (z-70)
+                    className="z-[100]"
+                    animal={transferAnimal} // The animal to be transferred
+                    onClose={handleCloseTransferWorkflow} // Function to close the modal
+                    onSubmit={handleSubmitTransfer} // Function to handle the transfer submission
+                    authToken={authToken}
+                    API_BASE_URL={API_BASE_URL}
+                    showModalMessage={showModalMessage}
+                    // Override default budgeting behavior to skip selection screens
+                    showTypeSelection={false} 
+                    showModeSelection={false}
+                    animalSaleMode="transfer"
+                    // Props from useTransferWorkflow for the modal's internal state/logic
+                    preSelectedTransactionType={preSelectedTransactionType}
+                    preSelectedTransferAnimal={preSelectedTransferAnimal}
+                    transferUserQuery={transferUserQuery}
+                    setTransferUserQuery={setTransferUserQuery}
+                    transferUserResults={transferUserResults}
+                    setTransferUserResults={setTransferUserResults}
+                    transferSelectedUser={transferSelectedUser}
+                    setTransferSelectedUser={setTransferSelectedUser}
+                    transferSearching={transferSearching}
+                    setTransferSearching={setTransferSearching}
+                    transferSearchPerformed={transferSearchPerformed}
+                    setTransferSearchPerformed={setTransferSearchPerformed}
+                />
+            )}
         </div>
     );
 };
@@ -2568,6 +2600,3 @@ const AppRouter = () => {
 };
 
 export default AppRouter;
-
-
-

@@ -82,24 +82,27 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
     }, []);
 
     // Handle pre-selected animal and type (from Transfer button)
-    useEffect(() => {
-        if (preSelectedAnimal && preSelectedType) {
-            setFormData(prev => ({
-                ...prev,
-                type: preSelectedType,
-                animalId: preSelectedAnimal.id_public,
-                animalName: preSelectedAnimal.name,
-                buyer: userProfile?.breederName || userProfile?.personalName || ''
-            }));
-            setSelectedSpecies(preSelectedAnimal.species);
-            setShowAddModal(true);
-            setShowTypeSelection(false);
-            // For animal-sale, show mode selection
-            if (preSelectedType === 'animal-sale') {
-                setShowModeSelection(true);
-            }
-        }
-    }, [preSelectedAnimal, preSelectedType, userProfile]);
+    // This useEffect is removed because the TransferOwnershipModal is now handled directly by useTransferWorkflow in App.jsx.
+    // The BudgetingTab should not automatically open its own modal flow when a transfer is initiated from the Animal Detail View.
+    // If BudgetingTab needs to handle pre-selected items when navigated to, it should be done via explicit navigation state or props,
+    // not by automatically opening a modal that conflicts with the dedicated TransferOwnershipModal.
+    // useEffect(() => {
+    //     if (preSelectedAnimal && preSelectedType) {
+    //         setFormData(prev => ({
+    //             ...prev,
+    //             type: preSelectedType,
+    //             animalId: preSelectedAnimal.id_public,
+    //             animalName: preSelectedAnimal.name,
+    //             buyer: userProfile?.breederName || userProfile?.personalName || ''
+    //         }));
+    //         setSelectedSpecies(preSelectedAnimal.species);
+    //         setShowAddModal(true);
+    //         setShowTypeSelection(false);
+    //         if (preSelectedType === 'animal-sale') {
+    //             setShowModeSelection(true);
+    //         }
+    //     }
+    // }, [preSelectedAnimal, preSelectedType, userProfile]);
 
     const fetchUserProfile = async () => {
         try {
