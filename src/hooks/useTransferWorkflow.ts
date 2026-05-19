@@ -144,12 +144,16 @@ export function useTransferWorkflow(
 
             try {
                 // For the standalone version, transfers are recorded as unified budget transactions
+                // The backend requires the type to be one of: sale, purchase, expense, or income.
+                // For an outgoing transfer, we use 'sale' with mode 'transfer' to trigger ownership change.
                 const payload = {
                     animalId: animal._id || animal.id_public,
-                    recipientId: recipientUserId,
-                    amount: price ? parseFloat(String(price)) : 0,
+                    animalName: animal.name,
+                    buyerUserId: recipientUserId,
+                    price: price ? parseFloat(String(price)) : 0,
                     notes: notes || '',
-                    type: parseFloat(String(price)) > 0 ? 'sale' : 'transfer'
+                    type: 'sale',
+                    mode: 'transfer'
                 };
 
                 console.log('[TRANSFER] Submitting transfer:', payload);
