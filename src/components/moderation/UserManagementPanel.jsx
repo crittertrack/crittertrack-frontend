@@ -911,8 +911,6 @@ const UserHistoryModal = ({ user, onClose, onLiftWarning, onRefresh }) => {
         return events.sort((a, b) => b.date.getTime() - a.date.getTime());
     }, [localUser]);
 
-    const timeline = buildTimeline();
-
     const getTimelineIcon = (event) => {
         switch (event.icon) {
             case 'warning': return <AlertTriangle size={16} />;
