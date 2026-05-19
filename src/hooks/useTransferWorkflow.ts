@@ -113,6 +113,7 @@ export function useTransferWorkflow(
             const selectedUser = transferData?.selectedUser || transferSelectedUser;
             const price = transferData?.price ?? transferPrice;
             const notes = transferData?.notes ?? transferNotes;
+            const date = transferData?.date ? new Date(transferData.date).toISOString() : new Date().toISOString(); // Get date from transferData or default to now
 
             // Ensure we have a recipient user object
             const resolvedUser = transferData?.selectedUser || transferSelectedUser;
@@ -121,6 +122,7 @@ export function useTransferWorkflow(
             console.log('[handleSubmitTransfer] Resolved animal:', animal);
             console.log('[handleSubmitTransfer] Resolved selectedUser:', resolvedUser);
             console.log('[handleSubmitTransfer] Resolved price:', price);
+            console.log('[handleSubmitTransfer] Resolved date:', date);
             console.log('[handleSubmitTransfer] Resolved notes:', notes);
 
             if (!animal) {
@@ -144,15 +146,17 @@ export function useTransferWorkflow(
 
             try {
                 // For the standalone version, transfers are recorded as unified budget transactions
-                // The backend requires the type to be one of: sale, purchase, expense, or income.
-                // For an outgoing transfer, we use 'sale' with mode 'transfer' to trigger ownership change.
+                // The 'type' must be one of: sale, purchase, expense, or income.
+                // If price > 0, it's a 'sale'. If price is 0, it's an 'expense' from the sender's perspective.
+                // The 'mode: "transfer"' flag signals the backend to also handle ownership change.
                 const payload = {
                     animalId: animal._id || animal.id_public,
                     animalName: animal.name,
                     buyerUserId: recipientUserId,
                     price: price ? parseFloat(String(price)) : 0,
+                    date: date, // Use the resolved date
                     notes: notes || '',
-                    type: 'sale',
+                    type: parseFloat(String(price)) > 0 ? 'sale' : 'expense',
                     mode: 'transfer'
                 };
 

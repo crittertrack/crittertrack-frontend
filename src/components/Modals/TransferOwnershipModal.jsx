@@ -83,7 +83,8 @@ const TransferOwnershipModal = ({
             animal: animal, // Pass the animal prop
             selectedUser: transferSelectedUser,
             price: formData.price === '' ? 0 : priceValue,
-            notes: formData.notes
+            notes: formData.notes,
+            date: formData.date // Pass the date from the form data
         });
     };
 
@@ -139,6 +140,7 @@ const TransferOwnershipModal = ({
                             onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                             maxDate={new Date()}
                             required
+                            readOnly // Make the date picker read-only
                         />
                     </div>
 
