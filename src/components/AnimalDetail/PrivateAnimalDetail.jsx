@@ -274,7 +274,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                 if (!seenAcrossGroups.has(rel.id_public)) { seenAcrossGroups.add(rel.id_public); items.push({ rel, relLabel }); }
             });
             if (globalRels) {
-                // Ensure globalRels[key] is an array before filtering/iterating
+                // Ensure globalRels[key] is an array before filtering/iterating.
+                // Filter out animals already seen from `relationships` to avoid duplicates.
                 const globalRelationsForKey = Array.isArray(globalRels[key]) ? globalRels[key] : [];
                 globalRelationsForKey.filter(a => a.id_public !== animal?.id_public).forEach(rel => {
                     if (!seenAcrossGroups.has(rel.id_public)) { seenAcrossGroups.add(rel.id_public); items.push({ rel, relLabel: getRelLabel(label, rel) }); }

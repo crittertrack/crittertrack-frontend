@@ -385,6 +385,30 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
         fetchCOI();
     }, [animal?.id_public, animal?.fatherId_public, animal?.sireId_public, animal?.motherId_public, animal?.damId_public, API_BASE_URL]);
     
+    const getRelLabel = useCallback((groupLabel, rel) => {
+        const isMale = rel.gender === 'Male';
+        const isFemale = rel.gender === 'Female';
+        const side = rel._side === 'paternal' ? 'Paternal ' : rel._side === 'maternal' ? 'Maternal ' : '';
+        switch (groupLabel) {
+            case 'Parents':
+                if (rel.id_public === animal?.sireId_public) return 'Sire (Father)';
+                if (rel.id_public === animal?.damId_public) return 'Dam (Mother)';
+                return isMale ? 'Sire (Father)' : isFemale ? 'Dam (Mother)' : 'Parent';
+            case 'Siblings':
+                return isMale ? 'Brother' : isFemale ? 'Sister' : 'Sibling';
+            case 'Nieces & Nephews':
+                return isMale ? 'Nephew' : isFemale ? 'Niece' : 'Niece / Nephew';
+            case 'Aunts & Uncles':
+                return isMale ? `${side}Uncle` : isFemale ? `${side}Aunt` : `${side}Aunt / Uncle`;
+            case 'Grandparents':
+                return isMale ? `${side}Grandfather` : isFemale ? `${side}Grandmother` : `${side}Grandparent`;
+            case 'Great-Grandparents':
+                return isMale ? `${side}Great-Grandfather` : isFemale ? `${side}Great-Grandmother` : `${side}Great-Grandparent`;
+            case 'Cousins': return 'Cousin';
+            default: return groupLabel;
+        }
+    }, [animal?.sireId_public, animal?.damId_public]);
+
     if (!animal) return null;
 
     // All sections are now publicly visible if the animal is public
@@ -396,6 +420,30 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
         detailViewTab,
         hasRemarks: !!animal.remarks,
         hasGeneticCode: !!animal.geneticCode
+    });
+
+    const allRelGroups = useMemo(() => {
+        const groupDefs = [
+            { key: 'parents', label: 'Parents' },
+            { key: 'siblings', label: 'Siblings' },
+            { key: 'nephewsNieces', label: 'Nieces & Nephews' },
+            { key: 'auntsUncles', label: 'Aunts & Uncles' },
+            { key: 'grandparents', label: 'Grandparents' },
+            { key: 'greatGrandparents', label: 'Great-Grandparents' },
+            { key: 'cousins', label: 'Cousins' },
+        ];
+        const seenAcrossGroups = new Set();
+        return groupDefs.map(({ key, label }) => {
+            const items = [];
+            if (publicRelationships) {
+                // Ensure publicRelationships[key] is an array before filtering/iterating
+                const relationsForKey = Array.isArray(publicRelationships[key]) ? publicRelationships[key] : [];
+                relationsForKey.filter(a => a.id_public !== animal?.id_public).forEach(rel => {
+                    if (!seenAcrossGroups.has(rel.id_public)) { seenAcrossGroups.add(rel.id_public); items.push({ rel, relLabel: getRelLabel(label, rel) }); }
+                });
+            }
+            return { label, items };
+        }).filter(g => g.items.length > 0);
     });
 
     return (
