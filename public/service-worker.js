@@ -28,11 +28,17 @@ const isLocalhost = (url) => url.includes('localhost') || url.includes('127.0.0.
 const fetchNetworkFirst = async (request) => {
   try {
     const response = await fetch(request);
+    if (response && response.status === 200 && response.type !== 'error') {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, response.clone()).catch(err => console.error('[SW] Cache put failed:', err));
+    }
     return response;
   } catch (error) {
     console.warn('[SW] Network-first fetch failed, serving fallback:', request.url, error);
-    const cached = await caches.match('/index.html');
-    return cached || new Response('Offline - Please check your connection', {
+    const cached = await caches.match(request, { ignoreVary: true });
+    if (cached) return cached;
+    const fallback = await caches.match('/index.html');
+    return fallback || new Response('Offline - Please check your connection', {
       status: 503,
       headers: { 'Content-Type': 'text/html' }
     });
@@ -51,6 +57,19 @@ const fetchCacheFirst = async (request) => {
     cache.put(request, response.clone()).catch(err => console.error('[SW] Cache put failed:', err));
   }
   return response;
+};
+
+const shouldUseNetworkFirst = (request, url) => {
+  if (request.destination === 'document' || request.headers.get('accept')?.includes('text/html') || url.pathname === '/' || url.pathname.endsWith('.html')) {
+    return true;
+  }
+  if (request.destination === 'script' || request.destination === 'style' || request.destination === 'font') {
+    return true;
+  }
+  if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css') || url.pathname.endsWith('.map')) {
+    return true;
+  }
+  return false;
 };
 
 self.addEventListener('fetch', (event) => {
@@ -82,7 +101,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  if (request.destination === 'document' || request.headers.get('accept')?.includes('text/html') || url.pathname === '/' || url.pathname.endsWith('.html')) {
+  if (shouldUseNetworkFirst(request, url)) {
     event.respondWith(fetchNetworkFirst(request));
     return;
   }
