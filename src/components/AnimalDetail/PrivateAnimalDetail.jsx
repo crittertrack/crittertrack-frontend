@@ -2880,6 +2880,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
             </div>
         </div>
     </div>
-);
+    )}
 
-export default PrivateAnimalDetail};
+export default PrivateAnimalDetail;
