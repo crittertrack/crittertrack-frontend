@@ -147,9 +147,13 @@ const AnimalImage = ({ src, alt = "Animal", className = "w-full h-full object-co
 // Conflict Resolution Modal Component
 
 async function compressImageFile(file, { maxWidth = 1200, maxHeight = 1200, quality = 0.8 } = {}) {
-    if (!file || !file.type || !file.type.startsWith('image/')) throw new Error('Not an image file');
+    if (!file || !file.name) throw new Error('Not an image file');
+    const fileType = (file.type || '').toLowerCase();
+    const fileName = file.name.toLowerCase();
+    const isLikelyImage = fileType.startsWith('image/') || /\.(jpe?g|png|gif|heic|heif)$/i.test(fileName);
+    if (!isLikelyImage) throw new Error('Not an image file');
     // Reject GIFs (animations not allowed) ? the server accepts PNG/JPEG only
-    if (file.type === 'image/gif') throw new Error('GIF_NOT_ALLOWED');
+    if (fileType === 'image/gif' || fileName.endsWith('.gif')) throw new Error('GIF_NOT_ALLOWED');
 
     const img = await new Promise((resolve, reject) => {
         const url = URL.createObjectURL(file);
@@ -192,9 +196,13 @@ async function compressImageFile(file, { maxWidth = 1200, maxHeight = 1200, qual
 // Tries decreasing quality first, then scales down dimensions and retries.
 // Returns a Blob (best-effort). Throws if input isn't an image.
 async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
-    if (!file || !file.type || !file.type.startsWith('image/')) throw new Error('Not an image file');
+    if (!file || !file.name) throw new Error('Not an image file');
+    const fileType = (file.type || '').toLowerCase();
+    const fileName = file.name.toLowerCase();
+    const isLikelyImage = fileType.startsWith('image/') || /\.(jpe?g|png|gif|heic|heif)$/i.test(fileName);
+    if (!isLikelyImage) throw new Error('Not an image file');
     // Reject GIFs (animations not allowed) ? the server accepts PNG/JPEG only
-    if (file.type === 'image/gif') throw new Error('GIF_NOT_ALLOWED');
+    if (fileType === 'image/gif' || fileName.endsWith('.gif')) throw new Error('GIF_NOT_ALLOWED');
 
     console.log('[COMPRESSION DEBUG] Starting compression:', {
         fileName: file.name,
@@ -5912,6 +5920,12 @@ const AnimalForm = ({
                                             setMovePhotoPrompt(oldPhotoUrl);
                                         }
                                         const original = e.target.files[0];
+                                        const baseName = original.name.replace(/\.[^/.]+$/, '') || 'image';
+                                        const originalType = (original.type || '').toLowerCase();
+                                        const isSupportedOriginalType = ['image/jpeg', 'image/jpg', 'image/png'].includes(originalType);
+                                        let chosenFile = original;
+                                        const createJpegFile = (blob) => new File([blob], `${baseName}.jpg`, { type: 'image/jpeg' });
+
                                         try {
                                             let compressedBlob = null;
                                             try {
@@ -5926,17 +5940,26 @@ const AnimalForm = ({
                                                     compressedBlob = await compressImageFile(original, { maxWidth: 1200, maxHeight: 1200, quality: 0.8 });
                                                 }
                                             }
-                                            const baseName = original.name.replace(/\.[^/.]+$/, '') || 'image';
-                                            const compressedFile = new File([compressedBlob], `${baseName}.jpg`, { type: 'image/jpeg' });
-                                            if (compressedBlob.size > 200 * 1024) {
-                                                showModalMessage('Image Compression', 'Image was compressed but is still larger than 200KB.');
+
+                                            if (compressedBlob) {
+                                                chosenFile = createJpegFile(compressedBlob);
+                                                if (compressedBlob.size > 200 * 1024) {
+                                                    showModalMessage('Image Compression', 'Image was compressed but is still larger than 200KB.');
+                                                }
+                                            } else if (!isSupportedOriginalType) {
+                                                showModalMessage('Image Upload', 'This photo format is not supported. Please choose a JPG or PNG image.');
+                                                return;
                                             }
-                                            setAnimalImageFile(compressedFile);
-                                            setAnimalImagePreview(URL.createObjectURL(compressedFile));
                                         } catch (err) {
-                                            setAnimalImageFile(original);
-                                            setAnimalImagePreview(URL.createObjectURL(original));
+                                            if (!isSupportedOriginalType) {
+                                                showModalMessage('Image Upload', 'This photo format is not supported. Please choose a JPG or PNG image.');
+                                                return;
+                                            }
+                                            chosenFile = original;
                                         }
+
+                                        setAnimalImageFile(chosenFile);
+                                        setAnimalImagePreview(URL.createObjectURL(chosenFile));
                                     }
                                 }}
                                 onDeleteImage={() => {
