@@ -2231,7 +2231,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                                         </div>
                                     </div>
                                 )}
-                                )}
+                            
                             </div>
 
                             {/* 3rd Section: Animal Care */}
@@ -2306,7 +2306,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                                 );
                             })()}
                         </div>
-                    )}
+                
 
                     {/* Tab 10: Behavior */}
                     {detailViewTab === 10 && (
@@ -2875,9 +2875,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                         onViewAnimal={onViewAnimal}
                     />
                 )}
+                
             </div>
         </div>
     </div>
+</div>
     );
 };
 
