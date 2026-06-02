@@ -2230,6 +2230,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                                             ))}
                                         </div>
                                     </div>
+                                    
                                 )}
                             
                             </div>
@@ -2306,7 +2307,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                                 );
                             })()}
                         </div>
-                
+                    </div>
+                    )}
 
                     {/* Tab 10: Behavior */}
                     {detailViewTab === 10 && (
@@ -2352,8 +2354,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                                     {fieldTemplate?.fields?.reactivityNotes?.enabled !== false && animal.reactivityNotes && <div className="col-span-2 flex items-baseline gap-1"><span className="text-gray-600 shrink-0">{getLabel('reactivityNotes', 'Reactivity Notes')}:</span><strong className="whitespace-pre-wrap">{animal.reactivityNotes}</strong></div>}
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        </div>)}
 
                     {/* Tab 11: Notes & Milestones */}
                     {detailViewTab === 11 && (
@@ -2875,12 +2876,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
                         onViewAnimal={onViewAnimal}
                     />
                 )}
-                
+             
             </div>
         </div>
     </div>
-</div>
-    );
-};
+);
 
-export default PrivateAnimalDetail;
+export default PrivateAnimalDetail};
