@@ -522,60 +522,6 @@ const App = () => {
     }, [detailViewTab]);
     
     // Fetch parent animals when viewing an animal
-    React.useEffect(() => {
-        if (!animalToView) {
-            setSireData(null);
-            setDamData(null);
-            setOffspringData([]);
-            return;
-        }
-        
-        const fetchPedigreeData = async () => {
-            try {
-                const sireId = animalToView.sireId_public || animalToView.fatherId_public;
-                const damId = animalToView.damId_public || animalToView.motherId_public;
-                
-                // Fetch parents using /any/ endpoint to get parents regardless of ownership
-                if (sireId) {
-                    const response = await axios.get(`${API_BASE_URL}/animals/any/${sireId}`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
-                    setSireData(response.data);
-                }
-                
-                if (damId) {
-                    const response = await axios.get(`${API_BASE_URL}/animals/any/${damId}`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
-                    setDamData(response.data);
-                }
-                
-                // Fetch offspring using the dedicated offspring endpoint
-                try {
-                    const offspringResponse = await axios.get(`${API_BASE_URL}/animals/${animalToView.id_public}/offspring`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
-                    
-                    const litters = offspringResponse.data || [];
-                    // Flatten offspring from all litters into a single array
-                    const allOffspring = [];
-                    litters.forEach(litter => {
-                        if (litter.offspring && Array.isArray(litter.offspring)) {
-                            allOffspring.push(...litter.offspring);
-                        }
-                    });
-                    
-                    setOffspringData(allOffspring);
-                } catch (e) {
-                    setOffspringData([]);
-                }
-            } catch (error) {
-                console.error('Error fetching pedigree data:', error);
-            }
-        };
-        
-        fetchPedigreeData();
-    }, [animalToView, authToken, animalDataRefreshTrigger]);
     
     // Fetch full animal record when a new animal is opened for viewing
     // (the list uses slim=true which strips appearance/genetics fields)
