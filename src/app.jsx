@@ -741,7 +741,7 @@ const App = () => {
         if (expired) {
             showModalMessage('Session Expired', 'You were logged out due to 30 minutes of inactivity.');
         }
-    }, [showModalMessage]);
+    }, [showModalMessage, navigate, setAuthToken, setUserProfile, setInModeratorMode, setShowAdminPanel, setShowModReportQueue, setBreedingLineDefs, setAnimalBreedingLines, BL_PRESETS_APP]);
 
     // Phase 10a: Use idle timeout hook
     useIdleTimeout(authToken, handleLogout, showModalMessage);
