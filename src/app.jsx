@@ -282,11 +282,6 @@ const App = () => {
     const setUserProfile = setUserProfileAuth;
     const fetchUserProfile = fetchUserProfileAuth;
     
-    // Setup idle timeout with auth
-    useIdleTimeout(authToken, () => handleLogout(), (title, message) => {
-        setModalMessage({ title, message });
-        setShowModal(true);
-    });
     
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [userCount, setUserCount] = useState('...');
