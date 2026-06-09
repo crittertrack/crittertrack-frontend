@@ -477,38 +477,6 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
         fetchPedigreeData();
     }, [animalToView?.id_public, authToken, API_BASE_URL]);
 
-    /**
-     * Listen for animal update events
-     * Updates viewed animal if it was modified externally
-     */
-    useEffect(() => {
-        const handleAnimalUpdated = (event: any) => {
-            const updatedAnimal = event.detail;
-            if (animalToView && updatedAnimal.id_public === animalToView.id_public) {
-                // Merge updates into viewed animal
-                setAnimalToView((prev: any) => ({
-                    ...prev,
-                    ...updatedAnimal
-                }));
-            }
-        };
-
-        const handleAnimalArchived = (event: any) => {
-            const archivedAnimalId = event.detail?.id_public;
-            if (animalToView && archivedAnimalId === animalToView.id_public) {
-                handleBackFromAnimal();
-            }
-        };
-
-        window.addEventListener('animal-updated', handleAnimalUpdated);
-        window.addEventListener('animal-archived', handleAnimalArchived);
-
-        return () => {
-            window.removeEventListener('animal-updated', handleAnimalUpdated);
-            window.removeEventListener('animal-archived', handleAnimalArchived);
-        };
-    }, [animalToView, handleBackFromAnimal]);
-
     // ========== RETURN ALL STATE & HANDLERS ==========
     return {
         // View/Edit States
