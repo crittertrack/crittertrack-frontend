@@ -523,16 +523,6 @@ const App = () => {
     
     // Fetch parent animals when viewing an animal
     
-    // Fetch full animal record when a new animal is opened for viewing
-    // (the list uses slim=true which strips appearance/genetics fields)
-    React.useEffect(() => {
-        if (!animalToView?.id_public || !authToken) return;
-        axios.get(`${API_BASE_URL}/animals/${animalToView.id_public}`, {
-            headers: { Authorization: `Bearer ${authToken}` }
-        })
-        .then(res => setAnimalToView(res.data))
-        .catch(() => {}); // silently keep the slim data if the fetch fails
-    }, [animalToView?.id_public]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Re-fetch the current animal from server when data is saved/updated
     const refetchTriggerRef = React.useRef(0);
