@@ -589,8 +589,13 @@ const App = () => {
     }, [animalToView?.id_public]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Re-fetch the current animal from server when data is saved/updated
+    const refetchTriggerRef = React.useRef(0);
     React.useEffect(() => {
         if (!animalToView?.id_public || animalDataRefreshTrigger === 0 || !authToken) return;
+        
+        // Prevent duplicate fetches for the same trigger value
+        if (refetchTriggerRef.current === animalDataRefreshTrigger) return;
+        refetchTriggerRef.current = animalDataRefreshTrigger;
         
         const refetchCurrentAnimal = async () => {
             try {
@@ -599,8 +604,7 @@ const App = () => {
                 });
                 // Update the animal state with fresh data from server
                 setAnimalToView(response.data);
-                // Broadcast settled server state to all components
-                window.dispatchEvent(new CustomEvent('animal-updated', { detail: response.data }));
+                // Don't dispatch event here - it causes infinite loop with the listener below
             } catch (error) {
                 console.error('Error refetching animal data:', error);
             }
@@ -610,13 +614,16 @@ const App = () => {
     }, [animalDataRefreshTrigger, animalToView?.id_public, authToken, API_BASE_URL]);
 
     // Global: keep animalToView in sync with any animal-updated event from anywhere in the app
+    // This listener is for external updates only, not for our own refetch above
     React.useEffect(() => {
         const handleGlobalAnimalUpdate = (e) => {
             const updated = e.detail;
             if (!updated?.id_public) return;
             setAnimalToView(prev => {
                 if (!prev || prev.id_public !== updated.id_public) return prev;
-                return { ...prev, ...updated };
+                // Only update if the data is actually different to prevent loops
+                const hasChanges = JSON.stringify(prev) !== JSON.stringify({ ...prev, ...updated });
+                return hasChanges ? { ...prev, ...updated } : prev;
             });
         };
         window.addEventListener('animal-updated', handleGlobalAnimalUpdate);
