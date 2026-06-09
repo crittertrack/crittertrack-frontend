@@ -524,47 +524,6 @@ const App = () => {
     // Fetch parent animals when viewing an animal
     
 
-    // Re-fetch the current animal from server when data is saved/updated
-    const refetchTriggerRef = React.useRef(0);
-    React.useEffect(() => {
-        if (!animalToView?.id_public || animalDataRefreshTrigger === 0 || !authToken) return;
-        
-        // Prevent duplicate fetches for the same trigger value
-        if (refetchTriggerRef.current === animalDataRefreshTrigger) return;
-        refetchTriggerRef.current = animalDataRefreshTrigger;
-        
-        const refetchCurrentAnimal = async () => {
-            try {
-                const response = await axios.get(`${API_BASE_URL}/animals/${animalToView.id_public}`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
-                // Update the animal state with fresh data from server
-                setAnimalToView(response.data);
-                // Don't dispatch event here - it causes infinite loop with the listener below
-            } catch (error) {
-                console.error('Error refetching animal data:', error);
-            }
-        };
-        
-        refetchCurrentAnimal();
-    }, [animalDataRefreshTrigger, animalToView?.id_public, authToken, API_BASE_URL]);
-
-    // Global: keep animalToView in sync with any animal-updated event from anywhere in the app
-    // This listener is for external updates only, not for our own refetch above
-    React.useEffect(() => {
-        const handleGlobalAnimalUpdate = (e) => {
-            const updated = e.detail;
-            if (!updated?.id_public) return;
-            setAnimalToView(prev => {
-                if (!prev || prev.id_public !== updated.id_public) return prev;
-                // Only update if the data is actually different to prevent loops
-                const hasChanges = JSON.stringify(prev) !== JSON.stringify({ ...prev, ...updated });
-                return hasChanges ? { ...prev, ...updated } : prev;
-            });
-        };
-        window.addEventListener('animal-updated', handleGlobalAnimalUpdate);
-        return () => window.removeEventListener('animal-updated', handleGlobalAnimalUpdate);
-    }, []);
     
     const [showPedigreeChart, setShowPedigreeChart] = useState(false);
     const [copySuccessAnimal, setCopySuccessAnimal] = useState(false);
