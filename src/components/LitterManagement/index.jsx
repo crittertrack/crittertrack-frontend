@@ -2607,7 +2607,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 litterSizeWeaned: formData.litterSizeWeaned || null,
                 stillbornCount: formData.stillbornCount || null,
                 lossesCount: formData.lossesCount || null,
-                weaningDate: formData.weaningDate || null
+                weaningDate: formData.weaningDate || null,
+                // Extraction flags
+                extractStillbornFromTotal: formData.extractStillbornFromTotal || false,
+                extractLossesFromTotal: formData.extractLossesFromTotal || false,
+                // Gender-specific stillborn
+                maleStillborn: formData.maleStillborn || null,
+                femaleStillborn: formData.femaleStillborn || null,
+                unknownStillborn: formData.unknownStillborn || null,
+                // Gender-specific losses
+                maleLosses: formData.maleLosses || null,
+                femaleLosses: formData.femaleLosses || null,
+                unknownLosses: formData.unknownLosses || null
             };
 
             const litterResponse = await axios.post(`${API_BASE_URL}/litters`, litterPayload, {
@@ -3178,7 +3189,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 litterSizeWeaned: formData.litterSizeWeaned || null,
                 stillbornCount: formData.stillbornCount || null,
                 lossesCount: formData.lossesCount || null,
-                weaningDate: formData.weaningDate || null
+                weaningDate: formData.weaningDate || null,
+                // Extraction flags
+                extractStillbornFromTotal: formData.extractStillbornFromTotal || false,
+                extractLossesFromTotal: formData.extractLossesFromTotal || false,
+                // Gender-specific stillborn
+                maleStillborn: formData.maleStillborn || null,
+                femaleStillborn: formData.femaleStillborn || null,
+                unknownStillborn: formData.unknownStillborn || null,
+                // Gender-specific losses
+                maleLosses: formData.maleLosses || null,
+                femaleLosses: formData.femaleLosses || null,
+                unknownLosses: formData.unknownLosses || null
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
