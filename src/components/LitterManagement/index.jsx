@@ -4050,7 +4050,38 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     <input
                                                         type="checkbox"
                                                         checked={formData.extractStillbornFromTotal || false}
-                                                        onChange={(e) => setFormData({...formData, extractStillbornFromTotal: e.target.checked})}
+                                                        onChange={(e) => {
+                                                            const checked = e.target.checked;
+                                                            setFormData(prev => {
+                                                                if (checked) {
+                                                                    // Extract stillborn from gender counts
+                                                                    const newMale = Math.max(0, (prev.maleCount || 0) - (prev.maleStillborn || 0));
+                                                                    const newFemale = Math.max(0, (prev.femaleCount || 0) - (prev.femaleStillborn || 0));
+                                                                    const newUnknown = Math.max(0, (prev.unknownCount || 0) - (prev.unknownStillborn || 0));
+                                                                    return {
+                                                                        ...prev,
+                                                                        extractStillbornFromTotal: true,
+                                                                        maleCount: newMale || null,
+                                                                        femaleCount: newFemale || null,
+                                                                        unknownCount: newUnknown || null,
+                                                                        litterSizeBorn: (newMale + newFemale + newUnknown) || null
+                                                                    };
+                                                                } else {
+                                                                    // Add stillborn back to gender counts
+                                                                    const newMale = (prev.maleCount || 0) + (prev.maleStillborn || 0);
+                                                                    const newFemale = (prev.femaleCount || 0) + (prev.femaleStillborn || 0);
+                                                                    const newUnknown = (prev.unknownCount || 0) + (prev.unknownStillborn || 0);
+                                                                    return {
+                                                                        ...prev,
+                                                                        extractStillbornFromTotal: false,
+                                                                        maleCount: newMale || null,
+                                                                        femaleCount: newFemale || null,
+                                                                        unknownCount: newUnknown || null,
+                                                                        litterSizeBorn: (newMale + newFemale + newUnknown) || null
+                                                                    };
+                                                                }
+                                                            });
+                                                        }}
                                                         className="rounded border-gray-300 text-primary focus:ring-primary"
                                                     />
                                                     <span>Extract stillborn from total counts (reduce M/F/U counts by stillborn amounts)</span>
@@ -4144,7 +4175,38 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     <input
                                                         type="checkbox"
                                                         checked={formData.extractLossesFromTotal || false}
-                                                        onChange={(e) => setFormData({...formData, extractLossesFromTotal: e.target.checked})}
+                                                        onChange={(e) => {
+                                                            const checked = e.target.checked;
+                                                            setFormData(prev => {
+                                                                if (checked) {
+                                                                    // Extract losses from gender counts
+                                                                    const newMale = Math.max(0, (prev.maleCount || 0) - (prev.maleLosses || 0));
+                                                                    const newFemale = Math.max(0, (prev.femaleCount || 0) - (prev.femaleLosses || 0));
+                                                                    const newUnknown = Math.max(0, (prev.unknownCount || 0) - (prev.unknownLosses || 0));
+                                                                    return {
+                                                                        ...prev,
+                                                                        extractLossesFromTotal: true,
+                                                                        maleCount: newMale || null,
+                                                                        femaleCount: newFemale || null,
+                                                                        unknownCount: newUnknown || null,
+                                                                        litterSizeBorn: (newMale + newFemale + newUnknown) || null
+                                                                    };
+                                                                } else {
+                                                                    // Add losses back to gender counts
+                                                                    const newMale = (prev.maleCount || 0) + (prev.maleLosses || 0);
+                                                                    const newFemale = (prev.femaleCount || 0) + (prev.femaleLosses || 0);
+                                                                    const newUnknown = (prev.unknownCount || 0) + (prev.unknownLosses || 0);
+                                                                    return {
+                                                                        ...prev,
+                                                                        extractLossesFromTotal: false,
+                                                                        maleCount: newMale || null,
+                                                                        femaleCount: newFemale || null,
+                                                                        unknownCount: newUnknown || null,
+                                                                        litterSizeBorn: (newMale + newFemale + newUnknown) || null
+                                                                    };
+                                                                }
+                                                            });
+                                                        }}
                                                         className="rounded border-gray-300 text-primary focus:ring-primary"
                                                     />
                                                     <span>Extract losses from total counts (reduce M/F/U counts by loss amounts)</span>
