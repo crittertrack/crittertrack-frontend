@@ -1171,6 +1171,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     else if (color === 'Silver')     color = 'Leaden Silver';
     else if (color === 'Champagne')  color = 'Leaden Champagne';
     else if (color === 'Lavender')   color = 'Leaden Lavender';
+    else if (!color) color = 'Leaden'; // If no color set yet, default to Leaden
     else if (!color.startsWith('Leaden') && !color.startsWith('Blue Leaden')) color = `Leaden ${color}`;
   }
 
