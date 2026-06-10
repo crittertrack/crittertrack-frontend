@@ -2612,13 +2612,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 extractStillbornFromTotal: formData.extractStillbornFromTotal || false,
                 extractLossesFromTotal: formData.extractLossesFromTotal || false,
                 // Gender-specific stillborn
-                maleStillborn: formData.maleStillborn || null,
-                femaleStillborn: formData.femaleStillborn || null,
-                unknownStillborn: formData.unknownStillborn || null,
+                maleStillbornCount: formData.maleStillborn || null,
+                femaleStillbornCount: formData.femaleStillborn || null,
+                unknownStillbornCount: formData.unknownStillborn || null,
                 // Gender-specific losses
-                maleLosses: formData.maleLosses || null,
-                femaleLosses: formData.femaleLosses || null,
-                unknownLosses: formData.unknownLosses || null
+                maleLossesCount: formData.maleLosses || null,
+                femaleLossesCount: formData.femaleLosses || null,
+                unknownLossesCount: formData.unknownLosses || null
             };
 
             const litterResponse = await axios.post(`${API_BASE_URL}/litters`, litterPayload, {
@@ -3202,13 +3202,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 extractStillbornFromTotal: formData.extractStillbornFromTotal || false,
                 extractLossesFromTotal: formData.extractLossesFromTotal || false,
                 // Gender-specific stillborn
-                maleStillborn: formData.maleStillborn || null,
-                femaleStillborn: formData.femaleStillborn || null,
-                unknownStillborn: formData.unknownStillborn || null,
+                maleStillbornCount: formData.maleStillborn || null,
+                femaleStillbornCount: formData.femaleStillborn || null,
+                unknownStillbornCount: formData.unknownStillborn || null,
                 // Gender-specific losses
-                maleLosses: formData.maleLosses || null,
-                femaleLosses: formData.femaleLosses || null,
-                unknownLosses: formData.unknownLosses || null
+                maleLossesCount: formData.maleLosses || null,
+                femaleLossesCount: formData.femaleLosses || null,
+                unknownLossesCount: formData.unknownLosses || null
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
