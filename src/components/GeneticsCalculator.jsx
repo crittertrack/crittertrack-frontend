@@ -1,4 +1,4 @@
-no as aimport React, { useState } from 'react';
+import React, { useState } from 'react';
 import { X, Book, User, Search } from 'lucide-react';
 
 // Define all gene loci with their possible allele combinations
