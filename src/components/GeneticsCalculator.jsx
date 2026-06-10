@@ -1030,6 +1030,8 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
         }
       } else if (singleGene === 'P') {
         title = genotype.P === 'p/p' ? 'Pink-Eyed Dilution' : 'Normal Eye Color';
+      } else if (singleGene === 'Ln') {
+        title = genotype.Ln === 'ln/ln' ? 'Leaden Dilution' : 'Non-Leaden';
       }
     } else {
       // Multiple genes selected without A-locus
@@ -1088,6 +1090,16 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     // u locus alone (non-umbrous)
     if (originalGenotype.U && genotype.U === 'u/u') {
       return { phenotype: '', carriers, hidden, notes: ['This gene combination does not affect phenotype'] };
+    }
+
+    // Ln locus alone
+    if (originalGenotype.Ln) {
+      if (genotype.Ln === 'Ln/ln') {
+        carriers.push('Leaden');
+        return { phenotype: '', carriers, hidden, notes: [] };
+      } else if (genotype.Ln === 'Ln/Ln') {
+        return { phenotype: '', carriers, hidden, notes: ['This gene combination does not affect phenotype'] };
+      }
     }
   }
 
