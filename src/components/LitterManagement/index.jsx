@@ -3074,6 +3074,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             litterSizeWeaned: litter.litterSizeWeaned || litter.numberWeaned || null,
             stillbornCount: litter.stillbornCount || litter.stillborn || null,
             lossesCount: litter.lossesCount || litter.losses || null,
+            // Sex-specific stillborn counts
+            maleStillborn: litter.maleStillbornCount || null,
+            femaleStillborn: litter.femaleStillbornCount || null,
+            unknownStillborn: litter.unknownStillbornCount || null,
+            // Sex-specific losses counts
+            maleLosses: litter.maleLossesCount || null,
+            femaleLosses: litter.femaleLossesCount || null,
+            unknownLosses: litter.unknownLossesCount || null,
             expectedDueDate: formatDateForInput(litter.expectedDueDate),
             weaningDate: formatDateForInput(litter.weaningDate)
         });
