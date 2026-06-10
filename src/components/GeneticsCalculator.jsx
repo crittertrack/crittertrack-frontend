@@ -1736,13 +1736,14 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
       Rn: 'Rn/Rn',   // No roan
       Si: 'Si/Si',   // No silver
       Mobr: 'mobr/mobr', // No xbrindle
+      U: 'u/u',      // No umbrous
+      Ln: 'Ln/Ln',   // No leaden
       Go: 'Go/Go',   // Shorthair (default)
       Re: 're/re',   // No astrex
       Sa: 'Sa/Sa',   // Non-satin
       Rst: 'Rst/Rst', // No rosette
       Fz: 'Fz/Fz',   // No fuzz
-      Nu: 'nu/nu',   // No nude
-      U: 'u/u'       // No umbrous
+      Nu: 'nu/nu'    // No nude
     };
     
     const filled = {};
