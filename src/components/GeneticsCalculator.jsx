@@ -1725,7 +1725,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
   // Function to apply defaults to genotype
   const applyDefaults = (genotype) => {
     // Base color genes - only apply defaults if NONE are selected
-    const baseGenes = ['A', 'B', 'C', 'D', 'E', 'P'];
+    const baseGenes = ['A', 'B', 'C', 'D', 'E', 'P', 'Ln'];
     const hasAnyBaseGene = baseGenes.some(gene => genotype[gene] && genotype[gene] !== '');
     
     // Marking add-on genes - always apply individually, never as a group
@@ -1749,7 +1749,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
       Si: 'Si/Si',   // No silver
       Mobr: 'mobr/mobr', // No xbrindle
       U: 'u/u',      // No umbrous
-      Ln: 'Ln/Ln',   // No leaden
+      Ln: 'Ln/Ln',   // No leaden (wild type)
       Go: 'Go/Go',   // Shorthair (default)
       Re: 're/re',   // No astrex
       Sa: 'Sa/Sa',   // Non-satin
@@ -1803,7 +1803,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
 
     // Mouse-only guard: incomplete color gene selection check
     if (selectedSpecies === 'Fancy Mouse') {
-      const colorGenes = ['A', 'B', 'C', 'D', 'E', 'P'];
+      const colorGenes = ['A', 'B', 'C', 'D', 'E', 'P', 'Ln'];
       const markingGenes = ['W', 'Wsh', 'Rw', 'S', 'Mi', 'Rb'];
       const selectedColorGenes = selectedLoci.filter(locus => colorGenes.includes(locus));
       const selectedMarkingGenes = selectedLoci.filter(locus => markingGenes.includes(locus));
