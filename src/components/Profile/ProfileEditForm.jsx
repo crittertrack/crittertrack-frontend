@@ -342,7 +342,9 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     }, [userProfile.allowMessages, userProfile.emailNotificationPreference, userProfile.country, userProfile.state]);
 
     // Keep breederInfo form fields in sync when userProfile updates after save/refetch
+    // ONLY update if breederInfoOpen is false to prevent overwriting user's current edits
     useEffect(() => {
+        if (breederInfoOpen) return; // Don't reset while user is editing
         setBreederInfo({
             aboutProgram:       userProfile.breederInfo?.aboutProgram       || '',
             adoptionRules:      userProfile.breederInfo?.adoptionRules      || '',
@@ -354,7 +356,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             contactPreferences: userProfile.breederInfo?.contactPreferences || '',
             customFields:       userProfile.breederInfo?.customFields       || [],
         });
-    }, [userProfile.breederInfo]);
+    }, [userProfile.breederInfo, breederInfoOpen]);
     
     console.log('[ProfileEditForm] Initial allowMessages state:', allowMessages);
 
