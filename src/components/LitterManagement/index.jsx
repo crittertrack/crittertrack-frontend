@@ -4015,25 +4015,103 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     </div>
 
                                     {/* Row 3: Outcomes */}
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        {/* Stillborn Count */}
+                                    <div className="space-y-4">
+                                        {/* Stillborn - matching Total Born layout */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Stillborn
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Stillborn (Born dead)
                                             </label>
-                                            <input
-                                                type="number"
-                                                value={typeof formData.stillbornCount === 'number' ? formData.stillbornCount : (formData.stillbornCount || '')}
-                                                onChange={(e) => setFormData({...formData, stillbornCount: e.target.value ? parseInt(e.target.value) : null})}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                placeholder="0"
-                                                min="0"
-                                            />
-                                            <p className="text-xs text-gray-400 mt-1">Born dead</p>
+                                            
+                                            {/* Checkbox to extract from total counts */}
+                                            <div className="mb-3">
+                                                <label className="flex items-center space-x-2 text-sm text-gray-600 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={formData.extractStillbornFromTotal || false}
+                                                        onChange={(e) => setFormData({...formData, extractStillbornFromTotal: e.target.checked})}
+                                                        className="rounded border-gray-300 text-primary focus:ring-primary"
+                                                    />
+                                                    <span>Extract stillborn from total counts (reduce M/F/U counts by stillborn amounts)</span>
+                                                </label>
+                                                <p className="text-xs text-gray-400 mt-1 ml-6">
+                                                    When enabled, stillborn will be subtracted from the gender counts above, showing only live-born offspring.
+                                                </p>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                                {/* Total Stillborn - read-only, summed from M+F+U */}
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Total Stillborn
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        value={typeof formData.stillbornCount === 'number' ? formData.stillbornCount : (formData.stillbornCount || '')}
+                                                        readOnly
+                                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 cursor-not-allowed font-semibold"
+                                                        placeholder="0"
+                                                    />
+                                                    <p className="text-xs text-gray-400 mt-1">Auto-calculated from M + F + U</p>
+                                                </div>
+
+                                                {/* Male Stillborn */}
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Male Stillborn</label>
+                                                    <input
+                                                        type="number"
+                                                        value={typeof formData.maleStillborn === 'number' ? formData.maleStillborn : (formData.maleStillborn || '')}
+                                                        onChange={(e) => {
+                                                            const v = e.target.value ? parseInt(e.target.value) : null;
+                                                            const f = formData.femaleStillborn || 0;
+                                                            const u = formData.unknownStillborn || 0;
+                                                            setFormData({...formData, maleStillborn: v, stillbornCount: (v || 0) + f + u || null});
+                                                        }}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                        placeholder="0"
+                                                        min="0"
+                                                    />
+                                                </div>
+
+                                                {/* Female Stillborn */}
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Female Stillborn</label>
+                                                    <input
+                                                        type="number"
+                                                        value={typeof formData.femaleStillborn === 'number' ? formData.femaleStillborn : (formData.femaleStillborn || '')}
+                                                        onChange={(e) => {
+                                                            const v = e.target.value ? parseInt(e.target.value) : null;
+                                                            const m = formData.maleStillborn || 0;
+                                                            const u = formData.unknownStillborn || 0;
+                                                            setFormData({...formData, femaleStillborn: v, stillbornCount: m + (v || 0) + u || null});
+                                                        }}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                        placeholder="0"
+                                                        min="0"
+                                                    />
+                                                </div>
+
+                                                {/* Unknown Stillborn */}
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Unknown Stillborn</label>
+                                                    <input
+                                                        type="number"
+                                                        value={typeof formData.unknownStillborn === 'number' ? formData.unknownStillborn : (formData.unknownStillborn || '')}
+                                                        onChange={(e) => {
+                                                            const v = e.target.value ? parseInt(e.target.value) : null;
+                                                            const m = formData.maleStillborn || 0;
+                                                            const f = formData.femaleStillborn || 0;
+                                                            setFormData({...formData, unknownStillborn: v, stillbornCount: m + f + (v || 0) || null});
+                                                        }}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                        placeholder="0"
+                                                        min="0"
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        {/* Losses - Gender Breakdown */}
-                                        <div className="md:col-span-3">
+                                        {/* Losses - matching Total Born layout */}
+                                        <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                                 Losses (Died after birth)
                                             </label>
@@ -4054,10 +4132,25 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 </p>
                                             </div>
 
-                                            {/* Gender-specific loss inputs */}
-                                            <div className="grid grid-cols-3 gap-3">
+                                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                                {/* Total Losses - read-only, summed from M+F+U */}
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-600 mb-1">Male Losses</label>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Total Losses
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        value={typeof formData.lossesCount === 'number' ? formData.lossesCount : (formData.lossesCount || '')}
+                                                        readOnly
+                                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 cursor-not-allowed font-semibold"
+                                                        placeholder="0"
+                                                    />
+                                                    <p className="text-xs text-gray-400 mt-1">Auto-calculated from M + F + U</p>
+                                                </div>
+
+                                                {/* Male Losses */}
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Male Losses</label>
                                                     <input
                                                         type="number"
                                                         value={typeof formData.maleLosses === 'number' ? formData.maleLosses : (formData.maleLosses || '')}
@@ -4067,13 +4160,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                             const u = formData.unknownLosses || 0;
                                                             setFormData({...formData, maleLosses: v, lossesCount: (v || 0) + f + u || null});
                                                         }}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                                         placeholder="0"
                                                         min="0"
                                                     />
                                                 </div>
+
+                                                {/* Female Losses */}
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-600 mb-1">Female Losses</label>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Female Losses</label>
                                                     <input
                                                         type="number"
                                                         value={typeof formData.femaleLosses === 'number' ? formData.femaleLosses : (formData.femaleLosses || '')}
@@ -4083,13 +4178,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                             const u = formData.unknownLosses || 0;
                                                             setFormData({...formData, femaleLosses: v, lossesCount: m + (v || 0) + u || null});
                                                         }}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                                         placeholder="0"
                                                         min="0"
                                                     />
                                                 </div>
+
+                                                {/* Unknown Losses */}
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-600 mb-1">Unknown Losses</label>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Unknown Losses</label>
                                                     <input
                                                         type="number"
                                                         value={typeof formData.unknownLosses === 'number' ? formData.unknownLosses : (formData.unknownLosses || '')}
@@ -4099,17 +4196,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                             const f = formData.femaleLosses || 0;
                                                             setFormData({...formData, unknownLosses: v, lossesCount: m + f + (v || 0) || null});
                                                         }}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                                         placeholder="0"
                                                         min="0"
                                                     />
                                                 </div>
                                             </div>
-                                            
-                                            {/* Total losses display */}
-                                            <p className="text-xs text-gray-500 mt-2">
-                                                Total losses: <span className="font-semibold">{(formData.maleLosses || 0) + (formData.femaleLosses || 0) + (formData.unknownLosses || 0)}</span>
-                                            </p>
                                         </div>
 
                                         {/* Total Weaned */}
