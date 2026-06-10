@@ -1338,6 +1338,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         females: 0,
         unknown: 0
     });
+    const [excludeLossesFromCreation, setExcludeLossesFromCreation] = useState(false);
     // Search filters for parent selection (UI not yet implemented)
     // const [sireSearch, setSireSearch] = useState('');
     // const [damSearch, setDamSearch] = useState('');
@@ -3874,7 +3875,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <p className="text-xs text-gray-500 mt-1">Optional — shows on calendar</p>
                                         </div>
 
-                                        {/* Birth Method */}}
+                                        {/* Birth Method */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                                 Birth Method
