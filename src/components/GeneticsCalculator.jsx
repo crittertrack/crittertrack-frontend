@@ -52,7 +52,7 @@ const GENE_LOCI = {
   },
   Ln: {
     name: 'Leaden',
-    description: 'Recessive. Dilutes black pigment to a blue-grey (leaden) colour, independent of the D locus. e.g. Leaden Black (ln/ln), Leaden Chocolate (ln/ln + b/b). Combined with d/d gives Blue Leaden.',
+    description: 'Recessive. Dilutes black pigment to a blue-grey (leaden) colour, independent of the D locus.',
     combinations: [
       'ln/ln',
       'Ln/ln', 'Ln/Ln'
@@ -538,6 +538,9 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   
   // E-locus carriers
   if (genotype.E === 'E/e' || genotype.E === 'e/E') carriers.push('Recessive Red');
+
+  // Ln-locus carriers
+  if (genotype.Ln === 'Ln/ln' || genotype.Ln === 'ln/Ln') carriers.push('Leaden');
   
   // S-locus carriers (Pied)
   if (genotype.S === 'S/s' || genotype.S === 's/S') carriers.push('Pied');
@@ -551,9 +554,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Si-locus carriers (Silvered)
   if (genotype.Si === 'Si/si' || genotype.Si === 'si/Si') carriers.push('Silvered');
   
-  // Ln-locus carriers (Leaden)
-  if (genotype.Ln === 'Ln/ln' || genotype.Ln === 'ln/Ln') carriers.push('Leaden');
-
   // Coat gene carriers
   if (genotype.Go === 'Go/go' || genotype.Go === 'go/Go') carriers.push('Longhair');
   if (genotype.Sa === 'Sa/sa' || genotype.Sa === 'sa/Sa') carriers.push('Satin');
@@ -714,6 +714,13 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     }
   }
 
+  // Leaden
+  if (genotype.Ln === 'ln/ln' && !color) {
+    if (!color) {
+      color = 'Leaden';
+    }
+  }
+
   // Dominant yellow/red (Ay)
   if (genotype.A && (genotype.A.startsWith('Ay/'))) {
     // Determine modifiers early (used throughout this block)
@@ -818,6 +825,12 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       color = isTanVariant ? 'Amber Tan' : 'Amber';
       return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
     }
+
+    // Handle leaden modifier
+    if (isLeaden) {
+      color = isTanVariant ? 'Leaden Tan' : 'Leaden';
+      return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
+    }
     
     // Handle pink-eye modifier
     if (isPinkEye) {
@@ -835,6 +848,28 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     if (genotype.A && genotype.A.includes('at')) {
       baseColor = 'Recessive Red Tan';
     }
+    
+    // Process all markings and coat textures for recessive red
+    // Continue processing instead of returning early
+    color = baseColor;
+  }
+
+  // Leaden (ln/ln) - but still process all other traits
+  if (genotype.Ln === 'ln/ln') {
+    let baseColor = 'Leaden';
+    if (genotype.A && genotype.A.includes('at')) {
+      baseColor = 'Leaden Tan';
+    }
+
+    // Process all markings and coat textures for leaden
+    // Continue processing instead of returning early
+    color = baseColor;
+  }
+
+  // Viable yellow (brindle - Avy)
+  if (genotype.A && genotype.A.startsWith('Avy/')) {
+    // Handle C/- carriers separately
+    if (genotype.C === 'C/c') {
     
     // Process all markings and coat textures for recessive red
     // Continue processing instead of returning early
@@ -927,6 +962,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     const isDilute = genotype.D === 'd/d';
     const isAgouti = genotype.A === 'Avy/A' || genotype.A === 'A/Avy';
     const isPinkEye = genotype.P === 'p/p';
+    const isLeaden = genotype.Ln === 'ln/ln';
     
     // Handle brown + dilute + pink-eye combination
     if (isBrown && isDilute && isPinkEye) {
@@ -949,6 +985,12 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     // Handle dilute modifier
     if (isDilute) {
       color = isTanVariant ? 'Blue Brindle Tan' : isAgouti ? 'Blue Agouti Brindle' : 'Blue Brindle';
+      return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
+    }
+
+    // Handle leaden modifier
+    if (isLeaden) {
+      color = isTanVariant ? 'Leaden Tan' : 'Leaden';
       return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
     }
     
@@ -975,7 +1017,8 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     (originalGenotype.C && originalGenotype.C !== '') ||
     (originalGenotype.D && originalGenotype.D !== '') ||
     (originalGenotype.E && originalGenotype.E !== '') ||
-    (originalGenotype.P && originalGenotype.P !== '')
+    (originalGenotype.P && originalGenotype.P !== '') ||
+    (originalGenotype.Ln && originalGenotype.Ln !== '')
   );
 
   // Check if ONLY one color gene is selected (incomplete for phenotype calculation)
@@ -987,6 +1030,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     if (originalGenotype.D && originalGenotype.D !== '') selectedColorGenes.push('D');
     if (originalGenotype.E && originalGenotype.E !== '') selectedColorGenes.push('E');
     if (originalGenotype.P && originalGenotype.P !== '') selectedColorGenes.push('P');
+    if (originalGenotype.Ln && originalGenotype.Ln !== '') selectedColorGenes.push('Ln');
   }
 
   // If color genes selected without A-locus (excluding marking-only selections), show note
