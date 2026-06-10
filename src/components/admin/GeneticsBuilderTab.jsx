@@ -257,7 +257,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
             const coatGenes = [];
             
             // Define which loci are marking vs coat
-            const markingGeneSymbols = ['S', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'U', 'Ld'];
+            const markingGeneSymbols = ['S', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'U', 'Ln'];
             const coatGeneSymbols = ['Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'];
             
             let geneOrder = 0;

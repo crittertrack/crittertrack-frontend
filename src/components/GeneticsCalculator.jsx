@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+no as aimport React, { useState } from 'react';
 import { X, Book, User, Search } from 'lucide-react';
 
 // Define all gene loci with their possible allele combinations
@@ -48,6 +48,14 @@ const GENE_LOCI = {
     combinations: [
       'e/e',
       'E/e', 'E/E'
+    ]
+  },
+  Ln: {
+    name: 'Leaden',
+    description: 'Recessive. Dilutes black pigment to a blue-grey (leaden) colour, independent of the D locus. e.g. Leaden Black (ln/ln), Leaden Chocolate (ln/ln + b/b). Combined with d/d gives Blue Leaden.',
+    combinations: [
+      'ln/ln',
+      'Ln/ln', 'Ln/Ln'
     ]
   },
   P: {
@@ -170,14 +178,6 @@ const GENE_LOCI = {
     combinations: [
       'nu/nu',
       'Nu/nu', 'Nu/Nu'
-    ]
-  },
-  Ln: {
-    name: 'Leaden',
-    description: 'Recessive. Dilutes black pigment to a blue-grey (leaden) colour, independent of the D locus. e.g. Leaden Black (ln/ln), Leaden Chocolate (ln/ln + b/b). Combined with d/d gives Blue Leaden.',
-    combinations: [
-      'ln/ln',
-      'Ln/ln', 'Ln/Ln'
     ]
   }
 };
