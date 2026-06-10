@@ -1022,6 +1022,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
         }
       } else if (singleGene === 'D') {
         title = genotype.D === 'd/d' ? 'Dilute' : 'Non-Dilute';
+
       } else if (singleGene === 'E') {
         if (genotype.E === 'E/E' || genotype.E === 'E/e') {
           title = 'Normal Extension';
@@ -1030,8 +1031,13 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
         }
       } else if (singleGene === 'P') {
         title = genotype.P === 'p/p' ? 'Pink-Eyed Dilution' : 'Normal Eye Color';
+
       } else if (singleGene === 'Ln') {
-        title = genotype.Ln === 'ln/ln' ? 'Leaden' : 'Non-Leaden';
+        if (genotype.Ln === 'ln/ln') {
+          title = 'Leaden';
+        } else {
+          title = 'Non-Leaden';
+        }
       }
     } else {
       // Multiple genes selected without A-locus
