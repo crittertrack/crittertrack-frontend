@@ -1031,7 +1031,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       } else if (singleGene === 'P') {
         title = genotype.P === 'p/p' ? 'Pink-Eyed Dilution' : 'Normal Eye Color';
       } else if (singleGene === 'Ln') {
-        title = genotype.Ln === 'ln/ln' ? 'Leaden Dilution' : 'Non-Leaden';
+        title = genotype.Ln === 'ln/ln' ? 'Leaden' : 'Non-Leaden';
       }
     } else {
       // Multiple genes selected without A-locus
