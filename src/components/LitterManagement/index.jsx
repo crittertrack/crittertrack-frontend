@@ -47,6 +47,7 @@ const TARGET_OUTCOME_TRAIT_CHIPS = {
         { id: 'dom-red',            label: 'Dominant Red',      code: 'Ay/-',           group: 'Base Color — Other' },
         { id: 'rec-red',            label: 'Recessive Red',     code: 'e/e',            group: 'Base Color — Other' },
         { id: 'am-brindle',         label: 'Am. Brindle',       code: 'Avy/-',          group: 'Base Color — Other' },
+        { id: 'Leaden',            label: 'Leaden',            code: 'ln/ln',          group: 'Base Color — Other' },
         // Albino & Dilution
         { id: 'albino',             label: 'Albino',            code: 'c/c',            group: 'Albino & Dilution' },
         { id: 'himalayan',          label: 'Himalayan',         code: 'c/ch',           group: 'Albino & Dilution' },
@@ -238,6 +239,7 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits, species = TARGET_OUTCO
             // Base Color — Other
             case 'dom-red':          genotype.A  = 'Ay/a';    break;
             case 'rec-red':          genotype.E  = 'e/e';     break;
+            case 'Leaden':          genotype.Ln = 'ln/ln';   break;
             // Albino & Dilution — C locus
             case 'albino':           genotype.C  = 'c/c';     break;
             case 'himalayan':        genotype.C  = 'c/ch';    break;
@@ -1509,7 +1511,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
     const CHIP_A_COMPOUND_HET_CAPABLE = new Set(['tan', 'fox']); // may pair with one A-locus series
     // E-locus: only rec-red remains (fawn/amber removed); can combine with A-locus chips
+    // ln-locus: only leaden remains; can combine with A-locus chips
     const CHIP_E_EXCLUSIVE  = new Set(['rec-red']);
+    const CHIP_LEADEN_EXCLUSIVE = new Set(['leaden']);
     const CHIP_C_EXCLUSIVE  = new Set(['albino','himalayan','bone','siamese','burmese','stone','beige','colorpoint-beige','mock-choc','sepia','silver-agouti']);
     const CHIP_GO_EXCLUSIVE = new Set(['shorthair','longhair','texel']);
     const CHIP_W_EXCLUSIVE  = new Set(['variegated','banded']);
@@ -1539,6 +1543,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             }
             // E-locus: rec-red is the only E chip; clearing is a no-op but kept for consistency
             if (CHIP_E_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_E_EXCLUSIVE.has(id));
+            // ln-locus: only leaden remains; can combine with A-locus chips
+            if (CHIP_LEADEN_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_LEADEN_EXCLUSIVE.has(id));
             // C-locus: mutually exclusive
             if (CHIP_C_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_C_EXCLUSIVE.has(id));
             // Go-locus: mutually exclusive

@@ -1949,6 +1949,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     'Fawn:1': ['A', 'P'], // Ay/a p/p variant
     'Amber:0': ['E', 'D'], // a/a e/e d/d variant
     'Amber:1': ['A', 'D'], // Ay/a d/d variant
+    'Leaden': ['Ln'],
     'Agouti': ['A'],
     'Brindle': ['A'],
     'Argente': ['A', 'P'],
@@ -2102,6 +2103,10 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
         { name: 'Amber', image: '/images/phenotypes/amber.png', genotypes: [
           { A: 'a/a', B: 'B/B', C: 'C/C', D: 'd/d', E: 'e/e', P: 'P/P' },
           { A: 'Ay/a', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' }
+        ] },
+        { name: 'Leaden', image: '/images/phenotypes/blue.png', genotypes: [
+          { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', Ln: 'ln/ln', P: 'P/P' },
+          { A: 'A/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', Ln: 'ln/ln', P: 'P/P' },
         ] },
       ]
     },
