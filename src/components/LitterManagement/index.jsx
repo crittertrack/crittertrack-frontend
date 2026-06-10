@@ -1318,6 +1318,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         maleCount: null,
         femaleCount: null,
         unknownCount: null,
+        maleLosses: null,
+        femaleLosses: null,
+        unknownLosses: null,
+        extractLossesFromTotal: false,
         notes: '',
         linkedOffspringIds: [],
         // Enhanced breeding record fields
@@ -1337,6 +1341,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         males: 0,
         females: 0,
         unknown: 0
+    });
+    
+    // Track losses to extract from gender counts when creating placeholders
+    const [extractLosses, setExtractLosses] = useState({
+        fromMales: 0,
+        fromFemales: 0,
+        fromUnknown: 0
     });
     const [excludeLossesFromCreation, setExcludeLossesFromCreation] = useState(false);
     // Search filters for parent selection (UI not yet implemented)
@@ -4021,20 +4032,84 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <p className="text-xs text-gray-400 mt-1">Born dead</p>
                                         </div>
 
-                                        {/* Losses */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Losses
+                                        {/* Losses - Gender Breakdown */}
+                                        <div className="md:col-span-3">
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Losses (Died after birth)
                                             </label>
-                                            <input
-                                                type="number"
-                                                value={typeof formData.lossesCount === 'number' ? formData.lossesCount : (formData.lossesCount || '')}
-                                                onChange={(e) => setFormData({...formData, lossesCount: e.target.value ? parseInt(e.target.value) : null})}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                placeholder="0"
-                                                min="0"
-                                            />
-                                            <p className="text-xs text-gray-400 mt-1">Died after birth</p>
+                                            
+                                            {/* Checkbox to extract from total counts */}
+                                            <div className="mb-3">
+                                                <label className="flex items-center space-x-2 text-sm text-gray-600 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={formData.extractLossesFromTotal || false}
+                                                        onChange={(e) => setFormData({...formData, extractLossesFromTotal: e.target.checked})}
+                                                        className="rounded border-gray-300 text-primary focus:ring-primary"
+                                                    />
+                                                    <span>Extract losses from total counts (reduce M/F/U counts by loss amounts)</span>
+                                                </label>
+                                                <p className="text-xs text-gray-400 mt-1 ml-6">
+                                                    When enabled, losses will be subtracted from the gender counts above, showing only surviving offspring.
+                                                </p>
+                                            </div>
+
+                                            {/* Gender-specific loss inputs */}
+                                            <div className="grid grid-cols-3 gap-3">
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-600 mb-1">Male Losses</label>
+                                                    <input
+                                                        type="number"
+                                                        value={typeof formData.maleLosses === 'number' ? formData.maleLosses : (formData.maleLosses || '')}
+                                                        onChange={(e) => {
+                                                            const v = e.target.value ? parseInt(e.target.value) : null;
+                                                            const f = formData.femaleLosses || 0;
+                                                            const u = formData.unknownLosses || 0;
+                                                            setFormData({...formData, maleLosses: v, lossesCount: (v || 0) + f + u || null});
+                                                        }}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                                                        placeholder="0"
+                                                        min="0"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-600 mb-1">Female Losses</label>
+                                                    <input
+                                                        type="number"
+                                                        value={typeof formData.femaleLosses === 'number' ? formData.femaleLosses : (formData.femaleLosses || '')}
+                                                        onChange={(e) => {
+                                                            const v = e.target.value ? parseInt(e.target.value) : null;
+                                                            const m = formData.maleLosses || 0;
+                                                            const u = formData.unknownLosses || 0;
+                                                            setFormData({...formData, femaleLosses: v, lossesCount: m + (v || 0) + u || null});
+                                                        }}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                                                        placeholder="0"
+                                                        min="0"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-600 mb-1">Unknown Losses</label>
+                                                    <input
+                                                        type="number"
+                                                        value={typeof formData.unknownLosses === 'number' ? formData.unknownLosses : (formData.unknownLosses || '')}
+                                                        onChange={(e) => {
+                                                            const v = e.target.value ? parseInt(e.target.value) : null;
+                                                            const m = formData.maleLosses || 0;
+                                                            const f = formData.femaleLosses || 0;
+                                                            setFormData({...formData, unknownLosses: v, lossesCount: m + f + (v || 0) || null});
+                                                        }}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                                                        placeholder="0"
+                                                        min="0"
+                                                    />
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Total losses display */}
+                                            <p className="text-xs text-gray-500 mt-2">
+                                                Total losses: <span className="font-semibold">{(formData.maleLosses || 0) + (formData.femaleLosses || 0) + (formData.unknownLosses || 0)}</span>
+                                            </p>
                                         </div>
 
                                         {/* Total Weaned */}
