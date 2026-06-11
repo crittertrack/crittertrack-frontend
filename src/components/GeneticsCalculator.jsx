@@ -1210,24 +1210,10 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   if (genotype.Ln === 'ln/ln') {
     if (color === 'Black')           color = 'Leaden';
     else if (color === 'Extreme Black') color = 'Leaden';
-    else if (color === 'Blue')       color = 'Blue Leaden';
-    else if (color === 'Chocolate')  color = 'Leaden Chocolate';
-    else if (color === 'Lilac')      color = 'Leaden Lilac';
-    else if (color === 'Agouti')     color = 'Leaden Agouti';
-    else if (color === 'Blue Agouti') color = 'Blue Agouti Leaden';
-    else if (color === 'Cinnamon')   color = 'Leaden Cinnamon';
-    else if (color === 'Cinnamon Argente') color = 'Leaden Cinnamon Argente';
     else if (color === 'Black Tan')  color = 'Leaden Tan';
-    else if (color === 'Blue Tan')   color = 'Blue Leaden Tan';
-    else if (color === 'Chocolate Tan') color = 'Leaden Chocolate Tan';
-    else if (color === 'Lilac Tan')  color = 'Leaden Lilac Tan';
-    else if (color === 'Agouti Tan') color = 'Leaden Agouti Tan';
-    else if (color === 'Dove')       color = 'Leaden Dove';
-    else if (color === 'Silver')     color = 'Leaden Silver';
-    else if (color === 'Champagne')  color = 'Leaden Champagne';
-    else if (color === 'Lavender')   color = 'Leaden Lavender';
     else if (!color) color = 'Leaden'; // If no color set yet, default to Leaden
-    else if (!color.startsWith('Leaden') && !color.startsWith('Blue Leaden')) color = `Leaden ${color}`;
+    // For all other colors, add Leaden as a suffix
+    else if (!color.includes('Leaden')) color = `${color} Leaden`;
   }
 
   // Lavender (b/b + d/d + p/p combination)
