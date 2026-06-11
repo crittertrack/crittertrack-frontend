@@ -870,16 +870,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   if (genotype.A && genotype.A.startsWith('Avy/')) {
     // Handle C/- carriers separately
     if (genotype.C === 'C/c') {
-    
-    // Process all markings and coat textures for recessive red
-    // Continue processing instead of returning early
-    color = baseColor;
-  }
-
-  // Viable yellow (brindle - Avy)
-  if (genotype.A && genotype.A.startsWith('Avy/')) {
-    // Handle C/- carriers separately
-    if (genotype.C === 'C/c') {
       carriers.push('Albino');
     } else if (genotype.C === 'C/ch') {
       carriers.push('Himalayan');
@@ -1149,6 +1139,9 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
         return { phenotype: '', carriers, hidden, notes: [] };
       } else if (genotype.Ln === 'Ln/Ln') {
         return { phenotype: '', carriers, hidden, notes: ['This gene combination does not affect phenotype'] };
+      } else if (genotype.Ln === 'ln/ln') {
+        // ln/ln alone should show similar to b/b alone
+        return { phenotype: 'Leaden', carriers, hidden, notes: ['Select A-locus (use a/a for self) for full phenotype calculation'] };
       }
     }
   }

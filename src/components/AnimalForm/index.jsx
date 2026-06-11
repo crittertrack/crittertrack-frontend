@@ -568,7 +568,7 @@ const getPedigreeCacheKey = (rootId, authToken) => {
     return `${authToken ? 'auth' : 'public'}:${rootId}`;
 };
 
-const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }) => {
+const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null, maxDepth = 4, priorityDepth = 4 }) => {
     const rootId = animalId;
     if (!rootId || !API_BASE_URL) return null;
 
@@ -587,18 +587,8 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
         const resultCache = new Map();
         let remainingFetchBudget = MAX_PEDIGREE_FETCH_NODES;
 
-        const fetchAnimalWithFamily = async (id, depth = 0, pathIds = new Set()) => {
-            if (!id || depth > MAX_PEDIGREE_FETCH_DEPTH) return null;
-            if (pathIds.has(id)) return null;
-
-            if (resultCache.has(id)) {
-                const cached = resultCache.get(id);
-                if (cached.fetchedAtDepth <= depth) return cached.data;
-            }
-
-            if (remainingFetchBudget <= 0) return null;
-            remainingFetchBudget -= 1;
-
+        // Helper to fetch a single animal's data
+        const fetchAnimalData = async (id) => {
             let animalInfo = null;
             if (authToken) {
                 const isPublicId = /^CTC\d+|^\d+$/.test(id);
@@ -660,20 +650,65 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
                 } catch (error) {}
             }
 
-            const fatherId = animalInfo.fatherId_public || animalInfo.sireId_public;
-            const motherId = animalInfo.motherId_public || animalInfo.damId_public;
-            const childPath = new Set([...pathIds, id]);
-            const father = fatherId ? await fetchAnimalWithFamily(fatherId, depth + 1, childPath) : null;
-            const mother = motherId ? await fetchAnimalWithFamily(motherId, depth + 1, childPath) : null;
-            const result = { ...animalInfo, father, mother };
-
-            if (!resultCache.has(id) || resultCache.get(id).fetchedAtDepth > depth) {
-                resultCache.set(id, { fetchedAtDepth: depth, data: result });
-            }
-            return result;
+            return animalInfo;
         };
 
-        const data = await fetchAnimalWithFamily(rootId);
+        // Breadth-first fetch for first N generations (priority depth)
+        const fetchBreadthFirst = async (startId, maxBreadthDepth) => {
+            const queue = [{ id: startId, depth: 0, path: new Set() }];
+            const fetchedAnimals = new Map();
+
+            while (queue.length > 0 && remainingFetchBudget > 0) {
+                const { id, depth, path } = queue.shift();
+                
+                if (!id || depth > maxBreadthDepth || path.has(id)) continue;
+                if (fetchedAnimals.has(id)) continue;
+
+                remainingFetchBudget -= 1;
+                const animalInfo = await fetchAnimalData(id);
+                if (!animalInfo) continue;
+
+                fetchedAnimals.set(id, { ...animalInfo, depth });
+
+                if (depth < maxBreadthDepth) {
+                    const fatherId = animalInfo.fatherId_public || animalInfo.sireId_public;
+                    const motherId = animalInfo.motherId_public || animalInfo.damId_public;
+                    const newPath = new Set([...path, id]);
+                    
+                    if (fatherId) queue.push({ id: fatherId, depth: depth + 1, path: newPath });
+                    if (motherId) queue.push({ id: motherId, depth: depth + 1, path: newPath });
+                }
+            }
+
+            return fetchedAnimals;
+        };
+
+        // Build tree structure from fetched animals
+        const buildTree = (animals, rootId) => {
+            const buildNode = (id, pathIds = new Set()) => {
+                if (!id || pathIds.has(id)) return null;
+                const animal = animals.get(id);
+                if (!animal) return null;
+
+                const fatherId = animal.fatherId_public || animal.sireId_public;
+                const motherId = animal.motherId_public || animal.damId_public;
+                const childPath = new Set([...pathIds, id]);
+
+                return {
+                    ...animal,
+                    father: fatherId ? buildNode(fatherId, childPath) : null,
+                    mother: motherId ? buildNode(motherId, childPath) : null
+                };
+            };
+
+            return buildNode(rootId);
+        };
+
+        // Fetch first 4 generations breadth-first for immediate display
+        const fetchedAnimals = await fetchBreadthFirst(rootId, Math.min(priorityDepth, maxDepth));
+        const data = buildTree(fetchedAnimals, rootId);
+
+        // Fetch owner profile
         let fetchedOwnerProfile = null;
         if (data?.breederId_public) {
             try {
@@ -686,7 +721,7 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
             } catch (error) {}
         }
 
-        const payload = { data, ownerProfile: fetchedOwnerProfile };
+        const payload = { data, ownerProfile: fetchedOwnerProfile, depth: priorityDepth };
         pedigreeTreeCache.set(cacheKey, payload);
         return payload;
     })().catch(() => null).finally(() => {
