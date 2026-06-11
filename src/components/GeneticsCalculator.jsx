@@ -980,7 +980,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
     // Handle leaden modifier
     if (isLeaden) {
-      color = isTanVariant ? 'Leaden Tan' : 'Leaden';
+      color = isTanVariant ? 'Brindle Tan Leaden' : isAgouti ? 'Agouti Brindle Leaden' : 'Brindle Leaden';
       return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
     }
     

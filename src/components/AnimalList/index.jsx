@@ -853,7 +853,7 @@ const AnimalList = ({
         };
         
         // Delay prefetch slightly to avoid competing with initial render
-        const timer = setTimeout(prefetchAllPedigrees, 500);
+        const timer = setTimeout(prefetchAllPedigrees, 100);
         return () => clearTimeout(timer);
     }, [animals, authToken]);
 

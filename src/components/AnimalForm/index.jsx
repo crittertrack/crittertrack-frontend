@@ -576,12 +576,16 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null, 
     if (!cacheKey) return null;
 
     if (pedigreeTreeCache.has(cacheKey)) {
+        console.log(`[Pedigree Prefetch] Cache HIT for ${rootId}`);
         return pedigreeTreeCache.get(cacheKey);
     }
 
     if (pedigreePrefetchInFlight.has(cacheKey)) {
+        console.log(`[Pedigree Prefetch] Already in-flight for ${rootId}`);
         return pedigreePrefetchInFlight.get(cacheKey);
     }
+
+    console.log(`[Pedigree Prefetch] Starting prefetch for ${rootId} (priority depth: ${priorityDepth})`);
 
     const task = (async () => {
         const resultCache = new Map();
@@ -705,7 +709,9 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null, 
         };
 
         // Fetch first 4 generations breadth-first for immediate display
+        console.log(`[Pedigree Prefetch] Fetching first ${Math.min(priorityDepth, maxDepth)} generations for ${rootId}...`);
         const fetchedAnimals = await fetchBreadthFirst(rootId, Math.min(priorityDepth, maxDepth));
+        console.log(`[Pedigree Prefetch] Fetched ${fetchedAnimals.size} animals for ${rootId}`);
         const data = buildTree(fetchedAnimals, rootId);
 
         // Fetch owner profile
@@ -723,6 +729,7 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null, 
 
         const payload = { data, ownerProfile: fetchedOwnerProfile, depth: priorityDepth };
         pedigreeTreeCache.set(cacheKey, payload);
+        console.log(`[Pedigree Prefetch] ✓ Completed and cached for ${rootId}`);
         return payload;
     })().catch(() => null).finally(() => {
         pedigreePrefetchInFlight.delete(cacheKey);
