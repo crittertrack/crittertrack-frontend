@@ -5628,14 +5628,32 @@ const AnimalForm = ({
             {/* --- Contact Selector Modal --- */}
             {showContactSelector && (
                 <ContactSelector
-                    isOpen={showContactSelector}
                     onClose={() => setShowContactSelector(false)}
                     onSelect={(contact) => {
-                        // Update keeper field with selected contact
+                        // Update manual breeder name with selected contact
+                        const displayName = [contact.prefix, contact.personalName, contact.suffix].filter(Boolean).join(' ') 
+                            || contact.breederName 
+                            || 'Unnamed Contact';
+                        
                         setFormData(prev => ({
                             ...prev,
-                            keeper: contact.personalName || contact.breederName || ''
+                            manualBreederName: displayName
                         }));
+                        
+                        // If contact has a linked CTUID, auto-fill the Breeder (User) field
+                        if (contact.linkedCTUID) {
+                            setFormData(prev => ({
+                                ...prev,
+                                breederId_public: contact.linkedCTUID,
+                                manualBreederName: '' // Clear manual name when CTUID is set
+                            }));
+                            
+                            // Fetch and set breeder info
+                            fetchBreederInfo(contact.linkedCTUID).then(info => {
+                                if (info) setBreederInfo(info);
+                            });
+                        }
+                        
                         setShowContactSelector(false);
                     }}
                     authToken={authToken}
@@ -6153,21 +6171,31 @@ const AnimalForm = ({
 
                                 {!isFieldHidden('manualBreederName') && (
                                 <div>
-                                    <label className='block text-sm font-medium text-gray-700 mb-2'>Breeder (Manual Name)</label>
-                                    <input 
-                                        type="text" 
-                                        name="manualBreederName" 
-                                        value={formData.manualBreederName || ''} 
-                                        onChange={(e) => {
-                                            handleChange(e);
-                                            if (e.target.value.trim() && formData.breederId_public) {
-                                                clearBreederSelection();
-                                            }
-                                        }}
-                                        placeholder="Enter breeder name (if not a registered user)"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1">Use this if the breeder is not a registered user on the platform.</p>
+                                    <label className='block text-sm font-medium text-gray-700 mb-2'>Breeder (Contact)</label>
+                                    <div className="flex gap-2">
+                                        <input 
+                                            type="text" 
+                                            name="manualBreederName" 
+                                            value={formData.manualBreederName || ''} 
+                                            onChange={(e) => {
+                                                handleChange(e);
+                                                if (e.target.value.trim() && formData.breederId_public) {
+                                                    clearBreederSelection();
+                                                }
+                                            }}
+                                            placeholder="Enter breeder name or select contact"
+                                            className="block flex-1 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowContactSelector(true)}
+                                            className="px-4 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-md transition flex items-center gap-1"
+                                        >
+                                            <User size={16} />
+                                            Select
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1">Select a contact or enter a name manually. If contact has a linked CTUID, it will auto-fill Breeder (User).</p>
                                 </div>
                                 )}
                             </div>

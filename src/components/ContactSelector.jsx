@@ -18,14 +18,24 @@ const ContactSelector = ({ onClose, onSelect, API_BASE_URL, authToken }) => {
         } else {
             const term = searchTerm.toLowerCase();
             const filtered = contacts.filter(contact => 
-                contact.name?.toLowerCase().includes(term) ||
-                contact.email?.toLowerCase().includes(term) ||
-                contact.phone?.toLowerCase().includes(term) ||
-                contact.location?.toLowerCase().includes(term)
+                contact.personalName?.toLowerCase().includes(term) ||
+                contact.breederName?.toLowerCase().includes(term) ||
+                contact.linkedCTUID?.toLowerCase().includes(term) ||
+                contact.address?.city?.toLowerCase().includes(term) ||
+                contact.address?.country?.toLowerCase().includes(term)
             );
             setFilteredContacts(filtered);
         }
     }, [searchTerm, contacts]);
+
+    const getDisplayName = (contact) => {
+        const parts = [];
+        if (contact.prefix) parts.push(contact.prefix);
+        if (contact.personalName) parts.push(contact.personalName);
+        if (contact.breederName) parts.push(`(${contact.breederName})`);
+        if (contact.suffix) parts.push(contact.suffix);
+        return parts.join(' ') || 'Unnamed Contact';
+    };
 
     const fetchContacts = async () => {
         try {
@@ -94,21 +104,16 @@ const ContactSelector = ({ onClose, onSelect, API_BASE_URL, authToken }) => {
                                     <div className="flex items-start justify-between">
                                         <div className="flex-grow">
                                             <h4 className="font-semibold text-gray-800 text-lg">
-                                                {contact.name}
+                                                {getDisplayName(contact)}
                                             </h4>
-                                            {contact.email && (
+                                            {contact.linkedCTUID && (
                                                 <p className="text-sm text-gray-600 mt-1">
-                                                    📧 {contact.email}
+                                                    🆔 {contact.linkedCTUID}
                                                 </p>
                                             )}
-                                            {contact.phone && (
+                                            {(contact.address?.city || contact.address?.country) && (
                                                 <p className="text-sm text-gray-600 mt-1">
-                                                    📱 {contact.phone}
-                                                </p>
-                                            )}
-                                            {contact.location && (
-                                                <p className="text-sm text-gray-600 mt-1">
-                                                    📍 {contact.location}
+                                                    📍 {[contact.address.city, contact.address.country].filter(Boolean).join(', ')}
                                                 </p>
                                             )}
                                             {contact.notes && (
