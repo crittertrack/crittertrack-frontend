@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { User, Users, Plus, Edit, Trash2, X, Save, MapPin, Globe, Hash, UserCheck, UserX, Filter, Search } from 'lucide-react';
 
@@ -27,11 +27,34 @@ const ContactsPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
         isBreeder: false,
         notes: ''
     });
+    
+    // CTUID selector state
+    const [availableUsers, setAvailableUsers] = useState([]);
+    const [userSearchTerm, setUserSearchTerm] = useState('');
+    const [loadingUsers, setLoadingUsers] = useState(false);
+    const [showUserDropdown, setShowUserDropdown] = useState(false);
+    const dropdownRef = useRef(null);
 
     // Fetch contacts on mount
     useEffect(() => {
         fetchContacts();
     }, []);
+
+    // Click outside handler to close dropdown
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setShowUserDropdown(false);
+            }
+        };
+
+        if (showUserDropdown) {
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => {
+                document.removeEventListener('mousedown', handleClickOutside);
+            };
+        }
+    }, [showUserDropdown]);
 
     // Apply filters when contacts, filterType, or searchTerm changes
     useEffect(() => {
@@ -76,6 +99,66 @@ const ContactsPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
         }
 
         setFilteredContacts(filtered);
+    };
+
+    // Fetch available users for CTUID selector
+    const fetchUsers = async (search = '') => {
+        try {
+            setLoadingUsers(true);
+            const response = await axios.get(`${API_BASE_URL}/contacts/users`, {
+                headers: { Authorization: `Bearer ${authToken}` },
+                params: { search }
+            });
+            setAvailableUsers(response.data);
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        } finally {
+            setLoadingUsers(false);
+        }
+    };
+
+    // Debounced user search
+    useEffect(() => {
+        if (showUserDropdown) {
+            const timer = setTimeout(() => {
+                fetchUsers(userSearchTerm);
+            }, 300);
+            return () => clearTimeout(timer);
+        }
+    }, [userSearchTerm, showUserDropdown]);
+
+    // Generate abbreviation from breeder name
+    const generateAbbreviation = (name) => {
+        if (!name) return '';
+        
+        // Split by spaces and take first letter of each word
+        const words = name.trim().split(/\s+/);
+        if (words.length === 1) {
+            // Single word - take first 2-3 letters
+            return name.substring(0, 3).toUpperCase();
+        }
+        
+        // Multiple words - take first letter of each
+        return words.map(w => w[0]).join('').toUpperCase();
+    };
+
+    // Handle CTUID selection from dropdown
+    const handleUserSelect = (user) => {
+        setFormData(prev => ({
+            ...prev,
+            linkedCTUID: user.id_public,
+            personalName: user.personalName || prev.personalName,
+            breederName: user.breederName || prev.breederName,
+            prefix: user.breederName ? generateAbbreviation(user.breederName) : prev.prefix,
+            suffix: user.breederName ? generateAbbreviation(user.breederName) : prev.suffix,
+            address: {
+                ...prev.address,
+                country: user.country || prev.address.country,
+                state: user.state || prev.address.state
+            }
+        }));
+        setUserSearchTerm('');
+        setShowUserDropdown(false);
     };
 
     const handleInputChange = (e) => {
@@ -417,19 +500,87 @@ const ContactsPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                                 </div>
                             </div>
 
-                            {/* Linked CTUID */}
-                            <div>
+                            {/* Linked CTUID - Searchable Selector */}
+                            <div className="relative" ref={dropdownRef}>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Linked CritterTrack ID
                                 </label>
-                                <input
-                                    type="text"
-                                    name="linkedCTUID"
-                                    value={formData.linkedCTUID}
-                                    onChange={handleInputChange}
-                                    placeholder="e.g., CTU123"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                />
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        value={formData.linkedCTUID || userSearchTerm}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            if (formData.linkedCTUID) {
+                                                // If CTUID is already selected, clear it and start searching
+                                                setFormData(prev => ({ ...prev, linkedCTUID: '' }));
+                                            }
+                                            setUserSearchTerm(value);
+                                            setShowUserDropdown(true);
+                                        }}
+                                        onFocus={() => {
+                                            setShowUserDropdown(true);
+                                            if (!userSearchTerm && !formData.linkedCTUID) {
+                                                fetchUsers('');
+                                            }
+                                        }}
+                                        placeholder="Search by CTUID or name..."
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    />
+                                    {formData.linkedCTUID && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setFormData(prev => ({ ...prev, linkedCTUID: '' }));
+                                                setUserSearchTerm('');
+                                            }}
+                                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    )}
+                                </div>
+                                
+                                {/* Dropdown */}
+                                {showUserDropdown && (
+                                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                        {loadingUsers ? (
+                                            <div className="p-3 text-center text-gray-500">
+                                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mx-auto"></div>
+                                            </div>
+                                        ) : availableUsers.length === 0 ? (
+                                            <div className="p-3 text-center text-gray-500 text-sm">
+                                                No users found
+                                            </div>
+                                        ) : (
+                                            availableUsers.map(user => (
+                                                <button
+                                                    key={user.id_public}
+                                                    type="button"
+                                                    onClick={() => handleUserSelect(user)}
+                                                    className="w-full text-left px-3 py-2 hover:bg-gray-100 transition border-b border-gray-100 last:border-b-0"
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <div>
+                                                            <div className="font-medium text-gray-800">
+                                                                {user.id_public}
+                                                            </div>
+                                                            <div className="text-sm text-gray-600">
+                                                                {user.personalName}
+                                                                {user.breederName && ` (${user.breederName})`}
+                                                            </div>
+                                                        </div>
+                                                        {user.country && (
+                                                            <div className="text-xs text-gray-500">
+                                                                {user.country}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </button>
+                                            ))
+                                        )}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Names */}
