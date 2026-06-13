@@ -34,6 +34,7 @@ import Marketplace from './components/Marketplace';
 import LitterManagement from './components/LitterManagement';
 import AnimalForm, { PedigreeChart } from './components/AnimalForm';
 import AnimalList from './components/AnimalList';
+import ContactsPage from './components/Contacts';
 import AuthView from './components/Auth/AuthView';
 import { WarningBanner, InformBanner, BroadcastPoll, UrgencyAlertsBanner, MgmtUrgencyBanner, BroadcastBanner, UrgentBroadcastPopup } from './components/Notifications/Banners';
 import NotificationsHub from './components/Notifications/NotificationsHub';
@@ -1856,6 +1857,10 @@ const App = () => {
                                     <button onClick={() => { navigate('/profile'); setShowProfileMenu(false); }}
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
                                         <User size={15} /> Profile
+                                    </button>
+                                    <button onClick={() => { navigate('/contacts'); setShowProfileMenu(false); }}
+                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                                        <Users size={15} /> Contacts
                                     </button>
                                     {['admin', 'moderator'].includes(userProfile?.role) && (
                                         <button onClick={() => { inModeratorMode ? setShowAdminPanel(!showAdminPanel) : setShowModerationAuthModal(true); setShowProfileMenu(false); }}

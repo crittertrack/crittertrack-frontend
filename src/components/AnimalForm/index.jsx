@@ -18,6 +18,7 @@ import { formatDate, formatDateShort } from '../../utils/dateFormatter';
 import { FamilyTabContent } from '../AnimalDetail/FamilyTabContent';
 import DatePicker from '../DatePicker';
 import GeneticCodeBuilder from '../GeneticCodeBuilder';
+import ContactSelector from '../ContactSelector';
 
 const getCountryFlag = (countryCode) => {
     if (!countryCode || countryCode.length !== 2) return '';
@@ -3966,6 +3967,11 @@ const AnimalForm = ({
     const [galleryUploadError, setGalleryUploadError] = useState(null);
     const [movePhotoPrompt, setMovePhotoPrompt] = useState(null); // URL of current profile photo when user selects a new one
     const galleryEditFileRef = useRef(null); // collapse health tab sections
+    
+    // Contact selector state
+    const [showContactSelector, setShowContactSelector] = useState(false);
+    const [contacts, setContacts] = useState([]);
+    const [loadingContacts, setLoadingContacts] = useState(false);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -5619,6 +5625,24 @@ const AnimalForm = ({
                 </div>
             )}
 
+            {/* --- Contact Selector Modal --- */}
+            {showContactSelector && (
+                <ContactSelector
+                    isOpen={showContactSelector}
+                    onClose={() => setShowContactSelector(false)}
+                    onSelect={(contact) => {
+                        // Update keeper field with selected contact
+                        setFormData(prev => ({
+                            ...prev,
+                            keeper: contact.personalName || contact.breederName || ''
+                        }));
+                        setShowContactSelector(false);
+                    }}
+                    authToken={authToken}
+                    API_BASE_URL={API_BASE_URL}
+                />
+            )}
+
             {/* --- Create Litter Modal --- */}
             {showCreateLitterModal && breedingRecordForLitter && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
@@ -6165,14 +6189,24 @@ const AnimalForm = ({
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className='block text-sm font-medium text-gray-700 mb-2'>{getFieldLabel('keeperName', 'Keeper Name')}</label>
-                                    <input 
-                                        type="text" 
-                                        name="keeperName" 
-                                        value={formData.keeperName || ''} 
-                                        onChange={handleChange}
-                                        placeholder="Keeper name (person caring for this animal)"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                    />
+                                    <div className="flex gap-2">
+                                        <input 
+                                            type="text" 
+                                            name="keeperName" 
+                                            value={formData.keeperName || ''} 
+                                            onChange={handleChange}
+                                            placeholder="Keeper name (person caring for this animal)"
+                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowContactSelector(true)}
+                                            className="px-3 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md transition flex items-center justify-center flex-shrink-0"
+                                            title="Select from contacts"
+                                        >
+                                            <User size={18} className="text-gray-600" />
+                                        </button>
+                                    </div>
                                     <p className="text-xs text-gray-500 mt-1">Records keeper changes in keeper history.</p>
                                 </div>
                             </div>
