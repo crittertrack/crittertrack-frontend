@@ -6452,9 +6452,9 @@ const AnimalForm = ({
                                             type="button"
                                             onClick={() => setShowContactSelector(true)}
                                             className="px-4 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-md transition flex items-center gap-1"
-                                            title="Select from contacts"
                                         >
-                                            <User size={18} className="text-gray-600" />
+                                            <User size={16} />
+                                            Select
                                         </button>
                                     </div>
                                     <p className="text-xs text-gray-500 mt-1">Select a contact or enter a name manually.</p>
