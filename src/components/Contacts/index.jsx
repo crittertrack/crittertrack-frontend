@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { User, Users, Plus, Edit, Trash2, X, Save, MapPin, Globe, Hash, UserCheck, UserX, Filter, Search } from 'lucide-react';
+import { User, Users, Plus, Edit, Trash2, X, Save, MapPin, Globe, Hash, UserCheck, UserX, Filter, Search, Cat, Loader2, Eye } from 'lucide-react';
 
 const ContactsPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
     const [contacts, setContacts] = useState([]);
@@ -27,6 +27,13 @@ const ContactsPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
         isBreeder: false,
         notes: ''
     });
+    
+    // Contact preview modal state
+    const [previewContact, setPreviewContact] = useState(null);
+    const [previewTab, setPreviewTab] = useState('bred'); // 'bred' or 'own'
+    const [bredAnimals, setBredAnimals] = useState([]);
+    const [ownAnimals, setOwnAnimals] = useState([]);
+    const [loadingAnimals, setLoadingAnimals] = useState(false);
     
     // CTUID selector state
     const [availableUsers, setAvailableUsers] = useState([]);
@@ -288,6 +295,46 @@ const ContactsPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
         return parts.join(' ') || 'Unnamed Contact';
     };
 
+    // Handle contact click to show preview modal
+    const handleContactClick = async (contact, e) => {
+        // Don't open preview if clicking on edit/delete buttons
+        if (e.target.closest('button')) {
+            return;
+        }
+
+        setPreviewContact(contact);
+        setPreviewTab('bred');
+        setLoadingAnimals(true);
+        setBredAnimals([]);
+        setOwnAnimals([]);
+
+        try {
+            const [bredRes, ownRes] = await Promise.all([
+                axios.get(`${API_BASE_URL}/contacts/${contact._id}/bred-animals`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                }),
+                axios.get(`${API_BASE_URL}/contacts/${contact._id}/own-animals`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                })
+            ]);
+
+            setBredAnimals(bredRes.data);
+            setOwnAnimals(ownRes.data);
+        } catch (error) {
+            console.error('Error fetching contact animals:', error);
+            showModalMessage('Error', 'Failed to load animals for this contact');
+        } finally {
+            setLoadingAnimals(false);
+        }
+    };
+
+    const closePreview = () => {
+        setPreviewContact(null);
+        setBredAnimals([]);
+        setOwnAnimals([]);
+        setPreviewTab('bred');
+    };
+
     if (loading) {
         return (
             <div className="w-full max-w-7xl bg-white p-6 rounded-xl shadow-lg">
@@ -383,7 +430,8 @@ const ContactsPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                     {filteredContacts.map(contact => (
                         <div
                             key={contact._id}
-                            className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition"
+                            onClick={(e) => handleContactClick(contact, e)}
+                            className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition cursor-pointer"
                         >
                             <div className="flex justify-between items-start mb-3">
                                 <div className="flex-1">
@@ -725,6 +773,188 @@ const ContactsPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Contact Preview Modal */}
+            {previewContact && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+                        {/* Header */}
+                        <div className="bg-gradient-to-r from-primary to-primary-dark px-6 py-4 flex justify-between items-center">
+                            <div>
+                                <h2 className="text-xl font-bold text-black">
+                                    {getDisplayName(previewContact)}
+                                </h2>
+                                {previewContact.linkedCTUID && (
+                                    <p className="text-sm text-gray-700 flex items-center gap-1 mt-1">
+                                        <Hash size={14} />
+                                        {previewContact.linkedCTUID}
+                                    </p>
+                                )}
+                            </div>
+                            <button
+                                onClick={closePreview}
+                                className="text-black hover:text-gray-700 transition"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        {/* Tabs */}
+                        <div className="border-b border-gray-200 px-6 flex gap-4">
+                            <button
+                                onClick={() => setPreviewTab('bred')}
+                                className={`py-3 px-4 font-medium transition border-b-2 ${
+                                    previewTab === 'bred'
+                                        ? 'border-primary text-primary'
+                                        : 'border-transparent text-gray-600 hover:text-gray-800'
+                                }`}
+                            >
+                                Bred Animals ({bredAnimals.length})
+                            </button>
+                            <button
+                                onClick={() => setPreviewTab('own')}
+                                className={`py-3 px-4 font-medium transition border-b-2 ${
+                                    previewTab === 'own'
+                                        ? 'border-primary text-primary'
+                                        : 'border-transparent text-gray-600 hover:text-gray-800'
+                                }`}
+                            >
+                                Own Animals ({ownAnimals.length})
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 overflow-y-auto p-6">
+                            {loadingAnimals ? (
+                                <div className="flex items-center justify-center py-12">
+                                    <Loader2 className="animate-spin text-primary mr-2" size={24} />
+                                    <span className="text-gray-600">Loading animals...</span>
+                                </div>
+                            ) : !previewContact.linkedCTUID ? (
+                                <div className="text-center py-12">
+                                    <User size={48} className="mx-auto text-gray-300 mb-4" />
+                                    <p className="text-gray-500">
+                                        This contact is not linked to a CritterTrack user.
+                                    </p>
+                                    <p className="text-sm text-gray-400 mt-2">
+                                        Link a CritterTrack ID to see animals bred by or owned by this contact.
+                                    </p>
+                                </div>
+                            ) : previewTab === 'bred' ? (
+                                bredAnimals.length === 0 ? (
+                                    <div className="text-center py-12">
+                                        <Cat size={48} className="mx-auto text-gray-300 mb-4" />
+                                        <p className="text-gray-500">
+                                            No animals bred by this contact in your stock.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {bredAnimals.map(animal => (
+                                            <div
+                                                key={animal.id_public}
+                                                className="border border-gray-200 rounded-lg p-3 hover:shadow-md transition cursor-pointer"
+                                                onClick={() => window.location.href = `/animals/${animal.id_public}`}
+                                            >
+                                                {/* Animal Image */}
+                                                <div className="w-full h-32 bg-gray-100 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
+                                                    {animal.imageUrl || animal.photoUrl ? (
+                                                        <img
+                                                            src={animal.imageUrl || animal.photoUrl}
+                                                            alt={animal.name}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <Cat size={32} className="text-gray-400" />
+                                                    )}
+                                                </div>
+
+                                                {/* Animal Info */}
+                                                <h4 className="font-semibold text-gray-800">
+                                                    {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}
+                                                </h4>
+                                                <p className="text-xs text-gray-500 mt-1">
+                                                    {animal.id_public}
+                                                </p>
+                                                <div className="flex items-center gap-2 mt-2 text-xs text-gray-600">
+                                                    <span className="px-2 py-1 bg-gray-100 rounded">
+                                                        {animal.species}
+                                                    </span>
+                                                    {animal.gender && (
+                                                        <span className="px-2 py-1 bg-gray-100 rounded">
+                                                            {animal.gender}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )
+                            ) : (
+                                ownAnimals.length === 0 ? (
+                                    <div className="text-center py-12">
+                                        <Cat size={48} className="mx-auto text-gray-300 mb-4" />
+                                        <p className="text-gray-500">
+                                            No animals bred by you and owned by this contact.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {ownAnimals.map(animal => (
+                                            <div
+                                                key={animal.id_public}
+                                                className="border border-gray-200 rounded-lg p-3 hover:shadow-md transition cursor-pointer"
+                                                onClick={() => window.location.href = `/animals/${animal.id_public}`}
+                                            >
+                                                {/* Animal Image */}
+                                                <div className="w-full h-32 bg-gray-100 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
+                                                    {animal.imageUrl || animal.photoUrl ? (
+                                                        <img
+                                                            src={animal.imageUrl || animal.photoUrl}
+                                                            alt={animal.name}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <Cat size={32} className="text-gray-400" />
+                                                    )}
+                                                </div>
+
+                                                {/* Animal Info */}
+                                                <h4 className="font-semibold text-gray-800">
+                                                    {[animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ')}
+                                                </h4>
+                                                <p className="text-xs text-gray-500 mt-1">
+                                                    {animal.id_public}
+                                                </p>
+                                                <div className="flex items-center gap-2 mt-2 text-xs text-gray-600">
+                                                    <span className="px-2 py-1 bg-gray-100 rounded">
+                                                        {animal.species}
+                                                    </span>
+                                                    {animal.gender && (
+                                                        <span className="px-2 py-1 bg-gray-100 rounded">
+                                                            {animal.gender}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )
+                            )}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="border-t border-gray-200 px-6 py-4 flex justify-end">
+                            <button
+                                onClick={closePreview}
+                                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition"
+                            >
+                                Close
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
