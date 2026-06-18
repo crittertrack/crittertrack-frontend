@@ -6345,7 +6345,7 @@ const AnimalForm = ({
                                         setShowManualAssignmentModal(true);
                                         setAssignmentRole('breeder');
                                     }}
-                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition flex items-center gap-2"
+                                    className="px-4 py-2 bg-primary hover:bg-primary-dark text-black rounded-lg text-sm font-semibold transition flex items-center gap-2"
                                 >
                                     <Plus size={16} />
                                     Assign Animal
@@ -6402,7 +6402,7 @@ const AnimalForm = ({
 
                                 {!isFieldHidden('manualBreederName') && (
                                 <div>
-                                    <label className='block text-sm font-medium text-gray-700 mb-2'>Breeder (Contact)</label>
+                                    <label className='block text-sm font-medium text-gray-700 mb-2'>Breeder (Manual or Contact)</label>
                                     <div className="flex gap-2">
                                         <input 
                                             type="text" 
@@ -6438,14 +6438,14 @@ const AnimalForm = ({
                             {!isFieldHidden('keeperName') && (
                             <div>
                                 <div>
-                                    <label className='block text-sm font-medium text-gray-700 mb-2'>{getFieldLabel('keeperName', 'Keeper Name')}</label>
+                                    <label className='block text-sm font-medium text-gray-700 mb-2'>{getFieldLabel('keeperName', 'Keeper Name (Manual or Contact)')}</label>
                                     <div className="flex gap-2">
                                         <input 
                                             type="text" 
                                             name="keeperName" 
                                             value={formData.keeperName || ''} 
                                             onChange={handleChange}
-                                            placeholder="Keeper name (person caring for this animal)"
+                                            placeholder="Enter keeper name or select contact"
                                             className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         />
                                         <button
