@@ -5782,6 +5782,31 @@ const AnimalForm = ({
                                                             }
                                                         );
 
+                                                        // Auto-fill form fields based on role
+                                                        if (assignmentRole === 'breeder' || assignmentRole === 'both') {
+                                                            if (contact.linkedCTUID) {
+                                                                setFormData(prev => ({
+                                                                    ...prev,
+                                                                    breederId_public: contact.linkedCTUID,
+                                                                    manualBreederName: ''
+                                                                }));
+                                                                fetchBreederInfo(contact.linkedCTUID).then(setBreederInfo);
+                                                            } else {
+                                                                setFormData(prev => ({
+                                                                    ...prev,
+                                                                    breederId_public: null,
+                                                                    manualBreederName: displayName
+                                                                }));
+                                                                setBreederInfo(null);
+                                                            }
+                                                        }
+                                                        if (assignmentRole === 'keeper' || assignmentRole === 'both') {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                keeperName: displayName
+                                                            }));
+                                                        }
+
                                                         showModalMessage('Success', `Animal assigned to ${displayName} as ${assignmentRole}!`);
                                                         setShowManualAssignmentModal(false);
                                                     } catch (error) {
@@ -6312,7 +6337,7 @@ const AnimalForm = ({
                                     <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
                                         <Link size={16} className="text-blue-600" /> Assign to Contact
                                     </h3>
-                                    <p className="text-xs text-gray-600 mt-1">Link this animal to a contact record (breeder, owner, keeper, etc.)</p>
+                                    <p className="text-xs text-gray-600 mt-1">Link this animal to a contact record (breeder, keeper, etc.)</p>
                                 </div>
                                 <button
                                     type="button"
