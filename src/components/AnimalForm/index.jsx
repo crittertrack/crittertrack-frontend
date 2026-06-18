@@ -6435,17 +6435,8 @@ const AnimalForm = ({
                         {/* Current Owner */}
                         <div data-tutorial-target="current-owner-field" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper</h3>
-                            {!isFieldHidden('isOwned') && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
-                                    <input type="checkbox" name="isOwned" checked={formData.isOwned} onChange={handleChange} 
-                                        className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                    <span className="text-sm font-medium text-gray-700">Currently Owned by Me</span>
-                                </label>
-                            </div>
-                            )}
                             {!isFieldHidden('keeperName') && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
                                 <div>
                                     <label className='block text-sm font-medium text-gray-700 mb-2'>{getFieldLabel('keeperName', 'Keeper Name')}</label>
                                     <div className="flex gap-2">
@@ -6460,7 +6451,7 @@ const AnimalForm = ({
                                         <button
                                             type="button"
                                             onClick={() => setShowContactSelector(true)}
-                                            className="px-3 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md transition flex items-center justify-center flex-shrink-0"
+                                            className="px-4 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-md transition flex items-center gap-1"
                                             title="Select from contacts"
                                         >
                                             <User size={18} className="text-gray-600" />
