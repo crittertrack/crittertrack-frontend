@@ -833,16 +833,6 @@ const ContactsPage = ({ API_BASE_URL, authToken, showModalMessage }) => {
                                     <Loader2 className="animate-spin text-primary mr-2" size={24} />
                                     <span className="text-gray-600">Loading animals...</span>
                                 </div>
-                            ) : !previewContact.linkedCTUID ? (
-                                <div className="text-center py-12">
-                                    <User size={48} className="mx-auto text-gray-300 mb-4" />
-                                    <p className="text-gray-500">
-                                        This contact is not linked to a CritterTrack user.
-                                    </p>
-                                    <p className="text-sm text-gray-400 mt-2">
-                                        Link a CritterTrack ID to see animals bred by or owned by this contact.
-                                    </p>
-                                </div>
                             ) : previewTab === 'bred' ? (
                                 bredAnimals.length === 0 ? (
                                     <div className="text-center py-12">
