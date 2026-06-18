@@ -3119,7 +3119,7 @@ const AnimalForm = ({
     // Check if a field is hidden for the current species
     // CRITICAL: Never hide fields that have existing data (backward compatibility)
     // Legal fields are always shown for all species regardless of template settings
-    const ALWAYS_VISIBLE_FIELDS = new Set([
+    const ALWAYS_VISIBLE_FIELDS = new Set([ // These fields are always visible regardless of template settings
         'licenseNumber', 'licenseJurisdiction', 'insurance', 'legalStatus',
         'breedingRestrictions', 'exportRestrictions',
     ]);
@@ -3333,6 +3333,8 @@ const AnimalForm = ({
             transferHistory: animalToEdit.transferHistory || '',
             breedingRestrictions: animalToEdit.breedingRestrictions || '',
             exportRestrictions: animalToEdit.exportRestrictions || '',
+            purchaseDate: animalToEdit.purchaseDate ? new Date(animalToEdit.purchaseDate).toISOString().substring(0, 10) : '',
+            purchaseLocation: animalToEdit.purchaseLocation || '',
             legalDocuments: animalToEdit.legalDocuments || [],
         } : {
             species: species, 
@@ -3511,6 +3513,8 @@ const AnimalForm = ({
             transferHistory: '',
             breedingRestrictions: '',
             exportRestrictions: '',
+            purchaseDate: '',
+            purchaseLocation: '',
             legalDocuments: [],
         }
     );
@@ -9067,6 +9071,27 @@ const AnimalForm = ({
 
                 {/* Tab 13: Legal & Documentation */}
                 {activeTab === 13 && (
+                    <div className="space-y-6">
+                        {/* Purchase Information */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4"><Package size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Purchase Information</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Purchase Date</label>
+                                    <DatePicker value={formData.purchaseDate || ''} onChange={(e) => handleChange({ target: { name: 'purchaseDate', value: e.target.value } })}
+                                        maxDate={new Date()}
+                                        className="p-2" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Purchase Location</label>
+                                    <input type="text" name="purchaseLocation" value={formData.purchaseLocation || ''} onChange={handleChange}
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                        placeholder="e.g., Local breeder, Pet Store, Online" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Licensing */}
                     <div className="space-y-6">
                         {/* Licensing */}
                         {(!isFieldHidden('licenseNumber') || !isFieldHidden('licenseJurisdiction')) && (
