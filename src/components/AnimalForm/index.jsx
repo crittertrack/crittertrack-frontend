@@ -6457,7 +6457,7 @@ const AnimalForm = ({
                                             <User size={18} className="text-gray-600" />
                                         </button>
                                     </div>
-                                    <p className="text-xs text-gray-500 mt-1">Records keeper changes in keeper history.</p>
+                                    <p className="text-xs text-gray-500 mt-1">Select a contact or enter a name manually.</p>
                                 </div>
                             </div>
                             )}
