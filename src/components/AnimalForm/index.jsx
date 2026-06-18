@@ -3970,8 +3970,30 @@ const AnimalForm = ({
     
     // Contact selector state
     const [showContactSelector, setShowContactSelector] = useState(false);
+    const [showManualAssignmentModal, setShowManualAssignmentModal] = useState(false);
+    const [assignmentRole, setAssignmentRole] = useState('breeder');
     const [contacts, setContacts] = useState([]);
     const [loadingContacts, setLoadingContacts] = useState(false);
+
+    // Load contacts when manual assignment modal opens
+    useEffect(() => {
+        if (showManualAssignmentModal && !loadingContacts && contacts.length === 0) {
+            setLoadingContacts(true);
+            axios.get(`${API_BASE_URL}/contacts`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            })
+            .then(response => {
+                setContacts(response.data || []);
+            })
+            .catch(error => {
+                console.error('Error loading contacts:', error);
+                setContacts([]);
+            })
+            .finally(() => {
+                setLoadingContacts(false);
+            });
+        }
+    }, [showManualAssignmentModal, API_BASE_URL, authToken]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -5661,6 +5683,167 @@ const AnimalForm = ({
                 />
             )}
 
+            {/* Manual Animal Assignment Modal */}
+            {showManualAssignmentModal && (
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-2xl max-h-[90vh] flex flex-col">
+                        <div className="flex justify-between items-center border-b pb-3 mb-4">
+                            <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                <User size={20} />
+                                Assign Animal to Contact
+                            </h3>
+                            <button onClick={() => setShowManualAssignmentModal(false)} className="text-gray-500 hover:text-gray-800">
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="mb-4">
+                            <p className="text-sm text-gray-600 mb-4">
+                                Select a contact and role to assign this animal. This helps track breeder and keeper relationships.
+                            </p>
+
+                            {/* Role Selection */}
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Assignment Role</label>
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setAssignmentRole('breeder')}
+                                        className={`flex-1 px-4 py-2 rounded-lg font-medium transition ${
+                                            assignmentRole === 'breeder'
+                                                ? 'bg-blue-600 text-white'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        Breeder
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setAssignmentRole('keeper')}
+                                        className={`flex-1 px-4 py-2 rounded-lg font-medium transition ${
+                                            assignmentRole === 'keeper'
+                                                ? 'bg-green-600 text-white'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        Keeper
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setAssignmentRole('both')}
+                                        className={`flex-1 px-4 py-2 rounded-lg font-medium transition ${
+                                            assignmentRole === 'both'
+                                                ? 'bg-purple-600 text-white'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        Both
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Contact List */}
+                        <div className="flex-grow overflow-y-auto">
+                            {loadingContacts ? (
+                                <div className="flex items-center justify-center p-8">
+                                    <Loader2 className="animate-spin text-primary-dark mr-2" size={24} />
+                                    <span className="text-gray-600">Loading contacts...</span>
+                                </div>
+                            ) : contacts.length > 0 ? (
+                                <div className="space-y-2">
+                                    {contacts.map((contact) => {
+                                        const displayName = [contact.prefix, contact.personalName, contact.suffix].filter(Boolean).join(' ') 
+                                            || contact.breederName 
+                                            || 'Unnamed Contact';
+                                        
+                                        return (
+                                            <div
+                                                key={contact._id}
+                                                onClick={async () => {
+                                                    try {
+                                                        // Get the animal ID
+                                                        const animalId = formData.id_public || animalToEdit?.id_public;
+                                                        
+                                                        if (!animalId) {
+                                                            showModalMessage('Error', 'Please save the animal first before assigning to a contact.');
+                                                            return;
+                                                        }
+
+                                                        // Call the API to assign the animal
+                                                        await axios.post(
+                                                            `${API_BASE_URL}/contacts/${contact._id}/assign-animal`,
+                                                            {
+                                                                animalId_public: animalId,
+                                                                role: assignmentRole
+                                                            },
+                                                            {
+                                                                headers: { Authorization: `Bearer ${authToken}` }
+                                                            }
+                                                        );
+
+                                                        showModalMessage('Success', `Animal assigned to ${displayName} as ${assignmentRole}!`);
+                                                        setShowManualAssignmentModal(false);
+                                                    } catch (error) {
+                                                        console.error('Error assigning animal:', error);
+                                                        showModalMessage('Error', error.response?.data?.message || 'Failed to assign animal to contact.');
+                                                    }
+                                                }}
+                                                className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition"
+                                            >
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex-grow">
+                                                        <h4 className="font-semibold text-gray-800 text-lg">
+                                                            {displayName}
+                                                        </h4>
+                                                        {contact.linkedCTUID && (
+                                                            <p className="text-sm text-gray-600 mt-1">
+                                                                🆔 {contact.linkedCTUID}
+                                                            </p>
+                                                        )}
+                                                        {(contact.address?.city || contact.address?.country) && (
+                                                            <p className="text-sm text-gray-600 mt-1">
+                                                                📍 {[contact.address.city, contact.address.country].filter(Boolean).join(', ')}
+                                                            </p>
+                                                        )}
+                                                        <div className="flex gap-2 mt-2">
+                                                            {contact.isBreeder && (
+                                                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Breeder</span>
+                                                            )}
+                                                            {contact.isKeeper && (
+                                                                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Keeper</span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8">
+                                    <User className="mx-auto text-gray-300 mb-3" size={48} />
+                                    <p className="text-gray-500">No contacts found.</p>
+                                    <p className="text-sm text-gray-400 mt-2">
+                                        Add contacts from the Contacts page to assign animals to them.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="mt-4 pt-4 border-t">
+                            <button
+                                onClick={() => setShowManualAssignmentModal(false)}
+                                className="w-full py-2 px-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* --- Create Litter Modal --- */}
             {showCreateLitterModal && breedingRecordForLitter && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
@@ -6249,6 +6432,29 @@ const AnimalForm = ({
                                         placeholder="Co-owner name, terms, breeding rights" />
                                 </div>
                             )}
+                        </div>
+
+                        {/* Manual Animal Assignment */}
+                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
+                                        <Link size={16} className="text-blue-600" /> Assign to Contact
+                                    </h3>
+                                    <p className="text-xs text-gray-600 mt-1">Link this animal to a contact record (breeder, owner, keeper, etc.)</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowManualAssignmentModal(true);
+                                        setAssignmentRole('breeder');
+                                    }}
+                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition flex items-center gap-2"
+                                >
+                                    <Plus size={16} />
+                                    Assign Animal
+                                </button>
+                            </div>
                         </div>
 
                         {/* Keeper History */}
