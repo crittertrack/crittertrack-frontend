@@ -6305,6 +6305,29 @@ const AnimalForm = ({
                 {/* Tab 2: Ownership */}
                 {activeTab === 2 && (
                     <div className="space-y-6">
+                        {/* Manual Animal Assignment */}
+                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
+                                        <Link size={16} className="text-blue-600" /> Assign to Contact
+                                    </h3>
+                                    <p className="text-xs text-gray-600 mt-1">Link this animal to a contact record (breeder, owner, keeper, etc.)</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowManualAssignmentModal(true);
+                                        setAssignmentRole('breeder');
+                                    }}
+                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition flex items-center gap-2"
+                                >
+                                    <Plus size={16} />
+                                    Assign Animal
+                                </button>
+                            </div>
+                        </div>
+
                         {/* Ownership */}
                         <div data-tutorial-target="ownership-section" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center gap-1.5"><Star size={16} className="flex-shrink-0 text-gray-400" /> Breeder</h3>
@@ -6432,29 +6455,6 @@ const AnimalForm = ({
                                         placeholder="Co-owner name, terms, breeding rights" />
                                 </div>
                             )}
-                        </div>
-
-                        {/* Manual Animal Assignment */}
-                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-3">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
-                                        <Link size={16} className="text-blue-600" /> Assign to Contact
-                                    </h3>
-                                    <p className="text-xs text-gray-600 mt-1">Link this animal to a contact record (breeder, owner, keeper, etc.)</p>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setShowManualAssignmentModal(true);
-                                        setAssignmentRole('breeder');
-                                    }}
-                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition flex items-center gap-2"
-                                >
-                                    <Plus size={16} />
-                                    Assign Animal
-                                </button>
-                            </div>
                         </div>
 
                         {/* Keeper History */}
