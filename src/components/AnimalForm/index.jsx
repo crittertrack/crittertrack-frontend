@@ -585,29 +585,24 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
     if (!cacheKey) return null;
 
     if (pedigreeTreeCache.has(cacheKey)) {
+        console.log(`[PEDIGREE PREFETCH] Cache hit for ${rootId}`);
         return pedigreeTreeCache.get(cacheKey);
     }
 
     if (pedigreePrefetchInFlight.has(cacheKey)) {
+        console.log(`[PEDIGREE PREFETCH] Already in flight for ${rootId}`);
         return pedigreePrefetchInFlight.get(cacheKey);
     }
+
+    console.log(`[PEDIGREE PREFETCH] Starting for ${rootId}`);
+    const overallStartTime = Date.now();
 
     const task = (async () => {
         const resultCache = new Map();
         let remainingFetchBudget = MAX_PEDIGREE_FETCH_NODES;
 
-        const fetchAnimalWithFamily = async (id, depth = 0, pathIds = new Set()) => {
-            if (!id || depth > MAX_PEDIGREE_FETCH_DEPTH) return null;
-            if (pathIds.has(id)) return null;
-
-            if (resultCache.has(id)) {
-                const cached = resultCache.get(id);
-                if (cached.fetchedAtDepth <= depth) return cached.data;
-            }
-
-            if (remainingFetchBudget <= 0) return null;
-            remainingFetchBudget -= 1;
-
+        // Helper function to fetch a single animal's data
+        const fetchSingleAnimalData = async (id) => {
             let animalInfo = null;
             if (authToken) {
                 const isPublicId = /^CTC\d+|^\d+$/.test(id);
@@ -669,11 +664,113 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
                 } catch (error) {}
             }
 
+            return animalInfo;
+        };
+
+        // Helper to build tree structure from flat results
+        const buildTreeFromResults = (id, resultsMap) => {
+            const animalData = resultsMap.get(id);
+            if (!animalData) return null;
+
+            const fatherId = animalData.fatherId_public || animalData.sireId_public;
+            const motherId = animalData.motherId_public || animalData.damId_public;
+
+            return {
+                ...animalData,
+                father: fatherId ? buildTreeFromResults(fatherId, resultsMap) : null,
+                mother: motherId ? buildTreeFromResults(motherId, resultsMap) : null
+            };
+        };
+
+        // PHASE 1: Breadth-first for first 3 generations (for fast initial display)
+        const BREADTH_FIRST_DEPTH = 3;
+        const generationQueue = [{ id: rootId, depth: 0, path: new Set() }];
+        const processedIds = new Set();
+
+        for (let currentDepth = 0; currentDepth <= BREADTH_FIRST_DEPTH; currentDepth++) {
+            const animalsAtThisDepth = generationQueue.filter(item => item.depth === currentDepth);
+            if (animalsAtThisDepth.length === 0) continue;
+
+            console.log(`[PEDIGREE PREFETCH] Fetching generation ${currentDepth} (${animalsAtThisDepth.length} animals)...`);
+            const genStartTime = Date.now();
+
+            // Fetch all animals in this generation in parallel
+            const fetchPromises = animalsAtThisDepth.map(async ({ id, path }) => {
+                if (processedIds.has(id) || !id || path.has(id)) return null;
+                if (remainingFetchBudget <= 0) return null;
+                
+                processedIds.add(id);
+                remainingFetchBudget -= 1;
+
+                const animalInfo = await fetchSingleAnimalData(id);
+                if (!animalInfo) return null;
+
+                resultCache.set(id, { fetchedAtDepth: currentDepth, data: animalInfo });
+
+                // Queue parents for next generation
+                const fatherId = animalInfo.fatherId_public || animalInfo.sireId_public;
+                const motherId = animalInfo.motherId_public || animalInfo.damId_public;
+                const childPath = new Set([...path, id]);
+
+                if (currentDepth < BREADTH_FIRST_DEPTH) {
+                    if (fatherId && !processedIds.has(fatherId)) {
+                        generationQueue.push({ id: fatherId, depth: currentDepth + 1, path: childPath });
+                    }
+                    if (motherId && !processedIds.has(motherId)) {
+                        generationQueue.push({ id: motherId, depth: currentDepth + 1, path: childPath });
+                    }
+                }
+
+                return animalInfo;
+            });
+
+            await Promise.all(fetchPromises);
+
+            const genElapsed = Date.now() - genStartTime;
+            console.log(`[PEDIGREE PREFETCH] Generation ${currentDepth} complete (${genElapsed}ms)`);
+
+            // Update cache with partial data after each generation
+            const partialTree = buildTreeFromResults(rootId, resultCache);
+            if (partialTree) {
+                pedigreeTreeCache.set(cacheKey, {
+                    data: partialTree,
+                    ownerProfile: null,
+                    isPartial: true,
+                    fetchedDepth: currentDepth,
+                    timestamp: Date.now()
+                });
+                console.log(`[PEDIGREE PREFETCH] Cache updated with ${currentDepth + 1} generation(s)`);
+            }
+        }
+
+        console.log(`[PEDIGREE PREFETCH] First ${BREADTH_FIRST_DEPTH + 1} generations complete, continuing depth-first for remaining generations...`);
+
+        // PHASE 2: Continue depth-first for remaining generations (4-13)
+        const fetchAnimalWithFamily = async (id, depth = 0, pathIds = new Set()) => {
+            if (!id || depth > MAX_PEDIGREE_FETCH_DEPTH) return null;
+            if (pathIds.has(id)) return null;
+
+            if (resultCache.has(id)) {
+                const cached = resultCache.get(id);
+                if (cached.fetchedAtDepth <= depth) return cached.data;
+            }
+
+            if (remainingFetchBudget <= 0) return null;
+            remainingFetchBudget -= 1;
+
+            const animalInfo = await fetchSingleAnimalData(id);
+            if (!animalInfo) return null;
+
             const fatherId = animalInfo.fatherId_public || animalInfo.sireId_public;
             const motherId = animalInfo.motherId_public || animalInfo.damId_public;
             const childPath = new Set([...pathIds, id]);
-            const father = fatherId ? await fetchAnimalWithFamily(fatherId, depth + 1, childPath) : null;
-            const mother = motherId ? await fetchAnimalWithFamily(motherId, depth + 1, childPath) : null;
+            
+            // Fetch parents in parallel for better performance
+            const [father, mother] = await Promise.all([
+                fatherId ? fetchAnimalWithFamily(fatherId, depth + 1, childPath) : null,
+                motherId ? fetchAnimalWithFamily(motherId, depth + 1, childPath) : null
+            ]);
+            
             const result = { ...animalInfo, father, mother };
 
             if (!resultCache.has(id) || resultCache.get(id).fetchedAtDepth > depth) {
@@ -683,6 +780,8 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
         };
 
         const data = await fetchAnimalWithFamily(rootId);
+        
+        // Fetch owner profile
         let fetchedOwnerProfile = null;
         if (data?.breederId_public) {
             try {
@@ -695,10 +794,23 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
             } catch (error) {}
         }
 
-        const payload = { data, ownerProfile: fetchedOwnerProfile };
+        const payload = { 
+            data, 
+            ownerProfile: fetchedOwnerProfile,
+            isPartial: false,
+            fetchedDepth: MAX_PEDIGREE_FETCH_DEPTH,
+            timestamp: Date.now()
+        };
         pedigreeTreeCache.set(cacheKey, payload);
+        
+        const overallElapsed = Date.now() - overallStartTime;
+        console.log(`[PEDIGREE PREFETCH] Complete for ${rootId} (${overallElapsed}ms total, ${MAX_PEDIGREE_FETCH_DEPTH + 1} generations)`);
+        
         return payload;
-    })().catch(() => null).finally(() => {
+    })().catch((error) => {
+        console.error(`[PEDIGREE PREFETCH] Error for ${rootId}:`, error);
+        return null;
+    }).finally(() => {
         pedigreePrefetchInFlight.delete(cacheKey);
     });
 
@@ -6104,6 +6216,29 @@ const AnimalForm = ({
                 />
             )}
 
+            {/* CTC selector modal ? always rendered so it works regardless of activeTab */}
+            {(() => {
+                const ctcModal = mpCTCOpenSlot ? (
+                    <ParentSearchModal
+                        title={mpCTCOpenSlot.endsWith('Sire') || mpCTCOpenSlot === 'sire' ? 'Sire' : 'Dam'}
+                        currentId={animalToEdit?.id_public}
+                        onSelect={async (a) => { setMpCTCOpenSlot(null); if (a) await mpLinkAnimal(mpCTCOpenSlot, a); }}
+                        onClose={() => setMpCTCOpenSlot(null)}
+                        authToken={authToken}
+                        showModalMessage={showModalMessage}
+                        API_BASE_URL={API_BASE_URL}
+                        X={X}
+                        Search={Search}
+                        Loader2={Loader2}
+                        LoadingSpinner={LoadingSpinner}
+                        requiredGender={mpCTCOpenSlot.endsWith('Sire') || mpCTCOpenSlot === 'sire' ? 'Male' : 'Female'}
+                        species={formData.species}
+                    />
+                ) : null;
+                return ctcModal;
+            })()}
+
+            <div>
             <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center justify-between">
                 <span>
                     <PlusCircle size={24} className="inline mr-2 text-primary" /> 
@@ -9250,6 +9385,7 @@ const AnimalForm = ({
                             </div>
                         </div>
                     </div>
+                    </div>
                 )}
 
                 {/* Tab 5: Pedigree */}
@@ -9423,7 +9559,7 @@ const AnimalForm = ({
                     };
 
                     return (<>
-                        {ctcModal}
+                        {/* ctcModal is now rendered outside the form */}
                         <div className="space-y-6">
                             <div className="flex items-center gap-2">
                                 <Dna size={18} className="text-orange-500" />
@@ -9671,7 +9807,7 @@ const AnimalForm = ({
                     </button>
                 </div>
             </form>
-            
+
             {/* Community Genetics Submission Modal */}
             {showCommunityGeneticsModal && (
                 <CommunityGeneticsModal
@@ -9682,6 +9818,7 @@ const AnimalForm = ({
                     showModalMessage={showModalMessage}
                 />
             )}
+            </div>
         </div>
     );
 };
