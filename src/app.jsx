@@ -1795,11 +1795,9 @@ const App = () => {
                     </nav>
 
                     <div className="flex items-center space-x-3">
-                        <ThemeToggle />
-                        
                         <button
                             onClick={() => setShowInfoTab(true)}
-                            className="relative flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-dark-text py-2 px-3 rounded-lg transition duration-150 shadow-sm"
+                            className="relative flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
                             title="Help"
                         >
                             <HelpCircle size={18} />
