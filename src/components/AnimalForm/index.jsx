@@ -3967,6 +3967,8 @@ const AnimalForm = ({
     const [mpCTCOpenSlot, setMpCTCOpenSlot] = useState(null);
     const [mpSlotUploading, setMpSlotUploading] = useState({});
     const mpAutoFetchedRef = useRef(false);
+    const animalToEditIdRef = useRef(animalToEdit?._id); // Keep track of the animal ID that was last auto-filled
+    const mpAutoFetchedRef = useRef(false);
 
     // Auto-fill all generations when Beta Pedigree tab is first opened in edit.
     // Refreshes existing CTC-linked slots, backfills sire/dam from lineage fields,
