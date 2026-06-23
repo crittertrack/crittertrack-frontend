@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import { 
     Dna, RefreshCw, Plus, Edit2, Trash2, Save, X, 
     AlertCircle, CheckCircle, Loader2, ChevronDown, ChevronUp,
@@ -257,7 +257,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
             const coatGenes = [];
             
             // Define which loci are marking vs coat
-            const markingGeneSymbols = ['S', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'U'];
+            const markingGeneSymbols = ['S', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'U', 'Ln'];
             const coatGeneSymbols = ['Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'];
             
             let geneOrder = 0;

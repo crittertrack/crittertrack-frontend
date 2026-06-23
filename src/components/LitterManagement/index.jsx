@@ -47,6 +47,7 @@ const TARGET_OUTCOME_TRAIT_CHIPS = {
         { id: 'dom-red',            label: 'Dominant Red',      code: 'Ay/-',           group: 'Base Color — Other' },
         { id: 'rec-red',            label: 'Recessive Red',     code: 'e/e',            group: 'Base Color — Other' },
         { id: 'am-brindle',         label: 'Am. Brindle',       code: 'Avy/-',          group: 'Base Color — Other' },
+        { id: 'Leaden',            label: 'Leaden',            code: 'ln/ln',          group: 'Base Color — Other' },
         // Albino & Dilution
         { id: 'albino',             label: 'Albino',            code: 'c/c',            group: 'Albino & Dilution' },
         { id: 'himalayan',          label: 'Himalayan',         code: 'c/ch',           group: 'Albino & Dilution' },
@@ -238,6 +239,7 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits, species = TARGET_OUTCO
             // Base Color — Other
             case 'dom-red':          genotype.A  = 'Ay/a';    break;
             case 'rec-red':          genotype.E  = 'e/e';     break;
+            case 'Leaden':          genotype.Ln = 'ln/ln';   break;
             // Albino & Dilution — C locus
             case 'albino':           genotype.C  = 'c/c';     break;
             case 'himalayan':        genotype.C  = 'c/ch';    break;
@@ -1318,6 +1320,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         maleCount: null,
         femaleCount: null,
         unknownCount: null,
+        maleLosses: null,
+        femaleLosses: null,
+        unknownLosses: null,
+        extractLossesFromTotal: false,
         notes: '',
         linkedOffspringIds: [],
         // Enhanced breeding record fields
@@ -1338,6 +1344,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         females: 0,
         unknown: 0
     });
+    
+    // Track losses to extract from gender counts when creating placeholders
+    const [extractLosses, setExtractLosses] = useState({
+        fromMales: 0,
+        fromFemales: 0,
+        fromUnknown: 0
+    });
+    const [excludeLossesFromCreation, setExcludeLossesFromCreation] = useState(false);
     // Search filters for parent selection (UI not yet implemented)
     // const [sireSearch, setSireSearch] = useState('');
     // const [damSearch, setDamSearch] = useState('');
@@ -1498,7 +1512,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
     const CHIP_A_COMPOUND_HET_CAPABLE = new Set(['tan', 'fox']); // may pair with one A-locus series
     // E-locus: only rec-red remains (fawn/amber removed); can combine with A-locus chips
+    // ln-locus: only leaden remains; can combine with A-locus chips
     const CHIP_E_EXCLUSIVE  = new Set(['rec-red']);
+    const CHIP_LEADEN_EXCLUSIVE = new Set(['leaden']);
     const CHIP_C_EXCLUSIVE  = new Set(['albino','himalayan','bone','siamese','burmese','stone','beige','colorpoint-beige','mock-choc','sepia','silver-agouti']);
     const CHIP_GO_EXCLUSIVE = new Set(['shorthair','longhair','texel']);
     const CHIP_W_EXCLUSIVE  = new Set(['variegated','banded']);
@@ -1528,6 +1544,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             }
             // E-locus: rec-red is the only E chip; clearing is a no-op but kept for consistency
             if (CHIP_E_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_E_EXCLUSIVE.has(id));
+            // ln-locus: only leaden remains; can combine with A-locus chips
+            if (CHIP_LEADEN_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_LEADEN_EXCLUSIVE.has(id));
             // C-locus: mutually exclusive
             if (CHIP_C_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_C_EXCLUSIVE.has(id));
             // Go-locus: mutually exclusive
@@ -2608,7 +2626,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 litterSizeWeaned: formData.litterSizeWeaned || null,
                 stillbornCount: formData.stillbornCount || null,
                 lossesCount: formData.lossesCount || null,
-                weaningDate: formData.weaningDate || null
+                weaningDate: formData.weaningDate || null,
+                // Extraction flags
+                extractStillbornFromTotal: formData.extractStillbornFromTotal || false,
+                extractLossesFromTotal: formData.extractLossesFromTotal || false,
+                // Gender-specific stillborn
+                maleStillbornCount: formData.maleStillborn || null,
+                femaleStillbornCount: formData.femaleStillborn || null,
+                unknownStillbornCount: formData.unknownStillborn || null,
+                // Gender-specific losses
+                maleLossesCount: formData.maleLosses || null,
+                femaleLossesCount: formData.femaleLosses || null,
+                unknownLossesCount: formData.unknownLosses || null
             };
 
             const litterResponse = await axios.post(`${API_BASE_URL}/litters`, litterPayload, {
@@ -3071,6 +3100,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             litterSizeWeaned: litter.litterSizeWeaned || litter.numberWeaned || null,
             stillbornCount: litter.stillbornCount || litter.stillborn || null,
             lossesCount: litter.lossesCount || litter.losses || null,
+            // Sex-specific stillborn counts
+            maleStillborn: litter.maleStillbornCount || null,
+            femaleStillborn: litter.femaleStillbornCount || null,
+            unknownStillborn: litter.unknownStillbornCount || null,
+            // Sex-specific losses counts
+            maleLosses: litter.maleLossesCount || null,
+            femaleLosses: litter.femaleLossesCount || null,
+            unknownLosses: litter.unknownLossesCount || null,
             expectedDueDate: formatDateForInput(litter.expectedDueDate),
             weaningDate: formatDateForInput(litter.weaningDate)
         });
@@ -3186,7 +3223,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 litterSizeWeaned: formData.litterSizeWeaned || null,
                 stillbornCount: formData.stillbornCount || null,
                 lossesCount: formData.lossesCount || null,
-                weaningDate: formData.weaningDate || null
+                weaningDate: formData.weaningDate || null,
+                // Extraction flags
+                extractStillbornFromTotal: formData.extractStillbornFromTotal || false,
+                extractLossesFromTotal: formData.extractLossesFromTotal || false,
+                // Gender-specific stillborn
+                maleStillbornCount: formData.maleStillborn || null,
+                femaleStillbornCount: formData.femaleStillborn || null,
+                unknownStillbornCount: formData.unknownStillborn || null,
+                // Gender-specific losses
+                maleLossesCount: formData.maleLosses || null,
+                femaleLossesCount: formData.femaleLosses || null,
+                unknownLossesCount: formData.unknownLosses || null
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
@@ -4077,37 +4125,255 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     </div>
 
                                     {/* Row 3: Outcomes */}
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        {/* Stillborn Count */}
+                                    <div className="space-y-4">
+                                        {/* Stillborn - matching Total Born layout */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Stillborn
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Stillborn (Born dead)
                                             </label>
-                                            <input
-                                                type="number"
-                                                value={typeof formData.stillbornCount === 'number' ? formData.stillbornCount : (formData.stillbornCount || '')}
-                                                onChange={(e) => setFormData({...formData, stillbornCount: e.target.value ? parseInt(e.target.value) : null})}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                placeholder="0"
-                                                min="0"
-                                            />
-                                            <p className="text-xs text-gray-400 mt-1">Born dead</p>
+                                            
+                                            {/* Checkbox to extract from total counts */}
+                                            <div className="mb-3">
+                                                <label className="flex items-center space-x-2 text-sm text-gray-600 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={formData.extractStillbornFromTotal || false}
+                                                        onChange={(e) => {
+                                                            const checked = e.target.checked;
+                                                            setFormData(prev => {
+                                                                if (checked) {
+                                                                    // Extract stillborn from gender counts
+                                                                    const newMale = Math.max(0, (prev.maleCount || 0) - (prev.maleStillborn || 0));
+                                                                    const newFemale = Math.max(0, (prev.femaleCount || 0) - (prev.femaleStillborn || 0));
+                                                                    const newUnknown = Math.max(0, (prev.unknownCount || 0) - (prev.unknownStillborn || 0));
+                                                                    return {
+                                                                        ...prev,
+                                                                        extractStillbornFromTotal: true,
+                                                                        maleCount: newMale || null,
+                                                                        femaleCount: newFemale || null,
+                                                                        unknownCount: newUnknown || null,
+                                                                        litterSizeBorn: (newMale + newFemale + newUnknown) || null
+                                                                    };
+                                                                } else {
+                                                                    // Add stillborn back to gender counts
+                                                                    const newMale = (prev.maleCount || 0) + (prev.maleStillborn || 0);
+                                                                    const newFemale = (prev.femaleCount || 0) + (prev.femaleStillborn || 0);
+                                                                    const newUnknown = (prev.unknownCount || 0) + (prev.unknownStillborn || 0);
+                                                                    return {
+                                                                        ...prev,
+                                                                        extractStillbornFromTotal: false,
+                                                                        maleCount: newMale || null,
+                                                                        femaleCount: newFemale || null,
+                                                                        unknownCount: newUnknown || null,
+                                                                        litterSizeBorn: (newMale + newFemale + newUnknown) || null
+                                                                    };
+                                                                }
+                                                            });
+                                                        }}
+                                                        className="rounded border-gray-300 text-primary focus:ring-primary"
+                                                    />
+                                                    <span>Extract stillborn from total counts (reduce M/F/U counts by stillborn amounts)</span>
+                                                </label>
+                                                <p className="text-xs text-gray-400 mt-1 ml-6">
+                                                    When enabled, stillborn will be subtracted from the gender counts above, showing only live-born offspring.
+                                                </p>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                                {/* Total Stillborn - read-only, summed from M+F+U */}
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Total Stillborn
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        value={typeof formData.stillbornCount === 'number' ? formData.stillbornCount : (formData.stillbornCount || '')}
+                                                        readOnly
+                                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 cursor-not-allowed font-semibold"
+                                                        placeholder="0"
+                                                    />
+                                                    <p className="text-xs text-gray-400 mt-1">Auto-calculated from M + F + U</p>
+                                                </div>
+
+                                                {/* Male Stillborn */}
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Male Stillborn</label>
+                                                    <input
+                                                        type="number"
+                                                        value={typeof formData.maleStillborn === 'number' ? formData.maleStillborn : (formData.maleStillborn || '')}
+                                                        onChange={(e) => {
+                                                            const v = e.target.value ? parseInt(e.target.value) : null;
+                                                            const f = formData.femaleStillborn || 0;
+                                                            const u = formData.unknownStillborn || 0;
+                                                            setFormData({...formData, maleStillborn: v, stillbornCount: (v || 0) + f + u || null});
+                                                        }}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                        placeholder="0"
+                                                        min="0"
+                                                    />
+                                                </div>
+
+                                                {/* Female Stillborn */}
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Female Stillborn</label>
+                                                    <input
+                                                        type="number"
+                                                        value={typeof formData.femaleStillborn === 'number' ? formData.femaleStillborn : (formData.femaleStillborn || '')}
+                                                        onChange={(e) => {
+                                                            const v = e.target.value ? parseInt(e.target.value) : null;
+                                                            const m = formData.maleStillborn || 0;
+                                                            const u = formData.unknownStillborn || 0;
+                                                            setFormData({...formData, femaleStillborn: v, stillbornCount: m + (v || 0) + u || null});
+                                                        }}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                        placeholder="0"
+                                                        min="0"
+                                                    />
+                                                </div>
+
+                                                {/* Unknown Stillborn */}
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Unknown Stillborn</label>
+                                                    <input
+                                                        type="number"
+                                                        value={typeof formData.unknownStillborn === 'number' ? formData.unknownStillborn : (formData.unknownStillborn || '')}
+                                                        onChange={(e) => {
+                                                            const v = e.target.value ? parseInt(e.target.value) : null;
+                                                            const m = formData.maleStillborn || 0;
+                                                            const f = formData.femaleStillborn || 0;
+                                                            setFormData({...formData, unknownStillborn: v, stillbornCount: m + f + (v || 0) || null});
+                                                        }}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                        placeholder="0"
+                                                        min="0"
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        {/* Losses */}
+                                        {/* Losses - matching Total Born layout */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Losses
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Losses (Died after birth)
                                             </label>
-                                            <input
-                                                type="number"
-                                                value={typeof formData.lossesCount === 'number' ? formData.lossesCount : (formData.lossesCount || '')}
-                                                onChange={(e) => setFormData({...formData, lossesCount: e.target.value ? parseInt(e.target.value) : null})}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                placeholder="0"
-                                                min="0"
-                                            />
-                                            <p className="text-xs text-gray-400 mt-1">Died after birth</p>
+                                            
+                                            {/* Checkbox to extract from total counts */}
+                                            <div className="mb-3">
+                                                <label className="flex items-center space-x-2 text-sm text-gray-600 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={formData.extractLossesFromTotal || false}
+                                                        onChange={(e) => {
+                                                            const checked = e.target.checked;
+                                                            setFormData(prev => {
+                                                                if (checked) {
+                                                                    // Extract losses from gender counts
+                                                                    const newMale = Math.max(0, (prev.maleCount || 0) - (prev.maleLosses || 0));
+                                                                    const newFemale = Math.max(0, (prev.femaleCount || 0) - (prev.femaleLosses || 0));
+                                                                    const newUnknown = Math.max(0, (prev.unknownCount || 0) - (prev.unknownLosses || 0));
+                                                                    return {
+                                                                        ...prev,
+                                                                        extractLossesFromTotal: true,
+                                                                        maleCount: newMale || null,
+                                                                        femaleCount: newFemale || null,
+                                                                        unknownCount: newUnknown || null,
+                                                                        litterSizeBorn: (newMale + newFemale + newUnknown) || null
+                                                                    };
+                                                                } else {
+                                                                    // Add losses back to gender counts
+                                                                    const newMale = (prev.maleCount || 0) + (prev.maleLosses || 0);
+                                                                    const newFemale = (prev.femaleCount || 0) + (prev.femaleLosses || 0);
+                                                                    const newUnknown = (prev.unknownCount || 0) + (prev.unknownLosses || 0);
+                                                                    return {
+                                                                        ...prev,
+                                                                        extractLossesFromTotal: false,
+                                                                        maleCount: newMale || null,
+                                                                        femaleCount: newFemale || null,
+                                                                        unknownCount: newUnknown || null,
+                                                                        litterSizeBorn: (newMale + newFemale + newUnknown) || null
+                                                                    };
+                                                                }
+                                                            });
+                                                        }}
+                                                        className="rounded border-gray-300 text-primary focus:ring-primary"
+                                                    />
+                                                    <span>Extract losses from total counts (reduce M/F/U counts by loss amounts)</span>
+                                                </label>
+                                                <p className="text-xs text-gray-400 mt-1 ml-6">
+                                                    When enabled, losses will be subtracted from the gender counts above, showing only surviving offspring.
+                                                </p>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                                {/* Total Losses - read-only, summed from M+F+U */}
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Total Losses
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        value={typeof formData.lossesCount === 'number' ? formData.lossesCount : (formData.lossesCount || '')}
+                                                        readOnly
+                                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 cursor-not-allowed font-semibold"
+                                                        placeholder="0"
+                                                    />
+                                                    <p className="text-xs text-gray-400 mt-1">Auto-calculated from M + F + U</p>
+                                                </div>
+
+                                                {/* Male Losses */}
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Male Losses</label>
+                                                    <input
+                                                        type="number"
+                                                        value={typeof formData.maleLosses === 'number' ? formData.maleLosses : (formData.maleLosses || '')}
+                                                        onChange={(e) => {
+                                                            const v = e.target.value ? parseInt(e.target.value) : null;
+                                                            const f = formData.femaleLosses || 0;
+                                                            const u = formData.unknownLosses || 0;
+                                                            setFormData({...formData, maleLosses: v, lossesCount: (v || 0) + f + u || null});
+                                                        }}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                        placeholder="0"
+                                                        min="0"
+                                                    />
+                                                </div>
+
+                                                {/* Female Losses */}
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Female Losses</label>
+                                                    <input
+                                                        type="number"
+                                                        value={typeof formData.femaleLosses === 'number' ? formData.femaleLosses : (formData.femaleLosses || '')}
+                                                        onChange={(e) => {
+                                                            const v = e.target.value ? parseInt(e.target.value) : null;
+                                                            const m = formData.maleLosses || 0;
+                                                            const u = formData.unknownLosses || 0;
+                                                            setFormData({...formData, femaleLosses: v, lossesCount: m + (v || 0) + u || null});
+                                                        }}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                        placeholder="0"
+                                                        min="0"
+                                                    />
+                                                </div>
+
+                                                {/* Unknown Losses */}
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Unknown Losses</label>
+                                                    <input
+                                                        type="number"
+                                                        value={typeof formData.unknownLosses === 'number' ? formData.unknownLosses : (formData.unknownLosses || '')}
+                                                        onChange={(e) => {
+                                                            const v = e.target.value ? parseInt(e.target.value) : null;
+                                                            const m = formData.maleLosses || 0;
+                                                            const f = formData.femaleLosses || 0;
+                                                            setFormData({...formData, unknownLosses: v, lossesCount: m + f + (v || 0) || null});
+                                                        }}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                        placeholder="0"
+                                                        min="0"
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
 
                                         {/* Total Weaned */}

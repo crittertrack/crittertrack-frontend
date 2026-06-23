@@ -18,19 +18,19 @@ import axios from 'axios';
  */
 export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_URL: string) {
     // ========== PRIVATE ANIMAL VIEWING STATES ==========
-    const [animalToView, setAnimalToView] = useState(null);
-    const [animalToEdit, setAnimalToEdit] = useState(null);
-    const [animalViewHistory, setAnimalViewHistory] = useState([]);
+    const [animalToView, setAnimalToView] = useState<any>(null);
+    const [animalToEdit, setAnimalToEdit] = useState<any>(null);
+    const [animalViewHistory, setAnimalViewHistory] = useState<any[]>([]);
     const [privateAnimalInitialTab, setPrivateAnimalInitialTab] = useState(1);
     const [privateBetaView, setPrivateBetaView] = useState('vertical');
     const [detailViewTab, setDetailViewTab] = useState(1);
-    const [speciesToAdd, setSpeciesToAdd] = useState(null);
-    const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
+    const [speciesToAdd, setSpeciesToAdd] = useState<any>(null);
+    const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState<any>(null);
 
     // ========== PEDIGREE DATA (ASYNC-FETCHED) ==========
-    const [sireData, setSireData] = useState(null);
-    const [damData, setDamData] = useState(null);
-    const [offspringData, setOffspringData] = useState([]);
+    const [sireData, setSireData] = useState<any>(null);
+    const [damData, setDamData] = useState<any>(null);
+    const [offspringData, setOffspringData] = useState<any[]>([]);
 
     // ========== NAVIGATION REFS (PERSISTENT ACROSS RENDERS) ==========
     // These store the path to return to when closing views - not state, so they don't trigger re-renders
@@ -48,7 +48,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
      * Handles fetching latest data and setting up return paths
      */
     const handleViewAnimal = useCallback(
-        (animal, targetTab = 1, returnTab = null) => {
+        (animal: any, targetTab = 1, returnTab = null) => {
             if (!animal) return;
 
             // Add current animal to history before viewing new one
@@ -71,7 +71,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
     /**
      * Edit an animal
      */
-    const handleEditAnimal = useCallback((animal) => {
+    const handleEditAnimal = useCallback((animal: any) => {
         if (!animal) return;
 
         // When editing from a nested detail context (for example offspring cards),
@@ -98,7 +98,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
      */
     const handleCancelEditAnimal = useCallback(() => {
         if (animalToEdit) {
-            setAnimalToView(prev => prev || animalToEdit);
+            setAnimalToView((prev: any) => prev || animalToEdit);
         }
         setAnimalToEdit(null);
     }, [animalToEdit]);
@@ -399,13 +399,21 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
      * Fetch pedigree data when viewing an animal
      * Gets sire, dam, and offspring data from API
      */
+    const lastPedigreeFetchRef = useRef<string | null>(null);
     useEffect(() => {
         if (!animalToView || !authToken) {
             setSireData(null);
             setDamData(null);
             setOffspringData([]);
+            lastPedigreeFetchRef.current = null;
             return;
         }
+
+        // Prevent duplicate fetches for the same animal
+        if (lastPedigreeFetchRef.current === animalToView.id_public) {
+            return;
+        }
+        lastPedigreeFetchRef.current = animalToView.id_public;
 
         const fetchPedigreeData = async () => {
             try {
@@ -419,7 +427,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
                             headers: { Authorization: `Bearer ${authToken}` }
                         });
                         setSireData(response.data);
-                    } catch (e) {
+                    } catch (e: any) {
                         console.warn('Failed to fetch sire data:', e.message);
                         setSireData(null);
                     }
@@ -431,7 +439,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
                             headers: { Authorization: `Bearer ${authToken}` }
                         });
                         setDamData(response.data);
-                    } catch (e) {
+                    } catch (e: any) {
                         console.warn('Failed to fetch dam data:', e.message);
                         setDamData(null);
                     }
@@ -448,8 +456,8 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
 
                     const litters = offspringResponse.data || [];
                     // Flatten offspring from all litters into single array
-                    const allOffspring = [];
-                    litters.forEach(litter => {
+                    const allOffspring: any[] = [];
+                    litters.forEach((litter: any) => {
                         if (litter.offspring && Array.isArray(litter.offspring)) {
                             allOffspring.push(...litter.offspring);
                         }
@@ -457,7 +465,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
 
                     console.log('[PEDIGREE] Fetched offspring:', allOffspring.length, 'animals');
                     setOffspringData(allOffspring);
-                } catch (e) {
+                } catch (e: any) {
                     console.log('[PEDIGREE] No offspring endpoint or no offspring found:', e.message);
                     setOffspringData([]);
                 }
@@ -467,39 +475,7 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
         };
 
         fetchPedigreeData();
-    }, [animalToView, authToken, API_BASE_URL]);
-
-    /**
-     * Listen for animal update events
-     * Updates viewed animal if it was modified externally
-     */
-    useEffect(() => {
-        const handleAnimalUpdated = (event: any) => {
-            const updatedAnimal = event.detail;
-            if (animalToView && updatedAnimal.id_public === animalToView.id_public) {
-                // Merge updates into viewed animal
-                setAnimalToView(prev => ({
-                    ...prev,
-                    ...updatedAnimal
-                }));
-            }
-        };
-
-        const handleAnimalArchived = (event: any) => {
-            const archivedAnimalId = event.detail?.id_public;
-            if (animalToView && archivedAnimalId === animalToView.id_public) {
-                handleBackFromAnimal();
-            }
-        };
-
-        window.addEventListener('animal-updated', handleAnimalUpdated);
-        window.addEventListener('animal-archived', handleAnimalArchived);
-
-        return () => {
-            window.removeEventListener('animal-updated', handleAnimalUpdated);
-            window.removeEventListener('animal-archived', handleAnimalArchived);
-        };
-    }, [animalToView, handleBackFromAnimal]);
+    }, [animalToView?.id_public, authToken, API_BASE_URL]);
 
     // ========== RETURN ALL STATE & HANDLERS ==========
     return {

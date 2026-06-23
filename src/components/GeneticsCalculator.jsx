@@ -50,6 +50,14 @@ const GENE_LOCI = {
       'E/e', 'E/E'
     ]
   },
+  Ln: {
+    name: 'Leaden',
+    description: 'Recessive. Dilutes black pigment to a blue-grey (leaden) colour, independent of the D locus.',
+    combinations: [
+      'ln/ln',
+      'Ln/ln', 'Ln/Ln'
+    ]
+  },
   P: {
     name: 'Pink-eye',
     description: 'Recessive. Dilutes pigment with pink eyes. e.g. Dove (p/p on black), Argente (p/p on agouti)',
@@ -170,14 +178,6 @@ const GENE_LOCI = {
     combinations: [
       'nu/nu',
       'Nu/nu', 'Nu/Nu'
-    ]
-  },
-  Ln: {
-    name: 'Leaden',
-    description: 'Recessive. Dilutes black pigment to a blue-grey (leaden) colour, independent of the D locus. e.g. Leaden Black (ln/ln), Leaden Chocolate (ln/ln + b/b). Combined with d/d gives Blue Leaden.',
-    combinations: [
-      'ln/ln',
-      'Ln/ln', 'Ln/Ln'
     ]
   }
 };
@@ -538,6 +538,9 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   
   // E-locus carriers
   if (genotype.E === 'E/e' || genotype.E === 'e/E') carriers.push('Recessive Red');
+
+  // Ln-locus carriers
+  if (genotype.Ln === 'Ln/ln' || genotype.Ln === 'ln/Ln') carriers.push('Leaden');
   
   // S-locus carriers (Pied)
   if (genotype.S === 'S/s' || genotype.S === 's/S') carriers.push('Pied');
@@ -551,9 +554,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Si-locus carriers (Silvered)
   if (genotype.Si === 'Si/si' || genotype.Si === 'si/Si') carriers.push('Silvered');
   
-  // Ln-locus carriers (Leaden)
-  if (genotype.Ln === 'Ln/ln' || genotype.Ln === 'ln/Ln') carriers.push('Leaden');
-
   // Coat gene carriers
   if (genotype.Go === 'Go/go' || genotype.Go === 'go/Go') carriers.push('Longhair');
   if (genotype.Sa === 'Sa/sa' || genotype.Sa === 'sa/Sa') carriers.push('Satin');
@@ -714,6 +714,13 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     }
   }
 
+  // Leaden
+  if (genotype.Ln === 'ln/ln' && !color) {
+    if (!color) {
+      color = 'Leaden';
+    }
+  }
+
   // Dominant yellow/red (Ay)
   if (genotype.A && (genotype.A.startsWith('Ay/'))) {
     // Determine modifiers early (used throughout this block)
@@ -818,6 +825,12 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       color = isTanVariant ? 'Amber Tan' : 'Amber';
       return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
     }
+
+    // Handle leaden modifier
+    if (isLeaden) {
+      color = isTanVariant ? 'Leaden Tan' : 'Leaden';
+      return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
+    }
     
     // Handle pink-eye modifier
     if (isPinkEye) {
@@ -837,6 +850,18 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     }
     
     // Process all markings and coat textures for recessive red
+    // Continue processing instead of returning early
+    color = baseColor;
+  }
+
+  // Leaden (ln/ln) - but still process all other traits
+  if (genotype.Ln === 'ln/ln') {
+    let baseColor = 'Leaden';
+    if (genotype.A && genotype.A.includes('at')) {
+      baseColor = 'Leaden Tan';
+    }
+
+    // Process all markings and coat textures for leaden
     // Continue processing instead of returning early
     color = baseColor;
   }
@@ -927,6 +952,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     const isDilute = genotype.D === 'd/d';
     const isAgouti = genotype.A === 'Avy/A' || genotype.A === 'A/Avy';
     const isPinkEye = genotype.P === 'p/p';
+    const isLeaden = genotype.Ln === 'ln/ln';
     
     // Handle brown + dilute + pink-eye combination
     if (isBrown && isDilute && isPinkEye) {
@@ -949,6 +975,12 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     // Handle dilute modifier
     if (isDilute) {
       color = isTanVariant ? 'Blue Brindle Tan' : isAgouti ? 'Blue Agouti Brindle' : 'Blue Brindle';
+      return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
+    }
+
+    // Handle leaden modifier
+    if (isLeaden) {
+      color = isTanVariant ? 'Brindle Tan Leaden' : isAgouti ? 'Agouti Brindle Leaden' : 'Brindle Leaden';
       return { phenotype: addMarkingsAndTexture(color), carriers, hidden, notes: [] };
     }
     
@@ -975,7 +1007,8 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     (originalGenotype.C && originalGenotype.C !== '') ||
     (originalGenotype.D && originalGenotype.D !== '') ||
     (originalGenotype.E && originalGenotype.E !== '') ||
-    (originalGenotype.P && originalGenotype.P !== '')
+    (originalGenotype.P && originalGenotype.P !== '') ||
+    (originalGenotype.Ln && originalGenotype.Ln !== '')
   );
 
   // Check if ONLY one color gene is selected (incomplete for phenotype calculation)
@@ -987,6 +1020,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     if (originalGenotype.D && originalGenotype.D !== '') selectedColorGenes.push('D');
     if (originalGenotype.E && originalGenotype.E !== '') selectedColorGenes.push('E');
     if (originalGenotype.P && originalGenotype.P !== '') selectedColorGenes.push('P');
+    if (originalGenotype.Ln && originalGenotype.Ln !== '') selectedColorGenes.push('Ln');
   }
 
   // If color genes selected without A-locus (excluding marking-only selections), show note
@@ -1022,6 +1056,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
         }
       } else if (singleGene === 'D') {
         title = genotype.D === 'd/d' ? 'Dilute' : 'Non-Dilute';
+
       } else if (singleGene === 'E') {
         if (genotype.E === 'E/E' || genotype.E === 'E/e') {
           title = 'Normal Extension';
@@ -1030,6 +1065,13 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
         }
       } else if (singleGene === 'P') {
         title = genotype.P === 'p/p' ? 'Pink-Eyed Dilution' : 'Normal Eye Color';
+
+      } else if (singleGene === 'Ln') {
+        if (genotype.Ln === 'ln/ln') {
+          title = 'Leaden';
+        } else {
+          title = 'Non-Leaden';
+        }
       }
     } else {
       // Multiple genes selected without A-locus
@@ -1088,6 +1130,19 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     // u locus alone (non-umbrous)
     if (originalGenotype.U && genotype.U === 'u/u') {
       return { phenotype: '', carriers, hidden, notes: ['This gene combination does not affect phenotype'] };
+    }
+
+    // Ln locus alone
+    if (originalGenotype.Ln) {
+      if (genotype.Ln === 'Ln/ln') {
+        carriers.push('Leaden');
+        return { phenotype: '', carriers, hidden, notes: [] };
+      } else if (genotype.Ln === 'Ln/Ln') {
+        return { phenotype: '', carriers, hidden, notes: ['This gene combination does not affect phenotype'] };
+      } else if (genotype.Ln === 'ln/ln') {
+        // ln/ln alone should show similar to b/b alone
+        return { phenotype: 'Leaden', carriers, hidden, notes: ['Select A-locus (use a/a for self) for full phenotype calculation'] };
+      }
     }
   }
 
@@ -1155,23 +1210,10 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   if (genotype.Ln === 'ln/ln') {
     if (color === 'Black')           color = 'Leaden';
     else if (color === 'Extreme Black') color = 'Leaden';
-    else if (color === 'Blue')       color = 'Blue Leaden';
-    else if (color === 'Chocolate')  color = 'Leaden Chocolate';
-    else if (color === 'Lilac')      color = 'Leaden Lilac';
-    else if (color === 'Agouti')     color = 'Leaden Agouti';
-    else if (color === 'Blue Agouti') color = 'Blue Agouti Leaden';
-    else if (color === 'Cinnamon')   color = 'Leaden Cinnamon';
-    else if (color === 'Cinnamon Argente') color = 'Leaden Cinnamon Argente';
     else if (color === 'Black Tan')  color = 'Leaden Tan';
-    else if (color === 'Blue Tan')   color = 'Blue Leaden Tan';
-    else if (color === 'Chocolate Tan') color = 'Leaden Chocolate Tan';
-    else if (color === 'Lilac Tan')  color = 'Leaden Lilac Tan';
-    else if (color === 'Agouti Tan') color = 'Leaden Agouti Tan';
-    else if (color === 'Dove')       color = 'Leaden Dove';
-    else if (color === 'Silver')     color = 'Leaden Silver';
-    else if (color === 'Champagne')  color = 'Leaden Champagne';
-    else if (color === 'Lavender')   color = 'Leaden Lavender';
-    else if (!color.startsWith('Leaden') && !color.startsWith('Blue Leaden')) color = `Leaden ${color}`;
+    else if (!color) color = 'Leaden'; // If no color set yet, default to Leaden
+    // For all other colors, add Leaden as a suffix
+    else if (!color.includes('Leaden')) color = `${color} Leaden`;
   }
 
   // Lavender (b/b + d/d + p/p combination)
@@ -1712,7 +1754,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
   // Function to apply defaults to genotype
   const applyDefaults = (genotype) => {
     // Base color genes - only apply defaults if NONE are selected
-    const baseGenes = ['A', 'B', 'C', 'D', 'E', 'P'];
+    const baseGenes = ['A', 'B', 'C', 'D', 'E', 'P', 'Ln'];
     const hasAnyBaseGene = baseGenes.some(gene => genotype[gene] && genotype[gene] !== '');
     
     // Marking add-on genes - always apply individually, never as a group
@@ -1735,13 +1777,14 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
       Rn: 'Rn/Rn',   // No roan
       Si: 'Si/Si',   // No silver
       Mobr: 'mobr/mobr', // No xbrindle
+      U: 'u/u',      // No umbrous
+      Ln: 'Ln/Ln',   // No leaden (wild type)
       Go: 'Go/Go',   // Shorthair (default)
       Re: 're/re',   // No astrex
       Sa: 'Sa/Sa',   // Non-satin
       Rst: 'Rst/Rst', // No rosette
       Fz: 'Fz/Fz',   // No fuzz
-      Nu: 'nu/nu',   // No nude
-      U: 'u/u'       // No umbrous
+      Nu: 'nu/nu'    // No nude
     };
     
     const filled = {};
@@ -1789,7 +1832,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
 
     // Mouse-only guard: incomplete color gene selection check
     if (selectedSpecies === 'Fancy Mouse') {
-      const colorGenes = ['A', 'B', 'C', 'D', 'E', 'P'];
+      const colorGenes = ['A', 'B', 'C', 'D', 'E', 'P', 'Ln'];
       const markingGenes = ['W', 'Wsh', 'Rw', 'S', 'Mi', 'Rb'];
       const selectedColorGenes = selectedLoci.filter(locus => colorGenes.includes(locus));
       const selectedMarkingGenes = selectedLoci.filter(locus => markingGenes.includes(locus));
@@ -1929,6 +1972,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
     'Fawn:1': ['A', 'P'], // Ay/a p/p variant
     'Amber:0': ['E', 'D'], // a/a e/e d/d variant
     'Amber:1': ['A', 'D'], // Ay/a d/d variant
+    'Leaden': ['Ln'],
     'Agouti': ['A'],
     'Brindle': ['A'],
     'Argente': ['A', 'P'],
@@ -2082,6 +2126,10 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
         { name: 'Amber', image: '/images/phenotypes/amber.png', genotypes: [
           { A: 'a/a', B: 'B/B', C: 'C/C', D: 'd/d', E: 'e/e', P: 'P/P' },
           { A: 'Ay/a', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' }
+        ] },
+        { name: 'Leaden', image: '/images/phenotypes/blue.png', genotypes: [
+          { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', Ln: 'ln/ln', P: 'P/P' },
+          { A: 'A/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', Ln: 'ln/ln', P: 'P/P' },
         ] },
       ]
     },
