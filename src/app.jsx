@@ -1683,7 +1683,7 @@ const App = () => {
     }
 
     return (
-        <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center font-sans px-7 sm:px-9 pt-4 sm:pt-0 transition-colors duration-200">
+        <div className="min-h-screen bg-page-bg flex flex-col items-center font-sans px-7 sm:px-9 pt-4 sm:pt-0">
             {/* Fixed Donation Button - Top Left */}
             <div className="fixed top-4 left-4 z-[60]">
                 <button
@@ -1746,7 +1746,7 @@ const App = () => {
                 />
             )}
             
-            <header className="w-full bg-white dark:bg-dark-surface p-3 sm:p-4 rounded-xl shadow-lg mb-6 max-w-7xl overflow-visible transition-colors duration-200">
+            <header className="w-full bg-white p-3 sm:p-4 rounded-xl shadow-lg mb-6 max-w-7xl overflow-visible">
                 {/* Desktop: Two row layout with search bar on top */}
                 <div className="hidden md:block mb-3">
                     <GlobalSearchBar 
