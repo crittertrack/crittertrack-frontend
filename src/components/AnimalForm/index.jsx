@@ -4058,6 +4058,53 @@ const AnimalForm = ({
     const [contacts, setContacts] = useState([]);
     const [loadingContacts, setLoadingContacts] = useState(false);
 
+    // Manual Pedigree (Beta) helpers
+    const mpEmptySlot = () => ({ mode: 'ctc', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
+    const mpToSlot = (a) => {
+        const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
+        return { mode: 'ctc', ctcId: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? a.birthDate.slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
+    };
+    const mpFetchByCtc = async (id) => {
+        try {
+            const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${authToken}` } });
+            return res.data || null;
+        } catch { return null; }
+    };
+    const MP_SLOT_CHILDREN = {
+        sire:    { father: 'sireSire',    mother: 'sireDam'    },
+        dam:     { father: 'damSire',     mother: 'damDam'     },
+        sireSire:{ father: 'sireSireSire',mother: 'sireSireDam'},
+        sireDam: { father: 'sireDamSire', mother: 'sireDamDam' },
+        damSire: { father: 'damSireSire', mother: 'damSireDam' },
+        damDam:  { father: 'damDamSire',  mother: 'damDamDam'  },
+    };
+    const mpLinkAnimal = async (slotKey, a) => {
+        const updates = { [slotKey]: mpToSlot(a) };
+        const queue = [{ animal: a, slot: slotKey }];
+        while (queue.length) {
+            const { animal: cur, slot } = queue.shift();
+            const children = MP_SLOT_CHILDREN[slot];
+            if (!children) continue;
+            const fatherId = cur.fatherId_public || cur.sireId_public;
+            const motherId = cur.motherId_public || cur.damId_public;
+            if (fatherId) { const f = await mpFetchByCtc(fatherId); if (f) { updates[children.father] = mpToSlot(f); queue.push({ animal: f, slot: children.father }); } }
+            if (motherId) { const m = await mpFetchByCtc(motherId); if (m) { updates[children.mother] = mpToSlot(m); queue.push({ animal: m, slot: children.mother }); } }
+        }
+        setMpEditForm(f => ({ ...f, ...updates }));
+        // Sync canonical parent fields so the overview shows the linked parent after save
+        if (slotKey === 'sire') {
+            setFormData(prev => ({ ...prev, fatherId_public: a.id_public }));
+            pedigreeRef.current.father = a.id_public;
+            pedigreeRef.current.fatherBackendId = a._id || null;
+            setFatherInfo({ id_public: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', backendId: a._id || null });
+        } else if (slotKey === 'dam') {
+            setFormData(prev => ({ ...prev, motherId_public: a.id_public }));
+            pedigreeRef.current.mother = a.id_public;
+            pedigreeRef.current.motherBackendId = a._id || null;
+            setMotherInfo({ id_public: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', backendId: a._id || null });
+        }
+    };
+
     // Load contacts when manual assignment modal opens
     useEffect(() => {
         if (showManualAssignmentModal && !loadingContacts && contacts.length === 0) {
@@ -9389,53 +9436,6 @@ const AnimalForm = ({
 
                 {/* Tab 5: Pedigree */}
                 {(() => {
-                    // Hoisted so the CTC modal (rendered outside the tab guard) can always call linkAnimal
-                    const mpEmptySlot = () => ({ mode: 'ctc', ctcId: '', prefix: '', name: '', suffix: '', variety: '', genCode: '', birthDate: '', breederName: '', gender: '', imageUrl: '', notes: '' });
-                    const mpToSlot = (a) => {
-                        const variety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => a[k]).filter(Boolean).join(' ');
-                        return { mode: 'ctc', ctcId: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', variety, genCode: a.geneticCode || '', birthDate: a.birthDate ? a.birthDate.slice(0,10) : '', breederName: a.breederName || a.manualBreederName || '', gender: a.gender || '', imageUrl: a.imageUrl || a.photoUrl || '', notes: '' };
-                    };
-                    const mpFetchByCtc = async (id) => {
-                        try {
-                            const res = await axios.get(`${API_BASE_URL}/animals/any/${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${authToken}` } });
-                            return res.data || null;
-                        } catch { return null; }
-                    };
-                    const MP_SLOT_CHILDREN = {
-                        sire:    { father: 'sireSire',    mother: 'sireDam'    },
-                        dam:     { father: 'damSire',     mother: 'damDam'     },
-                        sireSire:{ father: 'sireSireSire',mother: 'sireSireDam'},
-                        sireDam: { father: 'sireDamSire', mother: 'sireDamDam' },
-                        damSire: { father: 'damSireSire', mother: 'damSireDam' },
-                        damDam:  { father: 'damDamSire',  mother: 'damDamDam'  },
-                    };
-                    const mpLinkAnimal = async (slotKey, a) => {
-                        const updates = { [slotKey]: mpToSlot(a) };
-                        const queue = [{ animal: a, slot: slotKey }];
-                        while (queue.length) {
-                            const { animal: cur, slot } = queue.shift();
-                            const children = MP_SLOT_CHILDREN[slot];
-                            if (!children) continue;
-                            const fatherId = cur.fatherId_public || cur.sireId_public;
-                            const motherId = cur.motherId_public || cur.damId_public;
-                            if (fatherId) { const f = await mpFetchByCtc(fatherId); if (f) { updates[children.father] = mpToSlot(f); queue.push({ animal: f, slot: children.father }); } }
-                            if (motherId) { const m = await mpFetchByCtc(motherId); if (m) { updates[children.mother] = mpToSlot(m); queue.push({ animal: m, slot: children.mother }); } }
-                        }
-                        setMpEditForm(f => ({ ...f, ...updates }));
-                        // Sync canonical parent fields so the overview shows the linked parent after save
-                        if (slotKey === 'sire') {
-                            setFormData(prev => ({ ...prev, fatherId_public: a.id_public }));
-                            pedigreeRef.current.father = a.id_public;
-                            pedigreeRef.current.fatherBackendId = a._id || null;
-                            setFatherInfo({ id_public: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', backendId: a._id || null });
-                        } else if (slotKey === 'dam') {
-                            setFormData(prev => ({ ...prev, motherId_public: a.id_public }));
-                            pedigreeRef.current.mother = a.id_public;
-                            pedigreeRef.current.motherBackendId = a._id || null;
-                            setMotherInfo({ id_public: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', backendId: a._id || null });
-                        }
-                    };
-
                     // CTC selector modal ? always rendered so it works regardless of activeTab
                     const ctcModal = mpCTCOpenSlot ? (
                         <ParentSearchModal
