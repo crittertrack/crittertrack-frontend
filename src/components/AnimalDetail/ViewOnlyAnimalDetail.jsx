@@ -2116,22 +2116,37 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                             {showHorizCert && <PedigreeChart animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => setShowHorizCert(false)} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />}
                             {showVertCert && <PedigreeChart vertical animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => setShowVertCert(false)} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />}
                             
-                            <div className="mt-6">
-                                <div className="flex items-center justify-center gap-2 mb-2">
-                                    <Dna size={18} className="text-orange-500" />
-                                    <h3 className="text-base font-semibold text-gray-700">4-Generation Pedigree</h3>
+                            <div className="mt-6 space-y-4">
+                                <div>
+                                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Parents (Gen 1)</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        {renderSlot('sire', 'Sire')}
+                                        {renderSlot('dam', 'Dam')}
+                                    </div>
                                 </div>
-                                <div ref={mpTreeRef} className="bg-white p-2 rounded-xl border border-gray-200 shadow-sm">
-                                    <PedigreeChart
-                                        inline
-                                        inlineGenerations={4}
-                                        animalId={animal.id_public}
-                                        animalData={animal}
-                                        API_BASE_URL={API_BASE_URL}
-                                        authToken={authToken}
-                                        manualData={mpEnrichedData}
-                                        onViewAnimal={onViewAnimal}
-                                    />
+                                <div>
+                                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Grandparents (Gen 2)</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                                        {renderSlot('sireSire', 'Paternal Grandsire')}
+                                        {renderSlot('sireDam', 'Paternal Granddam')}
+                                        {renderSlot('damSire', 'Maternal Grandsire')}
+                                        {renderSlot('damDam', 'Maternal Granddam')}
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Great-Grandparents (Gen 3)</p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                                        {renderSlot('sireSireSire', 'SSS')}
+                                        {renderSlot('sireSireDam', 'SSD')}
+                                        {renderSlot('sireDamSire', 'SDS')}
+                                        {renderSlot('sireDamDam', 'SDD')}
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+                                        {renderSlot('damSireSire', 'DSS')}
+                                        {renderSlot('damSireDam', 'DSD')}
+                                        {renderSlot('damDamSire', 'DDS')}
+                                        {renderSlot('damDamDam', 'DDD')}
+                                    </div>
                                 </div>
                             </div>
 
