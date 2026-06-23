@@ -17,16 +17,16 @@ module.exports = {
         'accent': '#D27096',
         
         // Dark mode colors
-        'dark-bg': '#1a1a1a',
-        'dark-surface': '#2d2d2d',
-        'dark-surface-hover': '#3a3a3a',
-        'dark-border': '#404040',
-        'dark-primary': '#4a9ead',
-        'dark-primary-hover': '#5bb0c0',
-        'dark-accent': '#b85c7f',
-        'dark-text': '#e5e5e5',
-        'dark-text-secondary': '#a0a0a0',
-        'dark-text-muted': '#707070',
+        'dark-bg': '#1B1A20',
+        'dark-surface': '#25242B',
+        'dark-surface-hover': '#2D2B34',
+        'dark-border': '#35343D',
+        'dark-primary': '#7CC6DA',
+        'dark-primary-hover': '#96D5E6',
+        'dark-accent': '#E17AA0',
+        'dark-text': '#F2F2F5',
+        'dark-text-secondary': '#C5C5CF',
+        'dark-text-muted': '#90909B',
       }
     },
     fontFamily: {
