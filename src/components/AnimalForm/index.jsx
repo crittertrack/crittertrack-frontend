@@ -4213,49 +4213,50 @@ const AnimalForm = ({
             // Handle parent selection
             const idKey = effectiveTarget === 'father' ? 'fatherId_public' : 'motherId_public';
             setFormData(prev => ({ ...prev, [idKey]: id }));
-        // Update ref immediately so save uses the latest selection even if state update is pending
-        if (effectiveTarget === 'father') {
-            pedigreeRef.current.father = id;
-        } else {
-            pedigreeRef.current.mother = id;
-        }
-
-        // If caller passed the whole animal object, use it directly to avoid refetch
-        if (idOrAnimal && typeof idOrAnimal === 'object') {
-            const a = idOrAnimal;
-            const info = { id_public: a.id_public, prefix: a.prefix || '', suffix: a.suffix || '', name: a.name || '', backendId: a._id || a.id_backend || null };
+            
+            // Update ref immediately so save uses the latest selection even if state update is pending
             if (effectiveTarget === 'father') {
-                setFatherInfo(info);
-                pedigreeRef.current.fatherBackendId = info.backendId;
+                pedigreeRef.current.father = id;
             } else {
-                setMotherInfo(info);
-                pedigreeRef.current.motherBackendId = info.backendId;
+                pedigreeRef.current.mother = id;
             }
-        } else if (id) {
-            // Fetch a small summary for display (non-blocking for the user)
-            try {
-                console.debug('Selecting parent id:', id, 'for effectiveTarget:', effectiveTarget);
-                const info = await fetchAnimalSummary(id);
-                console.debug('Fetched parent summary:', info);
+
+            // If caller passed the whole animal object, use it directly to avoid refetch
+            if (idOrAnimal && typeof idOrAnimal === 'object') {
+                const a = idOrAnimal;
+                const info = { id_public: a.id_public, prefix: a.prefix || '', suffix: a.suffix || '', name: a.name || '', backendId: a._id || a.id_backend || null };
                 if (effectiveTarget === 'father') {
                     setFatherInfo(info);
-                    pedigreeRef.current.fatherBackendId = info?.backendId || null;
-                }
-                else {
+                    pedigreeRef.current.fatherBackendId = info.backendId;
+                } else {
                     setMotherInfo(info);
-                    pedigreeRef.current.motherBackendId = info?.backendId || null;
+                    pedigreeRef.current.motherBackendId = info.backendId;
                 }
-            } catch (err) {
-                console.warn('Failed to fetch parent summary', err);
+            } else if (id) {
+                // Fetch a small summary for display (non-blocking for the user)
+                try {
+                    console.debug('Selecting parent id:', id, 'for effectiveTarget:', effectiveTarget);
+                    const info = await fetchAnimalSummary(id);
+                    console.debug('Fetched parent summary:', info);
+                    if (effectiveTarget === 'father') {
+                        setFatherInfo(info);
+                        pedigreeRef.current.fatherBackendId = info?.backendId || null;
+                    }
+                    else {
+                        setMotherInfo(info);
+                        pedigreeRef.current.motherBackendId = info?.backendId || null;
+                    }
+                } catch (err) {
+                    console.warn('Failed to fetch parent summary', err);
+                }
+            } else {
+                // cleared selection
+                if (effectiveTarget === 'father') setFatherInfo(null);
+                else setMotherInfo(null);
             }
-        } else {
-            // cleared selection
-            if (effectiveTarget === 'father') setFatherInfo(null);
-            else setMotherInfo(null);
-        }
 
-        setModalTarget(null);
-    };
+            setModalTarget(null);
+        };
 
     // Clear a selected parent (father or mother)
     const clearParentSelection = (which) => {
