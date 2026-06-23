@@ -18,12 +18,12 @@ module.exports = {
         
         // Dark mode colors
         'dark-bg': '#1B1A20',
-        'dark-surface': '#25242B',
+        'dark-surface': '#66666b',
         'dark-surface-hover': '#2D2B34',
         'dark-border': '#35343D',
-        'dark-primary': '#7CC6DA',
-        'dark-primary-hover': '#96D5E6',
-        'dark-accent': '#E17AA0',
+        'dark-primary': '#7eaab3',
+        'dark-primary-hover': '#6f949d',
+        'dark-accent': '#b46280',
         'dark-text': '#F2F2F5',
         'dark-text-secondary': '#C5C5CF',
         'dark-text-muted': '#90909B',
