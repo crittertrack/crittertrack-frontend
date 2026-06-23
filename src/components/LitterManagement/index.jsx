@@ -1410,6 +1410,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     // Session-level cache: key = `${sireId}:${damId}` or `litter:${_id}`, value = COI number
     // Prevents re-fetching the same pairing every time fetchLitters is called
     const coiCacheRef = useRef({});
+    const fetchLittersAbortControllerRef = useRef(null); // Track current fetch to prevent stale requests
     const [myAnimalsLoaded, setMyAnimalsLoaded] = useState(false);
     const [litterOffspringMap, setLitterOffspringMap] = useState({}); // litter._id ? offspring array (undefined = not yet loaded)
     const [offspringRefetchToken, setOffspringRefetchToken] = useState(0); // increment to force offspring re-fetch
@@ -2081,10 +2082,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 if (cachedLitters && cachedLitters.length > 0) {
                     setLitters(cachedLitters);
                     setLoading(false);
-                    // Still fetch fresh data in background
-                    await fetchLitters();
+                    // Still fetch fresh data in background, but properly coordinated
+                    try {
+                        await fetchLitters();
+                    } catch (error) {
+                        console.error('Background litter fetch failed:', error);
+                    }
                 } else {
-                    // Load litters first so cards appear immediately; animals fetch silently in background
+                    // Load litters first so cards appear immediately
                     await fetchLitters();
                 }
             } catch (error) {
@@ -2092,7 +2097,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             } finally {
                 setLoading(false);
             }
-            // Background – populates offspring cards as soon as it resolves
+            // Background – populates offspring cards as soon as it resolves (no await to keep UI responsive)
             fetchMyAnimals().catch(err => console.error('Error loading animals:', err));
         };
         loadData();
@@ -2216,6 +2221,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
     const fetchLitters = async ({ preserveOffspring = false } = {}) => {
         try {
+            // Cancel any previous fetchLitters request to prevent race conditions on mobile
+            if (fetchLittersAbortControllerRef.current) {
+                fetchLittersAbortControllerRef.current.abort();
+            }
+            const controller = new AbortController();
+            fetchLittersAbortControllerRef.current = controller;
+            
             // Clear offspring cache so expanded litter re-fetches fresh data
             // (skip when caller has already applied an optimistic update)
             if (!preserveOffspring) {
@@ -2223,7 +2235,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             }
             setOffspringRefetchToken(t => t + 1);
             const response = await axios.get(`${API_BASE_URL}/litters`, {
-                headers: { Authorization: `Bearer ${authToken}` }
+                headers: { Authorization: `Bearer ${authToken}` },
+                signal: controller.signal
             });
             if (!Array.isArray(response.data)) {
                 console.warn('Unexpected litters payload shape; preserving existing litter list.');
@@ -2260,13 +2273,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 setCoiCalculating(new Set(littersNeedingCOI.map(l => l._id)));
                 littersNeedingCOI.forEach(async (litter) => {
                     const cacheKey = `${litter.sireId_public}:${litter.damId_public}`;
-                    const controller = new AbortController();
-                    const timeout = setTimeout(() => controller.abort(), 15000);
+                    const coiController = new AbortController();
+                    const timeout = setTimeout(() => coiController.abort(), 15000);
                     try {
                         const coiResponse = await axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
                             params: { sireId: litter.sireId_public, damId: litter.damId_public, generations: 20 },
                             headers: { Authorization: `Bearer ${authToken}` },
-                            signal: controller.signal,
+                            signal: coiController.signal,
                         });
                         const coi = coiResponse.data.inbreedingCoefficient ?? 0;
                         coiCacheRef.current[cacheKey] = coi;
@@ -2487,7 +2500,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             showModalMessage('Success', editingMatingId ? 'Planned mating updated!' : 'Planned mating recorded! Edit the entry to add birth details when the litter arrives.');
             setShowAddMatingForm(false);
             resetMatingForm();
-            fetchLitters();
+            await fetchLitters();
         } catch (error) {
             console.error('Error recording planned mating:', error);
             showModalMessage('Error', error.response?.data?.message || 'Failed to record mating');
@@ -2508,7 +2521,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 localStorage.setItem('ct_urgency_dismissed', JSON.stringify(prev));
                 window.dispatchEvent(new StorageEvent('storage', { key: 'ct_urgency_dismissed' }));
             } catch {}
-            fetchLitters();
+            await fetchLitters();
         } catch (err) {
             showModalMessage('Error', 'Failed to mark as mated');
         }
@@ -2867,13 +2880,19 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             showModalMessage('Success', 'Animal linked to litter!');
             
             // Remove from available list
+            const remainingAnimals = availableToLink.animals.filter(a => a.id_public !== animalId);
             setAvailableToLink({
                 ...availableToLink,
-                animals: availableToLink.animals.filter(a => a.id_public !== animalId)
+                animals: remainingAnimals
             });
             
+            // Close modal if no more animals to link
+            if (remainingAnimals.length === 0) {
+                setLinkingAnimals(false);
+            }
+            
             // Refresh litters to show updated count without clearing offspring cache
-            fetchLitters({ preserveOffspring: true });
+            await fetchLitters({ preserveOffspring: true });
         } catch (error) {
             console.error('Error linking animal to litter:', error);
             showModalMessage('Error', 'Failed to link animal to litter');
@@ -2907,14 +2926,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
             showModalMessage('Success', `${animalIdsToAdd.length} animal(s) linked to litter!`);
             
-            // Clear available list
+            // Close modal and clear available list
+            setLinkingAnimals(false);
             setAvailableToLink({
-                ...availableToLink,
+                litter: null,
                 animals: []
             });
             
             // Refresh litters to show updated count without clearing offspring cache
-            fetchLitters({ preserveOffspring: true });
+            await fetchLitters({ preserveOffspring: true });
         } catch (error) {
             console.error('Error linking animals to litter:', error);
             showModalMessage('Error', 'Failed to link animals to litter');
@@ -2955,7 +2975,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             });
             
             showModalMessage('Success', 'Litter deleted successfully!');
-            fetchLitters();
+            await fetchLitters();
         } catch (error) {
             console.error('Error deleting litter:', error);
             showModalMessage('Error', 'Failed to delete litter');
@@ -3892,6 +3912,60 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 <option value="Unknown">Unknown</option>
                                             </select>
                                         </div>
+
+                                        {/* Pregnancy Lost Checkbox - only show for mated litters without birth date */}
+                                        {formData.matingDate && !formData.birthDate && (
+                                            <div className="col-span-full">
+                                                <label className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg cursor-pointer hover:bg-amber-100 transition">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={formData.pregnancyLost || false}
+                                                        onChange={(e) => setFormData({
+                                                            ...formData,
+                                                            pregnancyLost: e.target.checked,
+                                                            pregnancyLostReason: e.target.checked ? (formData.pregnancyLostReason || 'Unknown') : null,
+                                                            pregnancyLostNotes: e.target.checked ? formData.pregnancyLostNotes : null
+                                                        })}
+                                                        className="form-checkbox h-5 w-5 text-amber-600 rounded focus:ring-amber-500"
+                                                    />
+                                                    <span className="text-sm font-medium text-gray-700">
+                                                        Pregnancy confirmed but no litter produced
+                                                    </span>
+                                                </label>
+                                                
+                                                {formData.pregnancyLost && (
+                                                    <div className="mt-3 space-y-3 pl-7">
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                                Reason
+                                                            </label>
+                                                            <select
+                                                                value={formData.pregnancyLostReason || 'Unknown'}
+                                                                onChange={(e) => setFormData({...formData, pregnancyLostReason: e.target.value})}
+                                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                                            >
+                                                                <option value="Cannibalized">Cannibalized (mom ate litter)</option>
+                                                                <option value="All Stillborn">All Stillborn</option>
+                                                                <option value="Reabsorbed">Reabsorbed</option>
+                                                                <option value="Unknown">Unknown</option>
+                                                            </select>
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                                Notes (optional)
+                                                            </label>
+                                                            <textarea
+                                                                value={formData.pregnancyLostNotes || ''}
+                                                                onChange={(e) => setFormData({...formData, pregnancyLostNotes: e.target.value})}
+                                                                placeholder="Additional details about the pregnancy loss..."
+                                                                rows={2}
+                                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

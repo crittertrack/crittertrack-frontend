@@ -47,6 +47,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, o
     const ownedAnimalsLoadedRef = useRef(false); // Always fetch to get complete list
     const [globalRels, setGlobalRels] = useState(null); // null = not yet fetched
     const [globalRelsLoading, setGlobalRelsLoading] = useState(false);
+    const [showContactSelector, setShowContactSelector] = useState(false);
+    const [contacts, setContacts] = useState([]);
+    const [contactsLoading, setContactsLoading] = useState(false);
     const [parentCardKey, setParentCardKey] = useState(0); // increment to force parent cards to refetch
     const [offspringRefreshKey, setOffspringRefreshKey] = useState(0); // increment to force offspring fetches to refetch
     // Manual Pedigree (Beta) • Tab 16

@@ -320,7 +320,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
 
             const testSuffix = testMode ? ` (test — ${data.recipientCount} user${data.recipientCount !== 1 ? 's' : ''})` : ` to ${data.recipientCount} users`;
             if (scheduledFor) {
-                setSuccess(`${broadcastType === 'poll' ? 'Poll' : 'Broadcast'} scheduled for ${scheduledFor.toLocaleString('en-GB')}${testSuffix}`);
+                setSuccess(`${broadcastType === 'poll' ? 'Poll' : 'Broadcast'} scheduled for ${scheduledFor.toLocaleString()}${testSuffix}`);
             } else {
                 setSuccess(`${broadcastType === 'poll' ? 'Poll' : 'Broadcast'} sent successfully${testSuffix}!`);
             }
@@ -874,7 +874,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                         <strong>{broadcast.details?.title || 'Broadcast'}</strong>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                             <span className="broadcast-date">
-                                                {new Date(broadcast.createdAt).toLocaleString('en-GB')}
+                                                {new Date(broadcast.createdAt).toLocaleString()}
                                             </span>
                                             <button 
                                                 onClick={() => handleDeleteBroadcast(broadcast._id)}
@@ -902,7 +902,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                         <span>Recipients: {broadcast.details?.recipientCount || 0}</span>
                                         <span>Type: {broadcast.details?.type || 'info'}</span>
                                         {broadcast.details?.scheduled && (
-                                            <span>Scheduled: {new Date(broadcast.details.scheduledFor).toLocaleString('en-GB')}</span>
+                                            <span>Scheduled: {new Date(broadcast.details.scheduledFor).toLocaleString()}</span>
                                         )}
                                     </div>
                                 </div>
@@ -941,7 +941,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                         <div className="poll-header">
                                             <strong>{poll.pollQuestion || poll.title}</strong>
                                             <span className="poll-date">
-                                                {new Date(poll.createdAt).toLocaleString('en-GB')}
+                                                {new Date(poll.createdAt).toLocaleString()}
                                             </span>
                                         </div>
                                         
@@ -950,7 +950,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                             <span>Type: {poll.allowMultipleChoices ? 'Multiple Choice' : 'Single Choice'}</span>
                                             {poll.pollEndsAt && (
                                                 <span className={hasEnded ? 'ended' : 'active'}>
-                                                    {hasEnded ? '🔴 Ended' : '🟢 Active'} - {new Date(poll.pollEndsAt).toLocaleString('en-GB')}
+                                                    {hasEnded ? '🔴 Ended' : '🟢 Active'} - {new Date(poll.pollEndsAt).toLocaleString()}
                                                 </span>
                                             )}
                                         </div>
@@ -1067,7 +1067,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                                     <span className="user-id">{conv.otherUserId}</span>
                                                 </div>
                                                 <span className="last-message-date">
-                                                    {new Date(conv.lastMessageAt).toLocaleString('en-GB')}
+                                                    {new Date(conv.lastMessageAt).toLocaleString()}
                                                 </span>
                                             </div>
                                             <div className="conversation-details">
@@ -1159,7 +1159,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                             <div className="message-text">{msg.message}</div>
                                             <div className="message-meta">
                                                 <span className="message-time">
-                                                    {new Date(msg.createdAt).toLocaleString('en-GB')}
+                                                    {new Date(msg.createdAt).toLocaleString()}
                                                 </span>
                                                 {msg.sentBy && (
                                                     <span className="sent-by-mod">

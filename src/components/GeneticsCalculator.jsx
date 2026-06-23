@@ -2351,7 +2351,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
               >
                 <option value="Fancy Mouse">Fancy Mouse</option>
                 {availableSpecies.filter(s => s !== 'Fancy Mouse').map(species => (
-                  <option key={species} value={species}>{species}</option>
+                  <option key={species} value={species} disabled={species.toLowerCase() === 'fancy rat'}>{species}</option>
                 ))}
               </select>
               

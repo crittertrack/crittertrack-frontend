@@ -319,17 +319,20 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [usState, setUsState] = useState(userProfile.state || '');
     const [breederInfoOpen, setBreederInfoOpen] = useState(false);
     const [breederInfoLoading, setBreederInfoLoading] = useState(false);
-    const [breederInfo, setBreederInfo] = useState({
-        aboutProgram:       userProfile.breederInfo?.aboutProgram       || '',
-        adoptionRules:      userProfile.breederInfo?.adoptionRules      || '',
-        enclosureCare:      userProfile.breederInfo?.enclosureCare      || '',
-        routineCare:        userProfile.breederInfo?.routineCare        || '',
-        healthGuarantee:    userProfile.breederInfo?.healthGuarantee    || '',
-        waitlistInfo:       userProfile.breederInfo?.waitlistInfo       || '',
-        pricingNotes:       userProfile.breederInfo?.pricingNotes       || '',
-        contactPreferences: userProfile.breederInfo?.contactPreferences || '',
-        customFields:       userProfile.breederInfo?.customFields       || [],
+    const resolveBreederInfoFromProfile = (profile) => ({
+        aboutProgram:       profile?.breederInfo?.aboutProgram       || '',
+        adoptionRules:      profile?.breederInfo?.adoptionRules      || '',
+        enclosureCare:      profile?.breederInfo?.enclosureCare      || '',
+        routineCare:        profile?.breederInfo?.routineCare        || '',
+        healthGuarantee:    profile?.breederInfo?.healthGuarantee    || '',
+        waitlistInfo:       profile?.breederInfo?.waitlistInfo       || '',
+        pricingNotes:       profile?.breederInfo?.pricingNotes       || '',
+        contactPreferences: profile?.breederInfo?.contactPreferences || '',
+        customFields:       Array.isArray(profile?.breederInfo?.customFields) ? profile.breederInfo.customFields : [],
     });
+
+    const [breederInfo, setBreederInfo] = useState(resolveBreederInfoFromProfile(userProfile));
+    const breederInfoProfileRef = useRef(resolveBreederInfoFromProfile(userProfile));
 
     // Keep allowMessages in sync if userProfile updates (e.g., after save or refetch)
     useEffect(() => {
@@ -341,22 +344,27 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         setUsState(userProfile.country === 'US' ? (userProfile.state || '') : '');
     }, [userProfile.allowMessages, userProfile.emailNotificationPreference, userProfile.country, userProfile.state]);
 
-    // Keep breederInfo form fields in sync when userProfile updates after save/refetch
-    // ONLY update if breederInfoOpen is false to prevent overwriting user's current edits
     useEffect(() => {
-        if (breederInfoOpen) return; // Don't reset while user is editing
-        setBreederInfo({
-            aboutProgram:       userProfile.breederInfo?.aboutProgram       || '',
-            adoptionRules:      userProfile.breederInfo?.adoptionRules      || '',
-            enclosureCare:      userProfile.breederInfo?.enclosureCare      || '',
-            routineCare:        userProfile.breederInfo?.routineCare        || '',
-            healthGuarantee:    userProfile.breederInfo?.healthGuarantee    || '',
-            waitlistInfo:       userProfile.breederInfo?.waitlistInfo       || '',
-            pricingNotes:       userProfile.breederInfo?.pricingNotes       || '',
-            contactPreferences: userProfile.breederInfo?.contactPreferences || '',
-            customFields:       userProfile.breederInfo?.customFields       || [],
-        });
-    }, [userProfile.breederInfo, breederInfoOpen]);
+        const nextBreederInfo = resolveBreederInfoFromProfile(userProfile);
+        const prevBreederInfo = breederInfoProfileRef.current;
+        const nextCustomFields = JSON.stringify(nextBreederInfo.customFields || []);
+        const prevCustomFields = JSON.stringify(prevBreederInfo.customFields || []);
+        const hasProfileChanged =
+            nextBreederInfo.aboutProgram !== prevBreederInfo.aboutProgram ||
+            nextBreederInfo.adoptionRules !== prevBreederInfo.adoptionRules ||
+            nextBreederInfo.enclosureCare !== prevBreederInfo.enclosureCare ||
+            nextBreederInfo.routineCare !== prevBreederInfo.routineCare ||
+            nextBreederInfo.healthGuarantee !== prevBreederInfo.healthGuarantee ||
+            nextBreederInfo.waitlistInfo !== prevBreederInfo.waitlistInfo ||
+            nextBreederInfo.pricingNotes !== prevBreederInfo.pricingNotes ||
+            nextBreederInfo.contactPreferences !== prevBreederInfo.contactPreferences ||
+            nextCustomFields !== prevCustomFields;
+
+        if (hasProfileChanged) {
+            breederInfoProfileRef.current = nextBreederInfo;
+            setBreederInfo(nextBreederInfo);
+        }
+    }, [userProfile]);
     
     console.log('[ProfileEditForm] Initial allowMessages state:', allowMessages);
 

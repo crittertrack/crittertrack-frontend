@@ -18,6 +18,7 @@ import { formatDate, formatDateShort } from '../../utils/dateFormatter';
 import { FamilyTabContent } from '../AnimalDetail/FamilyTabContent';
 import DatePicker from '../DatePicker';
 import GeneticCodeBuilder from '../GeneticCodeBuilder';
+import ContactSelector from '../ContactSelector';
 
 const getCountryFlag = (countryCode) => {
     if (!countryCode || countryCode.length !== 2) return '';
@@ -147,9 +148,13 @@ const AnimalImage = ({ src, alt = "Animal", className = "w-full h-full object-co
 // Conflict Resolution Modal Component
 
 async function compressImageFile(file, { maxWidth = 1200, maxHeight = 1200, quality = 0.8 } = {}) {
-    if (!file || !file.type || !file.type.startsWith('image/')) throw new Error('Not an image file');
+    if (!file || !file.name) throw new Error('Not an image file');
+    const fileType = (file.type || '').toLowerCase();
+    const fileName = file.name.toLowerCase();
+    const isLikelyImage = fileType.startsWith('image/') || /\.(jpe?g|png|gif|heic|heif)$/i.test(fileName);
+    if (!isLikelyImage) throw new Error('Not an image file');
     // Reject GIFs (animations not allowed) ? the server accepts PNG/JPEG only
-    if (file.type === 'image/gif') throw new Error('GIF_NOT_ALLOWED');
+    if (fileType === 'image/gif' || fileName.endsWith('.gif')) throw new Error('GIF_NOT_ALLOWED');
 
     const img = await new Promise((resolve, reject) => {
         const url = URL.createObjectURL(file);
@@ -192,9 +197,13 @@ async function compressImageFile(file, { maxWidth = 1200, maxHeight = 1200, qual
 // Tries decreasing quality first, then scales down dimensions and retries.
 // Returns a Blob (best-effort). Throws if input isn't an image.
 async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
-    if (!file || !file.type || !file.type.startsWith('image/')) throw new Error('Not an image file');
+    if (!file || !file.name) throw new Error('Not an image file');
+    const fileType = (file.type || '').toLowerCase();
+    const fileName = file.name.toLowerCase();
+    const isLikelyImage = fileType.startsWith('image/') || /\.(jpe?g|png|gif|heic|heif)$/i.test(fileName);
+    if (!isLikelyImage) throw new Error('Not an image file');
     // Reject GIFs (animations not allowed) ? the server accepts PNG/JPEG only
-    if (file.type === 'image/gif') throw new Error('GIF_NOT_ALLOWED');
+    if (fileType === 'image/gif' || fileName.endsWith('.gif')) throw new Error('GIF_NOT_ALLOWED');
 
     console.log('[COMPRESSION DEBUG] Starting compression:', {
         fileName: file.name,
@@ -568,7 +577,7 @@ const getPedigreeCacheKey = (rootId, authToken) => {
     return `${authToken ? 'auth' : 'public'}:${rootId}`;
 };
 
-const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null, maxDepth = 4, priorityDepth = 4 }) => {
+const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }) => {
     const rootId = animalId;
     if (!rootId || !API_BASE_URL) return null;
 
@@ -576,23 +585,24 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null, 
     if (!cacheKey) return null;
 
     if (pedigreeTreeCache.has(cacheKey)) {
-        console.log(`[Pedigree Prefetch] Cache HIT for ${rootId}`);
+        console.log(`[PEDIGREE PREFETCH] Cache hit for ${rootId}`);
         return pedigreeTreeCache.get(cacheKey);
     }
 
     if (pedigreePrefetchInFlight.has(cacheKey)) {
-        console.log(`[Pedigree Prefetch] Already in-flight for ${rootId}`);
+        console.log(`[PEDIGREE PREFETCH] Already in flight for ${rootId}`);
         return pedigreePrefetchInFlight.get(cacheKey);
     }
 
-    console.log(`[Pedigree Prefetch] Starting prefetch for ${rootId} (priority depth: ${priorityDepth})`);
+    console.log(`[PEDIGREE PREFETCH] Starting for ${rootId}`);
+    const overallStartTime = Date.now();
 
     const task = (async () => {
         const resultCache = new Map();
         let remainingFetchBudget = MAX_PEDIGREE_FETCH_NODES;
 
-        // Helper to fetch a single animal's data
-        const fetchAnimalData = async (id) => {
+        // Helper function to fetch a single animal's data
+        const fetchSingleAnimalData = async (id) => {
             let animalInfo = null;
             if (authToken) {
                 const isPublicId = /^CTC\d+|^\d+$/.test(id);
@@ -657,63 +667,120 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null, 
             return animalInfo;
         };
 
-        // Breadth-first fetch for first N generations (priority depth)
-        const fetchBreadthFirst = async (startId, maxBreadthDepth) => {
-            const queue = [{ id: startId, depth: 0, path: new Set() }];
-            const fetchedAnimals = new Map();
+        // Helper to build tree structure from flat results
+        const buildTreeFromResults = (id, resultsMap) => {
+            const animalData = resultsMap.get(id);
+            if (!animalData) return null;
 
-            while (queue.length > 0 && remainingFetchBudget > 0) {
-                const { id, depth, path } = queue.shift();
+            const fatherId = animalData.fatherId_public || animalData.sireId_public;
+            const motherId = animalData.motherId_public || animalData.damId_public;
+
+            return {
+                ...animalData,
+                father: fatherId ? buildTreeFromResults(fatherId, resultsMap) : null,
+                mother: motherId ? buildTreeFromResults(motherId, resultsMap) : null
+            };
+        };
+
+        // PHASE 1: Breadth-first for first 3 generations (for fast initial display)
+        const BREADTH_FIRST_DEPTH = 3;
+        const generationQueue = [{ id: rootId, depth: 0, path: new Set() }];
+        const processedIds = new Set();
+
+        for (let currentDepth = 0; currentDepth <= BREADTH_FIRST_DEPTH; currentDepth++) {
+            const animalsAtThisDepth = generationQueue.filter(item => item.depth === currentDepth);
+            if (animalsAtThisDepth.length === 0) continue;
+
+            console.log(`[PEDIGREE PREFETCH] Fetching generation ${currentDepth} (${animalsAtThisDepth.length} animals)...`);
+            const genStartTime = Date.now();
+
+            // Fetch all animals in this generation in parallel
+            const fetchPromises = animalsAtThisDepth.map(async ({ id, path }) => {
+                if (processedIds.has(id) || !id || path.has(id)) return null;
+                if (remainingFetchBudget <= 0) return null;
                 
-                if (!id || depth > maxBreadthDepth || path.has(id)) continue;
-                if (fetchedAnimals.has(id)) continue;
-
+                processedIds.add(id);
                 remainingFetchBudget -= 1;
-                const animalInfo = await fetchAnimalData(id);
-                if (!animalInfo) continue;
 
-                fetchedAnimals.set(id, { ...animalInfo, depth });
+                const animalInfo = await fetchSingleAnimalData(id);
+                if (!animalInfo) return null;
 
-                if (depth < maxBreadthDepth) {
-                    const fatherId = animalInfo.fatherId_public || animalInfo.sireId_public;
-                    const motherId = animalInfo.motherId_public || animalInfo.damId_public;
-                    const newPath = new Set([...path, id]);
-                    
-                    if (fatherId) queue.push({ id: fatherId, depth: depth + 1, path: newPath });
-                    if (motherId) queue.push({ id: motherId, depth: depth + 1, path: newPath });
+                resultCache.set(id, { fetchedAtDepth: currentDepth, data: animalInfo });
+
+                // Queue parents for next generation
+                const fatherId = animalInfo.fatherId_public || animalInfo.sireId_public;
+                const motherId = animalInfo.motherId_public || animalInfo.damId_public;
+                const childPath = new Set([...path, id]);
+
+                if (currentDepth < BREADTH_FIRST_DEPTH) {
+                    if (fatherId && !processedIds.has(fatherId)) {
+                        generationQueue.push({ id: fatherId, depth: currentDepth + 1, path: childPath });
+                    }
+                    if (motherId && !processedIds.has(motherId)) {
+                        generationQueue.push({ id: motherId, depth: currentDepth + 1, path: childPath });
+                    }
                 }
+
+                return animalInfo;
+            });
+
+            await Promise.all(fetchPromises);
+
+            const genElapsed = Date.now() - genStartTime;
+            console.log(`[PEDIGREE PREFETCH] Generation ${currentDepth} complete (${genElapsed}ms)`);
+
+            // Update cache with partial data after each generation
+            const partialTree = buildTreeFromResults(rootId, resultCache);
+            if (partialTree) {
+                pedigreeTreeCache.set(cacheKey, {
+                    data: partialTree,
+                    ownerProfile: null,
+                    isPartial: true,
+                    fetchedDepth: currentDepth,
+                    timestamp: Date.now()
+                });
+                console.log(`[PEDIGREE PREFETCH] Cache updated with ${currentDepth + 1} generation(s)`);
+            }
+        }
+
+        console.log(`[PEDIGREE PREFETCH] First ${BREADTH_FIRST_DEPTH + 1} generations complete, continuing depth-first for remaining generations...`);
+
+        // PHASE 2: Continue depth-first for remaining generations (4-13)
+        const fetchAnimalWithFamily = async (id, depth = 0, pathIds = new Set()) => {
+            if (!id || depth > MAX_PEDIGREE_FETCH_DEPTH) return null;
+            if (pathIds.has(id)) return null;
+
+            if (resultCache.has(id)) {
+                const cached = resultCache.get(id);
+                if (cached.fetchedAtDepth <= depth) return cached.data;
             }
 
-            return fetchedAnimals;
+            if (remainingFetchBudget <= 0) return null;
+            remainingFetchBudget -= 1;
+
+            const animalInfo = await fetchSingleAnimalData(id);
+            if (!animalInfo) return null;
+
+            const fatherId = animalInfo.fatherId_public || animalInfo.sireId_public;
+            const motherId = animalInfo.motherId_public || animalInfo.damId_public;
+            const childPath = new Set([...pathIds, id]);
+            
+            // Fetch parents in parallel for better performance
+            const [father, mother] = await Promise.all([
+                fatherId ? fetchAnimalWithFamily(fatherId, depth + 1, childPath) : null,
+                motherId ? fetchAnimalWithFamily(motherId, depth + 1, childPath) : null
+            ]);
+            
+            const result = { ...animalInfo, father, mother };
+
+            if (!resultCache.has(id) || resultCache.get(id).fetchedAtDepth > depth) {
+                resultCache.set(id, { fetchedAtDepth: depth, data: result });
+            }
+            return result;
         };
 
-        // Build tree structure from fetched animals
-        const buildTree = (animals, rootId) => {
-            const buildNode = (id, pathIds = new Set()) => {
-                if (!id || pathIds.has(id)) return null;
-                const animal = animals.get(id);
-                if (!animal) return null;
-
-                const fatherId = animal.fatherId_public || animal.sireId_public;
-                const motherId = animal.motherId_public || animal.damId_public;
-                const childPath = new Set([...pathIds, id]);
-
-                return {
-                    ...animal,
-                    father: fatherId ? buildNode(fatherId, childPath) : null,
-                    mother: motherId ? buildNode(motherId, childPath) : null
-                };
-            };
-
-            return buildNode(rootId);
-        };
-
-        // Fetch first 4 generations breadth-first for immediate display
-        console.log(`[Pedigree Prefetch] Fetching first ${Math.min(priorityDepth, maxDepth)} generations for ${rootId}...`);
-        const fetchedAnimals = await fetchBreadthFirst(rootId, Math.min(priorityDepth, maxDepth));
-        console.log(`[Pedigree Prefetch] Fetched ${fetchedAnimals.size} animals for ${rootId}`);
-        const data = buildTree(fetchedAnimals, rootId);
-
+        const data = await fetchAnimalWithFamily(rootId);
+        
         // Fetch owner profile
         let fetchedOwnerProfile = null;
         if (data?.breederId_public) {
@@ -727,11 +794,23 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null, 
             } catch (error) {}
         }
 
-        const payload = { data, ownerProfile: fetchedOwnerProfile, depth: priorityDepth };
+        const payload = { 
+            data, 
+            ownerProfile: fetchedOwnerProfile,
+            isPartial: false,
+            fetchedDepth: MAX_PEDIGREE_FETCH_DEPTH,
+            timestamp: Date.now()
+        };
         pedigreeTreeCache.set(cacheKey, payload);
-        console.log(`[Pedigree Prefetch] ✓ Completed and cached for ${rootId}`);
+        
+        const overallElapsed = Date.now() - overallStartTime;
+        console.log(`[PEDIGREE PREFETCH] Complete for ${rootId} (${overallElapsed}ms total, ${MAX_PEDIGREE_FETCH_DEPTH + 1} generations)`);
+        
         return payload;
-    })().catch(() => null).finally(() => {
+    })().catch((error) => {
+        console.error(`[PEDIGREE PREFETCH] Error for ${rootId}:`, error);
+        return null;
+    }).finally(() => {
         pedigreePrefetchInFlight.delete(cacheKey);
     });
 
@@ -3152,7 +3231,7 @@ const AnimalForm = ({
     // Check if a field is hidden for the current species
     // CRITICAL: Never hide fields that have existing data (backward compatibility)
     // Legal fields are always shown for all species regardless of template settings
-    const ALWAYS_VISIBLE_FIELDS = new Set([
+    const ALWAYS_VISIBLE_FIELDS = new Set([ // These fields are always visible regardless of template settings
         'licenseNumber', 'licenseJurisdiction', 'insurance', 'legalStatus',
         'breedingRestrictions', 'exportRestrictions',
     ]);
@@ -3207,6 +3286,7 @@ const AnimalForm = ({
             fatherId_public: animalToEdit.fatherId_public || animalToEdit.sireId_public || null,
             motherId_public: animalToEdit.motherId_public || animalToEdit.damId_public || null,
             breederId_public: animalToEdit.breederId_public || null,
+            manualBreederName: animalToEdit.manualBreederName || '',
             keeperName: animalToEdit.keeperName || animalToEdit.ownerName || animalToEdit.currentOwner || animalToEdit.currentOwnerDisplay || '',
             groupRole: animalToEdit.groupRole || '',
                 isPregnant: animalToEdit.isPregnant || false,
@@ -3366,6 +3446,8 @@ const AnimalForm = ({
             transferHistory: animalToEdit.transferHistory || '',
             breedingRestrictions: animalToEdit.breedingRestrictions || '',
             exportRestrictions: animalToEdit.exportRestrictions || '',
+            purchaseDate: animalToEdit.purchaseDate ? new Date(animalToEdit.purchaseDate).toISOString().substring(0, 10) : '',
+            purchaseLocation: animalToEdit.purchaseLocation || '',
             legalDocuments: animalToEdit.legalDocuments || [],
         } : {
             species: species, 
@@ -3544,6 +3626,8 @@ const AnimalForm = ({
             transferHistory: '',
             breedingRestrictions: '',
             exportRestrictions: '',
+            purchaseDate: '',
+            purchaseLocation: '',
             legalDocuments: [],
         }
     );
@@ -4000,6 +4084,33 @@ const AnimalForm = ({
     const [galleryUploadError, setGalleryUploadError] = useState(null);
     const [movePhotoPrompt, setMovePhotoPrompt] = useState(null); // URL of current profile photo when user selects a new one
     const galleryEditFileRef = useRef(null); // collapse health tab sections
+    
+    // Contact selector state
+    const [showContactSelector, setShowContactSelector] = useState(false);
+    const [showManualAssignmentModal, setShowManualAssignmentModal] = useState(false);
+    const [assignmentRole, setAssignmentRole] = useState('breeder');
+    const [contacts, setContacts] = useState([]);
+    const [loadingContacts, setLoadingContacts] = useState(false);
+
+    // Load contacts when manual assignment modal opens
+    useEffect(() => {
+        if (showManualAssignmentModal && !loadingContacts && contacts.length === 0) {
+            setLoadingContacts(true);
+            axios.get(`${API_BASE_URL}/contacts`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            })
+            .then(response => {
+                setContacts(response.data || []);
+            })
+            .catch(error => {
+                console.error('Error loading contacts:', error);
+                setContacts([]);
+            })
+            .finally(() => {
+                setLoadingContacts(false);
+            });
+        }
+    }, [showManualAssignmentModal, API_BASE_URL, authToken]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -4028,26 +4139,57 @@ const AnimalForm = ({
             
             // Handle breeder selection differently
             if (modalTarget === 'breeder') {
-                setFormData(prev => ({ ...prev, breederId_public: id, manualBreederName: '' }));
                 if (idOrAnimal && typeof idOrAnimal === 'object') {
                     // User object from search
                     const user = idOrAnimal;
+                    const showPersonalName = user.showPersonalName ?? false;
+                    const showBreederName = user.showBreederName ?? false;
+                    
+                    // Prefer breederName over personalName, or show both
+                    let displayName = '';
+                    if (showBreederName && user.breederName) {
+                        displayName = user.breederName;
+                        if (showPersonalName && user.personalName) {
+                            displayName = `${user.breederName} (${user.personalName})`;
+                        }
+                    } else if (showPersonalName && user.personalName) {
+                        displayName = user.personalName;
+                    }
+                    
+                    setFormData(prev => ({ ...prev, breederId_public: id, manualBreederName: displayName }));
                     const info = {
                         id_public: user.id_public,
                         personalName: user.personalName || '',
                         breederName: user.breederName || '',
-                        showBreederName: user.showBreederName || false
+                        showBreederName: user.showBreederName || false,
+                        showPersonalName: user.showPersonalName || false
                     };
                     setBreederInfo(info);
                 } else if (id) {
                     // Fetch user info
                     try {
                         const info = await fetchBreederInfo(id);
+                        const showPersonalName = info.showPersonalName ?? false;
+                        const showBreederName = info.showBreederName ?? false;
+                        
+                        // Prefer breederName over personalName, or show both
+                        let displayName = '';
+                        if (showBreederName && info.breederName) {
+                            displayName = info.breederName;
+                            if (showPersonalName && info.personalName) {
+                                displayName = `${info.breederName} (${info.personalName})`;
+                            }
+                        } else if (showPersonalName && info.personalName) {
+                            displayName = info.personalName;
+                        }
+                        
+                        setFormData(prev => ({ ...prev, breederId_public: id, manualBreederName: displayName }));
                         setBreederInfo(info);
                     } catch (err) {
                         console.warn('Failed to fetch breeder info', err);
                     }
                 } else {
+                    setFormData(prev => ({ ...prev, breederId_public: null, manualBreederName: '' }));
                     setBreederInfo(null);
                 }
                 setModalTarget(null);
@@ -5653,6 +5795,228 @@ const AnimalForm = ({
                 </div>
             )}
 
+            {/* --- Contact Selector Modal --- */}
+            {showContactSelector && (
+                <ContactSelector
+                    onClose={() => setShowContactSelector(false)}
+                    onSelect={(contact) => {
+                        // Update manual breeder name with selected contact
+                        const displayName = [contact.prefix, contact.personalName, contact.suffix].filter(Boolean).join(' ') 
+                            || contact.breederName 
+                            || 'Unnamed Contact';
+                        
+                        setFormData(prev => ({
+                            ...prev,
+                            manualBreederName: displayName
+                        }));
+                        
+                        // If contact has a linked CTUID, auto-fill the Breeder (User) field
+                        if (contact.linkedCTUID) {
+                            setFormData(prev => ({
+                                ...prev,
+                                breederId_public: contact.linkedCTUID,
+                                manualBreederName: '' // Clear manual name when CTUID is set
+                            }));
+                            
+                            // Fetch and set breeder info
+                            fetchBreederInfo(contact.linkedCTUID).then(info => {
+                                if (info) setBreederInfo(info);
+                            });
+                        }
+                        
+                        setShowContactSelector(false);
+                    }}
+                    authToken={authToken}
+                    API_BASE_URL={API_BASE_URL}
+                />
+            )}
+
+            {/* Manual Animal Assignment Modal */}
+            {showManualAssignmentModal && (
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-2xl max-h-[90vh] flex flex-col">
+                        <div className="flex justify-between items-center border-b pb-3 mb-4">
+                            <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                <User size={20} />
+                                Assign Animal to Contact
+                            </h3>
+                            <button onClick={() => setShowManualAssignmentModal(false)} className="text-gray-500 hover:text-gray-800">
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="mb-4">
+                            <p className="text-sm text-gray-600 mb-4">
+                                Select a contact and role to assign this animal. This helps track breeder and keeper relationships.
+                            </p>
+
+                            {/* Role Selection */}
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Assignment Role</label>
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setAssignmentRole('breeder')}
+                                        className={`flex-1 px-4 py-2 rounded-lg font-medium transition ${
+                                            assignmentRole === 'breeder'
+                                                ? 'bg-blue-600 text-white'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        Breeder
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setAssignmentRole('keeper')}
+                                        className={`flex-1 px-4 py-2 rounded-lg font-medium transition ${
+                                            assignmentRole === 'keeper'
+                                                ? 'bg-pink-600 text-white'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        Keeper
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setAssignmentRole('both')}
+                                        className={`flex-1 px-4 py-2 rounded-lg font-medium transition ${
+                                            assignmentRole === 'both'
+                                                ? 'bg-purple-600 text-white'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        Both
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Contact List */}
+                        <div className="flex-grow overflow-y-auto">
+                            {loadingContacts ? (
+                                <div className="flex items-center justify-center p-8">
+                                    <Loader2 className="animate-spin text-primary-dark mr-2" size={24} />
+                                    <span className="text-gray-600">Loading contacts...</span>
+                                </div>
+                            ) : contacts.length > 0 ? (
+                                <div className="space-y-2">
+                                    {contacts.map((contact) => {
+                                        const displayName = [contact.prefix, contact.personalName, contact.suffix].filter(Boolean).join(' ') 
+                                            || contact.breederName 
+                                            || 'Unnamed Contact';
+                                        
+                                        return (
+                                            <div
+                                                key={contact._id}
+                                                onClick={async () => {
+                                                    try {
+                                                        // Get the animal ID
+                                                        const animalId = formData.id_public || animalToEdit?.id_public;
+                                                        
+                                                        if (!animalId) {
+                                                            showModalMessage('Error', 'Please save the animal first before assigning to a contact.');
+                                                            return;
+                                                        }
+
+                                                        // Call the API to assign the animal
+                                                        await axios.post(
+                                                            `${API_BASE_URL}/contacts/${contact._id}/assign-animal`,
+                                                            {
+                                                                animalId_public: animalId,
+                                                                role: assignmentRole
+                                                            },
+                                                            {
+                                                                headers: { Authorization: `Bearer ${authToken}` }
+                                                            }
+                                                        );
+
+                                                        // Auto-fill form fields based on role
+                                                        if (assignmentRole === 'breeder' || assignmentRole === 'both') {
+                                                            if (contact.linkedCTUID) {
+                                                                setFormData(prev => ({
+                                                                    ...prev,
+                                                                    breederId_public: contact.linkedCTUID,
+                                                                    manualBreederName: ''
+                                                                }));
+                                                                fetchBreederInfo(contact.linkedCTUID).then(setBreederInfo);
+                                                            } else {
+                                                                setFormData(prev => ({
+                                                                    ...prev,
+                                                                    breederId_public: null,
+                                                                    manualBreederName: displayName
+                                                                }));
+                                                                setBreederInfo(null);
+                                                            }
+                                                        }
+                                                        if (assignmentRole === 'keeper' || assignmentRole === 'both') {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                keeperName: displayName
+                                                            }));
+                                                        }
+
+                                                        showModalMessage('Success', `Animal assigned to ${displayName} as ${assignmentRole}!`);
+                                                        setShowManualAssignmentModal(false);
+                                                    } catch (error) {
+                                                        console.error('Error assigning animal:', error);
+                                                        showModalMessage('Error', error.response?.data?.message || 'Failed to assign animal to contact.');
+                                                    }
+                                                }}
+                                                className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition"
+                                            >
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex-grow">
+                                                        <h4 className="font-semibold text-gray-800 text-lg">
+                                                            {displayName}
+                                                        </h4>
+                                                        {contact.linkedCTUID && (
+                                                            <p className="text-sm text-gray-600 mt-1">
+                                                                🆔 {contact.linkedCTUID}
+                                                            </p>
+                                                        )}
+                                                        {(contact.address?.city || contact.address?.country) && (
+                                                            <p className="text-sm text-gray-600 mt-1">
+                                                                📍 {[contact.address.city, contact.address.country].filter(Boolean).join(', ')}
+                                                            </p>
+                                                        )}
+                                                        <div className="flex gap-2 mt-2">
+                                                            {contact.isBreeder && (
+                                                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Breeder</span>
+                                                            )}
+                                                            {contact.isKeeper && (
+                                                                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Keeper</span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8">
+                                    <User className="mx-auto text-gray-300 mb-3" size={48} />
+                                    <p className="text-gray-500">No contacts found.</p>
+                                    <p className="text-sm text-gray-400 mt-2">
+                                        Add contacts from the Contacts page to assign animals to them.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="mt-4 pt-4 border-t">
+                            <button
+                                onClick={() => setShowManualAssignmentModal(false)}
+                                className="w-full py-2 px-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* --- Create Litter Modal --- */}
             {showCreateLitterModal && breedingRecordForLitter && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
@@ -5884,6 +6248,29 @@ const AnimalForm = ({
                 />
             )}
 
+            {/* CTC selector modal ? always rendered so it works regardless of activeTab */}
+            {(() => {
+                const ctcModal = mpCTCOpenSlot ? (
+                    <ParentSearchModal
+                        title={mpCTCOpenSlot.endsWith('Sire') || mpCTCOpenSlot === 'sire' ? 'Sire' : 'Dam'}
+                        currentId={animalToEdit?.id_public}
+                        onSelect={async (a) => { setMpCTCOpenSlot(null); if (a) await mpLinkAnimal(mpCTCOpenSlot, a); }}
+                        onClose={() => setMpCTCOpenSlot(null)}
+                        authToken={authToken}
+                        showModalMessage={showModalMessage}
+                        API_BASE_URL={API_BASE_URL}
+                        X={X}
+                        Search={Search}
+                        Loader2={Loader2}
+                        LoadingSpinner={LoadingSpinner}
+                        requiredGender={mpCTCOpenSlot.endsWith('Sire') || mpCTCOpenSlot === 'sire' ? 'Male' : 'Female'}
+                        species={formData.species}
+                    />
+                ) : null;
+                return ctcModal;
+            })()}
+
+            <div>
             <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center justify-between">
                 <span>
                     <PlusCircle size={24} className="inline mr-2 text-primary" /> 
@@ -5954,6 +6341,12 @@ const AnimalForm = ({
                                             setMovePhotoPrompt(oldPhotoUrl);
                                         }
                                         const original = e.target.files[0];
+                                        const baseName = original.name.replace(/\.[^/.]+$/, '') || 'image';
+                                        const originalType = (original.type || '').toLowerCase();
+                                        const isSupportedOriginalType = ['image/jpeg', 'image/jpg', 'image/png'].includes(originalType);
+                                        let chosenFile = original;
+                                        const createJpegFile = (blob) => new File([blob], `${baseName}.jpg`, { type: 'image/jpeg' });
+
                                         try {
                                             let compressedBlob = null;
                                             try {
@@ -5968,17 +6361,26 @@ const AnimalForm = ({
                                                     compressedBlob = await compressImageFile(original, { maxWidth: 1200, maxHeight: 1200, quality: 0.8 });
                                                 }
                                             }
-                                            const baseName = original.name.replace(/\.[^/.]+$/, '') || 'image';
-                                            const compressedFile = new File([compressedBlob], `${baseName}.jpg`, { type: 'image/jpeg' });
-                                            if (compressedBlob.size > 200 * 1024) {
-                                                showModalMessage('Image Compression', 'Image was compressed but is still larger than 200KB.');
+
+                                            if (compressedBlob) {
+                                                chosenFile = createJpegFile(compressedBlob);
+                                                if (compressedBlob.size > 200 * 1024) {
+                                                    showModalMessage('Image Compression', 'Image was compressed but is still larger than 200KB.');
+                                                }
+                                            } else if (!isSupportedOriginalType) {
+                                                showModalMessage('Image Upload', 'This photo format is not supported. Please choose a JPG or PNG image.');
+                                                return;
                                             }
-                                            setAnimalImageFile(compressedFile);
-                                            setAnimalImagePreview(URL.createObjectURL(compressedFile));
                                         } catch (err) {
-                                            setAnimalImageFile(original);
-                                            setAnimalImagePreview(URL.createObjectURL(original));
+                                            if (!isSupportedOriginalType) {
+                                                showModalMessage('Image Upload', 'This photo format is not supported. Please choose a JPG or PNG image.');
+                                                return;
+                                            }
+                                            chosenFile = original;
                                         }
+
+                                        setAnimalImageFile(chosenFile);
+                                        setAnimalImagePreview(URL.createObjectURL(chosenFile));
                                     }
                                 }}
                                 onDeleteImage={() => {
@@ -6099,6 +6501,29 @@ const AnimalForm = ({
                 {/* Tab 2: Ownership */}
                 {activeTab === 2 && (
                     <div className="space-y-6">
+                        {/* Manual Animal Assignment */}
+                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
+                                        <Link size={16} className="text-blue-600" /> Assign to Contact
+                                    </h3>
+                                    <p className="text-xs text-gray-600 mt-1">Link this animal to a contact record (breeder, keeper, etc.)</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowManualAssignmentModal(true);
+                                        setAssignmentRole('breeder');
+                                    }}
+                                    className="px-4 py-2 bg-primary hover:bg-primary-dark text-black rounded-lg text-sm font-semibold transition flex items-center gap-2"
+                                >
+                                    <Plus size={16} />
+                                    Assign Animal
+                                </button>
+                            </div>
+                        </div>
+
                         {/* Ownership */}
                         <div data-tutorial-target="ownership-section" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center gap-1.5"><Star size={16} className="flex-shrink-0 text-gray-400" /> Breeder</h3>
@@ -6148,21 +6573,31 @@ const AnimalForm = ({
 
                                 {!isFieldHidden('manualBreederName') && (
                                 <div>
-                                    <label className='block text-sm font-medium text-gray-700 mb-2'>Breeder (Manual Name)</label>
-                                    <input 
-                                        type="text" 
-                                        name="manualBreederName" 
-                                        value={formData.manualBreederName || ''} 
-                                        onChange={(e) => {
-                                            handleChange(e);
-                                            if (e.target.value.trim() && formData.breederId_public) {
-                                                clearBreederSelection();
-                                            }
-                                        }}
-                                        placeholder="Enter breeder name (if not a registered user)"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1">Use this if the breeder is not a registered user on the platform.</p>
+                                    <label className='block text-sm font-medium text-gray-700 mb-2'>Breeder (Manual or Contact)</label>
+                                    <div className="flex gap-2">
+                                        <input 
+                                            type="text" 
+                                            name="manualBreederName" 
+                                            value={formData.manualBreederName || ''} 
+                                            onChange={(e) => {
+                                                handleChange(e);
+                                                if (e.target.value.trim() && formData.breederId_public) {
+                                                    clearBreederSelection();
+                                                }
+                                            }}
+                                            placeholder="Enter breeder name or select contact"
+                                            className="block flex-1 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowContactSelector(true)}
+                                            className="px-4 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-md transition flex items-center gap-1"
+                                        >
+                                            <User size={16} />
+                                            Select
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1">Select a contact or enter a name manually. If contact has a linked CTUID, it will auto-fill Breeder (User).</p>
                                 </div>
                                 )}
                             </div>
@@ -6171,28 +6606,29 @@ const AnimalForm = ({
                         {/* Current Owner */}
                         <div data-tutorial-target="current-owner-field" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper</h3>
-                            {!isFieldHidden('isOwned') && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
-                                    <input type="checkbox" name="isOwned" checked={formData.isOwned} onChange={handleChange} 
-                                        className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                    <span className="text-sm font-medium text-gray-700">Currently Owned by Me</span>
-                                </label>
-                            </div>
-                            )}
                             {!isFieldHidden('keeperName') && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
                                 <div>
-                                    <label className='block text-sm font-medium text-gray-700 mb-2'>{getFieldLabel('keeperName', 'Keeper Name')}</label>
-                                    <input 
-                                        type="text" 
-                                        name="keeperName" 
-                                        value={formData.keeperName || ''} 
-                                        onChange={handleChange}
-                                        placeholder="Keeper name (person caring for this animal)"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1">Records keeper changes in keeper history.</p>
+                                    <label className='block text-sm font-medium text-gray-700 mb-2'>{getFieldLabel('keeperName', 'Keeper Name (Manual or Contact)')}</label>
+                                    <div className="flex gap-2">
+                                        <input 
+                                            type="text" 
+                                            name="keeperName" 
+                                            value={formData.keeperName || ''} 
+                                            onChange={handleChange}
+                                            placeholder="Enter keeper name or select contact"
+                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowContactSelector(true)}
+                                            className="px-4 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-md transition flex items-center gap-1"
+                                        >
+                                            <User size={16} />
+                                            Select
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1">Select a contact or enter a name manually.</p>
                                 </div>
                             </div>
                             )}
@@ -8803,6 +9239,27 @@ const AnimalForm = ({
                 {/* Tab 13: Legal & Documentation */}
                 {activeTab === 13 && (
                     <div className="space-y-6">
+                        {/* Purchase Information */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4"><Package size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Purchase Information</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Purchase Date</label>
+                                    <DatePicker value={formData.purchaseDate || ''} onChange={(e) => handleChange({ target: { name: 'purchaseDate', value: e.target.value } })}
+                                        maxDate={new Date()}
+                                        className="p-2" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Purchase Location</label>
+                                    <input type="text" name="purchaseLocation" value={formData.purchaseLocation || ''} onChange={handleChange}
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                        placeholder="e.g., Local breeder, Pet Store, Online" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Licensing */}
+                    <div className="space-y-6">
                         {/* Licensing */}
                         {(!isFieldHidden('licenseNumber') || !isFieldHidden('licenseJurisdiction')) && (
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
@@ -8959,6 +9416,7 @@ const AnimalForm = ({
                                 </label>
                             </div>
                         </div>
+                    </div>
                     </div>
                 )}
 
@@ -9133,7 +9591,7 @@ const AnimalForm = ({
                     };
 
                     return (<>
-                        {ctcModal}
+                        {/* ctcModal is now rendered outside the form */}
                         <div className="space-y-6">
                             <div className="flex items-center gap-2">
                                 <Dna size={18} className="text-orange-500" />
@@ -9381,7 +9839,7 @@ const AnimalForm = ({
                     </button>
                 </div>
             </form>
-            
+
             {/* Community Genetics Submission Modal */}
             {showCommunityGeneticsModal && (
                 <CommunityGeneticsModal
@@ -9392,6 +9850,7 @@ const AnimalForm = ({
                     showModalMessage={showModalMessage}
                 />
             )}
+            </div>
         </div>
     );
 };

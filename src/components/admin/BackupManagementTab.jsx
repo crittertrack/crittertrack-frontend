@@ -202,7 +202,7 @@ const BackupManagementTab = ({ authToken }) => {
 
     const formatDate = (dateStr) => {
         if (!dateStr) return 'Never';
-        return new Date(dateStr).toLocaleString('en-GB');
+        return new Date(dateStr).toLocaleString();
     };
 
     const getTimeSince = (dateStr) => {

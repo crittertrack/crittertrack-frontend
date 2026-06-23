@@ -211,7 +211,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 6,
         title: 'Status Selection',
-        content: 'Select the current status of your animal. Options include: Pet (living animal in your collection), Breeder (breeding animal), Available (for sale), Booked (reserved/spoken for), Retired (no longer breeding), Deceased (passed away), Rehomed (given to another home), or Unknown. Choose what best describes your animal\'s current situation. Note: The "Sold" status is automatically assigned by the system when a transfer is completed.',
+        content: 'Select the current status of your animal. Options include: Pet (living animal in your collection), Breeder (breeding animal), Growout (young animal being raised), Available (for sale), Booked (reserved/spoken for), Retired (no longer breeding), Deceased (passed away), Rehomed (given to another home), or Unknown. Choose what best describes your animal\'s current situation. Note: The "Sold" status is automatically assigned by the system when a transfer is completed.',
         tips: [
           'Status affects visibility and features available',
           'Can be changed as your animal\'s situation changes',
@@ -1651,7 +1651,7 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 6,
         title: 'Status Filter',
-        content: 'Filter by status (Pet, Breeder, Available, Sold, etc.) to quickly find animals in specific situations within your collection.',
+        content: 'Filter by status (Pet, Breeder, Growout, Available, Sold, etc.) to quickly find animals in specific situations within your collection.',
         tips: [
           'Find breeding stock',
           'See available for sale animals',

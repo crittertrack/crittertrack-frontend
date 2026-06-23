@@ -1316,7 +1316,7 @@ export default function ModOversightPanel({
                                             {/* Detailed fields in a grid */}
                                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', fontSize: '13px' }}>
                                                 {animal.birthDate && (
-                                                    <div><strong>Birth Date:</strong> {new Date(animal.birthDate).toLocaleDateString('en-GB')}</div>
+                                                    <div><strong>Birth Date:</strong> {new Date(animal.birthDate).toLocaleDateString()}</div>
                                                 )}
                                                 {animal.breed && (
                                                     <div><strong>Breed:</strong> {animal.breed}</div>
@@ -1416,7 +1416,7 @@ export default function ModOversightPanel({
                                                 {selectedReport.messageId?.message || 'Message content unavailable'}
                                             </p>
                                             <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#666' }}>
-                                                Sent: {selectedReport.messageId?.createdAt ? new Date(selectedReport.messageId.createdAt).toLocaleString('en-GB') : 'Unknown'}
+                                                Sent: {selectedReport.messageId?.createdAt ? new Date(selectedReport.messageId.createdAt).toLocaleString() : 'Unknown'}
                                             </p>
                                         </div>
                                     </div>
@@ -1442,7 +1442,7 @@ export default function ModOversightPanel({
                                                         {msg.message}
                                                     </p>
                                                     <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#888' }}>
-                                                        {msg.createdAt ? new Date(msg.createdAt).toLocaleString('en-GB') : 'Unknown time'}
+                                                        {msg.createdAt ? new Date(msg.createdAt).toLocaleString() : 'Unknown time'}
                                                     </p>
                                                 </div>
                                             ))}
@@ -1544,7 +1544,7 @@ export default function ModOversightPanel({
                                                     <div className="note-header">
                                                         <span className="note-author">{note.authorName}</span>
                                                         <span className="note-date">
-                                                            {new Date(note.createdAt).toLocaleString('en-GB')}
+                                                            {new Date(note.createdAt).toLocaleString()}
                                                             {note.editedAt && <span className="edited-badge"> (edited)</span>}
                                                         </span>
                                                     </div>
@@ -1759,7 +1759,7 @@ export default function ModOversightPanel({
                                                 </div>
                                                 <span className="report-card-date">
                                                     <Calendar size={14} />
-                                                    {new Date(report.createdAt).toLocaleDateString('en-GB')}
+                                                    {new Date(report.createdAt).toLocaleDateString()}
                                                 </span>
                                             </div>
                                             <div className="report-card-body">

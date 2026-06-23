@@ -678,7 +678,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                         <h4 className="font-bold text-gray-800 mb-4">Last Backup</h4>
                                         <p className="text-gray-600">
                                             {dashboardStats.lastBackup
-                                                ? new Date(dashboardStats.lastBackup).toLocaleString('en-GB')
+                                                ? new Date(dashboardStats.lastBackup).toLocaleString()
                                                 : 'No backups yet'}
                                         </p>
                                     </div>

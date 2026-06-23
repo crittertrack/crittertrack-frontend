@@ -6,6 +6,7 @@ const AnimalList = lazy(() => import('./components/AnimalList'));
 const DonationView = lazy(() => import('./components/Donation/DonationView'));
 const Marketplace = lazy(() => import('./components/Marketplace'));
 const ProfileView = lazy(() => import('./components/Profile/ProfileView'));
+const ContactsPage = lazy(() => import('./components/Contacts'));
 const CommunityPage = lazy(() => import('./components/Community/CommunityPage'));
 const BreederDirectory = lazy(() => import('./components/PublicProfile/BreederDirectory'));
 const LitterManagement = lazy(() => import('./components/LitterManagement'));
@@ -228,6 +229,15 @@ export function AppRoutes({
           saveBreedingLineDefs={saveBreedingLineDefs} 
           toggleAnimalBreedingLine={toggleAnimalBreedingLine} 
           BL_PRESETS_APP={BL_PRESETS_APP} 
+        />
+      } />
+
+      {/* Contacts */}
+      <Route path="/contacts" element={
+        <ContactsPage
+          API_BASE_URL={API_BASE_URL}
+          authToken={authToken}
+          showModalMessage={showModalMessage}
         />
       } />
 
