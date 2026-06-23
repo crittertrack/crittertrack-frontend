@@ -2136,22 +2136,14 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                 <div>
                                     <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Great-Grandparents (Gen 3)</p>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                                        <div className="space-y-2">
                                             {renderSlot('sireSireSire', 'Great Grandsire')}
-                                            {renderSlot('sireSireDam', 'Great Granddam')}
-                                        </div>
-                                        <div className="space-y-2">
                                             {renderSlot('sireDamSire', 'Great Grandsire')}
-                                            {renderSlot('sireDamDam', 'Great Granddam')}
-                                        </div>
-                                        <div className="space-y-2">
                                             {renderSlot('damSireSire', 'Great Grandsire')}
-                                            {renderSlot('damSireDam', 'Great Granddam')}
-                                        </div>
-                                        <div className="space-y-2">
                                             {renderSlot('damDamSire', 'Great Grandsire')}
-                                            {renderSlot('damDamDam', 'Great Granddam')}
-                                        </div>
+                                            {renderSlot('sireSireDam', 'Great Granddam')}
+                                            {renderSlot('sireDamDam', 'Great Granddam')}
+                                            {renderSlot('damSireDam', 'Great Granddam')}
+                                            {renderSlot('damDamDam', 'Great Granddam')} 
                                     </div>
                                 </div>
                             </div>

@@ -2770,14 +2770,14 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 <div>
                                     <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Great-Grandparents (Gen 3)</p>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                                            {renderSlot('sireSireSire', 'P1 Great Grandsire')}
-                                            {renderSlot('sireDamSire', 'P2 Great Grandsire')}
-                                            {renderSlot('damSireSire', 'M1 Great Grandsire')}
-                                            {renderSlot('damDamSire', 'M2 Great Grandsire')}
-                                            {renderSlot('sireSireDam', 'P1 Great Granddam')}
-                                            {renderSlot('sireDamDam', 'P2 Great Granddam')}
-                                            {renderSlot('damSireDam', 'M1 Great Granddam')}
-                                            {renderSlot('damDamDam', 'M2 Great Granddam')} 
+                                            {renderSlot('sireSireSire', 'Great Grandsire')}
+                                            {renderSlot('sireDamSire', 'Great Grandsire')}
+                                            {renderSlot('damSireSire', 'Great Grandsire')}
+                                            {renderSlot('damDamSire', 'Great Grandsire')}
+                                            {renderSlot('sireSireDam', 'Great Granddam')}
+                                            {renderSlot('sireDamDam', 'Great Granddam')}
+                                            {renderSlot('damSireDam', 'Great Granddam')}
+                                            {renderSlot('damDamDam', 'Great Granddam')} 
                                     </div>
                                 </div>
                             </div>
