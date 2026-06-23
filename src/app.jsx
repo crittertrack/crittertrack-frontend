@@ -459,7 +459,6 @@ const App = () => {
     const [sireData, setSireData] = useState(null);
     const [damData, setDamData] = useState(null);
     const [offspringData, setOffspringData] = useState([]);
-    const [showFamilyTreeModal, setShowFamilyTreeModal] = useState(false); // New state for Family Tree modal
     
     // Wrapper around handleSaveAnimal to trigger data refresh on any save
     const handleSaveAnimalWithRefresh = async (...args) => {
@@ -2367,7 +2366,6 @@ const App = () => {
                                 animalBreedingLines={animalBreedingLines}
                                 toggleAnimalBreedingLine={toggleAnimalBreedingLine}
                                 setAnimalBreedingLinesDirect={setAnimalBreedingLinesDirect}
-                                onViewFullFamilyTree={() => setShowFamilyTreeModal(true)} // Pass prop to open Family Tree modal
                                 onAddSibling={handleAddSibling}
                             />
                     );
@@ -2386,7 +2384,6 @@ const App = () => {
                                 showModalMessage={showModalMessage}
                                 onViewAnimal={handleViewAnimal}
                                 breedingLineDefs={breedingLineDefs}
-                                onViewFullFamilyTree={() => setShowFamilyTreeModal(true)} // Pass prop to open Family Tree modal
                                 animalBreedingLines={animalBreedingLines}
                                 toggleAnimalBreedingLine={toggleAnimalBreedingLine}
                             />
@@ -2460,26 +2457,6 @@ const App = () => {
                 </div>
             )}
 
-            {/* Full Family Tree Modal */}
-            {showFamilyTreeModal && animalToView && (
-                <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-xl shadow-2xl max-w-7xl w-full h-[90vh] p-6 relative">
-                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Family Tree: {animalToView.name}</h2>
-                        <button
-                            onClick={() => setShowFamilyTreeModal(false)}
-                            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition"
-                        >
-                            <X size={24} />
-                        </button>
-                        <PedigreeChart
-                            animal={animalToView}
-                            API_BASE_URL={API_BASE_URL}
-                            authToken={authToken}
-                            onViewAnimal={handleViewAnimal} // Allow navigating to other animals from the tree
-                        />
-                    </div>
-                </div>
-            )}
             <main className="w-full flex-grow max-w-7xl">
                 <AppRoutes
                   authToken={authToken}

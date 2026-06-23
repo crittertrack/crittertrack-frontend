@@ -2112,26 +2112,29 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                         <ScrollText size={14} /> Open Vertical Certificate
                                     </button>
                                 </div>
-                                <div className="flex items-center justify-center gap-2">
+                            </div>
+                            {showHorizCert && <PedigreeChart animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => setShowHorizCert(false)} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />}
+                            {showVertCert && <PedigreeChart vertical animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => setShowVertCert(false)} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />}
+                            
+                            <div className="mt-6">
+                                <div className="flex items-center justify-center gap-2 mb-2">
                                     <Dna size={18} className="text-orange-500" />
-                                    <h3 className="text-base font-semibold text-gray-700">Full Family Tree</h3>
+                                    <h3 className="text-base font-semibold text-gray-700">4-Generation Pedigree</h3>
+                                </div>
+                                <div ref={mpTreeRef} className="bg-white p-2 rounded-xl border border-gray-200 shadow-sm">
+                                    <PedigreeChart
+                                        inline
+                                        inlineGenerations={4}
+                                        animalId={animal.id_public}
+                                        animalData={animal}
+                                        API_BASE_URL={API_BASE_URL}
+                                        authToken={authToken}
+                                        manualData={mpEnrichedData}
+                                        onViewAnimal={onViewAnimal}
+                                    />
                                 </div>
                             </div>
-                            <p className="text-xs text-gray-400 -mt-3">You are viewing the full family tree here. Use the certificate buttons to open the horizontal or vertical certificate modal, where you can save/download as PDF or image. This pedigree displays both linked CritterTrack ancestors (with CTC IDs) and manually entered ancestors. Only linked CritterTrack ancestry is used for COI calculations (shown on Overview tab). Manual entries are for display/reference only and do not affect COI.</p>
-                            {showHorizCert && <PedigreeChart animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => setShowHorizCert(false)} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />}
-                                {showVertCert && <PedigreeChart vertical animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onClose={() => setShowVertCert(false)} manualData={mpEnrichedData} onViewAnimal={onViewAnimal} />}
-                            <div ref={mpTreeRef} className="bg-white p-2 rounded-xl">
-                                <PedigreeChart
-                                    inline
-                                    inlineGenerations={3}
-                                    animalId={animal.id_public}
-                                    animalData={animal}
-                                    API_BASE_URL={API_BASE_URL}
-                                    authToken={authToken}
-                                    manualData={mpEnrichedData}
-                                    onViewAnimal={onViewAnimal}
-                                />
-                            </div>
+
                             <div className="hidden">
                                 {(() => {
                                     const subjectVariety = ['color','coatPattern','coat','earset','phenotype','morph','markings'].map(k => animal[k]).filter(Boolean).join(' ');
