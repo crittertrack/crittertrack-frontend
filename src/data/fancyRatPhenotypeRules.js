@@ -618,12 +618,15 @@ export const RAT_GENE_LOCI = {
   Ws:  { name: 'Dominant White Spotting', description: 'Dominant. Ws/w = White Spot. Ws/Ws is lethal.', combinations: ['Ws/Ws', 'Ws/w', 'w/w'] },
   // --- Coat genes ---
   Re:  { name: 'Rex',                 description: 'Dominant. Re/re = Rex, Re/Re = Double Rex.', combinations: ['Re/Re', 'Re/re', 're/re'] },
-  Ve:  { name: 'Velveteen',           description: 'Dominant. Ve/ve = Velveteen, Ve/Ve = Double Velveteen.', combinations: ['Ve/Ve', 'Ve/ve', 've/ve'] },
+  Ve:  { name: 'Velveteen',           description: 'Dominant. Ve/ve = Velveteen, Ve/Ve = Double Velveteen. Official genetic code unknown.', combinations: ['Ve/Ve', 'Ve/ve', 've/ve'] },
   Br:  { name: 'Bristle',             description: 'Dominant. Br/br = Bristle, Br/Br = Extreme Bristle.', combinations: ['Br/Br', 'Br/br', 'br/br'] },
   wo:  { name: 'Woolly',              description: 'Dominant. Wo/wo = Woolly, Wo/Wo = Extreme Woolly.', combinations: ['Wo/Wo', 'Wo/wo', 'wo/wo'] },
   Wa:  { name: 'Wavy',                description: 'Dominant. Wa/wa = Wavy, Wa/Wa = Extreme Wavy.', combinations: ['Wa/Wa', 'Wa/wa', 'wa/wa'] },
   Ki:  { name: 'Kinky',               description: 'Dominant. Ki/ki = Kinky, Ki/Ki = Extreme Kinky.', combinations: ['Ki/Ki', 'Ki/ki', 'ki/ki'] },
   Sh:  { name: 'Shaggy',              description: 'Dominant. Sh/sh = Shaggy, Sh/Sh = Extreme Shaggy.', combinations: ['Sh/Sh', 'Sh/sh', 'sh/sh'] },
+  hr:  { name: 'Hairless',            description: 'Recessive. hr/hr = Hairless (no coat).', combinations: ['Hr/Hr', 'Hr/hr', 'hr/hr'] },
+  hrl: { name: 'Harley',              description: 'Recessive. hrl/hrl = Harley (patchy coat). Official genetic code unknown.', combinations: ['Hrl/Hrl', 'Hrl/hrl', 'hrl/hrl'] },
+  sa:  { name: 'Satin',               description: 'Recessive. sa/sa = Satin (shiny coat).', combinations: ['Sa/Sa', 'Sa/sa', 'sa/sa'] },
   // --- Ear type ---
   Du:  { name: 'Dumbo',               description: 'Recessive. du/du = Dumbo (low-set ears).', combinations: ['Du/Du', 'Du/du', 'du/du'] },
 };

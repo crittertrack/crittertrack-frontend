@@ -3,7 +3,7 @@ import { ChevronDown, ChevronUp, Info, HelpCircle } from 'lucide-react';
 import { calculatePhenotype, GENE_LOCI } from './GeneticsCalculator';
 import { matchFancyRatPhenotype, RAT_GENE_LOCI } from '../data/fancyRatPhenotypeRules';
 
-const RAT_GENE_ORDER = ['A', 'B', 'Bu', 'C', 'D', 'G', 'M', 'P', 'Pe', 'R', 'Me', 'Dal', 'H', 'Ma', 'Ro', 'Wh', 'Ws', 'Re', 'Ve', 'Br', 'wo', 'Wa', 'Ki', 'Sh', 'Du'];
+const RAT_GENE_ORDER = ['A', 'B', 'Bu', 'C', 'D', 'G', 'M', 'P', 'Pe', 'R', 'Me', 'Dal', 'H', 'Ma', 'Ro', 'Wh', 'Ws', 'Re', 'Ve', 'Br', 'wo', 'Wa', 'Ki', 'Sh', 'hr', 'hrl', 'sa', 'Du'];
 
 function parseRatGeneticCode(codeString) {
   if (!codeString) return {};
@@ -317,7 +317,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
     const RAT_GENE_GROUPS = [
       { label: 'Color Genes',   loci: ['A', 'B', 'Bu', 'C', 'D', 'G', 'M', 'P', 'Pe', 'R', 'Me'] },
       { label: 'Marking Genes', loci: ['Dal', 'H', 'Ma', 'Ro', 'Wh', 'Ws'] },
-      { label: 'Coat Genes',    loci: ['Re', 'Ve', 'Br', 'wo', 'Wa', 'Ki', 'Sh'] },
+      { label: 'Coat Genes',    loci: ['Re', 'Ve', 'Br', 'wo', 'Wa', 'Ki', 'Sh', 'hr', 'hrl', 'sa'] },
       { label: 'Ear Type',      loci: ['Du'] },
     ];
 

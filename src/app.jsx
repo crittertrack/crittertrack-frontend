@@ -53,6 +53,7 @@ import AnimalImageUpload from './components/AnimalImageUpload';
 import { compressImageFile, compressImageToMaxSize, compressImageWithWorker } from './utils/imageCompression';
 import DonationView from './components/Donation/DonationView';
 import CommunityPage from './components/Community/CommunityPage';
+import ThemeToggle from './components/ThemeToggle';
 
 import PrivateAnimalDetail from './components/AnimalDetail/PrivateAnimalDetail';
 import ViewOnlyPrivateAnimalDetail from './components/AnimalDetail/ViewOnlyPrivateAnimalDetail';
@@ -1682,8 +1683,8 @@ const App = () => {
         );
     }
 
-     return (
-        <div className="min-h-screen bg-page-bg flex flex-col items-center font-sans px-7 sm:px-9 pt-4 sm:pt-0">
+    return (
+        <div className="min-h-screen bg-page-bg dark:bg-dark-bg flex flex-col items-center font-sans px-7 sm:px-9 pt-4 sm:pt-0 transition-colors duration-200">
             {/* Fixed Donation Button - Top Left */}
             <div className="fixed top-4 left-4 z-[60]">
                 <button
@@ -1746,7 +1747,7 @@ const App = () => {
                 />
             )}
             
-            <header className="w-full bg-white p-3 sm:p-4 rounded-xl shadow-lg mb-6 max-w-7xl overflow-visible">
+            <header className="w-full bg-white dark:bg-dark-surface p-3 sm:p-4 rounded-xl shadow-lg mb-6 max-w-7xl overflow-visible transition-colors duration-200">
                 {/* Desktop: Two row layout with search bar on top */}
                 <div className="hidden md:block mb-3">
                     <GlobalSearchBar 
@@ -1795,9 +1796,11 @@ const App = () => {
                     </nav>
 
                     <div className="flex items-center space-x-3">
+                        <ThemeToggle />
+                        
                         <button
                             onClick={() => setShowInfoTab(true)}
-                            className="relative flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
+                            className="relative flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-dark-text py-2 px-3 rounded-lg transition duration-150 shadow-sm"
                             title="Help"
                         >
                             <HelpCircle size={18} />
@@ -1810,7 +1813,7 @@ const App = () => {
                                 fetchNotificationCount();
                             }}
                             data-tutorial-target="notification-bell"
-                            className="relative flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
+                            className="relative flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-dark-text py-2 px-3 rounded-lg transition duration-150 shadow-sm"
                             title="Notifications"
                         >
                             <Bell size={18} />
@@ -1853,13 +1856,13 @@ const App = () => {
                                 }
                             </button>
                             {showProfileMenu && (
-                                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 py-1 z-50">
+                                <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-surface rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50">
                                     <button onClick={() => { navigate('/profile'); setShowProfileMenu(false); }}
-                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                                         <User size={15} /> Profile
                                     </button>
                                     <button onClick={() => { navigate('/contacts'); setShowProfileMenu(false); }}
-                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                                         <Users size={15} /> Contacts
                                     </button>
                                     {['admin', 'moderator'].includes(userProfile?.role) && (
@@ -1902,7 +1905,7 @@ const App = () => {
                                     fetchNotificationCount();
                                 }}
                                 data-tutorial-target="notification-bell"
-                                className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
+                                className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-dark-text p-2 rounded-lg transition duration-150 shadow-sm"
                                 title="Notifications"
                             >
                                 <Bell size={18} />
@@ -1934,7 +1937,7 @@ const App = () => {
 
                             <button
                                 onClick={() => setShowInfoTab(true)}
-                                className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
+                                className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-dark-text p-2 rounded-lg transition duration-150 shadow-sm"
                                 title="Help"
                             >
                                 <HelpCircle size={18} />
@@ -1953,9 +1956,9 @@ const App = () => {
                                     }
                                 </button>
                                 {showProfileMenu && (
-                                    <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 py-1 z-50">
+                                    <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-surface rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50">
                                         <button onClick={() => { navigate('/profile'); setShowProfileMenu(false); }}
-                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700">
                                             <User size={15} /> Profile
                                         </button>
                                         {['admin', 'moderator'].includes(userProfile?.role) && (

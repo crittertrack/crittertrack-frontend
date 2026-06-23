@@ -1541,12 +1541,12 @@ const AnimalList = ({
 
         return (
             <div className="w-full flex justify-center">
-                <div
-                    onClick={handleClick}
-                    className={`relative bg-white rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] min-h-44 sm:min-h-48 md:min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${
-                        isSelected ? 'border-red-500' : animal.isViewOnly ? 'border-gray-400 bg-gray-50' : 'border-gray-300'
-                    }`}
-                >
+                    <div
+                        onClick={handleClick}
+                        className={`relative bg-white dark:bg-dark-surface rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] min-h-44 sm:min-h-48 md:min-h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${
+                            isSelected ? 'border-red-500' : animal.isViewOnly ? 'border-gray-400 dark:border-dark-border bg-gray-50 dark:bg-dark-surface-hover' : 'border-gray-300 dark:border-dark-border'
+                        }`}
+                    >
                     {isSelectable && (
                         <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
                             <input
@@ -1566,7 +1566,7 @@ const AnimalList = ({
 
                     {/* Birthdate center-top - only show if not in selection mode */}
                     {birth && !isSelectable && (
-                        <div className="absolute top-1 sm:top-2 left-1/2 transform -translate-x-1/2 text-[10px] sm:text-xs text-gray-600 bg-white/80 px-1 sm:px-2 py-0.5 rounded">
+                        <div className="absolute top-1 sm:top-2 left-1/2 transform -translate-x-1/2 text-[10px] sm:text-xs text-gray-600 dark:text-dark-text-secondary bg-white/80 dark:bg-dark-surface/80 px-1 sm:px-2 py-0.5 rounded">
                             {birth}
                         </div>
                     )}
@@ -1583,7 +1583,7 @@ const AnimalList = ({
                         {imgSrc ? (
                             <img src={imgSrc} alt={animal.name} className="max-w-20 max-h-20 sm:max-w-20 sm:max-h-20 md:max-w-24 md:max-h-24 w-auto h-auto object-contain rounded-md" />
                         ) : (
-                            <div className="w-20 h-20 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                            <div className="w-20 h-20 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gray-100 dark:bg-dark-surface-hover rounded-md flex items-center justify-center text-gray-400 dark:text-dark-text-muted">
                                 <Cat className="w-8 h-8 sm:w-8 sm:h-8 md:w-9 md:h-9" />
                             </div>
                         )}
@@ -1598,7 +1598,7 @@ const AnimalList = ({
                     
                     {/* Prefix / Name under image */}
                     <div className="w-full text-center px-1 sm:px-2 pb-0.5 sm:pb-1 flex-grow">
-                        <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 line-clamp-2 leading-tight">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</div>
+                        <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 dark:text-dark-text line-clamp-2 leading-tight">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</div>
                     </div>
 
                     {/* Edit is available when viewing full card; remove inline edit icon from dashboard cards */}
@@ -1618,8 +1618,8 @@ const AnimalList = ({
                                     }}
                                     className={`p-0.5 sm:p-1 rounded transition-colors ${
                                         animal.isOwned 
-                                            ? 'bg-red-100 hover:bg-red-200' 
-                                            : 'bg-gray-100 hover:bg-gray-200'
+                                            ? 'bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50' 
+                                            : 'bg-gray-100 dark:bg-dark-surface-hover hover:bg-gray-200 dark:hover:bg-dark-border'
                                     }`}
                                     title={animal.isOwned ? "Click to mark as Not Owned" : "Click to mark as Owned"}
                                 >
@@ -1639,8 +1639,8 @@ const AnimalList = ({
                                     }}
                                     className={`p-0.5 sm:p-1 rounded transition-colors ${
                                         animal.showOnPublicProfile 
-                                            ? 'bg-green-100 hover:bg-green-200' 
-                                            : 'bg-gray-100 hover:bg-gray-200'
+                                            ? 'bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50' 
+                                            : 'bg-gray-100 dark:bg-dark-surface-hover hover:bg-gray-200 dark:hover:bg-dark-border'
                                     }`}
                                     title={animal.showOnPublicProfile ? "Click to make Private" : "Click to make Public"}
                                 >
@@ -1654,7 +1654,7 @@ const AnimalList = ({
                         )}
                         {/* Spacer if no toggles */}
                         {(isSelectable || hideControls) && <div></div>}
-                        <div className="text-[9px] sm:text-[10px] md:text-xs text-gray-500">{animal.id_public}</div>
+                        <div className="text-[9px] sm:text-[10px] md:text-xs text-gray-500 dark:text-dark-text-secondary">{animal.id_public}</div>
                     </div>
                     {/* Breeding line diamonds */}
                     {!hideBreedingLines && (() => {
@@ -1676,11 +1676,11 @@ const AnimalList = ({
                         </div>
                     )}
                     {/* Status bar at bottom */}
-                    <div className={`w-full py-0.5 sm:py-1 text-center border-t border-gray-300 mt-auto ${
-                        animal.isViewOnly ? 'bg-orange-100' : 'bg-gray-100'
+                    <div className={`w-full py-0.5 sm:py-1 text-center border-t border-gray-300 dark:border-dark-border mt-auto ${
+                        animal.isViewOnly ? 'bg-orange-100 dark:bg-orange-900/30' : 'bg-gray-100 dark:bg-dark-surface-hover'
                     }`}>
                         <div className={`text-[10px] sm:text-xs font-medium ${
-                            animal.isViewOnly ? 'text-orange-800' : 'text-gray-700'
+                            animal.isViewOnly ? 'text-orange-800 dark:text-orange-400' : 'text-gray-700 dark:text-dark-text-secondary'
                         }`}>{animal.isViewOnly ? 'Sold' : (animal.status || 'Unknown')}</div>
                     </div>
                 </div>
@@ -4278,11 +4278,11 @@ const AnimalList = ({
     };
 
     return (
-        <div className="w-full max-w-7xl bg-white p-6 rounded-xl shadow-lg">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="w-full max-w-7xl bg-white dark:bg-dark-bg p-6 rounded-xl shadow-lg transition-colors duration-200">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-dark-text mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="flex items-center justify-between w-full sm:w-auto gap-2 min-w-0">
                     <div className='flex items-center gap-2 min-w-0 flex-1'>
-                        <ClipboardList size={20} className="sm:w-6 sm:h-6 shrink-0 text-primary-dark" />
+                        <ClipboardList size={20} className="sm:w-6 sm:h-6 shrink-0 text-primary-dark dark:text-dark-accent" />
                         <span className="truncate">
                             {animalView === 'list' ? `My Animals (${displayedAnimalCount})` : animalView === 'collections' ? 'Collections' : animalView === 'enclosures' ? 'Enclosures' : animalView === 'reproduction' ? 'Reproduction' : animalView === 'health' ? 'Health' : animalView === 'feeding' ? 'Feeding & Care' : animalView === 'supplies' ? 'Supplies & Inventory' : animalView === 'familyTree' ? 'Family Tree' : showActivityLogScreen ? 'Activity Log' : showForSaleScreen ? 'For Sale / Available' : 'My Animals'}
                         </span>
@@ -4296,7 +4296,7 @@ const AnimalList = ({
                     {isListLikeView && !showArchiveScreen && (
                         <button
                             onClick={() => navigate('/select-species')}
-                            className="sm:hidden bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 px-2.5 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 shrink-0 text-xs"
+                            className="sm:hidden bg-accent hover:bg-accent/90 dark:bg-dark-accent dark:hover:bg-dark-accent/80 text-white font-semibold py-1.5 px-2.5 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1 shrink-0 text-xs"
                             data-tutorial-target="add-animal-btn"
                             title="Add Animal"
                         >
@@ -4310,7 +4310,7 @@ const AnimalList = ({
                     {!showArchiveScreen && !showDuplicatesScreen && (
                         <button
                             onClick={() => { setShowForSaleScreen(v => !v); setShowActivityLogScreen(false); }}
-                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showForSaleScreen ? 'bg-purple-600 text-white border-purple-600' : 'text-purple-600 hover:text-purple-800 hover:bg-purple-50 border-purple-200'}`}
+                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showForSaleScreen ? 'bg-purple-600 text-white border-purple-600' : 'text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 border-purple-200 dark:border-purple-800'}`}
                             title="For Sale / Available"
                         >
                             <ShoppingBag size={14} className="sm:w-4 sm:h-4" />
@@ -4321,7 +4321,7 @@ const AnimalList = ({
                     {!showArchiveScreen && !showDuplicatesScreen && (
                         <button
                             onClick={() => { setShowActivityLogScreen(v => { if (!v) { setActivityLogs([]); setLogsLoaded(false); } return !v; }); setShowForSaleScreen(false); }}
-                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showActivityLogScreen ? 'bg-indigo-600 text-white border-indigo-600' : 'text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 border-indigo-200'}`}
+                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showActivityLogScreen ? 'bg-indigo-600 text-white border-indigo-600' : 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800'}`}
                             title="Activity Log"
                         >
                             <ScrollText size={14} className="sm:w-4 sm:h-4" />
@@ -4332,7 +4332,7 @@ const AnimalList = ({
                     {!showDuplicatesScreen && (
                         <button
                             onClick={() => { setShowArchiveScreen(v => !v); setShowForSaleScreen(false); setShowActivityLogScreen(false); }}
-                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showArchiveScreen ? 'bg-purple-600 text-white border-purple-600' : 'text-purple-600 hover:text-purple-800 hover:bg-purple-50 border-purple-200'}`}
+                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showArchiveScreen ? 'bg-purple-600 text-white border-purple-600' : 'text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 border-purple-200 dark:border-purple-800'}`}
                             title="Archive"
                         >
                             <Archive size={14} className="sm:w-4 sm:h-4" />
@@ -4343,7 +4343,7 @@ const AnimalList = ({
                     {!showArchiveScreen && (
                         <button
                             onClick={() => { setDuplicateGroups([]); setShowDuplicatesScreen(v => !v); setShowForSaleScreen(false); setShowActivityLogScreen(false); }}
-                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showDuplicatesScreen ? 'bg-amber-500 text-white border-amber-500' : 'text-amber-600 hover:text-amber-800 hover:bg-amber-50 border-amber-200'}`}
+                            className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${showDuplicatesScreen ? 'bg-amber-500 text-white border-amber-500' : 'text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}
                             title="Find Duplicate Animals"
                         >
                             <Search size={14} className="sm:w-4 sm:h-4" />
@@ -4354,7 +4354,7 @@ const AnimalList = ({
                     <button
                         onClick={toggleMgmtAlerts}
                         title={mgmtAlertsEnabled ? 'Alerts on — click to disable' : 'Alerts off — click to enable'}
-                        className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${mgmtAlertsEnabled ? 'bg-orange-50 border-orange-300 text-orange-700 hover:bg-orange-100' : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50'}`}
+                        className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg border transition ${mgmtAlertsEnabled ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-800 text-orange-700 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30' : 'bg-white dark:bg-dark-surface border-gray-200 dark:border-dark-border text-gray-400 dark:text-dark-text-muted hover:bg-gray-50 dark:hover:bg-dark-surface-hover'}`}
                     >
                         <Bell size={14} className="sm:w-4 sm:h-4" />
                         <span className="font-medium hidden sm:inline">Alerts {mgmtAlertsEnabled ? 'On' : 'Off'}</span>
@@ -4363,7 +4363,7 @@ const AnimalList = ({
                     <button
                         onClick={handleRefresh}
                         disabled={loading}
-                        className="text-gray-500 hover:text-primary transition disabled:opacity-50 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-medium"
+                        className="text-gray-500 dark:text-dark-text-secondary hover:text-primary dark:hover:text-dark-primary transition disabled:opacity-50 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface-hover text-xs sm:text-sm font-medium"
                         title="Refresh"
                     >
                         {loading ? <Loader2 size={14} className="sm:w-4 sm:h-4 animate-spin" /> : <RefreshCw size={14} className="sm:w-4 sm:h-4" />}
@@ -4373,7 +4373,7 @@ const AnimalList = ({
                     {isListLikeView && !showArchiveScreen && (
                         <button
                             onClick={() => navigate('/select-species')}
-                            className="hidden sm:flex bg-accent hover:bg-accent/90 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
+                            className="hidden sm:flex bg-accent hover:bg-accent/90 dark:bg-dark-accent dark:hover:bg-dark-accent/80 text-white font-semibold py-1.5 sm:py-2 px-3 rounded-lg transition duration-150 shadow-md items-center justify-center gap-1 whitespace-nowrap text-xs sm:text-sm"
                             data-tutorial-target="add-animal-btn"
                         >
                             <PlusCircle size={14} className="sm:w-4 sm:h-4" /> <span>Add Animal</span>
@@ -4588,52 +4588,52 @@ const AnimalList = ({
                     </div>
                 </div>
 
-                {/* Collapsible filter panel */}
-                {filtersExpanded && (
-                <div className="px-2 sm:px-3 pb-2 sm:pb-3 space-y-2 sm:space-y-3 border-t border-gray-200 pt-2 sm:pt-3">
-                    {/* Row 1: Species + Status dropdowns */}
-                    <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
-                        <div className="flex gap-1 sm:gap-2 items-center" data-tutorial-target="species-filter">
-                            <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
-                            <select 
-                                value={
-                                    speciesNames.every(species => selectedSpecies.includes(species)) ? '' : 
-                                    (selectedSpecies.find(s => speciesNames.includes(s)) || '')
+            {/* Collapsible filter panel */}
+            {filtersExpanded && (
+            <div className="px-2 sm:px-3 pb-2 sm:pb-3 space-y-2 sm:space-y-3 border-t border-gray-200 dark:border-dark-border pt-2 sm:pt-3">
+                {/* Row 1: Species + Status dropdowns */}
+                <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
+                    <div className="flex gap-1 sm:gap-2 items-center" data-tutorial-target="species-filter">
+                        <span className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Species:</span>
+                        <select 
+                            value={
+                                speciesNames.every(species => selectedSpecies.includes(species)) ? '' : 
+                                (selectedSpecies.find(s => speciesNames.includes(s)) || '')
+                            }
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                if (value === '') {
+                                    setSelectedSpecies([...speciesNames]);
+                                } else {
+                                    setSelectedSpecies([value]);
                                 }
-                                onChange={(e) => {
-                                    const value = e.target.value;
-                                    if (value === '') {
-                                        setSelectedSpecies([...speciesNames]);
-                                    } else {
-                                        setSelectedSpecies([value]);
-                                    }
-                                }}
-                                className="p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[110px] sm:min-w-[160px]"
-                            >
-                                <option value="">All</option>
-                                {speciesNames.map(species => (
-                                    <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
-                                ))}
-                            </select>
-                        </div>
-                        
-                        <div className="flex gap-1 sm:gap-2 items-center" data-tutorial-target="status-filter">
-                            <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Status:</span>
-                            <select value={statusFilter} onChange={handleStatusFilterChange} 
-                                className="p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[110px] sm:min-w-[160px]"
-                            >
-                                <option value="">All</option>
-                                {STATUS_OPTIONS.filter(s => s !== 'Sold').map(status => (
-                                    <option key={status} value={status}>{status}</option>
-                                ))}
-                            </select>
-                        </div>
+                            }}
+                            className="p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 dark:border-dark-border rounded-lg shadow-sm focus:ring-primary focus:border-primary dark:bg-dark-surface dark:text-dark-text transition min-w-[110px] sm:min-w-[160px]"
+                        >
+                            <option value="">All</option>
+                            {speciesNames.map(species => (
+                                <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
+                            ))}
+                        </select>
                     </div>
+                    
+                    <div className="flex gap-1 sm:gap-2 items-center" data-tutorial-target="status-filter">
+                        <span className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Status:</span>
+                        <select value={statusFilter} onChange={handleStatusFilterChange} 
+                            className="p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 dark:border-dark-border rounded-lg shadow-sm focus:ring-primary focus:border-primary dark:bg-dark-surface dark:text-dark-text transition min-w-[110px] sm:min-w-[160px]"
+                        >
+                            <option value="">All</option>
+                            {STATUS_OPTIONS.filter(s => s !== 'Sold').map(status => (
+                                <option key={status} value={status}>{status}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
 
-                    {/* Row 2: Gender + Visibility */}
-                    <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-6">
-                        <div className="flex items-center gap-1 sm:gap-2" data-tutorial-target="gender-filter">
-                            <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
+                {/* Row 2: Gender + Visibility */}
+                <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-6">
+                    <div className="flex items-center gap-1 sm:gap-2" data-tutorial-target="gender-filter">
+                        <span className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Gender:</span>
                             {GENDER_OPTIONS.map(gender => {
                                 const isSelected = selectedGenders.includes(gender);
                                 let Icon, bgColor;
@@ -4655,8 +4655,8 @@ const AnimalList = ({
                             })}
                         </div>
 
-                        <div className="flex items-center gap-1 sm:gap-2" data-tutorial-target="visibility-filter">
-                            <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Visibility:</span>
+                    <div className="flex items-center gap-1 sm:gap-2" data-tutorial-target="visibility-filter">
+                        <span className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Visibility:</span>
                             {['All', 'Public', 'Private'].map(option => {
                                 const value = option === 'All' ? '' : option.toLowerCase();
                                 const isSelected = publicFilter === value;
@@ -4673,9 +4673,9 @@ const AnimalList = ({
                         </div>
                     </div>
 
-                    {/* Row 3: Show filters */}
-                    <div className="flex flex-wrap justify-center items-center gap-1 sm:gap-2" data-tutorial-target="collection-filters">
-                        <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Show:</span>
+                {/* Row 3: Show filters */}
+                <div className="flex flex-wrap justify-center items-center gap-1 sm:gap-2" data-tutorial-target="collection-filters">
+                    <span className='text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap'>Show:</span>
 
                         <button onClick={handleFilterMating}
                             className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
@@ -4706,10 +4706,10 @@ const AnimalList = ({
                         </button>
                     </div>
 
-                    {/* Row 4: Breeding Line filters */}
-                    {breedingLineDefs.some(l => l.name) && (
-                        <div className="flex flex-wrap justify-center items-center gap-2">
-                            <span className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">Breeding Line:</span>
+                {/* Row 4: Breeding Line filters */}
+                {breedingLineDefs.some(l => l.name) && (
+                    <div className="flex flex-wrap justify-center items-center gap-2">
+                        <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-dark-text-secondary whitespace-nowrap">Breeding Line:</span>
                             {breedingLineDefs.filter(l => l.name).map(line => {
                                 const isActive = blFilter.includes(line.id);
                                 return (
@@ -4730,8 +4730,8 @@ const AnimalList = ({
                         </div>
                     )}
 
-                    {/* Apply / Clear row */}
-                    <div className="flex justify-center items-center gap-2 pt-2 border-t border-gray-200">
+                {/* Apply / Clear row */}
+                <div className="flex justify-center items-center gap-2 pt-2 border-t border-gray-200 dark:border-dark-border">
                         <button
                             onClick={() => { applyFilters(); setFiltersExpanded(false); }}
                             className={`font-semibold py-2 px-5 rounded-lg transition duration-150 shadow-md flex items-center justify-center gap-1.5 text-sm ${
