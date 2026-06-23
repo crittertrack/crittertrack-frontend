@@ -569,8 +569,8 @@ const LitterSyncConflictModal = ({ items, onResolve, onSkip }) => {
 // Pedigree Chart Component
 const pedigreeTreeCache = new Map(); // key: `${authScope}:${animalId}` => { data, ownerProfile }
 const pedigreePrefetchInFlight = new Map();
-const MAX_PEDIGREE_FETCH_DEPTH = 13; // 14 generations including the subject (depth 0)
-const MAX_PEDIGREE_FETCH_NODES = 1500; // safety guard against runaway recursive fetches
+const MAX_PEDIGREE_FETCH_DEPTH = 3; // 4 generations including the subject (depth 0) - reduced since we only show 4 generations max
+const MAX_PEDIGREE_FETCH_NODES = 30; // safety guard against runaway recursive fetches - reduced for 4 generations (2^4 = 16 max ancestors)
 
 const getPedigreeCacheKey = (rootId, authToken) => {
     if (!rootId) return null;
@@ -682,8 +682,8 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
             };
         };
 
-        // PHASE 1: Breadth-first for first 3 generations (for fast initial display)
-        const BREADTH_FIRST_DEPTH = 3;
+        // PHASE 1: Breadth-first for all generations (simplified for 4 generation limit)
+        const BREADTH_FIRST_DEPTH = MAX_PEDIGREE_FETCH_DEPTH;
         const generationQueue = [{ id: rootId, depth: 0, path: new Set() }];
         const processedIds = new Set();
 
@@ -743,43 +743,8 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
             }
         }
 
-        console.log(`[PEDIGREE PREFETCH] First ${BREADTH_FIRST_DEPTH + 1} generations complete, continuing depth-first for remaining generations...`);
-
-        // PHASE 2: Continue depth-first for remaining generations (4-13)
-        const fetchAnimalWithFamily = async (id, depth = 0, pathIds = new Set()) => {
-            if (!id || depth > MAX_PEDIGREE_FETCH_DEPTH) return null;
-            if (pathIds.has(id)) return null;
-
-            if (resultCache.has(id)) {
-                const cached = resultCache.get(id);
-                if (cached.fetchedAtDepth <= depth) return cached.data;
-            }
-
-            if (remainingFetchBudget <= 0) return null;
-            remainingFetchBudget -= 1;
-
-            const animalInfo = await fetchSingleAnimalData(id);
-            if (!animalInfo) return null;
-
-            const fatherId = animalInfo.fatherId_public || animalInfo.sireId_public;
-            const motherId = animalInfo.motherId_public || animalInfo.damId_public;
-            const childPath = new Set([...pathIds, id]);
-            
-            // Fetch parents in parallel for better performance
-            const [father, mother] = await Promise.all([
-                fatherId ? fetchAnimalWithFamily(fatherId, depth + 1, childPath) : null,
-                motherId ? fetchAnimalWithFamily(motherId, depth + 1, childPath) : null
-            ]);
-            
-            const result = { ...animalInfo, father, mother };
-
-            if (!resultCache.has(id) || resultCache.get(id).fetchedAtDepth > depth) {
-                resultCache.set(id, { fetchedAtDepth: depth, data: result });
-            }
-            return result;
-        };
-
-        const data = await fetchAnimalWithFamily(rootId);
+        // Build final tree from cached results (no additional fetching needed - we already have 4 generations)
+        const data = buildTreeFromResults(rootId, new Map(Array.from(resultCache.entries()).map(([k, v]) => [k, v.data])));
         
         // Fetch owner profile
         let fetchedOwnerProfile = null;

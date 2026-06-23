@@ -828,34 +828,8 @@ const AnimalList = ({
         fetchAnimals();
     }, [fetchAnimals]);
 
-    // Prefetch pedigree data for all animals when list loads
-    useEffect(() => {
-        if (!authToken || animals.length === 0) return;
-        
-        // Start prefetching pedigrees for all animals in the background
-        // This runs after the animal list loads, prioritizing first 3-4 generations
-        const prefetchAllPedigrees = async () => {
-            for (const animal of animals) {
-                if (animal.id_public) {
-                    // Fire and forget - prefetch in background without blocking UI
-                    prefetchPedigreeTree({
-                        animalId: animal.id_public,
-                        API_BASE_URL,
-                        authToken,
-                        maxDepth: 4,
-                        priorityDepth: 4
-                    }).catch(err => {
-                        // Silently fail - prefetch is a performance optimization, not critical
-                        console.debug(`[prefetch] Failed for ${animal.id_public}:`, err.message);
-                    });
-                }
-            }
-        };
-        
-        // Delay prefetch slightly to avoid competing with initial render
-        const timer = setTimeout(prefetchAllPedigrees, 100);
-        return () => clearTimeout(timer);
-    }, [animals, authToken]);
+    // Removed extensive prefetch logic - with only 4 generations to show, 
+    // pedigrees are fetched on-demand when viewing individual animals
 
     // Refresh animals when other parts of the app signal a change (e.g., after upload/save)
     useEffect(() => {
