@@ -3286,6 +3286,7 @@ const AnimalForm = ({
             fatherId_public: animalToEdit.fatherId_public || animalToEdit.sireId_public || null,
             motherId_public: animalToEdit.motherId_public || animalToEdit.damId_public || null,
             breederId_public: animalToEdit.breederId_public || null,
+            manualBreederName: animalToEdit.manualBreederName || '',
             keeperName: animalToEdit.keeperName || animalToEdit.ownerName || animalToEdit.currentOwner || animalToEdit.currentOwnerDisplay || '',
             groupRole: animalToEdit.groupRole || '',
                 isPregnant: animalToEdit.isPregnant || false,
@@ -4138,26 +4139,57 @@ const AnimalForm = ({
             
             // Handle breeder selection differently
             if (modalTarget === 'breeder') {
-                setFormData(prev => ({ ...prev, breederId_public: id, manualBreederName: '' }));
                 if (idOrAnimal && typeof idOrAnimal === 'object') {
                     // User object from search
                     const user = idOrAnimal;
+                    const showPersonalName = user.showPersonalName ?? false;
+                    const showBreederName = user.showBreederName ?? false;
+                    
+                    // Prefer breederName over personalName, or show both
+                    let displayName = '';
+                    if (showBreederName && user.breederName) {
+                        displayName = user.breederName;
+                        if (showPersonalName && user.personalName) {
+                            displayName = `${user.breederName} (${user.personalName})`;
+                        }
+                    } else if (showPersonalName && user.personalName) {
+                        displayName = user.personalName;
+                    }
+                    
+                    setFormData(prev => ({ ...prev, breederId_public: id, manualBreederName: displayName }));
                     const info = {
                         id_public: user.id_public,
                         personalName: user.personalName || '',
                         breederName: user.breederName || '',
-                        showBreederName: user.showBreederName || false
+                        showBreederName: user.showBreederName || false,
+                        showPersonalName: user.showPersonalName || false
                     };
                     setBreederInfo(info);
                 } else if (id) {
                     // Fetch user info
                     try {
                         const info = await fetchBreederInfo(id);
+                        const showPersonalName = info.showPersonalName ?? false;
+                        const showBreederName = info.showBreederName ?? false;
+                        
+                        // Prefer breederName over personalName, or show both
+                        let displayName = '';
+                        if (showBreederName && info.breederName) {
+                            displayName = info.breederName;
+                            if (showPersonalName && info.personalName) {
+                                displayName = `${info.breederName} (${info.personalName})`;
+                            }
+                        } else if (showPersonalName && info.personalName) {
+                            displayName = info.personalName;
+                        }
+                        
+                        setFormData(prev => ({ ...prev, breederId_public: id, manualBreederName: displayName }));
                         setBreederInfo(info);
                     } catch (err) {
                         console.warn('Failed to fetch breeder info', err);
                     }
                 } else {
+                    setFormData(prev => ({ ...prev, breederId_public: null, manualBreederName: '' }));
                     setBreederInfo(null);
                 }
                 setModalTarget(null);
@@ -5838,7 +5870,7 @@ const AnimalForm = ({
                                         onClick={() => setAssignmentRole('keeper')}
                                         className={`flex-1 px-4 py-2 rounded-lg font-medium transition ${
                                             assignmentRole === 'keeper'
-                                                ? 'bg-green-600 text-white'
+                                                ? 'bg-pink-600 text-white'
                                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                         }`}
                                     >

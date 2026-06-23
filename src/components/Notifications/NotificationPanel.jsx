@@ -290,7 +290,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                 <div className="flex-1">
                                                     <p className="text-sm text-gray-700">{notification.message}</p>
                                                     <p className="text-xs text-gray-500 mt-1">
-                                                        {new Date(notification.createdAt).toLocaleString('en-GB')}
+                                                        {new Date(notification.createdAt).toLocaleString()}
                                                     </p>
                                                 </div>
                                             </div>
@@ -418,7 +418,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                 <div className="flex-grow">
                                                     <p className="text-sm text-gray-700 mb-1">{notification.message}</p>
                                                     <p className="text-xs text-gray-500">
-                                                        {new Date(notification.createdAt).toLocaleString('en-GB')} ? 
+                                                        {new Date(notification.createdAt).toLocaleString()} ? 
                                                         <span className={`ml-1 ${notification.status === 'approved' ? 'text-green-600' : 'text-red-600'}`}>
                                                             {notification.status}
                                                         </span>

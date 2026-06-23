@@ -395,7 +395,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                                             ) : broadcast.message && (
                                                 <p className={`text-xs ${styles.text} line-clamp-4 leading-snug mb-1`}>{broadcast.message}</p>
                                             )}
-                                            <p className={`text-xs ${styles.sub} mt-auto`}>{new Date(broadcast.createdAt).toLocaleDateString('en-GB')}</p>
+                                            <p className={`text-xs ${styles.sub} mt-auto`}>{new Date(broadcast.createdAt).toLocaleDateString()}</p>
                                         </div>
                                     );
                                 })}
@@ -441,7 +441,7 @@ const NotificationsHub = ({ authToken, API_BASE_URL }) => {
                                     onOptionsUpdated={(opts) => setSelectedBroadcast(prev => prev ? { ...prev, pollOptions: opts } : null)}
                                 />
                             )}
-                            <p className={`text-xs ${styles.sub}`}>{new Date(selectedBroadcast.createdAt).toLocaleString('en-GB')}</p>
+                            <p className={`text-xs ${styles.sub}`}>{new Date(selectedBroadcast.createdAt).toLocaleString()}</p>
                         </div>
                         <div className="px-5 py-3 border-t border-gray-100 flex justify-end">
                             <button

@@ -68,7 +68,7 @@ const WarningBanner = ({ authToken, API_BASE_URL, userProfile }) => {
                                             <p className="font-semibold">Warning #{index + 1}</p>
                                             {warning.subject && <p className="mt-1"><strong>Regarding:</strong> {warning.subject}</p>}
                                             <p className="mt-1"><strong>Reason:</strong> {warning.reason}</p>
-                                            <p className="mt-1"><strong>Date:</strong> {new Date(warning.date).toLocaleString('en-GB')}</p>
+                                            <p className="mt-1"><strong>Date:</strong> {new Date(warning.date).toLocaleString()}</p>
                                             {warning.category && <p className="mt-1"><strong>Category:</strong> {warning.category}</p>}
                                         </div>
                                     ))}
@@ -140,7 +140,7 @@ const InformBanner = ({ authToken, API_BASE_URL }) => {
                                 <div className="mt-2 text-blue-700">
                                     <p className="text-sm">{msg.message}</p>
                                     {msg.metadata?.subject && <p className="text-xs font-semibold mt-1"><strong>Regarding:</strong> {msg.metadata.subject}</p>}
-                                    <p className="text-xs text-blue-500 mt-1">{new Date(msg.createdAt).toLocaleString('en-GB')}</p>
+                                    <p className="text-xs text-blue-500 mt-1">{new Date(msg.createdAt).toLocaleString()}</p>
                                 </div>
                                 <div className="mt-3">
                                     <button
@@ -322,7 +322,7 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles, authToken, API_BASE_URL
                 <span>Total votes: {getTotalVotes()}</span>
                 {poll.pollEndsAt && (
                     <span>
-                        {hasEnded ? 'Poll ended' : `Ends: ${new Date(poll.pollEndsAt).toLocaleDateString('en-GB')}`}
+                        {hasEnded ? 'Poll ended' : `Ends: ${new Date(poll.pollEndsAt).toLocaleDateString()}`}
                     </span>
                 )}
             </div>
@@ -912,7 +912,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                                     )}
                                     
                                     <p className={`mt-1.5 ${styles.subtitle} text-xs`}>
-                                        {new Date(broadcast.createdAt).toLocaleString('en-GB')}
+                                        {new Date(broadcast.createdAt).toLocaleString()}
                                     </p>
                                 </div>
                             </div>
@@ -998,7 +998,7 @@ const UrgentBroadcastPopup = ({ authToken, API_BASE_URL }) => {
                             {urgentBroadcast.message}
                         </p>
                         <p className={`mt-3 text-xs ${iconColor}`}>
-                            {new Date(urgentBroadcast.createdAt).toLocaleString('en-GB')}
+                            {new Date(urgentBroadcast.createdAt).toLocaleString()}
                         </p>
                         <button
                             onClick={handleAcknowledge}

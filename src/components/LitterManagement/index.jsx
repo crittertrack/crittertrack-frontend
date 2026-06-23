@@ -3864,6 +3864,60 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 <option value="Unknown">Unknown</option>
                                             </select>
                                         </div>
+
+                                        {/* Pregnancy Lost Checkbox - only show for mated litters without birth date */}
+                                        {formData.matingDate && !formData.birthDate && (
+                                            <div className="col-span-full">
+                                                <label className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg cursor-pointer hover:bg-amber-100 transition">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={formData.pregnancyLost || false}
+                                                        onChange={(e) => setFormData({
+                                                            ...formData,
+                                                            pregnancyLost: e.target.checked,
+                                                            pregnancyLostReason: e.target.checked ? (formData.pregnancyLostReason || 'Unknown') : null,
+                                                            pregnancyLostNotes: e.target.checked ? formData.pregnancyLostNotes : null
+                                                        })}
+                                                        className="form-checkbox h-5 w-5 text-amber-600 rounded focus:ring-amber-500"
+                                                    />
+                                                    <span className="text-sm font-medium text-gray-700">
+                                                        Pregnancy confirmed but no litter produced
+                                                    </span>
+                                                </label>
+                                                
+                                                {formData.pregnancyLost && (
+                                                    <div className="mt-3 space-y-3 pl-7">
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                                Reason
+                                                            </label>
+                                                            <select
+                                                                value={formData.pregnancyLostReason || 'Unknown'}
+                                                                onChange={(e) => setFormData({...formData, pregnancyLostReason: e.target.value})}
+                                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                                            >
+                                                                <option value="Cannibalized">Cannibalized (mom ate litter)</option>
+                                                                <option value="All Stillborn">All Stillborn</option>
+                                                                <option value="Reabsorbed">Reabsorbed</option>
+                                                                <option value="Unknown">Unknown</option>
+                                                            </select>
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                                Notes (optional)
+                                                            </label>
+                                                            <textarea
+                                                                value={formData.pregnancyLostNotes || ''}
+                                                                onChange={(e) => setFormData({...formData, pregnancyLostNotes: e.target.value})}
+                                                                placeholder="Additional details about the pregnancy loss..."
+                                                                rows={2}
+                                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -3894,7 +3948,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <p className="text-xs text-gray-500 mt-1">Optional — shows on calendar</p>
                                         </div>
 
-                                        {/* Birth Method */}}
+                                        {/* Birth Method */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                                 Birth Method

@@ -187,7 +187,7 @@ export default function AuditLogTab({ API_BASE_URL, authToken }) {
                             <tbody>
                                 {logs.map((log, idx) => (
                                     <tr key={idx}>
-                                        <td>{new Date(log.createdAt).toLocaleString('en-GB')}</td>
+                                        <td>{new Date(log.createdAt).toLocaleString()}</td>
                                         <td>
                                             <span 
                                                 className="action-badge"

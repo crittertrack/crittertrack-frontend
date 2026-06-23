@@ -416,8 +416,8 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
                             <p><strong>Email:</strong> {userSummary.user.email}</p>
                             <p><strong>Personal Name:</strong> {userSummary.user.personalName || 'N/A'}</p>
                             <p><strong>Breeder Name:</strong> {userSummary.user.breederName || 'N/A'}</p>
-                            <p><strong>Member Since:</strong> {new Date(userSummary.user.createdAt).toLocaleDateString('en-GB')}</p>
-                            <p><strong>Last Login:</strong> {userSummary.user.lastLogin ? new Date(userSummary.user.lastLogin).toLocaleDateString('en-GB') : 'Never'}</p>
+                            <p><strong>Member Since:</strong> {new Date(userSummary.user.createdAt).toLocaleDateString()}</p>
+                            <p><strong>Last Login:</strong> {userSummary.user.lastLogin ? new Date(userSummary.user.lastLogin).toLocaleDateString() : 'Never'}</p>
                             <p><strong>Warnings:</strong> {userSummary.user.warningCount}</p>
                         </div>
 
@@ -475,7 +475,7 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
                               ' 🎁 Recent Supporter' : ' None'}
                         </p>
                         {selectedUser.lastDonationDate && (
-                            <p><strong>Last Donation:</strong> {new Date(selectedUser.lastDonationDate).toLocaleDateString('en-GB')}</p>
+                            <p><strong>Last Donation:</strong> {new Date(selectedUser.lastDonationDate).toLocaleDateString()}</p>
                         )}
                         {selectedUser.monthlyDonationActive && (
                             <p><strong>Monthly Active:</strong> Yes</p>
@@ -509,7 +509,7 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
                             <tbody>
                                 {moderationHistory.map((entry, idx) => (
                                     <tr key={idx}>
-                                        <td>{new Date(entry.createdAt).toLocaleString('en-GB')}</td>
+                                        <td>{new Date(entry.createdAt).toLocaleString()}</td>
                                         <td>{entry.action.replace(/_/g, ' ')}</td>
                                         <td>{entry.moderatorId?.email || 'Unknown'}</td>
                                         <td>{entry.reason || 'N/A'}</td>
