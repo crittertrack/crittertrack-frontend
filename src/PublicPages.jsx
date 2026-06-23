@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { Loader2, XCircle, Download, X, Lock } from 'lucide-react';
+import { PedigreeChart } from './components/AnimalForm'; // Import PedigreeChart for the modal
 import CustomAppLogo from './components/shared/CustomAppLogo';
 import ViewOnlyAnimalDetail from './components/AnimalDetail/ViewOnlyAnimalDetail';
 import PublicProfileView from './components/PublicProfile/PublicProfileView';
@@ -40,6 +41,7 @@ const PublicAnimalPage = () => {
     const [showImageModal, setShowImageModal] = useState(false);
     const [enlargedImageUrl, setEnlargedImageUrl] = useState(null);
 
+    const [showFamilyTreeModal, setShowFamilyTreeModal] = useState(false); // New state for Family Tree modal
     // Check if user is in moderator mode
     const authToken = localStorage.getItem('authToken');
     const inModeratorMode = localStorage.getItem('moderationAuthenticated') === 'true';
@@ -180,6 +182,7 @@ const PublicAnimalPage = () => {
                 setModCurrentContext={setModCurrentContext}
                 setShowImageModal={setShowImageModal}
                 setEnlargedImageUrl={setEnlargedImageUrl}
+                onViewFullFamilyTree={() => setShowFamilyTreeModal(true)} // Pass prop to open Family Tree modal
             />
             
             {/* Image Modal */}
@@ -232,6 +235,27 @@ const PublicAnimalPage = () => {
                     currentPage={location.pathname}
                     currentContext={modCurrentContext}
                 />
+            )}
+
+            {/* Full Family Tree Modal */}
+            {showFamilyTreeModal && animal && (
+                <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-7xl w-full h-[90vh] p-6 relative">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Family Tree: {animal.name}</h2>
+                        <button
+                            onClick={() => setShowFamilyTreeModal(false)}
+                            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition"
+                        >
+                            <X size={24} />
+                        </button>
+                        <PedigreeChart
+                            animal={animal}
+                            API_BASE_URL={API_BASE_URL}
+                            // Assuming authToken is available in PublicAnimalPage scope
+                            authToken={authToken} 
+                        />
+                    </div>
+                </div>
             )}
         </div>
     );
