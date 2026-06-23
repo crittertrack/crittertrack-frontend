@@ -1467,7 +1467,7 @@ const FamilyTreeView = ({
                                         : relatedHighlightCount >= 2
                                 );
 
-                                const baseStroke = isPairLine ? '#9ED4E0' : isDescendantLine ? '#be185d' : '#64748b';
+                                const baseStroke = isPairLine ? '#6f949d' : isDescendantLine ? '#be185d' : '#64748b';
                                 const activeStroke = isPairLine ? '#7fd4e0' : isDescendantLine ? '#9d174d' : '#334155';
                                 const opacity = hasHighlightSelection
                                     ? (active ? 1 : 0.2)

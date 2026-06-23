@@ -1411,7 +1411,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         const pad      = genIndex === 0 ? '6px 8px' : genIndex === 1 ? '5px 7px' : genIndex === 2 ? '4px 6px' : '3px 5px';
         const borderColor = (!animal || animal.isHidden) ? (isSire ? '#76a7ff' : '#f48abf')
             : animal.gender === 'Male' ? '#3b82f6'
-            : animal.gender === 'Female' ? '#ec4899'
+            : animal.gender === 'Female' ? '#934E69'
             : (inlineMode ? '#94a3b8' : certBorderColor);
 
         const bgColor = (!animal || animal.isHidden) ? (isSire ? '#e8f1ff' : '#fdeef6')
@@ -1639,7 +1639,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         const isFemale = animal.gender === 'Female';
         const GenderIcon = isMale ? Mars : Venus;
         const cardBg = isMale ? '#dbeafe' : isFemale ? '#fce7f3' : '#f3f4f6';
-        const cardBorder = isMale ? '#3b82f6' : isFemale ? '#ec4899' : certBorderColor;
+        const cardBorder = isMale ? '#3b82f6' : isFemale ? '#934E69' : certBorderColor;
 
         return (
             <div style={{ display: 'flex', gap: 10, alignItems: 'center', backgroundColor: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 6, padding: '8px 12px 20px 12px', boxSizing: 'border-box', height: '100%', position: 'relative' }}>
@@ -1705,7 +1705,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
 
         return (
             <div style={{ backgroundColor: cardBg, border: `1.5px solid ${cardBorder}`, borderRadius: 10, padding: '10px', boxSizing: 'border-box', position: 'relative' }}>
-                <div style={{ position: 'absolute', top: 8, right: 8 }}><GenderIcon size={18} color={isMale ? '#3b82f6' : isFemale ? '#ec4899' : '#64748b'} /></div>
+                <div style={{ position: 'absolute', top: 8, right: 8 }}><GenderIcon size={18} color={isMale ? '#3b82f6' : isFemale ? '#934E69' : '#64748b'} /></div>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                     <div style={{ width: 86, height: 86, flexShrink: 0, overflow: 'hidden', borderRadius: 10, border: '1px solid #c9d5e6', backgroundColor: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {imgSrc ? (
@@ -1834,7 +1834,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                     const imgSrc = a && !a.isHidden ? (a.imageUrl || a.photoUrl || null) : null;
                     const isMale = a?.gender === 'Male' || (a?.gender !== 'Female' && n.isSire === true);
                     const isFemale = a?.gender === 'Female' || (a?.gender !== 'Male' && n.isSire === false);
-                    const borderColor = isUnknown ? '#94a3b8' : isMale ? '#3b82f6' : isFemale ? '#ec4899' : '#64748b';
+                    const borderColor = isUnknown ? '#94a3b8' : isMale ? '#3b82f6' : isFemale ? '#934E69' : '#64748b';
                     const bgColor = isUnknown ? '#e5e7eb' : '#f8fafc';
                     const fullName = a && !a.isHidden ? [a.prefix, a.name, a.suffix].filter(Boolean).join(' ') : 'Unknown';
                     const clickable = !!(a && !a.isHidden && a.id_public);

@@ -17,7 +17,7 @@ import axios from 'axios';
  */
 export function useBreedingLines(authToken: string | null, API_BASE_URL: string) {
     // ========== BREEDING LINE PRESETS (COLOR PALETTE) ==========
-    const BL_PRESETS_APP = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#14b8a6', '#3b82f6', '#6366f1', '#a855f7', '#ec4899', '#64748b'];
+    const BL_PRESETS_APP = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#14b8a6', '#3b82f6', '#6366f1', '#a855f7', '#934E69', '#64748b'];
 
     // ========== BREEDING LINE DEFINITIONS ==========
     const [breedingLineDefs, setBreedingLineDefs] = useState(() => {
@@ -87,7 +87,7 @@ export function useBreedingLines(authToken: string | null, API_BASE_URL: string)
                     console.warn('[BREEDING LINES] Failed to save assignments to localStorage:', e);
                 }
             } catch (error) {
-                console.warn('[BREEDING LINES] Failed to load from backend:', error.message);
+                console.warn('[BREEDING LINES] Failed to load from backend:', (error as Error).message);
                 // Silent fail - use localStorage fallback already loaded
             }
         };
@@ -102,7 +102,7 @@ export function useBreedingLines(authToken: string | null, API_BASE_URL: string)
      * Updates state, localStorage, and backend
      */
     const saveBreedingLineDefs = useCallback(
-        (defs, currentAssignments) => {
+        (defs: any, currentAssignments: any) => {
             setBreedingLineDefs(defs);
             try {
                 localStorage.setItem('ct_bldefs', JSON.stringify(defs));
@@ -136,9 +136,9 @@ export function useBreedingLines(authToken: string | null, API_BASE_URL: string)
      * Adds or removes animal from specified breeding line
      */
     const toggleAnimalBreedingLine = useCallback(
-        (animalId, lineId) => {
+        (animalId: any, lineId: any) => {
             const current = animalBreedingLines[animalId] || [];
-            const updated = current.includes(lineId) ? current.filter(id => id !== lineId) : [...current, lineId];
+            const updated = current.includes(lineId) ? current.filter((id: any) => id !== lineId) : [...current, lineId];
             const next = { ...animalBreedingLines, [animalId]: updated };
 
             setAnimalBreedingLines(next);
@@ -170,8 +170,8 @@ export function useBreedingLines(authToken: string | null, API_BASE_URL: string)
      * Update a breeding line definition (name/color)
      */
     const updateBreedingLineDef = useCallback(
-        (lineId, name, color) => {
-            const updated = breedingLineDefs.map(line =>
+        (lineId: any, name: any, color: any) => {
+            const updated = breedingLineDefs.map((line: any) =>
                 line.id === lineId ? { ...line, name, color } : line
             );
             saveBreedingLineDefs(updated, animalBreedingLines);
@@ -183,7 +183,7 @@ export function useBreedingLines(authToken: string | null, API_BASE_URL: string)
      * Clear all breeding line assignments for an animal
      */
     const clearAnimalBreedingLines = useCallback(
-        (animalId) => {
+        (animalId: any) => {
             const next = { ...animalBreedingLines };
             delete next[animalId];
             setAnimalBreedingLines(next);
