@@ -9426,10 +9426,12 @@ const AnimalForm = ({
                             setFormData(prev => ({ ...prev, fatherId_public: a.id_public }));
                             pedigreeRef.current.father = a.id_public;
                             pedigreeRef.current.fatherBackendId = a._id || null;
+                            setFatherInfo({ id_public: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', backendId: a._id || null });
                         } else if (slotKey === 'dam') {
                             setFormData(prev => ({ ...prev, motherId_public: a.id_public }));
                             pedigreeRef.current.mother = a.id_public;
                             pedigreeRef.current.motherBackendId = a._id || null;
+                            setMotherInfo({ id_public: a.id_public, prefix: a.prefix || '', name: a.name || '', suffix: a.suffix || '', backendId: a._id || null });
                         }
                     };
 
