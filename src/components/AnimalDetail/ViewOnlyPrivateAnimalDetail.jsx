@@ -1920,15 +1920,11 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                                 </div>
                                 <div>
                                     <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Grandparents (Gen 2)</p>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        <div className="space-y-3">
-                                            {renderSlot('sireSire', 'Paternal Grandsire')}
-                                            {renderSlot('sireDam', 'Paternal Granddam')}
-                                        </div>
-                                        <div className="space-y-3">
-                                            {renderSlot('damSire', 'Maternal Grandsire')}
-                                            {renderSlot('damDam', 'Maternal Granddam')}
-                                        </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                                        {renderSlot('sireSire', 'Paternal Grandsire')}
+                                        {renderSlot('sireDam', 'Paternal Granddam')}
+                                        {renderSlot('damSire', 'Maternal Grandsire')}
+                                        {renderSlot('damDam', 'Maternal Granddam')}
                                     </div>
                                 </div>
                                 <div>
@@ -1947,11 +1943,6 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                                             {renderSlot('damSireDam', 'Great Granddam')}
                                         </div>
                                         <div className="space-y-2">
-                                            {renderSlot('damDamSire', 'Great Grandsire')}
-                                            {renderSlot('damDamDam', 'Great Granddam')}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-wider">Maternal Granddam's Parents</p>
                                             {renderSlot('damDamSire', 'Great Grandsire')}
                                             {renderSlot('damDamDam', 'Great Granddam')}
                                         </div>
