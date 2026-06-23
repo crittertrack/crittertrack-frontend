@@ -53,7 +53,7 @@ import AnimalImageUpload from './components/AnimalImageUpload';
 import { compressImageFile, compressImageToMaxSize, compressImageWithWorker } from './utils/imageCompression';
 import DonationView from './components/Donation/DonationView';
 import CommunityPage from './components/Community/CommunityPage';
-import ThemeToggle from './components/ThemeToggle';
+// import ThemeToggle from './components/ThemeToggle';
 
 import PrivateAnimalDetail from './components/AnimalDetail/PrivateAnimalDetail';
 import ViewOnlyPrivateAnimalDetail from './components/AnimalDetail/ViewOnlyPrivateAnimalDetail';
@@ -1796,7 +1796,7 @@ const App = () => {
                     </nav>
 
                     <div className="flex items-center space-x-3">
-                        <ThemeToggle />
+                        {/* <ThemeToggle /> */}
                         
                         <button
                             onClick={() => setShowInfoTab(true)}

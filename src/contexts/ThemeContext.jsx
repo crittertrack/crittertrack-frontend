@@ -27,28 +27,12 @@ export const ThemeProvider = ({ children }) => {
 
     // Detect system preference
     useEffect(() => {
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        
-        const updateResolvedTheme = () => {
-            if (theme === 'auto') {
-                setResolvedTheme(mediaQuery.matches ? 'dark' : 'light');
-            } else {
-                setResolvedTheme(theme);
-            }
-        };
-
-        // Initial update
-        updateResolvedTheme();
-
-        // Listen for system preference changes
-        const handleChange = () => {
-            if (theme === 'auto') {
-                setResolvedTheme(mediaQuery.matches ? 'dark' : 'light');
-            }
-        };
-
-        mediaQuery.addEventListener('change', handleChange);
-        return () => mediaQuery.removeEventListener('change', handleChange);
+        if (theme === 'auto') {
+            // When auto-detection is disabled, default 'auto' to 'light'.
+            setResolvedTheme('light');
+        } else {
+            setResolvedTheme(theme);
+        }
     }, [theme]);
 
     // Apply theme class to document root
