@@ -1920,26 +1920,42 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                                 </div>
                                 <div>
                                     <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Grandparents (Gen 2)</p>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                                        {renderSlot('sireSire', 'Paternal Grandsire')}
-                                        {renderSlot('sireDam', 'Paternal Granddam')}
-                                        {renderSlot('damSire', 'Maternal Grandsire')}
-                                        {renderSlot('damDam', 'Maternal Granddam')}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div className="space-y-3">
+                                            <p className="text-xs font-semibold text-blue-400 uppercase tracking-wider">Paternal (Sire's Parents)</p>
+                                            {renderSlot('sireSire', 'Paternal Grandsire')}
+                                            {renderSlot('sireDam', 'Paternal Granddam')}
+                                        </div>
+                                        <div className="space-y-3">
+                                            <p className="text-xs font-semibold text-pink-400 uppercase tracking-wider">Maternal (Dam's Parents)</p>
+                                            {renderSlot('damSire', 'Maternal Grandsire')}
+                                            {renderSlot('damDam', 'Maternal Granddam')}
+                                        </div>
                                     </div>
                                 </div>
                                 <div>
                                     <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Great-Grandparents (Gen 3)</p>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                                        {renderSlot('sireSireSire', 'Great Grandsire')}
-                                        {renderSlot('sireSireDam', 'Great Granddam')}
-                                        {renderSlot('sireDamSire', 'Great Grandsire')}
-                                        {renderSlot('sireDamDam', 'Great Granddam')}
-                                    </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mt-3">
-                                        {renderSlot('damSireSire', 'Great Grandsire')}
-                                        {renderSlot('damSireDam', 'Great Granddam')}
-                                        {renderSlot('damDamSire', 'Great Grandsire')}
-                                        {renderSlot('damDamDam', 'Great Granddam')}
+                                        <div className="space-y-3">
+                                            <p className="text-xs font-semibold text-blue-400 uppercase tracking-wider">Paternal Grandsire's Parents</p>
+                                            {renderSlot('sireSireSire', 'Great Grandsire')}
+                                            {renderSlot('sireSireDam', 'Great Granddam')}
+                                        </div>
+                                        <div className="space-y-3">
+                                            <p className="text-xs font-semibold text-blue-400 uppercase tracking-wider">Paternal Granddam's Parents</p>
+                                            {renderSlot('sireDamSire', 'Great Grandsire')}
+                                            {renderSlot('sireDamDam', 'Great Granddam')}
+                                        </div>
+                                        <div className="space-y-3">
+                                            <p className="text-xs font-semibold text-pink-400 uppercase tracking-wider">Maternal Grandsire's Parents</p>
+                                            {renderSlot('damSireSire', 'Great Grandsire')}
+                                            {renderSlot('damSireDam', 'Great Granddam')}
+                                        </div>
+                                        <div className="space-y-3">
+                                            <p className="text-xs font-semibold text-pink-400 uppercase tracking-wider">Maternal Granddam's Parents</p>
+                                            {renderSlot('damDamSire', 'Great Grandsire')}
+                                            {renderSlot('damDamDam', 'Great Granddam')}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
