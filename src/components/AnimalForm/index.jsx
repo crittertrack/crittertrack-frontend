@@ -569,8 +569,8 @@ const LitterSyncConflictModal = ({ items, onResolve, onSkip }) => {
 // Pedigree Chart Component
 const pedigreeTreeCache = new Map(); // key: `${authScope}:${animalId}` => { data, ownerProfile }
 const pedigreePrefetchInFlight = new Map();
-const MAX_PEDIGREE_FETCH_DEPTH = 3; // 4 generations including the subject (depth 0) - reduced since we only show 4 generations max
-const MAX_PEDIGREE_FETCH_NODES = 30; // safety guard against runaway recursive fetches - reduced for 4 generations (2^4 = 16 max ancestors)
+const MAX_PEDIGREE_FETCH_DEPTH = 5; // 6 generations including the subject (depth 0)
+const MAX_PEDIGREE_FETCH_NODES = 63; // safety guard against runaway recursive fetches (2^6 - 1 = 63 max ancestors)
 
 const getPedigreeCacheKey = (rootId, authToken) => {
     if (!rootId) return null;

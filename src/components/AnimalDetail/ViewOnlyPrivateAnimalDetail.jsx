@@ -1930,16 +1930,16 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                                 <div>
                                     <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Great-Grandparents (Gen 3)</p>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                                        {renderSlot('sireSireSire', 'SSS')}
-                                        {renderSlot('sireSireDam', 'SSD')}
-                                        {renderSlot('sireDamSire', 'SDS')}
-                                        {renderSlot('sireDamDam', 'SDD')}
+                                        {renderSlot('sireSireSire', 'Great Grandsire')}
+                                        {renderSlot('sireSireDam', 'Great Granddam')}
+                                        {renderSlot('sireDamSire', 'Great Grandsire')}
+                                        {renderSlot('sireDamDam', 'Great Granddam')}
                                     </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mt-3">
-                                        {renderSlot('damSireSire', 'DSS')}
-                                        {renderSlot('damSireDam', 'DSD')}
-                                        {renderSlot('damDamSire', 'DDS')}
-                                        {renderSlot('damDamDam', 'DDD')}
+                                        {renderSlot('damSireSire', 'Great Grandsire')}
+                                        {renderSlot('damSireDam', 'Great Granddam')}
+                                        {renderSlot('damDamSire', 'Great Grandsire')}
+                                        {renderSlot('damDamDam', 'Great Granddam')}
                                     </div>
                                 </div>
                             </div>
