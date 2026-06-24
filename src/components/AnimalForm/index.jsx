@@ -831,9 +831,10 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
     }, [certText, certTextTopRight, certTextBottomLeft, certTextSignature, certFontColor, certBorderColor, certBgColor]);
 
     // Merge manual ancestors into fetched pedigree tree wherever API returned nothing
-    useEffect(() => {
-        if (!pedigreeData) { setDisplayData(null); return; }
-        if (!manualData) { setDisplayData(pedigreeData); return; }
+    const displayData = useMemo(() => {
+        if (!pedigreeData) return null;
+        if (!manualData) return pedigreeData;
+        
         const slotToAnimal = (slot) => {
             if (!slot) return null;
             if (!slot.ctcId && !slot.name && !slot.prefix && !slot.suffix) return null;
@@ -875,7 +876,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             if (!d.mother.mother.father && manualData.damDamSire) d.mother.mother.father = slotToAnimal(manualData.damDamSire);
             if (!d.mother.mother.mother && manualData.damDamDam)  d.mother.mother.mother = slotToAnimal(manualData.damDamDam);
         }
-        setDisplayData(d);
+        return d;
     }, [pedigreeData, manualData]);
 
     useEffect(() => {
@@ -5814,29 +5815,15 @@ const AnimalForm = ({
                 <ContactSelector
                     onClose={() => setShowContactSelector(false)}
                     onSelect={(contact) => {
-                        // Update manual breeder name with selected contact
+                        // Update keeper name with selected contact
                         const displayName = [contact.prefix, contact.personalName, contact.suffix].filter(Boolean).join(' ') 
                             || contact.breederName 
                             || 'Unnamed Contact';
                         
                         setFormData(prev => ({
                             ...prev,
-                            manualBreederName: displayName
+                            keeperName: displayName
                         }));
-                        
-                        // If contact has a linked CTUID, auto-fill the Breeder (User) field
-                        if (contact.linkedCTUID) {
-                            setFormData(prev => ({
-                                ...prev,
-                                breederId_public: contact.linkedCTUID,
-                                manualBreederName: '' // Clear manual name when CTUID is set
-                            }));
-                            
-                            // Fetch and set breeder info
-                            fetchBreederInfo(contact.linkedCTUID).then(info => {
-                                if (info) setBreederInfo(info);
-                            });
-                        }
                         
                         setShowContactSelector(false);
                     }}
