@@ -50,6 +50,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
     const [showContactSelector, setShowContactSelector] = useState(false);
     const [contacts, setContacts] = useState([]);
     const [contactsLoading, setContactsLoading] = useState(false);
+    const [keeperContactInfo, setKeeperContactInfo] = useState(null);
     const [parentCardKey, setParentCardKey] = useState(0); // increment to force parent cards to refetch
     const [offspringRefreshKey, setOffspringRefreshKey] = useState(0); // increment to force offspring fetches to refetch
     // Manual Pedigree (Beta) • Tab 16
@@ -479,6 +480,28 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
         };
         fetchOwner();
     }, [animal?.isOwned, animal?.ownerId_public, API_BASE_URL]);
+    
+    // Fetch keeper contact info when keeperContactId exists
+    React.useEffect(() => {
+        const fetchKeeperContact = async () => {
+            if (animal?.keeperContactId && authToken) {
+                try {
+                    const response = await axios.get(
+                        `${API_BASE_URL}/contacts`,
+                        { headers: { Authorization: `Bearer ${authToken}` } }
+                    );
+                    const keeper = response.data?.find(c => c._id === animal.keeperContactId);
+                    setKeeperContactInfo(keeper || null);
+                } catch (error) {
+                    console.error('Failed to fetch keeper contact:', error);
+                    setKeeperContactInfo(null);
+                }
+            } else {
+                setKeeperContactInfo(null);
+            }
+        };
+        fetchKeeperContact();
+    }, [animal?.keeperContactId, authToken, API_BASE_URL]);
 
     if (!animal) return null;
 
@@ -840,28 +863,60 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                             <div>
                                                 <span className="text-gray-500">Breeder:</span>{' '}
                                                 {breederInfo ? (() => {
-                                                    const showPersonal = breederInfo.showPersonalName ?? false;
-                                                    const showBreeder = breederInfo.showBreederName ?? false;
-                                                    let bDisplayName;
-                                                    if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
-                                                        bDisplayName = `${breederInfo.personalName} (${breederInfo.breederName})`;
-                                                    } else if (showBreeder && breederInfo.breederName) {
-                                                        bDisplayName = breederInfo.breederName;
-                                                    } else if (showPersonal && breederInfo.personalName) {
-                                                        bDisplayName = breederInfo.personalName;
-                                                    } else {
-                                                        bDisplayName = 'Unknown Breeder';
+                                                    const parts = [];
+                                                    if (breederInfo.prefix) parts.push(breederInfo.prefix);
+                                                    
+                                                    // Handle breeder name and personal name
+                                                    if (breederInfo.breederName && breederInfo.personalName) {
+                                                        parts.push(`${breederInfo.breederName} (${breederInfo.personalName})`);
+                                                    } else if (breederInfo.breederName) {
+                                                        parts.push(breederInfo.breederName);
+                                                    } else if (breederInfo.personalName) {
+                                                        parts.push(breederInfo.personalName);
                                                     }
-                                                    return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{bDisplayName}</RouterLink>;
+                                                    
+                                                    if (breederInfo.suffix) parts.push(breederInfo.suffix);
+                                                    
+                                                    const displayName = parts.join(' • ') || 'Unknown Breeder';
+                                                    
+                                                    return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{displayName}</RouterLink>;
                                                 })() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}
                                             </div>
                                             {/* Keeper */}
 {animal.ownerId_public && (
     <div>
         <span className="text-gray-500">Keeper:</span>{' '}
-        <span className="font-mono text-accent">
-            {animal.keeperName || animal.ownerId_public || '—'}
-        </span>
+        {keeperContactInfo ? (() => {
+            const parts = [];
+            if (keeperContactInfo.prefix) parts.push(keeperContactInfo.prefix);
+            
+            // Handle breeder name and personal name
+            if (keeperContactInfo.breederName && keeperContactInfo.personalName) {
+                parts.push(`${keeperContactInfo.breederName} (${keeperContactInfo.personalName})`);
+            } else if (keeperContactInfo.breederName) {
+                parts.push(keeperContactInfo.breederName);
+            } else if (keeperContactInfo.personalName) {
+                parts.push(keeperContactInfo.personalName);
+            }
+            
+            if (keeperContactInfo.suffix) parts.push(keeperContactInfo.suffix);
+            
+            const displayName = parts.join(' • ') || animal.keeperName || 'Unknown Keeper';
+            
+            return (
+                <RouterLink to={`/user/${animal.keeperContactId}`} className="text-purple-600 hover:underline font-semibold">
+                    {displayName}
+                </RouterLink>
+            );
+        })() : animal.keeperContactId ? (
+            <RouterLink to={`/user/${animal.keeperContactId}`} className="text-purple-600 hover:underline font-semibold">
+                {animal.keeperName || animal.ownerId_public || '—'}
+            </RouterLink>
+        ) : (
+            <span className="font-mono text-accent">
+                {animal.keeperName || animal.ownerId_public || '—'}
+            </span>
+        )}
     </div>
 )}
                                             {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
@@ -928,12 +983,40 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper</h3>
                                 <div className="text-sm space-y-2">
                                     {(() => {
-                                        const keeperDisplay = animal.keeperName || null;
-                                        if (!keeperDisplay) return null;
+                                        if (!animal.keeperName && !keeperContactInfo) return null;
+                                        
                                         return (
                                             <div className="flex items-center gap-2">
                                                 <span className="text-gray-600">Keeper Name:</span>
-                                                <strong>{keeperDisplay}</strong>
+                                                {keeperContactInfo ? (() => {
+                                                    const parts = [];
+                                                    if (keeperContactInfo.prefix) parts.push(keeperContactInfo.prefix);
+                                                    
+                                                    // Handle breeder name and personal name
+                                                    if (keeperContactInfo.breederName && keeperContactInfo.personalName) {
+                                                        parts.push(`${keeperContactInfo.breederName} (${keeperContactInfo.personalName})`);
+                                                    } else if (keeperContactInfo.breederName) {
+                                                        parts.push(keeperContactInfo.breederName);
+                                                    } else if (keeperContactInfo.personalName) {
+                                                        parts.push(keeperContactInfo.personalName);
+                                                    }
+                                                    
+                                                    if (keeperContactInfo.suffix) parts.push(keeperContactInfo.suffix);
+                                                    
+                                                    const displayName = parts.join(' • ') || animal.keeperName || 'Unknown Keeper';
+                                                    
+                                                    return (
+                                                        <RouterLink to={`/user/${animal.keeperContactId}`} className="text-purple-600 hover:underline font-semibold">
+                                                            {displayName}
+                                                        </RouterLink>
+                                                    );
+                                                })() : animal.keeperContactId ? (
+                                                    <RouterLink to={`/user/${animal.keeperContactId}`} className="text-purple-600 hover:underline font-semibold">
+                                                        {animal.keeperName}
+                                                    </RouterLink>
+                                                ) : (
+                                                    <strong>{animal.keeperName}</strong>
+                                                )}
                                             </div>
                                         );
                                     })()}

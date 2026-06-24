@@ -430,19 +430,23 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                                             <div>
                                                 <span className="text-gray-500">Breeder:</span>{' '}
                                                 {breederInfo ? (() => {
-                                                    const showPersonal = breederInfo.showPersonalName ?? false;
-                                                    const showBreeder = breederInfo.showBreederName ?? false;
-                                                    let bDisplayName;
-                                                    if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
-                                                        bDisplayName = `${breederInfo.personalName} (${breederInfo.breederName})`;
-                                                    } else if (showBreeder && breederInfo.breederName) {
-                                                        bDisplayName = breederInfo.breederName;
-                                                    } else if (showPersonal && breederInfo.personalName) {
-                                                        bDisplayName = breederInfo.personalName;
-                                                    } else {
-                                                        bDisplayName = 'Unknown Breeder';
+                                                    const parts = [];
+                                                    if (breederInfo.prefix) parts.push(breederInfo.prefix);
+                                                    
+                                                    // Handle breeder name and personal name
+                                                    if (breederInfo.breederName && breederInfo.personalName) {
+                                                        parts.push(`${breederInfo.breederName} (${breederInfo.personalName})`);
+                                                    } else if (breederInfo.breederName) {
+                                                        parts.push(breederInfo.breederName);
+                                                    } else if (breederInfo.personalName) {
+                                                        parts.push(breederInfo.personalName);
                                                     }
-                                                    return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{bDisplayName}</RouterLink>;
+                                                    
+                                                    if (breederInfo.suffix) parts.push(breederInfo.suffix);
+                                                    
+                                                    const displayName = parts.join(' • ') || 'Unknown Breeder';
+                                                    
+                                                    return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{displayName}</RouterLink>;
                                                 })() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}
                                             </div>
                                             {/* Keeper */}
