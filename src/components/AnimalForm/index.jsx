@@ -668,19 +668,37 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
         };
 
         // Helper to build tree structure from flat results
-        const buildTreeFromResults = (id, resultsMap) => {
-            const animalData = resultsMap.get(id);
-            if (!animalData) return null;
+const buildTreeFromResults = (id, resultsMap, path = new Set()) => {
+    if (!id) return null;
 
-            const fatherId = animalData.fatherId_public || animalData.sireId_public;
-            const motherId = animalData.motherId_public || animalData.damId_public;
+    // Prevent infinite recursion from circular pedigrees
+    if (path.has(id)) {
+        console.warn('[PEDIGREE LOOP DETECTED]', [...path, id]);
+        return null;
+    }
 
-            return {
-                ...animalData,
-                father: fatherId ? buildTreeFromResults(fatherId, resultsMap) : null,
-                mother: motherId ? buildTreeFromResults(motherId, resultsMap) : null
-            };
-        };
+    const animalData = resultsMap.get(id);
+    if (!animalData) return null;
+
+    const nextPath = new Set(path);
+    nextPath.add(id);
+
+    const fatherId =
+        animalData.fatherId_public || animalData.sireId_public;
+
+    const motherId =
+        animalData.motherId_public || animalData.damId_public;
+
+    return {
+        ...animalData,
+        father: fatherId
+            ? buildTreeFromResults(fatherId, resultsMap, nextPath)
+            : null,
+        mother: motherId
+            ? buildTreeFromResults(motherId, resultsMap, nextPath)
+            : null
+    };
+};
 
         // PHASE 1: Breadth-first for all generations (simplified for 4 generation limit)
         const BREADTH_FIRST_DEPTH = MAX_PEDIGREE_FETCH_DEPTH;
