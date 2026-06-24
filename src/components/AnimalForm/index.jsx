@@ -3120,10 +3120,6 @@ const CommunityGeneticsModal = ({ species, onClose, authToken, API_BASE_URL, sho
     );
 };
 
-
-
-
-﻿
 const AnimalForm = ({ 
     formTitle,             
     animalToEdit,          

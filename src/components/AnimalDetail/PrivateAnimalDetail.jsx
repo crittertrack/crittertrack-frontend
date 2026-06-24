@@ -965,9 +965,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper</h3>
                                 <div className="text-sm space-y-2">
                                     {(() => {
-                                        const keeperDisplay = animal.isOwned
-                                            ? (userProfile ? (userProfile.breederName || userProfile.personalName || userProfile.id_public) : null)
-                                            : (animal.keeperName || null);
+                                        const keeperDisplay = animal.keeperName || null;
                                         if (!keeperDisplay) return null;
                                         return (
                                             <div className="flex items-center gap-2">
