@@ -5195,10 +5195,10 @@ const AnimalForm = ({
             }
         };
         
-        if (breedingRecords.length > 0) {
+        if (breedingRecords.length > 0 && authToken) {
             fetchAllOffspring();
         }
-    }, [breedingRecords]);
+    }, [breedingRecords.length, authToken]);
     
     const addMedicalCondition = () => {
         if (!newMedicalCondition.name) {
