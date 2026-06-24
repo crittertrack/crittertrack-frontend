@@ -910,11 +910,11 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
             );
         })() : animal.keeperContactId ? (
             <RouterLink to={`/user/${animal.keeperContactId}`} className="text-purple-600 hover:underline font-semibold">
-                {animal.keeperName || animal.ownerId_public || '—'}
+                                                {animal.keeperName || '—'}
             </RouterLink>
         ) : (
             <span className="font-mono text-accent">
-                {animal.keeperName || animal.ownerId_public || '—'}
+                                                {animal.keeperName || '—'}
             </span>
         )}
     </div>

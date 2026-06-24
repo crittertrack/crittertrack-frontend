@@ -694,7 +694,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                                                 {(() => { const showPersonal = ownerInfo.showPersonalName ?? false; const showBreeder = ownerInfo.showBreederName ?? false; if (showPersonal && showBreeder && ownerInfo.personalName && ownerInfo.breederName) { return `${ownerInfo.personalName} (${ownerInfo.breederName})`; } else if (showBreeder && ownerInfo.breederName) { return ownerInfo.breederName; } else if (showPersonal && ownerInfo.personalName) { return ownerInfo.personalName; } else { return 'Unknown Keeper'; } })()}
                                                             </RouterLink>
                                                         ) : (
-                                                            <span className="font-mono text-accent">{animal.keeperName || animal.ownerId_public || '\u2014'}</span>
+                                                            <span className="font-mono text-accent">{animal.keeperName || '\u2014'}</span>
                                                         )}
                                                     </div>
                                                 )}

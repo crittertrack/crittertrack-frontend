@@ -473,7 +473,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                                                             })()}
                                                         </RouterLink>
                                                     ) : (
-                                                        <span className="font-mono text-accent">{animal.keeperName || animal.ownerId_public || '\u2014'}</span>
+                                                        <span className="font-mono text-accent">{animal.keeperName || '\u2014'}</span>
                                                     )}
                                                 </div>
                                             )}
