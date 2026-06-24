@@ -845,7 +845,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 gender: slot.gender || '', id_public: slot.ctcId || null, geneticCode: slot.genCode || '',
             };
         };
-        const d = JSON.parse(JSON.stringify(pedigreeData));
+        const d = pedigreeData;
         // Level 1 • parents
         if (!d.father && manualData.sire) d.father = slotToAnimal(manualData.sire);
         if (!d.mother && manualData.dam)  d.mother = slotToAnimal(manualData.dam);
