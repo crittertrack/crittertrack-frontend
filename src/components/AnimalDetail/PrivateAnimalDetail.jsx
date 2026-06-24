@@ -859,48 +859,11 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
 {animal.ownerId_public && (
     <div>
         <span className="text-gray-500">Keeper:</span>{' '}
-
-        {ownerInfo ? (() => {
-
-            const hasCTUID = !!ownerInfo.linkedCTUID;
-            const hasResolvedUser = !!ownerInfo.id_public;
-            const isClickable = hasCTUID && hasResolvedUser;
-
-            // ✅ Identity formatting ONLY (no CTUID logic here)
-            let label = '—';
-
-            if (ownerInfo.personalName && ownerInfo.breederName) {
-                label = `${ownerInfo.personalName} (${ownerInfo.breederName})`;
-            } else if (ownerInfo.breederName) {
-                label = ownerInfo.breederName;
-            } else if (ownerInfo.personalName) {
-                label = ownerInfo.personalName;
-            }
-
-            // ✅ Clickable only when fully resolvable user exists
-            if (isClickable) {
-                return (
-                    <RouterLink
-                        to={`/user/${ownerInfo.id_public}`}
-                        className="text-purple-600 hover:underline font-semibold"
-                    >
-                        {label}
-                    </RouterLink>
-                );
-            }
-
-            return (
-                <span className="font-mono text-accent">
-                    {label}
-                </span>
-            );
-        })() : (
-            <span className="font-mono text-accent">
-                {animal.keeperName || animal.ownerId_public || '—'}
-            </span>
-        )}
+        <span className="font-mono text-accent">
+            {animal.keeperName || animal.ownerId_public || '—'}
+        </span>
     </div>
-                                            )}
+)}
                                             {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
                                                 <hr className="border-gray-200" />
                                             )}

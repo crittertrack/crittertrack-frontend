@@ -535,17 +535,12 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                                 <h3 className="text-lg font-semibold text-gray-700"><Home size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Keeper</h3>
                                 <div className="text-sm space-y-2">
                                     {(() => {
-                                        const keeperDisplay = animal.isOwned
-                                            ? (ownerInfo ? (ownerInfo.breederName || ownerInfo.personalName || ownerInfo.id_public) : animal.ownerId_public) || null
-                                            : (animal.keeperName || null);
+                                        const keeperDisplay = animal.keeperName || null;
                                         if (!keeperDisplay) return null;
-                                        const keeperLink = animal.isOwned && ownerInfo?.id_public ? `/user/${ownerInfo.id_public}` : null;
                                         return (
                                             <div className="flex items-center gap-2">
                                                 <span className="text-gray-600">Keeper Name:</span>
-                                                {keeperLink
-                                                    ? <RouterLink to={keeperLink} className="text-purple-600 hover:underline font-semibold">{keeperDisplay}</RouterLink>
-                                                    : <strong>{keeperDisplay}</strong>}
+                                                <strong>{keeperDisplay}</strong>
                                             </div>
                                         );
                                     })()}
