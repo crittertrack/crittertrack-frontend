@@ -668,17 +668,25 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
         };
 
         // Helper to build tree structure from flat results
-        const buildTreeFromResults = (id, resultsMap) => {
+        const buildTreeFromResults = (id, resultsMap, visited = new Set()) => {
             const animalData = resultsMap.get(id);
             if (!animalData) return null;
+            
+            // Prevent infinite recursion by tracking visited nodes
+            if (visited.has(id)) {
+                console.warn(`[PEDIGREE] Circular reference detected for ${id}, stopping recursion`);
+                return { ...animalData, father: null, mother: null };
+            }
+            
+            visited.add(id);
 
             const fatherId = animalData.fatherId_public || animalData.sireId_public;
             const motherId = animalData.motherId_public || animalData.damId_public;
 
             return {
                 ...animalData,
-                father: fatherId ? buildTreeFromResults(fatherId, resultsMap) : null,
-                mother: motherId ? buildTreeFromResults(motherId, resultsMap) : null
+                father: fatherId ? buildTreeFromResults(fatherId, resultsMap, visited) : null,
+                mother: motherId ? buildTreeFromResults(motherId, resultsMap, visited) : null
             };
         };
 
@@ -5824,7 +5832,6 @@ const AnimalForm = ({
                     onSelect={(contact) => {
                         // Update keeper name with selected contact
                         const displayName = [contact.prefix, contact.personalName, contact.suffix].filter(Boolean).join(' ') 
-                            || contact.breederName 
                             || 'Unnamed Contact';
                         
                         setFormData(prev => ({
