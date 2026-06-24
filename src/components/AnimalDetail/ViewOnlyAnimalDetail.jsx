@@ -668,6 +668,37 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                                 {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
                                                     <hr className="border-gray-200" />
                                                 )}
+                                                {/* Keeper */}
+                                                {animal.ownerId_public && (
+                                                    <div>
+                                                        <span className="text-gray-500">Keeper:</span>{' '}
+                                                        {ownerInfo ? (
+                                                            <RouterLink
+                                                                to={`/user/${ownerInfo.id_public}`}
+                                                                className="text-purple-600 hover:underline font-medium"
+                                                            >
+                                                                {(() => {
+                                                                    const showPersonal = ownerInfo.showPersonalName ?? false;
+                                                                    const showBreeder = ownerInfo.showBreederName ?? false;
+                                                                    if (showPersonal && showBreeder && ownerInfo.personalName && ownerInfo.breederName) {
+                                                                        return `${ownerInfo.personalName} (${ownerInfo.breederName})`;
+                                                                    } else if (showBreeder && ownerInfo.breederName) {
+                                                                        return ownerInfo.breederName;
+                                                                    } else if (showPersonal && ownerInfo.personalName) {
+                                                                        return ownerInfo.personalName;
+                                                                    } else {
+                                                                        return 'Unknown Keeper';
+                                                                    }
+                                                                })()}
+                                                            </RouterLink>
+                                                        ) : (
+                                                            <span className="font-mono text-accent">{animal.keeperName || animal.ownerId_public || '\u2014'}</span>
+                                                        )}
+                                                    </div>
+                                                )}
+                                                {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
+                                                    <hr className="border-gray-200" />
+                                                )}
                                                 <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                                                     {animal.breederAssignedId && <div><span className="text-gray-500">Assigned ID:</span> <strong>{animal.breederAssignedId}</strong></div>}
                                                     {animal.microchipNumber && <div><span className="text-gray-500">Microchip:</span> <strong>{animal.microchipNumber}</strong></div>}

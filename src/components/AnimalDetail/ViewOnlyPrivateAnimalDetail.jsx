@@ -445,6 +445,34 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                                                     return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{bDisplayName}</RouterLink>;
                                                 })() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}
                                             </div>
+                                            {/* Keeper */}
+                                            {animal.ownerId_public && (
+                                                <div>
+                                                    <span className="text-gray-500">Keeper:</span>{' '}
+                                                    {ownerInfo ? (
+                                                        <RouterLink
+                                                            to={`/user/${ownerInfo.id_public}`}
+                                                            className="text-purple-600 hover:underline font-semibold"
+                                                        >
+                                                            {(() => {
+                                                                const showPersonal = ownerInfo.showPersonalName ?? false;
+                                                                const showBreeder = ownerInfo.showBreederName ?? false;
+                                                                if (showPersonal && showBreeder && ownerInfo.personalName && ownerInfo.breederName) {
+                                                                    return `${ownerInfo.personalName} (${ownerInfo.breederName})`;
+                                                                } else if (showBreeder && ownerInfo.breederName) {
+                                                                    return ownerInfo.breederName;
+                                                                } else if (showPersonal && ownerInfo.personalName) {
+                                                                    return ownerInfo.personalName;
+                                                                } else {
+                                                                    return 'Unknown Keeper';
+                                                                }
+                                                            })()}
+                                                        </RouterLink>
+                                                    ) : (
+                                                        <span className="font-mono text-accent">{animal.keeperName || animal.ownerId_public || '\u2014'}</span>
+                                                    )}
+                                                </div>
+                                            )}
                                             {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
                                                 <hr className="border-gray-200" />
                                             )}

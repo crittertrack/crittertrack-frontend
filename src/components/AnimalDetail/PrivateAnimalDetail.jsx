@@ -26,6 +26,7 @@ import { QRModal } from '../PublicProfile/PublicProfileView';
 import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, onArchive, onAddSibling, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, showModalMessage, onTransfer, onViewAnimal, onViewPublicAnimal, onToggleOwned, userProfile, userAnimals = [], breedingLineDefs = [], animalBreedingLines = {}, toggleAnimalBreedingLine, setAnimalBreedingLinesDirect, initialTab = 1, initialBetaView = 'vertical' }) => {
     const navigate = useNavigate();
     const [breederInfo, setBreederInfo] = useState(null);
+    const [ownerInfo, setOwnerInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(initialTab);
     const [copySuccess, setCopySuccess] = useState(false);
@@ -456,6 +457,29 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
         fetchBreeder();
     }, [animal?.breederId_public, API_BASE_URL]);
     
+    // Fetch owner info when animal is owned (ownerId_public differs from breederId_public)
+    React.useEffect(() => {
+        const fetchOwner = async () => {
+            if (animal?.isOwned && animal?.ownerId_public) {
+                try {
+                    const response = await axios.get(
+                        `${API_BASE_URL}/public/profiles/search?query=${animal.ownerId_public}&limit=1`
+                    );
+                    if (response.data && response.data.length > 0) {
+                        setOwnerInfo(response.data[0]);
+                    } else {
+                        setOwnerInfo(null);
+                    }
+                } catch {
+                    setOwnerInfo(null);
+                }
+            } else {
+                setOwnerInfo(null);
+            }
+        };
+        fetchOwner();
+    }, [animal?.isOwned, animal?.ownerId_public, API_BASE_URL]);
+
     if (!animal) return null;
 
     return (
@@ -831,6 +855,34 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                                     return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{bDisplayName}</RouterLink>;
                                                 })() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}
                                             </div>
+                                            {/* Keeper */}
+                                            {animal.ownerId_public && (
+                                                <div>
+                                                    <span className="text-gray-500">Keeper:</span>{' '}
+                                                    {ownerInfo ? (
+                                                        <RouterLink
+                                                            to={`/user/${ownerInfo.id_public}`}
+                                                            className="text-purple-600 hover:underline font-semibold"
+                                                        >
+                                                            {(() => {
+                                                                const showPersonal = ownerInfo.showPersonalName ?? false;
+                                                                const showBreeder = ownerInfo.showBreederName ?? false;
+                                                                if (showPersonal && showBreeder && ownerInfo.personalName && ownerInfo.breederName) {
+                                                                    return `${ownerInfo.personalName} (${ownerInfo.breederName})`;
+                                                                } else if (showBreeder && ownerInfo.breederName) {
+                                                                    return ownerInfo.breederName;
+                                                                } else if (showPersonal && ownerInfo.personalName) {
+                                                                    return ownerInfo.personalName;
+                                                                } else {
+                                                                    return 'Unknown Keeper';
+                                                                }
+                                                            })()}
+                                                        </RouterLink>
+                                                    ) : (
+                                                        <span className="font-mono text-accent">{animal.keeperName || animal.ownerId_public || '\u2014'}</span>
+                                                    )}
+                                                </div>
+                                            )}
                                             {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
                                                 <hr className="border-gray-200" />
                                             )}
