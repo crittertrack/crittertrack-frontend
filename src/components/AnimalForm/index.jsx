@@ -2302,8 +2302,9 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                         authToken={authToken}
                         onViewAnimal={onViewAnimal}
                     />
-                </div>
-            )}\n        </div>
+            </div>
+            )}
+        </div>
     );
 });
 
@@ -3611,6 +3612,12 @@ const AnimalForm = ({
         }
     );
     
+    // Introduce a useRef for formData to hold the latest value
+    const formDataRef = useRef(formData);
+    // Update the useRef whenever formData changes
+    useEffect(() => {
+        formDataRef.current = formData;
+    }, [formData]);
     // Fetch field template when species changes
     useEffect(() => {
         if (!formData.species) return;
@@ -4467,8 +4474,11 @@ const AnimalForm = ({
             const updated = e.detail;
             if (!updated?.id_public) return;
 
-            const fatherId = formData.fatherId_public;
-            const motherId = formData.motherId_public;
+            // Use formDataRef.current to access the latest formData without re-running this effect
+            const currentFormData = formDataRef.current;
+
+            const fatherId = currentFormData.fatherId_public;
+            const motherId = currentFormData.motherId_public;
             
             // Check if the updated animal is the father
             if (fatherId && updated.id_public === fatherId) {
@@ -4497,8 +4507,8 @@ const AnimalForm = ({
         }; // End of handleAnimalUpdated
 
         window.addEventListener('animal-updated', handleAnimalUpdated);
-        return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
-    }, [formData.fatherId_public, formData.motherId_public]);
+        return () => window.removeEventListener('animal-updated', handleAnimalUpdated); // Empty dependency array, as formDataRef is used inside
+    }, []); // End of useEffect for animal-updated listener
 
     const addMeasurement = () => {
         if (!newMeasurement.date || !newMeasurement.weight) {
