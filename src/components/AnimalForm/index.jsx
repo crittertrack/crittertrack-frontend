@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
+﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import axios from 'axios';
 import {
     Activity, AlertCircle, AlertTriangle, ArrowLeft, Ban, Camera, Cat,
@@ -2457,14 +2457,14 @@ const ParentSearchModal = ({
             <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
                 <div className="flex justify-between items-center border-b pb-3 mb-4">
                     <h3 className="text-xl font-bold text-gray-800">{title} Selector</h3>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
+                    <button onClick={() => { onClose(); setContactSelectorTarget(null); }} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
                 </div>
 
                 {/* Scope Toggle + Search Bar (Manual Search) */}
                 <div className="mb-3">
                     <div className="flex items-center space-x-2 mb-2">
                         <span className="text-sm font-medium text-gray-600">Search Scope:</span>
-                        {['local','global','both'].map(s => (
+                        {['local', 'global', 'both'].map(s => (
                             <button key={s} type="button" onClick={() => setScope(s)}
                                 className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
                                 {s === 'both' ? 'Local + Global' : (s === 'local' ? 'Local' : 'Global')}
@@ -2474,14 +2474,18 @@ const ParentSearchModal = ({
                     <div className="flex space-x-2">
                         <input
                             type="text"
-                            placeholder={`Search by Name or ID (e.g., Minnie or CT2468)...`}
+                            placeholder={`Search by Name or ID (e.g., Minnie or CT2468)`}
                             value={searchTerm}
                             onChange={(e) => { setSearchTerm(e.target.value); setHasSearched(false); }}
                             className="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
                         />
                         <button
                             onClick={handleSearch}
-                            disabled={((scope === 'local' || scope === 'both') && loadingLocal) || ((scope === 'global' || scope === 'both') && loadingGlobal) || searchTerm.trim().length < 1}
+                            disabled={
+                                ((scope === 'local' || scope === 'both') && loadingLocal) ||
+                                ((scope === 'global' || scope === 'both') && loadingGlobal) ||
+                                searchTerm.trim().length < 1
+                            }
                             className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50"
                         >
                             { (loadingLocal || loadingGlobal) ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} /> }
@@ -2516,7 +2520,7 @@ const ParentSearchModal = ({
                 <div className="mt-4 pt-4 border-t">
                     <button 
                         onClick={() => onSelect(null)} 
-                        className="w-full text-sm text-gray-500 hover:text-red-500 transition"
+                        className="w-full text-sm text-gray-500 hover:text-red-500 transition" // This button is for clearing the ID
                     >
                         Clear {title} ID
                     </button>
@@ -2718,32 +2722,42 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
             <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
                 <div className="flex justify-between items-center border-b pb-3 mb-4">
                     <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">Global Search <Search size={18} className="flex-shrink-0" /></h3>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
+                    <button onClick={() => { onClose(); setContactSelectorTarget(null); }} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
                 </div>
 
                 {/* Search Type Toggle - only show for pedigree (sire/dam), not for breeder */}
                 {modalTarget !== 'breeder' && (
                     <div className="flex space-x-2 mb-4">
                         <button
-                            onClick={() => { setSearchType('users'); setUserResults([]); setAnimalResults([]); setHasSearched(false); }}
+                            onClick={() => {
+                                setSearchType('users');
+                                setUserResults([]);
+                                setAnimalResults([]);
+                                setHasSearched(false);
+                            }}
                             className={`flex-1 py-2 px-4 rounded-lg font-semibold transition ${
                                 searchType === 'users' 
                                     ? 'bg-primary text-black' 
                                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                         >
-                            <User size={16} className="inline mr-2" />
+                            <User size={16} className="inline mr-2" /> {/* User icon */}
                             Users
                         </button>
                         <button
-                            onClick={() => { setSearchType('animals'); setUserResults([]); setAnimalResults([]); setHasSearched(false); }}
+                            onClick={() => {
+                                setSearchType('animals');
+                                setUserResults([]);
+                                setAnimalResults([]);
+                                setHasSearched(false);
+                            }}
                             className={`flex-1 py-2 px-4 rounded-lg font-semibold transition ${
                                 searchType === 'animals' 
                                     ? 'bg-primary text-black' 
                                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                         >
-                            <Cat size={16} className="inline mr-2" />
+                            <Cat size={16} className="inline mr-2" /> {/* Cat icon */}
                             Animals
                         </button>
                     </div>
@@ -3231,7 +3245,7 @@ const AnimalForm = ({
     };
     
     // Initial state setup (using the passed props for options)
-    const [formData, setFormData] = useState(
+    const [formData, setFormData] = useState(() => {
         animalToEdit ? {
             species: animalToEdit.species,
             breederAssignedId: animalToEdit.breederAssignedId || animalToEdit.breederyId || animalToEdit.registryCode || '',
@@ -3595,7 +3609,196 @@ const AnimalForm = ({
             purchaseLocation: '',
             legalDocuments: [],
         }
-    );
+        const newAnimalDefaults = { // Define the base defaults for a new animal
+            species: species, breederAssignedId: '', prefix: '', suffix: '', name: '', gender: 'Unknown', birthDate: '', deceasedDate: '', status: 'Pet', color: '', coat: '', earset: '', remarks: '', tags: [], geneticCode: '', fatherId_public: null, motherId_public: null, breederId_public: null, groupRole: '', isPregnant: false, isNursing: false, isInMating: false, isQuarantine: false, isInTreatment: false, enclosureId: '', lastFedDate: '', feedingFrequencyDays: '', lastMaintenanceDate: '', maintenanceFrequencyDays: '', careTasks: [], animalCareTasks: [], milestones: [], breedingRole: 'both', isOwned: true, isDisplay: true, microchipNumber: '', pedigreeRegistrationId: '', colonyId: '', breed: '', strain: '', coatPattern: '', phenotype: '', morph: '', markings: '', eyeColor: '', nailColor: '', size: '', carrierTraits: '', bodyWeight: '', bodyLength: '', heightAtWithers: '', bodyConditionScore: '', origin: 'Captive-bred', isNeutered: false, isInfertile: false, heatStatus: '', lastHeatDate: '', ovulationDate: '', matingDate: '', expectedDueDate: '', litterCount: '', litterSizeBorn: '', litterSizeWeaned: '', stillbornCount: '', nursingStartDate: '', weaningDate: '', isStudAnimal: false, availableForBreeding: false, studFeeCurrency: 'USD', studFeeAmount: '', isForSale: false, salePriceCurrency: 'USD', salePriceAmount: '', fertilityStatus: '', lastMatingDate: '', successfulMatings: '', fertilityNotes: '', isDamAnimal: false, damFertilityStatus: '', lastPregnancyDate: '', offspringCount: '', damFertilityNotes: '', medicalConditions: '', allergies: '', medications: '', vetVisits: '', primaryVet: '', dietType: '', feedingSchedule: '', supplements: '', housingType: '', bedding: '', temperatureRange: '', humidity: '', lighting: '', noise: '', enrichment: '', temperament: '', handlingTolerance: '', socialStructure: '', activityCycle: '', lifeStage: '', causeOfDeath: '', necropsyResults: '', insurance: '', legalStatus: '', keeperHistory: [], showTitles: '', showRatings: '', judgeComments: '', workingTitles: '', performanceScores: '', chestGirth: '', adultWeight: '', licenseNumber: '', licenseJurisdiction: '', rabiesTagNumber: '', tattooId: '', akcRegistrationNumber: '', fciRegistrationNumber: '', cfaRegistrationNumber: '', workingRegistryIds: '', estrusCycleLength: '', gestationLength: '', artificialInseminationUsed: false, whelpingDate: '', queeningDate: '', deliveryMethod: '', reproductiveComplications: '', reproductiveClearances: '', spayNeuterDate: '', parasitePreventionSchedule: '', heartwormStatus: '', hipElbowScores: '', geneticTestResults: '', eyeClearance: '', cardiacClearance: '', dentalRecords: '', chronicConditions: '', exerciseRequirements: '', dailyExerciseMinutes: '', groomingNeeds: '', sheddingLevel: '', crateTrained: false, litterTrained: false, leashTrained: false, freeFlightTrained: false, trainingLevel: '', trainingDisciplines: '', certifications: '', workingRole: '', behavioralIssues: '', biteHistory: '', reactivityNotes: '', endOfLifeCareNotes: '', coOwnership: '', transferHistory: '', breedingRestrictions: '', exportRestrictions: '', purchaseDate: '', purchaseLocation: '', legalDocuments: [],
+        };
+
+        const initialState = animalToEdit ? {
+            species: animalToEdit.species, breederAssignedId: animalToEdit.breederAssignedId || animalToEdit.breederyId || animalToEdit.registryCode || '', prefix: animalToEdit.prefix || '', suffix: animalToEdit.suffix || '', name: animalToEdit.name || '', gender: animalToEdit.gender || GENDER_OPTIONS[0], birthDate: animalToEdit.birthDate ? new Date(animalToEdit.birthDate).toISOString().substring(0, 10) : '', deceasedDate: animalToEdit.deceasedDate ? new Date(animalToEdit.deceasedDate).toISOString().substring(0, 10) : '', status: animalToEdit.status || 'Pet', color: animalToEdit.color || '', coat: animalToEdit.coat || '', earset: animalToEdit.earset || '', remarks: animalToEdit.remarks || '', tags: animalToEdit.tags || [], geneticCode: animalToEdit.geneticCode || '', fatherId_public: animalToEdit.fatherId_public || animalToEdit.sireId_public || null, motherId_public: animalToEdit.motherId_public || animalToEdit.damId_public || null, breederId_public: animalToEdit.breederId_public || null, manualBreederName: animalToEdit.manualBreederName || '', keeperName: animalToEdit.keeperName || animalToEdit.ownerName || animalToEdit.currentOwner || animalToEdit.currentOwnerDisplay || '', groupRole: animalToEdit.groupRole || '', isPregnant: animalToEdit.isPregnant || false, isNursing: animalToEdit.isNursing || false, isInMating: animalToEdit.isInMating || false, isQuarantine: animalToEdit.isQuarantine || false, isInTreatment: animalToEdit.isInTreatment || false, enclosureId: animalToEdit.enclosureId || '', lastFedDate: animalToEdit.lastFedDate ? new Date(animalToEdit.lastFedDate).toISOString().split('T')[0] : '', feedingFrequencyDays: animalToEdit.feedingFrequencyDays || '', lastMaintenanceDate: animalToEdit.lastMaintenanceDate ? new Date(animalToEdit.lastMaintenanceDate).toISOString().split('T')[0] : '', maintenanceFrequencyDays: animalToEdit.maintenanceFrequencyDays || '', careTasks: animalToEdit.careTasks || [], animalCareTasks: animalToEdit.animalCareTasks || [], milestones: (animalToEdit.milestones || []).map(m => ({ ...m, startDate: m.startDate ? new Date(m.startDate).toISOString().split('T')[0] : '', })), isOwned: animalToEdit.isOwned ?? true, isDisplay: animalToEdit.isDisplay ?? false, microchipNumber: animalToEdit.microchipNumber || '', pedigreeRegistrationId: animalToEdit.pedigreeRegistrationId || '', colonyId: animalToEdit.colonyId || '', breed: animalToEdit.breed || '', strain: animalToEdit.strain || '', coatPattern: animalToEdit.coatPattern || '', phenotype: animalToEdit.phenotype || '', morph: animalToEdit.morph || '', markings: animalToEdit.markings || '', eyeColor: animalToEdit.eyeColor || '', nailColor: animalToEdit.nailColor || '', size: animalToEdit.size || '', carrierTraits: animalToEdit.carrierTraits || '', bodyWeight: animalToEdit.bodyWeight || '', bodyLength: animalToEdit.bodyLength || '', heightAtWithers: animalToEdit.heightAtWithers || '', bodyConditionScore: animalToEdit.bodyConditionScore || '', origin: animalToEdit.origin || 'Captive-bred', isNeutered: animalToEdit.isNeutered || false, isInfertile: animalToEdit.isInfertile || false, heatStatus: animalToEdit.heatStatus || '', lastHeatDate: animalToEdit.lastHeatDate ? new Date(animalToEdit.lastHeatDate).toISOString().substring(0, 10) : '', ovulationDate: animalToEdit.ovulationDate ? new Date(animalToEdit.ovulationDate).toISOString().substring(0, 10) : '', matingDate: animalToEdit.matingDate || '', expectedDueDate: animalToEdit.expectedDueDate ? new Date(animalToEdit.expectedDueDate).toISOString().substring(0, 10) : '', litterCount: animalToEdit.litterCount || '', litterSizeBorn: animalToEdit.litterSizeBorn || '', litterSizeWeaned: animalToEdit.litterSizeWeaned || '', stillbornCount: animalToEdit.stillbornCount || '', nursingStartDate: animalToEdit.nursingStartDate ? new Date(animalToEdit.nursingStartDate).toISOString().substring(0, 10) : '', weaningDate: animalToEdit.weaningDate ? new Date(animalToEdit.weaningDate).toISOString().substring(0, 10) : '', isStudAnimal: animalToEdit.isStudAnimal || false, availableForBreeding: animalToEdit.availableForBreeding || false, studFeeCurrency: animalToEdit.studFeeCurrency || 'USD', studFeeAmount: animalToEdit.studFeeAmount || '', isForSale: animalToEdit.isForSale || false, salePriceCurrency: animalToEdit.salePriceCurrency || 'USD', salePriceAmount: animalToEdit.salePriceAmount || '', fertilityStatus: animalToEdit.fertilityStatus || 'Unknown', lastMatingDate: animalToEdit.lastMatingDate ? new Date(animalToEdit.lastMatingDate).toISOString().substring(0, 10) : '', successfulMatings: animalToEdit.successfulMatings || '', fertilityNotes: animalToEdit.fertilityNotes || '', isDamAnimal: animalToEdit.isDamAnimal || false, damFertilityStatus: animalToEdit.damFertilityStatus || 'Unknown', lastPregnancyDate: animalToEdit.lastPregnancyDate ? new Date(animalToEdit.lastPregnancyDate).toISOString().substring(0, 10) : '', offspringCount: animalToEdit.offspringCount || '', damFertilityNotes: animalToEdit.damFertilityNotes || '', medicalConditions: animalToEdit.medicalConditions || '', allergies: animalToEdit.allergies || '', medications: animalToEdit.medications || '', vetVisits: animalToEdit.vetVisits || '', primaryVet: animalToEdit.primaryVet || '', dietType: animalToEdit.dietType || '', feedingSchedule: animalToEdit.feedingSchedule || '', supplements: animalToEdit.supplements || '', housingType: animalToEdit.housingType || '', bedding: animalToEdit.bedding || '', temperatureRange: animalToEdit.temperatureRange || '', humidity: animalToEdit.humidity || '', lighting: animalToEdit.lighting || '', noise: animalToEdit.noise || '', enrichment: animalToEdit.enrichment || '', temperament: animalToEdit.temperament || '', handlingTolerance: animalToEdit.handlingTolerance || '', socialStructure: animalToEdit.socialStructure || '', activityCycle: animalToEdit.activityCycle || '', lifeStage: animalToEdit.lifeStage || '', causeOfDeath: animalToEdit.causeOfDeath || '', necropsyResults: animalToEdit.necropsyResults || '', insurance: animalToEdit.insurance || '', legalStatus: animalToEdit.legalStatus || '', keeperHistory: animalToEdit.keeperHistory || [], showTitles: animalToEdit.showTitles || '', showRatings: animalToEdit.showRatings || '', judgeComments: animalToEdit.judgeComments || '', workingTitles: animalToEdit.workingTitles || '', performanceScores: animalToEdit.performanceScores || '', chestGirth: animalToEdit.chestGirth || '', adultWeight: animalToEdit.adultWeight || '', licenseNumber: animalToEdit.licenseNumber || '', licenseJurisdiction: animalToEdit.licenseJurisdiction || '', rabiesTagNumber: animalToEdit.rabiesTagNumber || '', tattooId: animalToEdit.tattooId || '', akcRegistrationNumber: animalToEdit.akcRegistrationNumber || '', fciRegistrationNumber: animalToEdit.fciRegistrationNumber || '', cfaRegistrationNumber: animalToEdit.cfaRegistrationNumber || '', workingRegistryIds: animalToEdit.workingRegistryIds || '', estrusCycleLength: animalToEdit.estrusCycleLength || '', gestationLength: animalToEdit.gestationLength || '', artificialInseminationUsed: animalToEdit.artificialInseminationUsed || false, whelpingDate: animalToEdit.whelpingDate ? new Date(animalToEdit.whelpingDate).toISOString().substring(0, 10) : '', queeningDate: animalToEdit.queeningDate ? new Date(animalToEdit.queeningDate).toISOString().substring(0, 10) : '', deliveryMethod: animalToEdit.deliveryMethod || '', reproductiveComplications: animalToEdit.reproductiveComplications || '', reproductiveClearances: animalToEdit.reproductiveClearances || '', spayNeuterDate: animalToEdit.spayNeuterDate ? new Date(animalToEdit.spayNeuterDate).toISOString().substring(0, 10) : '', parasitePreventionSchedule: animalToEdit.parasitePreventionSchedule || '', heartwormStatus: animalToEdit.heartwormStatus || '', hipElbowScores: animalToEdit.hipElbowScores || '', geneticTestResults: animalToEdit.geneticTestResults || '', eyeClearance: animalToEdit.eyeClearance || '', cardiacClearance: animalToEdit.cardiacClearance || '', dentalRecords: animalToEdit.dentalRecords || '', chronicConditions: animalToEdit.chronicConditions || '', exerciseRequirements: animalToEdit.exerciseRequirements || '', dailyExerciseMinutes: animalToEdit.dailyExerciseMinutes || '', groomingNeeds: animalToEdit.groomingNeeds || '', sheddingLevel: animalToEdit.sheddingLevel || '', crateTrained: animalToEdit.crateTrained || false, litterTrained: animalToEdit.litterTrained || false, leashTrained: animalToEdit.leashTrained || false, freeFlightTrained: animalToEdit.freeFlightTrained || false, trainingLevel: animalToEdit.trainingLevel || '', trainingDisciplines: animalToEdit.trainingDisciplines || '', certifications: animalToEdit.certifications || '', workingRole: animalToEdit.workingRole || '', behavioralIssues: animalToEdit.behavioralIssues || '', biteHistory: animalToEdit.biteHistory || '', reactivityNotes: animalToEdit.reactivityNotes || '', endOfLifeCareNotes: animalToEdit.endOfLifeCareNotes || '', coOwnership: animalToEdit.coOwnership || '', transferHistory: animalToEdit.transferHistory || '', breedingRestrictions: animalToEdit.breedingRestrictions || '', exportRestrictions: animalToEdit.exportRestrictions || '', purchaseDate: animalToEdit.purchaseDate ? new Date(animalToEdit.purchaseDate).toISOString().substring(0, 10) : '', purchaseLocation: animalToEdit.purchaseLocation || '', legalDocuments: animalToEdit.legalDocuments || [],
+        } : (() => {
+            const newAnimalDefaults = {
+                species: species, 
+                breederAssignedId: '',
+                prefix: '',
+                suffix: '',
+                name: '',
+                gender: 'Unknown',
+                birthDate: '', 
+                deceasedDate: '',
+                status: 'Pet',
+                color: '',
+                coat: '',
+                earset: '', 
+                remarks: '',
+                tags: [],
+                geneticCode: '',
+                fatherId_public: null,
+                motherId_public: null,
+                breederId_public: null, // Default to null for new animals
+                keeperName: '', // Default to empty string
+                groupRole: '',
+                isPregnant: false,
+                isNursing: false,
+                isInMating: false,
+                isQuarantine: false,
+                isInTreatment: false,
+                enclosureId: '',
+                lastFedDate: '',
+                feedingFrequencyDays: '',
+                lastMaintenanceDate: '',
+                maintenanceFrequencyDays: '',
+                careTasks: [],
+                animalCareTasks: [],
+                milestones: [],
+                breedingRole: 'both',
+                isOwned: true,
+                isDisplay: true,
+                // New fields defaults
+                microchipNumber: '',
+                pedigreeRegistrationId: '',
+                colonyId: '',
+                breed: '',
+                strain: '',
+                coatPattern: '',
+                phenotype: '',
+                morph: '',
+                markings: '',
+                eyeColor: '',
+                nailColor: '',
+                size: '',
+                carrierTraits: '',
+                bodyWeight: '',
+                bodyLength: '',
+                heightAtWithers: '',
+                bodyConditionScore: '',
+                origin: 'Captive-bred',
+                isNeutered: false,
+                isInfertile: false,
+                heatStatus: '',
+                lastHeatDate: '',
+                ovulationDate: '',
+                matingDate: '',
+                expectedDueDate: '',
+                litterCount: '',
+                litterSizeBorn: '',
+                litterSizeWeaned: '',
+                stillbornCount: '',
+                nursingStartDate: '',
+                weaningDate: '',
+                // Stud/Fertility fields (sire role)
+                isStudAnimal: false,
+                availableForBreeding: false,
+                studFeeCurrency: 'USD',
+                studFeeAmount: '',
+                // Sale fields
+                isForSale: false,
+                salePriceCurrency: 'USD',
+                salePriceAmount: '',
+                fertilityStatus: '',
+                lastMatingDate: '',
+                successfulMatings: '',
+                fertilityNotes: '',
+                // Dam/Fertility fields (dam role)
+                isDamAnimal: false,
+                damFertilityStatus: '',
+                lastPregnancyDate: '',
+                offspringCount: '',
+                damFertilityNotes: '',
+                medicalConditions: '',
+                allergies: '',
+                medications: '',
+                vetVisits: '',
+                primaryVet: '',
+                dietType: '',
+                feedingSchedule: '',
+                supplements: '',
+                housingType: '',
+                bedding: '',
+                temperatureRange: '',
+                humidity: '',
+                lighting: '',
+                noise: '',
+                enrichment: '',
+                temperament: '',
+                handlingTolerance: '',
+                socialStructure: '',
+                activityCycle: '',
+                lifeStage: '',
+                causeOfDeath: '',
+                necropsyResults: '',
+                insurance: '',
+                legalStatus: '',
+                keeperHistory: [],
+                // Show tab fields
+                showTitles: '',
+                showRatings: '',
+                judgeComments: '',
+                workingTitles: '',
+                performanceScores: '',
+                // Dog/Cat specific - Physical measurements (duplicate entries removed)
+                chestGirth: '',
+                adultWeight: '',
+                // Dog/Cat specific - Identification
+                licenseNumber: '',
+                licenseJurisdiction: '',
+                rabiesTagNumber: '',
+                tattooId: '',
+                akcRegistrationNumber: '',
+                fciRegistrationNumber: '',
+                cfaRegistrationNumber: '',
+                workingRegistryIds: '',
+                // Dog/Cat specific - Reproduction
+                estrusCycleLength: '',
+                gestationLength: '',
+                artificialInseminationUsed: false,
+                whelpingDate: '',
+                queeningDate: '',
+                deliveryMethod: '',
+                reproductiveComplications: '',
+                reproductiveClearances: '',
+                // Dog/Cat specific - Health
+                spayNeuterDate: '',
+                parasitePreventionSchedule: '',
+                heartwormStatus: '',
+                hipElbowScores: '',
+                geneticTestResults: '',
+                eyeClearance: '',
+                cardiacClearance: '',
+                dentalRecords: '',
+                chronicConditions: '',
+                // Dog/Cat specific - Husbandry
+                exerciseRequirements: '',
+                dailyExerciseMinutes: '',
+                groomingNeeds: '',
+                sheddingLevel: '',
+                crateTrained: false,
+                litterTrained: false,
+                leashTrained: false,
+                freeFlightTrained: false,
+                trainingLevel: '',
+                trainingDisciplines: '',
+                certifications: '',
+                workingRole: '',
+                behavioralIssues: '',
+                biteHistory: '',
+                reactivityNotes: '',
+                // Dog/Cat specific - Legal & Ownership
+                endOfLifeCareNotes: '',
+                coOwnership: '',
+                transferHistory: '',
+                breedingRestrictions: '',
+                exportRestrictions: '',
+                purchaseDate: '',
+                purchaseLocation: '',
+                legalDocuments: [],
+            };
+            return {
+                ...newAnimalDefaults,
+                ...(initialValues || {}),
+                keeperName: '', // Explicitly ensure keeperName is empty for new animals
+            };
+        })()
+    });
     
     // Fetch field template when species changes
     useEffect(() => {
@@ -4056,6 +4259,7 @@ const AnimalForm = ({
     const [showManualAssignmentModal, setShowManualAssignmentModal] = useState(false);
     const [assignmentRole, setAssignmentRole] = useState('breeder');
     const [contacts, setContacts] = useState([]);
+    const [contactSelectorTarget, setContactSelectorTarget] = useState(null); // 'breeder' or 'keeper'
     const [loadingContacts, setLoadingContacts] = useState(false);
 
     // Manual Pedigree (Beta) helpers
