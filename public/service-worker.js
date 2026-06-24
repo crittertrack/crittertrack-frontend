@@ -1,5 +1,5 @@
 // Service Worker for CritterTrack PWA
-const CACHE_NAME = 'crittertrack-v29'; // Increment version to force cache update
+const CACHE_NAME = 'crittertrack-v30'; // Increment version to force cache update
 const urlsToCache = [
   '/',
   '/index.html',
@@ -11,14 +11,23 @@ const urlsToCache = [
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing new service worker...', CACHE_NAME);
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('[SW] Opened cache');
-        return cache.addAll(urlsToCache).catch(err => {
-          console.warn('[SW] Initial cache failed (ok for offline):', err);
-        });
-      })
-      .catch(err => console.error('[SW] Cache open failed:', err))
+    // Delete all old caches immediately on install
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          console.log('[SW] Deleting old cache during install:', cacheName);
+          return caches.delete(cacheName);
+        })
+      );
+    }).then(() => {
+      // Open new cache and add resources
+      return caches.open(CACHE_NAME);
+    }).then((cache) => {
+      console.log('[SW] Opened new cache:', CACHE_NAME);
+      return cache.addAll(urlsToCache).catch(err => {
+        console.warn('[SW] Initial cache failed (ok for offline):', err);
+      });
+    }).catch(err => console.error('[SW] Cache setup failed:', err))
   );
   self.skipWaiting();
 });
@@ -118,17 +127,27 @@ self.addEventListener('activate', (event) => {
   const cacheWhitelist = [CACHE_NAME];
 
   event.waitUntil(
+    // Double-check: delete any remaining old caches during activation
     caches.keys().then((cacheNames) => {
       return Promise.all(cacheNames.map((cacheName) => {
         if (!cacheWhitelist.includes(cacheName)) {
-          console.log('[SW] Deleting old cache:', cacheName);
+          console.log('[SW] Deleting old cache during activation:', cacheName);
           return caches.delete(cacheName);
         }
       }));
-    }).then(() => self.clients.claim())
-      .then(() => self.clients.matchAll({ type: 'window' }))
+    }).then(() => {
+      console.log('[SW] Taking control of all clients');
+      return self.clients.claim();
+    }).then(() => self.clients.matchAll({ type: 'window' }))
       .then((clients) => {
-        clients.forEach(client => client.postMessage({ type: 'SW_ACTIVATED', cacheName: CACHE_NAME }));
+        console.log('[SW] Notifying clients of activation');
+        clients.forEach(client => {
+          client.postMessage({ 
+            type: 'SW_ACTIVATED', 
+            cacheName: CACHE_NAME,
+            action: 'FORCE_RELOAD'
+          });
+        });
       })
   );
 });
