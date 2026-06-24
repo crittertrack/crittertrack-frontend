@@ -3252,7 +3252,7 @@ const AnimalForm = ({
             motherId_public: animalToEdit.motherId_public || animalToEdit.damId_public || null,
             breederId_public: animalToEdit.breederId_public || null,
             manualBreederName: animalToEdit.manualBreederName || '',
-            keeperName: formData.keeperName,
+            keeperName: animalToEdit.keeperName || animalToEdit.ownerName || animalToEdit.currentOwner || animalToEdit.currentOwnerDisplay || '',
             groupRole: animalToEdit.groupRole || '',
                 isPregnant: animalToEdit.isPregnant || false,
             isNursing: animalToEdit.isNursing || false,
