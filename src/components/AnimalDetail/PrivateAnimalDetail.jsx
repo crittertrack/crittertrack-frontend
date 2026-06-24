@@ -874,7 +874,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                                                 } else if (showPersonal && ownerInfo.personalName) {
                                                                     return ownerInfo.personalName;
                                                                 } else {
-                                                                    return 'Unknown Keeper';
+                                                                    return '✗';
                                                                 }
                                                             })()}
                                                         </RouterLink>

@@ -687,7 +687,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                                                     } else if (showPersonal && ownerInfo.personalName) {
                                                                         return ownerInfo.personalName;
                                                                     } else {
-                                                                        return 'Unknown Keeper';
+                                                                        return '✗';
                                                                     }
                                                                 })()}
                                                             </RouterLink>
