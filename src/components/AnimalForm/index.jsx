@@ -668,32 +668,18 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
         };
 
         // Helper to build tree structure from flat results
-        const buildTreeFromResults = (id, resultsMap, visited = new Set(), memo = new Map()) => {
-            if (memo.has(id)) {
-                return memo.get(id);
-            }
-
-            if (visited.has(id)) {
-                // Circular reference detected, return null to break the loop
-                console.warn(`[PEDIGREE PREFETCH] Circular reference detected for animal ID: ${id}. Terminating branch.`);
-                return null;
-            }
-            visited.add(id);
-
+        const buildTreeFromResults = (id, resultsMap) => {
             const animalData = resultsMap.get(id);
-            if (!animalData) { visited.delete(id); return null; } // Remove from visited if not found
+            if (!animalData) return null;
 
             const fatherId = animalData.fatherId_public || animalData.sireId_public;
             const motherId = animalData.motherId_public || animalData.damId_public;
 
             return {
                 ...animalData,
-                father: fatherId ? buildTreeFromResults(fatherId, resultsMap, new Set(visited), memo) : null, // Pass memo
-                mother: motherId ? buildTreeFromResults(motherId, resultsMap, new Set(visited), memo) : null  // Pass memo
+                father: fatherId ? buildTreeFromResults(fatherId, resultsMap) : null,
+                mother: motherId ? buildTreeFromResults(motherId, resultsMap) : null
             };
-            const builtAnimal = { ...animalData, father, mother };
-            memo.set(id, builtAnimal);
-            return builtAnimal;
         };
 
         // PHASE 1: Breadth-first for all generations (simplified for 4 generation limit)
@@ -744,7 +730,7 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
             console.log(`[PEDIGREE PREFETCH] Generation ${currentDepth} complete (${genElapsed}ms)`);
 
             // Update cache with partial data after each generation
-            const partialTree = buildTreeFromResults(rootId, new Map(Array.from(resultCache.entries()).map(([k, v]) => [k, v.data])), new Set(), new Map());
+            const partialTree = buildTreeFromResults(rootId, resultCache);
             if (partialTree) {
                 pedigreeTreeCache.set(cacheKey, {
                     data: partialTree,
@@ -757,8 +743,8 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
             }
         }
 
-        // Build final tree from cached results (no additional fetching needed - we already have 4 generations) using a fresh memo
-        const data = buildTreeFromResults(rootId, new Map(Array.from(resultCache.entries()).map(([k, v]) => [k, v.data])), new Set(), new Map());
+        // Build final tree from cached results (no additional fetching needed - we already have 4 generations)
+        const data = buildTreeFromResults(rootId, new Map(Array.from(resultCache.entries()).map(([k, v]) => [k, v.data])));
         
         // Fetch owner profile
         let fetchedOwnerProfile = null;
@@ -2302,9 +2288,8 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                         authToken={authToken}
                         onViewAnimal={onViewAnimal}
                     />
-            </div>
-            )}
-        </div>
+                </div>
+            )}\n        </div>
     );
 });
 
@@ -3612,12 +3597,6 @@ const AnimalForm = ({
         }
     );
     
-    // Introduce a useRef for formData to hold the latest value
-    const formDataRef = useRef(formData);
-    // Update the useRef whenever formData changes
-    useEffect(() => {
-        formDataRef.current = formData;
-    }, [formData]);
     // Fetch field template when species changes
     useEffect(() => {
         if (!formData.species) return;
@@ -4418,18 +4397,13 @@ const AnimalForm = ({
     }, [animalToEdit]);
 
     // Fetch parent info when parent IDs change (for newly selected parents)
-    // This useEffect is a prime candidate for causing a feedback loop if not handled carefully
-    // because it updates state (fatherInfo/motherInfo) which can trigger re-renders,
-    // and if those re-renders lead to another 'animal-updated' event, it loops.
     useEffect(() => {
         const fetchParentNames = async () => {
             // Fetch father info only if ID changed
             if (formData.fatherId_public !== lastFetchedParentIds.current.father) {
                 lastFetchedParentIds.current.father = formData.fatherId_public;
                 
-                // If fatherId_public is null, clear fatherInfo
                 if (formData.fatherId_public) {
-                    // Fetch summary for display
                     try {
                         const info = await fetchAnimalSummary(formData.fatherId_public);
                         console.log('[PARENT FETCH] Fetched FATHER info for ID', formData.fatherId_public, ':', info);
@@ -4456,7 +4430,7 @@ const AnimalForm = ({
                     } catch (e) { 
                         console.error('[PARENT FETCH] Failed to fetch mother info:', e);
                         setMotherInfo(null);
-                    } // If fetch fails, clear info to reflect unknown state
+                    }
                 } else {
                     console.log('[PARENT FETCH] Clearing mother info (no ID)');
                     setMotherInfo(null);
@@ -4468,47 +4442,25 @@ const AnimalForm = ({
     }, [formData.fatherId_public, formData.motherId_public]);
 
     useEffect(() => {
-        // This listener reacts to a global 'animal-updated' event.
-        // This is the core of the potential feedback loop.
         const handleAnimalUpdated = (e) => {
             const updated = e.detail;
             if (!updated?.id_public) return;
 
-            // Use formDataRef.current to access the latest formData without re-running this effect
-            const currentFormData = formDataRef.current;
+            const fatherId = formData.fatherId_public;
+            const motherId = formData.motherId_public;
 
-            const fatherId = currentFormData.fatherId_public;
-            const motherId = currentFormData.motherId_public;
-            
-            // Check if the updated animal is the father
             if (fatherId && updated.id_public === fatherId) {
-                // Only update if there's actual new information or a change
-                setFatherInfo(prev => {
-                    if (!prev) return updated; // If no info, set it
-                    // Simple check for change to prevent unnecessary re-renders
-                    if (prev.name !== updated.name || prev.prefix !== updated.prefix || prev.suffix !== updated.suffix) {
-                        return { ...prev, ...updated };
-                    }
-                    return prev; // No significant change, return previous state
-                });
+                setFatherInfo(prev => prev ? { ...prev, ...updated } : prev);
             }
-            
-            // Check if the updated animal is the mother
+
             if (motherId && updated.id_public === motherId) {
-                // Only update if there's actual new information or a change
-                setMotherInfo(prev => {
-                    if (!prev) return updated; // If no info, set it
-                    if (prev.name !== updated.name || prev.prefix !== updated.prefix || prev.suffix !== updated.suffix) {
-                        return { ...prev, ...updated };
-                    }
-                    return prev; // No significant change, return previous state
-                });
+                setMotherInfo(prev => prev ? { ...prev, ...updated } : prev);
             }
-        }; // End of handleAnimalUpdated
+        };
 
         window.addEventListener('animal-updated', handleAnimalUpdated);
-        return () => window.removeEventListener('animal-updated', handleAnimalUpdated); // Empty dependency array, as formDataRef is used inside
-    }, []); // End of useEffect for animal-updated listener
+        return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
+    }, [formData.fatherId_public, formData.motherId_public]);
 
     const addMeasurement = () => {
         if (!newMeasurement.date || !newMeasurement.weight) {
