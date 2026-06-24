@@ -668,7 +668,14 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
         };
 
         // Helper to build tree structure from flat results
-        const buildTreeFromResults = (id, resultsMap) => {
+        const buildTreeFromResults = (id, resultsMap, visited = new Set()) => {
+            if (visited.has(id)) {
+                // Circular reference detected, return null to break the loop
+                console.warn(`[PEDIGREE PREFETCH] Circular reference detected for animal ID: ${id}. Terminating branch.`);
+                return null;
+            }
+            visited.add(id);
+
             const animalData = resultsMap.get(id);
             if (!animalData) return null;
 
@@ -677,8 +684,8 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
 
             return {
                 ...animalData,
-                father: fatherId ? buildTreeFromResults(fatherId, resultsMap) : null,
-                mother: motherId ? buildTreeFromResults(motherId, resultsMap) : null
+                father: fatherId ? buildTreeFromResults(fatherId, resultsMap, new Set(visited)) : null, // Pass a new set for each branch
+                mother: motherId ? buildTreeFromResults(motherId, resultsMap, new Set(visited)) : null  // Pass a new set for each branch
             };
         };
 
@@ -730,7 +737,7 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
             console.log(`[PEDIGREE PREFETCH] Generation ${currentDepth} complete (${genElapsed}ms)`);
 
             // Update cache with partial data after each generation
-            const partialTree = buildTreeFromResults(rootId, resultCache);
+            const partialTree = buildTreeFromResults(rootId, new Map(Array.from(resultCache.entries()).map(([k, v]) => [k, v.data])), new Set());
             if (partialTree) {
                 pedigreeTreeCache.set(cacheKey, {
                     data: partialTree,
@@ -744,7 +751,7 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
         }
 
         // Build final tree from cached results (no additional fetching needed - we already have 4 generations)
-        const data = buildTreeFromResults(rootId, new Map(Array.from(resultCache.entries()).map(([k, v]) => [k, v.data])));
+        const data = buildTreeFromResults(rootId, new Map(Array.from(resultCache.entries()).map(([k, v]) => [k, v.data])), new Set());
         
         // Fetch owner profile
         let fetchedOwnerProfile = null;
