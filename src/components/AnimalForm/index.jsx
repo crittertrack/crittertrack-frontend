@@ -747,8 +747,8 @@ const buildTreeFromResults = (id, resultsMap, path = new Set()) => {
             const genElapsed = Date.now() - genStartTime;
             console.log(`[PEDIGREE PREFETCH] Generation ${currentDepth} complete (${genElapsed}ms)`);
 
-            // Update cache with partial data after each generation
-            const partialTree = buildTreeFromResults(rootId, resultCache);
+            // Fix: Correctly map resultCache to pass animal data, not the metadata wrapper, to prevent malformed partial trees causing a re-fetch loop.
+            const partialTree = buildTreeFromResults(rootId, new Map(Array.from(resultCache.entries()).map(([k, v]) => [k, v.data])));
             if (partialTree) {
                 pedigreeTreeCache.set(cacheKey, {
                     data: partialTree,
