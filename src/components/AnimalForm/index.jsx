@@ -1099,9 +1099,12 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
         }
         
         setLoading(true);
-        const resultCache = new Map();
-        let remainingFetchBudget = MAX_PEDIGREE_FETCH_NODES;
-        const fetchAnimalWithFamily = async (id, depth = 0, pathIds = new Set()) => {
+        
+        // Use async function to properly handle the fetch
+        const fetchAncestorPedigree = async () => {
+            const resultCache = new Map();
+            let remainingFetchBudget = MAX_PEDIGREE_FETCH_NODES;
+            const fetchAnimalWithFamily = async (id, depth = 0, pathIds = new Set()) => {
             if (!id || depth > MAX_PEDIGREE_FETCH_DEPTH) return null;
             if (pathIds.has(id)) return null;
             if (resultCache.has(id)) {
@@ -1184,28 +1187,33 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             return result;
         };
 
-        fetchAnimalWithFamily(rootId).then(data => {
-            setPedigreeData(data);
-            setLoading(false);
-            let fetchedOwnerProfile = null;
-            // Fetch breeder profile for the ancestor
-            if (data?.breederId_public) {
-                axios.get(`${API_BASE_URL}/public/profiles/search?query=${data.breederId_public}&limit=1`)
-                    .then(r => {
+            try {
+                const data = await fetchAnimalWithFamily(rootId);
+                setPedigreeData(data);
+                
+                let fetchedOwnerProfile = null;
+                // Fetch breeder profile for the ancestor
+                if (data?.breederId_public) {
+                    try {
+                        const r = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${data.breederId_public}&limit=1`);
                         if (r.data?.[0]) {
                             fetchedOwnerProfile = r.data[0];
                             setOwnerProfile(r.data[0]);
                         }
-                        pedigreeTreeCache.set(cacheKey, { data, ownerProfile: fetchedOwnerProfile });
-                    })
-                    .catch(() => {});
-            } else {
-                pedigreeTreeCache.set(cacheKey, { data, ownerProfile: null });
+                    } catch (error) {
+                        console.error('Error fetching breeder profile:', error);
+                    }
+                }
+                
+                pedigreeTreeCache.set(cacheKey, { data, ownerProfile: fetchedOwnerProfile });
+            } catch (error) {
+                console.error('Error fetching ancestor pedigree:', error);
+            } finally {
+                setLoading(false);
             }
-        }).catch(error => {
-            console.error('Error fetching ancestor pedigree:', error);
-            setLoading(false);
-        });
+        };
+        
+        fetchAncestorPedigree();
     }, [currentViewingAnimal, API_BASE_URL, authToken]);
 
     // Check when all images are loaded
