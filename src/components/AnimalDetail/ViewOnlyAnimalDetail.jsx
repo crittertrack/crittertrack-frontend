@@ -660,6 +660,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                                                     return 'Unknown Breeder';
                                                                 }
                                                             })()}
+                                                            {(() => { const showPersonal = breederInfo.showPersonalName ?? false; const showBreeder = breederInfo.showBreederName ?? false; if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) { return `${breederInfo.personalName} (${breederInfo.breederName})`; } else if (showBreeder && breederInfo.breederName) { return breederInfo.breederName; } else if (showPersonal && breederInfo.personalName) { return breederInfo.personalName; } else { return 'Unknown Breeder'; } })()}
                                                         </RouterLink>
                                                     ) : (
                                                         <span className="font-mono text-accent">{animal.breederId_public}</span>
@@ -690,6 +691,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                                                         return '✗';
                                                                     }
                                                                 })()}
+                                                                {(() => { const showPersonal = ownerInfo.showPersonalName ?? false; const showBreeder = ownerInfo.showBreederName ?? false; if (showPersonal && showBreeder && ownerInfo.personalName && ownerInfo.breederName) { return `${ownerInfo.personalName} (${ownerInfo.breederName})`; } else if (showBreeder && ownerInfo.breederName) { return ownerInfo.breederName; } else if (showPersonal && ownerInfo.personalName) { return ownerInfo.personalName; } else { return 'Unknown Keeper'; } })()}
                                                             </RouterLink>
                                                         ) : (
                                                             <span className="font-mono text-accent">{animal.keeperName || animal.ownerId_public || '\u2014'}</span>
