@@ -1,4 +1,4 @@
-﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
+﻿﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import axios from 'axios';
 import {
     Activity, AlertCircle, AlertTriangle, ArrowLeft, Ban, Camera, Cat,
