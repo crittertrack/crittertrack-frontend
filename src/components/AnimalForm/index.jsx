@@ -4411,13 +4411,18 @@ const AnimalForm = ({
     }, [animalToEdit]);
 
     // Fetch parent info when parent IDs change (for newly selected parents)
+    // This useEffect is a prime candidate for causing a feedback loop if not handled carefully
+    // because it updates state (fatherInfo/motherInfo) which can trigger re-renders,
+    // and if those re-renders lead to another 'animal-updated' event, it loops.
     useEffect(() => {
         const fetchParentNames = async () => {
             // Fetch father info only if ID changed
             if (formData.fatherId_public !== lastFetchedParentIds.current.father) {
                 lastFetchedParentIds.current.father = formData.fatherId_public;
                 
+                // If fatherId_public is null, clear fatherInfo
                 if (formData.fatherId_public) {
+                    // Fetch summary for display
                     try {
                         const info = await fetchAnimalSummary(formData.fatherId_public);
                         console.log('[PARENT FETCH] Fetched FATHER info for ID', formData.fatherId_public, ':', info);
@@ -4444,7 +4449,7 @@ const AnimalForm = ({
                     } catch (e) { 
                         console.error('[PARENT FETCH] Failed to fetch mother info:', e);
                         setMotherInfo(null);
-                    }
+                    } // If fetch fails, clear info to reflect unknown state
                 } else {
                     console.log('[PARENT FETCH] Clearing mother info (no ID)');
                     setMotherInfo(null);
@@ -4456,21 +4461,40 @@ const AnimalForm = ({
     }, [formData.fatherId_public, formData.motherId_public]);
 
     useEffect(() => {
+        // This listener reacts to a global 'animal-updated' event.
+        // This is the core of the potential feedback loop.
         const handleAnimalUpdated = (e) => {
             const updated = e.detail;
             if (!updated?.id_public) return;
 
             const fatherId = formData.fatherId_public;
             const motherId = formData.motherId_public;
-
+            
+            // Check if the updated animal is the father
             if (fatherId && updated.id_public === fatherId) {
-                setFatherInfo(prev => prev ? { ...prev, ...updated } : prev);
+                // Only update if there's actual new information or a change
+                setFatherInfo(prev => {
+                    if (!prev) return updated; // If no info, set it
+                    // Simple check for change to prevent unnecessary re-renders
+                    if (prev.name !== updated.name || prev.prefix !== updated.prefix || prev.suffix !== updated.suffix) {
+                        return { ...prev, ...updated };
+                    }
+                    return prev; // No significant change, return previous state
+                });
             }
-
+            
+            // Check if the updated animal is the mother
             if (motherId && updated.id_public === motherId) {
-                setMotherInfo(prev => prev ? { ...prev, ...updated } : prev);
+                // Only update if there's actual new information or a change
+                setMotherInfo(prev => {
+                    if (!prev) return updated; // If no info, set it
+                    if (prev.name !== updated.name || prev.prefix !== updated.prefix || prev.suffix !== updated.suffix) {
+                        return { ...prev, ...updated };
+                    }
+                    return prev; // No significant change, return previous state
+                });
             }
-        };
+        }; // End of handleAnimalUpdated
 
         window.addEventListener('animal-updated', handleAnimalUpdated);
         return () => window.removeEventListener('animal-updated', handleAnimalUpdated);
