@@ -2136,14 +2136,14 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                 <div>
                                     <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Great-Grandparents (Gen 3)</p>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                                            {renderSlot('sireSireSire', 'Great Grandsire')}
-                                            {renderSlot('sireDamSire', 'Great Grandsire')}
-                                            {renderSlot('damSireSire', 'Great Grandsire')}
-                                            {renderSlot('damDamSire', 'Great Grandsire')}
-                                            {renderSlot('sireSireDam', 'Great Granddam')}
-                                            {renderSlot('sireDamDam', 'Great Granddam')}
-                                            {renderSlot('damSireDam', 'Great Granddam')}
-                                            {renderSlot('damDamDam', 'Great Granddam')} 
+                                            {renderSlot('sireSireSire', 'PGS Great Grandsire')}
+                                            {renderSlot('sireDamSire', 'PGD Great Grandsire')}
+                                            {renderSlot('damSireSire', 'MGS Great Grandsire')}
+                                            {renderSlot('damDamSire', 'MGD Great Grandsire')}
+                                            {renderSlot('sireSireDam', 'PGS Great Granddam')}
+                                            {renderSlot('sireDamDam', 'PGD Great Granddam')}
+                                            {renderSlot('damSireDam', 'MGS Great Granddam')}
+                                            {renderSlot('damDamDam', 'MGD Great Granddam')} 
                                     </div>
                                 </div>
                             </div>
