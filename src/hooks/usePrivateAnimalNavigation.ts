@@ -183,44 +183,28 @@ export function usePrivateAnimalNavigation(authToken: string | null, API_BASE_UR
 
             console.log('[handleSaveAnimal] Save successful:', response.data);
 
-            // If editing (PUT), refetch the animal and update view
-            if (method.toLowerCase() === 'put' && animalToEdit) {
-                try {
-                    const refetchResponse = await axios.get(
-                        `${API_BASE_URL}/animals/${animalToEdit.id_public}`,
-                        { headers: { Authorization: `Bearer ${authToken}` } }
-                    );
-                    const updatedAnimal = refetchResponse.data;
-                    
-                    // Update the viewed animal with fresh data
-                    setAnimalToView(updatedAnimal);
-                    setAnimalToEdit(null);
+            // TEMPORARY DEBUG VERSION
+// Skip refetch and skip custom events entirely
 
-                    // Dispatch event so other components know the animal was updated
-                    try {
-                        window.dispatchEvent(new CustomEvent('animal-updated', { 
-                            detail: updatedAnimal 
-                        }));
-                        window.dispatchEvent(new Event('animals-changed'));
-                    } catch (e) {
-                        console.warn('Failed to dispatch animal-updated event:', e);
-                    }
-                } catch (refetchError) {
-                    console.error('[handleSaveAnimal] Failed to refetch animal:', refetchError);
-                    // Still update view with response data even if refetch fails
-                    setAnimalToView(response.data);
-                    setAnimalToEdit(null);
+if (method.toLowerCase() === 'put') {
+    console.log('[handleSaveAnimal] DEBUG: skipping refetch');
 
-                    try {
-                        window.dispatchEvent(new CustomEvent('animal-updated', {
-                            detail: response.data
-                        }));
-                        window.dispatchEvent(new Event('animals-changed'));
-                    } catch (e) {
-                        console.warn('Failed to dispatch fallback animal-updated event:', e);
-                    }
-                }
-            }
+    // Use whatever the save endpoint returned
+    const updatedAnimal =
+        response?.data?.animal ||
+        response?.data?.data ||
+        response?.data;
+
+    if (updatedAnimal) {
+        setAnimalToView(updatedAnimal);
+    }
+
+    setAnimalToEdit(null);
+
+    console.log(
+        '[handleSaveAnimal] DEBUG: save complete, no refetch, no events'
+    );
+}
 
             return response;
         } catch (error) {
