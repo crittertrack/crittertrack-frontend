@@ -845,14 +845,7 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
                 gender: slot.gender || '', id_public: slot.ctcId || null, geneticCode: slot.genCode || '',
             };
         };
-        console.log(
-    '[PEDIGREE DEBUG]',
-    pedigreeData?.id_public,
-    pedigreeData?.father?.id_public,
-    pedigreeData?.mother?.id_public
-        );
-
-        const d = pedigreeData;
+        const d = JSON.parse(JSON.stringify(pedigreeData));
         // Level 1 • parents
         if (!d.father && manualData.sire) d.father = slotToAnimal(manualData.sire);
         if (!d.mother && manualData.dam)  d.mother = slotToAnimal(manualData.dam);
@@ -882,13 +875,6 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             if (!d.mother.mother.father && manualData.damDamSire) d.mother.mother.father = slotToAnimal(manualData.damDamSire);
             if (!d.mother.mother.mother && manualData.damDamDam)  d.mother.mother.mother = slotToAnimal(manualData.damDamDam);
         }
-        console.log('[PEDIGREE CHECK]', {
-    self: d === d.father,
-    selfMother: d === d.mother,
-    fatherMother: d.father === d.mother,
-    fatherFatherSelf: d.father?.father === d,
-    motherMotherSelf: d.mother?.mother === d,
-});
         setDisplayData(d);
     }, [pedigreeData, manualData]);
 
@@ -902,21 +888,12 @@ const PedigreeChart = React.forwardRef(({ animalId, animalData, onClose, API_BAS
             const authScope = authToken ? 'auth' : 'public';
             const cacheKey = rootId ? `${authScope}:${rootId}` : null;
             if (cacheKey && pedigreeTreeCache.has(cacheKey)) {
-    const cached = pedigreeTreeCache.get(cacheKey);
-
-    console.log(
-        '[PEDIGREE CACHE HIT]',
-        cacheKey,
-        cached?.data?.id_public,
-        cached?.data?.father?.id_public,
-        cached?.data?.mother?.id_public
-    );
-
-    setPedigreeData(cached?.data || null);
-    setOwnerProfile(cached?.ownerProfile || null);
-    setLoading(false);
-    return;
-}
+                const cached = pedigreeTreeCache.get(cacheKey);
+                setPedigreeData(cached?.data || null);
+                setOwnerProfile(cached?.ownerProfile || null);
+                setLoading(false);
+                return;
+            }
 
             setLoading(true);
             try {
