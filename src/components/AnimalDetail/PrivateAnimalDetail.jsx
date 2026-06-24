@@ -861,25 +861,24 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
         <span className="text-gray-500">Keeper:</span>{' '}
 
         {ownerInfo ? (() => {
-            const showPersonal = ownerInfo.showPersonalName ?? false;
-            const showBreeder = ownerInfo.showBreederName ?? false;
 
-            let label = '✗';
+            const hasCTUID = !!ownerInfo.linkedCTUID;
+            const hasResolvedUser = !!ownerInfo.id_public;
+            const isClickable = hasCTUID && hasResolvedUser;
 
-            if (showPersonal && showBreeder && ownerInfo.personalName && ownerInfo.breederName) {
+            // ✅ Identity formatting ONLY (no CTUID logic here)
+            let label = '—';
+
+            if (ownerInfo.personalName && ownerInfo.breederName) {
                 label = `${ownerInfo.personalName} (${ownerInfo.breederName})`;
-            } else if (showBreeder && ownerInfo.breederName) {
+            } else if (ownerInfo.breederName) {
                 label = ownerInfo.breederName;
-            } else if (showPersonal && ownerInfo.personalName) {
+            } else if (ownerInfo.personalName) {
                 label = ownerInfo.personalName;
             }
 
-            const hasCTUID = !!ownerInfo.linkedCTUID;
-const hasResolvedUser = !!ownerInfo.id_public;
-
-const isClickable = hasCTUID && hasResolvedUser; // <-- adjust field name if needed
-
-            if (hasCTUID) {
+            // ✅ Clickable only when fully resolvable user exists
+            if (isClickable) {
                 return (
                     <RouterLink
                         to={`/user/${ownerInfo.id_public}`}
