@@ -668,7 +668,11 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
         };
 
         // Helper to build tree structure from flat results
-        const buildTreeFromResults = (id, resultsMap, visited = new Set()) => {
+        const buildTreeFromResults = (id, resultsMap, visited = new Set(), memo = new Map()) => {
+            if (memo.has(id)) {
+                return memo.get(id);
+            }
+
             if (visited.has(id)) {
                 // Circular reference detected, return null to break the loop
                 console.warn(`[PEDIGREE PREFETCH] Circular reference detected for animal ID: ${id}. Terminating branch.`);
@@ -677,16 +681,19 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
             visited.add(id);
 
             const animalData = resultsMap.get(id);
-            if (!animalData) return null;
+            if (!animalData) { visited.delete(id); return null; } // Remove from visited if not found
 
             const fatherId = animalData.fatherId_public || animalData.sireId_public;
             const motherId = animalData.motherId_public || animalData.damId_public;
 
             return {
                 ...animalData,
-                father: fatherId ? buildTreeFromResults(fatherId, resultsMap, new Set(visited)) : null, // Pass a new set for each branch
-                mother: motherId ? buildTreeFromResults(motherId, resultsMap, new Set(visited)) : null  // Pass a new set for each branch
+                father: fatherId ? buildTreeFromResults(fatherId, resultsMap, new Set(visited), memo) : null, // Pass memo
+                mother: motherId ? buildTreeFromResults(motherId, resultsMap, new Set(visited), memo) : null  // Pass memo
             };
+            const builtAnimal = { ...animalData, father, mother };
+            memo.set(id, builtAnimal);
+            return builtAnimal;
         };
 
         // PHASE 1: Breadth-first for all generations (simplified for 4 generation limit)
@@ -737,7 +744,7 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
             console.log(`[PEDIGREE PREFETCH] Generation ${currentDepth} complete (${genElapsed}ms)`);
 
             // Update cache with partial data after each generation
-            const partialTree = buildTreeFromResults(rootId, new Map(Array.from(resultCache.entries()).map(([k, v]) => [k, v.data])), new Set());
+            const partialTree = buildTreeFromResults(rootId, new Map(Array.from(resultCache.entries()).map(([k, v]) => [k, v.data])), new Set(), new Map());
             if (partialTree) {
                 pedigreeTreeCache.set(cacheKey, {
                     data: partialTree,
@@ -750,8 +757,8 @@ const prefetchPedigreeTree = async ({ animalId, API_BASE_URL, authToken = null }
             }
         }
 
-        // Build final tree from cached results (no additional fetching needed - we already have 4 generations)
-        const data = buildTreeFromResults(rootId, new Map(Array.from(resultCache.entries()).map(([k, v]) => [k, v.data])), new Set());
+        // Build final tree from cached results (no additional fetching needed - we already have 4 generations) using a fresh memo
+        const data = buildTreeFromResults(rootId, new Map(Array.from(resultCache.entries()).map(([k, v]) => [k, v.data])), new Set(), new Map());
         
         // Fetch owner profile
         let fetchedOwnerProfile = null;
