@@ -878,11 +878,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                                     if (breederInfo.suffix) parts.push(breederInfo.suffix);
                                                     
                                                     const displayName = parts.join(' • ') || 'Unknown Breeder';
-                                                    
-                                                    return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{displayName}</RouterLink>;
-                                                })() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}
-                                            </div>
-                                            {/* Keeper */}
+                                                    return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{displayName}</RouterLink>;})() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}</div>{/* Keeper */}
 {animal.ownerId_public && (
     <div>
         <span className="text-gray-500">Keeper:</span>{' '}
