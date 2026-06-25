@@ -49,7 +49,6 @@ export function useTransferWorkflow(
     const [preSelectedTransferAnimal, setPreSelectedTransferAnimal] = useState<Animal | null>(null);
     const [preSelectedTransactionType, setPreSelectedTransactionType] = useState<'transfer' | 'sale' | null>(null);
 
-    // ========== BUDGET/TRANSACTION PANEL ==========
     const [budgetModalOpen, setBudgetModalOpen] = useState(false);
 
     // ========== USER SEARCH STATES ==========
@@ -183,7 +182,6 @@ export function useTransferWorkflow(
      */
     const handleCloseTransferWorkflow = useCallback(() => {
         setShowTransferModal(false);
-        setBudgetModalOpen(false);
         setTransferAnimal(null); // Fix 4
         setTransferUserQuery('');
         setTransferUserResults([]);
@@ -209,7 +207,6 @@ export function useTransferWorkflow(
         setPreSelectedTransferAnimal(animal); // Fix 4
         setPreSelectedTransactionType(transactionType); // Fix 5
         setTransferAnimal(animal); // Fix 4
-        setBudgetModalOpen(false); // Ensure budget modal is closed when transfer modal opens
         setShowTransferModal(true);
     }, []); // No dependencies needed here, as it creates a new controller each time
 
@@ -219,20 +216,6 @@ export function useTransferWorkflow(
             abortController?.abort();
         };
     }, [abortController]);
-
-    /**
-     * Open budget modal for transaction management
-     */
-    const handleOpenBudgetModal = useCallback(() => {
-        setBudgetModalOpen(true);
-    }, []);
-
-    /**
-     * Close budget modal
-     */
-    const handleCloseBudgetModal = useCallback(() => {
-        setBudgetModalOpen(false);
-    }, []);
 
     // ========== RETURN ALL STATE & HANDLERS ==========
     return {
@@ -273,8 +256,6 @@ export function useTransferWorkflow(
         handleSelectTransferUser,
         handleSubmitTransfer,
         handleCloseTransferWorkflow,
-        handleOpenTransferWithAnimal,
-        handleOpenBudgetModal,
-        handleCloseBudgetModal,
+        handleOpenTransferWithAnimal, // This handler is still needed for PrivateAnimalDetail to open the transfer modal
     };
 }
