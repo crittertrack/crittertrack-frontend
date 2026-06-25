@@ -111,6 +111,22 @@ export function useTransferWorkflow(
     }, []);
 
     /**
+     * Opens the Add Animal Sale modal from an animal detail view.
+     * Sets the animal for transfer and ensures no transaction type is pre-selected,
+     * allowing the user to choose between Manual Entry or Transfer Ownership.
+     * @param animal The animal object to be transferred/sold.
+     */
+    const handleOpenAnimalSaleModal = useCallback((animal: Animal) => {
+        const controller = new AbortController();
+        setAbortController(controller);
+        setTransferAnimal(animal);
+        setPreSelectedTransferAnimal(animal);
+        setPreSelectedTransactionType(null); // Crucial: force manual selection
+        setBudgetModalOpen(false); // Ensure budget modal is closed
+        setShowTransferModal(true);
+    }, []);
+
+    /**
      * Submit transfer request
      * Sends transfer/sale to backend
      */    const handleSubmitTransfer = useCallback(
@@ -256,6 +272,7 @@ export function useTransferWorkflow(
         handleSelectTransferUser,
         handleSubmitTransfer,
         handleCloseTransferWorkflow,
-        handleOpenTransferWithAnimal, // This handler is still needed for PrivateAnimalDetail to open the transfer modal
+        handleOpenTransferWithAnimal,
+        handleOpenAnimalSaleModal,
     };
 }
