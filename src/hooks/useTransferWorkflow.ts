@@ -1,5 +1,27 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
+import { withRetry } from '../utils/errorHandler'; // Assuming errorHandler.js is in src/utils
+
+// Define interfaces for better type safety
+interface User {
+    userId_backend?: string;
+    id_public?: string;
+    // Add other user properties as they become relevant, e.g., name: string;
+}
+
+interface Animal {
+    id_public: string;
+    // Add other animal properties as they become relevant, e.g., name: string;
+}
+
+interface TransferData {
+    animal: Animal;
+    recipient: User;
+    price?: string; // Changed from number to string to match useState and input
+    notes?: string;
+    transactionType?: 'transfer' | 'sale'; // Assuming these are the possible transaction types
+    currency?: string; // Used in the success message
+}
 
 /**
  * useTransferWorkflow - Manages animal transfer and sale workflow
@@ -19,13 +41,13 @@ import axios from 'axios';
 export function useTransferWorkflow(
     authToken: string | null,
     API_BASE_URL: string,
-    showModalMessage: (title: string, message: string) => void
+    showModalMessage: (title: string, message: string) => void,
 ) {
     // ========== TRANSFER MODAL & ANIMAL SELECTION ==========
     const [showTransferModal, setShowTransferModal] = useState(false);
-    const [transferAnimal, setTransferAnimal] = useState(null);
-    const [preSelectedTransferAnimal, setPreSelectedTransferAnimal] = useState(null);
-    const [preSelectedTransactionType, setPreSelectedTransactionType] = useState(null);
+    const [transferAnimal, setTransferAnimal] = useState<Animal | null>(null);
+    const [preSelectedTransferAnimal, setPreSelectedTransferAnimal] = useState<Animal | null>(null);
+    const [preSelectedTransactionType, setPreSelectedTransactionType] = useState<'transfer' | 'sale' | null>(null);
 
     // ========== BUDGET/TRANSACTION PANEL ==========
     const [budgetModalOpen, setBudgetModalOpen] = useState(false);
@@ -33,7 +55,7 @@ export function useTransferWorkflow(
     // ========== USER SEARCH STATES ==========
     const [transferUserQuery, setTransferUserQuery] = useState('');
     const [transferUserResults, setTransferUserResults] = useState([]);
-    const [transferSelectedUser, setTransferSelectedUser] = useState(null);
+    const [transferSelectedUser, setTransferSelectedUser] = useState<User | null>(null);
     const [transferSearching, setTransferSearching] = useState(false);
     const [transferSearchPerformed, setTransferSearchPerformed] = useState(false);
 
@@ -59,17 +81,19 @@ export function useTransferWorkflow(
             setTransferSearchPerformed(false);
 
             try {
-                const response = await axios.get(`${API_BASE_URL}/public/users/search`, {
-                    params: { q: query },
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                const response = await withRetry(async () => {
+                    return await axios.get(`${API_BASE_URL}/public/users/search`, {
+                        params: { q: query },
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                }, { maxRetries: 3, delayMs: 500 }); // Example: retry up to 3 times with 500ms initial delay
 
                 setTransferUserResults(response.data || []);
                 setTransferSearchPerformed(true);
                 console.log('[TRANSFER] Search results:', response.data?.length || 0, 'users');
-            } catch (error) {
+            } catch (error: unknown) {
                 console.error('[TRANSFER] Search failed:', error);
-                showModalMessage('Search Failed', 'Could not search for users. Please try again.');
+                showModalMessage('Search Failed', (error as Error).message || 'Could not search for users. Please try again.');
                 setTransferUserResults([]);
             } finally {
                 setTransferSearching(false);
@@ -81,16 +105,15 @@ export function useTransferWorkflow(
     /**
      * Select a user as transfer recipient
      */
-    const handleSelectTransferUser = useCallback((user) => {
+    const handleSelectTransferUser = useCallback((user: User) => {
         setTransferSelectedUser(user);
     }, []);
 
     /**
      * Submit transfer request
      * Sends transfer/sale to backend
-     */
-    const handleSubmitTransfer = useCallback(
-        async (transferData) => {
+     */    const handleSubmitTransfer = useCallback(
+        async (transferData: TransferData) => {
             if (!transferData.animal || !transferData.recipient) {
                 showModalMessage('Missing Information', 'Please select an animal and recipient.');
                 return;
@@ -101,7 +124,7 @@ export function useTransferWorkflow(
                 const payload = {
                     animalId_public: transferData.animal.id_public,
                     recipientUserId: transferData.recipient.userId_backend || transferData.recipient.id_public,
-                    price: transferData.price ? parseFloat(transferData.price) : 0,
+                    price: transferData.price ? parseFloat(transferData.price) : 0, // parseFloat now correctly applied to string
                     notes: transferData.notes || '',
                     transactionType: transferData.transactionType || 'transfer'
                 };
@@ -109,19 +132,21 @@ export function useTransferWorkflow(
                 console.log('[TRANSFER] Submitting transfer:', payload);
 
                 // Submit to backend
-                const response = await axios.post(
-                    `${API_BASE_URL}/animals/${transferData.animal.id_public}/transfer`,
-                    payload,
-                    {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    }
-                );
-
+                const response = await withRetry(async () => {
+                    return await axios.post(
+                        `${API_BASE_URL}/animals/${transferData.animal.id_public}/transfer`,
+                        payload,
+                        {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        }
+                    );
+                }, { maxRetries: 3, delayMs: 500 }); // Example: retry up to 3 times with 500ms initial delay
+                
                 console.log('[TRANSFER] Transfer successful:', response.data);
 
                 // Show success message
                 const messageText =
-                    transferData.price && parseFloat(transferData.price) > 0
+                    transferData.price && parseFloat(transferData.price) > 0 // parseFloat now correctly applied to string
                         ? `Animal sold for ${transferData.currency || '$'}${transferData.price}`
                         : 'Animal transferred successfully';
 
@@ -139,10 +164,10 @@ export function useTransferWorkflow(
                 window.dispatchEvent(new Event('animals-changed'));
 
                 return response.data;
-            } catch (error) {
+            } catch (error: unknown) {
                 console.error('[TRANSFER] Transfer failed:', error);
                 const errorMessage =
-                    error.response?.data?.message || error.message || 'Transfer failed. Please try again.';
+                    (error as Error).message || (error as any).response?.data?.message || 'Transfer failed. Please try again.';
                 showModalMessage('Transfer Failed', errorMessage);
                 throw error;
             }
@@ -156,10 +181,10 @@ export function useTransferWorkflow(
     const handleCloseTransferWorkflow = useCallback(() => {
         setShowTransferModal(false);
         setBudgetModalOpen(false);
-        setTransferAnimal(null);
+        setTransferAnimal(null); // Fix 4
         setTransferUserQuery('');
         setTransferUserResults([]);
-        setTransferSelectedUser(null);
+        setTransferSelectedUser(null); // Fix 1
         setTransferSearchPerformed(false);
         setTransferPrice('');
         setTransferNotes('');
@@ -171,10 +196,10 @@ export function useTransferWorkflow(
      * Open transfer modal with pre-selected animal
      * Called from budget view or animal detail
      */
-    const handleOpenTransferWithAnimal = useCallback((animal, transactionType = 'transfer') => {
-        setPreSelectedTransferAnimal(animal);
-        setPreSelectedTransactionType(transactionType);
-        setTransferAnimal(animal);
+    const handleOpenTransferWithAnimal = useCallback((animal: Animal, transactionType: 'transfer' | 'sale' = 'transfer') => {
+        setPreSelectedTransferAnimal(animal); // Fix 4
+        setPreSelectedTransactionType(transactionType); // Fix 5
+        setTransferAnimal(animal); // Fix 4
         setShowTransferModal(true);
     }, []);
 
