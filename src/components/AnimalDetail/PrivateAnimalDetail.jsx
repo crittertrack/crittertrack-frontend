@@ -536,7 +536,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 if (iWasTransferredThisAnimal) {
                                     return (
                                         <button
-                                            onClick={handleReturnTransferredAnimal}
+                                            onClick={() => { console.log("Return button clicked!"); handleReturnTransferredAnimal(); }}
                                             disabled={returningAnimal}
                                             className="px-2 py-1 bg-orange-100 hover:bg-orange-200 text-orange-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
                                             title="Return to breeder"
@@ -548,7 +548,10 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 }
                                 return (
                                     <button
-                                        onClick={() => onTransfer(animal)}
+                                        onClick={() => {
+                                            console.log("Transfer button clicked!");
+                                            onTransfer(animal);
+                                        }}
                                         className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
                                         title="Transfer"
                                     >
@@ -620,7 +623,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 if (iWasTransferredThisAnimal) {
                                     return (
                                         <button
-                                            onClick={handleReturnTransferredAnimal}
+                                            onClick={() => { console.log("Return button clicked!"); handleReturnTransferredAnimal(); }}
                                             disabled={returningAnimal}
                                             className="px-3 py-1.5 bg-orange-100 hover:bg-orange-200 text-orange-700 font-semibold rounded-lg transition flex items-center gap-2"
                                             title="Return to breeder"
@@ -632,7 +635,10 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 }
                                 return (
                                     <button
-                                        onClick={() => onTransfer(animal)}
+                                        onClick={() => {
+                                            console.log("Transfer button clicked!");
+                                            onTransfer(animal);
+                                        }}
                                         className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
                                         title="Transfer this animal"
                                     >
