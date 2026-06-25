@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 import { withRetry } from '../utils/errorHandler'; // Assuming errorHandler.js is in src/utils
 
@@ -58,6 +58,7 @@ export function useTransferWorkflow(
     const [transferSelectedUser, setTransferSelectedUser] = useState<User | null>(null);
     const [transferSearching, setTransferSearching] = useState(false);
     const [transferSearchPerformed, setTransferSearchPerformed] = useState(false);
+    const [abortController, setAbortController] = useState<AbortController | null>(null);
 
     // ========== TRANSACTION DETAILS ==========
     const [transferPrice, setTransferPrice] = useState('');
@@ -84,7 +85,8 @@ export function useTransferWorkflow(
                 const response = await withRetry(async () => {
                     return await axios.get(`${API_BASE_URL}/public/users/search`, {
                         params: { q: query },
-                        headers: { Authorization: `Bearer ${authToken}` }
+                        headers: { Authorization: `Bearer ${authToken}` },
+                        signal: abortController?.signal // Pass abort signal
                     });
                 }, { maxRetries: 3, delayMs: 500 }); // Example: retry up to 3 times with 500ms initial delay
 
@@ -96,10 +98,10 @@ export function useTransferWorkflow(
                 showModalMessage('Search Failed', (error as Error).message || 'Could not search for users. Please try again.');
                 setTransferUserResults([]);
             } finally {
-                setTransferSearching(false);
+                setTransferSearching(false); // Ensure loading state is reset
             }
         },
-        [authToken, API_BASE_URL, showModalMessage]
+        [authToken, API_BASE_URL, showModalMessage, abortController]
     );
 
     /**
@@ -137,7 +139,8 @@ export function useTransferWorkflow(
                         `${API_BASE_URL}/animals/${transferData.animal.id_public}/transfer`,
                         payload,
                         {
-                            headers: { Authorization: `Bearer ${authToken}` }
+                            headers: { Authorization: `Bearer ${authToken}` },
+                            signal: abortController?.signal // Pass abort signal
                         }
                     );
                 }, { maxRetries: 3, delayMs: 500 }); // Example: retry up to 3 times with 500ms initial delay
@@ -171,8 +174,8 @@ export function useTransferWorkflow(
                 showModalMessage('Transfer Failed', errorMessage);
                 throw error;
             }
-        },
-        [authToken, API_BASE_URL, showModalMessage]
+        }, // Dependencies for useCallback
+        [authToken, API_BASE_URL, showModalMessage, abortController]
     );
 
     /**
@@ -190,18 +193,31 @@ export function useTransferWorkflow(
         setTransferNotes('');
         setPreSelectedTransferAnimal(null);
         setPreSelectedTransactionType(null);
-    }, []);
+        abortController?.abort(); // Abort any ongoing requests when closing the workflow
+        setAbortController(null); // Clear the controller
+    }, [abortController]);
 
     /**
      * Open transfer modal with pre-selected animal
      * Called from budget view or animal detail
      */
     const handleOpenTransferWithAnimal = useCallback((animal: Animal, transactionType: 'transfer' | 'sale' = 'transfer') => {
+        // Create a new AbortController for this workflow instance
+        const controller = new AbortController();
+        setAbortController(controller);
+
         setPreSelectedTransferAnimal(animal); // Fix 4
         setPreSelectedTransactionType(transactionType); // Fix 5
         setTransferAnimal(animal); // Fix 4
         setShowTransferModal(true);
-    }, []);
+    }, []); // No dependencies needed here, as it creates a new controller each time
+
+    // Cleanup AbortController on unmount of the component using this hook
+    useEffect(() => {
+        return () => {
+            abortController?.abort();
+        };
+    }, [abortController]);
 
     /**
      * Open budget modal for transaction management
