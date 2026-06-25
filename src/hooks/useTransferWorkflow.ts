@@ -209,6 +209,7 @@ export function useTransferWorkflow(
         setPreSelectedTransferAnimal(animal); // Fix 4
         setPreSelectedTransactionType(transactionType); // Fix 5
         setTransferAnimal(animal); // Fix 4
+        setBudgetModalOpen(false); // Ensure budget modal is closed when transfer modal opens
         setShowTransferModal(true);
     }, []); // No dependencies needed here, as it creates a new controller each time
 
