@@ -122,7 +122,7 @@ export function useTransferWorkflow(
         setTransferAnimal(animal);
         setPreSelectedTransferAnimal(animal);
         setPreSelectedTransactionType(null); // Crucial: force manual selection
-        setBudgetModalOpen(false); // Ensure budget modal is closed
+        setBudgetModalOpen(true); // Keep budget context to prevent re-navigation
         setShowTransferModal(true);
     }, []);
 
