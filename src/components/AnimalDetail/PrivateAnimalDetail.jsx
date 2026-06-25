@@ -545,20 +545,20 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                             {returningAnimal ? 'Returning...' : 'Return'}
                                         </button>
                                     );
-                                }
-                                return (
-                                    <button
-                                        onClick={() => {
-                                            console.log("Transfer button clicked!");
-                                            onTransfer(animal);
-                                        }}
-                                        className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
-                                        title="Transfer"
-                                    >
-                                        <ArrowLeftRight size={14} />
-                                        Transfer
-                                    </button>
-                                );
+                                }/*
+                                 return (
+                                     <button
+                                         onClick={() => {
+                                             console.log("Transfer button clicked!");
+                                             onTransfer(animal);
+                                         }}
+                                         className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
+                                         title="Transfer this animal"
+                                     >
+                                         <ArrowLeftRight size={16} />
+                                         Transfer
+                                     </button>
+                                 );*/
                             })()}
                             {onArchive && (
                                 <button
@@ -632,20 +632,20 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                             {returningAnimal ? 'Returning...' : 'Return Animal'}
                                         </button>
                                     );
-                                }
-                                return (
-                                    <button
-                                        onClick={() => {
-                                            console.log("Transfer button clicked!");
-                                            onTransfer(animal);
-                                        }}
-                                        className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
-                                        title="Transfer this animal"
-                                    >
-                                        <ArrowLeftRight size={16} />
-                                        Transfer
-                                    </button>
-                                );
+                                }/*
+                                 return (
+                                     <button
+                                         onClick={() => {
+                                             console.log("Transfer button clicked!");
+                                             onTransfer(animal);
+                                         }}
+                                         className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                         title="Transfer this animal"
+                                     >
+                                         <ArrowLeftRight size={14} />
+                                         Transfer
+                                     </button>
+                                 );*/
                             })()}
                             {onArchive && (
                                 <button
