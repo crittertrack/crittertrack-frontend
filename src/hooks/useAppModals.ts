@@ -1,5 +1,16 @@
 import { useState, useCallback } from 'react';
 
+interface Animal {
+    id_public: string;
+    // Add other animal properties as they become relevant, e.g., name: string;
+}
+
+interface User {
+    userId_backend?: string;
+    id_public?: string;
+    // Add other animal properties as they become relevant, e.g., name: string;
+}
+
 /**
  * useAppModals - Centralized modal state management
  * 
@@ -87,14 +98,14 @@ export function useAppModals() {
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
     // ========== TRANSFER & MARKETPLACE ==========
-    const [showTransferModal, setShowTransferModal] = useState(false);
-    const [transferAnimal, setTransferAnimal] = useState(null);
-    const [preSelectedTransferAnimal, setPreSelectedTransferAnimal] = useState(null);
-    const [preSelectedTransactionType, setPreSelectedTransactionType] = useState(null);
+     const [showTransferModal, setShowTransferModal] = useState<boolean>(false);
+    const [transferAnimal, setTransferAnimal] = useState<Animal | null>(null);
+    const [preSelectedTransferAnimal, setPreSelectedTransferAnimal] = useState<Animal | null>(null);
+    const [preSelectedTransactionType, setPreSelectedTransactionType] = useState<string | null>(null);
     const [budgetModalOpen, setBudgetModalOpen] = useState(false);
     const [transferUserQuery, setTransferUserQuery] = useState('');
-    const [transferUserResults, setTransferUserResults] = useState([]);
-    const [transferSelectedUser, setTransferSelectedUser] = useState(null);
+    const [transferUserResults, setTransferUserResults] = useState<Animal[]>([]);
+    const [transferSelectedUser, setTransferSelectedUser] = useState<User | null>(null);
     const [transferSearching, setTransferSearching] = useState(false);
     const [transferSearchPerformed, setTransferSearchPerformed] = useState(false);
     const [transferPrice, setTransferPrice] = useState('');
@@ -328,6 +339,20 @@ export function useAppModals() {
         setShowProfileMenu(false);
     }, []);
 
+    /**
+     * Opens the Add Animal Sale modal from an animal detail view.
+     * Sets the animal for transfer and ensures no transaction type is pre-selected,
+     * allowing the user to choose between Manual Entry or Transfer Ownership.
+     * @param animal The animal object to be transferred/sold.
+     */
+    const handleOpenAnimalSaleModal = useCallback((animal: Animal) => {
+        setTransferAnimal(animal);
+        setPreSelectedTransferAnimal(animal);
+        setPreSelectedTransactionType(null); // Crucial: force manual selection
+        setBudgetModalOpen(false); // Ensure budget modal is closed
+        setShowTransferModal(true);
+    }, []);
+
     // ========== RETURN ALL STATE & HELPERS ==========
     return {
         // Core modal system
@@ -523,5 +548,6 @@ export function useAppModals() {
         closeModal,
         toggleModal,
         clearAllModals,
+        handleOpenAnimalSaleModal,
     };
 }
