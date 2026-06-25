@@ -301,7 +301,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     
     const [personalName, setPersonalName] = useState(userProfile.personalName);
     const [breederName, setBreederName] = useState(userProfile.breederName || '');
-    const [showPersonalName, setShowPersonalName] = useState(userProfile.showPersonalName ?? false); 
+    const [showPersonalName, setShowPersonalName] = useState(userProfile.showPersonalName ?? true); 
     const [showBreederName, setShowBreederName] = useState(userProfile.showBreederName ?? false); 
     const [websiteURL, setWebsiteURL] = useState(userProfile.websiteURL || '');
     const [showWebsiteURL, setShowWebsiteURL] = useState(userProfile.showWebsiteURL ?? false);
