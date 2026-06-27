@@ -544,26 +544,26 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                             <RotateCcw size={14} />
                                             {returningAnimal ? 'Returning...' : 'Return'}
                                         </button>
-                                    );
-                                }/*
+                                    ); 
+                                }
                                  return (
                                      <button
                                          onClick={() => {
                                              console.log("Transfer button clicked!");
                                              onTransfer(animal);
                                          }}
-                                         className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
+                                         className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
                                          title="Transfer this animal"
                                      >
-                                         <ArrowLeftRight size={16} />
+                                         <ArrowLeftRight size={14} />
                                          Transfer
                                      </button>
-                                 );*/
+                                 );
                             })()}
                             {onArchive && (
                                 <button
                                     onClick={() => onArchive(animal)}
-                                    className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                    className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs whitespace-nowrap"
                                     title={animal.archived ? "Unarchive animal" : "Archive animal"}
                                 >
                                     <Archive size={14} />
@@ -631,26 +631,26 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                             <RotateCcw size={16} />
                                             {returningAnimal ? 'Returning...' : 'Return Animal'}
                                         </button>
-                                    );
-                                }/*
+                                    ); 
+                                }
                                  return (
                                      <button
                                          onClick={() => {
                                              console.log("Transfer button clicked!");
                                              onTransfer(animal);
                                          }}
-                                         className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                         className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
                                          title="Transfer this animal"
                                      >
-                                         <ArrowLeftRight size={14} />
+                                         <ArrowLeftRight size={16} />
                                          Transfer
                                      </button>
-                                 );*/
+                                 );
                             })()}
                             {onArchive && (
                                 <button
                                     onClick={() => onArchive(animal)}
-                                    className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-2"
+                                    className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition flex items-center gap-2 whitespace-nowrap"
                                     title={animal.archived ? "Restore from archive" : "Archive animal"}
                                 >
                                     <Archive size={16} />
@@ -2578,6 +2578,44 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 </div>
                             </div>
 
+                            {/* Purchase Information */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><Tag size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Purchase Information</h3>
+                                <div className="space-y-3 text-sm">
+                                    {animal.purchaseDate && (
+                                        <div><span className="text-gray-600">Purchase Date:</span> <strong>{formatDate(animal.purchaseDate)}</strong></div>
+                                    )}
+                                    {animal.purchasePrice && (
+                                        <div><span className="text-gray-600">Purchase Price:</span> <strong>{getCurrencySymbol(animal.purchasePriceCurrency)}{animal.purchasePrice}</strong></div>
+                                    )}
+                                    {animal.purchaseLocation && (
+                                        <div><span className="text-gray-600">Purchase Location:</span> <strong>{animal.purchaseLocation}</strong></div>
+                                    )}
+                                    {!animal.purchaseDate && !animal.purchasePrice && !animal.purchaseLocation && (
+                                        <p className="text-sm text-gray-500">No purchase information recorded.</p>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Sale Information */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700"><Tag size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Sale Information</h3>
+                                <div className="space-y-3 text-sm">
+                                    {animal.saleDate && (
+                                        <div><span className="text-gray-600">Sale Date:</span> <strong>{formatDate(animal.saleDate)}</strong></div>
+                                    )}
+                                    {animal.salePriceAmount && (
+                                        <div><span className="text-gray-600">Sale Price:</span> <strong>{getCurrencySymbol(animal.salePriceCurrency)}{animal.salePriceAmount}</strong></div>
+                                    )}
+                                    {animal.saleLocation && (
+                                        <div><span className="text-gray-600">Sale Location:</span> <strong>{animal.saleLocation}</strong></div>
+                                    )}
+                                    {!animal.saleDate && !animal.salePriceAmount && !animal.saleLocation && (
+                                        <p className="text-sm text-gray-500">No sale information recorded.</p>
+                                    )}
+                                </div>
+                            </div>
+
                             {/* Restrictions */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700"><Ban size={16} className="inline-block align-middle mr-1 flex-shrink-0" /> Restrictions</h3>
@@ -2591,8 +2629,8 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 </div>
                             </div>
 
-                            {/* No data fallback */}
-                            {!animal.licenseNumber && !animal.licenseJurisdiction && !animal.insurance && !animal.legalStatus && !animal.breedingRestrictions && !animal.exportRestrictions && (
+                            {/* No data fallback for the entire tab */}
+                            {!animal.licenseNumber && !animal.licenseJurisdiction && !animal.insurance && !animal.legalStatus && !animal.breedingRestrictions && !animal.exportRestrictions && !animal.purchaseDate && !animal.purchasePrice && !animal.purchaseLocation && !animal.saleDate && !animal.salePriceAmount && !animal.saleLocation && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center text-gray-500">
                                     <p>No legal or documentation records</p>
                                 </div>

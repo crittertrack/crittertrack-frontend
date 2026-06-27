@@ -1,4 +1,4 @@
-﻿// CritterTrack Frontend Application
+﻿﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -59,6 +59,7 @@ import PrivateAnimalDetail from './components/AnimalDetail/PrivateAnimalDetail';
 import ViewOnlyPrivateAnimalDetail from './components/AnimalDetail/ViewOnlyPrivateAnimalDetail';
 import ViewOnlyAnimalDetail from './components/AnimalDetail/ViewOnlyAnimalDetail';
 import { OffspringSection } from './components/AnimalDetail/utils';
+import TransferAnimalModal from './components/Modals/TransferAnimalModal'; // Import the new modal
 
 // Phase 7: Modals & Messages
 import { ConflictResolutionModal, LitterSyncConflictModal } from './components/Modals/LitterConflictModals';
