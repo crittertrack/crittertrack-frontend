@@ -730,26 +730,30 @@ const AnimalCard = ({ animal, onViewAnimal, onViewProfile, onContactOwner, isOwn
     const isForSale = animal.isForSale;
     const isForStud = animal.availableForBreeding;
     
-    // Calculate age
+    // Calculate age in years, months, and days
     const calculateAge = (birthDate) => {
         if (!birthDate) return null;
         const birth = new Date(birthDate);
         const now = new Date();
-        const months = Math.floor((now - birth) / (1000 * 60 * 60 * 24 * 30.44));
-        
-        if (months < 1) {
-            const weeks = Math.floor((now - birth) / (1000 * 60 * 60 * 24 * 7));
-            return `${weeks} week${weeks !== 1 ? 's' : ''}`;
-        } else if (months < 12) {
-            return `${months} month${months !== 1 ? 's' : ''}`;
-        } else {
-            const years = Math.floor(months / 12);
-            const remainingMonths = months % 12;
-            if (remainingMonths === 0) {
-                return `${years} year${years !== 1 ? 's' : ''}`;
-            }
-            return `${years}y ${remainingMonths}m`;
+
+        let years = now.getFullYear() - birth.getFullYear();
+        let months = now.getMonth() - birth.getMonth();
+        let days = now.getDate() - birth.getDate();
+
+        if (days < 0) {
+            months--;
+            days += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); // Days in previous month
         }
+        if (months < 0) {
+            years--;
+            months += 12;
+        }
+
+        let ageStr = '';
+        if (years > 0) ageStr += `${years}y `;
+        if (months > 0) ageStr += `${months}m `;
+        if (days > 0 || ageStr === '') ageStr += `${days}d`; // Show days even if 0 if no years/months
+        return ageStr.trim();
     };
 
     const age = calculateAge(animal.birthDate);
