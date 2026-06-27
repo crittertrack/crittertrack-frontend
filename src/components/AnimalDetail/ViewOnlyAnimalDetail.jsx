@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -506,6 +506,7 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                         {[
                             { id: 1, label: 'Overview', icon: ClipboardList, color: 'text-blue-500' },
                             { id: 2, label: 'Status', icon: Lock, color: 'text-slate-500' },
+                            { id: 2, label: 'Ownership', icon: Lock, color: 'text-slate-500' },
                             { id: 3, label: 'Identification', icon: Tag, color: 'text-amber-500' },
                             { id: 4, label: 'Appearance', icon: Palette, color: 'text-pink-500' },
                             { id: 5, label: 'Pedigree', icon: Dna, color: 'text-orange-500' },
@@ -662,38 +663,17 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                                             })()}
                                                         </RouterLink>
                                                     ) : (
-                                                        <span className="font-mono text-accent">{animal.breederId_public}</span>
+                                                        <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '—'}</span>
                                                     )}
                                                 </div>
                                                 {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
                                                     <hr className="border-gray-200" />
                                                 )}
                                                 {/* Keeper */}
-                                                {animal.ownerId_public && (
+                                                {animal.keeperName && (
                                                     <div>
                                                         <span className="text-gray-500">Keeper:</span>{' '}
-                                                        {ownerInfo ? (
-                                                            <RouterLink
-                                                                to={`/user/${ownerInfo.id_public}`}
-                                                                className="text-purple-600 hover:underline font-medium"
-                                                            >
-                                                                {(() => {
-                                                                    const showPersonal = ownerInfo.showPersonalName ?? false;
-                                                                    const showBreeder = ownerInfo.showBreederName ?? false;
-                                                                    if (showPersonal && showBreeder && ownerInfo.personalName && ownerInfo.breederName) {
-                                                                        return `${ownerInfo.personalName} (${ownerInfo.breederName})`;
-                                                                    } else if (showBreeder && ownerInfo.breederName) {
-                                                                        return ownerInfo.breederName;
-                                                                    } else if (showPersonal && ownerInfo.personalName) {
-                                                                        return ownerInfo.personalName;
-                                                                    } else {
-                                                                        return '✗';
-                                                                    }
-                                                                })()}
-                                                            </RouterLink>
-                                                        ) : (
-                                                            <span className="font-mono text-accent">{animal.keeperName || '\u2014'}</span>
-                                                        )}
+                                                        <span className="font-mono text-accent">{animal.keeperName}</span>
                                                     </div>
                                                 )}
                                                 {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
@@ -2225,8 +2205,8 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                 <div>
                                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 1 — Parents</p>
                                     <div className="grid grid-cols-2 gap-3">
-                                        {renderSlot('sire', 'Sire')}
-                                        {renderSlot('dam', 'Dam')}
+                                    {renderSlot('sire', 'Sire')}
+                                    {renderSlot('dam', 'Dam')}
                                     </div>
                                 </div>
                                 <div>
@@ -2234,10 +2214,10 @@ const ViewOnlyAnimalDetail = ({ animal: animalProp, onClose, onCloseAll, API_BAS
                                     <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                                         <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
                                         <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
-                                        {renderSlot('sireSire', 'Grandsire')}
-                                        {renderSlot('damSire', 'Grandsire')}
-                                        {renderSlot('sireDam', 'Granddam')}
-                                        {renderSlot('damDam', 'Granddam')}
+                                    {renderSlot('sireSire', 'Grandsire')}
+                                    {renderSlot('damSire', 'Grandsire')}
+                                    {renderSlot('sireDam', 'Granddam')}
+                                    {renderSlot('damDam', 'Granddam')}
                                     </div>
                                 </div>
                                 <div>

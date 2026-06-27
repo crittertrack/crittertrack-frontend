@@ -1888,7 +1888,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                 </div>
                             )}
 
-                            {/* Tab 2: Status */}
+                            {/* Tab 2: Ownership */}
                             {editActiveTab === 'status' && (
                                 <div className="tab-panel">
                                     <div className="edit-form">
