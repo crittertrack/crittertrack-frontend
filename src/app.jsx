@@ -1761,9 +1761,9 @@ const App = () => {
                     selectedUser={transferSelectedUser}
                     onSelectUser={handleSelectTransferUser}
                     price={transferPrice}
-                    setPrice={setPrice}
+                    setPrice={setTransferPrice}
                     notes={transferNotes}
-                    setNotes={setNotes}
+                    setNotes={setTransferNotes}
                     onSubmit={handleSubmitTransfer}
                     showModalMessage={showModalMessage}
                     API_BASE_URL={API_BASE_URL}
