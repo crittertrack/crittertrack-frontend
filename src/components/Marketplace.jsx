@@ -824,6 +824,13 @@ const AnimalCard = ({ animal, onViewAnimal, onViewProfile, onContactOwner, isOwn
                     <span>{animal.species}</span>
                     {age && <span className="mx-1">•</span>}
                     {age && <span>{age} old</span>}
+                    {(() => {
+                        const variety = [animal.color, animal.coatPattern, animal.coat, animal.earset].filter(Boolean).join(' ');
+                        return variety && (
+                        <div className="text-xs text-gray-500 mt-1">
+                            {variety}
+                        </div>
+                    );})()}
                 </div>
                 
                 {/* Price */}
