@@ -1747,6 +1747,29 @@ const App = () => {
                     setEnlargedImageUrl={setEnlargedImageUrl}
                 />
             )}
+
+            {showTransferModal && (
+                <TransferAnimalModal
+                    animal={transferAnimal}
+                    onClose={handleCloseTransferWorkflow}
+                    userQuery={transferUserQuery}
+                    setUserQuery={setTransferUserQuery}
+                    userResults={transferUserResults}
+                    onSearchUsers={handleSearchTransferUser}
+                    searching={transferSearching}
+                    searchPerformed={transferSearchPerformed}
+                    selectedUser={transferSelectedUser}
+                    onSelectUser={handleSelectTransferUser}
+                    price={transferPrice}
+                    setPrice={setPrice}
+                    notes={transferNotes}
+                    setNotes={setNotes}
+                    onSubmit={handleSubmitTransfer}
+                    showModalMessage={showModalMessage}
+                    API_BASE_URL={API_BASE_URL}
+                    authToken={authToken}
+                />
+            )}
             
             <header className="w-full bg-white dark:bg-dark-surface p-3 sm:p-4 rounded-xl shadow-lg mb-6 max-w-7xl overflow-visible transition-colors duration-200">
                 {/* Desktop: Two row layout with search bar on top */}
@@ -2360,8 +2383,9 @@ const App = () => {
                                 setEnlargedImageUrl={setEnlargedImageUrl}
                                 onUpdateAnimal={handleAnimalFieldUpdate}
                                 showModalMessage={showModalMessage}
-                                onTransfer={(animal) => {
-                                    handleOpenTransferWithAnimal(animal, 'animal-sale');
+                                onTransfer={(animal) => { // Open the new transfer modal directly
+                                    setTransferAnimal(animal);
+                                    setShowTransferModal(true);
                                 }}
                                 onViewAnimal={handleViewAnimal}
                                 onViewPublicAnimal={handleViewPublicAnimal}
