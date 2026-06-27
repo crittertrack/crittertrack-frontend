@@ -683,12 +683,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                     </button>
                                 </div>
                             </div>
-                        ) : showModeSelection && (formData.type === 'animal-sale' || formData.type === 'animal-purchase') ? (
-                            // This block is now removed, as mode selection is gone.
-                            null
                         ) : (
                         <>
-                        {console.log('[BudgetTab] Rendering form - type:', formData.type, 'animalSaleMode:', animalSaleMode)}
                         <form onSubmit={handleSaveTransaction} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -706,7 +702,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                             {(formData.type === 'animal-sale' || formData.type === 'animal-purchase') && (
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Select Animal {animalSaleMode === 'transfer' ? '*' : '(optional)'}
+                                        Select Animal (optional)
                                     </label>
                                     <div className="space-y-2">
                                         {/* Species filter */}
