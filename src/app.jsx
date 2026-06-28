@@ -1764,7 +1764,22 @@ const App = () => {
                     setPrice={setTransferPrice}
                     notes={transferNotes}
                     setNotes={setTransferNotes}
-                    onSubmit={handleSubmitTransfer}
+                    onSubmit={() => {
+    console.log("Submitting transfer", {
+        animal: transferAnimal,
+        recipient: transferSelectedUser,
+        price: transferPrice,
+        notes: transferNotes,
+    });
+
+    handleSubmitTransfer({
+        animal: transferAnimal,
+        recipient: transferSelectedUser,
+        price: transferPrice,
+        notes: transferNotes,
+        transactionType: "transfer",
+    });
+}}
                     showModalMessage={showModalMessage}
                     API_BASE_URL={API_BASE_URL}
                     authToken={authToken}
