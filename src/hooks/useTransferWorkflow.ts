@@ -70,8 +70,8 @@ export function useTransferWorkflow(
      * Called when user enters query and clicks search
      */
     const handleSearchTransferUser = useCallback(
-        async (query: string) => {
-            if (!query.trim()) {
+        async () => { // No longer takes 'query' as an argument
+            if (!transferUserQuery.trim()) { // Use state directly
                 setTransferUserResults([]);
                 setTransferSearchPerformed(false);
                 return;
@@ -83,7 +83,7 @@ export function useTransferWorkflow(
             try {
                 const response = await withRetry(async () => {
                     return await axios.get(`${API_BASE_URL}/public/users/search`, {
-                        params: { q: query },
+                          params: { q: transferUserQuery }, // Use state directly
                         headers: { Authorization: `Bearer ${authToken}` },
                         signal: abortController?.signal // Pass abort signal
                     });
@@ -100,7 +100,7 @@ export function useTransferWorkflow(
                 setTransferSearching(false); // Ensure loading state is reset
             }
         },
-        [authToken, API_BASE_URL, showModalMessage, abortController]
+         [authToken, API_BASE_URL, showModalMessage, abortController, transferUserQuery] // Add transferUserQuery to dependencies
     );
 
     /**
