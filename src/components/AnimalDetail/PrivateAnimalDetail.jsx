@@ -172,6 +172,25 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
             setReturningAnimal(false);
         }
     }, [animal, returningAnimal, API_BASE_URL, authToken, showModalMessage, onCloseAll, onClose]);
+
+    const handleWithdrawTransfer = useCallback(async (transferId) => {
+        if (!transferId) return;
+
+        if (!window.confirm('Are you sure you want to withdraw this transfer request?')) {
+            return;
+        }
+
+        try {
+            await axios.post(`${API_BASE_URL}/transfers/${transferId}/withdraw`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            showModalMessage('Success', 'Transfer request has been withdrawn.');
+            window.dispatchEvent(new CustomEvent('animal-updated', { detail: { ...animal, pendingTransfer: null, pendingTransferId: undefined } })); // Clear pendingTransfer and pendingTransferId
+        } catch (err) {
+            console.error('Failed to withdraw transfer:', err);
+            showModalMessage('Error', `Failed to withdraw transfer: ${err.response?.data?.message || err.message}`);
+        }
+    }, [API_BASE_URL, authToken, showModalMessage, animal]);
     useEffect(() => { setMpEnrichedData(null); setMpLoading(false); }, [animal?.id_public]);
     useEffect(() => { setDetailViewTab(initialTab); setBetaPedigreeView(initialBetaView); setShowHorizCert(false); setShowVertCert(false); }, [animal?.id_public, initialTab, initialBetaView]);
 
@@ -505,6 +524,8 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
 
     if (!animal) return null;
 
+    
+
     return (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-2 sm:p-4 z-[70] overflow-y-auto">
             <div className="bg-[#E1F2F5] rounded-xl shadow-2xl w-full max-w-6xl max-h-[95vh] sm:max-h-[90vh] my-2 sm:my-0 flex flex-col">
@@ -532,34 +553,68 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 Share
                             </button>
                             {onTransfer && (() => {
-                                const iWasTransferredThisAnimal = animal.originalOwnerId && animal.ownerId_public === userProfile?.id_public;
-                                if (iWasTransferredThisAnimal) {
-                                    return (
-                                        <button
-                                            onClick={() => { console.log("Return button clicked!"); handleReturnTransferredAnimal(); }}
-                                            disabled={returningAnimal}
-                                            className="px-2 py-1 bg-orange-100 hover:bg-orange-200 text-orange-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
-                                            title="Return to breeder"
-                                        >
-                                            <RotateCcw size={14} />
-                                            {returningAnimal ? 'Returning...' : 'Return'}
-                                        </button>
-                                    ); 
-                                }
-                                 return (
-                                     <button
-                                         onClick={() => {
-                                             console.log("Transfer button clicked!");
-                                             onTransfer(animal);
-                                         }}
-                                         className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
-                                         title="Transfer this animal"
-                                     >
-                                         <ArrowLeftRight size={14} />
-                                         Transfer
-                                     </button>
-                                 );
-                            })()}
+    const iWasTransferredThisAnimal =
+        animal.originalOwnerId &&
+        animal.ownerId_public === userProfile?.id_public;
+
+    // Recipient owns it
+if (iWasTransferredThisAnimal) {
+    return (
+        <button
+            onClick={() => handleReturnTransferredAnimal()}
+            disabled={returningAnimal}
+            className="px-2 py-1 bg-orange-100 hover:bg-orange-200 text-orange-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+            title="Return to breeder"
+        >
+            <RotateCcw size={14} />
+            {returningAnimal ? "Returning..." : "Return"}
+        </button>
+    );
+}
+
+// Transfer request exists
+if (animal.pendingTransfer) {
+
+    // 🆕 If current user is the SENDER → show Withdraw
+    if (animal.pendingTransfer.fromUserId === userProfile?._id) {
+        return (
+            <button
+                onClick={() => handleWithdrawTransfer(animal.pendingTransfer._id)}
+                className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                title="Withdraw transfer request"
+            >
+                <X size={14} />
+                Withdraw
+            </button>
+        );
+    }
+
+    
+
+    // Recipient view → still pending approval
+    return (
+        <button
+            disabled
+            className="px-2 py-1 bg-yellow-100 text-yellow-700 font-semibold rounded-lg flex items-center gap-1 text-xs cursor-not-allowed"
+            title="Transfer request pending"
+        >
+            <ArrowLeftRight size={14} />
+            Pending
+        </button>
+    );
+}
+
+// Original owner (no transfer)
+return (
+    <button
+        onClick={() => onTransfer(animal)}
+        className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+        title="Transfer this animal"
+    >
+        <ArrowLeftRight size={14} />
+        Transfer
+    </button>
+);})()}
                             {onArchive && (
                                 <button
                                     onClick={() => onArchive(animal)}
@@ -600,6 +655,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 </button>
                             )}
                         </div>
+                        </div>
                     </div>
                     
                     {/* Desktop layout: single row */}
@@ -633,19 +689,47 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                         </button>
                                     ); 
                                 }
-                                 return (
-                                     <button
-                                         onClick={() => {
-                                             console.log("Transfer button clicked!");
-                                             onTransfer(animal);
-                                         }}
-                                         className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
-                                         title="Transfer this animal"
-                                     >
-                                         <ArrowLeftRight size={16} />
-                                         Transfer
-                                     </button>
-                                 );
+
+                                // Transfer request exists
+                                if (animal.pendingTransfer) {
+                                    // If current user is the SENDER → show Withdraw
+                                    if (animal.pendingTransfer.fromUserId === userProfile?._id) {
+                                        return (
+                                            <button
+                                                onClick={() => handleWithdrawTransfer(animal.pendingTransfer._id)}
+                                                className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-lg transition flex items-center gap-2"
+                                                title="Withdraw transfer request"
+                                            >
+                                                <X size={16} />
+                                                Withdraw
+                                            </button>
+                                        );
+                                    }
+
+                                    // Recipient view → still pending approval
+                                    return (
+                                        <button
+                                            disabled
+                                            className="px-3 py-1.5 bg-yellow-100 text-yellow-700 font-semibold rounded-lg flex items-center gap-2 cursor-not-allowed"
+                                            title="Transfer request pending"
+                                        >
+                                            <ArrowLeftRight size={16} />
+                                            Pending
+                                        </button>
+                                    );
+                                }
+
+                                // Original owner (no transfer)
+                                return (
+                                    <button
+                                        onClick={() => onTransfer(animal)}
+                                        className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
+                                        title="Transfer this animal"
+                                    >
+                                        <ArrowLeftRight size={16} />
+                                        Transfer
+                                    </button>
+                                );
                             })()}
                             {onArchive && (
                                 <button
@@ -2954,7 +3038,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 const ownerUserId = breederInfo?.id_public || null;
                                 const ownerQrUrl = ownerUserId ? `${window.location.origin}/user/${ownerUserId}` : null;
                                 return (
-                                    <div className="rounded-xl border-2 border-primary bg-primary/10 overflow-hidden relative">
+                                        <React.Fragment> {/* Use Fragment to group multiple top-level elements */}
                                         {/* Owner/breeder • top-right corner */}
                                         {breederInfo && (
                                         <div className="absolute top-2 right-2 flex flex-col items-center gap-1 text-center z-10">
@@ -2987,15 +3071,15 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                             {animal.remarks && <p className="text-xs text-gray-400 border-t border-primary/20 pt-1 mt-1 max-w-xs">{animal.remarks}</p>}
                                             {animal.id_public && <p className="text-xs font-mono text-gray-400">{animal.id_public}</p>}
                                         </div>
-                                    </div>
+                                    </React.Fragment>
                                 );
                             })()}
 
                             <div>
                                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 1 — Parents</p>
                                 <div className="grid grid-cols-2 gap-3">
-                                    {renderSlot('sire', 'Sire', 'sire')}
-                                    {renderSlot('dam', 'Dam', 'dam')}
+                                    {renderSlot('sire', 'Sire')}
+                                    {renderSlot('dam', 'Dam')}
                                 </div>
                             </div>
 
@@ -3004,10 +3088,10 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                                     <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-widest">Paternal</p>
                                     <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
-                                    {renderSlot('sireSire', 'Grandsire', 'sire')}
-                                    {renderSlot('damSire', 'Grandsire', 'dam')}
-                                    {renderSlot('sireDam', 'Granddam', 'sire')}
-                                    {renderSlot('damDam', 'Granddam', 'dam')}
+                                    {renderSlot('sireSire', 'Paternal Grandsire')}
+                                    {renderSlot('damSire', 'Maternal Grandsire')}
+                                    {renderSlot('sireDam', 'Paternal Granddam')}
+                                    {renderSlot('damDam', 'Maternal Granddam')}
                                 </div>
                             </div>
 
@@ -3018,16 +3102,16 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                     <p className="text-[10px] font-semibold text-pink-400 uppercase tracking-widest">Maternal</p>
                                     <p className="text-[10px] text-gray-400 mb-0.5">via Grandsire</p>
                                     <p className="text-[10px] text-gray-400 mb-0.5">via Grandsire</p>
-                                    {renderSlot('sireSireSire', 'Great-Grandsire', 'sire')}
-                                    {renderSlot('damSireSire', 'Great-Grandsire', 'dam')}
-                                    {renderSlot('sireSireDam', 'Great-Granddam', 'sire')}
-                                    {renderSlot('damSireDam', 'Great-Granddam', 'dam')}
+                                    {renderSlot('sireSireSire', 'Paternal Great-Grandsire')}
+                                    {renderSlot('damSireSire', 'Maternal Great-Grandsire')}
+                                    {renderSlot('sireSireDam', 'Paternal Great-Granddam')}
+                                    {renderSlot('damSireDam', 'Maternal Great-Granddam')}
                                     <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
                                     <p className="text-[10px] text-gray-400 mt-1 mb-0.5">via Granddam</p>
-                                    {renderSlot('sireDamSire', 'Great-Grandsire', 'sire')}
-                                    {renderSlot('damDamSire', 'Great-Grandsire', 'dam')}
-                                    {renderSlot('sireDamDam', 'Great-Granddam', 'sire')}
-                                    {renderSlot('damDamDam', 'Great-Granddam', 'dam')}
+                                    {renderSlot('sireDamSire', 'Paternal Great-Grandsire')}
+                                    {renderSlot('damDamSire', 'Maternal Great-Grandsire')}
+                                    {renderSlot('sireDamDam', 'Paternal Great-Granddam')}
+                                    {renderSlot('damDamDam', 'Maternal Great-Granddam')}
                                 </div>
                             </div>
                             </div>
@@ -3051,7 +3135,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
              
             </div>
         </div>
-    </div>
-    )}
+    );
+};
 
 export default PrivateAnimalDetail;

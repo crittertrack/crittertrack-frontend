@@ -1572,13 +1572,13 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 10,
-        title: 'Notify Seller Feature',
-        content: 'The "Notify Seller" feature sends a notification to the original breeder that you\'ve acquired their animal. You enter their Personal ID, and they receive a notification. The seller gets a view-only copy showing that you now own the animal and any information you\'ve added.',
+        title: 'Legacy "Notify Seller" Feature (Migration Only)',
+        content: 'The "Notify Seller" feature was a legacy way to inform a previous owner that you acquired their animal, granting them view-only access. This functionality is now handled through a migration process for existing records and is not available for new user-initiated transfers. All new transfers are full ownership transfers.',
         tips: [
-          'Keeps breeding community connected',
-          'Seller gets updates on animal',
-          'Read-only access for seller',
-          'They cannot edit your records'
+          'This feature is no longer actively initiated by users.',
+          'Existing "Notify Seller" records have been migrated to "view_only_grant" transfers.',
+          'New transfers always involve full ownership change.',
+          'If you wish to share an animal without transferring ownership, use the sharing features on the animal\'s profile.'
         ]
       }
     ]

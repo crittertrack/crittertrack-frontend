@@ -19,7 +19,7 @@ interface TransferData {
     recipient: User;
     price?: string; // Changed from number to string to match useState and input
     notes?: string;
-    transactionType?: 'transfer' | 'sale'; // Assuming these are the possible transaction types
+    transferType?: 'sale' | 'purchase' | 'gift'; // Aligned with backend enum
     currency?: string; // Used in the success message
 }
 
@@ -146,10 +146,10 @@ setTransferUserResults(response.data || []);
                 // Prepare transfer payload
                 const payload = {
                     animalId_public: transferData.animal.id_public,
-                    recipientUserId: transferData.recipient.userId_backend || transferData.recipient.id_public,
+                    toUserId: transferData.recipient.userId_backend || transferData.recipient.id_public, // Corrected to toUserId
                     price: transferData.price ? parseFloat(transferData.price) : 0, // parseFloat now correctly applied to string
                     notes: transferData.notes || '',
-                    transactionType: transferData.transactionType || 'transfer'
+                    transferType: transferData.transferType || 'gift' // Corrected to transferType, default to 'gift'
                 };
 
                 console.log('[TRANSFER] Submitting transfer:', payload);
@@ -157,7 +157,7 @@ setTransferUserResults(response.data || []);
                 // Submit to backend
                 const response = await withRetry(async () => {
                     return await axios.post(
-                        `${API_BASE_URL}/animals/${transferData.animal.id_public}/transfer`,
+                        `${API_BASE_URL}/api/transfers`, // Corrected API endpoint
                         payload,
                         {
                             headers: { Authorization: `Bearer ${authToken}` },
@@ -168,13 +168,12 @@ setTransferUserResults(response.data || []);
                 
                 console.log('[TRANSFER] Transfer successful:', response.data);
 
-                // Show success message
                 const messageText =
-                    transferData.price && parseFloat(transferData.price) > 0 // parseFloat now correctly applied to string
-                        ? `Animal sold for ${transferData.currency || '$'}${transferData.price}`
-                        : 'Animal transferred successfully';
+    transferData.price && parseFloat(transferData.price) > 0
+        ? `Sale request sent. The recipient must accept before ownership changes.`
+        : `Transfer request sent. The recipient has been notified and must accept before ownership changes.`;
 
-                showModalMessage('Transfer Complete', messageText);
+showModalMessage('Request Sent', messageText);
 
                 // Reset form
                 handleCloseTransferWorkflow();
@@ -190,9 +189,15 @@ setTransferUserResults(response.data || []);
                 return response.data;
             } catch (error: unknown) {
                 console.error('[TRANSFER] Transfer failed:', error);
-                const errorMessage =
-                    (error as Error).message || (error as any).response?.data?.message || 'Transfer failed. Please try again.';
-                showModalMessage('Transfer Failed', errorMessage);
+                let errorMessage = 'Transfer failed. Please try again.';
+                if (axios.isAxiosError(error) && error.response) {
+                    if (error.response.status === 409) {
+                        errorMessage = 'This animal already has a pending transfer request.';
+                    } else {
+                        errorMessage = error.response.data?.message || errorMessage;
+                    }
+                }
+                showModalMessage('Transfer Failed', errorMessage); // Display specific error message
                 throw error;
             }
         }, // Dependencies for useCallback
@@ -226,7 +231,7 @@ setTransferUserResults(response.data || []);
         const controller = new AbortController();
         setAbortController(controller);
 
-        setPreSelectedTransferAnimal(animal); // Fix 4
+        setPreSelectedTransferAnimal(animal);
         setPreSelectedTransactionType(transactionType); // Fix 5
         setTransferAnimal(animal); // Fix 4
         setShowTransferModal(true);

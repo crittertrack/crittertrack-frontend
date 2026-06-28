@@ -1749,41 +1749,7 @@ const App = () => {
             )}
 
             {showTransferModal && (
-                <TransferAnimalModal
-                    animal={transferAnimal}
-                    onClose={handleCloseTransferWorkflow}
-                    userQuery={transferUserQuery}
-                    setUserQuery={setTransferUserQuery}
-                    userResults={transferUserResults}
-                    onSearchUsers={handleSearchTransferUser}
-                    searching={transferSearching}
-                    searchPerformed={transferSearchPerformed}
-                    selectedUser={transferSelectedUser}
-                    onSelectUser={handleSelectTransferUser}
-                    price={transferPrice}
-                    setPrice={setTransferPrice}
-                    notes={transferNotes}
-                    setNotes={setTransferNotes}
-                    onSubmit={() => {
-    console.log("Submitting transfer", {
-        animal: transferAnimal,
-        recipient: transferSelectedUser,
-        price: transferPrice,
-        notes: transferNotes,
-    });
-
-    handleSubmitTransfer({
-        animal: transferAnimal,
-        recipient: transferSelectedUser,
-        price: transferPrice,
-        notes: transferNotes,
-        transactionType: "transfer",
-    });
-}}
-                    showModalMessage={showModalMessage}
-                    API_BASE_URL={API_BASE_URL}
-                    authToken={authToken}
-                />
+                <TransferAnimalModal {...transferWorkflow} animal={transferAnimal} onClose={handleCloseTransferWorkflow} onSubmit={handleSubmitTransfer} showModalMessage={showModalMessage} API_BASE_URL={API_BASE_URL} authToken={authToken} />
             )}
             
             <header className="w-full bg-white dark:bg-dark-surface p-3 sm:p-4 rounded-xl shadow-lg mb-6 max-w-7xl overflow-visible transition-colors duration-200">
@@ -2399,9 +2365,7 @@ const App = () => {
                                 onUpdateAnimal={handleAnimalFieldUpdate}
                                 showModalMessage={showModalMessage}
                                 onTransfer={(animal) => { // Open the new transfer modal directly
-                                    setTransferAnimal(animal);
-                                    setShowTransferModal(true);
-                                }}
+                                    handleOpenTransferWithAnimal(animal); }}
                                 onViewAnimal={handleViewAnimal}
                                 onViewPublicAnimal={handleViewPublicAnimal}
                                 onToggleOwned={handleToggleAnimalOwned}

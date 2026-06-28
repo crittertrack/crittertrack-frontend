@@ -18,8 +18,8 @@ const TransferAnimalModal = ({
     setNotes,
     onSubmit,
     showModalMessage,
-    API_BASE_URL, // Passed for image loading if needed
-    authToken // Passed for image loading if needed
+    // API_BASE_URL, // Not directly used in this component, can be removed if not needed elsewhere
+    // authToken // Not directly used in this component, can be removed if not needed elsewhere
 }) => {
     const handleUserSelect = (user) => {
         onSelectUser(user);
@@ -28,7 +28,7 @@ const TransferAnimalModal = ({
 
     const getDisplayName = (user) => {
         const parts = [];
-        if (user.breederName && user.showBreederName) parts.push(user.breederName);
+        if (user.breederName) parts.push(user.breederName); // Always show breederName if present, regardless of showBreederName flag for internal selection
         if (user.personalName && user.showPersonalName) parts.push(user.personalName);
         return parts.join(' / ') || user.id_public || 'Unknown User';
     };
@@ -176,8 +176,7 @@ const TransferAnimalModal = ({
                             <div className="text-xs text-green-800">
                                 <p className="font-semibold mb-1">🔄 Transfer Ownership</p>
                                 <p>
-                                    The recipient will be notified and the animal ownership will be transferred to them in the system.
-                                    You will retain a view-only record.
+                                    The recipient will receive a transfer request. Ownership will remain unchanged until they accept the request. Once accepted, you will retain view-only access and they will become the owner.
                                 </p>
                             </div>
                         </div>
@@ -195,11 +194,22 @@ const TransferAnimalModal = ({
                     </button>
                     <button
                         type="button"
-                        onClick={onSubmit}
+                        onClick={() => {
+                            if (animal && selectedUser) {
+                                const transferType = parseFloat(price) > 0 ? 'sale' : 'gift';
+                                onSubmit({
+                                    animal: animal,
+                                    recipient: selectedUser,
+                                    price: price,
+                                    notes: notes,
+                                    transferType: transferType,
+                                });
+                            }
+                        }}
                         disabled={!selectedUser}
                         className="flex-1 bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Confirm Transfer
+                        Send Transfer Request
                     </button>
                 </div>
             </div>

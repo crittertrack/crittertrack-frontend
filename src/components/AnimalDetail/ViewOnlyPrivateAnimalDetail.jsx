@@ -1986,7 +1986,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                                 const ownerUserId = breederInfo?.id_public || null;
                                 const ownerQrUrl = ownerUserId ? `${window.location.origin}/user/${ownerUserId}` : null;
                                 return (
-                                    <div className="rounded-xl border-2 border-primary bg-primary/10 overflow-hidden relative">
+                                    <React.Fragment> {/* Use Fragment to group multiple top-level elements */}
                                         {/* Owner/breeder ? top-right corner */}
                                         {breederInfo && (
                                         <div className="absolute top-2 right-2 flex flex-col items-center gap-1 text-center z-10">
@@ -2014,7 +2014,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                                             {(animal.manualBreederName || (breederInfo && (breederInfo.breederName || breederInfo.personalName))) && <p className="text-xs text-gray-500 italic">{animal.manualBreederName || breederInfo.breederName || breederInfo.personalName}</p>}
                                             {animal.id_public && <p className="text-xs font-mono text-gray-400">{animal.id_public}</p>}
                                         </div>
-                                    </div>
+                                    </React.Fragment>
                                 );
                             })()}
                             <div>
