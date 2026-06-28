@@ -81,24 +81,30 @@ export function useTransferWorkflow(
             setTransferSearchPerformed(false);
 
             try {
-                const response = await withRetry(async () => {
-                    return await axios.get(`${API_BASE_URL}/public/users/search`, {
-                          params: { q: transferUserQuery }, // Use state directly
-                        headers: { Authorization: `Bearer ${authToken}` },
-                        signal: abortController?.signal // Pass abort signal
-                    });
-                }, { maxRetries: 3, delayMs: 500 }); // Example: retry up to 3 times with 500ms initial delay
-
-                setTransferUserResults(response.data || []);
-                setTransferSearchPerformed(true);
-                console.log('[TRANSFER] Search results:', response.data?.length || 0, 'users');
-            } catch (error: unknown) {
-                console.error('[TRANSFER] Search failed:', error);
-                showModalMessage('Search Failed', (error as Error).message || 'Could not search for users. Please try again.');
-                setTransferUserResults([]);
-            } finally {
-                setTransferSearching(false); // Ensure loading state is reset
-            }
+    const response = await withRetry(async () => {
+        return await axios.get(`${API_BASE_URL}/public/profiles/search`, {
+            params: {
+                query: transferUserQuery
+            },
+            headers: {
+                Authorization: `Bearer ${authToken}`
+            },
+            signal: abortController?.signal
+        });
+    }, { maxRetries: 3, delayMs: 500 });
+setTransferUserResults(response.data || []);
+    setTransferSearchPerformed(true);
+    console.log('[TRANSFER] Search results:', response.data?.length || 0, 'users');
+} catch (error: unknown) {
+    console.error('[TRANSFER] Search failed:', error);
+    showModalMessage(
+        'Search Failed',
+        (error as Error).message || 'Could not search for users. Please try again.'
+    );
+    setTransferUserResults([]);
+} finally {
+    setTransferSearching(false);
+}
         },
          [authToken, API_BASE_URL, showModalMessage, abortController, transferUserQuery] // Add transferUserQuery to dependencies
     );
