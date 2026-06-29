@@ -110,7 +110,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
             await axios.post(`${API_BASE_URL}/transfers/${transferId}/accept`, {}, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            showModalMessage('Success', 'Transfer accepted! Animal has been added to your account.');
+            showModalMessage('Success', 'Transfer accepted! Animal has been added to your account. Refresh your app to see the changes. It can take up to 30 minutes for the transfer to fully process.');
             fetchNotifications();
             if (onNotificationChange) onNotificationChange();
         } catch (error) {
