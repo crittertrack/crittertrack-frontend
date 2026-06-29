@@ -1,6 +1,16 @@
 import React from 'react';
 import { X, Search, Loader2, Info, ArrowLeftRight } from 'lucide-react';
 
+console.log({
+  userQuery,
+  userResults,
+  selectedUser,
+  searching,
+  searchPerformed,
+  price,
+  notes,
+});
+
 const TransferAnimalModal = ({
     animal,
     onClose,
