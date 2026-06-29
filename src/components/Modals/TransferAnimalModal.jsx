@@ -106,8 +106,8 @@ const TransferAnimalModal = ({
                                         />
                                         <button
                                             type="button"
-                                             onClick={onSearchUsers} // The error occurs here if userQuery is undefined
-                                            disabled={searching || (userQuery || '').trim().length < 2}
+                                            onClick={onSearchUsers}
+                                            disabled={searching || String(userQuery || '').trim().length < 2}
                                             className="px-4 py-2 bg-primary text-black rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                         >
                                             <Search className="w-4 h-4" />
