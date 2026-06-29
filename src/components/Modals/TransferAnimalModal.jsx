@@ -55,7 +55,7 @@ const TransferAnimalModal = ({
                             <img
                                 src={animal.imageUrl || animal.photoUrl}
                                 alt={animal.name}
-                                className="w-16 h-16 rounded-lg object-cover"
+                                className="w-16 h-16 rounded-lg object-cover" // animal.name is used here, but alt={undefined} is safe.
                             />
                         ) : (
                             <div className="w-16 h-16 rounded-lg bg-gray-200 flex items-center justify-center">
@@ -63,8 +63,8 @@ const TransferAnimalModal = ({
                             </div>
                         )}
                         <div>
-                            <h3 className="font-semibold text-gray-800">{animal.name}</h3>
-                            <p className="text-sm text-gray-600">{animal.species} • {animal.id_public}</p>
+                            <h3 className="font-semibold text-gray-800">{animal.name || ''}</h3>
+                            <p className="text-sm text-gray-600">{(animal.species || '')} • {(animal.id_public || '')}</p>
                         </div>
                     </div>
                 </div>
