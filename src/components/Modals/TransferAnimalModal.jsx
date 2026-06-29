@@ -1,15 +1,6 @@
 import React from 'react';
 import { X, Search, Loader2, Info, ArrowLeftRight } from 'lucide-react';
 
-console.log({
-  userQuery,
-  userResults,
-  selectedUser,
-  searching,
-  searchPerformed,
-  price,
-  notes,
-});
 
 const TransferAnimalModal = ({
     animal,
@@ -31,6 +22,16 @@ const TransferAnimalModal = ({
     // API_BASE_URL, // Not directly used in this component, can be removed if not needed elsewhere
     // authToken // Not directly used in this component, can be removed if not needed elsewhere
 }) => {
+
+    console.log({
+  userQuery,
+  userResults,
+  selectedUser,
+  searching,
+  searchPerformed,
+  price,
+  notes,
+});
     const handleUserSelect = (user) => {
         onSelectUser(user);
         setUserQuery(user.breederName || user.personalName || user.id_public); // Display selected user's name
