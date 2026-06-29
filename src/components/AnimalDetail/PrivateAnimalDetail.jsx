@@ -656,7 +656,6 @@ return (
                             )}
                         </div>
                         </div>
-                    </div>
                     
                     {/* Desktop layout: single row */}
                     <div className="hidden sm:flex justify-between items-center">
@@ -1003,8 +1002,8 @@ return (
                                                 {animal.keeperName || '—'}
             </span>
         )}
-    </div>
-)}
+                                                </div>
+                                            )}
                                             {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
                                                 <hr className="border-gray-200" />
                                             )}
@@ -2591,7 +2590,9 @@ return (
                                 )}
                             </div>
                         </div>
-                    )}                    {/* Tab 14: End of Life */}
+                    )}                    
+                    
+                    {/* Tab 14: End of Life */}
                     {detailViewTab === 14 && (
                         <div className="space-y-6">
                             {/* End of Life */}
@@ -2942,9 +2943,7 @@ return (
                                 </div>
                                 {hasData ? (
                                     <div className="flex gap-2.5">
-                                        {d.imageUrl && (
-                                            <img src={d.imageUrl} alt={fullName} className="w-10 h-10 sm:w-16 sm:h-16 rounded-lg object-cover flex-shrink-0 border border-gray-200 self-start" />
-                                        )}
+                                        {d.imageUrl && <img src={d.imageUrl} alt={fullName} className="w-10 h-10 sm:w-16 sm:h-16 rounded-lg object-cover flex-shrink-0 border border-gray-200 self-start" />}
                                         <div className="flex-1 min-w-0 space-y-0.5 pb-4">
                                             {fullName && <p className="text-[10px] sm:text-xs font-semibold text-gray-800 leading-tight">{fullName}</p>}
                                             {d.variety && <p className="text-[9px] sm:text-[11px] text-gray-500">{d.variety}</p>}
@@ -3038,7 +3037,7 @@ return (
                                 const ownerUserId = breederInfo?.id_public || null;
                                 const ownerQrUrl = ownerUserId ? `${window.location.origin}/user/${ownerUserId}` : null;
                                 return (
-                                        <React.Fragment> {/* Use Fragment to group multiple top-level elements */}
+                                        <div className="rounded-xl border-2 border-primary bg-primary/10 overflow-hidden relative">
                                         {/* Owner/breeder • top-right corner */}
                                         {breederInfo && (
                                         <div className="absolute top-2 right-2 flex flex-col items-center gap-1 text-center z-10">
@@ -3061,7 +3060,7 @@ return (
                                                 <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-gray-300"><Cat size={32} /></div>
                                             )}
                                             <div className="flex items-center gap-1 justify-center">
-                                                <SubjectGenderIcon size={14} className={`flex-shrink-0 ${subjectGColor}`} />
+                                            <SubjectGenderIcon size={14} className={`flex-shrink-0 ${subjectGColor}`} />
                                                 <p className="text-base font-bold text-gray-800 leading-tight">{subjectName}</p>
                                             </div>
                                             {subjectVariety && <p className="text-xs text-gray-500 -mt-1">{subjectVariety}</p>}
@@ -3071,8 +3070,8 @@ return (
                                             {animal.remarks && <p className="text-xs text-gray-400 border-t border-primary/20 pt-1 mt-1 max-w-xs">{animal.remarks}</p>}
                                             {animal.id_public && <p className="text-xs font-mono text-gray-400">{animal.id_public}</p>}
                                         </div>
-                                    </React.Fragment>
-                                );
+                                        </div>
+                                    );
                             })()}
 
                             <div>
@@ -3112,6 +3111,7 @@ return (
                                     {renderSlot('damDamSire', 'Maternal Great-Grandsire')}
                                     {renderSlot('sireDamDam', 'Paternal Great-Granddam')}
                                     {renderSlot('damDamDam', 'Maternal Great-Granddam')}
+                                    </div>
                                 </div>
                             </div>
                             </div>

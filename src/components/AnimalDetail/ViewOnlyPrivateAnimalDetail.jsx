@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+﻿﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -1986,7 +1986,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                                 const ownerUserId = breederInfo?.id_public || null;
                                 const ownerQrUrl = ownerUserId ? `${window.location.origin}/user/${ownerUserId}` : null;
                                 return (
-                                    <React.Fragment> {/* Use Fragment to group multiple top-level elements */}
+                                    <div className="rounded-xl border-2 border-primary bg-primary/10 overflow-hidden relative">
                                         {/* Owner/breeder ? top-right corner */}
                                         {breederInfo && (
                                         <div className="absolute top-2 right-2 flex flex-col items-center gap-1 text-center z-10">
@@ -2014,7 +2014,7 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const ViewOn
                                             {(animal.manualBreederName || (breederInfo && (breederInfo.breederName || breederInfo.personalName))) && <p className="text-xs text-gray-500 italic">{animal.manualBreederName || breederInfo.breederName || breederInfo.personalName}</p>}
                                             {animal.id_public && <p className="text-xs font-mono text-gray-400">{animal.id_public}</p>}
                                         </div>
-                                    </React.Fragment>
+                                    </div>
                                 );
                             })()}
                             <div>
