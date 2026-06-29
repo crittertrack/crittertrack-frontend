@@ -553,68 +553,68 @@ import { PedigreeChart, prefetchPedigreeTree } from '../AnimalForm';const Privat
                                 Share
                             </button>
                             {onTransfer && (() => {
-    const iWasTransferredThisAnimal =
-        animal.originalOwnerId &&
-        animal.ownerId_public === userProfile?.id_public;
+                             const iWasTransferredThisAnimal =
+                            animal.originalOwnerId &&
+                            animal.ownerId_public === userProfile?.id_public;
 
-    // Recipient owns it
-if (iWasTransferredThisAnimal) {
-    return (
-        <button
-            onClick={() => handleReturnTransferredAnimal()}
-            disabled={returningAnimal}
-            className="px-2 py-1 bg-orange-100 hover:bg-orange-200 text-orange-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
-            title="Return to breeder"
-        >
-            <RotateCcw size={14} />
-            {returningAnimal ? "Returning..." : "Return"}
-        </button>
-    );
-}
+                            // Recipient owns it
+                            if (iWasTransferredThisAnimal) {
+                            return (
+                           <button
+                            onClick={() => handleReturnTransferredAnimal()}
+                            disabled={returningAnimal}
+                            className="px-2 py-1 bg-orange-100 hover:bg-orange-200 text-orange-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                             title="Return to breeder"
+                            >
+                            <RotateCcw size={14} />
+                            {returningAnimal ? "Returning..." : "Return"}
+                            </button>
+                         );
+                     }
 
-// Transfer request exists
-if (animal.pendingTransfer) {
+                     // Transfer request exists
+                     if (animal.pendingTransfer) {
 
-    // 🆕 If current user is the SENDER → show Withdraw
-    if (animal.pendingTransfer.fromUserId === userProfile?._id) {
-        return (
-            <button
+                       // 🆕 If current user is the SENDER → show Withdraw
+                     if (animal.pendingTransfer.fromUserId === userProfile?._id) {
+                       return (
+                      <button
                 onClick={() => handleWithdrawTransfer(animal.pendingTransfer._id)}
                 className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
                 title="Withdraw transfer request"
-            >
+                  >
                 <X size={14} />
                 Withdraw
-            </button>
-        );
-    }
+              </button>
+             );
+            }
 
     
 
-    // Recipient view → still pending approval
-    return (
-        <button
+              // Recipient view → still pending approval
+              return (
+             <button
             disabled
             className="px-2 py-1 bg-yellow-100 text-yellow-700 font-semibold rounded-lg flex items-center gap-1 text-xs cursor-not-allowed"
             title="Transfer request pending"
-        >
+             >
             <ArrowLeftRight size={14} />
             Pending
-        </button>
-    );
-}
+           </button>
+            );
+              }
 
-// Original owner (no transfer)
-return (
-    <button
-        onClick={() => onTransfer(animal)}
-        className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
-        title="Transfer this animal"
-    >
-        <ArrowLeftRight size={14} />
-        Transfer
-    </button>
-);})()}
+               // Original owner (no transfer)
+              return (
+            <button
+             onClick={() => onTransfer(animal)}
+             className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+             title="Transfer this animal"
+               >
+             <ArrowLeftRight size={14} />
+              Transfer
+               </button>
+                       );})()}
                             {onArchive && (
                                 <button
                                     onClick={() => onArchive(animal)}
@@ -968,40 +968,40 @@ return (
                                                     
                                                     const displayName = parts.join(' • ') || 'Unknown Breeder';
                                                     return <RouterLink to={`/user/${breederInfo.id_public}`} className="text-purple-600 hover:underline font-semibold">{displayName}</RouterLink>;})() : <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public || '\u2014'}</span>}</div>{/* Keeper */}
-{animal.ownerId_public && (
-    <div>
-        <span className="text-gray-500">Keeper:</span>{' '}
-        {keeperContactInfo ? (() => {
-            const parts = [];
-            if (keeperContactInfo.prefix) parts.push(keeperContactInfo.prefix);
+                                                           {animal.ownerId_public && (
+                                                           <div>
+                                            <span className="text-gray-500">Keeper:</span>{' '}
+                                                       {keeperContactInfo ? (() => {
+                                                      const parts = [];
+                                                 if (keeperContactInfo.prefix) parts.push(keeperContactInfo.prefix);
             
-            // Handle breeder name and personal name
-            if (keeperContactInfo.breederName && keeperContactInfo.personalName) {
-                parts.push(`${keeperContactInfo.breederName} (${keeperContactInfo.personalName})`);
-            } else if (keeperContactInfo.breederName) {
-                parts.push(keeperContactInfo.breederName);
-            } else if (keeperContactInfo.personalName) {
-                parts.push(keeperContactInfo.personalName);
-            }
+                                                   // Handle breeder name and personal name
+                                                   if (keeperContactInfo.breederName && keeperContactInfo.personalName) {
+                                              parts.push(`${keeperContactInfo.breederName} (${keeperContactInfo.personalName})`);
+                                        } else if (keeperContactInfo.breederName) {
+                                parts.push(keeperContactInfo.breederName);
+                                      } else if (keeperContactInfo.personalName) {
+                                            parts.push(keeperContactInfo.personalName);
+                                    }
+             
+                                if (keeperContactInfo.suffix) parts.push(keeperContactInfo.suffix);
             
-            if (keeperContactInfo.suffix) parts.push(keeperContactInfo.suffix);
+                           const displayName = parts.join(' • ') || animal.keeperName || 'Unknown Keeper';
             
-            const displayName = parts.join(' • ') || animal.keeperName || 'Unknown Keeper';
-            
-            return (
+                         return (
                 <RouterLink to={`/user/${animal.keeperContactId}`} className="text-purple-600 hover:underline font-semibold">
                     {displayName}
                 </RouterLink>
-            );
-        })() : animal.keeperContactId ? (
-            <RouterLink to={`/user/${animal.keeperContactId}`} className="text-purple-600 hover:underline font-semibold">
+                        );
+                         })() : animal.keeperContactId ? (
+                         <RouterLink to={`/user/${animal.keeperContactId}`} className="text-purple-600 hover:underline font-semibold">
                                                 {animal.keeperName || '—'}
-            </RouterLink>
-        ) : (
-            <span className="font-mono text-accent">
+                           </RouterLink>
+                          ) : (
+                                 <span className="font-mono text-accent">
                                                 {animal.keeperName || '—'}
-            </span>
-        )}
+                                   </span>
+                                           )}
                                                 </div>
                                             )}
                                             {(animal.breederAssignedId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
@@ -1552,7 +1552,10 @@ return (
                                                 <button
                                                     type="button"
                                                     onClick={() => {
-                                                        const merged = [...new Set([...assignedIds, ...parentLineIds])];
+                                                        const merged = [...new Set([
+                                                           ...assignedIds,
+                                                                            ...parentLineIds
+                                                             ])];
                                                         setAnimalBreedingLinesDirect(animal.id_public, merged);
                                                     }}
                                                     className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-purple-400 text-purple-700 bg-purple-50 hover:bg-purple-100 text-xs font-medium transition"
@@ -3070,9 +3073,9 @@ return (
                                             {animal.remarks && <p className="text-xs text-gray-400 border-t border-primary/20 pt-1 mt-1 max-w-xs">{animal.remarks}</p>}
                                             {animal.id_public && <p className="text-xs font-mono text-gray-400">{animal.id_public}</p>}
                                         </div>
-                                        </div>
-                                    );
-                            })()}
+                                    </div>
+                                );
+                        })()}
 
                             <div>
                                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Generation 1 — Parents</p>
@@ -3114,7 +3117,6 @@ return (
                                     </div>
                                 </div>
                             </div>
-                            </div>
                         </div>
                     );
                 })()}
@@ -3135,6 +3137,7 @@ return (
              
             </div>
         </div>
+    </div>
     );
 };
 
