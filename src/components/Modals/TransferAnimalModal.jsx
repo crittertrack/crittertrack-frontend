@@ -30,7 +30,7 @@ const TransferAnimalModal = ({
         const parts = [];
         if (user.breederName) parts.push(user.breederName); // Always show breederName if present, regardless of showBreederName flag for internal selection
         if (user.personalName && user.showPersonalName) parts.push(user.personalName);
-        return parts.join(' / ') || user.id_public || 'Unknown User';
+        return parts.join(' / ') || String(user.id_public || '') || 'Unknown User';
     };
 
     if (!animal) return null;
@@ -63,8 +63,8 @@ const TransferAnimalModal = ({
                             </div>
                         )}
                         <div>
-                            <h3 className="font-semibold text-gray-800">{animal.name || ''}</h3>
-                            <p className="text-sm text-gray-600">{(animal.species || '')} • {(animal.id_public || '')}</p>
+                            <h3 className="font-semibold text-gray-800">{String(animal.name || '')}</h3>
+                            <p className="text-sm text-gray-600">{String(animal.species || '')} • {String(animal.id_public || '')}</p>
                         </div>
                     </div>
                 </div>
@@ -124,7 +124,7 @@ const TransferAnimalModal = ({
                                                     className="w-full text-left px-4 py-2 hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
                                                 >
                                                     <div className="font-medium">{user.id_public}</div>
-                                                    <div className="text-sm text-gray-600">{getDisplayName(user)}</div>
+                                                    <div className="text-sm text-gray-600">{String(getDisplayName(user))}</div>
                                                 </button>
                                             ))}
                                         </div>
