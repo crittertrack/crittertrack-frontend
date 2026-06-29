@@ -1749,7 +1749,24 @@ const App = () => {
             )}
 
             {showTransferModal && (
-                <TransferAnimalModal {...transferWorkflow} animal={transferAnimal} onClose={handleCloseTransferWorkflow} onSubmit={handleSubmitTransfer} showModalMessage={showModalMessage} API_BASE_URL={API_BASE_URL} authToken={authToken} />
+               <TransferAnimalModal
+    animal={transferAnimal}
+    userQuery={transferWorkflow.transferUserQuery}
+    setUserQuery={transferWorkflow.setTransferUserQuery}
+    userResults={transferWorkflow.transferUserResults}
+    selectedUser={transferWorkflow.transferSelectedUser}
+    onSelectUser={transferWorkflow.handleSelectTransferUser}
+    searching={transferWorkflow.transferSearching}
+    searchPerformed={transferWorkflow.transferSearchPerformed}
+    price={transferWorkflow.transferPrice}
+    setPrice={transferWorkflow.setTransferPrice}
+    notes={transferWorkflow.transferNotes}
+    setNotes={transferWorkflow.setTransferNotes}
+    onSearchUsers={transferWorkflow.handleSearchTransferUser}
+    onClose={handleCloseTransferWorkflow}
+    onSubmit={handleSubmitTransfer}
+    showModalMessage={showModalMessage}
+/>
             )}
             
             <header className="w-full bg-white dark:bg-dark-surface p-3 sm:p-4 rounded-xl shadow-lg mb-6 max-w-7xl overflow-visible transition-colors duration-200">
