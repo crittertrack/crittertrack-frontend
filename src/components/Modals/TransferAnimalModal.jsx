@@ -213,6 +213,8 @@ const TransferAnimalModal = ({
                                     recipient: selectedUser,
                                     price: price,
                                     notes: notes,
+                                    recipientId: selectedUser.id_public,
+                                    date: new Date().toISOString(),
                                     transferType: transferType,
                                 });
                             }
