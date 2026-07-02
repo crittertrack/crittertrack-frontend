@@ -25,7 +25,25 @@ const getSpeciesDisplayName = (species) => {
         'Chinese Dwarf Hamster': 'Chinese Dwarf Hamsters',
         'Syrian Hamster': 'Syrian Hamsters',
         'Hamster': 'Hamsters', // Backwards compatibility
-        'Guinea Pig': 'Guinea Pigs'
+        'Guinea Pig': 'Guinea Pigs',
+        'Ball Python': 'Ball Pythons',
+        'Budgie': 'Budgies',
+        'Corn Snake': 'Corn Snakes',
+        'Curlyhair Tarantula': 'Curlyhair Tarantulas',
+        'Eastern Kingsnake': 'Eastern Kingsnakes',
+        'Giant Day Gecko': 'Giant Day Geckos',
+        'Bearded Dragon': 'Bearded Dragons',
+        '3 Lined Knobtail Gecko': '3 Lined Knobtail Geckos',
+        'Banded Knobtails Gecko': 'Banded Knobtails Geckos',
+        'Cat': 'Cats',
+        'Centralian Rough Knobtail Gecko': 'Centralian Rough Knobtail Geckos',
+        'Cockatiel': 'Cockatiels',
+        'Fat-tailed Gerbil': 'Fat-tailed Gerbils',
+        'Ferret': 'Ferrets',
+        'Pilbara Knobtail Gecko': 'Pilbara Knobtail Geckos',
+        'Rabbit': 'Rabbits',
+        'Tarantula': 'Tarantulas',
+        'Thicktail Gecko': 'Thicktail Geckos',
     };
     return displayNames[species] || species;
 };
