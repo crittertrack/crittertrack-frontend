@@ -13,6 +13,8 @@ const TARGET_OUTCOME_TRAIT_CHIPS = {
         { id: 'tan',                label: 'Tan',               code: 'any + −/at',     group: 'Tan, Fox & Shaded' },
         { id: 'fox',                label: 'Fox',               code: 'any + −/at + C',       group: 'Tan, Fox & Shaded' },
         { id: 'sable',              label: 'Sable',             code: 'Ay/- + −/at + U/- or -/at + e/e + U/*', group: 'Tan, Fox & Shaded' },
+        { id: 'Snowtiger',          label: 'Snowtiger',         code: 'Avy/- + C', group: 'Tan, Fox & Shaded' },
+        { id: 'marten sable',        label: 'Marten Sable',     code: 'Ay/- + −/at + cch/cch + U/- or -/at + cch/cch + e/e + U/*', group: 'Tan, Fox & Shaded' },
 
         // Brown Dilutes
         { id: 'chocolate',          label: 'Chocolate',         code: 'b/b',            group: 'Brown Dilute' },
@@ -30,13 +32,14 @@ const TARGET_OUTCOME_TRAIT_CHIPS = {
         { id: 'mock-choc',          label: 'Mock Chocolate',    code: 'ce/cch',         group: 'Albino & Dilution' },
         { id: 'sepia',              label: 'Sepia',             code: 'a/a cch/cch',    group: 'Albino & Dilution' },
         { id: 'silver-agouti',      label: 'Silver Agouti',     code: 'A/- cch/cch',    group: 'Albino & Dilution' },
+        
 
         // Blue Dilutes
         { id: 'blue',               label: 'Blue',              code: 'd/d',            group: 'Blue Dilute' },
         { id: 'blue-agouti',        label: 'Blue Agouti',       code: 'A/- d/d',        group: 'Blue Dilute' },
-        { id: 'blue-brindle',       label: 'blue-brindle',      code: 'Avy/- p/p',      group: 'Blue Dilute' },
-        { id: 'Dominant Amber',     label: 'Amber',             code: 'Ay/- d/d',       group: 'Blue Dilute' },
-        { id: 'Recessive Amber',    label: 'Amber',             code: 'd/d e/e',        group: 'Blue Dilute' },
+        { id: 'blue-brindle',       label: 'Blue Brindle',      code: 'Avy/- p/p',      group: 'Blue Dilute' },
+        { id: 'Dominant Amber',     label: 'Amber (Dom.)',      code: 'Ay/- d/d',       group: 'Blue Dilute' },
+        { id: 'Recessive Amber',    label: 'Amber (Rec.)',      code: 'd/d e/e',        group: 'Blue Dilute' },
 
         // Red Dilute
         { id: 'rec-red',            label: 'Recessive Red',     code: 'e/e',            group: 'Red Dilute' },
@@ -451,7 +454,6 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions,
         'Recessive Amber': { 'Red Dilute': 'rec-red' },
         'sable': { 'Base Color': 'dom-red', 'Umbrous': 'umbrous' },
         'texel': { 'Astrex & Texel': 'astrex', 'Shorthair/Longhair': 'longhair' },
-        'fox': { 'Tan, Fox & Shaded': 'tan' },
     };
 
     const blackBasedDilutes = new Set(['chocolate', 'blue', 'dove', 'lilac', 'champagne', 'silver', 'lavender']);
@@ -578,6 +580,11 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions,
             ) : mode === 'traits' ? (
               <div>
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Select Desired Traits</h3>
+                {Object.values(selectedTraits).includes('fox') && !selectedTraits['Albino & Dilution'] && (
+                    <div className="p-3 mb-4 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm">
+                        <p><b>Note:</b> For the 'Fox' phenotype to be expressed, a selection from 'Albino & Dilution' (like Siamese, Himalayan, etc.) is also required.</p>
+                    </div>
+                )}
                 <TraitSelector
                   species={selectedSpecies}
                   selectedTraits={selectedTraits}
