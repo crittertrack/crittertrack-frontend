@@ -224,7 +224,7 @@ const findPotentialPairings = (allAnimals, target, mode, species) => {
 
 const getFullName = (animal) => [animal?.prefix, animal?.name, animal?.suffix].filter(Boolean).join(' ');
 
-const TraitSelector = ({ speciesConfig, selectedTraits, onTraitChange, disabled }) => {
+const TraitSelector = ({ species, selectedTraits, onTraitChange, disabled }) => {
   const traitCategories = useMemo(() => {
     const chips = TARGET_OUTCOME_TRAIT_CHIPS[species] || [];
     if (chips.length === 0) {
