@@ -1,10 +1,130 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Target, Dna, Loader2, Search, Settings, Palette } from 'lucide-react';
 
-// This is a placeholder for the actual calculation logic. In a real implementation,
-// this would likely be a backend endpoint that can efficiently query and
-// calculate genetic probabilities across all animals.
-const findPotentialPairings = (allAnimals, target, mode, speciesConfig) => {
+const TARGET_OUTCOME_TRAIT_CHIPS = {
+    'Fancy Mouse': [
+        // Base Color — Black series
+        { id: 'black',              label: 'Black',             code: 'a/a',            group: 'Base Color — Black' },
+        { id: 'tan',                label: 'Tan',               code: '−/at',           group: 'Base Color — Black' },
+        { id: 'chocolate',          label: 'Chocolate',         code: 'b/b',            group: 'Base Color — Black' },
+        { id: 'blue',               label: 'Blue',              code: 'd/d',            group: 'Base Color — Black' },
+        { id: 'dove',               label: 'Dove',              code: 'p/p',            group: 'Base Color — Black' },
+        { id: 'lilac',              label: 'Lilac',             code: 'b/b d/d',        group: 'Base Color — Black' },
+        { id: 'champagne',          label: 'Champagne',         code: 'b/b p/p',        group: 'Base Color — Black' },
+        { id: 'silver',             label: 'Silver',            code: 'd/d p/p',        group: 'Base Color — Black' },
+        { id: 'lavender',           label: 'Lavender',          code: 'b/b d/d p/p',    group: 'Base Color — Black' },
+        // Base Color — Agouti series
+        { id: 'agouti',             label: 'Agouti',            code: 'A/-',            group: 'Base Color — Agouti' },
+        { id: 'cinnamon',           label: 'Cinnamon',          code: 'A/- b/b',        group: 'Base Color — Agouti' },
+        { id: 'blue-agouti',        label: 'Blue Agouti',       code: 'A/- d/d',        group: 'Base Color — Agouti' },
+        { id: 'argente',            label: 'Argente',           code: 'A/- p/p',        group: 'Base Color — Agouti' },
+        { id: 'cinnamon-argente',   label: 'Cinnamon Argente',  code: 'A/- b/b p/p',   group: 'Base Color — Agouti' },
+        // Base Color — Other
+        { id: 'dom-red',            label: 'Dominant Red',      code: 'Ay/-',           group: 'Base Color — Other' },
+        { id: 'rec-red',            label: 'Recessive Red',     code: 'e/e',            group: 'Base Color — Other' },
+        { id: 'am-brindle',         label: 'Am. Brindle',       code: 'Avy/-',          group: 'Base Color — Other' },
+        { id: 'Leaden',            label: 'Leaden',            code: 'ln/ln',          group: 'Base Color — Other' },
+        // Albino & Dilution
+        { id: 'albino',             label: 'Albino',            code: 'c/c',            group: 'Albino & Dilution' },
+        { id: 'himalayan',          label: 'Himalayan',         code: 'c/ch',           group: 'Albino & Dilution' },
+        { id: 'bone',               label: 'Bone',              code: 'c/ce',           group: 'Albino & Dilution' },
+        { id: 'siamese',            label: 'Siamese',           code: 'ch/ch',          group: 'Albino & Dilution' },
+        { id: 'burmese',            label: 'Burmese',           code: 'ch/cch',         group: 'Albino & Dilution' },
+        { id: 'stone',              label: 'Stone',             code: 'c/cch',          group: 'Albino & Dilution' },
+        { id: 'beige',              label: 'Beige',             code: 'ce/ce',          group: 'Albino & Dilution' },
+        { id: 'colorpoint-beige',   label: 'Colorpoint Beige',  code: 'ch/ce',          group: 'Albino & Dilution' },
+        { id: 'mock-choc',          label: 'Mock Chocolate',    code: 'ce/cch',         group: 'Albino & Dilution' },
+        { id: 'sepia',              label: 'Sepia',             code: 'a/a cch/cch',    group: 'Albino & Dilution' },
+        { id: 'silver-agouti',      label: 'Silver Agouti',     code: 'A/- cch/cch',    group: 'Albino & Dilution' },
+        { id: 'fox',                label: 'Fox',               code: '−/at + C',        group: 'Albino & Dilution' },
+        // Pattern & Markings
+
+        { id: 'xbrindle',           label: 'Xbrindle',          code: 'Mobr/mobr',      group: 'Pattern & Markings' },
+        { id: 'pied',               label: 'Pied',              code: 's/s',            group: 'Pattern & Markings' },
+        { id: 'variegated',         label: 'Variegated',        code: 'W/w',            group: 'Pattern & Markings' },
+        { id: 'banded',             label: 'Banded',            code: 'Wsh/w',          group: 'Pattern & Markings' },
+        { id: 'splashed',           label: 'Splashed',          code: 'Spl/spl',        group: 'Pattern & Markings' },
+        { id: 'merle',              label: 'Merle',             code: 'rn/rn',          group: 'Pattern & Markings' },
+        { id: 'pearl',              label: 'Pearl',             code: 'si/si',          group: 'Pattern & Markings' },
+        { id: 'umbrous',            label: 'Umbrous',           code: 'U/-',            group: 'Pattern & Markings' },
+        // Coat & Texture
+        { id: 'shorthair',          label: 'Shorthair',         code: 'Go/-',           group: 'Coat & Texture' },
+        { id: 'longhair',           label: 'Longhair',          code: 'go/go',          group: 'Coat & Texture' },
+        { id: 'satin',              label: 'Satin',             code: 'sa/sa',          group: 'Coat & Texture' },
+        { id: 'astrex',             label: 'Astrex',            code: 'Re/-',           group: 'Coat & Texture' },
+        { id: 'texel',              label: 'Texel',             code: 'Re/- go/go',     group: 'Coat & Texture' },
+        { id: 'rosette',            label: 'Rosette',           code: 'rst/rst',        group: 'Coat & Texture' },
+        { id: 'fuzz',               label: 'Fuzz',              code: 'fz/fz',          group: 'Coat & Texture' },
+        { id: 'dom-hairless',       label: 'Dominant Hairless', code: 'Nu/-',           group: 'Coat & Texture' },
+    ],
+};
+
+const buildPrototypeGenotypeFromTraits = (selectedTraits, species = 'Fancy Mouse') => {
+    const genotype = {};
+    const assumptions = [];
+
+    selectedTraits.forEach((id) => {
+        switch (id) {
+            // Base Color — Black series
+            case 'black':            genotype.A  = 'a/a';     break;
+            case 'tan':              genotype.A  = 'at/a';    break;
+            case 'chocolate':        genotype.A  = 'a/a';  genotype.B = 'b/b'; break;
+            case 'blue':             genotype.A  = 'a/a';  genotype.D = 'd/d'; break;
+            case 'dove':             genotype.A  = 'a/a';  genotype.P = 'p/p'; break;
+            case 'lilac':            genotype.A  = 'a/a';  genotype.B = 'b/b'; genotype.D = 'd/d'; break;
+            case 'champagne':        genotype.A  = 'a/a';  genotype.B = 'b/b'; genotype.P = 'p/p'; break;
+            case 'silver':           genotype.A  = 'a/a';  genotype.D = 'd/d'; genotype.P = 'p/p'; break;
+            case 'lavender':         genotype.A  = 'a/a';  genotype.B = 'b/b'; genotype.D = 'd/d'; genotype.P = 'p/p'; break;
+            // Base Color — Agouti series
+            case 'agouti':           genotype.A  = 'A/A';     break;
+            case 'cinnamon':         genotype.A  = 'A/A';  genotype.B = 'b/b'; break;
+            case 'blue-agouti':      genotype.A  = 'A/A';  genotype.D = 'd/d'; break;
+            case 'argente':          genotype.A  = 'A/A';  genotype.P = 'p/p'; break;
+            case 'cinnamon-argente': genotype.A  = 'A/A';  genotype.B = 'b/b'; genotype.P = 'p/p'; break;
+            // Base Color — Other
+            case 'dom-red':          genotype.A  = 'Ay/a';    break;
+            case 'rec-red':          genotype.E  = 'e/e';     break;
+            case 'Leaden':          genotype.Ln = 'ln/ln';   break;
+            // Albino & Dilution — C locus
+            case 'albino':           genotype.C  = 'c/c';     break;
+            case 'himalayan':        genotype.C  = 'c/ch';    break;
+            case 'bone':             genotype.C  = 'c/ce';    break;
+            case 'siamese':          genotype.C  = 'ch/ch';   break;
+            case 'burmese':          genotype.C  = 'ch/cch';  break;
+            case 'stone':            genotype.C  = 'c/cch';   break;
+            case 'beige':            genotype.C  = 'ce/ce';   break;
+            case 'colorpoint-beige': genotype.C  = 'ch/ce';   break;
+            case 'mock-choc':        genotype.C  = 'ce/cch';  break;
+            case 'sepia':            genotype.A  = 'a/a'; genotype.C = 'cch/cch'; break;
+            case 'silver-agouti':    genotype.A  = 'A/A'; genotype.C = 'cch/cch'; break;
+            case 'fox':              genotype.A  = 'at/a';    break; // pair with a C chip for full fox expression
+            // Pattern & Markings
+            case 'am-brindle':       genotype.A  = 'Avy/a';   break;
+            case 'xbrindle':         genotype.Mobr = 'Mobr/mobr'; break;
+            case 'pied':             genotype.S  = 's/s';     break;
+            case 'variegated':       genotype.W  = 'W/w';     break;
+            case 'banded':           genotype.W  = 'Wsh/w';   break;
+            case 'splashed':         genotype.Spl = 'Spl/spl'; break;
+            case 'merle':            genotype.Rn = 'rn/rn';   break;
+            case 'pearl':            genotype.Si = 'si/si';   break;
+            case 'umbrous':          genotype.U  = 'U/u';     break;
+            // Coat & Texture
+            case 'shorthair':        genotype.Go = 'Go/Go';   break;
+            case 'longhair':         genotype.Go = 'go/go';   break;
+            case 'satin':            genotype.Sa = 'sa/sa';   break;
+            case 'astrex':           genotype.Re = 'Re/re';   break;
+            case 'texel':            genotype.Re = 'Re/re'; genotype.Go = 'go/go'; break;
+            case 'rosette':          genotype.Rst = 'rst/rst'; break;
+            case 'fuzz':             genotype.Fz = 'fz/fz';  break;
+            case 'dom-hairless':     genotype.Nu = 'Nu/nu';   break;
+            default: break;
+        }
+    });
+
+    return { genotype, assumptions };
+};
+
+const findPotentialPairings = (allAnimals, target, mode, species) => {
   console.log(`Finding pairings for ${mode}:`, target);
 
   // Helper to parse a genetic code string like "Ee/aa Wsh/w"
@@ -41,43 +161,9 @@ const findPotentialPairings = (allAnimals, target, mode, speciesConfig) => {
   if (mode === 'genetics') {
     targetLoci = parseGeneticCode(target);
   } else if (mode === 'traits') {
-    const targetLociFromTraits = {};
-    if (speciesConfig && speciesConfig.genetics && speciesConfig.genetics.loci) {
-        const lociConfig = speciesConfig.genetics.loci;
-        for (const traitValue of Object.values(target)) {
-            if (!traitValue) continue;
-
-            let found = false;
-            for (const locusKey in lociConfig) {
-                const locus = lociConfig[locusKey];
-                if (locus.phenotypes) {
-                    for (const genotypeString in locus.phenotypes) {
-                        if (locus.phenotypes[genotypeString] === traitValue) {
-                            // Ignore ambiguous genotypes like 'A/-'
-                            if (genotypeString.includes('-')) continue;
-
-                            let alleles;
-                            if (genotypeString.includes('/')) {
-                                alleles = genotypeString.split('/');
-                            } else if (genotypeString.length === 2) {
-                                alleles = [genotypeString[0], genotypeString[1]];
-                            } else {
-                                continue;
-                            }
-
-                            if (alleles.length === 2 && alleles[0] && alleles[1]) {
-                                targetLociFromTraits[locusKey] = alleles.sort();
-                                found = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-                if (found) break;
-            }
-        }
-    }
-    targetLoci = targetLociFromTraits;
+    const selectedTraitIds = Object.values(target).filter(Boolean);
+    const { genotype } = buildPrototypeGenotypeFromTraits(selectedTraitIds, species);
+    targetLoci = genotype;
   } else {
     return Promise.resolve([]);
   }
@@ -140,25 +226,26 @@ const getFullName = (animal) => [animal?.prefix, animal?.name, animal?.suffix].f
 
 const TraitSelector = ({ speciesConfig, selectedTraits, onTraitChange, disabled }) => {
   const traitCategories = useMemo(() => {
-    const genetics = speciesConfig?.genetics;
-    if (!genetics || !genetics.phenotypeCategories || !genetics.loci) {
+    const chips = TARGET_OUTCOME_TRAIT_CHIPS[species] || [];
+    if (chips.length === 0) {
       return [];
     }
 
-    return genetics.phenotypeCategories.map(category => {
-      const options = new Set();
-      category.loci.forEach(locusKey => {
-        const locus = genetics.loci[locusKey];
-        if (locus && locus.phenotypes) {
-          Object.values(locus.phenotypes).forEach(phenotype => options.add(phenotype));
-        }
-      });
+    const categories = {};
+    chips.forEach(chip => {
+      if (!categories[chip.group]) {
+        categories[chip.group] = [];
+      }
+      categories[chip.group].push({ id: chip.id, label: chip.label });
+    });
+
+    return Object.entries(categories).map(([label, options]) => ({
       return {
-        label: category.label,
-        options: Array.from(options).sort(),
+        label,
+        options: options.sort((a, b) => a.label.localeCompare(b.label)),
       };
-    }).filter(category => category.options.length > 0);
-  }, [speciesConfig]);
+    });
+  }, [species]);
 
   if (traitCategories.length === 0) {
     return <p className="text-sm text-gray-500 text-center">No visual traits configured for this species.</p>;
@@ -173,14 +260,14 @@ const TraitSelector = ({ speciesConfig, selectedTraits, onTraitChange, disabled 
           </label>
           <select
             id={`trait-${category.label}`}
-            value={selectedTraits[category.label] || ''}
+            value={selectedTraits[category.label] || ''} // This will be the chip ID
             onChange={(e) => onTraitChange(category.label, e.target.value)}
             disabled={disabled}
             className="w-full p-2 border border-gray-300 rounded-lg bg-white"
           >
             <option value="">Any</option>
             {category.options.map(option => (
-              <option key={option} value={option}>{option}</option>
+              <option key={option.id} value={option.id}>{option.label}</option>
             ))}
           </select>
         </div>
@@ -232,7 +319,7 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions,
     try {
       const target = isTraitsMode ? selectedTraits : targetGenetics;
       const animalsOfSpecies = myAnimals.filter(a => a.species === selectedSpecies);
-      const potentialPairings = await findPotentialPairings(animalsOfSpecies, target, mode, speciesConfigs[selectedSpecies]);
+      const potentialPairings = await findPotentialPairings(animalsOfSpecies, target, mode, selectedSpecies);
       setResults(potentialPairings);
 
     } catch (err) {
@@ -294,7 +381,7 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions,
               <div>
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Select Desired Traits</h3>
                 <TraitSelector
-                  speciesConfig={speciesConfigs[selectedSpecies]}
+                  species={selectedSpecies}
                   selectedTraits={selectedTraits}
                   onTraitChange={(trait, value) => setSelectedTraits(prev => ({ ...prev, [trait]: value }))}
                   disabled={isLoading}
