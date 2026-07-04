@@ -66,6 +66,7 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
         params: { sireId: sire.id_public, damId: dam.id_public, generations: 50, includeAncestors: true },
         headers: { Authorization: `Bearer ${authToken}` }
       });
+      console.log('COI API Response:', response.data); // For debugging
       setCoiResult(response.data);
     } catch (err) {
       console.error("COI Calculation Error:", err);
@@ -148,7 +149,13 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
               </div>
 
               {(() => {
-                const ancestors = coiResult.commonAncestors || coiResult.common_ancestors || [];
+                // Handle various possible structures for the ancestor list
+                const rawAncestors = coiResult.commonAncestors
+                  || coiResult.common_ancestors
+                  || (coiResult.ancestorAnalysis && coiResult.ancestorAnalysis.ancestors)
+                  || coiResult.ancestors;
+                const ancestors = Array.isArray(rawAncestors) ? rawAncestors : [];
+
                 if (ancestors.length === 0) return null;
 
                 return (
@@ -159,7 +166,7 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
                     </h4>
                     <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
                       {ancestors.map((ancestor, index) => (
-                        <div key={index} className="bg-white border border-gray-200 rounded-lg p-3 text-sm">
+                        <div key={ancestor.id_public || index} className="bg-white border border-gray-200 rounded-lg p-3 text-sm">
                           <p className="font-bold text-gray-800">{ancestor.name} ({ancestor.id_public})</p>
                           <p className="text-xs text-gray-500 mt-0.5">Contribution: <span className="font-semibold">{(ancestor.contribution * 100).toFixed(4)}%</span></p>
                           <div className="mt-2 text-xs grid grid-cols-1 sm:grid-cols-2 gap-2">
