@@ -240,11 +240,9 @@ const TraitSelector = ({ speciesConfig, selectedTraits, onTraitChange, disabled 
     });
 
     return Object.entries(categories).map(([label, options]) => ({
-      return {
-        label,
-        options: options.sort((a, b) => a.label.localeCompare(b.label)),
-      };
-    });
+      label,
+      options: options.sort((a, b) => a.label.localeCompare(b.label)),
+    }));
   }, [species]);
 
   if (traitCategories.length === 0) {
