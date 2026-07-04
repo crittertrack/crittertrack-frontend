@@ -302,7 +302,7 @@ export function AppRoutes({
       } />
 
       {/* Genetics Calculator */}
-      <Route path="/genetics-calculator" element={
+      <Route path="/calculator" element={
         <GeneticsCalculator
           API_BASE_URL={API_BASE_URL}
           authToken={authToken}
