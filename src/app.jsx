@@ -79,7 +79,7 @@ import { useBreedingLines } from './hooks/useBreedingLines.ts';
 import { useModerationMode } from './hooks/useModerationMode.ts';
 import { AppRoutes } from './AppRoutes';
 import { PublicAnimalPage, PublicProfilePage } from './PublicPages';
-import ToolsDropdown from './components/layout/ToolsDropdown';
+import ToolsDropdown from './components/ToolsDropdown';
 import TutorialsPage from './pages/TutorialsPage';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
