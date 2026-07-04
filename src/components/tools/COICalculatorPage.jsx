@@ -63,7 +63,7 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
     setCoiResult(null);
     try {
       const response = await axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
-        params: { sireId: sire.id_public, damId: dam.id_public, generations: 50 },
+        params: { sireId: sire.id_public, damId: dam.id_public, generations: 50, includeAncestors: true },
         headers: { Authorization: `Bearer ${authToken}` }
       });
       setCoiResult(response.data);
