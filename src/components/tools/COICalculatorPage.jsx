@@ -5,8 +5,9 @@ import { Scale, Dna, Loader2, Search } from 'lucide-react';
 // A simplified animal selector for the calculator
 const AnimalSelector = ({ animals, selectedAnimal, onSelect, title, disabled }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const getFullName = (animal) => [animal.prefix, animal.name, animal.suffix].filter(Boolean).join(' ');
   const filteredAnimals = animals.filter(a => 
-    a.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    getFullName(a).toLowerCase().includes(searchTerm.toLowerCase()) || 
     a.id_public.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -32,7 +33,7 @@ const AnimalSelector = ({ animals, selectedAnimal, onSelect, title, disabled }) 
             disabled={disabled}
             className={`w-full text-left p-2 text-sm hover:bg-blue-50 transition ${selectedAnimal?.id_public === animal.id_public ? 'bg-blue-100 font-semibold' : ''}`}
           >
-            {animal.name} ({animal.id_public})
+            {getFullName(animal)} ({animal.id_public})
           </button>
         ))}
       </div>
@@ -50,6 +51,8 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const getFullName = (animal) => [animal?.prefix, animal?.name, animal?.suffix].filter(Boolean).join(' ');
+
   const handleCalculate = async () => {
     if (!sire || !dam) {
       setError('Please select both a sire and a dam.');
@@ -59,14 +62,14 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
     setIsLoading(true);
     setCoiResult(null);
     try {
-      const response = await axios.post(`${API_BASE_URL}/animals/calculate-coi`, 
-        {
-          sireId: sire.id_public,
-          damId: dam.id_public
-        },
-        { headers: { Authorization: `Bearer ${authToken}` } }
-      );
-      setCoiResult(response.data);
+      const response = await axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
+        params: { sireId: sire.id_public, damId: dam.id_public, generations: 50 },
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      setCoiResult({ 
+        coi: response.data.inbreedingCoefficient ?? 0, 
+        generations: response.data.generations || 50 
+      });
     } catch (err) {
       console.error("COI Calculation Error:", err);
       setError(err.response?.data?.message || 'Failed to calculate COI. The backend endpoint may not be available.');
@@ -139,7 +142,7 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
               <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">Calculation Result</h3>
               <div className="text-center">
                 <p className="text-gray-600">The predicted Coefficient of Inbreeding (COI) for offspring from:</p>
-                <p className="font-semibold my-2">{sire.name} &times; {dam.name}</p>
+                <p className="font-semibold my-2">{getFullName(sire)} &times; {getFullName(dam)}</p>
                 <div className="my-4 p-6 bg-white border-2 border-primary rounded-full w-40 h-40 mx-auto flex flex-col items-center justify-center shadow-lg">
                   <span className="text-4xl font-bold text-primary">{coiResult.coi.toFixed(2)}%</span>
                   <span className="text-sm text-gray-500">COI</span>
