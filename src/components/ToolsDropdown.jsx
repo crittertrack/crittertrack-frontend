@@ -10,7 +10,7 @@ const toolLinks = [
   },
   {
     href: '/calculator',
-    label: 'Genetics Calculator',
+    label: 'Offspring Calculator',
     icon: <Calculator size={16} className="mr-2" />,
   },
   {
@@ -48,4 +48,3 @@ const ToolsDropdown = ({ onLinkClick }) => {
 };
 
 export default ToolsDropdown;
-

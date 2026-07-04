@@ -788,7 +788,7 @@ const App = () => {
     const [showTermsModal, setShowTermsModal] = useState(false);
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
     
-    // Animals for genetics calculator
+    // Animals for offspring calculator
     const [myAnimalsForCalculator, setMyAnimalsForCalculator] = useState([]);
     
     // Cached litters to prevent re-fetching on navigation
@@ -1027,8 +1027,8 @@ const App = () => {
             delete axios.defaults.headers.common['Authorization'];
             localStorage.removeItem('authToken');
             setUserProfile(null);
-            // Only redirect to home if not on a public route
-            const publicRoutes = ['donation', 'genetics-calculator', 'breeder', 'animal'];
+            // Only redirect to home if not on a public route. Note: /calculator is the Offspring Calculator.
+            const publicRoutes = ['donation', 'calculator', 'breeder', 'animal'];
             const currentPath = location.pathname.split('/')[1] || '';
             if (!publicRoutes.includes(currentPath)) {
                 navigate('/');
@@ -1094,10 +1094,10 @@ const App = () => {
         }
     }, [authToken, userProfile]);
 
-    // Fetch animals for genetics calculator when needed
+    // Fetch animals for offspring calculator when needed
     useEffect(() => {
         const fetchAnimalsForCalculator = async () => {
-            if ((currentView === 'genetics-calculator' || currentView === 'coi') && authToken) {
+            if ((currentView === 'calculator' || currentView === 'coi') && authToken) {
                 try {
                     const response = await axios.get(`${API_BASE_URL}/animals?isOwned=true`, {
                         headers: { Authorization: `Bearer ${authToken}` }
@@ -1450,8 +1450,8 @@ const App = () => {
             );
         }
         
-        // Genetics calculator for non-logged-in users
-        if (currentView === 'genetics-calculator') {
+        // Offspring Calculator for non-logged-in users
+        if (currentView === 'calculator') {
             return (
                 <div className="min-h-screen bg-page-bg flex flex-col items-center p-6 font-sans">
                     {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
@@ -1534,10 +1534,10 @@ const App = () => {
                 <header className="w-full max-w-7xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                     <CustomAppLogo size="w-10 h-10" />
                     <button 
-                        onClick={() => navigate('/genetics-calculator')}
+                        onClick={() => navigate('/calculator')}
                         className="px-3 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
                     >
-                        <Cat size={18} className="mr-1" /> Calculator
+                        <Cat size={18} className="mr-1" /> Offspring Calculator
                     </button>
                 </header>
                 

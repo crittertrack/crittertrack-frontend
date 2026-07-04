@@ -2340,7 +2340,7 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
         <div className="w-full max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-3 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 mb-4 sm:mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Genetics Calculator</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Offspring Calculator</h1>
               
               {/* Species Selector */}
               <select
@@ -2839,4 +2839,3 @@ const GeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole 
 
 export default GeneticsCalculator;
 export { calculatePhenotype, GENE_LOCI };
-
