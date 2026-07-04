@@ -19,7 +19,7 @@ const AnimalForm = lazy(() => import('./components/AnimalForm'));
 const PrivateAnimalDetail = lazy(() => import('./components/AnimalDetail/PrivateAnimalDetail'));
 const TutorialsPage = lazy(() => import('./components/tools/index'));
 const COICalculatorPage = lazy(() => import('./components/tools/COICalculatorPage'));
-const TargetOutcomePage = lazy(() => import('./components/tools/TargetOutcomePage'));
+const TargetOutcomePage = lazy(() => import('./components/Tools/TargetOutcomePage'));
 const ViewOnlyPrivateAnimalDetail = lazy(() => import('./components/AnimalDetail/ViewOnlyPrivateAnimalDetail'));
 
 const PageLoader = () => (
