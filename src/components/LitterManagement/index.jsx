@@ -1447,14 +1447,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [matingCalcCOI, setMatingCalcCOI] = useState(false);
     const [showMatingSpeciesPicker, setShowMatingSpeciesPicker] = useState(false);
 
-    // Test Pairing modal state
     const [showTestPairingModal, setShowTestPairingModal] = useState(false);
-    const [tpSireId, setTpSireId] = useState('');
-    const [tpDamId, setTpDamId] = useState('');
-    const [tpCOI, setTpCOI] = useState(null);
-    const [tpCalculating, setTpCalculating] = useState(false);
-    const [tpError, setTpError] = useState(null);
-    const [tpMode, setTpMode] = useState('coi'); // 'coi' | 'target'
+    const [tpMode, setTpMode] = useState('target');
     const [tpSourceMode, setTpSourceMode] = useState('mine'); // 'mine' | 'mine+favorited'
     const [tpTargetSpecies, setTpTargetSpecies] = useState(TARGET_OUTCOME_PROTOTYPE_SPECIES);
     const [tpSelectedTraits, setTpSelectedTraits] = useState([]);
@@ -1464,35 +1458,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [tpExpandedCard, setTpExpandedCard] = useState(null); // key = `${sireId}:${damId}:${idx}`
     const [tpShowResultsHelp, setTpShowResultsHelp] = useState(false);
     const [tpHideActiveFemales, setTpHideActiveFemales] = useState(false);
-    const handleCalculateTestPairing = async () => {
-        if (!tpSireId || !tpDamId) return;
-        const cacheKey = `${tpSireId}:${tpDamId}`;
-        if (coiCacheRef.current[cacheKey] != null) {
-            setTpCOI(coiCacheRef.current[cacheKey]);
-            return;
-        }
-        setTpCalculating(true);
-        setTpError(null);
-        setTpCOI(null);
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 15000);
-        try {
-            const res = await axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
-                params: { sireId: tpSireId, damId: tpDamId, generations: 20 },
-                headers: { Authorization: `Bearer ${authToken}` },
-                signal: controller.signal,
-            });
-            const val = res.data.inbreedingCoefficient ?? 0;
-            coiCacheRef.current[cacheKey] = val;
-            setTpCOI(val);
-        } catch (err) {
-            if (axios.isCancel(err)) setTpError('Request timed out — please try again.');
-            else setTpError('Failed to calculate COI. Please try again.');
-        } finally {
-            clearTimeout(timeout);
-            setTpCalculating(false);
-        }
-    };
 
     // Chips are grouped by the locus they write to. Selecting a chip from one group removes
     // chips from competing groups. Exceptions:
@@ -3520,12 +3485,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     {initialView !== 'calendar' && <button
                         onClick={() => {
                             setShowTestPairingModal(true);
-                            setTpSireId('');
-                            setTpDamId('');
-                            setTpCOI(null);
-                            setTpError(null);
-                            setTpCalculating(false);
-                            setTpMode('coi');
+                            setTpMode('target');
                             setTpSourceMode('mine');
                             setTpTargetSpecies(TARGET_OUTCOME_PROTOTYPE_SPECIES);
                             setTpSelectedTraits([]);
@@ -6296,85 +6256,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         </div>
                         {/* Scrollable body */}
                         <div className="flex-1 min-h-0 overflow-hidden">
-
-                        {tpMode === 'coi' && (
-                        <div className="p-5 space-y-5 overflow-y-auto h-full">
-                            <p className="text-sm text-gray-500">Pick a sire and dam to calculate the predicted Coefficient of Inbreeding (COI) for their offspring.</p>
-                            <hr className="border-gray-100" />
-                            {/* Sire */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Sire (Father)</label>
-                                <button
-                                    type="button"
-                                    onClick={() => setModalTarget('tp-sire')}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left transition focus:ring-2 focus:ring-primary focus:border-transparent"
-                                >
-                                    {tpSireId ? (
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <div className="font-medium">{myAnimals.find(a => a.id_public === tpSireId)?.name || selectedTpSireAnimal?.name || 'Unknown'}</div>
-                                                <div className="text-xs text-gray-500">{tpSireId}</div>
-                                            </div>
-                                            {!myAnimals.find(a => a.id_public === tpSireId) && selectedTpSireAnimal && (
-                                                <span className="text-xs text-black bg-primary px-2 py-1 rounded-full flex-shrink-0">Global</span>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div className="text-gray-400">Select Sire...</div>
-                                    )}
-                                </button>
-                            </div>
-                            {/* Dam */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Dam (Mother)</label>
-                                <button
-                                    type="button"
-                                    onClick={() => setModalTarget('tp-dam')}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left transition focus:ring-2 focus:ring-primary focus:border-transparent"
-                                >
-                                    {tpDamId ? (
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <div className="font-medium">{myAnimals.find(a => a.id_public === tpDamId)?.name || selectedTpDamAnimal?.name || 'Unknown'}</div>
-                                                <div className="text-xs text-gray-500">{tpDamId}</div>
-                                            </div>
-                                            {!myAnimals.find(a => a.id_public === tpDamId) && selectedTpDamAnimal && (
-                                                <span className="text-xs text-black bg-primary px-2 py-1 rounded-full flex-shrink-0">Global</span>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div className="text-gray-400">Select Dam...</div>
-                                    )}
-                                </button>
-                            </div>
-                            {/* Calculate Button */}
-                            <hr className="border-gray-100" />
-                            <button
-                                onClick={handleCalculateTestPairing}
-                                disabled={!tpSireId || !tpDamId || tpCalculating}
-                                className="w-full py-2 px-4 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors"
-                            >
-                                {tpCalculating ? (
-                                    <><Loader2 className="w-4 h-4 animate-spin" /> Calculating...</>
-                                ) : (
-                                    <><Calculator size={15} /> Calculate COI</>
-                                )}
-                            </button>
-                            {/* Result */}
-                            {tpCOI !== null && (
-                                <div className="p-4 rounded-lg border border-gray-200 bg-gray-50 text-center">
-                                    <div className="text-sm font-medium text-gray-600 mb-1">Predicted COI</div>
-                                    <div className="text-3xl font-bold text-gray-800">{tpCOI.toFixed(2)}%</div>
-                                </div>
-                            )}
-                            {/* Error */}
-                            {tpError && (
-                                <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">{tpError}</div>
-                            )}
-                        </div>
-                        )}
-
-                        {tpMode === 'target' && canAccessTargetOutcome && (
+                        {canAccessTargetOutcome && (
                         <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-200 h-full">
                             <div className="divide-y divide-gray-200 overflow-y-auto min-h-0">
 
@@ -6586,7 +6468,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 )}
                             </div>
                         </div>
-                        )}
+                        )} {/* end target outcome */}
 
                         </div>{/* end scrollable body */}
                         <div className="border-t border-gray-200 px-5 py-3 flex justify-end flex-shrink-0">
@@ -6599,8 +6481,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             {/* Test Pairing ? Sire Search Modal */}
             {modalTarget === 'tp-sire' && (
                 <ParentSearchModal
-                    title="Select Sire"
-                    onSelect={handleSelectOtherParentForLitter}
                     onClose={() => setModalTarget(null)}
                     authToken={authToken}
                     showModalMessage={showModalMessage}
@@ -6610,14 +6490,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     Loader2={Loader2}
                     LoadingSpinner={LoadingSpinner}
                     requiredGender={['Male', 'Intersex', 'Unknown']}
+                    onSelect={handleSelectOtherParentForLitter}
+                    title="Select Sire"
                 />
             )}
 
             {/* Test Pairing ? Dam Search Modal */}
             {modalTarget === 'tp-dam' && (
                 <ParentSearchModal
-                    title="Select Dam"
-                    onSelect={handleSelectOtherParentForLitter}
                     onClose={() => setModalTarget(null)}
                     authToken={authToken}
                     showModalMessage={showModalMessage}
@@ -6627,6 +6507,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     Loader2={Loader2}
                     LoadingSpinner={LoadingSpinner}
                     requiredGender={['Female', 'Intersex', 'Unknown']}
+                    onSelect={handleSelectOtherParentForLitter}
+                    title="Select Dam"
                 />
             )}
 

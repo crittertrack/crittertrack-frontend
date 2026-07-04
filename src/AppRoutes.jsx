@@ -18,6 +18,7 @@ const SpeciesManager = lazy(() => import('./components/Modals/SpeciesModals').th
 const AnimalForm = lazy(() => import('./components/AnimalForm'));
 const PrivateAnimalDetail = lazy(() => import('./components/AnimalDetail/PrivateAnimalDetail'));
 const TutorialsPage = lazy(() => import('./components/tutorials'));
+const COICalculatorPage = lazy(() => import('./components/tools/COICalculatorPage'));
 const ViewOnlyPrivateAnimalDetail = lazy(() => import('./components/AnimalDetail/ViewOnlyPrivateAnimalDetail'));
 
 const PageLoader = () => (
@@ -308,6 +309,16 @@ export function AppRoutes({
           authToken={authToken}
           myAnimals={myAnimalsForCalculator}
           userRole={userProfile?.role}
+        />
+      } />
+
+      {/* COI Calculator */}
+      <Route path="/coi" element={
+        <COICalculatorPage
+          API_BASE_URL={API_BASE_URL}
+          authToken={authToken}
+          myAnimals={myAnimalsForCalculator}
+          userProfile={userProfile}
         />
       } />
 
