@@ -66,8 +66,9 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
         params: { sireId: sire.id_public, damId: dam.id_public, generations: 50, includeAncestors: true },
         headers: { Authorization: `Bearer ${authToken}` }
       });
-      console.log('COI API Response:', response.data); // For debugging
-      setCoiResult(response.data);
+      console.log('COI API Response:', JSON.stringify(response.data, null, 2)); // For debugging
+      const resultData = response.data.pairingResult || response.data;
+      setCoiResult(resultData);
     } catch (err) {
       console.error("COI Calculation Error:", err);
       setError(err.response?.data?.message || 'Failed to calculate COI. The backend endpoint may not be available.');
