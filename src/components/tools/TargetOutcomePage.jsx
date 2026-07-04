@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Target, Dna, Loader2, Search, Settings, Palette, PlusCircle, X } from 'lucide-react';
+import { Target, Dna, Loader2, Search, Settings, Palette, PlusCircle, X, ChevronUp, ChevronDown } from 'lucide-react';
 import { GENE_LOCI as MOUSE_GENE_LOCI } from '../GeneticsCalculator';
 
 const TARGET_OUTCOME_TRAIT_CHIPS = {
@@ -429,7 +429,7 @@ const findPotentialPairings = (allAnimals, target, mode, species) => {
   }
 
   pairings.sort((a, b) => b.probability - a.probability);
-  return new Promise(resolve => setTimeout(() => resolve(pairings), 250));
+  return new Promise(resolve => setTimeout(() => resolve({ pairings, targetLoci }), 250));
 };
 
 const getFullName = (animal) => [animal?.prefix, animal?.name, animal?.suffix].filter(Boolean).join(' ');
@@ -567,6 +567,102 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions,
     }
   };
 
+  const [expandedGroups, setExpandedGroups] = useState({ high: true, medium: true, low: true });
+
+  const groupedResults = useMemo(() => {
+    if (!results?.pairings) return null;
+    const groups = {
+        high: [], // > 50%
+        medium: [], // 10-50%
+        low: [], // < 10%
+    };
+    results.pairings.forEach(result => {
+        if (result.probability >= 0.5) {
+            groups.high.push(result);
+        } else if (result.probability >= 0.1) {
+            groups.medium.push(result);
+        } else {
+            groups.low.push(result);
+        }
+    });
+    return groups;
+  }, [results]);
+
+  const toggleGroup = (groupName) => {
+    setExpandedGroups(prev => ({ ...prev, [groupName]: !prev[groupName] }));
+  };
+
+  const ResultCard = ({ sire, dam, probability, targetLoci, species }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    const sireLoci = useMemo(() => parseGeneticCode(sire.geneticCode, species), [sire.geneticCode, species]);
+    const damLoci = useMemo(() => parseGeneticCode(dam.geneticCode, species), [dam.geneticCode, species]);
+
+    const renderGenotype = (animalLoci) => {
+        const allLoci = getLociForSpecies(species);
+        const geneOrder = Object.keys(allLoci);
+
+        const relevantLoci = geneOrder.filter(locus => animalLoci[locus]);
+
+        if (relevantLoci.length === 0) {
+            return <span className="text-gray-400 italic">No genetic code recorded.</span>;
+        }
+
+        return (
+            <div className="font-mono text-xs flex flex-wrap gap-x-2 gap-y-1">
+                {relevantLoci.map(locus => {
+                    const isResponsible = targetLoci.hasOwnProperty(locus);
+                    const combo = animalLoci[locus].join('/');
+                    return (
+                        <span key={locus} className={isResponsible ? 'font-bold text-black' : 'text-gray-500'}>
+                            {combo}
+                        </span>
+                    );
+                })}
+            </div>
+        );
+    };
+
+    return (
+        <div className="bg-white border border-gray-200 rounded-lg">
+            <div className="p-4 cursor-pointer hover:bg-gray-50" onClick={() => setIsExpanded(!isExpanded)}>
+                <div className="flex items-center justify-between">
+                    <div className="text-sm">
+                        <p><span className="font-semibold text-blue-700">Sire:</span> {getFullName(sire)} ({sire.id_public})</p>
+                        <p><span className="font-semibold text-pink-700">Dam:</span> {getFullName(dam)} ({dam.id_public})</p>
+                    </div>
+                    <div className="text-center ml-4 flex-shrink-0">
+                        <p className="text-2xl font-bold text-primary">{(probability * 100).toFixed(1)}%</p>
+                        <p className="text-xs text-gray-500">Chance</p>
+                    </div>
+                </div>
+            </div>
+            {isExpanded && (
+                <div className="border-t bg-gray-50 p-4 space-y-2">
+                    <div>
+                        <p className="text-xs font-semibold text-blue-700 mb-1">Sire Genotype:</p>
+                        {renderGenotype(sireLoci)}
+                    </div>
+                    <div>
+                        <p className="text-xs font-semibold text-pink-700 mb-1">Dam Genotype:</p>
+                        {renderGenotype(damLoci)}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+  };
+
+  const CollapsibleGroup = ({ title, count, children, isOpen, onToggle }) => (
+    <div className="border border-gray-200 rounded-lg">
+        <button onClick={onToggle} className="w-full flex items-center justify-between p-3 bg-gray-100 hover:bg-gray-200 transition">
+            <div className="flex items-center gap-2"><h4 className="font-bold text-gray-700">{title}</h4><span className="text-xs bg-gray-300 text-gray-700 font-semibold px-2 py-0.5 rounded-full">{count}</span></div>
+            {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+        </button>
+        {isOpen && <div className="p-3 space-y-3">{children}</div>}
+    </div>
+  );
+
   return (
     <div className="w-full h-full bg-white rounded-xl shadow-lg flex flex-col overflow-hidden">
       {/* Header */}
@@ -669,23 +765,24 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions,
 
           {results && (
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">Potential Pairings Found ({results.length})</h3>
-              {results.length > 0 ? (
-                <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
-                  {results.map(({ sire, dam, probability }) => (
-                    <div key={sire.id_public + dam.id_public} className="bg-white border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm">
-                          <p><span className="font-semibold text-blue-700">Sire:</span> {getFullName(sire)} ({sire.id_public})</p>
-                          <p><span className="font-semibold text-pink-700">Dam:</span> {getFullName(dam)} ({dam.id_public})</p>
-                        </div>
-                        <div className="text-center ml-4 flex-shrink-0">
-                          <p className="text-2xl font-bold text-primary">{(probability * 100).toFixed(1)}%</p>
-                          <p className="text-xs text-gray-500">Chance</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+              <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">Potential Pairings Found ({results.pairings.length})</h3>
+              {results.pairings.length > 0 ? (
+                <div className="space-y-4">
+                  {groupedResults.high.length > 0 && (
+                    <CollapsibleGroup title="High Probability (>50%)" count={groupedResults.high.length} isOpen={expandedGroups.high} onToggle={() => toggleGroup('high')}>
+                      {groupedResults.high.map(r => <ResultCard key={r.sire.id_public + r.dam.id_public} {...r} targetLoci={results.targetLoci} species={selectedSpecies} />)}
+                    </CollapsibleGroup>
+                  )}
+                  {groupedResults.medium.length > 0 && (
+                    <CollapsibleGroup title="Medium Probability (10-50%)" count={groupedResults.medium.length} isOpen={expandedGroups.medium} onToggle={() => toggleGroup('medium')}>
+                      {groupedResults.medium.map(r => <ResultCard key={r.sire.id_public + r.dam.id_public} {...r} targetLoci={results.targetLoci} species={selectedSpecies} />)}
+                    </CollapsibleGroup>
+                  )}
+                  {groupedResults.low.length > 0 && (
+                    <CollapsibleGroup title="Low Probability (<10%)" count={groupedResults.low.length} isOpen={expandedGroups.low} onToggle={() => toggleGroup('low')}>
+                      {groupedResults.low.map(r => <ResultCard key={r.sire.id_public + r.dam.id_public} {...r} targetLoci={results.targetLoci} species={selectedSpecies} />)}
+                    </CollapsibleGroup>
+                  )}
                 </div>
               ) : (<p className="text-center text-gray-600">No potential pairings found in your animals that can produce the target genetics.</p>)}
             </div>
