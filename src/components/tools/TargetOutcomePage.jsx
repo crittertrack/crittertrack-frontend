@@ -4,28 +4,92 @@ import { Target, Dna, Loader2, Search } from 'lucide-react';
 // This is a placeholder for the actual calculation logic. In a real implementation,
 // this would likely be a backend endpoint that can efficiently query and
 // calculate genetic probabilities across all animals.
-const findPotentialPairings = (allAnimals, targetGenetics) => {
-  console.log('Finding pairings for:', targetGenetics);
+const findPotentialPairings = (allAnimals, target, mode) => {
+  console.log(`Finding pairings for ${mode}:`, target);
 
-  // Example result structure.
-  const exampleResults = [
-    {
-      sire: allAnimals.find(a => a.gender === 'Male' && a.id_public === 'CTC6189'),
-      dam: allAnimals.find(a => a.gender === 'Female' && a.id_public === 'CTC6194'),
-      probability: 0.25, // 25% chance
-    },
-    {
-      sire: allAnimals.find(a => a.gender === 'Male' && a.name === 'Fiero'),
-      dam: allAnimals.find(a => a.gender === 'Female' && a.name === 'Favilla'),
-      probability: 0.125, // 12.5% chance
-    },
-  ].filter(p => p.sire && p.dam); // Filter out any undefined animals from this example
+  // Helper to parse a genetic code string like "Ee/aa/Dd" or "a/a d/d"
+  // into a map like { E: ['E', 'e'], A: ['a', 'a'], D: ['D', 'd'] }
+  const parseGeneticCode = (codeString) => {
+    if (!codeString) return {};
+    const loci = {};
+    // Normalize separators and split into tokens
+    const parts = codeString.trim().replace(/\//g, ' ').split(/\s+/).filter(Boolean);
 
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(exampleResults);
-    }, 1500); // Simulate network/calculation delay
-  });
+    for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+        if (part.length === 2 && part[0].toUpperCase() === part[1].toUpperCase()) { // Handles "Ee", "aa"
+            const locus = part[0].toUpperCase();
+            if (!loci[locus]) {
+                loci[locus] = [part[0], part[1]].sort();
+            }
+        } else if (part.length === 1) { // Handles "a a" from "a / a"
+            const locus = part.toUpperCase();
+            if (!loci[locus] && i + 1 < parts.length) {
+                const nextPart = parts[i+1];
+                if (nextPart.length === 1 && nextPart.toUpperCase() === locus) {
+                    loci[locus] = [part, nextPart].sort();
+                    i++; // Skip next part as it's consumed
+                }
+            }
+        }
+    }
+    return loci;
+  };
+
+  if (mode === 'genetics') {
+    const targetLoci = parseGeneticCode(target);
+    if (Object.keys(targetLoci).length === 0) {
+      return Promise.resolve([]);
+    }
+
+    const getAlleleProbability = (parentAlleles, desiredAllele) => {
+      if (!parentAlleles) return 0; // Parent doesn't have this locus
+      const count = parentAlleles.filter(a => a === desiredAllele).length;
+      return count / 2;
+    };
+
+    const calculateLocusProbability = (sireAlleles, damAlleles, targetAlleles) => {
+      const [t1, t2] = targetAlleles;
+
+      const p_t1_sire = getAlleleProbability(sireAlleles, t1);
+      const p_t2_sire = getAlleleProbability(sireAlleles, t2);
+      const p_t1_dam = getAlleleProbability(damAlleles, t1);
+      const p_t2_dam = getAlleleProbability(damAlleles, t2);
+
+      if (t1 === t2) { // Homozygous target, e.g., e/e
+        return p_t1_sire * p_t1_dam;
+      } else { // Heterozygous target, e.g., E/e
+        const prob1 = p_t1_sire * p_t2_dam; // Sire gives t1, Dam gives t2
+        const prob2 = p_t2_sire * p_t1_dam; // Sire gives t2, Dam gives t1
+        return prob1 + prob2;
+      }
+    };
+
+    const sires = allAnimals.filter(a => a.gender === 'Male' && a.geneticCode);
+    const dams = allAnimals.filter(a => a.gender === 'Female' && a.geneticCode);
+    const pairings = [];
+
+    for (const sire of sires) {
+      for (const dam of dams) {
+        const sireLoci = parseGeneticCode(sire.geneticCode);
+        const damLoci = parseGeneticCode(dam.geneticCode);
+        let totalProbability = 1;
+        for (const [locus, targetAlleles] of Object.entries(targetLoci)) {
+          const locusProbability = calculateLocusProbability(sireLoci[locus], damLoci[locus], targetAlleles);
+          totalProbability *= locusProbability;
+        }
+        if (totalProbability > 0) {
+          pairings.push({ sire, dam, probability: totalProbability });
+        }
+      }
+    }
+
+    pairings.sort((a, b) => b.probability - a.probability);
+    return new Promise(resolve => setTimeout(() => resolve(pairings), 250));
+  }
+
+  // Fallback for 'traits' mode or other cases
+  return Promise.resolve([]);
 };
 
 const getFullName = (animal) => [animal?.prefix, animal?.name, animal?.suffix].filter(Boolean).join(' ');

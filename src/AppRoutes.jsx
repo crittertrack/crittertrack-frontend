@@ -330,6 +330,9 @@ export function AppRoutes({
           authToken={authToken}
           myAnimals={myAnimalsForCalculator}
           userProfile={userProfile}
+          // Pass species data for trait selection
+          speciesOptions={speciesOptions || []}
+          speciesConfigs={speciesConfigs || {}}
         />
       } />
 
