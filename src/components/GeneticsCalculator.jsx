@@ -7,10 +7,8 @@ const GENE_LOCI = {
     name: 'Agouti',
     description: 'Multiple alleles controlling base color with complex dominance. e.g. Black (a/a), Agouti (A/-), Tan (at/-), Brindle (Avy/-), Dom. Red (Ay/-)',
     combinations: [
-      'ae/ae', 'ae/-',
-      'a/ae', 'a/a', 'a/-',
       'ae/ae',
-      'a/ae', 'a/a', 'a/-', // ae/- is not a valid combination
+      'a/ae', 'a/a', 'a/-',
       'at/ae', 'at/a', 'at/at',
       'A/ae', 'A/a', 'A/at', 'A/A', 'A/-',
       'Avy/ae', 'Avy/a', 'Avy/at', 'Avy/A', 'Avy/Avy', 'Avy/-',
@@ -467,7 +465,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Check if this is ae/ae, a/ae, or a/a (non-agouti self colors)
   const isExtremeBlack = genotype.A === 'ae/ae';
   const isBlackHetero = genotype.A === 'a/ae' || genotype.A === 'ae/a';
-  const isBlack = genotype.A === 'a/a';
   const isBlack = genotype.A === 'a/a' || genotype.A === 'a/-';
   const isSelfBlackVariant = isExtremeBlack || isBlackHetero || isBlack;
 

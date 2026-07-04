@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Target, Dna, Loader2, Search, Settings, Palette, PlusCircle, X } from 'lucide-react';
+import { GENE_LOCI as MOUSE_GENE_LOCI } from '../GeneticsCalculator';
 
 const TARGET_OUTCOME_TRAIT_CHIPS = {
     'Fancy Mouse': [
@@ -151,6 +152,29 @@ const TARGET_OUTCOME_TRAIT_CHIPS = {
     ],
 };
 
+// Simplified rat loci for the parser. A more robust solution would import this from a shared file.
+const RAT_GENE_LOCI = {
+    A: { combinations: ['a/a', 'A/A', 'A/a'] },
+    B: { combinations: ['b/b', 'B/B', 'B/b'] },
+    Bu: { combinations: ['Bu/bu', 'Bu/Bu', 'bu/bu'] },
+    C: { combinations: ['c/c', 'ch/c', 'ch/ch', 'ct/ct', 'cm/c'] },
+    D: { combinations: ['d/d', 'D/D', 'D/d'] },
+    G: { combinations: ['g/g', 'G/G', 'G/g'] },
+    M: { combinations: ['m/m', 'M/M', 'M/m'] },
+    P: { combinations: ['p/p', 'P/P', 'P/p'] },
+    R: { combinations: ['r/r', 'R/R', 'R/r'] },
+    H: { combinations: ['H/H', 'H/h', 'H/hi', 'Hre/h', 'H/he', 'h/h'] },
+    Dal: { combinations: ['Dal/dal', 'dal/dal'] },
+    Ro: { combinations: ['ro/ro', 'Ro/Ro', 'Ro/ro'] },
+    Wh: { combinations: ['wh/wh', 'Wh/Wh', 'Wh/wh'] },
+    Ws: { combinations: ['Ws/w', 'w/w'] },
+    Ma: { combinations: ['Ma/ma', 'ma/ma'] },
+    Re: { combinations: ['Re/re', 'Re/Re', 're/re'] },
+    Ve: { combinations: ['Ve/ve', 've/ve'] },
+    Br: { combinations: ['Br/br', 'br/br'] },
+    Du: { combinations: ['du/du', 'Du/Du', 'Du/du'] },
+};
+
 const TraitSelector = ({ species, selectedTraits, onTraitChange, disabled }) => {
   const traitGroups = useMemo(() => {
     const chips = TARGET_OUTCOME_TRAIT_CHIPS[species] || [];
@@ -300,43 +324,56 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits, species = 'Fancy Mouse
 const findPotentialPairings = (allAnimals, target, mode, species) => {
   console.log(`Finding pairings for ${mode}:`, target);
 
-  // Helper to parse a genetic code string like "Ee/aa Wsh/w"
-  // into a map like { E: ['E', 'e'], A: ['a', 'a'], W: ['Wsh', 'w'] }
-  const parseGeneticCode = (codeString) => {
+  const getLociForSpecies = (species) => {
+    if (species === 'Fancy Rat') return RAT_GENE_LOCI;
+    return MOUSE_GENE_LOCI; // Default to mouse
+  };
+
+  const parseGeneticCode = (codeString, species) => {
     if (!codeString) return {};
-    const loci = {};
+    const genotype = {};
     const parts = codeString.trim().split(/[ \t]+/);
+    const ALL_LOCI = getLociForSpecies(species);
 
     for (const part of parts) {
-      let alleles;
-      if (part.includes('/')) {
-        alleles = part.split('/');
-      } else if (part.length === 2 && part[0].toUpperCase() === part[1].toUpperCase()) {
-        alleles = [part[0], part[1]];
-      } else {
-        continue;
+      if (!part.includes('/')) continue;
+
+      let found = false;
+      for (const [locus, data] of Object.entries(ALL_LOCI)) {
+        if (data.combinations.includes(part)) {
+          genotype[locus] = part.split('/').sort();
+          found = true;
+          break;
+        }
       }
 
-      if (alleles.length !== 2 || !alleles[0] || !alleles[1]) continue;
-
-      // Heuristic for locus key: first letter of first allele, capitalized.
-      const locusKey = alleles[0].replace(/[^a-zA-Z]/g, '')[0]?.toUpperCase();
-
-      if (locusKey && !loci[locusKey]) {
-        loci[locusKey] = alleles.sort();
+      if (!found) {
+        const [a1, a2] = part.split('/');
+        if (a1 && a2) {
+          const reversedPart = `${a2}/${a1}`;
+          for (const [locus, data] of Object.entries(ALL_LOCI)) {
+            if (data.combinations.includes(reversedPart)) {
+              genotype[locus] = reversedPart.split('/').sort();
+              break;
+            }
+          }
+        }
       }
     }
-    return loci;
+    return genotype;
   };
 
   let targetLoci;
 
   if (mode === 'genetics') {
-    targetLoci = parseGeneticCode(target);
+    targetLoci = parseGeneticCode(target, species);
   } else if (mode === 'traits') {
-    // target is already the array of selected trait IDs
     const { genotype } = buildPrototypeGenotypeFromTraits(target, species);
-    targetLoci = genotype;
+    // Convert genotype strings to allele arrays
+    targetLoci = Object.entries(genotype).reduce((acc, [locus, combo]) => {
+      acc[locus] = combo.split('/');
+      return acc;
+    }, {});
   } else {
     return Promise.resolve([]);
   }
@@ -373,8 +410,8 @@ const findPotentialPairings = (allAnimals, target, mode, species) => {
 
   for (const sire of sires) {
     for (const dam of dams) {
-      const sireLoci = parseGeneticCode(sire.geneticCode);
-      const damLoci = parseGeneticCode(dam.geneticCode);
+      const sireLoci = parseGeneticCode(sire.geneticCode, species);
+      const damLoci = parseGeneticCode(dam.geneticCode, species);
       let totalProbability = 1;
       let possible = true;
       for (const [locus, targetAlleles] of Object.entries(targetLoci)) {
