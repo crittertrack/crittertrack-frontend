@@ -375,11 +375,11 @@ const findPotentialPairings = (allAnimals, target, mode, species) => {
       return acc;
     }, {});
   } else {
-    return Promise.resolve([]);
+    return Promise.resolve({ pairings: [], targetLoci: {} });
   }
 
   if (!targetLoci || Object.keys(targetLoci).length === 0) {
-    return Promise.resolve([]);
+    return Promise.resolve({ pairings: [], targetLoci: {} });
   }
 
   const getAlleleProbability = (parentAlleles, desiredAllele) => {
