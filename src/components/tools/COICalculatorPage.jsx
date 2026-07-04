@@ -67,8 +67,17 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
         headers: { Authorization: `Bearer ${authToken}` }
       });
       console.log('COI API Response:', JSON.stringify(response.data, null, 2)); // For debugging
-      const resultData = response.data.pairingResult || response.data;
-      setCoiResult(resultData);
+      const rawResult = response.data;
+      const normalizedResult = {
+        ...rawResult,
+        inbreedingCoefficient: rawResult.inbreedingCoefficient ?? rawResult.total,
+        commonAncestors: (rawResult.breakdown || []).map(ancestor => ({
+          id_public: ancestor.ancestorId,
+          name: ancestor.ancestorName,
+          contribution: (ancestor.contribution_pct || 0) / 100, // Convert percentage back to fraction
+        }))
+      };
+      setCoiResult(normalizedResult);
     } catch (err) {
       console.error("COI Calculation Error:", err);
       setError(err.response?.data?.message || 'Failed to calculate COI. The backend endpoint may not be available.');
@@ -170,10 +179,13 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
                         <div key={ancestor.id_public || index} className="bg-white border border-gray-200 rounded-lg p-3 text-sm">
                           <p className="font-bold text-gray-800">{ancestor.name} ({ancestor.id_public})</p>
                           <p className="text-xs text-gray-500 mt-0.5">Contribution: <span className="font-semibold">{(ancestor.contribution * 100).toFixed(4)}%</span></p>
-                          <div className="mt-2 text-xs grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <div><p className="font-semibold text-blue-700">Path from Sire:</p><p className="text-gray-600">{(ancestor.sirePath || ancestor.sire_path || []).join(' → ')}</p></div>
-                            <div><p className="font-semibold text-pink-700">Path from Dam:</p><p className="text-gray-600">{(ancestor.damPath || ancestor.dam_path || []).join(' → ')}</p></div>
-                          </div>
+                          {/* Paths are not available in the current API response, so they are hidden. */}
+                          {(ancestor.sirePath || ancestor.damPath) &&
+                            <div className="mt-2 text-xs grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              <div><p className="font-semibold text-blue-700">Path from Sire:</p><p className="text-gray-600">{(ancestor.sirePath || []).join(' → ')}</p></div>
+                              <div><p className="font-semibold text-pink-700">Path from Dam:</p><p className="text-gray-600">{(ancestor.damPath || []).join(' → ')}</p></div>
+                            </div>
+                          }
                         </div>
                       ))}
                     </div>
