@@ -303,8 +303,8 @@ const findPotentialPairings = (allAnimals, target, mode, species) => {
   if (mode === 'genetics') {
     targetLoci = parseGeneticCode(target);
   } else if (mode === 'traits') {
-    const selectedTraitIds = Object.values(target).filter(Boolean);
-    const { genotype } = buildPrototypeGenotypeFromTraits(selectedTraitIds, species);
+    // target is already the array of selected trait IDs
+    const { genotype } = buildPrototypeGenotypeFromTraits(target, species);
     targetLoci = genotype;
   } else {
     return Promise.resolve([]);
@@ -366,56 +366,6 @@ const findPotentialPairings = (allAnimals, target, mode, species) => {
 
 const getFullName = (animal) => [animal?.prefix, animal?.name, animal?.suffix].filter(Boolean).join(' ');
 
-const TraitSelector = ({ species, selectedTraits, onTraitChange, disabled }) => {
-  const traitCategories = useMemo(() => {
-    const chips = TARGET_OUTCOME_TRAIT_CHIPS[species] || [];
-    if (chips.length === 0) {
-      return [];
-    }
-
-    const categories = {};
-    chips.forEach(chip => {
-      if (!categories[chip.group]) {
-        categories[chip.group] = [];
-      }
-      categories[chip.group].push({ id: chip.id, label: chip.label });
-    });
-
-    return Object.entries(categories).map(([label, options]) => ({
-      label,
-      options: options.sort((a, b) => a.label.localeCompare(b.label)),
-    }));
-  }, [species]);
-
-  if (traitCategories.length === 0) {
-    return <p className="text-sm text-gray-500 text-center">No visual traits configured for this species.</p>;
-  }
-
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-      {traitCategories.map(category => (
-        <div key={category.label}>
-          <label htmlFor={`trait-${category.label}`} className="block text-sm font-medium text-gray-700 mb-1">
-            {category.label}
-          </label>
-          <select
-            id={`trait-${category.label}`}
-            value={selectedTraits[category.label] || ''} // This will be the chip ID
-            onChange={(e) => onTraitChange(category.label, e.target.value)}
-            disabled={disabled}
-            className="w-full p-2 border border-gray-300 rounded-lg bg-white"
-          >
-            <option value="">Any</option>
-            {category.options.map(option => (
-              <option key={option.id} value={option.id}>{option.label}</option>
-            ))}
-          </select>
-        </div>
-      ))}
-    </div>
-  );
-};
-
 /**
  * A dedicated page for the Target Outcome Calculator.
  */
@@ -445,9 +395,69 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions,
     setResults(null);
   }, [selectedSpecies]);
 
+  const CHIP_A_SERIES = {
+      black:        ['black','chocolate','blue','dove','lilac','champagne','silver','lavender'],
+      agouti:       ['agouti','cinnamon','blue-agouti','argente','cinnamon-argente'],
+  };
+  const chipToASeries = {};
+  Object.entries(CHIP_A_SERIES).forEach(([series, chips]) => chips.forEach(c => chipToASeries[c] = series));
+  const CHIP_A_COMPOUND_HET_CAPABLE = new Set(['tan', 'fox']);
+  const CHIP_E_EXCLUSIVE  = new Set(['rec-red']);
+  const CHIP_LEADEN_EXCLUSIVE = new Set(['Leaden']);
+  const CHIP_C_EXCLUSIVE  = new Set(['albino','himalayan','bone','siamese','burmese','stone','beige','colorpoint-beige','mock-choc','sepia','silver-agouti']);
+  const CHIP_GO_EXCLUSIVE = new Set(['shorthair','longhair','texel']);
+  const CHIP_W_EXCLUSIVE  = new Set(['variegated','banded']);
+
+  const toggleTargetTraitChip = (chipId) => {
+      setResults(null);
+      setSelectedTraits(prev => {
+          const isAdding = !prev.includes(chipId);
+          if (!isAdding) {
+              return prev.filter(id => id !== chipId);
+          }
+
+          let next = [...prev];
+
+          if (chipToASeries[chipId]) next = next.filter(id => CHIP_A_COMPOUND_HET_CAPABLE.has(id) || CHIP_E_EXCLUSIVE.has(id) || !chipToASeries[id]);
+          if (CHIP_A_COMPOUND_HET_CAPABLE.has(chipId)) next = next.filter(id => !CHIP_A_COMPOUND_HET_CAPABLE.has(id));
+          if (CHIP_E_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_E_EXCLUSIVE.has(id));
+          if (CHIP_LEADEN_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_LEADEN_EXCLUSIVE.has(id));
+          if (CHIP_C_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_C_EXCLUSIVE.has(id));
+          if (CHIP_GO_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_GO_EXCLUSIVE.has(id));
+          if (CHIP_W_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_W_EXCLUSIVE.has(id));
+
+          next.push(chipId);
+
+          const dependencies = {
+              'chocolate': ['black'], 'blue': ['black'], 'dove': ['black'],
+              'lilac': ['black', 'chocolate', 'blue'], 'champagne': ['black', 'chocolate', 'dove'],
+              'silver': ['black', 'blue', 'dove'], 'lavender': ['black', 'chocolate', 'blue', 'dove'],
+              'cinnamon': ['agouti'], 'blue-agouti': ['agouti'], 'argente': ['agouti'],
+              'cinnamon-argente': ['agouti', 'cinnamon', 'argente'],
+              'Dominant Amber': ['dom-red'], 'Recessive Amber': ['rec-red'],
+              'sable': ['dom-red', 'umbrous'], 'texel': ['astrex', 'longhair'], 'fox': ['tan'],
+          };
+
+          const toProcess = [chipId];
+          const processed = new Set();
+          while (toProcess.length > 0) {
+              const currentId = toProcess.pop();
+              if (processed.has(currentId) || !dependencies[currentId]) continue;
+              processed.add(currentId);
+              dependencies[currentId].forEach(dep => {
+                  if (!next.includes(dep)) {
+                      next.push(dep);
+                      toProcess.push(dep);
+                  }
+              });
+          }
+          return [...new Set(next)];
+      });
+  };
+
   const handleFindPairings = async () => {
     const isTraitsMode = mode === 'traits';
-    const hasTarget = isTraitsMode ? selectedTraits.some(v => v) : targetGenetics.trim();
+    const hasTarget = isTraitsMode ? selectedTraits.length > 0 : targetGenetics.trim();
 
     if (!hasTarget) {
       setError(isTraitsMode ? 'Please select at least one trait.' : 'Please enter the desired genetic code.');
@@ -520,10 +530,10 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions,
             ) : mode === 'traits' ? (
               <div>
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Select Desired Traits</h3>
-                <TraitSelector
+                <TraitChipSelector
                   species={selectedSpecies}
                   selectedTraits={selectedTraits}
-                  onTraitsChange={setSelectedTraits}
+                  onToggle={toggleTargetTraitChip}
                   disabled={isLoading}
                 />
               </div>
