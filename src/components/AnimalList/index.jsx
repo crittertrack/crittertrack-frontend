@@ -2753,7 +2753,7 @@ const AnimalList = ({
                             if (uncategorized.length === 0) return null;
                             const isUncatCollapsed = collapsedCollections['__uncategorized'] || false;
                             return (
-                                <div className="border border-dashed border-gray-300 rounded-xl overflow-hidden">
+                                <div className="border border-dashed border-gray-300 rounded-xl">
                                     <div
                                         className="flex items-center justify-between bg-gray-50 px-4 py-2.5 border-b cursor-pointer"
                                         onClick={() => setCollapsedCollections(prev => ({ ...prev, __uncategorized: !prev.__uncategorized }))}
