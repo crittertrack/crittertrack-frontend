@@ -601,7 +601,7 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions,
                   <input
                     id="targetGenetics"
                     type="text"
-                    placeholder="e.g., Ee/aa/Dd"
+                    placeholder="e.g., a/a d/d e/e"
                     value={targetGenetics}
                     onChange={(e) => setTargetGenetics(e.target.value)}
                     disabled={isLoading}

@@ -9,6 +9,8 @@ const GENE_LOCI = {
     combinations: [
       'ae/ae', 'ae/-',
       'a/ae', 'a/a', 'a/-',
+      'ae/ae',
+      'a/ae', 'a/a', 'a/-', // ae/- is not a valid combination
       'at/ae', 'at/a', 'at/at',
       'A/ae', 'A/a', 'A/at', 'A/A', 'A/-',
       'Avy/ae', 'Avy/a', 'Avy/at', 'Avy/A', 'Avy/Avy', 'Avy/-',
@@ -466,6 +468,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   const isExtremeBlack = genotype.A === 'ae/ae';
   const isBlackHetero = genotype.A === 'a/ae' || genotype.A === 'ae/a';
   const isBlack = genotype.A === 'a/a';
+  const isBlack = genotype.A === 'a/a' || genotype.A === 'a/-';
   const isSelfBlackVariant = isExtremeBlack || isBlackHetero || isBlack;
 
   // Check if this is at/ae, ae/at, at/a, or at/at (tan/fox variants)
@@ -523,6 +526,11 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // B-locus carriers
   if (genotype.B === 'B/b' || genotype.B === 'b/B') carriers.push('Chocolate');
   
+  // Note for a/-
+  if (genotype.A === 'a/-') {
+    notes.push('Incomplete genotype (a/-). Actual genotype could be a/a or a/ae.');
+  }
+
   // C-locus carriers
   if (genotype.C && (genotype.C.includes('C/') || genotype.C.includes('/C'))) {
     const alleles = genotype.C.split('/');
@@ -544,6 +552,11 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   
   // S-locus carriers (Pied)
   if (genotype.S === 'S/s' || genotype.S === 's/S') carriers.push('Pied');
+  if (genotype.S === 'S/s' || genotype.S === 's/S') {
+    carriers.push('Pied');
+  } else if (genotype.S === 'S/s+') {
+    carriers.push('Pied (with modifiers)');
+  }
   
   // P-locus carriers (Pink-eye)
   if (genotype.P === 'P/p' || genotype.P === 'p/P') carriers.push('Pink-eye');
@@ -1247,6 +1260,9 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Don't add Pied if it's already in the color name (for Ay/Avy)
   if (genotype.S === 's/s' && !color.includes('Pied')) {
     markings.push('Pied');
+  } else if (genotype.S === 's/s+' && !color.includes('Pied')) {
+    markings.push('Pied');
+    notes.push('s+ indicates polygenic modifiers affecting the spotting pattern (e.g., Hereford, Dutch).');
   }
 
   // W-locus markings with all combinations
