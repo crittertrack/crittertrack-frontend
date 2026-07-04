@@ -148,6 +148,34 @@ const TARGET_OUTCOME_TRAIT_CHIPS = {
     ],
 };
 
+const TraitSelector = ({ species, selectedTraits, onTraitChange, disabled }) => {
+  const traitGroups = useMemo(() => {
+    const chips = TARGET_OUTCOME_TRAIT_CHIPS[species] || [];
+    const groups = {};
+    chips.forEach(chip => {
+      if (!groups[chip.group]) {
+        groups[chip.group] = [];
+      }
+      groups[chip.group].push(chip);
+    });
+    return Object.entries(groups).map(([groupName, chips]) => ({ groupName, chips }));
+  }, [species]);
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      {traitGroups.map(({ groupName, chips }) => (
+        <div key={groupName}>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{groupName}</label>
+          <select value={selectedTraits[groupName] || ''} onChange={(e) => onTraitChange(groupName, e.target.value)} disabled={disabled} className="w-full p-2 border border-gray-300 rounded-lg bg-white">
+            <option value="">- None -</option>
+            {chips.map(chip => (<option key={chip.id} value={chip.id}>{chip.label}</option>))}
+          </select>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const buildPrototypeGenotypeFromTraits = (selectedTraits, species = 'Fancy Mouse') => {
     const genotype = {};
     const assumptions = [];
@@ -496,6 +524,7 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions,
     setResults(null);
     try {
       const target = isTraitsMode ? selectedTraits.filter(Boolean) : targetGenetics;
+      const target = isTraitsMode ? Object.values(selectedTraits).filter(Boolean) : targetGenetics;
       const animalsOfSpecies = myAnimals.filter(a => a.species === selectedSpecies);
       const potentialPairings = await findPotentialPairings(animalsOfSpecies, target, mode, selectedSpecies);
       setResults(potentialPairings);
