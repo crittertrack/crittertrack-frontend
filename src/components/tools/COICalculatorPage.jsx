@@ -74,6 +74,8 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
         commonAncestors: (rawResult.breakdown || []).map(ancestor => ({
           id_public: ancestor.ancestorId,
           name: ancestor.ancestorName,
+          prefix: ancestor.ancestorPrefix,
+          suffix: ancestor.ancestorSuffix,
           contribution: (ancestor.contribution_pct || 0) / 100, // Convert percentage back to fraction
         }))
       };
@@ -177,7 +179,7 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
                     <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
                       {ancestors.map((ancestor, index) => (
                         <div key={ancestor.id_public || index} className="bg-white border border-gray-200 rounded-lg p-3 text-sm">
-                          <p className="font-bold text-gray-800">{ancestor.name} ({ancestor.id_public})</p>
+                          <p className="font-bold text-gray-800">{getFullName(ancestor)} ({ancestor.id_public})</p>
                           <p className="text-xs text-gray-500 mt-0.5">Contribution: <span className="font-semibold">{(ancestor.contribution * 100).toFixed(4)}%</span></p>
                           {/* Paths are not available in the current API response, so they are hidden. */}
                           {(ancestor.sirePath || ancestor.damPath) &&
