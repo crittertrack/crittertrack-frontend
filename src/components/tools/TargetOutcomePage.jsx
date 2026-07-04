@@ -401,7 +401,7 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions,
   const [mode, setMode] = useState('traits'); // 'traits' or 'genetics'
   const [selectedSpecies, setSelectedSpecies] = useState('');
   const [targetGenetics, setTargetGenetics] = useState('');
-  const [selectedTraits, setSelectedTraits] = useState([]);
+  const [selectedTraits, setSelectedTraits] = useState({});
   const [results, setResults] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -434,14 +434,6 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions,
         setSelectedTraits(nextTraits);
         return;
     }
-
-    const chipToGroupMap = useMemo(() => {
-        const map = {};
-        Object.values(TARGET_OUTCOME_TRAIT_CHIPS).flat().forEach(chip => {
-            map[chip.id] = chip.group;
-        });
-        return map;
-    }, []);
 
     const fullDependencies = {
         'chocolate': { 'Base Color': 'black' },
