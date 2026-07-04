@@ -2768,7 +2768,7 @@ const AnimalList = ({
                                         <div className="p-1.5 sm:p-4">
                                             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
                                                 {uncategorized.map(animal => (
-                                                    <div key={animal.id_public} className="relative" onClick={e => { if (assigningCollectionAnimalId === animal.id_public) e.stopPropagation(); }}>
+                                                    <div key={animal.id_public} className={`relative ${assigningCollectionAnimalId === animal.id_public ? 'z-10' : ''}`} onClick={e => { if (assigningCollectionAnimalId === animal.id_public) e.stopPropagation(); }}>
                                                         {/* grey overlay */}
                                                         <div className="absolute inset-0 bg-gray-400/20 rounded-xl z-10 pointer-events-none" />
                                                         <AnimalCard animal={animal} onEditAnimal={onEditAnimal} species={animal.species} isSelectable={false} isSelected={false} onToggleSelect={() => {}} onTogglePrivacy={toggleAnimalPrivacy} onToggleOwned={toggleAnimalOwned} />
