@@ -24,7 +24,6 @@ import AdminPanel from './components/EnhancedAdminPanel';
 import MaintenanceMode from './MaintenanceMode';
 import { TUTORIAL_LESSONS } from './data/tutorialLessonsNew';
 import DatePicker from './components/DatePicker';
-import InfoTab from './components/InfoTab';
 import WelcomeGuideModal from './components/WelcomeGuideModal';
 import ReportButton from './components/ReportButton';
 import ModerationAuthModal from './components/moderation/ModerationAuthModal';
@@ -80,7 +79,6 @@ import { useModerationMode } from './hooks/useModerationMode.ts';
 import { AppRoutes } from './AppRoutes';
 import { PublicAnimalPage, PublicProfilePage } from './PublicPages';
 import ToolsDropdown from './components/ToolsDropdown';
-import TutorialsPage from './pages/TutorialsPage';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
@@ -811,7 +809,6 @@ const App = () => {
     const [archiveLoading, setArchiveLoading] = useState(false);
     
     // Tutorial modal states
-    const [showInfoTab, setShowInfoTab] = useState(false);
     // NOTE: showAdminPanel, inModeratorMode, showModReportQueue now handled by useModerationMode hook
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showToolsMenu, setShowToolsMenu] = useState(false);
@@ -1835,14 +1832,6 @@ const App = () => {
                         {/* <ThemeToggle /> */}
                         
                         <button
-                            onClick={() => setShowInfoTab(true)}
-                            className="relative flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
-                            title="Help"
-                        >
-                            <HelpCircle size={18} />
-                        </button>
-
-                        <button
                             onClick={() => {
                                 setShowNotifications(true);
                                 setNotificationCount(0);
@@ -2295,13 +2284,6 @@ const App = () => {
                 </div>
             )}
 
-            {/* Help/Lessons Tab Modal */}
-            {showInfoTab && (
-                <InfoTab 
-                    onClose={() => setShowInfoTab(false)}
-                />
-            )}
-
             {/* Moderation Auth Modal */}
             {showModerationAuthModal && authToken && !inModeratorMode && (
                 <ModerationAuthModal
@@ -2502,87 +2484,79 @@ const App = () => {
             )}
 
             <main className="w-full flex-grow max-w-7xl">
-                {/* 
-                  This is a temporary routing solution for the Tutorials page.
-                  Ideally, this route should be integrated into the AppRoutes component.
-                */}
-                {location.pathname === '/tutorials' ? (
-                    <TutorialsPage />
-                ) : (
-                    <AppRoutes
-                      authToken={authToken}
-                      userProfile={userProfile}
-                      setUserProfile={setUserProfile}
-                      fetchUserProfile={fetchUserProfile}
-                      showModalMessage={showModalMessage}
-                      modals={modals}
-                      setShowMessages={setShowMessages}
-                      setSelectedConversation={setSelectedConversation}
-                      setBudgetModalOpen={setBudgetModalOpen}
-                      myAnimalsForCalculator={myAnimalsForCalculator}
-                      cachedLitters={cachedLitters}
-                      setCachedLitters={setCachedLitters}
-                      litterCacheTimestamp={litterCacheTimestamp}
-                      setLitterCacheTimestamp={setLitterCacheTimestamp}
-                      animalToView={animalToView}
-                      animalToEdit={animalToEdit}
-                      handleViewAnimal={handleViewAnimal}
-                      handleEditAnimal={handleEditAnimal}
-                      handleSaveAnimal={handleSaveAnimalWithRefresh}
-                      handleDeleteAnimal={handleDeleteAnimal}
-                      handleBackFromAnimal={handleBackFromAnimal}
-                      handleCloseAllAnimals={handleCloseAllAnimals}
-                      handleArchiveAnimal={handleArchiveAnimal}
-                      privateAnimalInitialTab={privateAnimalInitialTab}
-                      privateBetaView={privateBetaView}
-                      editReturnPathRef={editReturnPathRef}
-                      showArchiveScreen={showArchiveScreen}
-                      setShowArchiveScreen={setShowArchiveScreen}
-                      archivedAnimals={archivedAnimals}
-                      setArchivedAnimals={setArchivedAnimals}
-                      soldTransferredAnimals={soldTransferredAnimals}
-                      setSoldTransferredAnimals={setSoldTransferredAnimals}
-                      archiveLoading={archiveLoading}
-                      setArchiveLoading={setArchiveLoading}
-                      breedingLineDefs={breedingLineDefs}
-                      animalBreedingLines={animalBreedingLines}
-                      saveBreedingLineDefs={saveBreedingLineDefs}
-                      toggleAnimalBreedingLine={toggleAnimalBreedingLine}
-                      BL_PRESETS_APP={BL_PRESETS_APP}
-                      preSelectedTransferAnimal={preSelectedTransferAnimal}
-                      preSelectedTransactionType={preSelectedTransactionType}
-                      setPreSelectedTransferAnimal={setPreSelectedTransferAnimal}
-                      setPreSelectedTransactionType={setPreSelectedTransactionType}
-                      setTransferAnimal={setTransferAnimal}
-                      setShowTransferModal={setShowTransferModal}
-                      speciesToAdd={speciesToAdd}
-                      setSpeciesToAdd={setSpeciesToAdd}
-                      speciesOptions={speciesOptions}
-                      setSpeciesOptions={setSpeciesOptions}
-                      speciesConfigs={speciesConfigs}
-                      speciesSearchTerm={speciesSearchTerm}
-                      setSpeciesSearchTerm={setSpeciesSearchTerm}
-                      speciesCategoryFilter={speciesCategoryFilter}
-                      setSpeciesCategoryFilter={setSpeciesCategoryFilter}
-                      setShowImageModal={setShowImageModal}
-                      setEnlargedImageUrl={setEnlargedImageUrl}
-                      showTransferModal={showTransferModal}
-                      transferAnimal={transferAnimal}
-                      X={X}
-                      Search={Search}
-                      Loader2={Loader2}
-                      LoadingSpinner={LoadingSpinner}
-                      PlusCircle={PlusCircle}
-                      ArrowLeft={ArrowLeft}
-                      Save={Save}
-                      Trash2={Trash2}
-                      RotateCcw={RotateCcw}
-                      GENDER_OPTIONS={GENDER_OPTIONS}
-                      STATUS_OPTIONS={STATUS_OPTIONS}
-                      AnimalImageUpload={AnimalImageUpload}
-                      API_BASE_URL={API_BASE_URL}
-                    />
-                )}
+                <AppRoutes
+                  authToken={authToken}
+                  userProfile={userProfile}
+                  setUserProfile={setUserProfile}
+                  fetchUserProfile={fetchUserProfile}
+                  showModalMessage={showModalMessage}
+                  modals={modals}
+                  setShowMessages={setShowMessages}
+                  setSelectedConversation={setSelectedConversation}
+                  setBudgetModalOpen={setBudgetModalOpen}
+                  myAnimalsForCalculator={myAnimalsForCalculator}
+                  cachedLitters={cachedLitters}
+                  setCachedLitters={setCachedLitters}
+                  litterCacheTimestamp={litterCacheTimestamp}
+                  setLitterCacheTimestamp={setLitterCacheTimestamp}
+                  animalToView={animalToView}
+                  animalToEdit={animalToEdit}
+                  handleViewAnimal={handleViewAnimal}
+                  handleEditAnimal={handleEditAnimal}
+                  handleSaveAnimal={handleSaveAnimalWithRefresh}
+                  handleDeleteAnimal={handleDeleteAnimal}
+                  handleBackFromAnimal={handleBackFromAnimal}
+                  handleCloseAllAnimals={handleCloseAllAnimals}
+                  handleArchiveAnimal={handleArchiveAnimal}
+                  privateAnimalInitialTab={privateAnimalInitialTab}
+                  privateBetaView={privateBetaView}
+                  editReturnPathRef={editReturnPathRef}
+                  showArchiveScreen={showArchiveScreen}
+                  setShowArchiveScreen={setShowArchiveScreen}
+                  archivedAnimals={archivedAnimals}
+                  setArchivedAnimals={setArchivedAnimals}
+                  soldTransferredAnimals={soldTransferredAnimals}
+                  setSoldTransferredAnimals={setSoldTransferredAnimals}
+                  archiveLoading={archiveLoading}
+                  setArchiveLoading={setArchiveLoading}
+                  breedingLineDefs={breedingLineDefs}
+                  animalBreedingLines={animalBreedingLines}
+                  saveBreedingLineDefs={saveBreedingLineDefs}
+                  toggleAnimalBreedingLine={toggleAnimalBreedingLine}
+                  BL_PRESETS_APP={BL_PRESETS_APP}
+                  preSelectedTransferAnimal={preSelectedTransferAnimal}
+                  preSelectedTransactionType={preSelectedTransactionType}
+                  setPreSelectedTransferAnimal={setPreSelectedTransferAnimal}
+                  setPreSelectedTransactionType={setPreSelectedTransactionType}
+                  setTransferAnimal={setTransferAnimal}
+                  setShowTransferModal={setShowTransferModal}
+                  speciesToAdd={speciesToAdd}
+                  setSpeciesToAdd={setSpeciesToAdd}
+                  speciesOptions={speciesOptions}
+                  setSpeciesOptions={setSpeciesOptions}
+                  speciesConfigs={speciesConfigs}
+                  speciesSearchTerm={speciesSearchTerm}
+                  setSpeciesSearchTerm={setSpeciesSearchTerm}
+                  speciesCategoryFilter={speciesCategoryFilter}
+                  setSpeciesCategoryFilter={setSpeciesCategoryFilter}
+                  setShowImageModal={setShowImageModal}
+                  setEnlargedImageUrl={setEnlargedImageUrl}
+                  showTransferModal={showTransferModal}
+                  transferAnimal={transferAnimal}
+                  X={X}
+                  Search={Search}
+                  Loader2={Loader2}
+                  LoadingSpinner={LoadingSpinner}
+                  PlusCircle={PlusCircle}
+                  ArrowLeft={ArrowLeft}
+                  Save={Save}
+                  Trash2={Trash2}
+                  RotateCcw={RotateCcw}
+                  GENDER_OPTIONS={GENDER_OPTIONS}
+                  STATUS_OPTIONS={STATUS_OPTIONS}
+                  AnimalImageUpload={AnimalImageUpload}
+                  API_BASE_URL={API_BASE_URL}
+                />
             </main>
 
             {/* Image Enlarge Modal */}

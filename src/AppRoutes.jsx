@@ -17,6 +17,7 @@ const SpeciesSelector = lazy(() => import('./components/Modals/SpeciesModals').t
 const SpeciesManager = lazy(() => import('./components/Modals/SpeciesModals').then(m => ({ default: m.SpeciesManager })));
 const AnimalForm = lazy(() => import('./components/AnimalForm'));
 const PrivateAnimalDetail = lazy(() => import('./components/AnimalDetail/PrivateAnimalDetail'));
+const TutorialsPage = lazy(() => import('./components/tutorials'));
 const ViewOnlyPrivateAnimalDetail = lazy(() => import('./components/AnimalDetail/ViewOnlyPrivateAnimalDetail'));
 
 const PageLoader = () => (
@@ -381,6 +382,9 @@ export function AppRoutes({
           />
         )
       } />
+
+      {/* Tutorials Page */}
+      <Route path="/tutorials" element={<TutorialsPage />} />
 
     </Routes>
     </Suspense>
