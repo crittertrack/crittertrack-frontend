@@ -1,4 +1,4 @@
-﻿﻿// CritterTrack Frontend Application
+﻿﻿﻿﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo, useImperativeHandle } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -79,6 +79,8 @@ import { useBreedingLines } from './hooks/useBreedingLines.ts';
 import { useModerationMode } from './hooks/useModerationMode.ts';
 import { AppRoutes } from './AppRoutes';
 import { PublicAnimalPage, PublicProfilePage } from './PublicPages';
+import ToolsDropdown from './components/layout/ToolsDropdown';
+import TutorialsPage from './pages/TutorialsPage';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
@@ -812,8 +814,11 @@ const App = () => {
     const [showInfoTab, setShowInfoTab] = useState(false);
     // NOTE: showAdminPanel, inModeratorMode, showModReportQueue now handled by useModerationMode hook
     const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [showToolsMenu, setShowToolsMenu] = useState(false);
     const profileMenuDesktopRef = useRef(null);
     const profileMenuMobileRef = useRef(null);
+    const toolsMenuDesktopRef = useRef(null);
+    const toolsMenuMobileRef = useRef(null);
     const [maintenanceMode, setMaintenanceMode] = useState(false);
     const [maintenanceMessage, setMaintenanceMessage] = useState('');
     const [showUrgentNotification, setShowUrgentNotification] = useState(false);
@@ -1193,11 +1198,15 @@ const App = () => {
         const handleClickOutside = (e) => {
             const inDesktop = profileMenuDesktopRef.current?.contains(e.target);
             const inMobile = profileMenuMobileRef.current?.contains(e.target);
+            const inToolsDesktop = toolsMenuDesktopRef.current?.contains(e.target);
+            const inToolsMobile = toolsMenuMobileRef.current?.contains(e.target);
+
             if (!inDesktop && !inMobile) setShowProfileMenu(false);
+            if (!inToolsDesktop && !inToolsMobile) setShowToolsMenu(false);
         };
-        if (showProfileMenu) document.addEventListener('mousedown', handleClickOutside);
+        if (showProfileMenu || showToolsMenu) document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [showProfileMenu]);
+    }, [showProfileMenu, showToolsMenu]);
 	
     // Fetch global species list and configs
     useEffect(() => {
@@ -1807,10 +1816,15 @@ const App = () => {
                             <ShoppingBag size={18} className="mb-1" />
                             <span>Available Animals</span>
                         </button>
-                        <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <Calculator size={18} className="mb-1" />
-                            <span>Calculator</span>
-                        </button>
+                        <div className="relative" ref={toolsMenuDesktopRef}>
+                            <button onClick={() => setShowToolsMenu(p => !p)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['tutorials', 'calculator', 'coi', 'target'].includes(currentView) ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                                <Wrench size={18} className="mb-1" />
+                                <span>Tools</span>
+                            </button>
+                            {showToolsMenu && (
+                                <ToolsDropdown onLinkClick={() => setShowToolsMenu(false)} />
+                            )}
+                        </div>
                         <button onClick={() => navigate('/breeder-directory')} data-tutorial-target="breeders-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <MoonStar size={18} className="mb-1" />
                             <span>Breeders</span>
@@ -2034,10 +2048,15 @@ const App = () => {
                             <ShoppingBag size={18} className="mb-0.5" />
                             <span>Available</span>
                         </button>
-                        <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            <Calculator size={18} className="mb-0.5" />
-                            <span>Calculator</span>
-                        </button>
+                        <div className="relative" ref={toolsMenuMobileRef}>
+                            <button onClick={() => setShowToolsMenu(p => !p)} className={`w-full px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${['tutorials', 'calculator', 'coi', 'target'].includes(currentView) ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                                <Wrench size={18} className="mb-0.5" />
+                                <span>Tools</span>
+                            </button>
+                            {showToolsMenu && (
+                                <ToolsDropdown onLinkClick={() => setShowToolsMenu(false)} />
+                            )}
+                        </div>
                         <button onClick={() => navigate('/breeder-directory')} data-tutorial-target="breeders-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                             <MoonStar size={18} className="mb-0.5" />
                             <span>Breeders</span>
@@ -2483,79 +2502,87 @@ const App = () => {
             )}
 
             <main className="w-full flex-grow max-w-7xl">
-                <AppRoutes
-                  authToken={authToken}
-                  userProfile={userProfile}
-                  setUserProfile={setUserProfile}
-                  fetchUserProfile={fetchUserProfile}
-                  showModalMessage={showModalMessage}
-                  modals={modals}
-                  setShowMessages={setShowMessages}
-                  setSelectedConversation={setSelectedConversation}
-                  setBudgetModalOpen={setBudgetModalOpen}
-                  myAnimalsForCalculator={myAnimalsForCalculator}
-                  cachedLitters={cachedLitters}
-                  setCachedLitters={setCachedLitters}
-                  litterCacheTimestamp={litterCacheTimestamp}
-                  setLitterCacheTimestamp={setLitterCacheTimestamp}
-                  animalToView={animalToView}
-                  animalToEdit={animalToEdit}
-                  handleViewAnimal={handleViewAnimal}
-                  handleEditAnimal={handleEditAnimal}
-                  handleSaveAnimal={handleSaveAnimalWithRefresh}
-                  handleDeleteAnimal={handleDeleteAnimal}
-                  handleBackFromAnimal={handleBackFromAnimal}
-                  handleCloseAllAnimals={handleCloseAllAnimals}
-                  handleArchiveAnimal={handleArchiveAnimal}
-                  privateAnimalInitialTab={privateAnimalInitialTab}
-                  privateBetaView={privateBetaView}
-                  editReturnPathRef={editReturnPathRef}
-                  showArchiveScreen={showArchiveScreen}
-                  setShowArchiveScreen={setShowArchiveScreen}
-                  archivedAnimals={archivedAnimals}
-                  setArchivedAnimals={setArchivedAnimals}
-                  soldTransferredAnimals={soldTransferredAnimals}
-                  setSoldTransferredAnimals={setSoldTransferredAnimals}
-                  archiveLoading={archiveLoading}
-                  setArchiveLoading={setArchiveLoading}
-                  breedingLineDefs={breedingLineDefs}
-                  animalBreedingLines={animalBreedingLines}
-                  saveBreedingLineDefs={saveBreedingLineDefs}
-                  toggleAnimalBreedingLine={toggleAnimalBreedingLine}
-                  BL_PRESETS_APP={BL_PRESETS_APP}
-                  preSelectedTransferAnimal={preSelectedTransferAnimal}
-                  preSelectedTransactionType={preSelectedTransactionType}
-                  setPreSelectedTransferAnimal={setPreSelectedTransferAnimal}
-                  setPreSelectedTransactionType={setPreSelectedTransactionType}
-                  setTransferAnimal={setTransferAnimal}
-                  setShowTransferModal={setShowTransferModal}
-                  speciesToAdd={speciesToAdd}
-                  setSpeciesToAdd={setSpeciesToAdd}
-                  speciesOptions={speciesOptions}
-                  setSpeciesOptions={setSpeciesOptions}
-                  speciesConfigs={speciesConfigs}
-                  speciesSearchTerm={speciesSearchTerm}
-                  setSpeciesSearchTerm={setSpeciesSearchTerm}
-                  speciesCategoryFilter={speciesCategoryFilter}
-                  setSpeciesCategoryFilter={setSpeciesCategoryFilter}
-                  setShowImageModal={setShowImageModal}
-                  setEnlargedImageUrl={setEnlargedImageUrl}
-                  showTransferModal={showTransferModal}
-                  transferAnimal={transferAnimal}
-                  X={X}
-                  Search={Search}
-                  Loader2={Loader2}
-                  LoadingSpinner={LoadingSpinner}
-                  PlusCircle={PlusCircle}
-                  ArrowLeft={ArrowLeft}
-                  Save={Save}
-                  Trash2={Trash2}
-                  RotateCcw={RotateCcw}
-                  GENDER_OPTIONS={GENDER_OPTIONS}
-                  STATUS_OPTIONS={STATUS_OPTIONS}
-                  AnimalImageUpload={AnimalImageUpload}
-                  API_BASE_URL={API_BASE_URL}
-                />
+                {/* 
+                  This is a temporary routing solution for the Tutorials page.
+                  Ideally, this route should be integrated into the AppRoutes component.
+                */}
+                {location.pathname === '/tutorials' ? (
+                    <TutorialsPage />
+                ) : (
+                    <AppRoutes
+                      authToken={authToken}
+                      userProfile={userProfile}
+                      setUserProfile={setUserProfile}
+                      fetchUserProfile={fetchUserProfile}
+                      showModalMessage={showModalMessage}
+                      modals={modals}
+                      setShowMessages={setShowMessages}
+                      setSelectedConversation={setSelectedConversation}
+                      setBudgetModalOpen={setBudgetModalOpen}
+                      myAnimalsForCalculator={myAnimalsForCalculator}
+                      cachedLitters={cachedLitters}
+                      setCachedLitters={setCachedLitters}
+                      litterCacheTimestamp={litterCacheTimestamp}
+                      setLitterCacheTimestamp={setLitterCacheTimestamp}
+                      animalToView={animalToView}
+                      animalToEdit={animalToEdit}
+                      handleViewAnimal={handleViewAnimal}
+                      handleEditAnimal={handleEditAnimal}
+                      handleSaveAnimal={handleSaveAnimalWithRefresh}
+                      handleDeleteAnimal={handleDeleteAnimal}
+                      handleBackFromAnimal={handleBackFromAnimal}
+                      handleCloseAllAnimals={handleCloseAllAnimals}
+                      handleArchiveAnimal={handleArchiveAnimal}
+                      privateAnimalInitialTab={privateAnimalInitialTab}
+                      privateBetaView={privateBetaView}
+                      editReturnPathRef={editReturnPathRef}
+                      showArchiveScreen={showArchiveScreen}
+                      setShowArchiveScreen={setShowArchiveScreen}
+                      archivedAnimals={archivedAnimals}
+                      setArchivedAnimals={setArchivedAnimals}
+                      soldTransferredAnimals={soldTransferredAnimals}
+                      setSoldTransferredAnimals={setSoldTransferredAnimals}
+                      archiveLoading={archiveLoading}
+                      setArchiveLoading={setArchiveLoading}
+                      breedingLineDefs={breedingLineDefs}
+                      animalBreedingLines={animalBreedingLines}
+                      saveBreedingLineDefs={saveBreedingLineDefs}
+                      toggleAnimalBreedingLine={toggleAnimalBreedingLine}
+                      BL_PRESETS_APP={BL_PRESETS_APP}
+                      preSelectedTransferAnimal={preSelectedTransferAnimal}
+                      preSelectedTransactionType={preSelectedTransactionType}
+                      setPreSelectedTransferAnimal={setPreSelectedTransferAnimal}
+                      setPreSelectedTransactionType={setPreSelectedTransactionType}
+                      setTransferAnimal={setTransferAnimal}
+                      setShowTransferModal={setShowTransferModal}
+                      speciesToAdd={speciesToAdd}
+                      setSpeciesToAdd={setSpeciesToAdd}
+                      speciesOptions={speciesOptions}
+                      setSpeciesOptions={setSpeciesOptions}
+                      speciesConfigs={speciesConfigs}
+                      speciesSearchTerm={speciesSearchTerm}
+                      setSpeciesSearchTerm={setSpeciesSearchTerm}
+                      speciesCategoryFilter={speciesCategoryFilter}
+                      setSpeciesCategoryFilter={setSpeciesCategoryFilter}
+                      setShowImageModal={setShowImageModal}
+                      setEnlargedImageUrl={setEnlargedImageUrl}
+                      showTransferModal={showTransferModal}
+                      transferAnimal={transferAnimal}
+                      X={X}
+                      Search={Search}
+                      Loader2={Loader2}
+                      LoadingSpinner={LoadingSpinner}
+                      PlusCircle={PlusCircle}
+                      ArrowLeft={ArrowLeft}
+                      Save={Save}
+                      Trash2={Trash2}
+                      RotateCcw={RotateCcw}
+                      GENDER_OPTIONS={GENDER_OPTIONS}
+                      STATUS_OPTIONS={STATUS_OPTIONS}
+                      AnimalImageUpload={AnimalImageUpload}
+                      API_BASE_URL={API_BASE_URL}
+                    />
+                )}
             </main>
 
             {/* Image Enlarge Modal */}
