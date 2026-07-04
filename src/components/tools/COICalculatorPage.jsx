@@ -147,26 +147,31 @@ const COICalculatorPage = ({ myAnimals, authToken, API_BASE_URL }) => {
                 <p className="text-xs text-gray-500 mt-2">Calculated over {coiResult.generations} generations.</p>
               </div>
 
-              {coiResult.commonAncestors && coiResult.commonAncestors.length > 0 && (
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <h4 className="text-lg font-semibold text-gray-800 mb-4 text-center flex items-center justify-center gap-2">
-                    <Dna size={20} />
-                    Common Ancestors ({coiResult.commonAncestors.length})
-                  </h4>
-                  <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
-                    {coiResult.commonAncestors.map((ancestor, index) => (
-                      <div key={index} className="bg-white border border-gray-200 rounded-lg p-3 text-sm">
-                        <p className="font-bold text-gray-800">{ancestor.name} ({ancestor.id_public})</p>
-                        <p className="text-xs text-gray-500 mt-0.5">Contribution: <span className="font-semibold">{(ancestor.contribution * 100).toFixed(4)}%</span></p>
-                        <div className="mt-2 text-xs grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          <div><p className="font-semibold text-blue-700">Path from Sire:</p><p className="text-gray-600">{ancestor.sirePath.join(' → ')}</p></div>
-                          <div><p className="font-semibold text-pink-700">Path from Dam:</p><p className="text-gray-600">{ancestor.damPath.join(' → ')}</p></div>
+              {(() => {
+                const ancestors = coiResult.commonAncestors || coiResult.common_ancestors || [];
+                if (ancestors.length === 0) return null;
+
+                return (
+                  <div className="mt-6 pt-6 border-t border-gray-200">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-4 text-center flex items-center justify-center gap-2">
+                      <Dna size={20} />
+                      Common Ancestors ({ancestors.length})
+                    </h4>
+                    <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+                      {ancestors.map((ancestor, index) => (
+                        <div key={index} className="bg-white border border-gray-200 rounded-lg p-3 text-sm">
+                          <p className="font-bold text-gray-800">{ancestor.name} ({ancestor.id_public})</p>
+                          <p className="text-xs text-gray-500 mt-0.5">Contribution: <span className="font-semibold">{(ancestor.contribution * 100).toFixed(4)}%</span></p>
+                          <div className="mt-2 text-xs grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div><p className="font-semibold text-blue-700">Path from Sire:</p><p className="text-gray-600">{(ancestor.sirePath || ancestor.sire_path || []).join(' → ')}</p></div>
+                            <div><p className="font-semibold text-pink-700">Path from Dam:</p><p className="text-gray-600">{(ancestor.damPath || ancestor.dam_path || []).join(' → ')}</p></div>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
           )}
 
