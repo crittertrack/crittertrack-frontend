@@ -19,6 +19,7 @@ const AnimalForm = lazy(() => import('./components/AnimalForm'));
 const PrivateAnimalDetail = lazy(() => import('./components/AnimalDetail/PrivateAnimalDetail'));
 const TutorialsPage = lazy(() => import('./components/tools/index'));
 const COICalculatorPage = lazy(() => import('./components/tools/COICalculatorPage'));
+const TargetOutcomePage = lazy(() => import('./components/tools/TargetOutcomePage'));
 const ViewOnlyPrivateAnimalDetail = lazy(() => import('./components/AnimalDetail/ViewOnlyPrivateAnimalDetail'));
 
 const PageLoader = () => (
@@ -315,6 +316,16 @@ export function AppRoutes({
       {/* COI Calculator */}
       <Route path="/coi" element={
         <COICalculatorPage
+          API_BASE_URL={API_BASE_URL}
+          authToken={authToken}
+          myAnimals={myAnimalsForCalculator}
+          userProfile={userProfile}
+        />
+      } />
+
+      {/* Target Outcome Calculator */}
+      <Route path="/target" element={
+        <TargetOutcomePage
           API_BASE_URL={API_BASE_URL}
           authToken={authToken}
           myAnimals={myAnimalsForCalculator}
