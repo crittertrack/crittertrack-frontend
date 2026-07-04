@@ -428,7 +428,7 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions,
               <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">Potential Pairings Found ({results.length})</h3>
               {results.length > 0 ? (
                 <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
-                  {results.map(({ sire, dam, probability }, index) => (
+                  {results.map(({ sire, dam, probability }) => (
                     <div key={sire.id_public + dam.id_public} className="bg-white border border-gray-200 rounded-lg p-4">
                       <div className="flex items-center justify-between">
                         <div className="text-sm">
