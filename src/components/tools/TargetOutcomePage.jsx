@@ -523,7 +523,6 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions,
     setIsLoading(true);
     setResults(null);
     try {
-      const target = isTraitsMode ? selectedTraits.filter(Boolean) : targetGenetics;
       const target = isTraitsMode ? Object.values(selectedTraits).filter(Boolean) : targetGenetics;
       const animalsOfSpecies = myAnimals.filter(a => a.species === selectedSpecies);
       const potentialPairings = await findPotentialPairings(animalsOfSpecies, target, mode, selectedSpecies);
