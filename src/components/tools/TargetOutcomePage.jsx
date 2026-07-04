@@ -203,6 +203,45 @@ const TraitSelector = ({ species, selectedTraits, onTraitChange, disabled }) => 
   );
 };
 
+const getLociForSpecies = (species) => {
+  if (species === 'Fancy Rat') return RAT_GENE_LOCI;
+  return MOUSE_GENE_LOCI; // Default to mouse
+};
+
+const parseGeneticCode = (codeString, species) => {
+  if (!codeString) return {};
+  const genotype = {};
+  const parts = codeString.trim().split(/[ \t]+/);
+  const ALL_LOCI = getLociForSpecies(species);
+
+  for (const part of parts) {
+    if (!part.includes('/')) continue;
+
+    let partFound = false;
+    for (const [locus, data] of Object.entries(ALL_LOCI)) {
+      if (data.combinations.includes(part)) {
+        genotype[locus] = part.split('/').sort();
+        partFound = true;
+        break;
+      }
+    }
+
+    if (partFound) continue;
+
+    const [a1, a2] = part.split('/');
+    if (a1 && a2) {
+      const reversedPart = `${a2}/${a1}`;
+      for (const [locus, data] of Object.entries(ALL_LOCI)) {
+        if (data.combinations.includes(reversedPart)) {
+          genotype[locus] = reversedPart.split('/').sort();
+          break;
+        }
+      }
+    }
+  }
+  return genotype;
+};
+
 const buildPrototypeGenotypeFromTraits = (selectedTraits, species = 'Fancy Mouse') => {
     const genotype = {};
     const assumptions = [];
@@ -323,45 +362,6 @@ const buildPrototypeGenotypeFromTraits = (selectedTraits, species = 'Fancy Mouse
 
 const findPotentialPairings = (allAnimals, target, mode, species) => {
   console.log(`Finding pairings for ${mode}:`, target);
-
-  const getLociForSpecies = (species) => {
-    if (species === 'Fancy Rat') return RAT_GENE_LOCI;
-    return MOUSE_GENE_LOCI; // Default to mouse
-  };
-
-  const parseGeneticCode = (codeString, species) => {
-    if (!codeString) return {};
-    const genotype = {};
-    const parts = codeString.trim().split(/[ \t]+/);
-    const ALL_LOCI = getLociForSpecies(species);
-
-    for (const part of parts) {
-      if (!part.includes('/')) continue;
-
-      let found = false;
-      for (const [locus, data] of Object.entries(ALL_LOCI)) {
-        if (data.combinations.includes(part)) {
-          genotype[locus] = part.split('/').sort();
-          found = true;
-          break;
-        }
-      }
-
-      if (!found) {
-        const [a1, a2] = part.split('/');
-        if (a1 && a2) {
-          const reversedPart = `${a2}/${a1}`;
-          for (const [locus, data] of Object.entries(ALL_LOCI)) {
-            if (data.combinations.includes(reversedPart)) {
-              genotype[locus] = reversedPart.split('/').sort();
-              break;
-            }
-          }
-        }
-      }
-    }
-    return genotype;
-  };
 
   let targetLoci;
 
