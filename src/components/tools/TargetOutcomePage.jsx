@@ -391,73 +391,101 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions,
   }, [availableSpecies, selectedSpecies]);
 
   useEffect(() => {
-    setSelectedTraits([]);
+    setSelectedTraits({});
     setResults(null);
   }, [selectedSpecies]);
 
-  const CHIP_A_SERIES = {
-      black:        ['black','chocolate','blue','dove','lilac','champagne','silver','lavender'],
-      agouti:       ['agouti','cinnamon','blue-agouti','argente','cinnamon-argente'],
-  };
-  const chipToASeries = {};
-  Object.entries(CHIP_A_SERIES).forEach(([series, chips]) => chips.forEach(c => chipToASeries[c] = series));
-  const CHIP_A_COMPOUND_HET_CAPABLE = new Set(['tan', 'fox']);
-  const CHIP_E_EXCLUSIVE  = new Set(['rec-red']);
-  const CHIP_LEADEN_EXCLUSIVE = new Set(['Leaden']);
-  const CHIP_C_EXCLUSIVE  = new Set(['albino','himalayan','bone','siamese','burmese','stone','beige','colorpoint-beige','mock-choc','sepia','silver-agouti']);
-  const CHIP_GO_EXCLUSIVE = new Set(['shorthair','longhair','texel']);
-  const CHIP_W_EXCLUSIVE  = new Set(['variegated','banded']);
+  const handleTraitChange = (group, chipId) => {
+    setResults(null);
 
-  const toggleTargetTraitChip = (chipId) => {
-      setResults(null);
-      setSelectedTraits(prev => {
-          const isAdding = !prev.includes(chipId);
-          if (!isAdding) {
-              return prev.filter(id => id !== chipId);
-          }
+    let nextTraits = { ...selectedTraits, [group]: chipId };
+    if (!chipId) {
+        delete nextTraits[group];
+        // Note: Does not handle reverse dependency clearing for simplicity.
+        // Clearing a dropdown will not automatically clear the things that depend on it.
+        setSelectedTraits(nextTraits);
+        return;
+    }
 
-          let next = [...prev];
+    const chipToGroupMap = useMemo(() => {
+        const map = {};
+        Object.values(TARGET_OUTCOME_TRAIT_CHIPS).flat().forEach(chip => {
+            map[chip.id] = chip.group;
+        });
+        return map;
+    }, []);
 
-          if (chipToASeries[chipId]) next = next.filter(id => CHIP_A_COMPOUND_HET_CAPABLE.has(id) || CHIP_E_EXCLUSIVE.has(id) || !chipToASeries[id]);
-          if (CHIP_A_COMPOUND_HET_CAPABLE.has(chipId)) next = next.filter(id => !CHIP_A_COMPOUND_HET_CAPABLE.has(id));
-          if (CHIP_E_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_E_EXCLUSIVE.has(id));
-          if (CHIP_LEADEN_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_LEADEN_EXCLUSIVE.has(id));
-          if (CHIP_C_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_C_EXCLUSIVE.has(id));
-          if (CHIP_GO_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_GO_EXCLUSIVE.has(id));
-          if (CHIP_W_EXCLUSIVE.has(chipId)) next = next.filter(id => !CHIP_W_EXCLUSIVE.has(id));
+    const fullDependencies = {
+        'chocolate': { 'Base Color': 'black' },
+        'blue': { 'Base Color': 'black' },
+        'dove': { 'Base Color': 'black' },
+        'lilac': { 'Base Color': 'black', 'Brown Dilute': 'chocolate', 'Blue Dilute': 'blue' },
+        'champagne': { 'Base Color': 'black', 'Brown Dilute': 'chocolate', 'Pink Eye Dilute': 'dove' },
+        'silver': { 'Base Color': 'black', 'Blue Dilute': 'blue', 'Pink Eye Dilute': 'dove' },
+        'lavender': { 'Base Color': 'black', 'Brown Dilute': 'chocolate', 'Blue Dilute': 'blue', 'Pink Eye Dilute': 'dove' },
+        'cinnamon': { 'Base Color': 'agouti' },
+        'blue-agouti': { 'Base Color': 'agouti' },
+        'argente': { 'Base Color': 'agouti' },
+        'cinnamon-argente': { 'Base Color': 'agouti', 'Brown Dilute': 'cinnamon', 'Pink Eye Dilute': 'argente' },
+        'Dominant Amber': { 'Base Color': 'dom-red' },
+        'Recessive Amber': { 'Red Dilute': 'rec-red' },
+        'sable': { 'Base Color': 'dom-red', 'Umbrous': 'umbrous' },
+        'texel': { 'Astrex & Texel': 'astrex', 'Shorthair/Longhair': 'longhair' },
+        'fox': { 'Tan, Fox & Shaded': 'tan' },
+    };
 
-          next.push(chipId);
+    const blackBasedDilutes = new Set(['chocolate', 'blue', 'dove', 'lilac', 'champagne', 'silver', 'lavender']);
+    const agoutiBasedDilutes = new Set(['cinnamon', 'blue-agouti', 'argente', 'cinnamon-argente']);
 
-          const dependencies = {
-              'chocolate': ['black'], 'blue': ['black'], 'dove': ['black'],
-              'lilac': ['black', 'chocolate', 'blue'], 'champagne': ['black', 'chocolate', 'dove'],
-              'silver': ['black', 'blue', 'dove'], 'lavender': ['black', 'chocolate', 'blue', 'dove'],
-              'cinnamon': ['agouti'], 'blue-agouti': ['agouti'], 'argente': ['agouti'],
-              'cinnamon-argente': ['agouti', 'cinnamon', 'argente'],
-              'Dominant Amber': ['dom-red'], 'Recessive Amber': ['rec-red'],
-              'sable': ['dom-red', 'umbrous'], 'texel': ['astrex', 'longhair'], 'fox': ['tan'],
-          };
+    const queue = [chipId];
+    const processed = new Set();
 
-          const toProcess = [chipId];
-          const processed = new Set();
-          while (toProcess.length > 0) {
-              const currentId = toProcess.pop();
-              if (processed.has(currentId) || !dependencies[currentId]) continue;
-              processed.add(currentId);
-              dependencies[currentId].forEach(dep => {
-                  if (!next.includes(dep)) {
-                      next.push(dep);
-                      toProcess.push(dep);
-                  }
-              });
-          }
-          return [...new Set(next)];
-      });
+    while (queue.length > 0) {
+        const currentId = queue.shift();
+        if (processed.has(currentId)) continue;
+        processed.add(currentId);
+
+        // Apply dependencies
+        const deps = fullDependencies[currentId];
+        if (deps) {
+            for (const depGroup in deps) {
+                const depChipId = deps[depGroup];
+                if (nextTraits[depGroup] !== depChipId) {
+                    nextTraits[depGroup] = depChipId;
+                    queue.push(depChipId);
+                }
+            }
+        }
+    }
+
+    // Handle exclusivity between black and agouti based dilutes
+    const selectedIds = new Set(Object.values(nextTraits));
+    const hasBlackDilute = [...selectedIds].some(id => blackBasedDilutes.has(id));
+    const hasAgoutiDilute = [...selectedIds].some(id => agoutiBasedDilutes.has(id));
+
+    if (hasBlackDilute && hasAgoutiDilute) {
+        // Last selected type wins. If the user just selected a black-based dilute, clear agouti ones.
+        if (blackBasedDilutes.has(chipId)) {
+            Object.keys(nextTraits).forEach(g => {
+                if (agoutiBasedDilutes.has(nextTraits[g])) {
+                    delete nextTraits[g];
+                }
+            });
+        } else if (agoutiBasedDilutes.has(chipId)) {
+            Object.keys(nextTraits).forEach(g => {
+                if (blackBasedDilutes.has(nextTraits[g])) {
+                    delete nextTraits[g];
+                }
+            });
+        }
+    }
+
+    setSelectedTraits(nextTraits);
   };
 
   const handleFindPairings = async () => {
     const isTraitsMode = mode === 'traits';
-    const hasTarget = isTraitsMode ? selectedTraits.length > 0 : targetGenetics.trim();
+    const hasTarget = isTraitsMode ? Object.keys(selectedTraits).length > 0 : targetGenetics.trim();
 
     if (!hasTarget) {
       setError(isTraitsMode ? 'Please select at least one trait.' : 'Please enter the desired genetic code.');
@@ -530,10 +558,10 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions,
             ) : mode === 'traits' ? (
               <div>
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Select Desired Traits</h3>
-                <TraitChipSelector
+                <TraitSelector
                   species={selectedSpecies}
                   selectedTraits={selectedTraits}
-                  onToggle={toggleTargetTraitChip}
+                  onTraitChange={handleTraitChange}
                   disabled={isLoading}
                 />
               </div>
@@ -609,43 +637,6 @@ const TargetOutcomePage = ({ myAnimals, authToken, API_BASE_URL, speciesOptions,
         </div>
       </div>
     </div>
-  );
-};
-
-const TraitChipSelector = ({ species, selectedTraits, onToggle, disabled }) => {
-  const traitGroups = useMemo(() => {
-      const chips = TARGET_OUTCOME_TRAIT_CHIPS[species] || [];
-      if (chips.length === 0) return [];
-      const groups = {};
-      chips.forEach(chip => {
-          if (!groups[chip.group]) groups[chip.group] = [];
-          groups[chip.group].push(chip);
-      });
-      return Object.entries(groups).map(([label, chips]) => ({ label, chips: chips.sort((a, b) => a.label.localeCompare(b.label)) }));
-  }, [species]);
-
-  if (traitGroups.length === 0) {
-      return <p className="text-sm text-gray-500 text-center">No visual traits configured for this species.</p>;
-  }
-
-  return (
-      <div className="space-y-4">
-          {traitGroups.map(group => (
-              <div key={group.label}>
-                  <h4 className="text-sm font-semibold text-gray-600 mb-2">{group.label}</h4>
-                  <div className="flex flex-wrap gap-2">
-                      {group.chips.map(chip => {
-                          const isActive = selectedTraits.includes(chip.id);
-                          return (
-                              <button key={chip.id} type="button" onClick={() => onToggle(chip.id)} disabled={disabled} className={`px-3 py-1.5 text-xs rounded-full border transition ${ isActive ? 'bg-primary/80 border-primary text-black font-semibold' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' }`} title={chip.code}>
-                                  {chip.label}
-                              </button>
-                          );
-                      })}
-                  </div>
-              </div>
-          ))}
-      </div>
   );
 };
 
