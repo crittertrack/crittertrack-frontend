@@ -1,36 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Save, X, UserPlus, Loader2, User, Search } from 'lucide-react';
-// NOTE: You may need to adjust this path depending on where UserSearchModal is located.
+import { Save, X, User, Loader2, Search } from 'lucide-react';
 import { UserSearchModal } from '../AnimalForm';
 
-
-const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile }) => {
+const EditContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile }) => {
+    const { contactId } = useParams();
     const navigate = useNavigate();
-    const [formData, setFormData] = useState({
-        personalName: '',
-        breederName: '',
-        prefix: '',
-        suffix: '',
-        isKeeper: false,
-        isBreeder: false,
-        notes: '',
-        linkedCTUID: '',
-        address: {
-            street: '',
-            city: '',
-            state: '',
-            postalCode: '',
-            country: '',
-        },
-    });
+    const [formData, setFormData] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [showUserSearch, setShowUserSearch] = useState(false);
     const [linkedUserName, setLinkedUserName] = useState('');
 
     useEffect(() => {
-        if (formData.linkedCTUID) {
+        const fetchContact = async () => {
+            try {
+                setLoading(true);
+                const response = await axios.get(`${API_BASE_URL}/contacts/${contactId}`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                setFormData({
+                    ...response.data,
+                    address: response.data.address || { street: '', city: '', state: '', postalCode: '', country: '' }
+                });
+            } catch (error) {
+                console.error('Error fetching contact:', error);
+                showModalMessage('Error', 'Failed to load contact data.');
+                navigate('/contacts');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchContact();
+    }, [contactId, API_BASE_URL, authToken, navigate, showModalMessage]);
+
+    useEffect(() => {
+        if (formData?.linkedCTUID) {
             axios.get(`${API_BASE_URL}/public/profiles/search?query=${formData.linkedCTUID}&limit=1`)
                 .then(res => {
                     const user = res.data?.[0];
@@ -56,7 +62,7 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
         } else {
             setLinkedUserName('');
         }
-    }, [formData.linkedCTUID, API_BASE_URL]);
+    }, [formData?.linkedCTUID, API_BASE_URL]);
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -88,7 +94,6 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
         setFormData(prev => ({ ...prev, linkedCTUID: '' }));
     };
 
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.personalName && !formData.breederName) {
@@ -98,28 +103,36 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
 
         setIsSaving(true);
         try {
-            await axios.post(`${API_BASE_URL}/contacts`, formData, {
+            await axios.put(`${API_BASE_URL}/contacts/${contactId}`, formData, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            showModalMessage('Success', 'Contact added successfully!');
-            navigate('/contacts');
+            showModalMessage('Success', 'Contact updated successfully!');
+            navigate(`/contacts/${contactId}/overview`);
         } catch (error) {
-            console.error('Error creating contact:', error);
+            console.error('Error updating contact:', error);
             const errorMessage = error.response?.data?.message || 'An unexpected error occurred.';
-            showModalMessage('Error', `Failed to create contact: ${errorMessage}`);
+            showModalMessage('Error', `Failed to update contact: ${errorMessage}`);
         } finally {
             setIsSaving(false);
         }
     };
 
+    if (loading) {
+        return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={32} /></div>;
+    }
+
+    if (!formData) {
+        return <div className="text-center py-12">Contact not found.</div>;
+    }
+
     return (
         <div className="p-4 md:p-6 max-w-4xl mx-auto">
             <header className="bg-white rounded-lg shadow p-4 mb-6">
                 <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                    <UserPlus size={28} className="text-primary" />
-                    Add New Contact
+                    <User size={28} className="text-primary" />
+                    Edit Contact
                 </h1>
-                <p className="text-sm text-gray-600 mt-1">Create a new record for a keeper or breeder.</p>
+                <p className="text-sm text-gray-600 mt-1">Update the details for {formData.personalName || formData.breederName}.</p>
             </header>
 
             <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 space-y-6">
@@ -127,55 +140,22 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
                     {/* Personal Name */}
                     <div>
                         <label htmlFor="personalName" className="block text-sm font-medium text-gray-700 mb-1">Personal Name</label>
-                        <input
-                            type="text"
-                            id="personalName"
-                            name="personalName"
-                            value={formData.personalName}
-                            onChange={handleInputChange}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                        />
+                        <input type="text" id="personalName" name="personalName" value={formData.personalName} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" />
                     </div>
-
                     {/* Breeder Name */}
                     <div>
                         <label htmlFor="breederName" className="block text-sm font-medium text-gray-700 mb-1">Breeder Name / Kennel</label>
-                        <input
-                            type="text"
-                            id="breederName"
-                            name="breederName"
-                            value={formData.breederName}
-                            onChange={handleInputChange}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                        />
+                        <input type="text" id="breederName" name="breederName" value={formData.breederName} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" />
                     </div>
-
                     {/* Prefix */}
                     <div>
                         <label htmlFor="prefix" className="block text-sm font-medium text-gray-700 mb-1">Prefix</label>
-                        <input
-                            type="text"
-                            id="prefix"
-                            name="prefix"
-                            value={formData.prefix}
-                            onChange={handleInputChange}
-                            placeholder="e.g., Dr., Mr., Ms."
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                        />
+                        <input type="text" id="prefix" name="prefix" value={formData.prefix} onChange={handleInputChange} placeholder="e.g., Dr., Mr., Ms." className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" />
                     </div>
-
                     {/* Suffix */}
                     <div>
                         <label htmlFor="suffix" className="block text-sm font-medium text-gray-700 mb-1">Suffix</label>
-                        <input
-                            type="text"
-                            id="suffix"
-                            name="suffix"
-                            value={formData.suffix}
-                            onChange={handleInputChange}
-                            placeholder="e.g., Jr., Sr., III"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                        />
+                        <input type="text" id="suffix" name="suffix" value={formData.suffix} onChange={handleInputChange} placeholder="e.g., Jr., Sr., III" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" />
                     </div>
                 </div>
 
@@ -185,58 +165,23 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="md:col-span-2">
                             <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-1">Street</label>
-                            <input
-                                type="text"
-                                id="street"
-                                name="street"
-                                value={formData.address.street}
-                                onChange={handleAddressChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                            />
+                            <input type="text" id="street" name="street" value={formData.address.street} onChange={handleAddressChange} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" />
                         </div>
                         <div>
                             <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">City</label>
-                            <input
-                                type="text"
-                                id="city"
-                                name="city"
-                                value={formData.address.city}
-                                onChange={handleAddressChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                            />
+                            <input type="text" id="city" name="city" value={formData.address.city} onChange={handleAddressChange} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" />
                         </div>
                         <div>
                             <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">State / Province</label>
-                            <input
-                                type="text"
-                                id="state"
-                                name="state"
-                                value={formData.address.state}
-                                onChange={handleAddressChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                            />
+                            <input type="text" id="state" name="state" value={formData.address.state} onChange={handleAddressChange} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" />
                         </div>
                         <div>
                             <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1">Postal / ZIP Code</label>
-                            <input
-                                type="text"
-                                id="postalCode"
-                                name="postalCode"
-                                value={formData.address.postalCode}
-                                onChange={handleAddressChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                            />
+                            <input type="text" id="postalCode" name="postalCode" value={formData.address.postalCode} onChange={handleAddressChange} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" />
                         </div>
                         <div>
                             <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-                            <input
-                                type="text"
-                                id="country"
-                                name="country"
-                                value={formData.address.country}
-                                onChange={handleAddressChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                            />
+                            <input type="text" id="country" name="country" value={formData.address.country} onChange={handleAddressChange} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" />
                         </div>
                     </div>
                 </div>
@@ -257,22 +202,9 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
                             <p className="text-gray-500">No user linked.</p>
                         )}
                         <div className="flex gap-2">
-                            <button
-                                type="button"
-                                onClick={() => setShowUserSearch(true)}
-                                className="px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                            >
-                                {formData.linkedCTUID ? 'Change' : 'Search'}
-                            </button>
+                            <button type="button" onClick={() => setShowUserSearch(true)} className="px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">{formData.linkedCTUID ? 'Change' : 'Search'}</button>
                             {formData.linkedCTUID && (
-                                <button
-                                    type="button"
-                                    onClick={handleClearLinkedUser}
-                                    className="p-1.5 border border-gray-300 text-sm font-medium rounded-md text-red-600 bg-white hover:bg-red-50"
-                                    title="Clear linked user"
-                                >
-                                    <X size={16} />
-                                </button>
+                                <button type="button" onClick={handleClearLinkedUser} className="p-1.5 border border-gray-300 text-sm font-medium rounded-md text-red-600 bg-white hover:bg-red-50" title="Clear linked user"><X size={16} /></button>
                             )}
                         </div>
                     </div>
@@ -302,10 +234,10 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
 
                 {/* Action Buttons */}
                 <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-                    <button type="button" onClick={() => navigate('/contacts')} className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition flex items-center gap-2"><X size={18} />Cancel</button>
+                    <button type="button" onClick={() => navigate(`/contacts/${contactId}/overview`)} className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition flex items-center gap-2"><X size={18} />Cancel</button>
                     <button type="submit" disabled={isSaving} className="px-4 py-2 bg-primary text-black rounded-md hover:bg-primary-dark disabled:bg-gray-300 disabled:cursor-not-allowed transition flex items-center gap-2">
                         {isSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
-                        {isSaving ? 'Saving...' : 'Save Contact'}
+                        {isSaving ? 'Saving...' : 'Save Changes'}
                     </button>
                 </div>
             </form>
@@ -323,4 +255,4 @@ const AddContactPage = ({ API_BASE_URL, authToken, showModalMessage, userProfile
     );
 };
 
-export default AddContactPage;
+export default EditContactPage;

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink, Outlet, useParams } from 'react-router-dom';
+import { NavLink, Outlet, useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Edit } from 'lucide-react';
 
 const ContactDetail = ({ API_BASE_URL, authToken }) => {
     const { contactId } = useParams();
@@ -11,6 +12,7 @@ const ContactDetail = ({ API_BASE_URL, authToken }) => {
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchContactData = async () => {
@@ -65,9 +67,18 @@ const ContactDetail = ({ API_BASE_URL, authToken }) => {
 
     return (
         <div className="bg-white rounded-xl shadow-lg p-4 md:p-6">
-            <header className="mb-6">
-                <h1 className="text-2xl font-bold">{contactData.details.breederName || contactData.details.personalName}</h1>
-                <p className="text-gray-500">Contact Profile</p>
+            <header className="mb-6 flex justify-between items-start">
+                <div>
+                    <h1 className="text-2xl font-bold">{contactData.details.breederName || contactData.details.personalName}</h1>
+                    <p className="text-gray-500">Contact Profile</p>
+                </div>
+                <button
+                    onClick={() => navigate(`/contacts/${contactId}/edit`)}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition"
+                >
+                    <Edit size={16} />
+                    Edit
+                </button>
             </header>
 
             <nav className="flex space-x-2 border-b-2 border-gray-200 mb-4">

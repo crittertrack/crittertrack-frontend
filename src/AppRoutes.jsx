@@ -29,6 +29,7 @@ const ContactOverview = lazy(() => import('./components/Contacts/Overview'));
 const ContactOwnedAnimals = lazy(() => import('./components/Contacts/OwnedAnimals'));
 const ContactBredAnimals = lazy(() => import('./components/Contacts/BredAnimals'));
 const AddContactPage = lazy(() => import('./components/Contacts/AddContactPage'));
+const EditContactPage = lazy(() => import('./components/Contacts/EditContactPage'));
 
 const PageLoader = () => (
     <div className="w-full flex items-center justify-center py-24">
@@ -267,6 +268,15 @@ export function AppRoutes({
           API_BASE_URL={API_BASE_URL}
           authToken={authToken}
           showModalMessage={showModalMessage}
+          userProfile={userProfile}
+        />
+      } />
+      <Route path="/contacts/:contactId/edit" element={
+        <EditContactPage
+          API_BASE_URL={API_BASE_URL}
+          authToken={authToken}
+          showModalMessage={showModalMessage}
+          userProfile={userProfile}
         />
       } />
 
