@@ -269,7 +269,7 @@ const FamilyTreeView = ({
           };
 
           let guard = 0;
-          while (queue.length > 0 && guard < 1000) { // Safety guard
+          while (queue.length > 0 && guard < 5000) { // Safety guard, increased for deep pedigrees
               guard++;
               const currentId = queue.shift();
 

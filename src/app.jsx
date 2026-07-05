@@ -1099,7 +1099,7 @@ const App = () => {
         const fetchAnimalsForCalculator = async () => {
             if ((currentView === 'calculator' || currentView === 'coi' || currentView === 'pedigree') && authToken) {
                 try {
-                    const response = await axios.get(`${API_BASE_URL}/animals?isOwned=true`, {
+                    const response = await axios.get(`${API_BASE_URL}/animals?isOwned=true&slim=false`, {
                         headers: { Authorization: `Bearer ${authToken}` }
                     });
                     setMyAnimalsForCalculator(response.data || []);
